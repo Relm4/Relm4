@@ -71,7 +71,12 @@ impl ComponentUpdate<CompMsg, AppMsg> for Comp1Model {
         Comp1Model { hidden: false }
     }
 
-    fn update(&mut self, message: CompMsg, _widgets: &Self::Widgets, parent_sender: Sender<AppMsg>) {
+    fn update(
+        &mut self,
+        message: CompMsg,
+        _widgets: &Self::Widgets,
+        parent_sender: Sender<AppMsg>,
+    ) {
         match message {
             CompMsg::Hide => {
                 self.hidden = true;
@@ -96,7 +101,12 @@ impl ComponentUpdate<CompMsg, AppMsg> for Comp2Model {
         Comp2Model { hidden: true }
     }
 
-    fn update(&mut self, message: CompMsg, _widgets: &Self::Widgets, parent_sender: Sender<AppMsg>) {
+    fn update(
+        &mut self,
+        message: CompMsg,
+        _widgets: &Self::Widgets,
+        parent_sender: Sender<AppMsg>,
+    ) {
         match message {
             CompMsg::Hide => {
                 self.hidden = true;
