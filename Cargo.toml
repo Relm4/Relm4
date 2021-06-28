@@ -17,6 +17,5 @@ libc = "^0.2.54"
 log = "^0.4.6"
 
 [dependencies.gtk]
-features = ["v4_2"]
 package = "gtk4"
 version = "0.1"
