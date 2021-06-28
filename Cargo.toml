@@ -1,22 +1,18 @@
 [package]
-name = "relm4"
-version = "0.1.0"
 authors = ["Aaron Erhardt <aaron.erhardt@t-online.de>"]
 edition = "2018"
+name = "relm4"
+version = "0.1.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-cairo-rs = { git = "https://github.com/gtk-rs/gtk-rs-core", version = "0.14" }
+cairo-rs = "0.14.0"
 #fragile = "1.0"
-glib = { git = "https://github.com/gtk-rs/gtk-rs-core" }
-glib-sys = { git = "https://github.com/gtk-rs/gtk-rs-core" }
+crossbeam-channel = "0.5"
+glib = "0.14.0"
+glib-sys = "0.14.0"
 gobject-sys = "^0.10.0"
+gtk4 = "0.1.0"
 libc = "^0.2.54"
 log = "^0.4.6"
-crossbeam-channel = "0.5"
-
-[dependencies.gtk]
-package = "gtk4"
-version = "0.1"
-git = " https://github.com/gtk-rs/gtk4-rs"

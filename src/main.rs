@@ -1,5 +1,6 @@
 use glib::Sender;
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, WidgetExt};
+use gtk4 as gtk;
 use relm4::*;
 
 // Implement components that will be part of the main app
