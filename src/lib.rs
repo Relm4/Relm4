@@ -1,9 +1,5 @@
-use glib::{IsA, Sender};
-use gtk::{
-    gio::MenuModel,
-    prelude::{ApplicationExt, ApplicationExtManual, GtkApplicationExt, GtkWindowExt, WidgetExt},
-};
-use gtk4 as gtk;
+use glib::Sender;
+use gtk::prelude::{ApplicationExt, ApplicationExtManual, GtkWindowExt, WidgetExt};
 
 use std::marker::PhantomData;
 
