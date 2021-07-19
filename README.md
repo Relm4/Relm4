@@ -15,5 +15,8 @@ This demonstrates how to use components that can send messages to each other but
 For each update of the UI only the actual changes to the model are considered to minimize UI updates.
 For example counting up by toggling the button will not affect the other widgets and will not trigger a regeneration of the selectable widget.
 
++ generator and grid_generator: Simple apps that use a generator to create and update widgets. A generator brings the concept of trackers to collections.
+A VecGen can be modified during the update method just like a normal vector and during the view function the generator will update only the affected widgets.
+To know how to update the widgets, a GeneratorBlueprint is used that defines the functions needed to generate, update and remove widgets.
 
 **Feedback on the design and contributions are highly appreciated!**
