@@ -3,6 +3,8 @@ use gtk::prelude::{ApplicationExt, ApplicationExtManual, GtkWindowExt, WidgetExt
 
 use std::marker::PhantomData;
 
+pub mod generator;
+
 /// Relm app that runs the main application.
 /// The app consists of widgets that represents the UI and the model
 /// that stores the application state.

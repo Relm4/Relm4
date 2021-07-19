@@ -146,5 +146,3 @@ fn main() {
     let relm: RelmApp<AppWidgets, AppModel, AppMsg> = RelmApp::create();
     relm.run();
 }
-
-
