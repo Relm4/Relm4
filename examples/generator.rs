@@ -21,10 +21,10 @@ struct AppModel {
     counter: u8,
 }
 
-impl Widget<AppMsg, AppModel> for AppWidgets {
+impl RelmWidgets<AppModel, (), AppMsg> for AppWidgets {
     type Root = gtk::ApplicationWindow;
 
-    fn init_view(sender: Sender<AppMsg>, _model: &AppModel) -> Self {
+    fn init_view(_model: &AppModel, _components: &(), sender: Sender<AppMsg>) -> Self {
         let main = gtk::ApplicationWindowBuilder::new()
             .default_width(300)
             .default_height(200)
@@ -78,31 +78,10 @@ impl Widget<AppMsg, AppModel> for AppWidgets {
     }
 }
 
-impl AppUpdate<AppMsg> for AppModel {
+impl AppUpdate<(), AppMsg> for AppModel {
     type Widgets = AppWidgets;
 
-    fn init_model() -> Self {
-        let generator = GeneratorBlueprint {
-            generate: |data: &u8, index: &usize, sender| {
-                let button = gtk::Button::with_label(&data.to_string());
-                let index = *index;
-                button.connect_clicked(move |_| {
-                    sender.send(AppMsg::Clicked(index)).unwrap();
-                });
-                (button, ())
-            },
-            update: |data, _index, widget| {
-                widget.set_label(&data.to_string());
-            },
-            remove: |widget| widget,
-        };
-        AppModel {
-            data: VecGen::new(generator),
-            counter: 0,
-        }
-    }
-
-    fn update(&mut self, msg: AppMsg, _widgets: &Self::Widgets) {
+    fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) {
         match msg {
             AppMsg::Add => {
                 self.data.push(self.counter);
@@ -118,13 +97,32 @@ impl AppUpdate<AppMsg> for AppModel {
         }
     }
 
-    fn view(&self, widgets: &mut Self::Widgets) {
+    fn view(&self, widgets: &mut Self::Widgets, _sender: Sender<AppMsg>) {
         self.data.generate(&widgets.gen_box, widgets.sender.clone());
     }
 }
 
 fn main() {
     gtk::init().unwrap();
-    let relm: RelmApp<AppWidgets, AppModel, AppMsg> = RelmApp::create();
+    let generator = GeneratorBlueprint {
+        generate: |data: &u8, index: &usize, sender| {
+            let button = gtk::Button::with_label(&data.to_string());
+            let index = *index;
+            button.connect_clicked(move |_| {
+                sender.send(AppMsg::Clicked(index)).unwrap();
+            });
+            (button, ())
+        },
+        update: |data, _index, widget| {
+            widget.set_label(&data.to_string());
+        },
+        remove: |widget| widget,
+    };
+    let model = AppModel {
+        data: VecGen::new(generator),
+        counter: 0,
+    };
+
+    let relm: RelmApp<AppWidgets, AppModel, (), AppMsg> = RelmApp::new(model);
     relm.run();
 }

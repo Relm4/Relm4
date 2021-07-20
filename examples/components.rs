@@ -25,10 +25,10 @@ enum CompMsg {
     Show,
 }
 
-impl Widget<CompMsg, Comp1Model> for Comp1Widgets {
+impl RelmWidgets<Comp1Model, (), CompMsg> for Comp1Widgets {
     type Root = gtk::Button;
 
-    fn init_view(sender: Sender<CompMsg>, model: &Comp1Model) -> Self {
+    fn init_view(model: &Comp1Model, _component: &(), sender: Sender<CompMsg>) -> Self {
         // Initialize gtk widgets
         let button = gtk::Button::with_label("First Component");
         button.set_visible(!model.hidden);
@@ -45,10 +45,10 @@ impl Widget<CompMsg, Comp1Model> for Comp1Widgets {
     }
 }
 
-impl Widget<CompMsg, Comp2Model> for Comp2Widgets {
+impl RelmWidgets<Comp2Model, (), CompMsg> for Comp2Widgets {
     type Root = gtk::Button;
 
-    fn init_view(sender: Sender<CompMsg>, model: &Comp2Model) -> Self {
+    fn init_view(model: &Comp2Model, _component: &(), sender: Sender<CompMsg>) -> Self {
         let button = gtk::Button::with_label("Second Component");
         button.set_visible(!model.hidden);
 
@@ -64,17 +64,18 @@ impl Widget<CompMsg, Comp2Model> for Comp2Widgets {
     }
 }
 
-impl ComponentUpdate<CompMsg, AppMsg> for Comp1Model {
+impl ComponentUpdate<(), CompMsg, AppModel, AppMsg> for Comp1Model {
     type Widgets = Comp1Widgets;
 
-    fn init_model() -> Self {
+    fn init_model(_parent_model: &AppModel) -> Self {
         Comp1Model { hidden: false }
     }
 
     fn update(
         &mut self,
         message: CompMsg,
-        _widgets: &Self::Widgets,
+        _components: &(),
+        _sender: Sender<CompMsg>,
         parent_sender: Sender<AppMsg>,
     ) {
         match message {
@@ -89,22 +90,23 @@ impl ComponentUpdate<CompMsg, AppMsg> for Comp1Model {
         }
     }
 
-    fn view(&self, widgets: &mut Self::Widgets) {
+    fn view(&self, widgets: &mut Self::Widgets, _sender: Sender<CompMsg>) {
         widgets.button.set_visible(!self.hidden);
     }
 }
 
-impl ComponentUpdate<CompMsg, AppMsg> for Comp2Model {
+impl ComponentUpdate<(), CompMsg, AppModel, AppMsg> for Comp2Model {
     type Widgets = Comp2Widgets;
 
-    fn init_model() -> Self {
+    fn init_model(_parent_model: &AppModel) -> Self {
         Comp2Model { hidden: true }
     }
 
     fn update(
         &mut self,
         message: CompMsg,
-        _widgets: &Self::Widgets,
+        _components: &(),
+        _sender: Sender<CompMsg>,
         parent_sender: Sender<AppMsg>,
     ) {
         match message {
@@ -118,21 +120,29 @@ impl ComponentUpdate<CompMsg, AppMsg> for Comp2Model {
         }
     }
 
-    fn view(&self, widgets: &mut Self::Widgets) {
+    fn view(&self, widgets: &mut Self::Widgets, _sender: Sender<CompMsg>) {
         widgets.button.set_visible(!self.hidden);
     }
 }
 
 // The main app
 struct Components {
-    comp1: RelmComponent<Comp1Widgets, Comp1Model, CompMsg, AppMsg>,
-    comp2: RelmComponent<Comp2Widgets, Comp2Model, CompMsg, AppMsg>,
+    comp1: RelmComponent<Comp1Widgets, Comp1Model, (), CompMsg, AppModel, AppMsg>,
+    comp2: RelmComponent<Comp2Widgets, Comp2Model, (), CompMsg, AppModel, AppMsg>,
+}
+
+impl RelmComponents<AppModel, AppMsg> for Components {
+    fn init_components(parent_model: &AppModel, parent_sender: Sender<AppMsg>) -> Self {
+        Components {
+            comp1: RelmComponent::new(parent_model, parent_sender.clone()),
+            comp2: RelmComponent::new(parent_model, parent_sender),
+        }
+    }
 }
 
 struct AppWidgets {
     main: gtk::ApplicationWindow,
     text: gtk::Label,
-    relm: Components,
 }
 
 enum AppMsg {
@@ -146,10 +156,10 @@ struct AppModel {
     counter: u8,
 }
 
-impl Widget<AppMsg, AppModel> for AppWidgets {
+impl RelmWidgets<AppModel, Components, AppMsg> for AppWidgets {
     type Root = gtk::ApplicationWindow;
 
-    fn init_view(sender: Sender<AppMsg>, model: &AppModel) -> Self {
+    fn init_view(model: &AppModel, components: &Components, sender: Sender<AppMsg>) -> Self {
         let main = gtk::ApplicationWindowBuilder::new().build();
         let vbox = gtk::BoxBuilder::new()
             .orientation(gtk::Orientation::Vertical)
@@ -163,15 +173,12 @@ impl Widget<AppMsg, AppModel> for AppWidgets {
         let inc_button = gtk::Button::with_label("Increment");
         let dec_button = gtk::Button::with_label("Decrement");
 
-        let (comp1, comp1_root) = RelmComponent::create(sender.clone());
-        let (comp2, comp2_root) = RelmComponent::create(sender.clone());
-
         vbox.append(&text);
         vbox.append(&inc_button);
         vbox.append(&dec_button);
 
-        vbox.append(&comp1_root);
-        vbox.append(&comp2_root);
+        vbox.append(components.comp1.root_widget());
+        vbox.append(components.comp2.root_widget());
 
         main.set_child(Some(&vbox));
 
@@ -185,11 +192,7 @@ impl Widget<AppMsg, AppModel> for AppWidgets {
             sender2.send(AppMsg::Decrement).unwrap();
         });
 
-        AppWidgets {
-            main,
-            text,
-            relm: Components { comp1, comp2 },
-        }
+        AppWidgets { main, text }
     }
 
     fn root_widget(&self) -> gtk::ApplicationWindow {
@@ -197,34 +200,31 @@ impl Widget<AppMsg, AppModel> for AppWidgets {
     }
 }
 
-impl AppUpdate<AppMsg> for AppModel {
+impl AppUpdate<Components, AppMsg> for AppModel {
     type Widgets = AppWidgets;
 
-    fn init_model() -> Self {
-        AppModel { counter: 0 }
-    }
-
-    fn update(&mut self, msg: AppMsg, widgets: &Self::Widgets) {
+    fn update(&mut self, msg: AppMsg, components: &Components, _sender: Sender<AppMsg>) {
         match msg {
             AppMsg::Increment => self.counter = self.counter.saturating_add(1),
             AppMsg::Decrement => self.counter = self.counter.saturating_sub(1),
             AppMsg::ShowComp1 => {
-                widgets.relm.comp1.sender().send(CompMsg::Show).unwrap();
+                components.comp1.sender().send(CompMsg::Show).unwrap();
             }
             AppMsg::ShowComp2 => {
-                widgets.relm.comp2.sender().send(CompMsg::Show).unwrap();
+                components.comp2.sender().send(CompMsg::Show).unwrap();
             }
         }
         println!("counter: {}", self.counter);
     }
 
-    fn view(&self, widgets: &mut Self::Widgets) {
+    fn view(&self, widgets: &mut Self::Widgets, _sender: Sender<AppMsg>) {
         widgets.text.set_label(&self.counter.to_string());
     }
 }
 
 fn main() {
     gtk::init().unwrap();
-    let relm: RelmApp<AppWidgets, AppModel, AppMsg> = RelmApp::create();
+    let model = AppModel { counter: 0 };
+    let relm: RelmApp<AppWidgets, AppModel, Components, AppMsg> = RelmApp::new(model);
     relm.run();
 }
