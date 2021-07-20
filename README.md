@@ -19,4 +19,7 @@ For example counting up by toggling the button will not affect the other widgets
 A VecGen can be modified during the update method just like a normal vector and during the view function the generator will update only the affected widgets.
 To know how to update the widgets, a GeneratorBlueprint is used that defines the functions needed to generate, update and remove widgets.
 
++ future: A small app that demonstrates how futures can be executed in relm4 by using the surf crate to download HTML from websites.
+Sadly this doesn't work for tokio (async-std and similar are fine though) but you can still spawn a thread with the tokio runtime inside.
+
 **Feedback on the design and contributions are highly appreciated!**

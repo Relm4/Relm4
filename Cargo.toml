@@ -15,6 +15,10 @@ glib-sys = "0.14.0"
 #libc = "^0.2.54"
 log = "^0.4.6"
 struct-tracker = { git = "https://github.com/AaronErhardt/Struct-Tracker", branch = "main", version = "0.1" }
+futures-core = "0.3"
+
+# Only for http example, should be removed later
+surf = "2.2"
 
 [dependencies.gtk]
 package = "gtk4"

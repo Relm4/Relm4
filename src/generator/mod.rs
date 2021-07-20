@@ -1,4 +1,3 @@
-
 mod collections;
 mod widgets;
 
@@ -22,4 +21,3 @@ pub trait GeneratorWidget<Widget, Positioning> {
     fn add(&self, widget: &Widget, position: &Positioning);
     fn remove(&self, widget: &Widget);
 }
-
