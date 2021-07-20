@@ -23,9 +23,17 @@ pub struct GridPosition {
 }
 
 impl<Widget> GeneratorWidget<Widget, GridPosition> for gtk::Grid
-where Widget: glib::IsA<gtk::Widget> {
+where
+    Widget: glib::IsA<gtk::Widget>,
+{
     fn add(&self, widget: &Widget, position: &GridPosition) {
-        self.attach(widget, position.column, position.row, position.width, position.height);
+        self.attach(
+            widget,
+            position.column,
+            position.row,
+            position.width,
+            position.height,
+        );
     }
 
     fn remove(&self, widget: &Widget) {

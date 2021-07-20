@@ -1,9 +1,12 @@
 use glib::Sender;
-use gtk::prelude::{ApplicationExt, ApplicationExtManual, GtkWindowExt, WidgetExt};
+use gtk::prelude::{ApplicationExt, ApplicationExtManual, GtkWindowExt};
 
 use std::marker::PhantomData;
 
 pub mod generator;
+mod traits;
+
+pub use traits::*;
 
 /// Relm app that runs the main application.
 /// The app consists of widgets that represents the UI and the model
@@ -13,21 +16,24 @@ pub mod generator;
 /// Use [`RelmApp::create()`] to create the app and call `run()` on it
 /// to start the application.
 #[derive(Clone)]
-pub struct RelmApp<Widgets, Model, Msg>
+pub struct RelmApp<Widgets, Model, Components, Msg>
 where
-    Widgets: Widget<Msg, Model>,
-    Model: AppUpdate<Msg>,
+    Widgets: RelmWidgets<Model, Components, Msg>,
+    Model: AppUpdate<Components, Msg>,
 {
     widgets: PhantomData<Widgets>,
     model: PhantomData<Model>,
-    sender: Sender<Msg>,
+    components: PhantomData<Components>,
+    msg: PhantomData<Msg>,
     app: gtk::Application,
 }
 
-impl<Widgets, Model, Msg> RelmApp<Widgets, Model, Msg>
+impl<Widgets, Model, Components, Msg> RelmApp<Widgets, Model, Components, Msg>
 where
-    Widgets: Widget<Msg, Model, Root = gtk::ApplicationWindow> + 'static,
-    Model: AppUpdate<Msg, Widgets = Widgets> + 'static,
+    Widgets: RelmWidgets<Model, Components, Msg, Root = gtk::ApplicationWindow> + 'static,
+    Model: AppUpdate<Components, Msg, Widgets = Widgets> + 'static,
+    Components: RelmComponents<Model, Msg> + 'static,
+    Msg: 'static,
 {
     /// Run the application. This will return once the application is closed.
     pub fn run(&self) {
@@ -35,13 +41,13 @@ where
     }
 
     /// Create an application.
-    pub fn create() -> Self {
+    pub fn new(mut model: Model) -> Self {
         let app = gtk::ApplicationBuilder::new().build();
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
-        let mut model = Model::init_model();
+        let components = Components::init_components(&model, sender.clone());
 
-        let mut widgets: Widgets = Widgets::init_view(sender.clone(), &model);
+        let mut widgets: Widgets = Widgets::init_view(&model, &components, sender.clone());
         let root = widgets.root_widget();
 
         // Initialize GTK
@@ -58,8 +64,8 @@ where
 
             // Register receiver on the main loop to wait for messages to update model and view the changes.
             receiver.attach(Some(&context), move |msg: Msg| {
-                model.update(msg, &widgets);
-                model.view(&mut widgets);
+                model.update(msg, &components, sender.clone());
+                model.view(&mut widgets, sender.clone());
                 glib::Continue(true)
             });
         }
@@ -67,7 +73,8 @@ where
         RelmApp {
             widgets: PhantomData,
             model: PhantomData,
-            sender,
+            components: PhantomData,
+            msg: PhantomData,
             app,
         }
     }
@@ -78,32 +85,40 @@ where
 /// widgets, models and message type. They also store the parent message type
 /// to communicate with the parent.
 #[derive(Clone)]
-pub struct RelmComponent<Widgets, Model, Msg, ParentMsg>
+pub struct RelmComponent<Widgets, Model, Components, Msg, ParentModel, ParentMsg>
 where
-    Widgets: Widget<Msg, Model>,
-    Model: ComponentUpdate<Msg, ParentMsg>,
+    Widgets: RelmWidgets<Model, Components, Msg>,
+    Model: ComponentUpdate<Components, Msg, ParentModel, ParentMsg>,
 {
     widgets: PhantomData<Widgets>,
     model: PhantomData<Model>,
-    parent_msg: PhantomData<ParentMsg>,
+    parent_info: PhantomData<(ParentModel, ParentMsg)>,
+    components: PhantomData<Components>,
     sender: Sender<Msg>,
+    root_widget: Widgets::Root,
 }
 
-impl<Widgets, Model, Msg, ParentMsg> RelmComponent<Widgets, Model, Msg, ParentMsg>
+impl<Widgets, Model, Components, Msg, ParentModel, ParentMsg>
+    RelmComponent<Widgets, Model, Components, Msg, ParentModel, ParentMsg>
 where
-    Widgets: Widget<Msg, Model> + 'static,
-    Model: ComponentUpdate<Msg, ParentMsg, Widgets = Widgets> + 'static,
+    Widgets: RelmWidgets<Model, Components, Msg> + 'static,
+    Model: ComponentUpdate<Components, Msg, ParentModel, ParentMsg, Widgets = Widgets> + 'static,
+    Components: RelmComponents<Model, Msg> + 'static,
     ParentMsg: 'static,
+    Msg: 'static,
 {
     /// Create component. Usually you can store Self in the widgets of the parent component.
     /// The root widget needs to be attached to a GTK container in the parent's `init_view` function.
-    pub fn create(parent_sender: Sender<ParentMsg>) -> (Self, Widgets::Root) {
+    pub fn new(parent_model: &ParentModel, parent_sender: Sender<ParentMsg>) -> Self {
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
-        let mut model = Model::init_model();
+        let mut model = Model::init_model(parent_model);
 
-        let mut widgets: Widgets = Widgets::init_view(sender.clone(), &model);
-        let root = widgets.root_widget();
+        let components = Components::init_components(&model, sender.clone());
+        let cloned_sender = sender.clone();
+
+        let mut widgets: Widgets = Widgets::init_view(&model, &components, sender.clone());
+        let root_widget = widgets.root_widget();
 
         {
             let context = glib::MainContext::default();
@@ -112,67 +127,32 @@ where
                 .expect("Couldn't acquire glib main context");
             // The main loop executes the closure as soon as it receives the message
             receiver.attach(Some(&context), move |msg: Msg| {
-                model.update(msg, &widgets, parent_sender.clone());
-                model.view(&mut widgets);
+                model.update(msg, &components, sender.clone(), parent_sender.clone());
+                model.view(&mut widgets, sender.clone());
                 glib::Continue(true)
             });
         }
 
-        (
-            RelmComponent {
-                widgets: PhantomData,
-                model: PhantomData,
-                parent_msg: PhantomData,
-                sender,
-            },
-            root,
-        )
+        RelmComponent {
+            widgets: PhantomData,
+            model: PhantomData,
+            parent_info: PhantomData,
+            components: PhantomData,
+            sender: cloned_sender,
+            root_widget,
+        }
     }
 
     /// Get a sender that can send messages to this component.
     pub fn sender(&self) -> Sender<Msg> {
         self.sender.clone()
     }
+
+    pub fn root_widget(&self) -> &Widgets::Root {
+        &self.root_widget
+    }
 }
 
-/// Widgets are part of an app or components. They represent the UI
-/// that usually consists out of GTK widgets. The root represents the
-/// widget that all other widgets are attached to.
-/// The root of the main app must be a [`gtk::ApplicationWindow`].
-pub trait Widget<Msg, Model> {
-    type Root: WidgetExt;
-
-    /// Initialize the UI.
-    fn init_view(sender: glib::Sender<Msg>, model: &Model) -> Self;
-
-    /// Return the root widget.
-    fn root_widget(&self) -> Self::Root;
-}
-
-/// Methods that initialize and update the main app.
-pub trait AppUpdate<Msg> {
-    type Widgets;
-
-    /// Create initial model.
-    fn init_model() -> Self;
-
-    /// Update the model.
-    fn update(&mut self, msg: Msg, widgets: &Self::Widgets);
-
-    /// Update the view to represent the updated model.
-    fn view(&self, widgets: &mut Self::Widgets);
-}
-
-/// Methods that initialize and update a component.
-pub trait ComponentUpdate<Msg, ParentMsg> {
-    type Widgets;
-
-    /// Create initial model.
-    fn init_model() -> Self;
-
-    /// Update the model. The parent_sender allows to send messages to the parent.
-    fn update(&mut self, msg: Msg, widgets: &Self::Widgets, parent_sender: Sender<ParentMsg>);
-
-    /// Update the view to represent the updated model.
-    fn view(&self, widgets: &mut Self::Widgets);
+pub fn spawn_future<F: futures_core::future::Future<Output = ()> + Send + 'static>(f: F) {
+    glib::MainContext::ref_thread_default().spawn(f);
 }
