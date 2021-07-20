@@ -13,7 +13,7 @@ struct AppWidgets {
 #[derive(Debug)]
 enum AppMsg {
     Request(String),
-    Repsonse(String),
+    Response(String),
 }
 
 #[struct_tracker::tracker]
@@ -90,12 +90,12 @@ impl AppUpdate<(), AppMsg> for AppModel {
                             }
                         }
                     }
-                    sender.send(AppMsg::Repsonse(text)).unwrap();
+                    sender.send(AppMsg::Response(text)).unwrap();
                 };
 
                 spawn_future(fut);
             }
-            AppMsg::Repsonse(text) => {
+            AppMsg::Response(text) => {
                 self.set_text(text);
                 self.set_waiting(false);
             }
