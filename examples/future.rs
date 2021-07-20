@@ -1,5 +1,7 @@
 use glib::Sender;
-use gtk::prelude::{BoxExt, ButtonExt, EditableExt, GtkWindowExt, TextBufferExt, TextViewExt, WidgetExt};
+use gtk::prelude::{
+    BoxExt, ButtonExt, EditableExt, GtkWindowExt, TextBufferExt, TextViewExt, WidgetExt,
+};
 use relm4::*;
 use struct_tracker::Tracker;
 
@@ -37,10 +39,15 @@ impl RelmWidgets<AppModel, (), AppMsg> for AppWidgets {
             .spacing(5)
             .build();
 
-        let url = gtk::Entry::builder().placeholder_text("https://example.com").build();
+        let url = gtk::Entry::builder()
+            .placeholder_text("https://example.com")
+            .build();
         let submit = gtk::Button::with_label("Submit");
 
-        let scroller = gtk::ScrolledWindow::builder().hexpand(true).vexpand(true).build();
+        let scroller = gtk::ScrolledWindow::builder()
+            .hexpand(true)
+            .vexpand(true)
+            .build();
         let text = gtk::TextView::new();
         scroller.set_child(Some(&text));
 
