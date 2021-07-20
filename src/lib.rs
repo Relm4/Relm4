@@ -1,7 +1,8 @@
 use glib::Sender;
 use gtk::prelude::{ApplicationExt, ApplicationExtManual, GtkWindowExt};
 
-use std::marker::PhantomData;
+use std::marker::{PhantomData, Send};
+use std::sync::mpsc::channel;
 
 pub mod generator;
 mod traits;
@@ -150,6 +151,80 @@ where
 
     pub fn root_widget(&self) -> &Widgets::Root {
         &self.root_widget
+    }
+}
+
+impl<Widgets, Model, Components, Msg, ParentModel, ParentMsg>
+    RelmComponent<Widgets, Model, Components, Msg, ParentModel, ParentMsg>
+where
+    Widgets: RelmWidgets<Model, Components, Msg> + 'static,
+    Model: ComponentUpdate<Components, Msg, ParentModel, ParentMsg, Widgets = Widgets>
+        + Send
+        + 'static,
+    Components: RelmComponents<Model, Msg> + Send + 'static,
+    ParentMsg: Send + 'static,
+    Msg: Send + 'static,
+{
+    pub fn with_new_thread(parent_model: &ParentModel, parent_sender: Sender<ParentMsg>) -> Self {
+        let (global_sender, global_receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
+        let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
+
+        let model = Model::init_model(parent_model);
+
+        let components = Components::init_components(&model, sender.clone());
+        let cloned_sender = sender.clone();
+
+        let mut widgets: Widgets = Widgets::init_view(&model, &components, sender.clone());
+        let root_widget = widgets.root_widget();
+
+        let update_sender = sender.clone();
+        let view_sender = sender;
+
+        let (model_tx, model_rx) = channel();
+        model_tx.send(model).unwrap();
+
+        std::thread::spawn(move || {
+            let context = glib::MainContext::new();
+            context.push_thread_default();
+            let _guard = context
+                .acquire()
+                .expect("Couldn't acquire glib main context");
+
+            // The main loop executes the closure as soon as it receives the message
+            receiver.attach(Some(&context), move |msg: Msg| {
+                println!("Update!");
+                let mut model: Model = model_rx.recv().unwrap();
+                model.update(
+                    msg,
+                    &components,
+                    update_sender.clone(),
+                    parent_sender.clone(),
+                );
+                global_sender.send(model).unwrap();
+                glib::Continue(true)
+            });
+
+            let main_loop = glib::MainLoop::new(Some(&context), true);
+            main_loop.run();
+            context.pop_thread_default();
+        });
+
+        let global_context = glib::MainContext::default();
+        let _global_guard = global_context.acquire().unwrap();
+        global_receiver.attach(Some(&global_context), move |model: Model| {
+            model.view(&mut widgets, view_sender.clone());
+            model_tx.send(model).unwrap();
+            glib::Continue(true)
+        });
+
+        RelmComponent {
+            widgets: PhantomData,
+            model: PhantomData,
+            parent_info: PhantomData,
+            components: PhantomData,
+            sender: cloned_sender,
+            root_widget,
+        }
     }
 }
 
