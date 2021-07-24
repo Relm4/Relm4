@@ -1,4 +1,4 @@
-use glib::{object::Cast, Sender};
+use gtk::glib::{object::Cast, Sender};
 use gtk::prelude::{ButtonExt, GtkWindowExt};
 use gtk::StringList;
 use relm4::*;
@@ -81,14 +81,35 @@ impl RelmWidgets<AppModel, (), AppMsg> for AppWidgets {
         }
     }
 
+    fn view(&mut self, model: &AppModel, _sender: Sender<AppMsg>) {
+        // Only update the widget if model.active_widget was actually changed.
+        // This can be simply done by checking bits in the tracker variable of the member struct.
+        if model.changed(AppModel::active_widget()) {
+            let widget: gtk::Widget = match model.get_active_widget() {
+                WidgetSelection::Label => gtk::Label::new(Some("Label")).upcast::<gtk::Widget>(),
+                WidgetSelection::Button => {
+                    gtk::Button::with_label("Button").upcast::<gtk::Widget>()
+                }
+                WidgetSelection::Slider => {
+                    gtk::Scale::with_range(gtk::Orientation::Horizontal, 0.0, 100.0, 1.0)
+                        .upcast::<gtk::Widget>()
+                }
+            };
+            self.cntr_box.set_center_widget(Some(&widget));
+        }
+        // Only update toggle button if model.counter was actually changed
+        if model.changed(AppModel::counter()) {
+            self.toggle
+                .set_label(&format!("Toggled: {}", model.counter));
+        }
+    }
+
     fn root_widget(&self) -> gtk::ApplicationWindow {
         self.main.clone()
     }
 }
 
 impl AppUpdate<(), AppMsg> for AppModel {
-    type Widgets = AppWidgets;
-
     fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) {
         // reset tracker value of the model
         self.reset();
@@ -106,30 +127,6 @@ impl AppUpdate<(), AppMsg> for AppModel {
             }
         }
         println!("counter: {}", self.counter);
-    }
-
-    fn view(&self, widgets: &mut Self::Widgets, _sender: Sender<AppMsg>) {
-        // Only update the widget if model.active_widget was actually changed.
-        // This can be simply done by checking bits in the tracker variable of the member struct.
-        if self.changed(AppModel::active_widget()) {
-            let widget: gtk::Widget = match self.get_active_widget() {
-                WidgetSelection::Label => gtk::Label::new(Some("Label")).upcast::<gtk::Widget>(),
-                WidgetSelection::Button => {
-                    gtk::Button::with_label("Button").upcast::<gtk::Widget>()
-                }
-                WidgetSelection::Slider => {
-                    gtk::Scale::with_range(gtk::Orientation::Horizontal, 0.0, 100.0, 1.0)
-                        .upcast::<gtk::Widget>()
-                }
-            };
-            widgets.cntr_box.set_center_widget(Some(&widget));
-        }
-        // Only update toggle button if model.counter was actually changed
-        if self.changed(AppModel::counter()) {
-            widgets
-                .toggle
-                .set_label(&format!("Toggled: {}", self.counter));
-        }
     }
 }
 

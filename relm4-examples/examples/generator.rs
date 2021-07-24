@@ -1,12 +1,11 @@
-use glib::Sender;
+use gtk::glib::Sender;
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt};
-use relm4::generator::{Generator, GeneratorBlueprint, GridPosition, VecGen};
+use relm4::generator::{Generator, GeneratorBlueprint, VecGen};
 use relm4::*;
 
 struct AppWidgets {
     main: gtk::ApplicationWindow,
-    gen_grid: gtk::Grid,
-    sender: Sender<AppMsg>,
+    gen_box: gtk::Box,
 }
 
 #[derive(Debug)]
@@ -17,7 +16,7 @@ enum AppMsg {
 }
 
 struct AppModel {
-    data: VecGen<u8, gtk::Button, GridPosition, AppMsg>,
+    data: VecGen<u8, gtk::Button, (), AppMsg>,
     counter: u8,
 }
 
@@ -38,15 +37,13 @@ impl RelmWidgets<AppModel, (), AppMsg> for AppWidgets {
             .spacing(5)
             .build();
 
-        let gen_grid = gtk::Grid::builder()
+        let gen_box = gtk::Box::builder()
             .orientation(gtk::Orientation::Vertical)
             .margin_end(5)
             .margin_top(5)
             .margin_start(5)
             .margin_bottom(5)
-            .row_spacing(5)
-            .column_spacing(5)
-            .column_homogeneous(true)
+            .spacing(5)
             .build();
 
         let add = gtk::Button::with_label("Add");
@@ -54,7 +51,7 @@ impl RelmWidgets<AppModel, (), AppMsg> for AppWidgets {
 
         main_box.append(&add);
         main_box.append(&remove);
-        main_box.append(&gen_grid);
+        main_box.append(&gen_box);
 
         main.set_child(Some(&main_box));
 
@@ -63,16 +60,15 @@ impl RelmWidgets<AppModel, (), AppMsg> for AppWidgets {
             cloned_sender.send(AppMsg::Add).unwrap();
         });
 
-        let cloned_sender = sender.clone();
         remove.connect_clicked(move |_| {
-            cloned_sender.send(AppMsg::Remove).unwrap();
+            sender.send(AppMsg::Remove).unwrap();
         });
 
-        AppWidgets {
-            main,
-            gen_grid,
-            sender,
-        }
+        AppWidgets { main, gen_box }
+    }
+
+    fn view(&mut self, model: &AppModel, sender: Sender<AppMsg>) {
+        model.data.generate(&self.gen_box, sender);
     }
 
     fn root_widget(&self) -> gtk::ApplicationWindow {
@@ -81,8 +77,6 @@ impl RelmWidgets<AppModel, (), AppMsg> for AppWidgets {
 }
 
 impl AppUpdate<(), AppMsg> for AppModel {
-    type Widgets = AppWidgets;
-
     fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) {
         match msg {
             AppMsg::Add => {
@@ -98,11 +92,6 @@ impl AppUpdate<(), AppMsg> for AppModel {
             }
         }
     }
-
-    fn view(&self, widgets: &mut Self::Widgets, _sender: Sender<AppMsg>) {
-        self.data
-            .generate(&widgets.gen_grid, widgets.sender.clone());
-    }
 }
 
 fn main() {
@@ -114,17 +103,7 @@ fn main() {
             button.connect_clicked(move |_| {
                 sender.send(AppMsg::Clicked(index)).unwrap();
             });
-
-            let row = index as i32 / 5;
-            let column = (index as i32 % 5) * 2 + row % 2;
-            let position = GridPosition {
-                column,
-                row,
-                width: 1,
-                height: 1,
-            };
-
-            (button, position)
+            (button, ())
         },
         update: |data, _index, widget| {
             widget.set_label(&data.to_string());
@@ -135,6 +114,7 @@ fn main() {
         data: VecGen::new(generator),
         counter: 0,
     };
+
     let relm: RelmApp<AppWidgets, AppModel, (), AppMsg> = RelmApp::new(model);
     relm.run();
 }

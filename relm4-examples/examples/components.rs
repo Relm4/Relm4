@@ -1,5 +1,5 @@
-use glib::Sender;
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, WidgetExt};
+use relm4::Sender;
 use relm4::*;
 
 // Implement components that will be part of the main app
@@ -40,6 +40,10 @@ impl RelmWidgets<Comp1Model, (), CompMsg> for Comp1Widgets {
         Comp1Widgets { button }
     }
 
+    fn view(&mut self, model: &Comp1Model, _sender: Sender<CompMsg>) {
+        self.button.set_visible(!model.hidden);
+    }
+
     fn root_widget(&self) -> Self::Root {
         self.button.clone()
     }
@@ -59,14 +63,16 @@ impl RelmWidgets<Comp2Model, (), CompMsg> for Comp2Widgets {
         Comp2Widgets { button }
     }
 
+    fn view(&mut self, model: &Comp2Model, _sender: Sender<CompMsg>) {
+        self.button.set_visible(!model.hidden);
+    }
+
     fn root_widget(&self) -> Self::Root {
         self.button.clone()
     }
 }
 
 impl ComponentUpdate<(), CompMsg, AppModel, AppMsg> for Comp1Model {
-    type Widgets = Comp1Widgets;
-
     fn init_model(_parent_model: &AppModel) -> Self {
         Comp1Model { hidden: false }
     }
@@ -89,15 +95,9 @@ impl ComponentUpdate<(), CompMsg, AppModel, AppMsg> for Comp1Model {
             }
         }
     }
-
-    fn view(&self, widgets: &mut Self::Widgets, _sender: Sender<CompMsg>) {
-        widgets.button.set_visible(!self.hidden);
-    }
 }
 
 impl ComponentUpdate<(), CompMsg, AppModel, AppMsg> for Comp2Model {
-    type Widgets = Comp2Widgets;
-
     fn init_model(_parent_model: &AppModel) -> Self {
         Comp2Model { hidden: true }
     }
@@ -119,10 +119,6 @@ impl ComponentUpdate<(), CompMsg, AppModel, AppMsg> for Comp2Model {
             }
         }
     }
-
-    fn view(&self, widgets: &mut Self::Widgets, _sender: Sender<CompMsg>) {
-        widgets.button.set_visible(!self.hidden);
-    }
 }
 
 // The main app
@@ -134,7 +130,7 @@ struct Components {
 impl RelmComponents<AppModel, AppMsg> for Components {
     fn init_components(parent_model: &AppModel, parent_sender: Sender<AppMsg>) -> Self {
         Components {
-            comp1: RelmComponent::new(parent_model, parent_sender.clone()),
+            comp1: RelmComponent::with_new_thread(parent_model, parent_sender.clone()),
             comp2: RelmComponent::new(parent_model, parent_sender),
         }
     }
@@ -195,14 +191,16 @@ impl RelmWidgets<AppModel, Components, AppMsg> for AppWidgets {
         AppWidgets { main, text }
     }
 
+    fn view(&mut self, model: &AppModel, _sender: Sender<AppMsg>) {
+        self.text.set_label(&model.counter.to_string());
+    }
+
     fn root_widget(&self) -> gtk::ApplicationWindow {
         self.main.clone()
     }
 }
 
 impl AppUpdate<Components, AppMsg> for AppModel {
-    type Widgets = AppWidgets;
-
     fn update(&mut self, msg: AppMsg, components: &Components, _sender: Sender<AppMsg>) {
         match msg {
             AppMsg::Increment => self.counter = self.counter.saturating_add(1),
@@ -215,10 +213,6 @@ impl AppUpdate<Components, AppMsg> for AppModel {
             }
         }
         println!("counter: {}", self.counter);
-    }
-
-    fn view(&self, widgets: &mut Self::Widgets, _sender: Sender<AppMsg>) {
-        widgets.text.set_label(&self.counter.to_string());
     }
 }
 

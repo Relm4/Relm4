@@ -1,7 +1,7 @@
-use glib::Sender;
 use gtk::prelude::{
     BoxExt, ButtonExt, EditableExt, GtkWindowExt, TextBufferExt, TextViewExt, WidgetExt,
 };
+use relm4::Sender;
 use relm4::*;
 use struct_tracker::Tracker;
 
@@ -65,14 +65,22 @@ impl RelmWidgets<AppModel, (), AppMsg> for AppWidgets {
         AppWidgets { main, text }
     }
 
+    fn view(&mut self, model: &AppModel, _sender: Sender<AppMsg>) {
+        if model.changed(AppModel::text()) {
+            self.text.buffer().set_text(&model.text);
+        }
+
+        if model.changed(AppModel::waiting()) {
+            self.main.set_sensitive(!model.waiting);
+        }
+    }
+
     fn root_widget(&self) -> gtk::ApplicationWindow {
         self.main.clone()
     }
 }
 
 impl AppUpdate<(), AppMsg> for AppModel {
-    type Widgets = AppWidgets;
-
     fn update(&mut self, msg: AppMsg, _components: &(), sender: Sender<AppMsg>) {
         self.reset();
 
@@ -99,16 +107,6 @@ impl AppUpdate<(), AppMsg> for AppModel {
                 self.set_text(text);
                 self.set_waiting(false);
             }
-        }
-    }
-
-    fn view(&self, widgets: &mut Self::Widgets, _sender: Sender<AppMsg>) {
-        if self.changed(Self::text()) {
-            widgets.text.buffer().set_text(&self.text);
-        }
-
-        if self.changed(Self::waiting()) {
-            widgets.main.set_sensitive(!self.waiting);
         }
     }
 }
