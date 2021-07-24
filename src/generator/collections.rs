@@ -1,3 +1,5 @@
+use gtk::glib::Sender;
+
 use std::cell::RefCell;
 use std::collections::BTreeMap;
 
@@ -62,10 +64,10 @@ impl<W, T, Widget, Positioning, Msg> Generator<W, T, Widget, Positioning, Msg>
 where
     W: GeneratorWidget<Widget, Positioning>,
 {
-    fn generate(&self, parent: &W, sender: glib::Sender<Msg>) {
+    fn generate(&self, parent: &W, sender: Sender<Msg>) {
         for (index, change) in self.changes.borrow().iter().rev() {
             let mut widgets = self.widgets.borrow_mut();
-            dbg!(change);
+
             match change {
                 ChangeType::Add => {
                     let (widget, position) =
