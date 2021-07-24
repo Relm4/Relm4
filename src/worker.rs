@@ -140,7 +140,7 @@ where
                 .expect("Couldn't acquire glib main context");
 
             let rt = tokio::runtime::Builder::new_current_thread()
-            .enable_all()
+                .enable_all()
                 .build()
                 .unwrap();
 

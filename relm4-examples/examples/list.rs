@@ -175,14 +175,15 @@ impl RelmWidgets<AppModel, (), AppMsg> for AppWidgets {
                 .expect("The object needs to be of type `IntegerObject`.");
 
             // Get property "number" from `IntegerObject`
-            let number = integer_object
+            let _number = integer_object
                 .property("number")
                 .expect("The property needs to exist and be readable.")
                 .get::<i32>()
                 .expect("The property needs to be of type `i32`.");
 
-            // Only allow even numbers
-            number % 2 == 0
+            // Uncomment to only allow even numbers
+            // _number % 2 == 0
+            true
         });
         let filter_model = gtk::FilterListModel::new(Some(&model.store), Some(&filter));
 
