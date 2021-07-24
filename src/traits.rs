@@ -1,4 +1,4 @@
-use glib::Sender;
+use gtk::glib::{self, Sender};
 
 /// Widgets are part of an app or components. They represent the UI
 /// that usually consists out of GTK widgets. The root represents the
@@ -12,6 +12,9 @@ pub trait RelmWidgets<Model, Components, Msg> {
 
     /// Return the root widget.
     fn root_widget(&self) -> Self::Root;
+
+    /// Update the view to represent the updated model.
+    fn view(&mut self, model: &Model, sender: Sender<Msg>);
 }
 
 pub trait RelmComponents<ParentModel, ParentMsg> {
@@ -20,18 +23,12 @@ pub trait RelmComponents<ParentModel, ParentMsg> {
 
 /// Methods that initialize and update the main app.
 pub trait AppUpdate<Components, Msg> {
-    type Widgets;
     /// Update the model.
     fn update(&mut self, msg: Msg, components: &Components, sender: Sender<Msg>);
-
-    /// Update the view to represent the updated model.
-    fn view(&self, widgets: &mut Self::Widgets, sender: Sender<Msg>);
 }
 
 /// Methods that initialize and update a component.
 pub trait ComponentUpdate<Components, Msg, ParentModel, ParentMsg> {
-    type Widgets;
-
     fn init_model(parent_model: &ParentModel) -> Self;
 
     /// Update the model. The parent_sender allows to send messages to the parent.
@@ -42,9 +39,21 @@ pub trait ComponentUpdate<Components, Msg, ParentModel, ParentMsg> {
         sender: Sender<Msg>,
         parent_sender: Sender<ParentMsg>,
     );
+}
 
-    /// Update the view to represent the updated model.
-    fn view(&self, widgets: &mut Self::Widgets, sender: Sender<Msg>);
+#[cfg(feature = "tokio-rt")]
+#[async_trait::async_trait]
+pub trait AsyncComponentUpdate<Components, Msg, ParentModel, ParentMsg> {
+    fn init_model(parent_model: &ParentModel) -> Self;
+
+    /// Update the model. The parent_sender allows to send messages to the parent.
+    async fn update(
+        &mut self,
+        msg: Msg,
+        components: &Components,
+        sender: Sender<Msg>,
+        parent_sender: Sender<ParentMsg>,
+    );
 }
 
 impl<ParentModel, ParentMsg> RelmComponents<ParentModel, ParentMsg> for () {
