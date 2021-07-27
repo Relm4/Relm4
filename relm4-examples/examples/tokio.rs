@@ -5,7 +5,6 @@ use gtk::prelude::{
 };
 use relm4::Sender;
 use relm4::*;
-use struct_tracker::Tracker;
 
 struct HttpWorker {}
 
@@ -88,7 +87,7 @@ enum AppMsg {
     SetImage(Option<bytes::Bytes>),
 }
 
-#[struct_tracker::tracker]
+#[tracker::track]
 struct AppModel {
     text: String,
     text_waiting: bool,

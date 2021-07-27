@@ -3,7 +3,6 @@ use gtk::prelude::{
 };
 use relm4::Sender;
 use relm4::*;
-use struct_tracker::Tracker;
 
 struct AppWidgets {
     main: gtk::ApplicationWindow,
@@ -16,7 +15,7 @@ enum AppMsg {
     Response(String),
 }
 
-#[struct_tracker::tracker]
+#[tracker::track]
 struct AppModel {
     text: String,
     waiting: bool,

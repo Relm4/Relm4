@@ -2,7 +2,6 @@ use gtk::glib::{object::Cast, Sender};
 use gtk::prelude::{ButtonExt, GtkWindowExt};
 use gtk::StringList;
 use relm4::*;
-use struct_tracker::Tracker;
 
 struct AppWidgets {
     main: gtk::ApplicationWindow,
@@ -25,9 +24,10 @@ enum WidgetSelection {
 
 // The proc macro allows to easily track changes to different
 // members of the model
-#[struct_tracker::tracker]
+#[tracker::track]
 struct AppModel {
     counter: u8,
+    #[no_eq]
     active_widget: WidgetSelection,
 }
 

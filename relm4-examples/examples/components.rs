@@ -206,10 +206,10 @@ impl AppUpdate<Components, AppMsg> for AppModel {
             AppMsg::Increment => self.counter = self.counter.saturating_add(1),
             AppMsg::Decrement => self.counter = self.counter.saturating_sub(1),
             AppMsg::ShowComp1 => {
-                components.comp1.sender().send(CompMsg::Show).unwrap();
+                components.comp1.send(CompMsg::Show).unwrap();
             }
             AppMsg::ShowComp2 => {
-                components.comp2.sender().send(CompMsg::Show).unwrap();
+                components.comp2.send(CompMsg::Show).unwrap();
             }
         }
         println!("counter: {}", self.counter);
