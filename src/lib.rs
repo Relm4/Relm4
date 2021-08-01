@@ -1,3 +1,10 @@
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/AaronErhardt/relm4/main/assets/Relm_logo.svg"
+)]
+#![doc(
+    html_favicon_url = "https://raw.githubusercontent.com/AaronErhardt/relm4/main/assets/Relm_logo.svg"
+)]
+
 mod app;
 mod component;
 pub mod generator;
