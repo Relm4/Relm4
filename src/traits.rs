@@ -8,7 +8,7 @@ pub trait RelmWidgets<Model, Components, Msg> {
     type Root: glib::IsA<gtk::Widget>;
 
     /// Initialize the UI.
-    fn init_view(model: &Model, component: &Components, sender: glib::Sender<Msg>) -> Self;
+    fn init_view(model: &Model, component: &Components, sender: Sender<Msg>) -> Self;
 
     /// Return the root widget.
     fn root_widget(&self) -> Self::Root;
