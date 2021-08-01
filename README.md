@@ -34,6 +34,10 @@ Sadly this doesn't work for tokio (async-std and similar are fine though) but yo
 
 + list: A simple app using `gtk::ListView` to efficiently render large list. It's very close to the example in the [gtk4-rs book](https://gtk-rs.org/gtk4-rs/git/book/lists.html).
 
-+ tokio: An app using the tokio-rt feature and an `AsyncRelmWorker` to efficiently fetch favicons and HTML text from websites. Note that by default delays for the HTTP-requests are enabled that makes UI updates better visible. To disable the delays comment the two lines starting with `tokio::time::delay`.
++ tokio: An app using the tokio-rt feature and an `AsyncRelmWorker` to efficiently fetch favicons and HTML text from websites.
+Note that by default delays for the HTTP-requests are enabled that makes UI updates better visible.
+To disable the delays comment the two lines starting with `tokio::time::delay`.
+
++ macro: A simple app with a counter that demonstrates how to use the `relm4-macros::widget` macro.
 
 **Feedback on the design and contributions are highly appreciated!**
