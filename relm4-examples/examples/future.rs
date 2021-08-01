@@ -111,7 +111,6 @@ impl AppUpdate<(), AppMsg> for AppModel {
 }
 
 fn main() {
-    gtk::init().unwrap();
     let model = AppModel {
         text: String::new(),
         waiting: false,

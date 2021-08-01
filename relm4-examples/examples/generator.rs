@@ -95,7 +95,6 @@ impl AppUpdate<(), AppMsg> for AppModel {
 }
 
 fn main() {
-    gtk::init().unwrap();
     let generator = GeneratorBlueprint {
         generate: |data: &u8, index: &usize, sender| {
             let button = gtk::Button::with_label(&data.to_string());

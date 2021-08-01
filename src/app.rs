@@ -10,7 +10,7 @@ use crate::{AppUpdate, RelmComponents, RelmWidgets};
 /// that stores the application state.
 /// A relm app might run as a standalone application or may consist
 /// of multiple components that communicate with each other.
-/// Use [`RelmApp::create()`] to create the app and call `run()` on it
+/// Use [`RelmApp::new()`] to create the app and call `run()` on it
 /// to start the application.
 #[derive(Clone)]
 pub struct RelmApp<Widgets, Model, Components, Msg>
@@ -39,6 +39,7 @@ where
 
     /// Create an application.
     pub fn new(mut model: Model) -> Self {
+        gtk::init().expect("Couln't initialize GTK");
         let app = gtk::ApplicationBuilder::new().build();
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 

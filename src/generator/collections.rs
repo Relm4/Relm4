@@ -81,12 +81,12 @@ where
                 ChangeType::Remove => {
                     let widget = widgets.pop().unwrap();
                     let remove_widget = (self.generator.remove)(&widget);
-                    parent.remove(&remove_widget);
+                    parent.remove(remove_widget);
                 }
                 ChangeType::Recreate => {
                     let widget = widgets.pop().unwrap();
                     let remove_widget = (self.generator.remove)(&widget);
-                    parent.remove(&remove_widget);
+                    parent.remove(remove_widget);
                     let (widget, position) =
                         (self.generator.generate)(&self.data[*index], index, sender.clone());
                     parent.add(&widget, &position);

@@ -217,7 +217,6 @@ impl AppUpdate<Components, AppMsg> for AppModel {
 }
 
 fn main() {
-    gtk::init().unwrap();
     let model = AppModel { counter: 0 };
     let relm: RelmApp<AppWidgets, AppModel, Components, AppMsg> = RelmApp::new(model);
     relm.run();

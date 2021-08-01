@@ -265,7 +265,6 @@ impl AppUpdate<(), AppMsg> for AppModel {
 }
 
 fn main() {
-    gtk::init().unwrap();
     let store = gio::ListStore::new(IntegerObject::static_type());
     for number in 0..=10 {
         //0_000 {
