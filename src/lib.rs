@@ -25,3 +25,10 @@ pub use async_trait::async_trait;
 pub fn spawn_future<F: futures_core::future::Future<Output = ()> + Send + 'static>(f: F) {
     gtk::glib::MainContext::ref_thread_default().spawn(f);
 }
+
+#[macro_export]
+macro_rules! send {
+    ($sender:ident, $msg:expr) => {
+        $sender.clone().send($msg).unwrap()
+    };
+}
