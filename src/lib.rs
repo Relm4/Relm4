@@ -7,6 +7,7 @@
 
 mod app;
 mod component;
+pub mod default_widgets;
 pub mod generator;
 mod traits;
 mod worker;
