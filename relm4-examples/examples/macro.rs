@@ -1,6 +1,5 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
-use relm4::send;
-use relm4::{AppUpdate, RelmApp, RelmWidgets, Sender};
+use relm4::{AppUpdate, RelmApp, RelmWidgets, Sender, WidgetPlus, send};
 
 enum AppMsg {
     Increment,
@@ -40,10 +39,7 @@ impl RelmWidgets for AppWidgets {
         set_default_width: model.width as i32,
         set_child = Some(&gtk::Box) {
           set_orientation: gtk::Orientation::Vertical,
-          set_margin_start: 10,
-          set_margin_end: 10,
-          set_margin_top: 10,
-          set_margin_bottom: 10,
+          set_margin_all: 10,
           set_spacing: 10,
           set_hexpand: true,
           append: label = &gtk::Label {
@@ -56,6 +52,10 @@ impl RelmWidgets for AppWidgets {
             connect_clicked => move |_btn| {
               send!(sender, AppMsg::Increment);
             },
+          },
+          append: _inv_label = &gtk::Label {
+            set_label: "Green inverted text!",
+            inline_css: b"transform: rotate(180deg); color: green;",
           }
         }
       }
