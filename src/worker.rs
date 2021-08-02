@@ -7,7 +7,12 @@ use crate::{ComponentUpdate, RelmComponents};
 #[derive(Clone)]
 pub struct RelmWorker<Model, Components, Msg, ParentModel, ParentMsg>
 where
-    Model: ComponentUpdate<Components, Msg, ParentModel, ParentMsg>,
+    Model: ComponentUpdate<
+        Components = Components,
+        Msg = Msg,
+        ParentModel = ParentModel,
+        ParentMsg = ParentMsg,
+    >,
 {
     model: PhantomData<Model>,
     parent_info: PhantomData<(ParentModel, ParentMsg)>,
@@ -18,7 +23,12 @@ where
 impl<Model, Components, Msg, ParentModel, ParentMsg>
     RelmWorker<Model, Components, Msg, ParentModel, ParentMsg>
 where
-    Model: ComponentUpdate<Components, Msg, ParentModel, ParentMsg> + 'static,
+    Model: ComponentUpdate<
+            Components = Components,
+            Msg = Msg,
+            ParentModel = ParentModel,
+            ParentMsg = ParentMsg,
+        > + 'static,
     Components: RelmComponents<Model, Msg> + 'static,
     ParentMsg: 'static,
     Msg: 'static,
@@ -61,7 +71,13 @@ where
 impl<Model, Components, Msg, ParentModel, ParentMsg>
     RelmWorker<Model, Components, Msg, ParentModel, ParentMsg>
 where
-    Model: ComponentUpdate<Components, Msg, ParentModel, ParentMsg> + Send + 'static,
+    Model: ComponentUpdate<
+            Components = Components,
+            Msg = Msg,
+            ParentModel = ParentModel,
+            ParentMsg = ParentMsg,
+        > + Send
+        + 'static,
     Components: RelmComponents<Model, Msg> + Send + 'static,
     ParentMsg: Send + 'static,
     Msg: Send + 'static,

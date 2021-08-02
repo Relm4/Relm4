@@ -31,8 +31,11 @@ struct AppModel {
     active_widget: WidgetSelection,
 }
 
-impl RelmWidgets<AppModel, (), AppMsg> for AppWidgets {
+impl RelmWidgets for AppWidgets {
     type Root = gtk::ApplicationWindow;
+    type Model = AppModel;
+    type Components = ();
+    type Msg = AppMsg;
 
     fn init_view(model: &AppModel, _components: &(), sender: Sender<AppMsg>) -> Self {
         let main = gtk::ApplicationWindowBuilder::new()
@@ -109,7 +112,10 @@ impl RelmWidgets<AppModel, (), AppMsg> for AppWidgets {
     }
 }
 
-impl AppUpdate<(), AppMsg> for AppModel {
+impl AppUpdate for AppModel {
+    type Components = ();
+    type Msg = AppMsg;
+
     fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) {
         // reset tracker value of the model
         self.reset();

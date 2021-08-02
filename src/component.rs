@@ -12,8 +12,13 @@ use crate::{ComponentUpdate, RelmComponents, RelmWidgets};
 #[derive(Clone)]
 pub struct RelmComponent<Widgets, Model, Components, Msg, ParentModel, ParentMsg>
 where
-    Widgets: RelmWidgets<Model, Components, Msg>,
-    Model: ComponentUpdate<Components, Msg, ParentModel, ParentMsg>,
+    Widgets: RelmWidgets<Model = Model, Components = Components, Msg = Msg>,
+    Model: ComponentUpdate<
+        Components = Components,
+        Msg = Msg,
+        ParentModel = ParentModel,
+        ParentMsg = ParentMsg,
+    >,
 {
     widgets: PhantomData<Widgets>,
     model: PhantomData<Model>,
@@ -26,8 +31,13 @@ where
 impl<Widgets, Model, Components, Msg, ParentModel, ParentMsg>
     RelmComponent<Widgets, Model, Components, Msg, ParentModel, ParentMsg>
 where
-    Widgets: RelmWidgets<Model, Components, Msg> + 'static,
-    Model: ComponentUpdate<Components, Msg, ParentModel, ParentMsg> + 'static,
+    Widgets: RelmWidgets<Model = Model, Components = Components, Msg = Msg> + 'static,
+    Model: ComponentUpdate<
+            Components = Components,
+            Msg = Msg,
+            ParentModel = ParentModel,
+            ParentMsg = ParentMsg,
+        > + 'static,
     Components: RelmComponents<Model, Msg> + 'static,
     ParentMsg: 'static,
     Msg: 'static,
@@ -80,8 +90,14 @@ where
 impl<Widgets, Model, Components, Msg, ParentModel, ParentMsg>
     RelmComponent<Widgets, Model, Components, Msg, ParentModel, ParentMsg>
 where
-    Widgets: RelmWidgets<Model, Components, Msg> + 'static,
-    Model: ComponentUpdate<Components, Msg, ParentModel, ParentMsg> + Send + 'static,
+    Widgets: RelmWidgets<Model = Model, Components = Components, Msg = Msg> + 'static,
+    Model: ComponentUpdate<
+            Components = Components,
+            Msg = Msg,
+            ParentModel = ParentModel,
+            ParentMsg = ParentMsg,
+        > + Send
+        + 'static,
     Components: RelmComponents<Model, Msg> + Send + 'static,
     ParentMsg: Send + 'static,
     Msg: Send + 'static,

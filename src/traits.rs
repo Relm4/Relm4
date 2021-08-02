@@ -5,40 +5,57 @@ use gtk::prelude::StyleContextExt;
 /// that usually consists out of GTK widgets. The root represents the
 /// widget that all other widgets are attached to.
 /// The root of the main app must be a [`gtk::ApplicationWindow`].
-pub trait RelmWidgets<Model, Components, Msg> {
+pub trait RelmWidgets {
     type Root: glib::IsA<gtk::Widget>;
+    type Model;
+    type Components;
+    type Msg;
 
     /// Initialize the UI.
-    fn init_view(model: &Model, component: &Components, sender: Sender<Msg>) -> Self;
+    fn init_view(
+        model: &Self::Model,
+        component: &Self::Components,
+        sender: Sender<Self::Msg>,
+    ) -> Self;
 
     /// Return the root widget.
     fn root_widget(&self) -> Self::Root;
 
     /// Update the view to represent the updated model.
-    fn view(&mut self, model: &Model, sender: Sender<Msg>);
+    fn view(&mut self, model: &Self::Model, sender: Sender<Self::Msg>);
 }
 
 pub trait RelmComponents<ParentModel, ParentMsg> {
+    //type ParentModel;
+    //type PargentMsg;
+
     fn init_components(parent_model: &ParentModel, parent_sender: Sender<ParentMsg>) -> Self;
 }
 
 /// Methods that initialize and update the main app.
-pub trait AppUpdate<Components, Msg> {
+pub trait AppUpdate {
+    type Components;
+    type Msg;
     /// Update the model.
-    fn update(&mut self, msg: Msg, components: &Components, sender: Sender<Msg>);
+    fn update(&mut self, msg: Self::Msg, components: &Self::Components, sender: Sender<Self::Msg>);
 }
 
 /// Methods that initialize and update a component.
-pub trait ComponentUpdate<Components, Msg, ParentModel, ParentMsg> {
-    fn init_model(parent_model: &ParentModel) -> Self;
+pub trait ComponentUpdate {
+    type Components;
+    type Msg;
+    type ParentModel;
+    type ParentMsg;
+
+    fn init_model(parent_model: &Self::ParentModel) -> Self;
 
     /// Update the model. The parent_sender allows to send messages to the parent.
     fn update(
         &mut self,
-        msg: Msg,
-        components: &Components,
-        sender: Sender<Msg>,
-        parent_sender: Sender<ParentMsg>,
+        msg: Self::Msg,
+        components: &Self::Components,
+        sender: Sender<Self::Msg>,
+        parent_sender: Sender<Self::ParentMsg>,
     );
 }
 

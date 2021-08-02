@@ -15,8 +15,8 @@ use crate::{AppUpdate, RelmComponents, RelmWidgets};
 #[derive(Clone)]
 pub struct RelmApp<Widgets, Model, Components, Msg>
 where
-    Widgets: RelmWidgets<Model, Components, Msg>,
-    Model: AppUpdate<Components, Msg>,
+    Widgets: RelmWidgets<Model = Model, Components = Components, Msg = Msg>,
+    Model: AppUpdate<Components = Components, Msg = Msg>,
 {
     widgets: PhantomData<Widgets>,
     model: PhantomData<Model>,
@@ -27,8 +27,13 @@ where
 
 impl<Widgets, Model, Components, Msg> RelmApp<Widgets, Model, Components, Msg>
 where
-    Widgets: RelmWidgets<Model, Components, Msg, Root = gtk::ApplicationWindow> + 'static,
-    Model: AppUpdate<Components, Msg> + 'static,
+    Widgets: RelmWidgets<
+            Model = Model,
+            Components = Components,
+            Msg = Msg,
+            Root = gtk::ApplicationWindow,
+        > + 'static,
+    Model: AppUpdate<Components = Components, Msg = Msg> + 'static,
     Components: RelmComponents<Model, Msg> + 'static,
     Msg: 'static,
 {
