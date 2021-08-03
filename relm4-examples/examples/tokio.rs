@@ -8,12 +8,16 @@ use relm4::*;
 
 struct HttpWorker {}
 
+impl_model!(HttpWorker, HttpMsg);
+
 enum HttpMsg {
     Request(String),
 }
 
 #[relm4::async_trait]
-impl AsyncComponentUpdate<(), HttpMsg, AppModel, AppMsg> for HttpWorker {
+impl AsyncComponentUpdate for HttpWorker {
+    type ParentModel = AppModel;
+
     fn init_model(_parent_model: &AppModel) -> Self {
         HttpWorker {}
     }
@@ -60,10 +64,10 @@ impl AsyncComponentUpdate<(), HttpMsg, AppModel, AppMsg> for HttpWorker {
 }
 
 struct Components {
-    http: AsyncRelmWorker<HttpWorker, (), HttpMsg, AppModel, AppMsg>,
+    http: AsyncRelmWorker<HttpWorker>,
 }
 
-impl RelmComponents<AppModel, AppMsg> for Components {
+impl RelmComponents<AppModel> for Components {
     fn init_components(parent_model: &AppModel, parent_sender: Sender<AppMsg>) -> Self {
         Components {
             http: AsyncRelmWorker::with_new_tokio_rt(parent_model, parent_sender),
@@ -95,8 +99,11 @@ struct AppModel {
     image_waiting: bool,
 }
 
-impl RelmWidgets<AppModel, Components, AppMsg> for AppWidgets {
+impl_model!(AppModel, AppMsg, Components);
+
+impl RelmWidgets for AppWidgets {
     type Root = gtk::ApplicationWindow;
+    type Model = AppModel;
 
     fn init_view(model: &AppModel, _components: &Components, sender: Sender<AppMsg>) -> Self {
         let main = gtk::ApplicationWindowBuilder::new()
@@ -193,7 +200,7 @@ impl RelmWidgets<AppModel, Components, AppMsg> for AppWidgets {
 
         if model.changed(AppModel::image_data()) {
             if let Some(buf) = &model.image_data {
-                self.image.set_from_pixbuf(Some(&buf));
+                self.image.set_from_pixbuf(Some(buf));
             } else {
                 self.image.clear();
             }
@@ -205,7 +212,7 @@ impl RelmWidgets<AppModel, Components, AppMsg> for AppWidgets {
     }
 }
 
-impl AppUpdate<Components, AppMsg> for AppModel {
+impl AppUpdate for AppModel {
     fn update(&mut self, msg: AppMsg, components: &Components, _sender: Sender<AppMsg>) {
         self.reset();
 
@@ -244,6 +251,6 @@ fn main() {
         image_waiting: false,
         tracker: 0,
     };
-    let relm: RelmApp<AppWidgets, AppModel, Components, AppMsg> = RelmApp::new(model);
+    let relm: RelmApp<AppWidgets> = RelmApp::new(model);
     relm.run();
 }

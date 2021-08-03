@@ -21,8 +21,11 @@ struct AppModel {
     waiting: bool,
 }
 
-impl RelmWidgets<AppModel, (), AppMsg> for AppWidgets {
+impl_model!(AppModel, AppMsg);
+
+impl RelmWidgets for AppWidgets {
     type Root = gtk::ApplicationWindow;
+    type Model = AppModel;
 
     fn init_view(_model: &AppModel, _components: &(), sender: Sender<AppMsg>) -> Self {
         let main = gtk::ApplicationWindowBuilder::new()
@@ -79,7 +82,7 @@ impl RelmWidgets<AppModel, (), AppMsg> for AppWidgets {
     }
 }
 
-impl AppUpdate<(), AppMsg> for AppModel {
+impl AppUpdate for AppModel {
     fn update(&mut self, msg: AppMsg, _components: &(), sender: Sender<AppMsg>) {
         self.reset();
 
@@ -116,6 +119,6 @@ fn main() {
         waiting: false,
         tracker: 0,
     };
-    let relm: RelmApp<AppWidgets, AppModel, (), AppMsg> = RelmApp::new(model);
+    let relm: RelmApp<AppWidgets> = RelmApp::new(model);
     relm.run();
 }

@@ -19,14 +19,18 @@ struct Comp2Model {
     hidden: bool,
 }
 
+impl_model!(Comp1Model, CompMsg);
+impl_model!(Comp2Model, CompMsg);
+
 #[derive(PartialEq)]
 enum CompMsg {
     Hide,
     Show,
 }
 
-impl RelmWidgets<Comp1Model, (), CompMsg> for Comp1Widgets {
+impl RelmWidgets for Comp1Widgets {
     type Root = gtk::Button;
+    type Model = Comp1Model;
 
     fn init_view(model: &Comp1Model, _component: &(), sender: Sender<CompMsg>) -> Self {
         // Initialize gtk widgets
@@ -49,8 +53,9 @@ impl RelmWidgets<Comp1Model, (), CompMsg> for Comp1Widgets {
     }
 }
 
-impl RelmWidgets<Comp2Model, (), CompMsg> for Comp2Widgets {
+impl RelmWidgets for Comp2Widgets {
     type Root = gtk::Button;
+    type Model = Comp2Model;
 
     fn init_view(model: &Comp2Model, _component: &(), sender: Sender<CompMsg>) -> Self {
         let button = gtk::Button::with_label("Second Component");
@@ -72,7 +77,9 @@ impl RelmWidgets<Comp2Model, (), CompMsg> for Comp2Widgets {
     }
 }
 
-impl ComponentUpdate<(), CompMsg, AppModel, AppMsg> for Comp1Model {
+impl ComponentUpdate for Comp1Model {
+    type ParentModel = AppModel;
+
     fn init_model(_parent_model: &AppModel) -> Self {
         Comp1Model { hidden: false }
     }
@@ -97,7 +104,9 @@ impl ComponentUpdate<(), CompMsg, AppModel, AppMsg> for Comp1Model {
     }
 }
 
-impl ComponentUpdate<(), CompMsg, AppModel, AppMsg> for Comp2Model {
+impl ComponentUpdate for Comp2Model {
+    type ParentModel = AppModel;
+
     fn init_model(_parent_model: &AppModel) -> Self {
         Comp2Model { hidden: true }
     }
@@ -123,11 +132,11 @@ impl ComponentUpdate<(), CompMsg, AppModel, AppMsg> for Comp2Model {
 
 // The main app
 struct Components {
-    comp1: RelmComponent<Comp1Widgets, Comp1Model, (), CompMsg, AppModel, AppMsg>,
-    comp2: RelmComponent<Comp2Widgets, Comp2Model, (), CompMsg, AppModel, AppMsg>,
+    comp1: RelmComponent<Comp1Widgets>,
+    comp2: RelmComponent<Comp2Widgets>,
 }
 
-impl RelmComponents<AppModel, AppMsg> for Components {
+impl RelmComponents<AppModel> for Components {
     fn init_components(parent_model: &AppModel, parent_sender: Sender<AppMsg>) -> Self {
         Components {
             comp1: RelmComponent::with_new_thread(parent_model, parent_sender.clone()),
@@ -152,17 +161,19 @@ struct AppModel {
     counter: u8,
 }
 
-impl RelmWidgets<AppModel, Components, AppMsg> for AppWidgets {
+impl_model!(AppModel, AppMsg, Components);
+
+impl RelmWidgets for AppWidgets {
     type Root = gtk::ApplicationWindow;
+    type Model = AppModel;
 
     fn init_view(model: &AppModel, components: &Components, sender: Sender<AppMsg>) -> Self {
         let main = gtk::ApplicationWindowBuilder::new().build();
         let vbox = gtk::BoxBuilder::new()
             .orientation(gtk::Orientation::Vertical)
             .spacing(10)
-            .margin_end(5)
-            .margin_top(5)
             .build();
+        vbox.set_margin_all(5);
 
         let text = gtk::Label::new(Some(&model.counter.to_string()));
 
@@ -200,7 +211,7 @@ impl RelmWidgets<AppModel, Components, AppMsg> for AppWidgets {
     }
 }
 
-impl AppUpdate<Components, AppMsg> for AppModel {
+impl AppUpdate for AppModel {
     fn update(&mut self, msg: AppMsg, components: &Components, _sender: Sender<AppMsg>) {
         match msg {
             AppMsg::Increment => self.counter = self.counter.saturating_add(1),
@@ -218,6 +229,6 @@ impl AppUpdate<Components, AppMsg> for AppModel {
 
 fn main() {
     let model = AppModel { counter: 0 };
-    let relm: RelmApp<AppWidgets, AppModel, Components, AppMsg> = RelmApp::new(model);
+    let relm: RelmApp<AppWidgets> = RelmApp::new(model);
     relm.run();
 }
