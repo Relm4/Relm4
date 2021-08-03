@@ -31,8 +31,11 @@ struct AppModel {
     active_widget: WidgetSelection,
 }
 
-impl RelmWidgets<AppModel, (), AppMsg> for AppWidgets {
+impl_model!(AppModel, AppMsg);
+
+impl RelmWidgets for AppWidgets {
     type Root = gtk::ApplicationWindow;
+    type Model = AppModel;
 
     fn init_view(model: &AppModel, _components: &(), sender: Sender<AppMsg>) -> Self {
         let main = gtk::ApplicationWindowBuilder::new()
@@ -46,6 +49,9 @@ impl RelmWidgets<AppModel, (), AppMsg> for AppWidgets {
             .margin_start(5)
             .margin_bottom(5)
             .build();
+
+        //main.inline_css(b"border: 1px solid white;");
+        //set_global_css(b"box { margin: 0.5rem; }");
 
         let options = vec!["label", "button", "slider"];
         let list = StringList::new(&options);
@@ -109,7 +115,7 @@ impl RelmWidgets<AppModel, (), AppMsg> for AppWidgets {
     }
 }
 
-impl AppUpdate<(), AppMsg> for AppModel {
+impl AppUpdate for AppModel {
     fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) {
         // reset tracker value of the model
         self.reset();
@@ -136,6 +142,6 @@ fn main() {
         active_widget: WidgetSelection::Label,
         tracker: 0,
     };
-    let relm: RelmApp<AppWidgets, AppModel, (), AppMsg> = RelmApp::new(model);
+    let relm: RelmApp<AppWidgets> = RelmApp::new(model);
     relm.run();
 }

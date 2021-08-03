@@ -3,7 +3,7 @@ use gtk::glib::Sender;
 use std::cell::RefCell;
 use std::collections::BTreeMap;
 
-use crate::generator::{Generator, GeneratorBlueprint, GeneratorWidget};
+use crate::factory::{Factory, FactoryPrototype, FactoryView};
 
 #[derive(Debug)]
 enum ChangeType {
@@ -13,24 +13,29 @@ enum ChangeType {
     Update,
 }
 
-pub struct VecGen<T, Widget, Positioning, Msg> {
-    data: Vec<T>,
-    widgets: RefCell<Vec<Widget>>,
+#[derive(Default)]
+pub struct FactoryVec<Data>
+where
+    Data: FactoryPrototype,
+{
+    data: Vec<Data>,
+    widgets: RefCell<Vec<Data::Widget>>,
     changes: RefCell<BTreeMap<usize, ChangeType>>,
-    generator: GeneratorBlueprint<T, usize, Widget, Positioning, Msg>,
 }
 
-impl<T, Widget, Positioning, Msg> VecGen<T, Widget, Positioning, Msg> {
-    pub fn new(generator: GeneratorBlueprint<T, usize, Widget, Positioning, Msg>) -> Self {
-        VecGen {
+impl<Data> FactoryVec<Data>
+where
+    Data: FactoryPrototype,
+{
+    pub fn new() -> Self {
+        FactoryVec {
             data: Vec::new(),
             widgets: RefCell::new(Vec::new()),
             changes: RefCell::new(BTreeMap::new()),
-            generator,
         }
     }
 
-    pub fn push(&mut self, data: T) {
+    pub fn push(&mut self, data: Data) {
         let index = self.data.len();
         self.data.push(data);
 
@@ -41,7 +46,7 @@ impl<T, Widget, Positioning, Msg> VecGen<T, Widget, Positioning, Msg> {
         self.changes.borrow_mut().insert(index, change);
     }
 
-    pub fn pop(&mut self) -> Option<T> {
+    pub fn pop(&mut self) -> Option<Data> {
         let data = self.data.pop();
         if data.is_some() {
             let index = self.data.len();
@@ -51,7 +56,7 @@ impl<T, Widget, Positioning, Msg> VecGen<T, Widget, Positioning, Msg> {
         data
     }
 
-    pub fn get_mut(&mut self, index: usize) -> &mut T {
+    pub fn get_mut(&mut self, index: usize) -> &mut Data {
         let mut changes = self.changes.borrow_mut();
         changes.entry(index).or_insert(ChangeType::Update);
 
@@ -59,38 +64,42 @@ impl<T, Widget, Positioning, Msg> VecGen<T, Widget, Positioning, Msg> {
     }
 }
 
-impl<W, T, Widget, Positioning, Msg> Generator<W, T, Widget, Positioning, Msg>
-    for VecGen<T, Widget, Positioning, Msg>
+impl<Data, View> Factory<Data, View> for FactoryVec<Data>
 where
-    W: GeneratorWidget<Widget, Positioning>,
+    Data: FactoryPrototype<Factory = Self, View = View>,
+    View: FactoryView<Data::Widget>,
 {
-    fn generate(&self, parent: &W, sender: Sender<Msg>) {
+    type Key = usize;
+
+    fn generate(&self, view: &View, sender: Sender<Data::Msg>) {
         for (index, change) in self.changes.borrow().iter().rev() {
             let mut widgets = self.widgets.borrow_mut();
 
             match change {
                 ChangeType::Add => {
-                    let (widget, position) =
-                        (self.generator.generate)(&self.data[*index], index, sender.clone());
-                    parent.add(&widget, &position);
+                    let data = &self.data[*index];
+                    let widget = data.generate(index, sender.clone());
+                    let position = data.position(index);
+                    view.add(&widget, &position);
                     widgets.push(widget);
                 }
                 ChangeType::Update => {
-                    (self.generator.update)(&self.data[*index], index, &widgets[*index]);
+                    self.data[*index].update(index, &widgets[*index]);
                 }
                 ChangeType::Remove => {
                     let widget = widgets.pop().unwrap();
-                    let remove_widget = (self.generator.remove)(&widget);
-                    parent.remove(remove_widget);
+                    let remove_widget = Data::remove(&widget);
+                    view.remove(remove_widget);
                 }
                 ChangeType::Recreate => {
                     let widget = widgets.pop().unwrap();
-                    let remove_widget = (self.generator.remove)(&widget);
-                    parent.remove(remove_widget);
-                    let (widget, position) =
-                        (self.generator.generate)(&self.data[*index], index, sender.clone());
-                    parent.add(&widget, &position);
-                    widgets.push(widget)
+                    let remove_widget = Data::remove(&widget);
+                    view.remove(remove_widget);
+                    let data = &self.data[*index];
+                    let widget = data.generate(index, sender.clone());
+                    let position = data.position(index);
+                    view.add(&widget, &position);
+                    widgets.push(widget);
                 }
             }
         }

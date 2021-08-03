@@ -1,5 +1,5 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
-use relm4::{AppUpdate, RelmApp, RelmWidgets, Sender, WidgetPlus, send};
+use relm4::{impl_model, send, AppUpdate, RelmApp, RelmWidgets, Sender, WidgetPlus};
 
 enum AppMsg {
     Increment,
@@ -11,7 +11,9 @@ struct AppModel {
     counter: u32,
 }
 
-impl AppUpdate<(), AppMsg> for AppModel {
+impl_model!(AppModel, AppMsg);
+
+impl AppUpdate for AppModel {
     fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) {
         self.reset();
         // reset tracker value of the model
@@ -30,8 +32,6 @@ impl AppUpdate<(), AppMsg> for AppModel {
 impl RelmWidgets for AppWidgets {
     // specify generic types
     type Model = AppModel;
-    type Components = ();
-    type Msg = AppMsg;
 
     view! {
       main_window = gtk::ApplicationWindow {
@@ -68,6 +68,6 @@ fn main() {
         counter: 0,
         tracker: 0,
     };
-    let relm: RelmApp<AppWidgets, AppModel, (), AppMsg> = RelmApp::new(model);
+    let relm: RelmApp<AppWidgets> = RelmApp::new(model);
     relm.run();
 }

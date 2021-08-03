@@ -1,12 +1,20 @@
 use gtk::glib;
 use gtk::prelude::{BoxExt, GridExt};
 
-use crate::generator::GeneratorWidget;
+use crate::factory::FactoryView;
 
-impl<Widget> GeneratorWidget<Widget, ()> for gtk::Box
+pub struct GridPosition {
+    pub column: i32,
+    pub row: i32,
+    pub width: i32,
+    pub height: i32,
+}
+
+impl<Widget> FactoryView<Widget> for gtk::Box
 where
     Widget: glib::IsA<gtk::Widget>,
 {
+    type Position = ();
     fn add(&self, widget: &Widget, _position: &()) {
         self.append(widget);
     }
@@ -16,17 +24,12 @@ where
     }
 }
 
-pub struct GridPosition {
-    pub column: i32,
-    pub row: i32,
-    pub width: i32,
-    pub height: i32,
-}
-
-impl<Widget> GeneratorWidget<Widget, GridPosition> for gtk::Grid
+impl<Widget> FactoryView<Widget> for gtk::Grid
 where
     Widget: glib::IsA<gtk::Widget>,
 {
+    type Position = GridPosition;
+
     fn add(&self, widget: &Widget, position: &GridPosition) {
         self.attach(
             widget,

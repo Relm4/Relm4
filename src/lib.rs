@@ -8,7 +8,7 @@
 mod app;
 mod component;
 pub mod default_widgets;
-pub mod generator;
+pub mod factory;
 mod traits;
 mod worker;
 
@@ -26,7 +26,11 @@ pub fn set_global_css(style_data: &[u8]) {
     let display = gtk::gdk::Display::default().unwrap();
     let provider = gtk::CssProvider::new();
     provider.load_from_data(style_data);
-    gtk::StyleContext::add_provider_for_display(&display, &provider, gtk::STYLE_PROVIDER_PRIORITY_APPLICATION);
+    gtk::StyleContext::add_provider_for_display(
+        &display,
+        &provider,
+        gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
+    );
 }
 
 pub fn set_global_css_from_file<P: AsRef<std::path::Path>>(path: P) {
@@ -48,5 +52,18 @@ pub fn spawn_future<F: futures_core::future::Future<Output = ()> + Send + 'stati
 macro_rules! send {
     ($sender:ident, $msg:expr) => {
         $sender.clone().send($msg).unwrap()
+    };
+}
+
+#[macro_export]
+macro_rules! impl_model {
+    ($model:ty, $msg:ty, $components:ty) => {
+        impl ::relm4::Model for $model {
+            type Msg = $msg;
+            type Components = $components;
+        }
+    };
+    ($model:ty, $msg:ty) => {
+        impl_model!($model, $msg, ());
     };
 }
