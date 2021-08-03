@@ -1,0 +1,48 @@
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+name: CI
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:21.04
+    strategy:
+      matrix:
+        rust:
+          - stable
+          - beta
+          - nightly
+          - "1.51.0"
+    env:
+        DISPLAY: ":99.0"
+        # Workaround to avoid getting stuck by apt about choosing a timezone.
+        DEBIAN_FRONTEND: noninteractive
+        TZ: America/New_York
+    steps:
+      - run: apt-get update -y
+      - run: apt-get install -y libgtk-4-dev libssl-dev
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: ${{ matrix.rust }}
+          override: true
+      - name: "clippy"
+        run: cargo clippy -- --deny warnings
+
+      # nightly
+      - name: "relm: build nightly"
+        run: cargo build
+        if: matrix.rust == 'nightly'
+      # not nightly
+      - name: "relm: build"
+        run: cargo build
+        if: matrix.rust != 'nightly'
+
+      - name: "relm: check examples"
+        run: cargo check --manifest-path relm-examples/Cargo.toml --examples
+
+      - uses: bcomnes/cleanup-xvfb@v1.0.6
