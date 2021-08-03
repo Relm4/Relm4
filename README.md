@@ -2,6 +2,7 @@
   <img src="assets/Relm_logo_with_text.svg" height="65" alt="Relm4">
 </h1>
 
+![CI](https://github.com/AaronErhardt/relm4/actions/workflows/CI/badge.svg)
 
 An experimental port of [relm](https://github.com/antoyo/relm) to use GTK4. Actually it's rather a rewrite/redesign of relm's core functionality than a port by now but it's already functional. 
 
