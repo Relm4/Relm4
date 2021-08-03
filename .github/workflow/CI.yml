@@ -1,9 +1,13 @@
+name: CI
+
 on:
   push:
-    branches: [main]
+    branches: [ main ]
   pull_request:
+    branches: [ main ]
 
-name: CI
+env:
+  CARGO_TERM_COLOR: always
 
 jobs:
   build:
@@ -30,6 +34,7 @@ jobs:
         with:
           toolchain: ${{ matrix.rust }}
           override: true
+
       - name: "clippy"
         run: cargo clippy -- --deny warnings
 
