@@ -3,7 +3,7 @@ use gtk::prelude::{ApplicationExt, ApplicationExtManual, GtkWindowExt};
 
 use std::marker::PhantomData;
 
-use crate::{AppUpdate, RelmComponents, RelmWidgets};
+use crate::{AppUpdate, Model, RelmComponents, RelmWidgets};
 
 /// Relm app that runs the main application.
 /// The app consists of widgets that represents the UI and the model
@@ -13,29 +13,21 @@ use crate::{AppUpdate, RelmComponents, RelmWidgets};
 /// Use [`RelmApp::new()`] to create the app and call `run()` on it
 /// to start the application.
 #[derive(Clone)]
-pub struct RelmApp<Widgets, Model, Components, Msg>
+pub struct RelmApp<Widgets>
 where
-    Widgets: RelmWidgets<Model = Model, Components = Components, Msg = Msg>,
-    Model: AppUpdate<Components = Components, Msg = Msg>,
+    Widgets: RelmWidgets<Root = gtk::ApplicationWindow> + 'static,
+    Widgets::Model: AppUpdate + 'static,
+    <Widgets::Model as Model>::Components: RelmComponents<Widgets::Model> + 'static,
 {
     widgets: PhantomData<Widgets>,
-    model: PhantomData<Model>,
-    components: PhantomData<Components>,
-    msg: PhantomData<Msg>,
     app: gtk::Application,
 }
 
-impl<Widgets, Model, Components, Msg> RelmApp<Widgets, Model, Components, Msg>
+impl<Widgets> RelmApp<Widgets>
 where
-    Widgets: RelmWidgets<
-            Model = Model,
-            Components = Components,
-            Msg = Msg,
-            Root = gtk::ApplicationWindow,
-        > + 'static,
-    Model: AppUpdate<Components = Components, Msg = Msg> + 'static,
-    Components: RelmComponents<Model, Msg> + 'static,
-    Msg: 'static,
+    Widgets: RelmWidgets<Root = gtk::ApplicationWindow> + 'static,
+    Widgets::Model: AppUpdate + 'static,
+    <Widgets::Model as Model>::Components: RelmComponents<Widgets::Model> + 'static,
 {
     /// Run the application. This will return once the application is closed.
     pub fn run(&self) {
@@ -43,12 +35,13 @@ where
     }
 
     /// Create an application.
-    pub fn new(mut model: Model) -> Self {
+    pub fn new(mut model: Widgets::Model) -> Self {
         gtk::init().expect("Couln't initialize GTK");
         let app = gtk::ApplicationBuilder::new().build();
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
-        let components = Components::init_components(&model, sender.clone());
+        let components =
+            <Widgets::Model as Model>::Components::init_components(&model, sender.clone());
 
         let mut widgets: Widgets = Widgets::init_view(&model, &components, sender.clone());
         let root = widgets.root_widget();
@@ -66,18 +59,18 @@ where
                 .expect("Couldn't acquire glib main context");
 
             // Register receiver on the main loop to wait for messages to update model and view the changes.
-            receiver.attach(Some(&context), move |msg: Msg| {
-                model.update(msg, &components, sender.clone());
-                widgets.view(&model, sender.clone());
-                glib::Continue(true)
-            });
+            receiver.attach(
+                Some(&context),
+                move |msg: <Widgets::Model as Model>::Msg| {
+                    model.update(msg, &components, sender.clone());
+                    widgets.view(&model, sender.clone());
+                    glib::Continue(true)
+                },
+            );
         }
 
         RelmApp {
             widgets: PhantomData,
-            model: PhantomData,
-            components: PhantomData,
-            msg: PhantomData,
             app,
         }
     }

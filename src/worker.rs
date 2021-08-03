@@ -2,45 +2,32 @@ use gtk::glib::{self, Sender};
 
 use std::marker::{PhantomData, Send};
 
-use crate::{ComponentUpdate, RelmComponents};
+use crate::{ComponentUpdate, Model as ModelTrait, RelmComponents};
 
 #[derive(Clone)]
-pub struct RelmWorker<Model, Components, Msg, ParentModel, ParentMsg>
+pub struct RelmWorker<Model>
 where
-    Model: ComponentUpdate<
-        Components = Components,
-        Msg = Msg,
-        ParentModel = ParentModel,
-        ParentMsg = ParentMsg,
-    >,
+    Model: ComponentUpdate,
 {
     model: PhantomData<Model>,
-    parent_info: PhantomData<(ParentModel, ParentMsg)>,
-    components: PhantomData<Components>,
-    sender: Sender<Msg>,
+    sender: Sender<Model::Msg>,
 }
 
-impl<Model, Components, Msg, ParentModel, ParentMsg>
-    RelmWorker<Model, Components, Msg, ParentModel, ParentMsg>
+impl<Model> RelmWorker<Model>
 where
-    Model: ComponentUpdate<
-            Components = Components,
-            Msg = Msg,
-            ParentModel = ParentModel,
-            ParentMsg = ParentMsg,
-        > + 'static,
-    Components: RelmComponents<Model, Msg> + 'static,
-    ParentMsg: 'static,
-    Msg: 'static,
+    Model: ComponentUpdate + 'static,
 {
     /// Create component. Usually you can store Self in the widgets of the parent component.
     /// The root widget needs to be attached to a GTK container in the parent's `init_view` function.
-    pub fn new(parent_model: &ParentModel, parent_sender: Sender<ParentMsg>) -> Self {
+    pub fn new(
+        parent_model: &Model::ParentModel,
+        parent_sender: Sender<<Model::ParentModel as ModelTrait>::Msg>,
+    ) -> Self {
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
         let mut model = Model::init_model(parent_model);
 
-        let components = Components::init_components(&model, sender.clone());
+        let components = Model::Components::init_components(&model, sender.clone());
         let cloned_sender = sender.clone();
 
         {
@@ -49,7 +36,7 @@ where
                 .acquire()
                 .expect("Couldn't acquire glib main context");
             // The main loop executes the closure as soon as it receives the message
-            receiver.attach(Some(&context), move |msg: Msg| {
+            receiver.attach(Some(&context), move |msg: Model::Msg| {
                 model.update(msg, &components, sender.clone(), parent_sender.clone());
                 glib::Continue(true)
             });
@@ -57,37 +44,31 @@ where
 
         RelmWorker {
             model: PhantomData,
-            parent_info: PhantomData,
-            components: PhantomData,
             sender: cloned_sender,
         }
     }
 
-    pub fn send(&self, msg: Msg) -> Result<(), std::sync::mpsc::SendError<Msg>> {
+    pub fn send(&self, msg: Model::Msg) -> Result<(), std::sync::mpsc::SendError<Model::Msg>> {
         self.sender.send(msg)
     }
 }
 
-impl<Model, Components, Msg, ParentModel, ParentMsg>
-    RelmWorker<Model, Components, Msg, ParentModel, ParentMsg>
+impl<Model> RelmWorker<Model>
 where
-    Model: ComponentUpdate<
-            Components = Components,
-            Msg = Msg,
-            ParentModel = ParentModel,
-            ParentMsg = ParentMsg,
-        > + Send
-        + 'static,
-    Components: RelmComponents<Model, Msg> + Send + 'static,
-    ParentMsg: Send + 'static,
-    Msg: Send + 'static,
+    Model: ComponentUpdate + Send + 'static,
+    Model::Components: Send + 'static,
+    Model::Msg: Send,
+    <Model::ParentModel as ModelTrait>::Msg: Send,
 {
-    pub fn with_new_thread(parent_model: &ParentModel, parent_sender: Sender<ParentMsg>) -> Self {
+    pub fn with_new_thread(
+        parent_model: &Model::ParentModel,
+        parent_sender: Sender<<Model::ParentModel as ModelTrait>::Msg>,
+    ) -> Self {
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
         let mut model = Model::init_model(parent_model);
 
-        let components = Components::init_components(&model, sender.clone());
+        let components = Model::Components::init_components(&model, sender.clone());
         let cloned_sender = sender.clone();
 
         std::thread::spawn(move || {
@@ -98,7 +79,7 @@ where
                 .expect("Couldn't acquire glib main context");
 
             // The main loop executes the closure as soon as it receives the message
-            receiver.attach(Some(&context), move |msg: Msg| {
+            receiver.attach(Some(&context), move |msg: Model::Msg| {
                 model.update(msg, &components, sender.clone(), parent_sender.clone());
                 glib::Continue(true)
             });
@@ -110,8 +91,6 @@ where
 
         RelmWorker {
             model: PhantomData,
-            parent_info: PhantomData,
-            components: PhantomData,
             sender: cloned_sender,
         }
     }
@@ -119,33 +98,31 @@ where
 
 #[cfg(feature = "tokio-rt")]
 #[derive(Clone)]
-pub struct AsyncRelmWorker<Model, Components, Msg, ParentModel, ParentMsg>
+pub struct AsyncRelmWorker<Model>
 where
-    Model: crate::traits::AsyncComponentUpdate<Components, Msg, ParentModel, ParentMsg>,
+    Model: crate::traits::AsyncComponentUpdate,
 {
     model: PhantomData<Model>,
-    parent_info: PhantomData<(ParentModel, ParentMsg)>,
-    components: PhantomData<Components>,
-    sender: Sender<Msg>,
+    sender: Sender<Model::Msg>,
 }
 
 #[cfg(feature = "tokio-rt")]
-impl<Model, Components, Msg, ParentModel, ParentMsg>
-    AsyncRelmWorker<Model, Components, Msg, ParentModel, ParentMsg>
+impl<Model> AsyncRelmWorker<Model>
 where
-    Model: crate::traits::AsyncComponentUpdate<Components, Msg, ParentModel, ParentMsg>
-        + Send
-        + 'static,
-    Components: RelmComponents<Model, Msg> + Send + 'static,
-    ParentMsg: Send + 'static,
-    Msg: Send + 'static,
+    Model: crate::traits::AsyncComponentUpdate + Send + 'static,
+    Model::Components: Send + 'static,
+    <Model::ParentModel as ModelTrait>::Msg: Send + 'static,
+    Model::Msg: Send + 'static,
 {
-    pub fn with_new_tokio_rt(parent_model: &ParentModel, parent_sender: Sender<ParentMsg>) -> Self {
+    pub fn with_new_tokio_rt(
+        parent_model: &Model::ParentModel,
+        parent_sender: Sender<<Model::ParentModel as ModelTrait>::Msg>,
+    ) -> Self {
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
         let mut model = Model::init_model(parent_model);
 
-        let components = Components::init_components(&model, sender.clone());
+        let components = Model::Components::init_components(&model, sender.clone());
         let cloned_sender = sender.clone();
 
         std::thread::spawn(move || {
@@ -161,7 +138,7 @@ where
                 .unwrap();
 
             // The main loop executes the closure as soon as it receives the message
-            receiver.attach(Some(&context), move |msg: Msg| {
+            receiver.attach(Some(&context), move |msg: Model::Msg| {
                 rt.block_on(model.update(msg, &components, sender.clone(), parent_sender.clone()));
                 glib::Continue(true)
             });
@@ -173,13 +150,11 @@ where
 
         AsyncRelmWorker {
             model: PhantomData,
-            parent_info: PhantomData,
-            components: PhantomData,
             sender: cloned_sender,
         }
     }
 
-    pub fn send(&self, msg: Msg) -> Result<(), std::sync::mpsc::SendError<Msg>> {
+    pub fn send(&self, msg: Model::Msg) -> Result<(), std::sync::mpsc::SendError<Model::Msg>> {
         self.sender.send(msg)
     }
 }

@@ -7,45 +7,41 @@ use gtk::prelude::StyleContextExt;
 /// The root of the main app must be a [`gtk::ApplicationWindow`].
 pub trait RelmWidgets {
     type Root: glib::IsA<gtk::Widget>;
-    type Model;
-    type Components;
-    type Msg;
+    type Model: Model;
 
     /// Initialize the UI.
     fn init_view(
         model: &Self::Model,
-        component: &Self::Components,
-        sender: Sender<Self::Msg>,
+        component: &<Self::Model as Model>::Components,
+        sender: Sender<<Self::Model as Model>::Msg>,
     ) -> Self;
 
     /// Return the root widget.
     fn root_widget(&self) -> Self::Root;
 
     /// Update the view to represent the updated model.
-    fn view(&mut self, model: &Self::Model, sender: Sender<Self::Msg>);
+    fn view(&mut self, model: &Self::Model, sender: Sender<<Self::Model as Model>::Msg>);
 }
 
-pub trait RelmComponents<ParentModel, ParentMsg> {
-    //type ParentModel;
-    //type PargentMsg;
+pub trait RelmComponents<ParentModel: ?Sized + Model> {
+    fn init_components(parent_model: &ParentModel, parent_sender: Sender<ParentModel::Msg>)
+        -> Self;
+}
 
-    fn init_components(parent_model: &ParentModel, parent_sender: Sender<ParentMsg>) -> Self;
+pub trait Model {
+    type Msg: 'static;
+    type Components: RelmComponents<Self>;
 }
 
 /// Methods that initialize and update the main app.
-pub trait AppUpdate {
-    type Components;
-    type Msg;
+pub trait AppUpdate: Model {
     /// Update the model.
     fn update(&mut self, msg: Self::Msg, components: &Self::Components, sender: Sender<Self::Msg>);
 }
 
 /// Methods that initialize and update a component.
-pub trait ComponentUpdate {
-    type Components;
-    type Msg;
-    type ParentModel;
-    type ParentMsg;
+pub trait ComponentUpdate: Model {
+    type ParentModel: Model;
 
     fn init_model(parent_model: &Self::ParentModel) -> Self;
 
@@ -55,22 +51,24 @@ pub trait ComponentUpdate {
         msg: Self::Msg,
         components: &Self::Components,
         sender: Sender<Self::Msg>,
-        parent_sender: Sender<Self::ParentMsg>,
+        parent_sender: Sender<<Self::ParentModel as Model>::Msg>,
     );
 }
 
 #[cfg(feature = "tokio-rt")]
 #[async_trait::async_trait]
-pub trait AsyncComponentUpdate<Components, Msg, ParentModel, ParentMsg> {
-    fn init_model(parent_model: &ParentModel) -> Self;
+pub trait AsyncComponentUpdate: Model {
+    type ParentModel: Model;
+
+    fn init_model(parent_model: &Self::ParentModel) -> Self;
 
     /// Update the model. The parent_sender allows to send messages to the parent.
     async fn update(
         &mut self,
-        msg: Msg,
-        components: &Components,
-        sender: Sender<Msg>,
-        parent_sender: Sender<ParentMsg>,
+        msg: Self::Msg,
+        components: &Self::Components,
+        sender: Sender<Self::Msg>,
+        parent_sender: Sender<<Self::ParentModel as Model>::Msg>,
     );
 }
 
@@ -100,6 +98,6 @@ impl<W: gtk::prelude::WidgetExt> WidgetPlus for W {
     }
 }
 
-impl<ParentModel, ParentMsg> RelmComponents<ParentModel, ParentMsg> for () {
-    fn init_components(_parent_model: &ParentModel, _sender: Sender<ParentMsg>) {}
+impl<ParentModel: Model> RelmComponents<ParentModel> for () {
+    fn init_components(_parent_model: &ParentModel, _sender: Sender<ParentModel::Msg>) {}
 }
