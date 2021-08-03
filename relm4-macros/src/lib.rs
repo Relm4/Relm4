@@ -3,11 +3,11 @@ use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned};
 use syn::{parse_macro_input, spanned::Spanned, *};
 
-mod generic_types;
+mod types;
 mod util;
 mod widgets;
 
-use generic_types::GenericTypes;
+use types::ModelType;
 use widgets::Widget;
 
 #[proc_macro_attribute]
@@ -17,11 +17,7 @@ pub fn widget(_attributes: TokenStream, input: TokenStream) -> TokenStream {
     let data = parse_macro_input!(input as ItemImpl);
     let span = data.span();
 
-    let GenericTypes {
-        model,
-        components,
-        msg,
-    } = GenericTypes::new(span.unwrap(), &data.items).unwrap();
+    let ModelType { model } = ModelType::new(span.unwrap(), &data.items).unwrap();
     let trt = util::trait_to_path(data.self_ty.span().unwrap(), data.trait_).unwrap();
     let ty = data.self_ty;
 
@@ -70,11 +66,12 @@ pub fn widget(_attributes: TokenStream, input: TokenStream) -> TokenStream {
             #struct_stream
         }
 
-        impl #trt <#model, #components, #msg> for #ty {
+        impl #trt for #ty {
             type Root = #root_widget_type;
+            type Model = #model;
 
             /// Initialize the UI.
-            fn init_view(model: &#model, components: &#components, sender: ::gtk::glib::Sender<#msg>) -> Self {
+            fn init_view(model: &Self::Model, components: &<Self::Model as ::relm4::Model>::Components, sender: ::gtk::glib::Sender<<Self::Model as ::relm4::Model>::Msg>) -> Self {
                 #init_stream
                 #property_stream
                 #connect_stream
@@ -89,7 +86,7 @@ pub fn widget(_attributes: TokenStream, input: TokenStream) -> TokenStream {
             }
 
             /// Update the view to represent the updated model.
-            fn view(&mut self, model: &#model, sender: ::gtk::glib::Sender<#msg>) {
+            fn view(&mut self, model: &Self::Model, sender: ::gtk::glib::Sender<<Self::Model as ::relm4::Model>::Msg>) {
                 #view_stream
                 #track_stream
             }
