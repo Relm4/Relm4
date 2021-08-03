@@ -48,6 +48,6 @@ jobs:
         if: matrix.rust != 'nightly'
 
       - name: "relm: check examples"
-        run: cargo check --manifest-path relm-examples/Cargo.toml --examples
+        run: cargo check --manifest-path relm4-examples/Cargo.toml --examples
 
       - uses: bcomnes/cleanup-xvfb@v1.0.6
