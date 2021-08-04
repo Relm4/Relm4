@@ -20,6 +20,8 @@ cargo run --example NAME
 
 The following examples are available:
 
++ simple: A simple counter app.
+
 + components: A simple app that counts up or down and also has two components that hide and show each other. 
 This demonstrates how to use components that can send messages to each other but are fully independent apart from that.
 
