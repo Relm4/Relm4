@@ -7,13 +7,17 @@ mod types;
 mod util;
 mod widgets;
 mod args;
+mod attrs;
 
 use types::ModelType;
 use widgets::Widget;
+use attrs::Attrs;
 
 #[proc_macro_attribute]
-pub fn widget(_attributes: TokenStream, input: TokenStream) -> TokenStream {
+pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let start = std::time::Instant::now();
+
+    let attrs = parse_macro_input!(attributes as Attrs);
 
     let data = parse_macro_input!(input as ItemImpl);
     let span = data.span();
@@ -63,7 +67,7 @@ pub fn widget(_attributes: TokenStream, input: TokenStream) -> TokenStream {
     }
 
     let out = quote! {
-        pub struct #ty {
+        #attrs struct #ty {
             #struct_stream
         }
 
