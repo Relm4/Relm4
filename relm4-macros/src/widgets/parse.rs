@@ -15,18 +15,9 @@ impl Parse for Tracker {
         while !input.is_empty() {
             let _comma: Token![,] = input.parse()?;
             items.push(input.parse()?);
-            /*if input.peek2(Token! [,]) {
-                items.push(input.parse().map(TrackItem::Ident)?);
-            } else {
-                items.push(input.parse().map(TrackItem::Expr)?);
-            }*/
         }
 
         let update_fn = if let Some(item) = items.pop() {
-            /*match item {
-                TrackItem::Expr(expr) => Ok(expr),
-                TrackItem::Ident(ident) => Err(Error::new(ident.span(), ""))
-            }*/
             Ok(item)
         } else {
             Err(input.error("Expected identifier or expression"))
@@ -43,7 +34,6 @@ impl Parse for Tracker {
 impl Parse for Property {
     fn parse(input: ParseStream) -> Result<Self> {
         let name: Ident = input.parse()?;
-        //dbg!(&name);
 
         let ty = if input.peek(Token! [=>]) {
             let _arrow: Token![=>] = input.parse()?;
@@ -69,10 +59,20 @@ impl Parse for Property {
                     if ident == "track" {
                         let tokens = mac.tokens.into();
                         PropertyType::Track(parse_macro_input::parse(tokens)?)
+                    } else if ident == "component" {
+                        let tokens = mac.tokens.into();
+                        PropertyType::Component(parse_macro_input::parse(tokens)?)
+                    } else if ident == "args" {
+                        let tokens = mac.tokens.into();
+                        PropertyType::Args(parse_macro_input::parse(tokens)?)
                     } else if ident == "watch" {
                         PropertyType::Watch(mac.tokens)
                     } else {
-                        input.parse().map(PropertyType::Expr)?
+                        PropertyType::Expr(Expr::Macro(ExprMacro {
+                                attrs: Vec::new(),
+                                mac,
+                            }
+                        ))
                     }
                 } else {
                     input.parse().map(PropertyType::Expr)?

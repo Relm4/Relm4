@@ -37,7 +37,11 @@ where
     /// Create an application.
     pub fn new(mut model: Widgets::Model) -> Self {
         gtk::init().expect("Couln't initialize GTK");
-        let app = gtk::ApplicationBuilder::new().build();
+        let app = gtk::Application::builder().build();
+        crate::APP
+            .set(fragile::Fragile::new(app.clone()))
+            .expect("APP was alredy set");
+
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
         let components =

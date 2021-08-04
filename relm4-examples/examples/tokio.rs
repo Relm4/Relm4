@@ -15,9 +15,7 @@ enum HttpMsg {
 }
 
 #[relm4::async_trait]
-impl AsyncComponentUpdate for HttpWorker {
-    type ParentModel = AppModel;
-
+impl AsyncComponentUpdate<AppModel> for HttpWorker {
     fn init_model(_parent_model: &AppModel) -> Self {
         HttpWorker {}
     }
@@ -64,7 +62,7 @@ impl AsyncComponentUpdate for HttpWorker {
 }
 
 struct Components {
-    http: AsyncRelmWorker<HttpWorker>,
+    http: AsyncRelmWorker<HttpWorker, AppModel>,
 }
 
 impl RelmComponents<AppModel> for Components {

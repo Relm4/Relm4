@@ -3,6 +3,7 @@
 </h1>
 
 [![CI](https://github.com/AaronErhardt/relm4/actions/workflows/rust.yml/badge.svg)](https://github.com/AaronErhardt/relm4/actions/workflows/rust.yml)
+![Matrix](https://img.shields.io/matrix/relm4:matrix.org?label=matrix%20chat)
 
 An experimental port of [relm](https://github.com/antoyo/relm) to use GTK4. Actually it's rather a rewrite/redesign of relm's core functionality than a port by now but it's already functional. 
 
@@ -18,6 +19,8 @@ cargo run --example NAME
 ```
 
 The following examples are available:
+
++ simple: A simple counter app.
 
 + components: A simple app that counts up or down and also has two components that hide and show each other. 
 This demonstrates how to use components that can send messages to each other but are fully independent apart from that.

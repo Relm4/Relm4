@@ -3,6 +3,8 @@ use proc_macro2::Span as Span2;
 use proc_macro2::TokenStream as TokenStream2;
 use syn::{punctuated::Punctuated, spanned::Spanned, *};
 
+use crate::args::Args;
+
 mod gen;
 mod parse;
 
@@ -17,6 +19,8 @@ pub(super) enum PropertyType {
     Expr(Expr),
     Value(Lit),
     Track(Tracker),
+    Component(Expr),
+    Args(Args),
     Connect(ExprClosure),
     Watch(TokenStream2),
     Widget(Widget),

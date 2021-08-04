@@ -27,9 +27,11 @@ impl PropertyType {
             PropertyType::Value(lit) => Some(quote_spanned! { lit.span() => #lit }),
             PropertyType::Widget(widget) => Some(widget.property_assignment()),
             PropertyType::Watch(tokens) => Some(quote_spanned! { tokens.span() => #tokens }),
+            PropertyType::Args(args) => Some(args.to_token_stream()),
             PropertyType::Track(Tracker { update_fn, .. }) => {
                 Some(quote_spanned! { update_fn.span() => #update_fn })
             }
+            PropertyType::Component(expr) => Some(quote_spanned! { expr.span() => #expr.root_widget()}),
             _ => None,
         }
     }
@@ -45,7 +47,12 @@ impl PropertyType {
 
     fn connect_assign_tokens(&self) -> Option<TokenStream2> {
         if let PropertyType::Connect(closure) = self {
-            Some(quote_spanned! { closure.span() => #closure})
+            Some(quote_spanned! { closure.span() => {
+                #[allow(dead_code)]
+                #[allow(clippy::redundant_clone)]
+                let sender = sender.clone();
+                #closure
+            }})
         } else {
             None
         }
