@@ -17,10 +17,23 @@ pub use component::RelmComponent;
 pub use traits::*;
 pub use worker::*;
 
+use fragile::Fragile;
+use once_cell::sync::OnceCell;
+
+static APP: OnceCell<Fragile<gtk::Application>> = OnceCell::new();
+
 pub use gtk::glib::Sender;
 
 #[cfg(feature = "tokio-rt")]
 pub use async_trait::async_trait;
+
+pub fn gtk_application() -> gtk::Application {
+    APP.get()
+        .expect("The gloabl gtk application hasn't been initialized yet")
+        .try_get()
+        .expect("The global gtk application can only be read from the main thread")
+        .clone()
+}
 
 pub fn set_global_css(style_data: &[u8]) {
     let display = gtk::gdk::Display::default().unwrap();
