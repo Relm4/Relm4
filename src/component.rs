@@ -10,29 +10,27 @@ use crate::{ComponentUpdate, Model as ModelTrait, RelmComponents, RelmWidgets};
 /// widgets, models and message type. They also store the parent message type
 /// to communicate with the parent.
 #[derive(Clone)]
-pub struct RelmComponent<Widgets>
+pub struct RelmComponent<Widgets, ParentModel>
 where
     Widgets: RelmWidgets + 'static,
-    Widgets::Model: ComponentUpdate + 'static,
+    Widgets::Model: ComponentUpdate<ParentModel> + 'static,
+    ParentModel: ModelTrait,
 {
     widgets: PhantomData<Widgets>,
+    parent_model: PhantomData<ParentModel>,
     sender: Sender<<Widgets::Model as ModelTrait>::Msg>,
     root_widget: Widgets::Root,
 }
 
-impl<Widgets> RelmComponent<Widgets>
+impl<Widgets, ParentModel> RelmComponent<Widgets, ParentModel>
 where
     Widgets: RelmWidgets + 'static,
-    Widgets::Model: ComponentUpdate + 'static,
+    Widgets::Model: ComponentUpdate<ParentModel> + 'static,
+    ParentModel: ModelTrait,
 {
     /// Create component. Usually you can store Self in the widgets of the parent component.
     /// The root widget needs to be attached to a GTK container in the parent's `init_view` function.
-    pub fn new(
-        parent_model: &<Widgets::Model as ComponentUpdate>::ParentModel,
-        parent_sender: Sender<
-            <<Widgets::Model as ComponentUpdate>::ParentModel as ModelTrait>::Msg,
-        >,
-    ) -> Self {
+    pub fn new(parent_model: &ParentModel, parent_sender: Sender<ParentModel::Msg>) -> Self {
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
         let mut model = Widgets::Model::init_model(parent_model);
@@ -62,6 +60,7 @@ where
 
         RelmComponent {
             widgets: PhantomData,
+            parent_model: PhantomData,
             sender: cloned_sender,
             root_widget,
         }
@@ -79,19 +78,18 @@ where
     }
 }
 
-impl<Widgets> RelmComponent<Widgets>
+impl<Widgets, ParentModel> RelmComponent<Widgets, ParentModel>
 where
     Widgets: RelmWidgets + 'static,
-    Widgets::Model: ComponentUpdate + Send + 'static,
+    Widgets::Model: ComponentUpdate<ParentModel> + Send + 'static,
     <Widgets::Model as ModelTrait>::Components: Send,
     <Widgets::Model as ModelTrait>::Msg: Send,
-    <<Widgets::Model as ComponentUpdate>::ParentModel as ModelTrait>::Msg: Send,
+    ParentModel: ModelTrait,
+    ParentModel::Msg: Send,
 {
     pub fn with_new_thread(
-        parent_model: &<Widgets::Model as ComponentUpdate>::ParentModel,
-        parent_sender: Sender<
-            <<Widgets::Model as ComponentUpdate>::ParentModel as ModelTrait>::Msg,
-        >,
+        parent_model: &ParentModel,
+        parent_sender: Sender<ParentModel::Msg>,
     ) -> Self {
         let (global_sender, global_receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
@@ -149,6 +147,7 @@ where
 
         RelmComponent {
             widgets: PhantomData,
+            parent_model: PhantomData,
             sender: cloned_sender,
             root_widget,
         }

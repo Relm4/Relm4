@@ -40,10 +40,8 @@ pub trait AppUpdate: Model {
 }
 
 /// Methods that initialize and update a component.
-pub trait ComponentUpdate: Model {
-    type ParentModel: Model;
-
-    fn init_model(parent_model: &Self::ParentModel) -> Self;
+pub trait ComponentUpdate<ParentModel: Model>: Model {
+    fn init_model(parent_model: &ParentModel) -> Self;
 
     /// Update the model. The parent_sender allows to send messages to the parent.
     fn update(
@@ -51,16 +49,14 @@ pub trait ComponentUpdate: Model {
         msg: Self::Msg,
         components: &Self::Components,
         sender: Sender<Self::Msg>,
-        parent_sender: Sender<<Self::ParentModel as Model>::Msg>,
+        parent_sender: Sender<ParentModel::Msg>,
     );
 }
 
 #[cfg(feature = "tokio-rt")]
 #[async_trait::async_trait]
-pub trait AsyncComponentUpdate: Model {
-    type ParentModel: Model;
-
-    fn init_model(parent_model: &Self::ParentModel) -> Self;
+pub trait AsyncComponentUpdate<ParentModel: Model>: Model {
+    fn init_model(parent_model: &ParentModel) -> Self;
 
     /// Update the model. The parent_sender allows to send messages to the parent.
     async fn update(
@@ -68,7 +64,7 @@ pub trait AsyncComponentUpdate: Model {
         msg: Self::Msg,
         components: &Self::Components,
         sender: Sender<Self::Msg>,
-        parent_sender: Sender<<Self::ParentModel as Model>::Msg>,
+        parent_sender: Sender<ParentModel::Msg>,
     );
 }
 

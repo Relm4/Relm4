@@ -5,24 +5,24 @@ use std::marker::{PhantomData, Send};
 use crate::{ComponentUpdate, Model as ModelTrait, RelmComponents};
 
 #[derive(Clone)]
-pub struct RelmWorker<Model>
+pub struct RelmWorker<Model, ParentModel>
 where
-    Model: ComponentUpdate,
+    Model: ComponentUpdate<ParentModel>,
+    ParentModel: ModelTrait,
 {
     model: PhantomData<Model>,
+    parent_model: PhantomData<ParentModel>,
     sender: Sender<Model::Msg>,
 }
 
-impl<Model> RelmWorker<Model>
+impl<Model, ParentModel> RelmWorker<Model, ParentModel>
 where
-    Model: ComponentUpdate + 'static,
+    Model: ComponentUpdate<ParentModel> + 'static,
+    ParentModel: ModelTrait,
 {
     /// Create component. Usually you can store Self in the widgets of the parent component.
     /// The root widget needs to be attached to a GTK container in the parent's `init_view` function.
-    pub fn new(
-        parent_model: &Model::ParentModel,
-        parent_sender: Sender<<Model::ParentModel as ModelTrait>::Msg>,
-    ) -> Self {
+    pub fn new(parent_model: &ParentModel, parent_sender: Sender<ParentModel::Msg>) -> Self {
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
         let mut model = Model::init_model(parent_model);
@@ -44,6 +44,7 @@ where
 
         RelmWorker {
             model: PhantomData,
+            parent_model: PhantomData,
             sender: cloned_sender,
         }
     }
@@ -53,16 +54,17 @@ where
     }
 }
 
-impl<Model> RelmWorker<Model>
+impl<Model, ParentModel> RelmWorker<Model, ParentModel>
 where
-    Model: ComponentUpdate + Send + 'static,
+    Model: ComponentUpdate<ParentModel> + Send + 'static,
     Model::Components: Send + 'static,
     Model::Msg: Send,
-    <Model::ParentModel as ModelTrait>::Msg: Send,
+    ParentModel: ModelTrait,
+    ParentModel::Msg: Send,
 {
     pub fn with_new_thread(
-        parent_model: &Model::ParentModel,
-        parent_sender: Sender<<Model::ParentModel as ModelTrait>::Msg>,
+        parent_model: &ParentModel,
+        parent_sender: Sender<ParentModel::Msg>,
     ) -> Self {
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
@@ -91,6 +93,7 @@ where
 
         RelmWorker {
             model: PhantomData,
+            parent_model: PhantomData,
             sender: cloned_sender,
         }
     }
@@ -98,25 +101,31 @@ where
 
 #[cfg(feature = "tokio-rt")]
 #[derive(Clone)]
-pub struct AsyncRelmWorker<Model>
+pub struct AsyncRelmWorker<Model, ParentModel>
 where
-    Model: crate::traits::AsyncComponentUpdate,
+    Model: crate::traits::AsyncComponentUpdate<ParentModel> + Send + 'static,
+    Model::Components: Send + 'static,
+    ParentModel: ModelTrait,
+    ParentModel::Msg: Send + 'static,
+    Model::Msg: Send + 'static,
 {
     model: PhantomData<Model>,
+    parent_model: PhantomData<ParentModel>,
     sender: Sender<Model::Msg>,
 }
 
 #[cfg(feature = "tokio-rt")]
-impl<Model> AsyncRelmWorker<Model>
+impl<Model, ParentModel> AsyncRelmWorker<Model, ParentModel>
 where
-    Model: crate::traits::AsyncComponentUpdate + Send + 'static,
+    Model: crate::traits::AsyncComponentUpdate<ParentModel> + Send + 'static,
     Model::Components: Send + 'static,
-    <Model::ParentModel as ModelTrait>::Msg: Send + 'static,
+    ParentModel: ModelTrait,
+    ParentModel::Msg: Send + 'static,
     Model::Msg: Send + 'static,
 {
     pub fn with_new_tokio_rt(
-        parent_model: &Model::ParentModel,
-        parent_sender: Sender<<Model::ParentModel as ModelTrait>::Msg>,
+        parent_model: &ParentModel,
+        parent_sender: Sender<ParentModel::Msg>,
     ) -> Self {
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
@@ -150,6 +159,7 @@ where
 
         AsyncRelmWorker {
             model: PhantomData,
+            parent_model: PhantomData,
             sender: cloned_sender,
         }
     }

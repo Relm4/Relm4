@@ -77,9 +77,7 @@ impl RelmWidgets for Comp2Widgets {
     }
 }
 
-impl ComponentUpdate for Comp1Model {
-    type ParentModel = AppModel;
-
+impl ComponentUpdate<AppModel> for Comp1Model {
     fn init_model(_parent_model: &AppModel) -> Self {
         Comp1Model { hidden: false }
     }
@@ -104,9 +102,7 @@ impl ComponentUpdate for Comp1Model {
     }
 }
 
-impl ComponentUpdate for Comp2Model {
-    type ParentModel = AppModel;
-
+impl ComponentUpdate<AppModel> for Comp2Model {
     fn init_model(_parent_model: &AppModel) -> Self {
         Comp2Model { hidden: true }
     }
@@ -132,8 +128,8 @@ impl ComponentUpdate for Comp2Model {
 
 // The main app
 struct Components {
-    comp1: RelmComponent<Comp1Widgets>,
-    comp2: RelmComponent<Comp2Widgets>,
+    comp1: RelmComponent<Comp1Widgets, AppModel>,
+    comp2: RelmComponent<Comp2Widgets, AppModel>,
 }
 
 impl RelmComponents<AppModel> for Components {
