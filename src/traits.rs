@@ -1,4 +1,4 @@
-use gtk::glib::{self, Sender};
+use gtk::glib::Sender;
 use gtk::prelude::StyleContextExt;
 
 /// Widgets are part of an app or components. They represent the UI
@@ -6,7 +6,7 @@ use gtk::prelude::StyleContextExt;
 /// widget that all other widgets are attached to.
 /// The root of the main app must be a [`gtk::ApplicationWindow`].
 pub trait RelmWidgets {
-    type Root: glib::IsA<gtk::Widget>;
+    type Root;
     type Model: Model;
 
     /// Initialize the UI.
