@@ -28,7 +28,7 @@ impl ModelType {
 
         Ok(ModelType {
             model: model
-                .ok_or_else(|| Error::new(span.into(), "Type Model need's to be defined"))?,
+                .ok_or_else(|| Error::new(span.into(), "Type Model needs to be defined"))?,
         })
     }
 }

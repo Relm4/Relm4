@@ -1,11 +1,12 @@
 use proc_macro::{self, TokenStream};
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned};
-use syn::{parse_macro_input, spanned::Spanned, *};
+use syn::{parse_macro_input, spanned::Spanned, ItemImpl};
 
 mod types;
 mod util;
 mod widgets;
+mod args;
 
 use types::ModelType;
 use widgets::Widget;
@@ -62,7 +63,7 @@ pub fn widget(_attributes: TokenStream, input: TokenStream) -> TokenStream {
     }
 
     let out = quote! {
-        struct #ty {
+        pub struct #ty {
             #struct_stream
         }
 
