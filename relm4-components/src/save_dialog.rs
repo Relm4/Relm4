@@ -78,7 +78,7 @@ where
 }
 
 #[relm4_macros::widget(pub)]
-impl relm4::RelmWidgets for SaveDialogWidgets {
+impl relm4::Widgets for SaveDialogWidgets {
     type Model = SaveDialogModel;
 
     view! {

@@ -1,5 +1,5 @@
-use relm4::{impl_model, RelmWidgets, AppUpdate, Sender, send, RelmApp, WidgetPlus};
-use gtk::prelude::{ButtonExt, BoxExt, GtkWindowExt, OrientableExt};
+use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
+use relm4::{impl_model, send, AppUpdate, RelmApp, Sender, WidgetPlus, Widgets};
 
 #[derive(Default)]
 struct AppModel {
@@ -27,7 +27,7 @@ impl AppUpdate for AppModel {
 }
 
 #[relm4_macros::widget]
-impl RelmWidgets for AppWidgets {
+impl Widgets for AppWidgets {
     type Model = AppModel;
 
     view! {

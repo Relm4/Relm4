@@ -15,7 +15,7 @@ pub(super) fn trait_to_path(
             .segments
             .iter()
             .map(|segment| &segment.ident)
-            .filter(|ident| *ident == "RelmWidgets")
+            .filter(|ident| *ident == "Widgets")
             .count()
             == 1
         {
@@ -23,13 +23,13 @@ pub(super) fn trait_to_path(
         } else {
             Err(Error::new(
                 trt.1.span().unwrap().into(),
-                "Unknown trait. Expected RelmWidgets",
+                "Unknown trait. Expected Widgets",
             ))
         }
     } else {
         Err(Error::new(
             type_span.into(),
-            "No trait specified. Expected RelmWidgets.",
+            "No trait specified. Expected Widgets.",
         ))
     }
 }

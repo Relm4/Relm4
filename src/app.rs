@@ -3,7 +3,7 @@ use gtk::prelude::{ApplicationExt, ApplicationExtManual, GtkWindowExt};
 
 use std::marker::PhantomData;
 
-use crate::{AppUpdate, Model, RelmComponents, RelmWidgets};
+use crate::{AppUpdate, Components, Model, Widgets as WidgetsTrait};
 
 /// Relm app that runs the main application.
 /// The app consists of widgets that represents the UI and the model
@@ -15,9 +15,9 @@ use crate::{AppUpdate, Model, RelmComponents, RelmWidgets};
 #[derive(Clone)]
 pub struct RelmApp<Widgets>
 where
-    Widgets: RelmWidgets<Root = gtk::ApplicationWindow> + 'static,
+    Widgets: WidgetsTrait<Root = gtk::ApplicationWindow> + 'static,
     Widgets::Model: AppUpdate + 'static,
-    <Widgets::Model as Model>::Components: RelmComponents<Widgets::Model> + 'static,
+    <Widgets::Model as Model>::Components: Components<Widgets::Model> + 'static,
 {
     widgets: PhantomData<Widgets>,
     app: gtk::Application,
@@ -25,9 +25,9 @@ where
 
 impl<Widgets> RelmApp<Widgets>
 where
-    Widgets: RelmWidgets<Root = gtk::ApplicationWindow> + 'static,
+    Widgets: WidgetsTrait<Root = gtk::ApplicationWindow> + 'static,
     Widgets::Model: AppUpdate + 'static,
-    <Widgets::Model as Model>::Components: RelmComponents<Widgets::Model> + 'static,
+    <Widgets::Model as Model>::Components: Components<Widgets::Model> + 'static,
 {
     /// Run the application. This will return once the application is closed.
     pub fn run(&self) {

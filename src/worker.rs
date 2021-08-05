@@ -2,7 +2,7 @@ use gtk::glib::{self, Sender};
 
 use std::marker::{PhantomData, Send};
 
-use crate::{ComponentUpdate, Model as ModelTrait, RelmComponents};
+use crate::{ComponentUpdate, Components, Model as ModelTrait};
 
 #[derive(Clone)]
 pub struct RelmWorker<Model, ParentModel>

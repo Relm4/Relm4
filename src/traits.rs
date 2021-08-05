@@ -5,7 +5,7 @@ use gtk::prelude::StyleContextExt;
 /// that usually consists out of GTK widgets. The root represents the
 /// widget that all other widgets are attached to.
 /// The root of the main app must be a [`gtk::ApplicationWindow`].
-pub trait RelmWidgets {
+pub trait Widgets {
     type Root;
     type Model: Model;
 
@@ -23,14 +23,14 @@ pub trait RelmWidgets {
     fn view(&mut self, model: &Self::Model, sender: Sender<<Self::Model as Model>::Msg>);
 }
 
-pub trait RelmComponents<ParentModel: ?Sized + Model> {
+pub trait Components<ParentModel: ?Sized + Model> {
     fn init_components(parent_model: &ParentModel, parent_sender: Sender<ParentModel::Msg>)
         -> Self;
 }
 
 pub trait Model {
     type Msg: 'static;
-    type Components: RelmComponents<Self>;
+    type Components: Components<Self>;
 }
 
 /// Methods that initialize and update the main app.
@@ -94,6 +94,6 @@ impl<W: gtk::prelude::WidgetExt> WidgetPlus for W {
     }
 }
 
-impl<ParentModel: Model> RelmComponents<ParentModel> for () {
+impl<ParentModel: Model> Components<ParentModel> for () {
     fn init_components(_parent_model: &ParentModel, _sender: Sender<ParentModel::Msg>) {}
 }

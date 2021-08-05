@@ -61,13 +61,13 @@ impl AsyncComponentUpdate<AppModel> for HttpWorker {
     }
 }
 
-struct Components {
+struct AppComponents {
     http: AsyncRelmWorker<HttpWorker, AppModel>,
 }
 
-impl RelmComponents<AppModel> for Components {
+impl Components<AppModel> for AppComponents {
     fn init_components(parent_model: &AppModel, parent_sender: Sender<AppMsg>) -> Self {
-        Components {
+        AppComponents {
             http: AsyncRelmWorker::with_new_tokio_rt(parent_model, parent_sender),
         }
     }
@@ -97,13 +97,13 @@ struct AppModel {
     image_waiting: bool,
 }
 
-impl_model!(AppModel, AppMsg, Components);
+impl_model!(AppModel, AppMsg, AppComponents);
 
-impl RelmWidgets for AppWidgets {
+impl Widgets for AppWidgets {
     type Root = gtk::ApplicationWindow;
     type Model = AppModel;
 
-    fn init_view(model: &AppModel, _components: &Components, sender: Sender<AppMsg>) -> Self {
+    fn init_view(model: &AppModel, _components: &AppComponents, sender: Sender<AppMsg>) -> Self {
         let main = gtk::ApplicationWindowBuilder::new()
             .default_width(300)
             .default_height(200)
@@ -211,7 +211,7 @@ impl RelmWidgets for AppWidgets {
 }
 
 impl AppUpdate for AppModel {
-    fn update(&mut self, msg: AppMsg, components: &Components, _sender: Sender<AppMsg>) {
+    fn update(&mut self, msg: AppMsg, components: &AppComponents, _sender: Sender<AppMsg>) {
         self.reset();
 
         match msg {

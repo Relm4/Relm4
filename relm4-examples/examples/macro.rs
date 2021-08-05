@@ -1,5 +1,5 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
-use relm4::{impl_model, send, AppUpdate, RelmApp, RelmWidgets, Sender, WidgetPlus};
+use relm4::{impl_model, send, AppUpdate, RelmApp, Sender, WidgetPlus, Widgets};
 
 enum AppMsg {
     Increment,
@@ -29,7 +29,7 @@ impl AppUpdate for AppModel {
 }
 
 #[relm4_macros::widget]
-impl RelmWidgets for AppWidgets {
+impl Widgets for AppWidgets {
     // specify generic types
     type Model = AppModel;
 

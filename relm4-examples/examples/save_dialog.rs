@@ -1,6 +1,10 @@
-use relm4::{impl_model, RelmWidgets, AppUpdate, Sender, send, RelmApp, WidgetPlus, RelmComponent, RelmComponents};
-use relm4_components::save_dialog::{SaveDialogWidgets, SaveDialogParent, SaveDialogSettings, SaveDialogMsg};
-use gtk::prelude::{ButtonExt, BoxExt, GtkWindowExt, OrientableExt};
+use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
+use relm4::{
+    impl_model, send, AppUpdate, Components, RelmApp, RelmComponent, Sender, WidgetPlus, Widgets,
+};
+use relm4_components::save_dialog::{
+    SaveDialogMsg, SaveDialogParent, SaveDialogSettings, SaveDialogWidgets,
+};
 
 use std::path::PathBuf;
 
@@ -16,10 +20,10 @@ pub enum AppMsg {
     SaveResponse(PathBuf),
 }
 
-impl_model!(AppModel, AppMsg, Components);
+impl_model!(AppModel, AppMsg, AppComponents);
 
 impl AppUpdate for AppModel {
-    fn update(&mut self, msg: AppMsg, components: &Components, _sender: Sender<AppMsg>) {
+    fn update(&mut self, msg: AppMsg, components: &AppComponents, _sender: Sender<AppMsg>) {
         match msg {
             AppMsg::Increment => {
                 self.counter = self.counter.wrapping_add(1);
@@ -28,7 +32,10 @@ impl AppUpdate for AppModel {
                 self.counter = self.counter.wrapping_sub(1);
             }
             AppMsg::SaveRequest => {
-                components.dialog.send(SaveDialogMsg::SaveAs(format!("Counter_{}", self.counter))).unwrap();
+                components
+                    .dialog
+                    .send(SaveDialogMsg::SaveAs(format!("Counter_{}", self.counter)))
+                    .unwrap();
             }
             AppMsg::SaveResponse(path) => {
                 println!("File would have been saved at {:?}", path);
@@ -52,20 +59,20 @@ impl SaveDialogParent for AppModel {
     }
 }
 
-pub struct Components {
+pub struct AppComponents {
     dialog: RelmComponent<SaveDialogWidgets, AppModel>,
 }
 
-impl RelmComponents<AppModel> for Components {
+impl Components<AppModel> for AppComponents {
     fn init_components(model: &AppModel, sender: Sender<AppMsg>) -> Self {
-        Components {
+        AppComponents {
             dialog: RelmComponent::new(model, sender),
         }
     }
 }
 
 #[relm4_macros::widget]
-impl RelmWidgets for AppWidgets {
+impl Widgets for AppWidgets {
     type Model = AppModel;
 
     view! {

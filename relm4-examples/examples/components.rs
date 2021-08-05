@@ -28,7 +28,7 @@ enum CompMsg {
     Show,
 }
 
-impl RelmWidgets for Comp1Widgets {
+impl Widgets for Comp1Widgets {
     type Root = gtk::Button;
     type Model = Comp1Model;
 
@@ -53,7 +53,7 @@ impl RelmWidgets for Comp1Widgets {
     }
 }
 
-impl RelmWidgets for Comp2Widgets {
+impl Widgets for Comp2Widgets {
     type Root = gtk::Button;
     type Model = Comp2Model;
 
@@ -127,14 +127,14 @@ impl ComponentUpdate<AppModel> for Comp2Model {
 }
 
 // The main app
-struct Components {
+struct AppComponents {
     comp1: RelmComponent<Comp1Widgets, AppModel>,
     comp2: RelmComponent<Comp2Widgets, AppModel>,
 }
 
-impl RelmComponents<AppModel> for Components {
+impl Components<AppModel> for AppComponents {
     fn init_components(parent_model: &AppModel, parent_sender: Sender<AppMsg>) -> Self {
-        Components {
+        AppComponents {
             comp1: RelmComponent::with_new_thread(parent_model, parent_sender.clone()),
             comp2: RelmComponent::new(parent_model, parent_sender),
         }
@@ -157,13 +157,13 @@ struct AppModel {
     counter: u8,
 }
 
-impl_model!(AppModel, AppMsg, Components);
+impl_model!(AppModel, AppMsg, AppComponents);
 
-impl RelmWidgets for AppWidgets {
+impl Widgets for AppWidgets {
     type Root = gtk::ApplicationWindow;
     type Model = AppModel;
 
-    fn init_view(model: &AppModel, components: &Components, sender: Sender<AppMsg>) -> Self {
+    fn init_view(model: &AppModel, components: &AppComponents, sender: Sender<AppMsg>) -> Self {
         let main = gtk::ApplicationWindowBuilder::new().build();
         let vbox = gtk::BoxBuilder::new()
             .orientation(gtk::Orientation::Vertical)
@@ -208,7 +208,7 @@ impl RelmWidgets for AppWidgets {
 }
 
 impl AppUpdate for AppModel {
-    fn update(&mut self, msg: AppMsg, components: &Components, _sender: Sender<AppMsg>) {
+    fn update(&mut self, msg: AppMsg, components: &AppComponents, _sender: Sender<AppMsg>) {
         match msg {
             AppMsg::Increment => self.counter = self.counter.saturating_add(1),
             AppMsg::Decrement => self.counter = self.counter.saturating_sub(1),

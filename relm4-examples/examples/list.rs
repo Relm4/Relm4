@@ -104,7 +104,7 @@ struct AppModel {
 
 impl_model!(AppModel, AppMsg);
 
-impl RelmWidgets for AppWidgets {
+impl Widgets for AppWidgets {
     type Root = gtk::ApplicationWindow;
     type Model = AppModel;
 

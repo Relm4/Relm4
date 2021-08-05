@@ -3,7 +3,7 @@ use gtk::glib::{self, Sender};
 use std::marker::{PhantomData, Send};
 use std::sync::mpsc::channel;
 
-use crate::{ComponentUpdate, Model as ModelTrait, RelmComponents, RelmWidgets};
+use crate::{ComponentUpdate, Components, Model as ModelTrait, Widgets as WidgetsTrait};
 
 /// Component that can be part of the main application or other
 /// components. Components can send each other messages and have their own
@@ -12,7 +12,7 @@ use crate::{ComponentUpdate, Model as ModelTrait, RelmComponents, RelmWidgets};
 #[derive(Clone)]
 pub struct RelmComponent<Widgets, ParentModel>
 where
-    Widgets: RelmWidgets + 'static,
+    Widgets: WidgetsTrait + 'static,
     Widgets::Model: ComponentUpdate<ParentModel> + 'static,
     ParentModel: ModelTrait,
 {
@@ -24,7 +24,7 @@ where
 
 impl<Widgets, ParentModel> RelmComponent<Widgets, ParentModel>
 where
-    Widgets: RelmWidgets + 'static,
+    Widgets: WidgetsTrait + 'static,
     Widgets::Model: ComponentUpdate<ParentModel> + 'static,
     ParentModel: ModelTrait,
 {
@@ -80,7 +80,7 @@ where
 
 impl<Widgets, ParentModel> RelmComponent<Widgets, ParentModel>
 where
-    Widgets: RelmWidgets + 'static,
+    Widgets: WidgetsTrait + 'static,
     Widgets::Model: ComponentUpdate<ParentModel> + Send + 'static,
     <Widgets::Model as ModelTrait>::Components: Send,
     <Widgets::Model as ModelTrait>::Msg: Send,
