@@ -12,11 +12,10 @@ pub struct SaveDialogSettings {
 
 #[tracker::track]
 pub struct SaveDialogModel {
-    #[no_eq]
+    #[do_not_track]
     settings: SaveDialogSettings,
     suggestion: Option<String>,
     is_active: bool,
-    invalid_input: bool,
     name: String,
 }
 
@@ -43,7 +42,6 @@ where
         SaveDialogModel {
             settings: parent_model.dialog_config(),
             is_active: false,
-            invalid_input: false,
             suggestion: None,
             name: String::new(),
             tracker: 0,
@@ -62,11 +60,9 @@ where
         match msg {
             SaveDialogMsg::Save => {
                 self.is_active = true;
-                self.invalid_input = false;
             }
             SaveDialogMsg::SaveAs(name) => {
                 self.is_active = true;
-                self.invalid_input = false;
                 self.set_name(name);
             }
             SaveDialogMsg::Cancel => {
@@ -90,6 +86,7 @@ impl relm4::RelmWidgets for SaveDialogWidgets {
             set_action: gtk::FileChooserAction::Save,
             set_visible: watch!(model.is_active),
             set_current_name: track!(model.changed(SaveDialogModel::name()), &model.name),
+            add_filter: iterate!(&model.settings.filters),
             set_create_folders: model.settings.create_folders,
             set_cancel_label: Some(&model.settings.cancel_label),
             set_accept_label: Some(&model.settings.accept_label),
