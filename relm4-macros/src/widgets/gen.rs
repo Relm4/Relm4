@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned, ToTokens};
-use syn::{spanned::Spanned, *};
+use syn::{spanned::Spanned, Error};
 
 use super::{PropertyType, Tracker, Widget, WidgetFunc};
 
@@ -23,24 +23,20 @@ impl Tracker {
 impl PropertyType {
     fn init_assign_tokens(&self) -> Option<TokenStream2> {
         match self {
-            PropertyType::Expr(expr) => Some(quote_spanned! { expr.span() => #expr }),
-            PropertyType::Value(lit) => Some(quote_spanned! { lit.span() => #lit }),
-            PropertyType::Widget(widget) => Some(widget.property_assignment()),
-            PropertyType::Watch(tokens) => Some(quote_spanned! { tokens.span() => #tokens }),
+            PropertyType::Expr(expr) => Some(quote! { #expr }),
+            PropertyType::Value(lit) => Some(quote! { #lit }),
+            PropertyType::Widget(widget) => Some(widget.widget_assignment()),
+            PropertyType::Watch(tokens) => Some(quote! { #tokens }),
             PropertyType::Args(args) => Some(args.to_token_stream()),
-            PropertyType::Track(Tracker { update_fn, .. }) => {
-                Some(quote_spanned! { update_fn.span() => #update_fn })
-            }
-            PropertyType::Component(expr) => Some(quote_spanned! { expr.span() => #expr.root_widget()}),
+            PropertyType::Track(Tracker { update_fn, .. }) => Some(quote! { #update_fn }),
+            PropertyType::Component(expr) => Some(quote! { #expr.root_widget()}),
             _ => None,
         }
     }
 
     fn view_assign_tokens(&self) -> Option<TokenStream2> {
         match self {
-            PropertyType::Watch(token_stream) => {
-                Some(quote_spanned! { token_stream.span() => #token_stream })
-            }
+            PropertyType::Watch(token_stream) => Some(quote! { #token_stream }),
             _ => None,
         }
     }
@@ -64,6 +60,16 @@ impl PropertyType {
             let update_stream = quote_spanned! { update_fn.span() => #update_fn };
             let bool_stream = tracker.bool_eqation_tokens();
             Some((bool_stream, update_stream))
+        } else {
+            None
+        }
+    }
+
+    fn factory_expr(&self) -> Option<TokenStream2> {
+        if let PropertyType::Factory(expr) = self {
+            Some(quote! {
+                #expr
+            })
         } else {
             None
         }
@@ -138,13 +144,13 @@ impl Widget {
         }
     }
 
-    pub fn property_assignment(&self) -> TokenStream2 {
+    pub fn widget_assignment(&self) -> TokenStream2 {
         let w_span = self.func.span();
         let w_name = &self.name;
         let out_stream = if self.assign_as_ref {
             quote_spanned! { w_span => & #w_name}
         } else {
-            quote_spanned! { w_span => #w_name}
+            quote! { #w_name}
         };
         if let Some(wrapper) = &self.wrapper {
             quote_spanned! {
@@ -155,40 +161,103 @@ impl Widget {
         }
     }
 
-    pub fn view_stream(&self) -> TokenStream2 {
+    pub fn view_stream(&self, property_stream: &mut TokenStream2) {
         let w_name = &self.name;
-        let mut property_stream = TokenStream2::new();
 
         for prop in &self.properties.properties {
             let p_assign_opt = prop.ty.view_assign_tokens();
             if let Some(p_assign) = p_assign_opt {
                 let p_name = &prop.name;
                 let p_span = p_name.span().unwrap().into();
-                property_stream.extend(quote_spanned! {
-                    p_span => self.#w_name.#p_name(#p_assign);
+                property_stream.extend(match (prop.optional_assign, prop.iterative) {
+                    (false, false) => {
+                        quote_spanned! {
+                            p_span => self.#w_name.#p_name(#p_assign);
+                        }
+                    }
+                    (true, false) => {
+                        quote_spanned! {
+                            p_span => if let Some(__p_assign) = #p_assign {
+                                self.#w_name.#p_name(__p_assign);
+                            }
+                        }
+                    }
+                    (false, true) => {
+                        quote_spanned! {
+                            p_span => for __elem in #p_assign {
+                                self.#w_name.#p_name(__elem);
+                            }
+                        }
+                    }
+                    (true, true) => {
+                        quote_spanned! {
+                            p_span => for __elem in #p_assign {
+                                if let Some(__p_assign) = __elem {
+                                    self.#w_name.#p_name(__p_assign);
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            let fact_assign_opt = prop.ty.factory_expr();
+            if let Some(f_expr) = fact_assign_opt {
+                property_stream.extend(quote! {
+                    #f_expr.generate(self.#w_name, sender.clone());
                 });
             }
         }
-
-        property_stream
     }
 
-    pub fn property_stream(&self) -> TokenStream2 {
+    pub fn property_assign_stream(&self, property_stream: &mut TokenStream2) {
         let w_name = &self.name;
-        let mut property_stream = TokenStream2::new();
 
         for prop in &self.properties.properties {
             let p_assign_opt = prop.ty.init_assign_tokens();
             if let Some(p_assign) = p_assign_opt {
                 let p_name = &prop.name;
                 let p_span = p_name.span().unwrap().into();
-                property_stream.extend(quote_spanned! {
-                    p_span => #w_name.#p_name(#p_assign);
+
+                property_stream.extend(match (prop.optional_assign, prop.iterative) {
+                    (false, false) => {
+                        quote_spanned! {
+                            p_span => #w_name.#p_name(#p_assign);
+                        }
+                    }
+                    (true, false) => {
+                        quote_spanned! {
+                            p_span => if let Some(__p_assign) = #p_assign {
+                                #w_name.#p_name(__p_assign);
+                            }
+                        }
+                    }
+                    (false, true) => {
+                        quote_spanned! {
+                            p_span => for __elem in #p_assign {
+                                #w_name.#p_name(__elem);
+                            }
+                        }
+                    }
+                    (true, true) => {
+                        quote_spanned! {
+                            p_span => for __elem in #p_assign {
+                                if let Some(__p_assign) = __elem {
+                                    #w_name.#p_name(__p_assign);
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            let fact_assign_opt = prop.ty.factory_expr();
+            if let Some(f_expr) = fact_assign_opt {
+                property_stream.extend(quote! {
+                    #f_expr.generate(#w_name, sender.clone());
                 });
             }
         }
-
-        property_stream
     }
 
     pub fn connect_stream(&self) -> TokenStream2 {

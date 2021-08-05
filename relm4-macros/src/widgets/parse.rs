@@ -1,7 +1,9 @@
 use syn::{
+    braced, parenthesized,
     parse::{Parse, ParseBuffer, ParseStream},
+    parse_macro_input,
     punctuated::Punctuated,
-    *,
+    token, Expr, ExprMacro, Ident, Lit, Macro, Result, Token,
 };
 
 use crate::util;
@@ -31,9 +33,47 @@ impl Parse for Tracker {
     }
 }
 
+/*impl Parse for Factory {
+    fn parse(input: ParseStream) -> Result<Self> {
+        let data = input.parse()?;
+        let _comma: Token![,] = input.parse()?;
+        let widget_name = input.parse()?;
+
+        Ok(Factory { data, widget_name })
+    }
+}*/
+
 impl Parse for Property {
     fn parse(input: ParseStream) -> Result<Self> {
         let name: Ident = input.parse()?;
+        let mut optional_assign = false;
+        let mut iterative = false;
+
+        if input.peek(Token![!]) {
+            return if name == "factory" {
+                let _exclm: Token![!] = input.parse()?;
+                let paren_input;
+                parenthesized!(paren_input in input);
+                Ok(Property {
+                    name,
+                    ty: PropertyType::Factory(paren_input.parse()?),
+                    optional_assign,
+                    iterative,
+                    args: None,
+                })
+            } else {
+                Err(input.error("Expected macro factory"))
+            };
+        }
+
+        // check for property(a, b, c): ...
+        let args = if input.peek(token::Paren) {
+            let paren_input;
+            parenthesized!(paren_input in input);
+            Some(paren_input.parse()?)
+        } else {
+            None
+        };
 
         let ty = if input.peek(Token! [=>]) {
             let _arrow: Token![=>] = input.parse()?;
@@ -45,7 +85,12 @@ impl Parse for Property {
                 let _colon: Token! [:] = input.parse()?;
             }
             input.parse().map(PropertyType::Widget)?
-        } else if input.peek(Token! [:]) {
+        } else if input.peek(Token! [:]) || input.peek(Token! [?]) {
+            // look for ? at beginning for optional assign
+            if input.peek(Token! [?]) {
+                let _question_mark: Token![?] = input.parse()?;
+                optional_assign = true;
+            }
             let _colon: Token! [:] = input.parse()?;
             if input.peek(Lit) {
                 input.parse().map(PropertyType::Value)?
@@ -67,12 +112,19 @@ impl Parse for Property {
                         PropertyType::Args(parse_macro_input::parse(tokens)?)
                     } else if ident == "watch" {
                         PropertyType::Watch(mac.tokens)
+                    } else if ident == "iterate" {
+                        iterative = true;
+                        let tokens = mac.tokens.into();
+                        PropertyType::Expr(parse_macro_input::parse(tokens)?)
+                    } else if ident == "iterate_watch" {
+                        iterative = true;
+                        let tokens = mac.tokens.into();
+                        PropertyType::Watch(parse_macro_input::parse(tokens)?)
                     } else {
                         PropertyType::Expr(Expr::Macro(ExprMacro {
-                                attrs: Vec::new(),
-                                mac,
-                            }
-                        ))
+                            attrs: Vec::new(),
+                            mac,
+                        }))
                     }
                 } else {
                     input.parse().map(PropertyType::Expr)?
@@ -84,7 +136,13 @@ impl Parse for Property {
             return Err(input.error("TODO"));
         };
 
-        Ok(Property { name, ty })
+        Ok(Property {
+            name,
+            ty,
+            args,
+            optional_assign,
+            iterative,
+        })
     }
 }
 

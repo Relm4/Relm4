@@ -3,15 +3,16 @@ use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned};
 use syn::{parse_macro_input, spanned::Spanned, ItemImpl};
 
+mod args;
+mod attrs;
+mod macros;
 mod types;
 mod util;
 mod widgets;
-mod args;
-mod attrs;
 
-use types::ModelType;
-use widgets::Widget;
 use attrs::Attrs;
+use macros::Macros;
+use types::ModelType;
 
 #[proc_macro_attribute]
 pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
@@ -22,12 +23,24 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let data = parse_macro_input!(input as ItemImpl);
     let span = data.span();
 
-    let ModelType { model } = ModelType::new(span.unwrap(), &data.items).unwrap();
-    let trt = util::trait_to_path(data.self_ty.span().unwrap(), data.trait_).unwrap();
+    let ModelType { model } = match ModelType::new(span.unwrap(), &data.items) {
+        Ok(model) => model,
+        Err(err) => return TokenStream::from(err.to_compile_error()),
+    };
+
+    let trt = match util::trait_to_path(data.self_ty.span().unwrap(), data.trait_) {
+        Ok(trt) => trt,
+        Err(err) => return TokenStream::from(err.to_compile_error()),
+    };
+
     let ty = data.self_ty;
 
-    let widgets = match Widget::new(span.unwrap(), &data.items) {
-        Ok(widgets) => widgets,
+    let Macros {
+        widgets,
+        manual_init,
+        manual_view,
+    } = match Macros::new(span.unwrap(), &data.items) {
+        Ok(macros) => macros,
         Err(err) => return TokenStream::from(err.to_compile_error()),
     };
 
@@ -60,10 +73,17 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
         });
 
         return_stream.extend(widget.return_stream());
-        property_stream.extend(widget.property_stream());
-        view_stream.extend(widget.view_stream());
+        widget.property_assign_stream(&mut property_stream);
+        widget.view_stream(&mut view_stream);
         connect_stream.extend(widget.connect_stream());
         track_stream.extend(widget.track_stream());
+    }
+
+    if let Some(manual_init_stream) = manual_init {
+        init_stream.extend(manual_init_stream);
+    }
+    if let Some(manual_view_stream) = manual_view {
+        view_stream.extend(manual_view_stream);
     }
 
     let out = quote! {

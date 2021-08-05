@@ -1,6 +1,11 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote_spanned, ToTokens};
-use syn::{spanned::Spanned, punctuated::Punctuated, Expr, Token, parse::{Parse, ParseStream}, Result};
+use syn::{
+    parse::{Parse, ParseStream},
+    punctuated::Punctuated,
+    spanned::Spanned,
+    Expr, Result, Token,
+};
 
 #[derive(Debug)]
 pub struct Args {
@@ -9,12 +14,11 @@ pub struct Args {
 
 impl Parse for Args {
     fn parse(input: ParseStream) -> Result<Self> {
-        let punct: Punctuated<Expr, Token![,]> = input.call(Punctuated::parse_separated_nonempty)?;
+        let punct: Punctuated<Expr, Token![,]> =
+            input.call(Punctuated::parse_separated_nonempty)?;
         let exprs = punct.into_pairs().map(|pair| pair.into_value()).collect();
 
-        Ok(Args {
-            exprs
-        })
+        Ok(Args { exprs })
     }
 }
 
@@ -24,8 +28,8 @@ impl ToTokens for Args {
 
         let first = iter.next().unwrap();
         out.extend(quote_spanned! {
-                first.span() => #first
-            });
+            first.span() => #first
+        });
 
         for expr in iter {
             out.extend(quote_spanned! {
@@ -34,4 +38,3 @@ impl ToTokens for Args {
         }
     }
 }
-

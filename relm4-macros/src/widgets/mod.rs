@@ -1,7 +1,6 @@
-use proc_macro::Span;
 use proc_macro2::Span as Span2;
 use proc_macro2::TokenStream as TokenStream2;
-use syn::{punctuated::Punctuated, spanned::Spanned, *};
+use syn::{punctuated::Punctuated, spanned::Spanned, token, Expr, ExprClosure, Ident, Lit};
 
 use crate::args::Args;
 
@@ -14,6 +13,12 @@ pub(super) struct Tracker {
     update_fn: Expr,
 }
 
+/*#[derive(Debug)]
+pub(super) struct Factory {
+    data: Expr,
+    widget_name: Ident,
+}*/
+
 #[derive(Debug)]
 pub(super) enum PropertyType {
     Expr(Expr),
@@ -23,6 +28,9 @@ pub(super) enum PropertyType {
     Args(Args),
     Connect(ExprClosure),
     Watch(TokenStream2),
+    //Iterate(Expr),
+    //IterateWatch(Expr),
+    Factory(Expr),
     Widget(Widget),
 }
 
@@ -30,6 +38,9 @@ pub(super) enum PropertyType {
 pub(super) struct Property {
     pub name: Ident,
     pub ty: PropertyType,
+    pub args: Option<Args>,
+    pub optional_assign: bool,
+    pub iterative: bool,
 }
 
 #[derive(Debug)]
@@ -75,7 +86,7 @@ impl<'a> Widget {
     }
 }
 
-impl Widget {
+/*impl Widget {
     pub fn new(span: Span, items: &[ImplItem]) -> Result<Self> {
         let mut widgets = None;
         for item in items {
@@ -100,4 +111,4 @@ impl Widget {
 
         widgets.ok_or_else(|| Error::new(span.into(), "No view macro in impl block"))
     }
-}
+}*/

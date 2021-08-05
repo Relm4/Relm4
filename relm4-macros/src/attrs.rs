@@ -1,10 +1,13 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens};
-use syn::{parse::{Parse, ParseStream}, Result, Token};
+use syn::{
+    parse::{Parse, ParseStream},
+    Result, Token,
+};
 
 #[derive(Debug)]
 pub struct Attrs {
-    pub_vis: Option<Token! [pub]>,
+    pub_vis: Option<Token![pub]>,
 }
 
 impl Parse for Attrs {
@@ -15,9 +18,7 @@ impl Parse for Attrs {
             Some(input.parse()?)
         };
 
-        Ok(Attrs {
-            pub_vis
-        })
+        Ok(Attrs { pub_vis })
     }
 }
 
