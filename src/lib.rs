@@ -27,6 +27,7 @@ pub use gtk::glib::Sender;
 #[cfg(feature = "tokio-rt")]
 pub use async_trait::async_trait;
 
+#[must_use]
 pub fn gtk_application() -> gtk::Application {
     APP.get()
         .expect("The gloabl gtk application hasn't been initialized yet")
@@ -68,15 +69,19 @@ macro_rules! send {
     };
 }
 
-#[macro_export]
+/*#[macro_export]
 macro_rules! impl_model {
-    ($model:ty, $msg:ty, $components:ty) => {
+    ($model:ty, $msg:ty, $widgets:ty, $components:ty) => {
         impl ::relm4::Model for $model {
             type Msg = $msg;
+            type Widgets = $widgets;
             type Components = $components;
         }
     };
-    ($model:ty, $msg:ty) => {
-        impl_model!($model, $msg, ());
+    ($model:ty, $msg:ty, $widgets:ty) => {
+        impl_model!($model, $msg, $widgets, ());
     };
-}
+    ($model:ty, $msg:ty) => {
+        impl_model!($model, $msg, (), ());
+    };
+}*/

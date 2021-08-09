@@ -5,32 +5,47 @@ use gtk::prelude::StyleContextExt;
 /// that usually consists out of GTK widgets. The root represents the
 /// widget that all other widgets are attached to.
 /// The root of the main app must be a [`gtk::ApplicationWindow`].
-pub trait Widgets {
+pub trait Widgets<ModelType, ParentModel>
+where
+    ModelType: Model<Widgets = Self>,
+    ParentModel: Model,
+{
     type Root;
-    type Model: Model;
 
     /// Initialize the UI.
     fn init_view(
-        model: &Self::Model,
-        component: &<Self::Model as Model>::Components,
-        sender: Sender<<Self::Model as Model>::Msg>,
+        model: &ModelType,
+        parent_widgets: &ParentModel::Widgets,
+        sender: Sender<ModelType::Msg>,
     ) -> Self;
+
+    fn connect_components(&self, _components: &ModelType::Components) {}
 
     /// Return the root widget.
     fn root_widget(&self) -> Self::Root;
 
     /// Update the view to represent the updated model.
-    fn view(&mut self, model: &Self::Model, sender: Sender<<Self::Model as Model>::Msg>);
+    fn view(&mut self, model: &ModelType, sender: Sender<ModelType::Msg>);
 }
 
 pub trait Components<ParentModel: ?Sized + Model> {
-    fn init_components(parent_model: &ParentModel, parent_sender: Sender<ParentModel::Msg>)
-        -> Self;
+    fn init_components(
+        parent_model: &ParentModel,
+        parent_widget: &ParentModel::Widgets,
+        parent_sender: Sender<ParentModel::Msg>,
+    ) -> Self;
 }
 
-pub trait Model {
+pub trait Model: std::marker::Sized {
     type Msg: 'static;
+    type Widgets;
     type Components: Components<Self>;
+}
+
+impl Model for () {
+    type Msg = ();
+    type Widgets = ();
+    type Components = ();
 }
 
 /// Methods that initialize and update the main app.
@@ -94,6 +109,35 @@ impl<W: gtk::prelude::WidgetExt> WidgetPlus for W {
     }
 }
 
+impl<ModelType, ParentModel> Widgets<ModelType, ParentModel> for ()
+where
+    ModelType: Model<Widgets = ()>,
+    ParentModel: Model,
+{
+    type Root = ();
+
+    /// Initialize the UI.
+    fn init_view(
+        _model: &ModelType,
+        _parent_widgets: &ParentModel::Widgets,
+        _sender: Sender<ModelType::Msg>,
+    ) -> Self {
+    }
+
+    fn connect_components(&self, _components: &ModelType::Components) {}
+
+    /// Return the root widget.
+    fn root_widget(&self) -> Self::Root {}
+
+    /// Update the view to represent the updated model.
+    fn view(&mut self, _model: &ModelType, _sender: Sender<ModelType::Msg>) {}
+}
+
 impl<ParentModel: Model> Components<ParentModel> for () {
-    fn init_components(_parent_model: &ParentModel, _sender: Sender<ParentModel::Msg>) {}
+    fn init_components(
+        _parent_model: &ParentModel,
+        _widgets: &ParentModel::Widgets,
+        _sender: Sender<ParentModel::Msg>,
+    ) {
+    }
 }

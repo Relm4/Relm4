@@ -7,7 +7,7 @@ use crate::{ComponentUpdate, Components, Model as ModelTrait};
 #[derive(Clone)]
 pub struct RelmWorker<Model, ParentModel>
 where
-    Model: ComponentUpdate<ParentModel>,
+    Model: ComponentUpdate<ParentModel, Widgets = ()> + 'static,
     ParentModel: ModelTrait,
 {
     model: PhantomData<Model>,
@@ -17,7 +17,7 @@ where
 
 impl<Model, ParentModel> RelmWorker<Model, ParentModel>
 where
-    Model: ComponentUpdate<ParentModel> + 'static,
+    Model: ComponentUpdate<ParentModel, Widgets = ()> + 'static,
     ParentModel: ModelTrait,
 {
     /// Create component. Usually you can store Self in the widgets of the parent component.
@@ -27,7 +27,7 @@ where
 
         let mut model = Model::init_model(parent_model);
 
-        let components = Model::Components::init_components(&model, sender.clone());
+        let components = Model::Components::init_components(&model, &(), sender.clone());
         let cloned_sender = sender.clone();
 
         {
@@ -56,7 +56,7 @@ where
 
 impl<Model, ParentModel> RelmWorker<Model, ParentModel>
 where
-    Model: ComponentUpdate<ParentModel> + Send + 'static,
+    Model: ComponentUpdate<ParentModel, Widgets = ()> + Send + 'static,
     Model::Components: Send + 'static,
     Model::Msg: Send,
     ParentModel: ModelTrait,
@@ -70,7 +70,7 @@ where
 
         let mut model = Model::init_model(parent_model);
 
-        let components = Model::Components::init_components(&model, sender.clone());
+        let components = Model::Components::init_components(&model, &(), sender.clone());
         let cloned_sender = sender.clone();
 
         std::thread::spawn(move || {
@@ -103,11 +103,11 @@ where
 #[derive(Clone)]
 pub struct AsyncRelmWorker<Model, ParentModel>
 where
-    Model: crate::traits::AsyncComponentUpdate<ParentModel> + Send + 'static,
-    Model::Components: Send + 'static,
+    Model: crate::traits::AsyncComponentUpdate<ParentModel, Widgets = ()> + Send + 'static,
+    Model::Components: Send,
     ParentModel: ModelTrait,
-    ParentModel::Msg: Send + 'static,
-    Model::Msg: Send + 'static,
+    ParentModel::Msg: Send,
+    Model::Msg: Send,
 {
     model: PhantomData<Model>,
     parent_model: PhantomData<ParentModel>,
@@ -117,11 +117,11 @@ where
 #[cfg(feature = "tokio-rt")]
 impl<Model, ParentModel> AsyncRelmWorker<Model, ParentModel>
 where
-    Model: crate::traits::AsyncComponentUpdate<ParentModel> + Send + 'static,
-    Model::Components: Send + 'static,
+    Model: crate::traits::AsyncComponentUpdate<ParentModel, Widgets = ()> + Send,
+    Model::Components: Send,
     ParentModel: ModelTrait,
-    ParentModel::Msg: Send + 'static,
-    Model::Msg: Send + 'static,
+    ParentModel::Msg: Send,
+    Model::Msg: Send,
 {
     pub fn with_new_tokio_rt(
         parent_model: &ParentModel,
@@ -131,7 +131,7 @@ where
 
         let mut model = Model::init_model(parent_model);
 
-        let components = Model::Components::init_components(&model, sender.clone());
+        let components = Model::Components::init_components(&model, &(), sender.clone());
         let cloned_sender = sender.clone();
 
         std::thread::spawn(move || {
