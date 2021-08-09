@@ -7,14 +7,15 @@
 
 mod app;
 mod component;
-pub mod default_widgets;
 pub mod factory;
 mod traits;
+pub mod util;
 mod worker;
 
 pub use app::RelmApp;
 pub use component::RelmComponent;
 pub use traits::*;
+pub use util::widget_plus::WidgetPlus;
 pub use worker::*;
 
 use fragile::Fragile;
@@ -68,20 +69,3 @@ macro_rules! send {
         $sender.clone().send($msg).unwrap()
     };
 }
-
-/*#[macro_export]
-macro_rules! impl_model {
-    ($model:ty, $msg:ty, $widgets:ty, $components:ty) => {
-        impl ::relm4::Model for $model {
-            type Msg = $msg;
-            type Widgets = $widgets;
-            type Components = $components;
-        }
-    };
-    ($model:ty, $msg:ty, $widgets:ty) => {
-        impl_model!($model, $msg, $widgets, ());
-    };
-    ($model:ty, $msg:ty) => {
-        impl_model!($model, $msg, (), ());
-    };
-}*/
