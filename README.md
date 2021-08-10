@@ -5,43 +5,25 @@
 [![CI](https://github.com/AaronErhardt/relm4/actions/workflows/rust.yml/badge.svg)](https://github.com/AaronErhardt/relm4/actions/workflows/rust.yml)
 ![Matrix](https://img.shields.io/matrix/relm4:matrix.org?label=matrix%20chat)
 
-An experimental port of [relm](https://github.com/antoyo/relm) to use GTK4. Actually it's rather a rewrite/redesign of relm's core functionality than a port by now but it's already functional. 
+An idiomatic GUI library inspired by [Elm](https://elm-lang.org/) and based on [gtk4-rs](https://crates.io/crates/gtk4). 
+Relm4 is a new version of [relm](https://github.com/antoyo/relm) that's built from scratch and is compatible with [GTK4](https://www.gtk.org/).
 
-It's not finished yet so macros are still missing and the API might change in the future.
+## Goals
 
-## Example
++ ⏱️ **Productivity:** Writing an application should require as few overhead as possible
++ ✨ **Simplicity:** Writing an application should be as easy and straight forward as possible
++ ⚡ **Flexibility:** Anything that's possible to do with GTK4 should be possible in Relm4 as well
++ 🔧 **Maintainability**: The Elm programming model used by Relm4 provides a simple and clear structure for app development
 
-Please have a look at the examples folder. Examples can be run with:
+## Ecosystem
 
-```bash
-cd relm4-examples
-cargo run --example NAME
-```
+Relm4 has two crates that extend the core functionality:
 
-The following examples are available:
++ relm4-macros provides a `widget` macro that simplifies UI creation
++ relm4-component is a collections of reusable components you can easily integrate into your application
 
-+ simple: A simple counter app.
+## Examples
 
-+ components: A simple app that counts up or down and also has two components that hide and show each other. 
-This demonstrates how to use components that can send messages to each other but are fully independent apart from that.
-
-+ tracker: A simple app that can show different widgets and also count up.
-For each update of the UI only the actual changes to the model are considered to minimize UI updates.
-For example counting up by toggling the button will not affect the other widgets and will not trigger a regeneration of the selectable widget.
-
-+ factory and grid_factory: Simple apps that use a factory to create and update widgets. Factories brings the concept of trackers to collections.
-A `FactoryVec` can be modified during the update method just like a normal vector and during the view function the factory will update only the affected widgets.
-To know how to update the widgets the `FactoryPrototype` trait is used to define the functions needed to generate, update and remove widgets.
-
-+ future: A small app that demonstrates how futures can be executed in relm4 by using the surf crate to download HTML from websites.
-Sadly this doesn't work for tokio (async-std and similar are fine though) but you can still spawn a thread that runs your asynchronous code inside a tokio runtime.
-
-+ list: A simple app using `gtk::ListView` to efficiently render large list. It's very close to the example in the [gtk4-rs book](https://gtk-rs.org/gtk4-rs/git/book/lists.html).
-
-+ tokio: An app using the tokio-rt feature and an `AsyncRelmWorker` to efficiently fetch favicons and HTML text from websites.
-Note that by default delays for the HTTP-requests are enabled that makes UI updates better visible.
-To disable the delays comment the two lines starting with `tokio::time::delay`.
-
-+ macro: A simple app with a counter that demonstrates how to use the `relm4-macros::widget` macro.
+Several example applications are available at [relm4-examples/](relm4-examples/).
 
 **Feedback on the design and contributions are highly appreciated!**
