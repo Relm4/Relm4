@@ -13,12 +13,6 @@ pub(super) struct Tracker {
     update_fn: Expr,
 }
 
-/*#[derive(Debug)]
-pub(super) struct Factory {
-    data: Expr,
-    widget_name: Ident,
-}*/
-
 #[derive(Debug)]
 pub(super) enum PropertyType {
     Expr(Expr),
@@ -28,8 +22,6 @@ pub(super) enum PropertyType {
     Args(Args),
     Connect(ExprClosure),
     Watch(TokenStream2),
-    //Iterate(Expr),
-    //IterateWatch(Expr),
     Factory(Expr),
     Widget(Widget),
 }

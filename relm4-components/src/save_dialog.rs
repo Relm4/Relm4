@@ -1,5 +1,5 @@
-use relm4::{impl_model, ComponentUpdate, Model, Sender, send};
-use gtk::prelude::{FileChooserExt, NativeDialogExt, FileExt};
+use gtk::prelude::{FileChooserExt, FileExt, NativeDialogExt};
+use relm4::{send, ComponentUpdate, Model, Sender};
 
 use std::path::PathBuf;
 
@@ -7,6 +7,7 @@ pub struct SaveDialogSettings {
     pub cancel_label: String,
     pub accept_label: String,
     pub create_folders: bool,
+    pub is_modal: bool,
     pub filters: Vec<gtk::FileFilter>,
 }
 
@@ -27,16 +28,28 @@ pub enum SaveDialogMsg {
     Cancel,
 }
 
-impl_model!(SaveDialogModel, SaveDialogMsg);
+impl Model for SaveDialogModel {
+    type Msg = SaveDialogMsg;
+    type Widgets = SaveDialogWidgets;
+    type Components = ();
+}
 
-pub trait SaveDialogParent: Model {
+pub trait SaveDialogParent: Model
+where
+    Self::Widgets: SaveDialogParentWidgets,
+{
     fn dialog_config(&self) -> SaveDialogSettings;
     fn save_msg(path: PathBuf) -> Self::Msg;
+}
+
+pub trait SaveDialogParentWidgets {
+    fn parent_window(&self) -> Option<gtk::Window>;
 }
 
 impl<ParentModel> ComponentUpdate<ParentModel> for SaveDialogModel
 where
     ParentModel: SaveDialogParent,
+    <ParentModel as relm4::Model>::Widgets: SaveDialogParentWidgets,
 {
     fn init_model(parent_model: &ParentModel) -> Self {
         SaveDialogModel {
@@ -78,8 +91,12 @@ where
 }
 
 #[relm4_macros::widget(pub)]
-impl relm4::Widgets for SaveDialogWidgets {
-    type Model = SaveDialogModel;
+impl<ParentModel> relm4::Widgets<SaveDialogModel, ParentModel> for SaveDialogWidgets
+where
+    ParentModel: Model,
+    ParentModel::Widgets: SaveDialogParentWidgets,
+{
+    //type Model = SaveDialogModel;
 
     view! {
         gtk::FileChooserNative {
@@ -90,6 +107,8 @@ impl relm4::Widgets for SaveDialogWidgets {
             set_create_folders: model.settings.create_folders,
             set_cancel_label: Some(&model.settings.cancel_label),
             set_accept_label: Some(&model.settings.accept_label),
+            set_modal: model.settings.is_modal,
+            set_transient_for: parent_widgets.parent_window().as_ref(),
             connect_response => move |dialog, res_ty| {
                 match res_ty {
                     gtk::ResponseType::Accept => {

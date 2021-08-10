@@ -31,13 +31,16 @@ struct AppModel {
     active_widget: WidgetSelection,
 }
 
-impl_model!(AppModel, AppMsg);
+impl Model for AppModel {
+    type Msg = AppMsg;
+    type Widgets = AppWidgets;
+    type Components = ();
+}
 
-impl Widgets for AppWidgets {
+impl Widgets<AppModel, ()> for AppWidgets {
     type Root = gtk::ApplicationWindow;
-    type Model = AppModel;
 
-    fn init_view(model: &AppModel, _components: &(), sender: Sender<AppMsg>) -> Self {
+    fn init_view(model: &AppModel, _parent_widgets: &(), sender: Sender<AppMsg>) -> Self {
         let main = gtk::ApplicationWindowBuilder::new()
             .default_width(300)
             .default_height(200)
@@ -116,7 +119,7 @@ impl Widgets for AppWidgets {
 }
 
 impl AppUpdate for AppModel {
-    fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) {
+    fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) -> bool {
         // reset tracker value of the model
         self.reset();
         // set_#member_name() will set a bit in the tracker variable of the model
@@ -133,6 +136,7 @@ impl AppUpdate for AppModel {
             }
         }
         println!("counter: {}", self.counter);
+        true
     }
 }
 
@@ -142,6 +146,6 @@ fn main() {
         active_widget: WidgetSelection::Label,
         tracker: 0,
     };
-    let relm: RelmApp<AppWidgets> = RelmApp::new(model);
+    let relm = RelmApp::new(model);
     relm.run();
 }

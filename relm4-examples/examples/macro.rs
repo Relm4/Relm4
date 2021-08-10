@@ -1,5 +1,5 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
-use relm4::{impl_model, send, AppUpdate, RelmApp, Sender, WidgetPlus, Widgets};
+use relm4::{send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets};
 
 enum AppMsg {
     Increment,
@@ -11,28 +11,27 @@ struct AppModel {
     counter: u32,
 }
 
-impl_model!(AppModel, AppMsg);
+impl Model for AppModel {
+    type Msg = AppMsg;
+    type Widgets = AppWidgets;
+    type Components = ();
+}
 
 impl AppUpdate for AppModel {
-    fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) {
+    fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) -> bool {
         self.reset();
-        // reset tracker value of the model
-        //self.reset();
-        // set_#member_name() will set a bit in the tracker variable of the model
         match msg {
             AppMsg::Increment => {
                 self.update_counter(|cnt| *cnt += 1);
             }
         }
-        //println!("counter: {}", self.counter);
+        println!("counter: {}", self.counter);
+        true
     }
 }
 
 #[relm4_macros::widget]
-impl Widgets for AppWidgets {
-    // specify generic types
-    type Model = AppModel;
-
+impl Widgets<AppModel, ()> for AppWidgets {
     view! {
       main_window = gtk::ApplicationWindow {
         set_default_height: 400,
@@ -68,6 +67,6 @@ fn main() {
         counter: 0,
         tracker: 0,
     };
-    let relm: RelmApp<AppWidgets> = RelmApp::new(model);
+    let relm = RelmApp::new(model);
     relm.run();
 }

@@ -1,4 +1,4 @@
-use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
+use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, PopoverExt};
 use relm4::{send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets};
 
 #[derive(Default)]
@@ -35,7 +35,7 @@ impl AppUpdate for AppModel {
 impl Widgets<AppModel, ()> for AppWidgets {
     view! {
         gtk::ApplicationWindow {
-            set_title: Some("Simple app"),
+            set_title: Some("Popup example"),
             set_default_width: 300,
             set_default_height: 100,
             set_child = Some(&gtk::Box) {
@@ -43,16 +43,28 @@ impl Widgets<AppModel, ()> for AppWidgets {
                 set_margin_all: 5,
                 set_spacing: 5,
 
-                append = &gtk::Button {
-                    set_label: "Increment",
-                    connect_clicked(sender) => move |_| {
-                        send!(sender, AppMsg::Increment);
-                    },
-                },
-                append = &gtk::Button {
-                    set_label: "Decrement",
-                    connect_clicked(sender) => move |_| {
-                        send!(sender, AppMsg::Decrement);
+                append = &gtk::MenuButton {
+                    set_label: "Pop up!",
+                    set_direction: gtk::ArrowType::Right,
+                    set_popover: popover = Some(&gtk::Popover) {
+                        set_position: gtk::PositionType::Right,
+
+                        set_child = Some(&gtk::Box) {
+                            set_orientation: gtk::Orientation::Vertical,
+                            set_spacing: 5,
+                            append = &gtk::Button {
+                                set_label: "Increment counter",
+                                connect_clicked(sender) => move |_| {
+                                    send!(sender, AppMsg::Increment);
+                                }
+                            },
+                            append = &gtk::Button {
+                                set_label: "Decrement counter",
+                                connect_clicked(sender) => move |_| {
+                                    send!(sender, AppMsg::Decrement);
+                                }
+                            },
+                        },
                     },
                 },
                 append = &gtk::Label {

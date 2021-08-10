@@ -102,11 +102,14 @@ struct AppModel {
     store: gio::ListStore,
 }
 
-impl_model!(AppModel, AppMsg);
+impl Model for AppModel {
+    type Msg = AppMsg;
+    type Widgets = AppWidgets;
+    type Components = ();
+}
 
-impl Widgets for AppWidgets {
+impl Widgets<AppModel, ()> for AppWidgets {
     type Root = gtk::ApplicationWindow;
-    type Model = AppModel;
 
     fn init_view(model: &AppModel, _components: &(), sender: Sender<AppMsg>) -> Self {
         let main = gtk::ApplicationWindowBuilder::new()
@@ -249,7 +252,7 @@ impl Widgets for AppWidgets {
 }
 
 impl AppUpdate for AppModel {
-    fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) {
+    fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) -> bool {
         match msg {
             AppMsg::Add(text) => {
                 let parse_res = text.parse();
@@ -264,6 +267,8 @@ impl AppUpdate for AppModel {
                 }
             }
         }
+
+        true
     }
 }
 
@@ -276,6 +281,6 @@ fn main() {
     }
 
     let model = AppModel { store };
-    let relm: RelmApp<AppWidgets> = RelmApp::new(model);
+    let relm = RelmApp::new(model);
     relm.run();
 }

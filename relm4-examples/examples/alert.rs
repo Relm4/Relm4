@@ -2,11 +2,9 @@ use gtk::prelude::{BoxExt, ButtonExt, Cast, GtkWindowExt, OrientableExt};
 use relm4::{
     send, AppUpdate, Components, Model, RelmApp, RelmComponent, Sender, WidgetPlus, Widgets,
 };
-use relm4_components::save_dialog::{
-    SaveDialogModel, SaveDialogMsg, SaveDialogParent, SaveDialogParentWidgets, SaveDialogSettings,
+use relm4_components::alert::{
+    AlertModel, AlertMsg, AlertParent, AlertParentWidgets, AlertSettings,
 };
-
-use std::path::PathBuf;
 
 #[derive(Default)]
 struct AppModel {
@@ -16,8 +14,10 @@ struct AppModel {
 enum AppMsg {
     Increment,
     Decrement,
-    SaveRequest,
-    SaveResponse(PathBuf),
+    CloseRequest,
+    Save,
+    Close,
+    Ignore,
 }
 
 impl Model for AppModel {
@@ -35,44 +35,60 @@ impl AppUpdate for AppModel {
             AppMsg::Decrement => {
                 self.counter = self.counter.wrapping_sub(1);
             }
-            AppMsg::SaveRequest => {
-                components
-                    .dialog
-                    .send(SaveDialogMsg::SaveAs(format!("Counter_{}", self.counter)))
-                    .unwrap();
+            AppMsg::CloseRequest => {
+                if self.counter == 42 {
+                    return false;
+                } else {
+                    components.dialog.send(AlertMsg::Show).unwrap();
+                }
             }
-            AppMsg::SaveResponse(path) => {
-                println!("File would have been saved at {:?}", path);
+            AppMsg::Save => {
+                println!("* Open save dialog here *");
             }
+            AppMsg::Close => {
+                return false;
+            }
+            AppMsg::Ignore => (),
         }
+
         true
     }
 }
 
-impl SaveDialogParent for AppModel {
-    fn dialog_config(&self) -> SaveDialogSettings {
-        SaveDialogSettings {
-            accept_label: "Open".to_string(),
+impl AlertParent for AppModel {
+    fn alert_config(&self) -> AlertSettings {
+        AlertSettings {
+            text: "Do you want to quit without saving?".to_string(),
+            secondary_text: Some("Your counter hasn't reached 42 yet".to_string()),
+            confirm_label: "Close without saving".to_string(),
             cancel_label: "Cancel".to_string(),
-            create_folders: true,
+            option_label: Some("Save".to_string()),
             is_modal: true,
-            filters: Vec::new(),
+            destructive_accept: true,
         }
     }
 
-    fn save_msg(path: PathBuf) -> Self::Msg {
-        AppMsg::SaveResponse(path)
+    fn confirm_msg() -> Self::Msg {
+        AppMsg::Close
+    }
+
+    fn cancel_msg() -> Self::Msg {
+        AppMsg::Ignore
+    }
+
+    fn option_msg() -> Self::Msg {
+        AppMsg::Save
     }
 }
 
-impl SaveDialogParentWidgets for AppWidgets {
+impl AlertParentWidgets for AppWidgets {
     fn parent_window(&self) -> Option<gtk::Window> {
         Some(self.main_window.clone().upcast::<gtk::Window>())
     }
 }
 
 pub struct AppComponents {
-    dialog: RelmComponent<SaveDialogModel, AppModel>,
+    dialog: RelmComponent<AlertModel, AppModel>,
 }
 
 impl Components<AppModel> for AppComponents {
@@ -94,6 +110,10 @@ impl Widgets<AppModel, ()> for AppWidgets {
             set_title: Some("Simple app"),
             set_default_width: 300,
             set_default_height: 100,
+            connect_close_request(sender) => move |_| {
+                send!(sender, AppMsg::CloseRequest);
+                gtk::Inhibit(true)
+            },
             set_child = Some(&gtk::Box) {
                 set_orientation: gtk::Orientation::Vertical,
                 set_margin_all: 5,
@@ -116,9 +136,9 @@ impl Widgets<AppModel, ()> for AppWidgets {
                     set_label: watch! { &format!("Counter: {}", model.counter) },
                 },
                 append = &gtk::Button {
-                    set_label: "Save",
+                    set_label: "Close",
                     connect_clicked(sender) => move |_| {
-                        send!(sender, AppMsg::SaveRequest);
+                        send!(sender, AppMsg::CloseRequest);
                     },
                 },
             },

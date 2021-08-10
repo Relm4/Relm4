@@ -14,6 +14,7 @@ enum ChangeType {
 }
 
 #[derive(Default)]
+/// A container similar to [`Vec`] that implements [`Factory`].
 pub struct FactoryVec<Data>
 where
     Data: FactoryPrototype,
@@ -27,6 +28,7 @@ impl<Data> FactoryVec<Data>
 where
     Data: FactoryPrototype,
 {
+    /// Create a new [`FactoryVec`].
     pub fn new() -> Self {
         FactoryVec {
             data: Vec::new(),
@@ -35,6 +37,7 @@ where
         }
     }
 
+    /// Insert an element at the end of a [`FactoryVec`].
     pub fn push(&mut self, data: Data) {
         let index = self.data.len();
         self.data.push(data);
@@ -46,6 +49,7 @@ where
         self.changes.borrow_mut().insert(index, change);
     }
 
+    /// Remove an element at the end of a [`FactoryVec`].
     pub fn pop(&mut self) -> Option<Data> {
         let data = self.data.pop();
         if data.is_some() {
@@ -56,6 +60,15 @@ where
         data
     }
 
+    /// Get a reference to data stored at `index`.
+    pub fn get(&self, index: usize) -> &Data {
+        &self.data[index]
+    }
+
+    /// Get a mutable reference to data stored at `index`.
+    ///
+    /// Assumes that the data will be modified and the corresponding widget
+    /// needs to be updated.
     pub fn get_mut(&mut self, index: usize) -> &mut Data {
         let mut changes = self.changes.borrow_mut();
         changes.entry(index).or_insert(ChangeType::Update);

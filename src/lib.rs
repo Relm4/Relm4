@@ -7,14 +7,15 @@
 
 mod app;
 mod component;
-pub mod default_widgets;
 pub mod factory;
 mod traits;
+pub mod util;
 mod worker;
 
 pub use app::RelmApp;
 pub use component::RelmComponent;
 pub use traits::*;
+pub use util::widget_plus::WidgetPlus;
 pub use worker::*;
 
 use fragile::Fragile;
@@ -25,8 +26,16 @@ static APP: OnceCell<Fragile<gtk::Application>> = OnceCell::new();
 pub use gtk::glib::Sender;
 
 #[cfg(feature = "tokio-rt")]
+/// Re-export of [`async_trait::async_trait`]
 pub use async_trait::async_trait;
 
+#[must_use]
+/// Returns the application created by [`RelmApp::new`].
+///
+/// # Panics
+///
+/// This function panics if [`RelmApp::new`] wasn't called before
+/// or this function is not called on the thread that also called [`RelmApp::new`].
 pub fn gtk_application() -> gtk::Application {
     APP.get()
         .expect("The gloabl gtk application hasn't been initialized yet")
@@ -35,6 +44,12 @@ pub fn gtk_application() -> gtk::Application {
         .clone()
 }
 
+/// Sets a custom global stylesheet.
+///
+/// # Panics
+///
+/// This function panics if [`RelmApp::new`] wasn't called before
+/// or this function is not called on the thread that also called [`RelmApp::new`].
 pub fn set_global_css(style_data: &[u8]) {
     let display = gtk::gdk::Display::default().unwrap();
     let provider = gtk::CssProvider::new();
@@ -46,6 +61,14 @@ pub fn set_global_css(style_data: &[u8]) {
     );
 }
 
+/// Sets a custom global stylesheet from a file.
+///
+/// If the file doesn't exist a [`log::error`] message will be emitted.
+///
+/// # Panics
+///
+/// This function panics if [`RelmApp::new`] wasn't called before
+/// or this function is not called on the thread that also called [`RelmApp::new`].
 pub fn set_global_css_from_file<P: AsRef<std::path::Path>>(path: P) {
     match std::fs::read(path) {
         Ok(bytes) => {
@@ -57,26 +80,22 @@ pub fn set_global_css_from_file<P: AsRef<std::path::Path>>(path: P) {
     }
 }
 
+/// Spawns a future on the main thread in the main event loop.
+///
+/// # Panics
+///
+/// This function itself doesn't panic but it might panic if you run futures that
+/// expect the tokio runtime. Use the tokio-rt feature and an `AsyncComponent` for this instead.
 pub fn spawn_future<F: futures_core::future::Future<Output = ()> + Send + 'static>(f: F) {
     gtk::glib::MainContext::ref_thread_default().spawn(f);
 }
 
+/// Send a message with a sender.
+///
+/// The sender is automatically cloned and the [`Result`] is unwrapped.
 #[macro_export]
 macro_rules! send {
     ($sender:ident, $msg:expr) => {
         $sender.clone().send($msg).unwrap()
-    };
-}
-
-#[macro_export]
-macro_rules! impl_model {
-    ($model:ty, $msg:ty, $components:ty) => {
-        impl ::relm4::Model for $model {
-            type Msg = $msg;
-            type Components = $components;
-        }
-    };
-    ($model:ty, $msg:ty) => {
-        impl_model!($model, $msg, ());
     };
 }
