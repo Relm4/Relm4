@@ -15,6 +15,6 @@ categories = ["gui"]
 
 [dependencies]
 gtk = { version = "0.2", package = "gtk4" }
-relm4-macros = { path = "../relm4-macros" }
 relm4 = { path = "../" }
+relm4-macros = { path = "../relm4-macros" }
 tracker = "0.1"
