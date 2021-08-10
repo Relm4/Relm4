@@ -1,8 +1,19 @@
 use gtk::prelude::StyleContextExt;
 
+/// Trait that extends [`gtk::prelude::WidgetExt`].
 pub trait WidgetPlus {
+    /// Set margin at start, end, top and bottom all at once.
     fn set_margin_all(&self, margin: i32);
+
+    /// Add class name to self that can be used inside CSS selectors.
     fn add_class_name(&self, class: &str);
+
+    /// Add inline CSS instructions to a widget.
+    /// ```
+    /// # use relm4::WidgetPlus;
+    /// # gtk::init().unwrap();
+    /// # let widget = gtk::Button::new();
+    /// widget.inline_css(b"border: 1px solid red");
     fn inline_css(&self, style_data: &[u8]);
 }
 

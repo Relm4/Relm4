@@ -1,3 +1,7 @@
+/// Default widget implementation.
+///
+/// This is mainly useful for macros that generate widgets
+/// in order to avoid passing arguments to `new(...)` functions of GTK widgets.
 pub trait DefaultWidget {
     fn default_widget() -> Self;
 }

@@ -5,10 +5,12 @@ use std::sync::mpsc::channel;
 
 use crate::{ComponentUpdate, Components, Model as ModelTrait, Widgets as WidgetsTrait};
 
-/// Component that can be part of the main application or other
-/// components. Components can send each other messages and have their own
-/// widgets, models and message type. They also store the parent message type
-/// to communicate with the parent.
+/// A component that can be part of the main application or other components.
+///
+/// A [`RelmComponent`] has its own widget, model and message type
+/// and can send messages to its parent and its children components.
+///
+/// Multiple [`RelmComponent`]s that have the same parent are usually bundled in a struct that implements [`Components`].
 pub struct RelmComponent<Model, ParentModel>
 where
     Model: ComponentUpdate<ParentModel> + 'static,
@@ -27,8 +29,7 @@ where
     ParentModel: ModelTrait,
     Model: ComponentUpdate<ParentModel> + 'static,
 {
-    /// Create component. Usually you can store Self in the widgets of the parent component.
-    /// The root widget needs to be attached to a GTK container in the parent's `init_view` function.
+    /// Create a new [`RelmComponent`].
     pub fn new(
         parent_model: &ParentModel,
         parent_widgets: &ParentModel::Widgets,
@@ -67,10 +68,15 @@ where
         }
     }
 
+    /// Send a message to this component.
+    /// This can be used by the parent to send messages to this component.
     pub fn send(&self, msg: Model::Msg) -> Result<(), std::sync::mpsc::SendError<Model::Msg>> {
         self.sender.send(msg)
     }
 
+    /// Returns the root widget of this component's widgets.
+    /// Can be used by the parent [`Widgets::connect_components`](fn@crate::Widgets::connect_components) to connect the root widget
+    /// to the parent's widgets.
     pub fn root_widget(&self) -> &<Model::Widgets as WidgetsTrait<Model, ParentModel>>::Root {
         &self.root_widget
     }
@@ -85,6 +91,12 @@ where
     ParentModel: ModelTrait,
     ParentModel::Msg: Send,
 {
+    /// Create a new [`RelmComponent`] that runs the [`ComponentUpdate::update`] function in another thread.
+    ///
+    /// Because GTK4 widgets are neither [`Send`] nor [`Sync`] we must still run the [`Widgets::view`](WidgetsTrait::view) function
+    /// on the main thread.
+    /// Also the model needs to be sent between threads to run the update and view functions.
+    /// So if you look want to send a lot of messages to self using a [`RelmWorker`](crate::RelmWorker) will perform better.
     pub fn with_new_thread(
         parent_model: &ParentModel,
         parent_widgets: &ParentModel::Widgets,
