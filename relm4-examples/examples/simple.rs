@@ -1,5 +1,5 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
-use relm4::{impl_model, send, AppUpdate, RelmApp, Sender, WidgetPlus, Widgets};
+use relm4::{send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets};
 
 #[derive(Default)]
 struct AppModel {
@@ -11,10 +11,14 @@ enum AppMsg {
     Decrement,
 }
 
-impl_model!(AppModel, AppMsg);
+impl Model for AppModel {
+    type Msg = AppMsg;
+    type Widgets = AppWidgets;
+    type Components = ();
+}
 
 impl AppUpdate for AppModel {
-    fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) {
+    fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) -> bool {
         match msg {
             AppMsg::Increment => {
                 self.counter = self.counter.wrapping_add(1);
@@ -23,13 +27,12 @@ impl AppUpdate for AppModel {
                 self.counter = self.counter.wrapping_sub(1);
             }
         }
+        true
     }
 }
 
 #[relm4_macros::widget]
-impl Widgets for AppWidgets {
-    type Model = AppModel;
-
+impl Widgets<AppModel, ()> for AppWidgets {
     view! {
         gtk::ApplicationWindow {
             set_title: Some("Simple app"),
@@ -42,13 +45,13 @@ impl Widgets for AppWidgets {
 
                 append = &gtk::Button {
                     set_label: "Increment",
-                    connect_clicked => move |_| {
+                    connect_clicked(sender) => move |_| {
                         send!(sender, AppMsg::Increment);
                     },
                 },
                 append = &gtk::Button {
                     set_label: "Decrement",
-                    connect_clicked => move |_| {
+                    connect_clicked(sender) => move |_| {
                         send!(sender, AppMsg::Decrement);
                     },
                 },
@@ -63,6 +66,6 @@ impl Widgets for AppWidgets {
 
 fn main() {
     let model = AppModel::default();
-    let app: RelmApp<AppWidgets> = RelmApp::new(model);
+    let app = RelmApp::new(model);
     app.run();
 }

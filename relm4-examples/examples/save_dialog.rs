@@ -1,29 +1,33 @@
-use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
+use gtk::prelude::{BoxExt, ButtonExt, Cast, GtkWindowExt, OrientableExt};
 use relm4::{
-    impl_model, send, AppUpdate, Components, RelmApp, RelmComponent, Sender, WidgetPlus, Widgets,
+    send, AppUpdate, Components, Model, RelmApp, RelmComponent, Sender, WidgetPlus, Widgets,
 };
 use relm4_components::save_dialog::{
-    SaveDialogMsg, SaveDialogParent, SaveDialogSettings, SaveDialogWidgets,
+    SaveDialogModel, SaveDialogMsg, SaveDialogParent, SaveDialogParentWidgets, SaveDialogSettings,
 };
 
 use std::path::PathBuf;
 
 #[derive(Default)]
-pub struct AppModel {
+struct AppModel {
     counter: u8,
 }
 
-pub enum AppMsg {
+enum AppMsg {
     Increment,
     Decrement,
     SaveRequest,
     SaveResponse(PathBuf),
 }
 
-impl_model!(AppModel, AppMsg, AppComponents);
+impl Model for AppModel {
+    type Msg = AppMsg;
+    type Widgets = AppWidgets;
+    type Components = AppComponents;
+}
 
 impl AppUpdate for AppModel {
-    fn update(&mut self, msg: AppMsg, components: &AppComponents, _sender: Sender<AppMsg>) {
+    fn update(&mut self, msg: AppMsg, components: &AppComponents, _sender: Sender<AppMsg>) -> bool {
         match msg {
             AppMsg::Increment => {
                 self.counter = self.counter.wrapping_add(1);
@@ -41,6 +45,7 @@ impl AppUpdate for AppModel {
                 println!("File would have been saved at {:?}", path);
             }
         }
+        true
     }
 }
 
@@ -50,6 +55,7 @@ impl SaveDialogParent for AppModel {
             accept_label: "Open".to_string(),
             cancel_label: "Cancel".to_string(),
             create_folders: true,
+            is_modal: true,
             filters: Vec::new(),
         }
     }
@@ -59,24 +65,32 @@ impl SaveDialogParent for AppModel {
     }
 }
 
+impl SaveDialogParentWidgets for AppWidgets {
+    fn parent_window(&self) -> Option<gtk::Window> {
+        Some(self.main_window.clone().upcast::<gtk::Window>())
+    }
+}
+
 pub struct AppComponents {
-    dialog: RelmComponent<SaveDialogWidgets, AppModel>,
+    dialog: RelmComponent<SaveDialogModel, AppModel>,
 }
 
 impl Components<AppModel> for AppComponents {
-    fn init_components(model: &AppModel, sender: Sender<AppMsg>) -> Self {
+    fn init_components(
+        model: &AppModel,
+        parent_widgets: &AppWidgets,
+        sender: Sender<AppMsg>,
+    ) -> Self {
         AppComponents {
-            dialog: RelmComponent::new(model, sender),
+            dialog: RelmComponent::new(model, parent_widgets, sender),
         }
     }
 }
 
 #[relm4_macros::widget]
-impl Widgets for AppWidgets {
-    type Model = AppModel;
-
+impl Widgets<AppModel, ()> for AppWidgets {
     view! {
-        gtk::ApplicationWindow {
+        main_window = gtk::ApplicationWindow {
             set_title: Some("Simple app"),
             set_default_width: 300,
             set_default_height: 100,
@@ -87,13 +101,13 @@ impl Widgets for AppWidgets {
 
                 append = &gtk::Button {
                     set_label: "Increment",
-                    connect_clicked => move |_| {
+                    connect_clicked(sender) => move |_| {
                         send!(sender, AppMsg::Increment);
                     },
                 },
                 append = &gtk::Button {
                     set_label: "Decrement",
-                    connect_clicked => move |_| {
+                    connect_clicked(sender) => move |_| {
                         send!(sender, AppMsg::Decrement);
                     },
                 },
@@ -103,7 +117,7 @@ impl Widgets for AppWidgets {
                 },
                 append = &gtk::Button {
                     set_label: "Save",
-                    connect_clicked => move |_| {
+                    connect_clicked(sender) => move |_| {
                         send!(sender, AppMsg::SaveRequest);
                     },
                 },
@@ -114,6 +128,6 @@ impl Widgets for AppWidgets {
 
 fn main() {
     let model = AppModel::default();
-    let app: RelmApp<AppWidgets> = RelmApp::new(model);
+    let app = RelmApp::new(model);
     app.run();
 }

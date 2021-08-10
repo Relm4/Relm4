@@ -24,11 +24,14 @@ struct AppModel {
     counter: u8,
 }
 
-impl_model!(AppModel, AppMsg);
+impl Model for AppModel {
+    type Msg = AppMsg;
+    type Widgets = AppWidgets;
+    type Components = ();
+}
 
-impl Widgets for AppWidgets {
+impl Widgets<AppModel, ()> for AppWidgets {
     type Root = gtk::ApplicationWindow;
-    type Model = AppModel;
 
     fn init_view(_model: &AppModel, _components: &(), sender: Sender<AppMsg>) -> Self {
         let main = gtk::ApplicationWindowBuilder::new()
@@ -84,7 +87,7 @@ impl Widgets for AppWidgets {
 }
 
 impl AppUpdate for AppModel {
-    fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) {
+    fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) -> bool {
         match msg {
             AppMsg::Add => {
                 self.data.push(Data {
@@ -100,6 +103,7 @@ impl AppUpdate for AppModel {
                 data.counter = data.counter.wrapping_sub(1);
             }
         }
+        true
     }
 }
 
@@ -134,6 +138,6 @@ fn main() {
         counter: 0,
     };
 
-    let relm: RelmApp<AppWidgets> = RelmApp::new(model);
+    let relm = RelmApp::new(model);
     relm.run();
 }

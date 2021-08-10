@@ -19,8 +19,17 @@ struct Comp2Model {
     hidden: bool,
 }
 
-impl_model!(Comp1Model, CompMsg);
-impl_model!(Comp2Model, CompMsg);
+impl Model for Comp1Model {
+    type Msg = CompMsg;
+    type Widgets = Comp1Widgets;
+    type Components = ();
+}
+
+impl Model for Comp2Model {
+    type Msg = CompMsg;
+    type Widgets = Comp2Widgets;
+    type Components = ();
+}
 
 #[derive(PartialEq)]
 enum CompMsg {
@@ -28,11 +37,10 @@ enum CompMsg {
     Show,
 }
 
-impl Widgets for Comp1Widgets {
+impl Widgets<Comp1Model, AppModel> for Comp1Widgets {
     type Root = gtk::Button;
-    type Model = Comp1Model;
 
-    fn init_view(model: &Comp1Model, _component: &(), sender: Sender<CompMsg>) -> Self {
+    fn init_view(model: &Comp1Model, _parent_widget: &AppWidgets, sender: Sender<CompMsg>) -> Self {
         // Initialize gtk widgets
         let button = gtk::Button::with_label("First Component");
         button.set_visible(!model.hidden);
@@ -53,11 +61,14 @@ impl Widgets for Comp1Widgets {
     }
 }
 
-impl Widgets for Comp2Widgets {
+impl Widgets<Comp2Model, AppModel> for Comp2Widgets {
     type Root = gtk::Button;
-    type Model = Comp2Model;
 
-    fn init_view(model: &Comp2Model, _component: &(), sender: Sender<CompMsg>) -> Self {
+    fn init_view(
+        model: &Comp2Model,
+        _parent_widgets: &AppWidgets,
+        sender: Sender<CompMsg>,
+    ) -> Self {
         let button = gtk::Button::with_label("Second Component");
         button.set_visible(!model.hidden);
 
@@ -126,17 +137,24 @@ impl ComponentUpdate<AppModel> for Comp2Model {
     }
 }
 
-// The main app
 struct AppComponents {
-    comp1: RelmComponent<Comp1Widgets, AppModel>,
-    comp2: RelmComponent<Comp2Widgets, AppModel>,
+    comp1: RelmComponent<Comp1Model, AppModel>,
+    comp2: RelmComponent<Comp2Model, AppModel>,
 }
 
 impl Components<AppModel> for AppComponents {
-    fn init_components(parent_model: &AppModel, parent_sender: Sender<AppMsg>) -> Self {
+    fn init_components(
+        parent_model: &AppModel,
+        parent_widgets: &AppWidgets,
+        parent_sender: Sender<AppMsg>,
+    ) -> Self {
         AppComponents {
-            comp1: RelmComponent::with_new_thread(parent_model, parent_sender.clone()),
-            comp2: RelmComponent::new(parent_model, parent_sender),
+            comp1: RelmComponent::with_new_thread(
+                parent_model,
+                parent_widgets,
+                parent_sender.clone(),
+            ),
+            comp2: RelmComponent::new(parent_model, parent_widgets, parent_sender),
         }
     }
 }
@@ -144,6 +162,7 @@ impl Components<AppModel> for AppComponents {
 struct AppWidgets {
     main: gtk::ApplicationWindow,
     text: gtk::Label,
+    vbox: gtk::Box,
 }
 
 enum AppMsg {
@@ -157,13 +176,16 @@ struct AppModel {
     counter: u8,
 }
 
-impl_model!(AppModel, AppMsg, AppComponents);
+impl Model for AppModel {
+    type Msg = AppMsg;
+    type Widgets = AppWidgets;
+    type Components = AppComponents;
+}
 
-impl Widgets for AppWidgets {
+impl Widgets<AppModel, ()> for AppWidgets {
     type Root = gtk::ApplicationWindow;
-    type Model = AppModel;
 
-    fn init_view(model: &AppModel, components: &AppComponents, sender: Sender<AppMsg>) -> Self {
+    fn init_view(model: &AppModel, _parent_widgets: &(), sender: Sender<AppMsg>) -> Self {
         let main = gtk::ApplicationWindowBuilder::new().build();
         let vbox = gtk::BoxBuilder::new()
             .orientation(gtk::Orientation::Vertical)
@@ -180,9 +202,6 @@ impl Widgets for AppWidgets {
         vbox.append(&inc_button);
         vbox.append(&dec_button);
 
-        vbox.append(components.comp1.root_widget());
-        vbox.append(components.comp2.root_widget());
-
         main.set_child(Some(&vbox));
 
         let sender2 = sender.clone();
@@ -195,7 +214,12 @@ impl Widgets for AppWidgets {
             sender2.send(AppMsg::Decrement).unwrap();
         });
 
-        AppWidgets { main, text }
+        AppWidgets { main, text, vbox }
+    }
+
+    fn connect_components(&self, components: &AppComponents) {
+        self.vbox.append(components.comp1.root_widget());
+        self.vbox.append(components.comp2.root_widget());
     }
 
     fn view(&mut self, model: &AppModel, _sender: Sender<AppMsg>) {
@@ -208,7 +232,7 @@ impl Widgets for AppWidgets {
 }
 
 impl AppUpdate for AppModel {
-    fn update(&mut self, msg: AppMsg, components: &AppComponents, _sender: Sender<AppMsg>) {
+    fn update(&mut self, msg: AppMsg, components: &AppComponents, _sender: Sender<AppMsg>) -> bool {
         match msg {
             AppMsg::Increment => self.counter = self.counter.saturating_add(1),
             AppMsg::Decrement => self.counter = self.counter.saturating_sub(1),
@@ -220,11 +244,12 @@ impl AppUpdate for AppModel {
             }
         }
         println!("counter: {}", self.counter);
+        true
     }
 }
 
 fn main() {
     let model = AppModel { counter: 0 };
-    let relm: RelmApp<AppWidgets> = RelmApp::new(model);
+    let relm = RelmApp::new(model);
     relm.run();
 }

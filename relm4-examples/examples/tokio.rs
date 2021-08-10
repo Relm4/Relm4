@@ -6,18 +6,22 @@ use gtk::prelude::{
 use relm4::Sender;
 use relm4::*;
 
-struct HttpWorker {}
+struct HttpModel {}
 
-impl_model!(HttpWorker, HttpMsg);
+impl Model for HttpModel {
+    type Msg = HttpMsg;
+    type Widgets = ();
+    type Components = ();
+}
 
 enum HttpMsg {
     Request(String),
 }
 
 #[relm4::async_trait]
-impl AsyncComponentUpdate<AppModel> for HttpWorker {
+impl AsyncComponentUpdate<AppModel> for HttpModel {
     fn init_model(_parent_model: &AppModel) -> Self {
-        HttpWorker {}
+        HttpModel {}
     }
 
     async fn update(
@@ -62,11 +66,15 @@ impl AsyncComponentUpdate<AppModel> for HttpWorker {
 }
 
 struct AppComponents {
-    http: AsyncRelmWorker<HttpWorker, AppModel>,
+    http: AsyncRelmWorker<HttpModel, AppModel>,
 }
 
 impl Components<AppModel> for AppComponents {
-    fn init_components(parent_model: &AppModel, parent_sender: Sender<AppMsg>) -> Self {
+    fn init_components(
+        parent_model: &AppModel,
+        _parent_widgets: &AppWidgets,
+        parent_sender: Sender<AppMsg>,
+    ) -> Self {
         AppComponents {
             http: AsyncRelmWorker::with_new_tokio_rt(parent_model, parent_sender),
         }
@@ -97,13 +105,16 @@ struct AppModel {
     image_waiting: bool,
 }
 
-impl_model!(AppModel, AppMsg, AppComponents);
+impl Model for AppModel {
+    type Msg = AppMsg;
+    type Widgets = AppWidgets;
+    type Components = AppComponents;
+}
 
-impl Widgets for AppWidgets {
+impl Widgets<AppModel, ()> for AppWidgets {
     type Root = gtk::ApplicationWindow;
-    type Model = AppModel;
 
-    fn init_view(model: &AppModel, _components: &AppComponents, sender: Sender<AppMsg>) -> Self {
+    fn init_view(model: &AppModel, _parent_widgets: &(), sender: Sender<AppMsg>) -> Self {
         let main = gtk::ApplicationWindowBuilder::new()
             .default_width(300)
             .default_height(200)
@@ -211,7 +222,7 @@ impl Widgets for AppWidgets {
 }
 
 impl AppUpdate for AppModel {
-    fn update(&mut self, msg: AppMsg, components: &AppComponents, _sender: Sender<AppMsg>) {
+    fn update(&mut self, msg: AppMsg, components: &AppComponents, _sender: Sender<AppMsg>) -> bool {
         self.reset();
 
         match msg {
@@ -238,6 +249,7 @@ impl AppUpdate for AppModel {
                 }
             }
         }
+        true
     }
 }
 
@@ -249,6 +261,6 @@ fn main() {
         image_waiting: false,
         tracker: 0,
     };
-    let relm: RelmApp<AppWidgets> = RelmApp::new(model);
+    let relm = RelmApp::new(model);
     relm.run();
 }
