@@ -4,10 +4,16 @@
 
 [![CI](https://github.com/AaronErhardt/relm4/actions/workflows/rust.yml/badge.svg)](https://github.com/AaronErhardt/relm4/actions/workflows/rust.yml)
 [![Matrix](https://img.shields.io/matrix/relm4:matrix.org?label=matrix%20chat)](https://matrix.to/#/#relm4:matrix.org)
+[![Relm4 on crates.io](https://img.shields.io/crates/v/relm4.svg)](https://crates.io/crates/relm4)
+[![Relm4 on docs.rs](https://docs.rs/relm4/badge.svg)](https://docs.rs/relm4)
 ![Miminum Rust version 1.53](https://img.shields.io/badge/rustc-1.53+-red.svg)
 
 An idiomatic GUI library inspired by [Elm](https://elm-lang.org/) and based on [gtk4-rs](https://crates.io/crates/gtk4). 
 Relm4 is a new version of [relm](https://github.com/antoyo/relm) that's built from scratch and is compatible with [GTK4](https://www.gtk.org/).
+
+## Dependencies
+
+Relm4 only depends on GTK4: [How to install GTK4](https://www.gtk.org/docs/installations/)
 
 ## Goals
 
