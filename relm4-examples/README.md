@@ -10,7 +10,7 @@ If you're not already in the examples directory run:
 cd relm4-examples
 ```
 
-Execute examples by running
+Execute examples by running:
 
 ```bash
 cargo run --example NAME
@@ -41,3 +41,9 @@ Note that by default delays for the HTTP-requests are enabled that makes UI upda
 To disable the delays comment the two lines starting with `tokio::time::delay`.
 
 + macro: A simple app with a counter that demonstrates how to use the `relm4-macros::widget` macro.
+
++ save_dialog: A simple app that uses the save dialog provided by relm4-components.
+
++ alert: A simple app that uses the alert provided by relm4-components.
+
++ popover: A simple app that uses a popover.
