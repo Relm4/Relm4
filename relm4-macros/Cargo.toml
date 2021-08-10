@@ -7,6 +7,7 @@ description = "An idiomatic GUI library inspired by Elm and based on gtk4-rs"
 repository = "https://github.com/AaronErhardt/relm4"
 readme = "README.md"
 license = "LGPL-3.0-or-later"
+documentation = "https://aaronerhardt.github.io/docs/relm4-macros/relm4_macros/"
 
 keywords = ["gui", "gtk", "gtk4"]
 categories = ["gui"]
@@ -19,3 +20,7 @@ proc-macro = true
 proc-macro2 = "1.0"
 quote = "1.0"
 syn = { version = "1.0", features = ["full", "extra-traits"] }
+
+[dev-dependencies]
+relm4 = { path = ".." }
+gtk = { version = "0.2", package = "gtk4" }
