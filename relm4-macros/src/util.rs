@@ -1,11 +1,7 @@
 use proc_macro::Span;
-use syn::{
-    spanned::Spanned,
-    token::{Bang, For},
-    Error, Ident, Path, Result,
-};
+use syn::Ident;
 
-pub(super) fn trait_to_path(
+/*pub(super) fn trait_to_path(
     type_span: Span,
     trait_: Option<(Option<Bang>, Path, For)>,
 ) -> Result<Path> {
@@ -32,7 +28,7 @@ pub(super) fn trait_to_path(
             "No trait specified. Expected Widgets.",
         ))
     }
-}
+}*/
 
 pub(super) fn idents_to_snake_case(idents: &[Ident]) -> Ident {
     use std::sync::atomic::{AtomicU16, Ordering};

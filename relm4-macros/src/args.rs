@@ -9,7 +9,7 @@ use syn::{
 
 #[derive(Debug)]
 pub struct Args {
-    exprs: Vec<Expr>,
+    pub exprs: Vec<Expr>,
 }
 
 impl Parse for Args {

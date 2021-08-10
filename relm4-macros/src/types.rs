@@ -1,34 +1,32 @@
-use proc_macro::Span;
-use syn::{Error, ImplItem, Result, Type};
+use syn::{spanned::Spanned, AngleBracketedGenericArguments, Error, GenericArgument, Result, Type};
 
-const MODEL_IDENT: &str = "Model";
+//const MODEL_IDENT: &str = "Model";
+const GENERICS_ERROR: &str = "Expected at least two generic types for Model and ParentModel";
 
 #[derive(Debug)]
-pub(super) struct ModelType {
+pub(super) struct ModelTypes {
     pub model: Type,
+    pub parent_model: Type,
 }
 
-impl ModelType {
-    pub fn new(span: Span, items: &[ImplItem]) -> Result<Self> {
-        let mut model = None;
-
-        for item in items {
-            if let ImplItem::Type(ty) = item {
-                let ident = &ty.ident;
-                if ident == MODEL_IDENT {
-                    model = Some(ty.ty.clone());
-                } else {
-                    return Err(Error::new(
-                        ident.span().unwrap().into(),
-                        format!("Unknown type identifier {:?}", ident),
-                    ));
-                }
+impl ModelTypes {
+    pub fn new(generics: &AngleBracketedGenericArguments) -> Result<Self> {
+        let mut indent_iter = generics.args.clone().into_pairs().filter_map(|pair| {
+            let generic = pair.into_value();
+            if let GenericArgument::Type(ty) = generic {
+                Some(ty)
+            } else {
+                None
             }
-        }
+        });
 
-        Ok(ModelType {
-            model: model
-                .ok_or_else(|| Error::new(span.into(), "Type Model needs to be defined"))?,
+        Ok(ModelTypes {
+            model: indent_iter
+                .next()
+                .ok_or_else(|| Error::new(generics.span(), GENERICS_ERROR))?,
+            parent_model: indent_iter
+                .next()
+                .ok_or_else(|| Error::new(generics.span(), GENERICS_ERROR))?,
         })
     }
 }

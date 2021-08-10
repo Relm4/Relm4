@@ -23,32 +23,26 @@ impl Tracker {
 impl PropertyType {
     fn init_assign_tokens(&self) -> Option<TokenStream2> {
         match self {
-            PropertyType::Expr(expr) => Some(quote! { #expr }),
-            PropertyType::Value(lit) => Some(quote! { #lit }),
+            PropertyType::Expr(expr) => Some(expr.to_token_stream()),
+            PropertyType::Value(lit) => Some(lit.to_token_stream()),
             PropertyType::Widget(widget) => Some(widget.widget_assignment()),
-            PropertyType::Watch(tokens) => Some(quote! { #tokens }),
+            PropertyType::Watch(tokens) => Some(tokens.to_token_stream()),
             PropertyType::Args(args) => Some(args.to_token_stream()),
-            PropertyType::Track(Tracker { update_fn, .. }) => Some(quote! { #update_fn }),
-            PropertyType::Component(expr) => Some(quote! { #expr.root_widget()}),
+            PropertyType::Track(Tracker { update_fn, .. }) => Some(update_fn.to_token_stream()),
             _ => None,
         }
     }
 
     fn view_assign_tokens(&self) -> Option<TokenStream2> {
         match self {
-            PropertyType::Watch(token_stream) => Some(quote! { #token_stream }),
+            PropertyType::Watch(token_stream) => Some(token_stream.clone()),
             _ => None,
         }
     }
 
     fn connect_assign_tokens(&self) -> Option<TokenStream2> {
         if let PropertyType::Connect(closure) = self {
-            Some(quote_spanned! { closure.span() => {
-                #[allow(dead_code)]
-                #[allow(clippy::redundant_clone)]
-                let sender = sender.clone();
-                #closure
-            }})
+            Some(closure.to_token_stream())
         } else {
             None
         }
@@ -57,7 +51,7 @@ impl PropertyType {
     fn track_tokens(&self) -> Option<(TokenStream2, TokenStream2)> {
         if let PropertyType::Track(tracker) = self {
             let update_fn = &tracker.update_fn;
-            let update_stream = quote_spanned! { update_fn.span() => #update_fn };
+            let update_stream = update_fn.to_token_stream();
             let bool_stream = tracker.bool_eqation_tokens();
             Some((bool_stream, update_stream))
         } else {
@@ -67,9 +61,15 @@ impl PropertyType {
 
     fn factory_expr(&self) -> Option<TokenStream2> {
         if let PropertyType::Factory(expr) = self {
-            Some(quote! {
-                #expr
-            })
+            Some(expr.to_token_stream())
+        } else {
+            None
+        }
+    }
+
+    fn component_tokens(&self) -> Option<TokenStream2> {
+        if let PropertyType::Component(expr) = self {
+            Some(quote_spanned! { expr.span() => #expr.root_widget() })
         } else {
             None
         }
@@ -129,7 +129,7 @@ impl WidgetFunc {
             tokens
         } else {
             quote! {
-                <#tokens as relm4::default_widgets::DefaultWidget>::default_widget()
+                <#tokens as relm4::util::default_widgets::DefaultWidget>::default_widget()
             }
         }
     }
@@ -269,8 +269,22 @@ impl Widget {
             if let Some(p_assign) = p_assign_opt {
                 let p_name = &prop.name;
                 let p_span = p_name.span().unwrap().into();
+
+                let mut clone_stream = TokenStream2::new();
+                if let Some(args) = &prop.args {
+                    for arg in &args.exprs {
+                        clone_stream.extend(quote_spanned! { arg.span() =>
+                            #[allow(clippy::redundant_clone)]
+                            let #arg = #arg.clone();
+                        });
+                    }
+                }
+
                 stream.extend(quote_spanned! {
-                    p_span => #w_name.#p_name(#p_assign);
+                    p_span => {
+                        #clone_stream
+                        #w_name.#p_name(#p_assign);
+                    }
                 });
             }
         }
@@ -291,6 +305,24 @@ impl Widget {
                     p_span =>  if #bool_stream {
                         self.#w_name.#p_name(#update_stream);
                 }});
+            }
+        }
+        stream
+    }
+
+    pub fn component_stream(&self) -> TokenStream2 {
+        let w_name = &self.name;
+        let mut stream = TokenStream2::new();
+
+        for prop in &self.properties.properties {
+            let p_assign_opt = prop.ty.component_tokens();
+            if let Some(component_tokens) = p_assign_opt {
+                let p_name = &prop.name;
+                let p_span = p_name.span().unwrap().into();
+                stream.extend(quote_spanned! {
+                    p_span =>
+                        self.#w_name.#p_name(#component_tokens);
+                });
             }
         }
         stream
