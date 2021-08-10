@@ -1,13 +1,22 @@
+//! Reusable and easily configurable save dialog component.
+//!
+//! **[Example implementation](https://github.com/AaronErhardt/relm4/blob/main/relm4-examples/examples/save_dialog.rs)**
+
 use gtk::prelude::{FileChooserExt, FileExt, NativeDialogExt};
 use relm4::{send, ComponentUpdate, Model, Sender};
 
 use std::path::PathBuf;
 
 pub struct SaveDialogSettings {
+    /// Label for cancel button
     pub cancel_label: String,
+    /// Label for accept button
     pub accept_label: String,
+    /// Allow or disallow creating folders
     pub create_folders: bool,
+    /// Modal dialogs freeze other windows as long they are visible
     pub is_modal: bool,
+    /// Filter for MINE types or other patterns
     pub filters: Vec<gtk::FileFilter>,
 }
 
@@ -21,10 +30,15 @@ pub struct SaveDialogModel {
 }
 
 pub enum SaveDialogMsg {
+    /// Opens the dialog
     Save,
+    /// Opens the dialog with a suggested file name
     SaveAs(String),
+    #[doc(hidden)]
     Accept(PathBuf),
+    #[doc(hidden)]
     InvalidInput,
+    #[doc(hidden)]
     Cancel,
 }
 
@@ -34,14 +48,20 @@ impl Model for SaveDialogModel {
     type Components = ();
 }
 
+/// Interface for the parent model
 pub trait SaveDialogParent: Model
 where
     Self::Widgets: SaveDialogParentWidgets,
 {
+    /// Configure the save dialog
     fn dialog_config(&self) -> SaveDialogSettings;
+
+    /// Tell the save dialog how to response if the user wants to save
     fn save_msg(path: PathBuf) -> Self::Msg;
 }
 
+/// Get the parent window that allows setting the parent window of the dialog with
+/// [`gtk::prelude::GtkWindowExt::set_transient_for`].
 pub trait SaveDialogParentWidgets {
     fn parent_window(&self) -> Option<gtk::Window>;
 }
