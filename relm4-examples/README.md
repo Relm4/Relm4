@@ -20,6 +20,8 @@ cargo run --example NAME
 
 + simple: A simple counter app.
 
++ simple_manual: A simple counter app that doesn't use relm4-macros.
+
 + components: A simple app that counts up or down and also has two components that hide and show each other. 
 This demonstrates how to use components that can send messages to each other but are fully independent apart from that.
 
