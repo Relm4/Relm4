@@ -70,7 +70,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
             send!(btn_sender, AppMsg::Increment);
         });
 
-        let btn_sender = sender.clone();
+        let btn_sender = sender;
         dec_button.connect_clicked(move |_| {
             send!(btn_sender, AppMsg::Decrement);
         });
@@ -94,9 +94,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
 }
 
 fn main() {
-    let model = AppModel {
-        counter: 0,
-    };
+    let model = AppModel { counter: 0 };
     let app = RelmApp::new(model);
     app.run();
 }

@@ -21,6 +21,6 @@ tracker = "0.1"
 surf = "2.2"
 tokio = { version = "1.9", features = ["rt", "macros", "time"] }
 
-relm4 = { path = "..", features = ["tokio-rt"] }
-relm4-macros = { path = "../relm4-macros" }
-relm4-components = { path = "../relm4-components" }
+relm4 = { version = "0.1.0-beta.2", features = ["tokio-rt"] }
+relm4-macros = "0.1.0-beta.2"
+relm4-components = "0.1.0-beta.2"
