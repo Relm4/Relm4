@@ -272,7 +272,7 @@ impl Widget {
 
                 let mut clone_stream = TokenStream2::new();
                 if let Some(args) = &prop.args {
-                    for arg in &args.exprs {
+                    for arg in &args.inner {
                         clone_stream.extend(quote_spanned! { arg.span() =>
                             #[allow(clippy::redundant_clone)]
                             let #arg = #arg.clone();

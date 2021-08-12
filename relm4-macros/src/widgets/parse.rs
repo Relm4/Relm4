@@ -33,16 +33,6 @@ impl Parse for Tracker {
     }
 }
 
-/*impl Parse for Factory {
-    fn parse(input: ParseStream) -> Result<Self> {
-        let data = input.parse()?;
-        let _comma: Token![,] = input.parse()?;
-        let widget_name = input.parse()?;
-
-        Ok(Factory { data, widget_name })
-    }
-}*/
-
 impl Parse for Property {
     fn parse(input: ParseStream) -> Result<Self> {
         let name: Ident = input.parse()?;
