@@ -38,6 +38,7 @@ Relm4 has two crates that extend the core functionality:
 Add this to your `Cargo.toml`:
 
 ```toml
+gtk = { version = "0.2", package = "gtk4" }
 relm4 = "0.1.0-beta.2"
 relm4-macros = "0.1.0-beta.2"
 relm4-components = "0.1.0-beta.2"
