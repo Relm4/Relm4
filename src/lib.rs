@@ -7,6 +7,7 @@
 
 mod app;
 mod component;
+pub mod drawing;
 pub mod factory;
 mod traits;
 pub mod util;
