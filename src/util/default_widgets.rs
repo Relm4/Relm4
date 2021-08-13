@@ -22,6 +22,14 @@ macro_rules! impl_default_widgets {
     };
 }
 
+#[cfg(feature = "linux")]
+impl_default_widgets![
+    gtk::PageSetupUnixDialog,
+    gtk::PrintJob,
+    gtk::PrintUnixDialog,
+    gtk::Printer
+];
+
 impl_default_widgets![
     gtk::AboutDialog,
     gtk::ActionBar,
@@ -129,17 +137,13 @@ impl_default_widgets![
     gtk::Overlay,
     gtk::OverlayLayoutChild,
     gtk::PadController,
-    gtk::PageSetupUnixDialog,
     gtk::Paned,
     gtk::PasswordEntry,
     gtk::Picture,
     gtk::Popover,
     gtk::PopoverMenu,
     gtk::PopoverMenuBar,
-    gtk::PrintJob,
     gtk::PrintOperation,
-    gtk::PrintUnixDialog,
-    gtk::Printer,
     gtk::ProgressBar,
     gtk::Revealer,
     gtk::Scale,

@@ -24,4 +24,6 @@ tokio = { version = "1.9", optional = true, features = ["rt"] }
 
 [features]
 default = []
+linux = []
 tokio-rt = ["tokio", "async-trait"]
+all = ["linux", "tokio-rt"]
