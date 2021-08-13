@@ -16,6 +16,7 @@ enum AppMsg {
     ShowSlider,
 }
 
+#[derive(PartialEq)]
 enum WidgetSelection {
     Label,
     Button,
@@ -23,11 +24,10 @@ enum WidgetSelection {
 }
 
 // The proc macro allows to easily track changes to different
-// members of the model
+// fields of the model
 #[tracker::track]
 struct AppModel {
     counter: u8,
-    #[no_eq]
     active_widget: WidgetSelection,
 }
 
@@ -52,9 +52,6 @@ impl Widgets<AppModel, ()> for AppWidgets {
             .margin_start(5)
             .margin_bottom(5)
             .build();
-
-        //main.inline_css(b"border: 1px solid white;");
-        //set_global_css(b"box { margin: 0.5rem; }");
 
         let options = vec!["label", "button", "slider"];
         let list = StringList::new(&options);

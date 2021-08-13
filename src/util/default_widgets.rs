@@ -1,3 +1,6 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 /// Default widget implementation.
 ///
 /// This is mainly useful for macros that generate widgets
@@ -21,6 +24,14 @@ macro_rules! impl_default_widgets {
         $(impl_default_widget!($name);)+
     };
 }
+
+#[cfg(feature = "linux")]
+impl_default_widgets![
+    gtk::PageSetupUnixDialog,
+    gtk::PrintJob,
+    gtk::PrintUnixDialog,
+    gtk::Printer
+];
 
 impl_default_widgets![
     gtk::AboutDialog,
@@ -129,17 +140,13 @@ impl_default_widgets![
     gtk::Overlay,
     gtk::OverlayLayoutChild,
     gtk::PadController,
-    gtk::PageSetupUnixDialog,
     gtk::Paned,
     gtk::PasswordEntry,
     gtk::Picture,
     gtk::Popover,
     gtk::PopoverMenu,
     gtk::PopoverMenuBar,
-    gtk::PrintJob,
     gtk::PrintOperation,
-    gtk::PrintUnixDialog,
-    gtk::Printer,
     gtk::ProgressBar,
     gtk::Revealer,
     gtk::Scale,
