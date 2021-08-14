@@ -1,6 +1,3 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 //! Reusable and easily configurable alert component.
 //!
 //! **[Example implementation](https://github.com/AaronErhardt/relm4/blob/main/relm4-examples/examples/alert.rs)**
@@ -127,7 +124,8 @@ where
             add_button: args!(&model.settings.cancel_label, gtk::ResponseType::Cancel),
         }
     }
-    manual_init! {
+
+    fn post_init() {
         if let Some(option_label) = &model.settings.option_label {
             dialog.add_button(option_label, gtk::ResponseType::Other(0));
         }

@@ -81,13 +81,12 @@ impl Components<AppModel> for AppComponents {
     }
 }
 
-struct AppWidgets {
-    main: gtk::ApplicationWindow,
-    image: gtk::Image,
-    image_spinner: gtk::Spinner,
-    text: gtk::TextView,
-    text_window: gtk::ScrolledWindow,
-    text_spinner: gtk::CenterBox,
+#[tracker::track]
+struct AppModel {
+    text: String,
+    text_waiting: bool,
+    image_data: Option<Pixbuf>,
+    image_waiting: bool,
 }
 
 #[derive(Debug)]
@@ -97,18 +96,53 @@ enum AppMsg {
     SetImage(Option<bytes::Bytes>),
 }
 
-#[tracker::track]
-struct AppModel {
-    text: String,
-    text_waiting: bool,
-    image_data: Option<Pixbuf>,
-    image_waiting: bool,
-}
-
 impl Model for AppModel {
     type Msg = AppMsg;
     type Widgets = AppWidgets;
     type Components = AppComponents;
+}
+
+impl AppUpdate for AppModel {
+    fn update(&mut self, msg: AppMsg, components: &AppComponents, _sender: Sender<AppMsg>) -> bool {
+        self.reset();
+
+        match msg {
+            AppMsg::Request(url) => {
+                components.http.send(HttpMsg::Request(url)).unwrap();
+                self.set_text_waiting(true);
+                self.set_image_waiting(true);
+            }
+            AppMsg::SetText(text_opt) => {
+                self.set_text_waiting(false);
+                if let Some(text) = text_opt {
+                    self.set_text(text);
+                } else {
+                    self.set_text("No response".to_string());
+                }
+            }
+            AppMsg::SetImage(bytes_opt) => {
+                self.set_image_waiting(false);
+                if let Some(bytes) = bytes_opt {
+                    let buf = Pixbuf::from_read(bytes.reader()).ok();
+                    self.set_image_data(buf);
+                } else {
+                    self.set_image_data(None);
+                }
+            }
+        }
+        true
+    }
+}
+
+struct AppWidgets {
+    main: gtk::ApplicationWindow,
+    image: gtk::Image,
+    image_spinner: gtk::Spinner,
+    text: gtk::TextView,
+    text_window: gtk::ScrolledWindow,
+    text_spinner: gtk::Spinner,
+    text_spinner_box: gtk::CenterBox,
+    submit: gtk::Button,
 }
 
 impl Widgets<AppModel, ()> for AppWidgets {
@@ -154,17 +188,17 @@ impl Widgets<AppModel, ()> for AppWidgets {
             .vexpand(true)
             .build();
         text_window.set_child(Some(&text));
-        let text_spinner_widget = gtk::Spinner::builder().spinning(true).build();
-        let text_spinner = gtk::CenterBox::builder()
+        let text_spinner = gtk::Spinner::builder().spinning(true).build();
+        let text_spinner_box= gtk::CenterBox::builder()
             .visible(model.text_waiting)
             .vexpand(true)
             .hexpand(true)
             .build();
         let text_box = gtk::Box::new(gtk::Orientation::Vertical, 0);
 
-        text_spinner.set_center_widget(Some(&text_spinner_widget));
+        text_spinner_box.set_center_widget(Some(&text_spinner));
         text_box.append(&text_window);
-        text_box.append(&text_spinner);
+        text_box.append(&text_spinner_box);
 
         main_box.append(&url);
         main_box.append(&submit);
@@ -185,6 +219,8 @@ impl Widgets<AppModel, ()> for AppWidgets {
             text,
             text_window,
             text_spinner,
+            text_spinner_box,
+            submit,
         }
     }
 
@@ -195,15 +231,17 @@ impl Widgets<AppModel, ()> for AppWidgets {
 
         if model.changed(AppModel::text_waiting()) {
             self.text_window.set_visible(!model.text_waiting);
-            self.text_spinner.set_visible(model.text_waiting);
-            self.main
+            self.text_spinner_box.set_visible(model.text_waiting);
+            self.text_spinner.set_spinning(model.text_waiting);
+            self.submit
                 .set_sensitive(!model.image_waiting && !model.text_waiting);
         }
 
         if model.changed(AppModel::image_waiting()) {
             self.image.set_visible(!model.image_waiting);
             self.image_spinner.set_visible(model.image_waiting);
-            self.main
+            self.image_spinner.set_spinning(model.image_waiting);
+            self.submit
                 .set_sensitive(!model.image_waiting && !model.text_waiting);
         }
 
@@ -218,38 +256,6 @@ impl Widgets<AppModel, ()> for AppWidgets {
 
     fn root_widget(&self) -> gtk::ApplicationWindow {
         self.main.clone()
-    }
-}
-
-impl AppUpdate for AppModel {
-    fn update(&mut self, msg: AppMsg, components: &AppComponents, _sender: Sender<AppMsg>) -> bool {
-        self.reset();
-
-        match msg {
-            AppMsg::Request(url) => {
-                components.http.send(HttpMsg::Request(url)).unwrap();
-                self.set_text_waiting(true);
-                self.set_image_waiting(true);
-            }
-            AppMsg::SetText(text_opt) => {
-                self.set_text_waiting(false);
-                if let Some(text) = text_opt {
-                    self.set_text(text);
-                } else {
-                    self.set_text("No response".to_string());
-                }
-            }
-            AppMsg::SetImage(bytes_opt) => {
-                self.set_image_waiting(false);
-                if let Some(bytes) = bytes_opt {
-                    let buf = Pixbuf::from_read(bytes.reader()).ok();
-                    self.set_image_data(buf);
-                } else {
-                    self.set_image_data(None);
-                }
-            }
-        }
-        true
     }
 }
 

@@ -1,6 +1,3 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 use syn::{
     braced, parenthesized,
     parse::{Parse, ParseBuffer, ParseStream},
@@ -35,16 +32,6 @@ impl Parse for Tracker {
         Ok(Tracker { items, update_fn })
     }
 }
-
-/*impl Parse for Factory {
-    fn parse(input: ParseStream) -> Result<Self> {
-        let data = input.parse()?;
-        let _comma: Token![,] = input.parse()?;
-        let widget_name = input.parse()?;
-
-        Ok(Factory { data, widget_name })
-    }
-}*/
 
 impl Parse for Property {
     fn parse(input: ParseStream) -> Result<Self> {

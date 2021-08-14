@@ -1,6 +1,3 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 use proc_macro2::Span as Span2;
 use proc_macro2::TokenStream as TokenStream2;
 use syn::{punctuated::Punctuated, spanned::Spanned, token, Expr, ExprClosure, Ident, Lit};
@@ -22,7 +19,7 @@ pub(super) enum PropertyType {
     Value(Lit),
     Track(Tracker),
     Component(Expr),
-    Args(Args),
+    Args(Args<Expr>),
     Connect(ExprClosure),
     Watch(TokenStream2),
     Factory(Expr),
@@ -33,7 +30,7 @@ pub(super) enum PropertyType {
 pub(super) struct Property {
     pub name: Ident,
     pub ty: PropertyType,
-    pub args: Option<Args>,
+    pub args: Option<Args<Expr>>,
     pub optional_assign: bool,
     pub iterative: bool,
 }
@@ -80,30 +77,3 @@ impl<'a> Widget {
         }
     }
 }
-
-/*impl Widget {
-    pub fn new(span: Span, items: &[ImplItem]) -> Result<Self> {
-        let mut widgets = None;
-        for item in items {
-            if let ImplItem::Macro(mac) = item {
-                if mac
-                    .mac
-                    .path
-                    .segments
-                    .first()
-                    .expect("No path segments in macro path")
-                    .ident
-                    == "view"
-                {
-                    let tokens = mac.mac.tokens.clone();
-                    let new_widgets = syn::parse_macro_input::parse::<Widget>(tokens.into())?;
-                    widgets = Some(new_widgets);
-                } else {
-                    return Err(Error::new(item.span().unwrap().into(), "Unexpected macro"));
-                }
-            }
-        }
-
-        widgets.ok_or_else(|| Error::new(span.into(), "No view macro in impl block"))
-    }
-}*/

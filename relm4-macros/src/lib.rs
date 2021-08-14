@@ -1,6 +1,3 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 use proc_macro::{self, TokenStream};
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned};
@@ -8,13 +5,16 @@ use syn::{parse_macro_input, spanned::Spanned, PathArguments};
 
 mod args;
 mod attrs;
+mod funcs;
 mod item_impl;
 mod macros;
+mod struct_field;
 mod types;
 mod util;
 mod widgets;
 
 use attrs::Attrs;
+use funcs::Funcs;
 use item_impl::ItemImpl;
 use macros::Macros;
 use types::ModelTypes;
@@ -121,10 +121,17 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
 
     let Macros {
         widgets,
-        manual_pre_init,
-        manual_init,
-        manual_view,
+        additional_fields,
     } = match Macros::new(&data.macros, data.brace_span.unwrap()) {
+        Ok(macros) => macros,
+        Err(err) => return TokenStream::from(err.to_compile_error()),
+    };
+
+    let Funcs {
+        pre_init,
+        post_init,
+        manual_view,
+    } = match Funcs::new(&data.funcs) {
         Ok(macros) => macros,
         Err(err) => return TokenStream::from(err.to_compile_error()),
     };
@@ -169,10 +176,21 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let impl_generics = data.impl_generics;
     let where_clause = data.where_clause;
 
+    let additional_fields_return_stream = if let Some(fields) = &additional_fields {
+        let mut tokens = TokenStream2::new();
+        for field in &fields.inner {
+            tokens.extend(field.ident_token());
+        }
+        tokens
+    } else {
+        TokenStream2::new()
+    };
+
     let out = quote! {
         #[allow(dead_code)]
         #attrs struct #ty {
             #struct_stream
+            #additional_fields
         }
 
         impl #impl_generics #trt for #ty #where_clause {
@@ -180,13 +198,14 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
 
             /// Initialize the UI.
             fn init_view(model: &#model, parent_widgets: &<#parent_model as ::relm4::Model>::Widgets, sender: ::gtk::glib::Sender<<#model as ::relm4::Model>::Msg>) -> Self {
-                #manual_pre_init
+                #pre_init
                 #init_stream
                 #property_stream
                 #connect_stream
-                #manual_init
+                #post_init
                 Self {
                     #return_stream
+                    #additional_fields_return_stream
                 }
             }
 

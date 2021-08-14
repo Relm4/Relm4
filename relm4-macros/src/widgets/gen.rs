@@ -1,6 +1,3 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned, ToTokens};
 use syn::{spanned::Spanned, Error};
@@ -275,7 +272,7 @@ impl Widget {
 
                 let mut clone_stream = TokenStream2::new();
                 if let Some(args) = &prop.args {
-                    for arg in &args.exprs {
+                    for arg in &args.inner {
                         clone_stream.extend(quote_spanned! { arg.span() =>
                             #[allow(clippy::redundant_clone)]
                             let #arg = #arg.clone();

@@ -1,33 +1,38 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote_spanned, ToTokens};
 use syn::{
     parse::{Parse, ParseStream},
     punctuated::Punctuated,
     spanned::Spanned,
-    Expr, Result, Token,
+    Result, Token,
 };
 
 #[derive(Debug)]
-pub struct Args {
-    pub exprs: Vec<Expr>,
+pub struct Args<T>
+where
+    T: Parse + ToTokens,
+{
+    pub inner: Vec<T>,
 }
 
-impl Parse for Args {
+impl<T> Parse for Args<T>
+where
+    T: Parse + ToTokens,
+{
     fn parse(input: ParseStream) -> Result<Self> {
-        let punct: Punctuated<Expr, Token![,]> =
-            input.call(Punctuated::parse_separated_nonempty)?;
-        let exprs = punct.into_pairs().map(|pair| pair.into_value()).collect();
+        let punct: Punctuated<T, Token![,]> = input.call(Punctuated::parse_separated_nonempty)?;
+        let inner = punct.into_pairs().map(|pair| pair.into_value()).collect();
 
-        Ok(Args { exprs })
+        Ok(Args { inner })
     }
 }
 
-impl ToTokens for Args {
+impl<T> ToTokens for Args<T>
+where
+    T: Parse + ToTokens,
+{
     fn to_tokens(&self, out: &mut TokenStream2) {
-        let mut iter = self.exprs.iter();
+        let mut iter = self.inner.iter();
 
         let first = iter.next().unwrap();
         out.extend(quote_spanned! {

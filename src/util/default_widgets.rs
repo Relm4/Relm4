@@ -1,6 +1,3 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 /// Default widget implementation.
 ///
 /// This is mainly useful for macros that generate widgets
@@ -25,7 +22,7 @@ macro_rules! impl_default_widgets {
     };
 }
 
-#[cfg(feature = "linux")]
+#[cfg(target_os = "linux")]
 impl_default_widgets![
     gtk::PageSetupUnixDialog,
     gtk::PrintJob,
