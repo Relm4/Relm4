@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream as TokenStream2;
-use syn::{spanned::Spanned, Error, ImplItemMethod, Result};
 use quote::quote;
+use syn::{spanned::Spanned, Error, ImplItemMethod, Result};
 
 pub(super) struct Funcs {
     pub pre_init: Option<TokenStream2>,
@@ -16,8 +16,8 @@ impl Funcs {
 
         for func in funcs {
             let ident = &func.sig.ident;
-                let stmts = &func.block.stmts;
-                let tokens = quote! { #(#stmts)* };
+            let stmts = &func.block.stmts;
+            let tokens = quote! { #(#stmts)* };
 
             if ident == "pre_init" {
                 if pre_init.is_some() {

@@ -1,9 +1,9 @@
 use proc_macro::Span;
 use syn::{spanned::Spanned, Error, Macro, Result};
 
-use crate::widgets::Widget;
 use crate::args::Args;
 use crate::struct_field::StructField;
+use crate::widgets::Widget;
 
 pub(super) struct Macros {
     pub widgets: Widget,
@@ -22,7 +22,7 @@ impl Macros {
                 .first()
                 .expect("No path segments in macro path")
                 .ident;
-                let tokens = mac.tokens.clone();
+            let tokens = mac.tokens.clone();
 
             if ident == "view" {
                 if tokens.is_empty() {
@@ -45,7 +45,9 @@ impl Macros {
                         "additional_fields macro defined multiple times",
                     ));
                 }
-                additional_fields = Some(syn::parse_macro_input::parse::<Args<StructField>>(tokens.into())?);
+                additional_fields = Some(syn::parse_macro_input::parse::<Args<StructField>>(
+                    tokens.into(),
+                )?);
             } else {
                 return Err(Error::new(
                     mac.span().unwrap().into(),

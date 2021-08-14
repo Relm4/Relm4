@@ -1,6 +1,9 @@
 use proc_macro2::TokenStream as TokenStream2;
-use syn::{parse::{Parse, ParseStream}, Field, Result};
 use quote::ToTokens;
+use syn::{
+    parse::{Parse, ParseStream},
+    Field, Result,
+};
 
 pub struct StructField {
     inner: Field,
@@ -15,7 +18,7 @@ impl StructField {
 impl Parse for StructField {
     fn parse(input: ParseStream) -> Result<Self> {
         Ok(StructField {
-            inner: input.call(Field::parse_named)?
+            inner: input.call(Field::parse_named)?,
         })
     }
 }

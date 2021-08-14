@@ -5,18 +5,18 @@ use syn::{parse_macro_input, spanned::Spanned, PathArguments};
 
 mod args;
 mod attrs;
+mod funcs;
 mod item_impl;
 mod macros;
+mod struct_field;
 mod types;
 mod util;
 mod widgets;
-mod funcs;
-mod struct_field;
 
 use attrs::Attrs;
+use funcs::Funcs;
 use item_impl::ItemImpl;
 use macros::Macros;
-use funcs::Funcs;
 use types::ModelTypes;
 
 /// Macro that implemements [relm4::Widgets](https://aaronerhardt.github.io/docs/relm4/relm4/trait.Widgets.html) and generates the corresponding struct.
@@ -121,7 +121,7 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
 
     let Macros {
         widgets,
-        additional_fields
+        additional_fields,
     } = match Macros::new(&data.macros, data.brace_span.unwrap()) {
         Ok(macros) => macros,
         Err(err) => return TokenStream::from(err.to_compile_error()),
@@ -177,11 +177,11 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let where_clause = data.where_clause;
 
     let additional_fields_return_stream = if let Some(fields) = &additional_fields {
-    let mut tokens = TokenStream2::new();
+        let mut tokens = TokenStream2::new();
         for field in &fields.inner {
             tokens.extend(field.ident_token());
-            }
-            tokens
+        }
+        tokens
     } else {
         TokenStream2::new()
     };
