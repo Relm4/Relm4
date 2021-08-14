@@ -1,4 +1,4 @@
-//! Utility to help drawing on a widget in a relm application.
+//! Utility to help drawing on a [`gtk::DrawingArea`] in a Relm4 application.
 //! Create a DrawHandler, initialize it, and get its context when handling a message (that could be
 //! sent from the draw signal).
 
@@ -36,20 +36,20 @@ pub struct DrawContext {
     context: Context,
     draw_surface: Surface,
     edit_surface: ImageSurface,
-    widget: gtk::DrawingArea,
+    draw_area: gtk::DrawingArea,
 }
 
 impl DrawContext {
     fn new(
         draw_surface: &Surface,
         edit_surface: &ImageSurface,
-        widget: &gtk::DrawingArea,
+        draw_area: &gtk::DrawingArea,
     ) -> Result<Self, cairo::Error> {
         let draw_context = Self {
             context: Context::new(edit_surface)?,
             draw_surface: draw_surface.clone(),
             edit_surface: edit_surface.clone(),
-            widget: widget.clone(),
+            draw_area: draw_area.clone(),
         };
 
         Ok(draw_context)
@@ -67,7 +67,7 @@ impl Deref for DrawContext {
 impl Drop for DrawContext {
     fn drop(&mut self) {
         self.draw_surface.set(&self.edit_surface);
-        self.widget.queue_draw();
+        self.draw_area.queue_draw();
     }
 }
 
@@ -75,7 +75,7 @@ impl Drop for DrawContext {
 pub struct DrawHandler {
     draw_surface: Surface,
     edit_surface: ImageSurface,
-    widget: Option<gtk::DrawingArea>,
+    draw_area: Option<gtk::DrawingArea>,
 }
 
 impl DrawHandler {
@@ -84,52 +84,48 @@ impl DrawHandler {
         Ok(Self {
             draw_surface: Surface::new(ImageSurface::create(Format::ARgb32, 100, 100)?),
             edit_surface: ImageSurface::create(Format::ARgb32, 100, 100)?,
-            widget: None,
+            draw_area: None,
         })
     }
 
-    /// Get the drawing context to draw on a widget.
+    /// Get the drawing context to draw on a DrawingArea.
+    /// If the size of the DrawingArea changed, the contents of the
+    /// surface will be replaced by a new, empty surface.
     pub fn get_context(&mut self) -> Result<DrawContext, cairo::Error> {
-        if let Some(ref widget) = self.widget {
-            let allocation = widget.allocation();
-            let scale = if cfg!(feature = "hidpi") {
-                widget.scale_factor()
-            } else {
-                1
-            };
+        if let Some(ref draw_area) = self.draw_area {
+            let allocation = draw_area.allocation();
+            let scale = draw_area.scale_factor();
             let width = allocation.width * scale;
             let height = allocation.height * scale;
+
             if (width, height) != (self.edit_surface.width(), self.edit_surface.height()) {
                 // TODO: also copy the old small surface to the new bigger one?
                 match ImageSurface::create(Format::ARgb32, width, height) {
                     Ok(surface) => {
-                        {
-                            surface.set_device_scale(scale as f64, scale as f64);
-                        }
+                        surface.set_device_scale(scale as f64, scale as f64);
                         self.edit_surface = surface
                     }
-                    Err(error) => eprintln!("Cannot resize image surface: {:?}", error),
+                    Err(error) => log::error!("Cannot resize image surface: {:?}", error),
                 }
             }
-            DrawContext::new(&self.draw_surface, &self.edit_surface, widget)
+            DrawContext::new(&self.draw_surface, &self.edit_surface, draw_area)
         } else {
             panic!("Call DrawHandler::init() before DrawHandler::get_context().");
         }
     }
 
     /// Initialize the draw handler.
-    /// The widget is the one on which drawing will occur.
-    pub fn init(&mut self, widget: &gtk::DrawingArea) {
-        self.widget = Some(widget.clone());
+    pub fn init(&mut self, draw_area: &gtk::DrawingArea) {
+        self.draw_area = Some(draw_area.clone());
         let draw_surface = self.draw_surface.clone();
-        widget.set_draw_func(move |_, context, _, _| {
+        draw_area.set_draw_func(move |_, context, _, _| {
             // TODO: only copy the area that was exposed?
             if let Err(error) = context.set_source_surface(&draw_surface.get(), 0.0, 0.0) {
-                eprintln!("Cannot set source surface: {:?}", error);
+                log::error!("Cannot set source surface: {:?}", error);
             }
 
             if let Err(error) = context.paint() {
-                eprintln!("Cannot paint: {:?}", error);
+                log::error!("Cannot paint: {:?}", error);
             }
         });
     }
