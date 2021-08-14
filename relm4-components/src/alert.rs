@@ -124,7 +124,8 @@ where
             add_button: args!(&model.settings.cancel_label, gtk::ResponseType::Cancel),
         }
     }
-    manual_init! {
+
+    fn post_init() {
         if let Some(option_label) = &model.settings.option_label {
             dialog.add_button(option_label, gtk::ResponseType::Other(0));
         }
