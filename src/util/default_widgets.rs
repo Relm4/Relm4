@@ -22,7 +22,7 @@ macro_rules! impl_default_widgets {
     };
 }
 
-#[cfg(feature = "linux")]
+#[cfg(target_os = "linux")]
 impl_default_widgets![
     gtk::PageSetupUnixDialog,
     gtk::PrintJob,

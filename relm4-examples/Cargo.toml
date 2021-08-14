@@ -2,7 +2,7 @@
 name = "relm4-examples"
 authors = ["Aaron Erhardt <aaron.erhardt@t-online.de>"]
 edition = "2018"
-version = "0.1.0-beta.2"
+version = "0.1.0-beta.5"
 description = "An idiomatic GUI library inspired by Elm and based on gtk4-rs"
 repository = "https://github.com/AaronErhardt/relm4"
 readme = "README.md"
@@ -20,9 +20,11 @@ reqwest = "0.11"
 tracker = "0.1"
 surf = "2.2"
 tokio = { version = "1.9", features = ["rt", "macros", "time"] }
+rand = "0.8"
 
-#relm4 = { version = "0.1.0-beta.2", features = ["tokio-rt"] }
+#relm4 = { version = "0.1.0-beta.5", features = ["tokio-rt"] }
 relm4 = { path = "../", features = ["tokio-rt"] }
-#relm4-macros = "0.1.0-beta.2"
+#relm4-macros = "0.1.0-beta.5"
 relm4-macros = { path = "../relm4-macros" }
-relm4-components = "0.1.0-beta.2"
+#relm4-components = "0.1.0-beta.5"
+relm4-components = { path = "../relm4-components" }

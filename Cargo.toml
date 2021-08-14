@@ -2,7 +2,7 @@
 name = "relm4"
 authors = ["Aaron Erhardt <aaron.erhardt@t-online.de>"]
 edition = "2018"
-version = "0.1.0-beta.4"
+version = "0.1.0-beta.5"
 description = "An idiomatic GUI library inspired by Elm and based on gtk4-rs"
 repository = "https://github.com/AaronErhardt/relm4"
 readme = "README.md"
@@ -30,6 +30,5 @@ tokio = { version = "1.9", optional = true, features = ["rt"] }
 
 [features]
 default = []
-linux = []
 tokio-rt = ["tokio", "async-trait"]
-all = ["linux", "tokio-rt"]
+all = ["tokio-rt"]
