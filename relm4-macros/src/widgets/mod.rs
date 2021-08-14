@@ -19,7 +19,7 @@ pub(super) enum PropertyType {
     Value(Lit),
     Track(Tracker),
     Component(Expr),
-    Args(Args<Ident>),
+    Args(Args<Expr>),
     Connect(ExprClosure),
     Watch(TokenStream2),
     Factory(Expr),
