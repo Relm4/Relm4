@@ -1,6 +1,3 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 //! Reusable and easily configurable save dialog component.
 //!
 //! **[Example implementation](https://github.com/AaronErhardt/relm4/blob/main/relm4-examples/examples/save_dialog.rs)**

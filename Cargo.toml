@@ -6,7 +6,7 @@ version = "0.1.0-beta.2"
 description = "An idiomatic GUI library inspired by Elm and based on gtk4-rs"
 repository = "https://github.com/AaronErhardt/relm4"
 readme = "README.md"
-license = "MPL-2.0-or-later"
+license = "Apache-2.0 OR MIT"
 documentation = "https://aaronerhardt.github.io/docs/relm4/relm4/"
 
 keywords = ["gui", "gtk", "gtk4"]

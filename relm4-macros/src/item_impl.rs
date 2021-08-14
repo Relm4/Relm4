@@ -1,6 +1,3 @@
-/* This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at https://mozilla.org/MPL/2.0/. */
 use proc_macro2::Span;
 use syn::{
     braced,
@@ -44,7 +41,7 @@ impl Parse for ItemImpl {
         while !braced_input.is_empty() {
             if braced_input.peek2(Token![!]) {
                 macros.push(braced_input.parse()?);
-            } else if braced_input.peek(Token! [fn]) {
+            } else if braced_input.peek(Token![fn]) {
                 funcs.push(braced_input.parse()?);
             } else {
                 return Err(braced_input.error("Expeted macro or method"));
