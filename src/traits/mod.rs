@@ -250,6 +250,7 @@ pub trait Components<ParentModel: ?Sized + Model> {
 }
 
 #[cfg(feature = "tokio-rt")]
+#[cfg_attr(doc, doc(cfg(feature = "tokio-rt")))]
 #[async_trait::async_trait]
 /// [`ComponentUpdate`] for asynchronous workers and components.
 pub trait AsyncComponentUpdate<ParentModel: Model>: Model {

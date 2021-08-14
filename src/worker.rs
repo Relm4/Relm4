@@ -113,9 +113,11 @@ where
 }
 
 #[cfg(feature = "tokio-rt")]
+#[cfg_attr(doc, doc(cfg(feature = "tokio-rt")))]
 use crate::traits::AsyncComponentUpdate;
 
 #[cfg(feature = "tokio-rt")]
+#[cfg_attr(doc, doc(cfg(feature = "tokio-rt")))]
 #[derive(Clone)]
 /// A [`AsyncRelmWorker`] is like a [`RelmWorker`] but runs the [`AsyncComponentUpdate::update`] function in
 /// a tokio [`Runtime`](tokio::runtime::Runtime).
@@ -133,6 +135,7 @@ where
 }
 
 #[cfg(feature = "tokio-rt")]
+#[cfg_attr(doc, doc(cfg(feature = "tokio-rt")))]
 impl<Model, ParentModel> AsyncRelmWorker<Model, ParentModel>
 where
     Model: AsyncComponentUpdate<ParentModel, Widgets = ()> + Send,

@@ -27,6 +27,7 @@ static APP: OnceCell<Fragile<gtk::Application>> = OnceCell::new();
 pub use gtk::glib::Sender;
 
 #[cfg(feature = "tokio-rt")]
+#[cfg_attr(doc, doc(cfg(feature = "tokio-rt")))]
 /// Re-export of [`async_trait::async_trait`]
 pub use async_trait::async_trait;
 
