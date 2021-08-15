@@ -4,7 +4,6 @@ use std::marker::{PhantomData, Send};
 
 use crate::{ComponentUpdate, Components, Model as ModelTrait};
 
-#[derive(Clone)]
 /// [`RelmWorker`]s are like [`RelmComponent`](crate::RelmComponent)s but they don't have any widgets.
 ///
 /// They are usually used to run expansive tasks on different threads and report back when they are finished
@@ -16,6 +15,7 @@ use crate::{ComponentUpdate, Components, Model as ModelTrait};
 ///
 /// Multiple [`RelmWorker`]s that have the same parent are usually bundled along with [`RelmComponent`](crate::RelmComponent)s
 /// in a struct that implements [`Components`].
+#[derive(Clone, Debug)]
 pub struct RelmWorker<Model, ParentModel>
 where
     Model: ComponentUpdate<ParentModel, Widgets = ()> + 'static,

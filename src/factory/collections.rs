@@ -13,8 +13,8 @@ enum ChangeType {
     Update,
 }
 
-#[derive(Default)]
 /// A container similar to [`Vec`] that implements [`Factory`].
+#[derive(Default, Debug)]
 pub struct FactoryVec<Data>
 where
     Data: FactoryPrototype,

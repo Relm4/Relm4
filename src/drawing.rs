@@ -11,7 +11,7 @@ use std::rc::Rc;
 use gtk::cairo::{self, Context, Format, ImageSurface};
 use gtk::prelude::{DrawingAreaExt, WidgetExt};
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct Surface {
     surface: Rc<RefCell<ImageSurface>>,
 }
@@ -32,6 +32,9 @@ impl Surface {
     }
 }
 
+#[derive(Debug)]
+/// Context returned by [`DrawHandler`] that stores a [`Context`] along
+/// with additional data required for drawing.
 pub struct DrawContext {
     context: Context,
     draw_surface: Surface,
@@ -72,6 +75,7 @@ impl Drop for DrawContext {
 }
 
 /// Manager for drawing operations.
+#[derive(Debug)]
 pub struct DrawHandler {
     draw_surface: Surface,
     edit_surface: ImageSurface,

@@ -11,6 +11,7 @@ use crate::{AppUpdate, Components, Model as ModelTrait, Widgets as WidgetsTrait}
 ///
 /// A [`RelmApp`] might run as a standalone application or may contain
 /// multiple components that communicate with each other.
+#[derive(Debug)]
 pub struct RelmApp<Model>
 where
     Model: ModelTrait + AppUpdate + 'static,

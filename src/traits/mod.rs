@@ -95,9 +95,9 @@ pub trait AppUpdate: Model {
     ) -> bool;
 }
 
-/// Define the behavior to initialize and update a component.
+/// Define the behavior to initialize and update a component or worker.
 pub trait ComponentUpdate<ParentModel: Model>: Model {
-    /// Initialize the model of the component.
+    /// Initialize the model of the component or worker.
     ///
     /// In case you want to share information or settings with the parent component you
     /// get the parent's model passed as parameter.
@@ -133,7 +133,7 @@ where
 {
     /// The root represents the first widget that all other widgets of this app or component are attached to.
     /// The root of the main app must be a [`gtk::ApplicationWindow`].
-    type Root;
+    type Root: std::fmt::Debug;
 
     /// Initialize the UI.
     ///
@@ -242,6 +242,7 @@ where
 /// }
 /// ```
 pub trait Components<ParentModel: ?Sized + Model> {
+    /// Initialize your components and workers inside this function.
     fn init_components(
         parent_model: &ParentModel,
         parent_widget: &ParentModel::Widgets,
@@ -254,6 +255,10 @@ pub trait Components<ParentModel: ?Sized + Model> {
 #[async_trait::async_trait]
 /// [`ComponentUpdate`] for asynchronous workers and components.
 pub trait AsyncComponentUpdate<ParentModel: Model>: Model {
+    /// Initialize the model of the component or worker.
+    ///
+    /// In case you want to share information or settings with the parent component you
+    /// get the parent's model passed as parameter.
     fn init_model(parent_model: &ParentModel) -> Self;
 
     /// Update the model. The parent_sender allows to send messages to the parent.

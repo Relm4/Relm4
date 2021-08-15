@@ -11,6 +11,7 @@ use crate::{ComponentUpdate, Components, Model as ModelTrait, Widgets as Widgets
 /// and can send messages to its parent and its children components.
 ///
 /// Multiple [`RelmComponent`]s that have the same parent are usually bundled in a struct that implements [`Components`].
+#[derive(Debug)]
 pub struct RelmComponent<Model, ParentModel>
 where
     Model: ComponentUpdate<ParentModel> + 'static,

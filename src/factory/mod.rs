@@ -12,9 +12,18 @@ pub use widgets::GridPosition;
 /// Define behavior to create, update and remove widgets according to
 /// data stored in a factory.
 pub trait FactoryPrototype: Sized {
+    /// Factory container that stores the data.
     type Factory: Factory<Self, Self::View>;
+
+    /// Outermost type of the newly created widgets.
+    /// Similar to the `Root` type in [`crate::Widgets`].
     type Widget: WidgetExt;
+
+    /// Widget that the generated widgets are added to.
     type View: FactoryView<Self::Widget>;
+
+    /// Message type used to send messages back to the component or app
+    /// where this factory is used
     type Msg;
 
     /// Create new widgets when self is inserted into the factory.
@@ -57,8 +66,14 @@ where
 
 /// A trait implemented for GTK4 widgets that allows a factory to create and remove widgets.
 pub trait FactoryView<Widget: WidgetExt> {
+    /// Position type used by this widget.
+    ///
+    /// For example [`GridPosition`] for [`gtk::Grid`] or `()` for [`gtk::Box`]
     type Position;
 
+    /// Adds a new widget to self at the end.
     fn add(&self, widget: &Widget, position: &Self::Position);
+
+    /// Removes a widget from self at the end.
     fn remove(&self, widget: &Widget);
 }
