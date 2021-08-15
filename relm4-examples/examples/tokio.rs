@@ -189,7 +189,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
             .build();
         text_window.set_child(Some(&text));
         let text_spinner = gtk::Spinner::builder().spinning(true).build();
-        let text_spinner_box= gtk::CenterBox::builder()
+        let text_spinner_box = gtk::CenterBox::builder()
             .visible(model.text_waiting)
             .vexpand(true)
             .hexpand(true)

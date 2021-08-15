@@ -25,9 +25,8 @@ cargo run --example NAME
 + components: A simple app that counts up or down and also has two components that hide and show each other. 
 This demonstrates how to use components that can send messages to each other but are fully independent apart from that.
 
-+ tracker: A simple app that can show different widgets and also count up.
-For each update of the UI only the actual changes to the model are considered to minimize UI updates.
-For example counting up by toggling the button will not affect the other widgets and will not trigger a regeneration of the selectable widget.
++ tracker: A simple app that shows two images that can are randomly selected from a list of icons.
+The app uses a tracker for efficient UI updates.
 
 + factory and grid_factory: Simple apps that use a factory to create and update widgets. Factories brings the concept of trackers to collections.
 A `FactoryVec` can be modified during the update method just like a normal vector and during the view function the factory will update only the affected widgets.
@@ -49,3 +48,5 @@ To disable the delays comment the two lines starting with `tokio::time::delay`.
 + alert: A simple app that uses the alert provided by relm4-components.
 
 + popover: A simple app that uses a popover.
+
++ drawing: A simple app that draws moving circles on a canvas.
