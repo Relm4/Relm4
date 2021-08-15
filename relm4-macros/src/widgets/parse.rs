@@ -12,24 +12,19 @@ use super::{Properties, Property, PropertyType, Tracker, Widget, WidgetFunc};
 
 impl Parse for Tracker {
     fn parse(input: ParseStream) -> Result<Self> {
-        let mut items = vec![input.parse()?];
+        let bool_fn = input.parse()?;
+        let _comma: Token![,] = input.parse()?;
+        let mut update_fns = vec![input.parse()?];
 
         while !input.is_empty() {
             let _comma: Token![,] = input.parse()?;
-            items.push(input.parse()?);
+            // allow comma at the end of the macro
+            if !input.is_empty() {
+                update_fns.push(input.parse()?);
+            }
         }
 
-        let update_fn = if let Some(item) = items.pop() {
-            Ok(item)
-        } else {
-            Err(input.error("Expected identifier or expression"))
-        }?;
-
-        if items.is_empty() {
-            return Err(input.error("Expected at least two arguments"));
-        }
-
-        Ok(Tracker { items, update_fn })
+        Ok(Tracker { bool_fn, update_fns })
     }
 }
 

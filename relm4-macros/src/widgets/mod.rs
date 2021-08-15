@@ -9,8 +9,8 @@ mod parse;
 
 #[derive(Debug)]
 pub(super) struct Tracker {
-    items: Vec<Expr>,
-    update_fn: Expr,
+    bool_fn: Expr,
+    update_fns: Vec<Expr>,
 }
 
 #[derive(Debug)]

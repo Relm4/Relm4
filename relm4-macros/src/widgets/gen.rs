@@ -4,7 +4,7 @@ use syn::{spanned::Spanned, Error};
 
 use super::{PropertyType, Tracker, Widget, WidgetFunc};
 
-impl Tracker {
+/*impl Tracker {
     fn bool_eqation_tokens(&self) -> TokenStream2 {
         let mut tokens = TokenStream2::new();
 
@@ -18,7 +18,7 @@ impl Tracker {
 
         tokens
     }
-}
+}*/
 
 impl PropertyType {
     fn init_assign_tokens(&self) -> Option<TokenStream2> {
@@ -28,7 +28,7 @@ impl PropertyType {
             PropertyType::Widget(widget) => Some(widget.widget_assignment()),
             PropertyType::Watch(tokens) => Some(tokens.to_token_stream()),
             PropertyType::Args(args) => Some(args.to_token_stream()),
-            PropertyType::Track(Tracker { update_fn, .. }) => Some(update_fn.to_token_stream()),
+            PropertyType::Track(Tracker { update_fns, .. }) => Some(quote! { #(#update_fns),* }),
             _ => None,
         }
     }
@@ -50,9 +50,9 @@ impl PropertyType {
 
     fn track_tokens(&self) -> Option<(TokenStream2, TokenStream2)> {
         if let PropertyType::Track(tracker) = self {
-            let update_fn = &tracker.update_fn;
-            let update_stream = update_fn.to_token_stream();
-            let bool_stream = tracker.bool_eqation_tokens();
+            let update_fns = &tracker.update_fns;
+            let update_stream = quote! { #(#update_fns),* };
+            let bool_stream = tracker.bool_fn.to_token_stream();
             Some((bool_stream, update_stream))
         } else {
             None
