@@ -1,5 +1,5 @@
 //! Utility to help drawing on a [`gtk::DrawingArea`] in a Relm4 application.
-//! Create a DrawHandler, initialize it, and get its context when handling a message (that could be
+//! Create a [`DrawHandler`], initialize it, and get its context when handling a message (that could be
 //! sent from the draw signal).
 
 // TODO: check if clip has the intended behavior.
@@ -83,7 +83,7 @@ pub struct DrawHandler {
 }
 
 impl DrawHandler {
-    /// Create a new DrawHandler.
+    /// Create a new [`DrawHandler`].
     pub fn new() -> Result<Self, cairo::Error> {
         Ok(Self {
             draw_surface: Surface::new(ImageSurface::create(Format::ARgb32, 100, 100)?),
@@ -92,8 +92,8 @@ impl DrawHandler {
         })
     }
 
-    /// Get the drawing context to draw on a DrawingArea.
-    /// If the size of the DrawingArea changed, the contents of the
+    /// Get the drawing context to draw on a [`gtk::DrawingArea`].
+    /// If the size of the [`gtk::DrawingArea`] changed, the contents of the
     /// surface will be replaced by a new, empty surface.
     pub fn get_context(&mut self) -> Result<DrawContext, cairo::Error> {
         if let Some(ref draw_area) = self.draw_area {
@@ -106,8 +106,8 @@ impl DrawHandler {
                 // TODO: also copy the old small surface to the new bigger one?
                 match ImageSurface::create(Format::ARgb32, width, height) {
                     Ok(surface) => {
-                        surface.set_device_scale(scale as f64, scale as f64);
-                        self.edit_surface = surface
+                        surface.set_device_scale(f64::from(scale), f64::from(scale));
+                        self.edit_surface = surface;
                     }
                     Err(error) => log::error!("Cannot resize image surface: {:?}", error),
                 }

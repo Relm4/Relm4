@@ -15,7 +15,8 @@ pub trait FactoryPrototype: Sized {
     /// Factory container that stores the data.
     type Factory: Factory<Self, Self::View>;
 
-    /// Type that stores all widgets needed for the [`update`] function.
+    /// Type that stores all widgets needed to update them
+    /// in the [`update`](FactoryPrototype::update) function.
     type Widgets;
 
     /// Outermost type of the newly created widgets.

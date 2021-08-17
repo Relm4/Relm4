@@ -101,7 +101,7 @@ struct Change {
 
 impl Change {
     fn new(index: usize, ty: ChangeType) -> Self {
-        Change { index, ty }
+        Change { ty, index }
     }
 }
 
@@ -134,6 +134,7 @@ where
     Data: FactoryPrototype,
 {
     /// Create a new [`FactoryVecDeque`].
+    #[must_use]
     pub fn new() -> Self {
         FactoryVecDeque {
             data: VecDeque::new(),

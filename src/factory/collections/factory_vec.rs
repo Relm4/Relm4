@@ -29,6 +29,7 @@ where
     Data: FactoryPrototype,
 {
     /// Create a new [`FactoryVec`].
+    #[must_use]
     pub fn new() -> Self {
         FactoryVec {
             data: Vec::new(),
