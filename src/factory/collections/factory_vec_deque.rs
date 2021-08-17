@@ -9,16 +9,16 @@ use crate::factory::{Factory, FactoryListView, FactoryPrototype, FactoryView};
 #[derive(Debug, PartialEq, Eq)]
 /// A dynamic index that updates automatically when items are shifted inside a [`Factory`].
 ///
-/// For example a [`FactoryVecDeque`] has an [`insert`] method that allows users
+/// For example a [`FactoryVecDeque`] has an [`insert`](FactoryVecDeque::insert) method that allows users
 /// to insert data at arbitrary positions.
 /// If we insert at the front all following widgets will be moved by one which would
 /// invalidate their indices.
 /// To allow widgets in a [`Factory`] to still send messages with valid indices
 /// this type ensures that the indices is always up to date.
-/// Never send this index as [`uszize`] but always inside of a [`Rc`] to the update function
+/// Never send this index as [`usize`] but always inside of a [`Rc`] to the update function
 /// because messages can be queued up and stale by the time they are handled.
 ///
-/// In short: only call [`current_index`] from the update function where you actually need the index as [`usize`].
+/// In short: only call [`current_index`](DynamicIndex::current_index) from the update function where you actually need the index as [`usize`].
 pub struct DynamicIndex {
     inner: RefCell<usize>,
 }
