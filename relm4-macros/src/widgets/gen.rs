@@ -204,7 +204,7 @@ impl Widget {
             let fact_assign_opt = prop.ty.factory_expr();
             if let Some(f_expr) = fact_assign_opt {
                 property_stream.extend(quote! {
-                    #f_expr.generate(self.#w_name, sender.clone());
+                    #f_expr.generate(&self.#w_name, sender.clone());
                 });
             }
         }
@@ -254,7 +254,7 @@ impl Widget {
             let fact_assign_opt = prop.ty.factory_expr();
             if let Some(f_expr) = fact_assign_opt {
                 property_stream.extend(quote! {
-                    #f_expr.generate(#w_name, sender.clone());
+                    #f_expr.generate(&#w_name, sender.clone());
                 });
             }
         }

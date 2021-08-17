@@ -24,7 +24,10 @@ impl Parse for Tracker {
             }
         }
 
-        Ok(Tracker { bool_fn, update_fns })
+        Ok(Tracker {
+            bool_fn,
+            update_fns,
+        })
     }
 }
 
