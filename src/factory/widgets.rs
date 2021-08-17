@@ -45,6 +45,82 @@ where
     }
 }
 
+impl<Widget> FactoryView<Widget> for gtk::ListBox
+where
+    Widget: glib::IsA<gtk::Widget>,
+{
+    type Position = ();
+    fn add(&self, widget: &Widget, _position: &()) {
+        self.append(widget);
+    }
+
+    fn remove(&self, widget: &Widget) {
+        self.remove(widget);
+    }
+}
+
+impl<Widget> FactoryListView<Widget> for gtk::ListBox
+where
+    Self: FactoryView<Widget>,
+    Widget: gtk::prelude::ListBoxRowExt + glib::IsA<gtk::Widget>,
+{
+    fn insert_after(&self, widget: &Widget, other: &Widget) {
+        self.insert(widget, other.index());
+    }
+
+    fn push_front(&self, widget: &Widget) {
+        self.prepend(widget);
+    }
+}
+
+impl<Widget> FactoryView<Widget> for gtk::FlowBox
+where
+    Widget: glib::IsA<gtk::Widget>,
+{
+    type Position = ();
+    fn add(&self, widget: &Widget, _position: &()) {
+        self.insert(widget, -1);
+    }
+
+    fn remove(&self, widget: &Widget) {
+        self.remove(widget);
+    }
+}
+
+impl<Widget> FactoryListView<Widget> for gtk::FlowBox
+where
+    Self: FactoryView<Widget>,
+    Widget: gtk::prelude::FlowBoxChildExt + glib::IsA<gtk::Widget>,
+{
+    fn insert_after(&self, widget: &Widget, other: &Widget) {
+        self.insert(widget, other.index());
+    }
+
+    fn push_front(&self, widget: &Widget) {
+        self.insert(widget, 0);
+    }
+}
+
+#[derive(Debug)]
+pub struct FixedPosition {
+    pub x: f64,
+    pub y: f64,
+}
+
+impl<Widget> FactoryView<Widget> for gtk::Fixed
+where
+    Widget: glib::IsA<gtk::Widget>,
+{
+    type Position = FixedPosition;
+    fn add(&self, widget: &Widget, position: &FixedPosition) {
+        gtk::prelude::FixedExt::put(self, widget, position.x, position.y);
+    }
+
+    fn remove(&self, widget: &Widget) {
+        gtk::prelude::FixedExt::remove(self, widget);
+    }
+}
+
 impl<Widget> FactoryView<Widget> for gtk::Grid
 where
     Widget: glib::IsA<gtk::Widget>,
