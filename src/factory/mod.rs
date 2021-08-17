@@ -3,10 +3,10 @@
 use gtk::glib::Sender;
 use gtk::prelude::WidgetExt;
 
-mod collections;
+pub mod collections;
 mod widgets;
 
-pub use collections::FactoryVec;
+pub use collections::*;
 pub use widgets::GridPosition;
 
 /// Define behavior to create, update and remove widgets according to
@@ -15,12 +15,15 @@ pub trait FactoryPrototype: Sized {
     /// Factory container that stores the data.
     type Factory: Factory<Self, Self::View>;
 
+    /// Type that stores all widgets needed for the [`update`] function.
+    type Widgets;
+
     /// Outermost type of the newly created widgets.
     /// Similar to the `Root` type in [`crate::Widgets`].
-    type Widget: WidgetExt;
+    type Root: WidgetExt;
 
     /// Widget that the generated widgets are added to.
-    type View: FactoryView<Self::Widget>;
+    type View: FactoryView<Self::Root>;
 
     /// Message type used to send messages back to the component or app
     /// where this factory is used
@@ -31,23 +34,23 @@ pub trait FactoryPrototype: Sized {
         &self,
         key: &<Self::Factory as Factory<Self, Self::View>>::Key,
         sender: Sender<Self::Msg>,
-    ) -> Self::Widget;
+    ) -> Self::Widgets;
 
     /// Set the widget position upon creation, useful for [`gtk::Grid`] or similar.
     fn position(
         &self,
         key: &<Self::Factory as Factory<Self, Self::View>>::Key,
-    ) -> <Self::View as FactoryView<Self::Widget>>::Position;
+    ) -> <Self::View as FactoryView<Self::Root>>::Position;
 
     /// Function called when self is modified.
     fn update(
         &self,
         key: &<Self::Factory as Factory<Self, Self::View>>::Key,
-        widget: &Self::Widget,
+        widgets: &Self::Widgets,
     );
 
-    /// Function called when self is removed from the factory.
-    fn remove(widget: &Self::Widget) -> &Self::Widget;
+    /// Get the outermost widget from the widgets.
+    fn get_root(widgets: &Self::Widgets) -> &Self::Root;
 }
 
 /// A container that is a able to efficiently update, generate and remove widgets
@@ -55,7 +58,7 @@ pub trait FactoryPrototype: Sized {
 pub trait Factory<Data, View>
 where
     Data: FactoryPrototype<View = View>,
-    View: FactoryView<Data::Widget>,
+    View: FactoryView<Data::Root>,
 {
     /// Key that provides additional information for the [`FactoryPrototype`] functions.
     type Key;
@@ -65,7 +68,7 @@ where
 }
 
 /// A trait implemented for GTK4 widgets that allows a factory to create and remove widgets.
-pub trait FactoryView<Widget: WidgetExt> {
+pub trait FactoryView<Widget> {
     /// Position type used by this widget.
     ///
     /// For example [`GridPosition`] for [`gtk::Grid`] or `()` for [`gtk::Box`]
@@ -76,4 +79,18 @@ pub trait FactoryView<Widget: WidgetExt> {
 
     /// Removes a widget from self at the end.
     fn remove(&self, widget: &Widget);
+}
+
+/// Extends [`FactoryView`] for containers that work similar to lists.
+/// This means that the container can insert widgets before and after other
+/// widgets.
+pub trait FactoryListView<Widget>
+where
+    Self: FactoryView<Widget>,
+{
+    /// Insert a widget after another widget.
+    fn insert_after(&self, widget: &Widget, other: &Widget);
+
+    /// Add an widget to the front.
+    fn push_front(&self, widget: &Widget);
 }

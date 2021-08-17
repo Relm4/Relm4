@@ -1,7 +1,7 @@
 use gtk::glib;
 use gtk::prelude::{BoxExt, GridExt};
 
-use crate::factory::FactoryView;
+use crate::factory::{FactoryListView, FactoryView};
 
 /// Storing information about where new widgets can be placed
 /// inside a [`gtk::Grid`].
@@ -28,6 +28,20 @@ where
 
     fn remove(&self, widget: &Widget) {
         BoxExt::remove(self, widget);
+    }
+}
+
+impl<Widget> FactoryListView<Widget> for gtk::Box
+where
+    Self: FactoryView<Widget>,
+    Widget: glib::IsA<gtk::Widget>,
+{
+    fn insert_after(&self, widget: &Widget, other: &Widget) {
+        self.insert_child_after(widget, Some(other));
+    }
+
+    fn push_front(&self, widget: &Widget) {
+        self.prepend(widget);
     }
 }
 

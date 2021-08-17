@@ -20,7 +20,7 @@ where
     Data: FactoryPrototype,
 {
     data: Vec<Data>,
-    widgets: RefCell<Vec<Data::Widget>>,
+    widgets: RefCell<Vec<Data::Widgets>>,
     changes: RefCell<BTreeMap<usize, ChangeType>>,
 }
 
@@ -80,7 +80,7 @@ where
 impl<Data, View> Factory<Data, View> for FactoryVec<Data>
 where
     Data: FactoryPrototype<Factory = Self, View = View>,
-    View: FactoryView<Data::Widget>,
+    View: FactoryView<Data::Root>,
 {
     type Key = usize;
 
@@ -93,7 +93,7 @@ where
                     let data = &self.data[*index];
                     let widget = data.generate(index, sender.clone());
                     let position = data.position(index);
-                    view.add(&widget, &position);
+                    view.add(Data::get_root(&widget), &position);
                     widgets.push(widget);
                 }
                 ChangeType::Update => {
@@ -101,17 +101,17 @@ where
                 }
                 ChangeType::Remove => {
                     let widget = widgets.pop().unwrap();
-                    let remove_widget = Data::remove(&widget);
+                    let remove_widget = Data::get_root(&widget);
                     view.remove(remove_widget);
                 }
                 ChangeType::Recreate => {
                     let widget = widgets.pop().unwrap();
-                    let remove_widget = Data::remove(&widget);
+                    let remove_widget = Data::get_root(&widget);
                     view.remove(remove_widget);
                     let data = &self.data[*index];
                     let widget = data.generate(index, sender.clone());
                     let position = data.position(index);
-                    view.add(&widget, &position);
+                    view.add(Data::get_root(&widget), &position);
                     widgets.push(widget);
                 }
             }
