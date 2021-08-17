@@ -130,7 +130,9 @@ where
             dialog.add_button(option_label, gtk::ResponseType::Other(0));
         }
         if model.settings.destructive_accept {
-            let accept_widget = dialog.widget_for_response(gtk::ResponseType::Accept).expect("No button for accept response set");
+            let accept_widget = dialog
+                .widget_for_response(gtk::ResponseType::Accept)
+                .expect("No button for accept response set");
             accept_widget.add_class_name("destructive-action");
         }
     }
