@@ -109,20 +109,26 @@ impl AppUpdate for AppModel {
     }
 }
 
+struct FactoryWidgets {
+    button: gtk::Button,
+}
+
 impl FactoryPrototype for Data {
     type Factory = FactoryVec<Self>;
-    type Widget = gtk::Button;
+    type Widgets = FactoryWidgets;
+    type Root = gtk::Button;
     type View = gtk::Grid;
     type Msg = AppMsg;
 
-    fn generate(&self, index: &usize, sender: Sender<AppMsg>) -> gtk::Button {
+    fn generate(&self, index: &usize, sender: Sender<AppMsg>) -> FactoryWidgets {
         let button = gtk::Button::with_label(&self.counter.to_string());
         let index = *index;
         button.connect_clicked(move |_| {
             sender.send(AppMsg::Clicked(index)).unwrap();
         });
-
-        button
+        FactoryWidgets {
+            button
+        }
     }
 
     fn position(&self, index: &usize) -> GridPosition {
@@ -136,12 +142,12 @@ impl FactoryPrototype for Data {
         }
     }
 
-    fn update(&self, _index: &usize, widget: &gtk::Button) {
-        widget.set_label(&self.counter.to_string());
+    fn update(&self, _index: &usize, widgets: &FactoryWidgets) {
+        widgets.button.set_label(&self.counter.to_string());
     }
 
-    fn remove(widget: &gtk::Button) -> &gtk::Button {
-        widget
+    fn get_root(widgets: &FactoryWidgets) -> &gtk::Button {
+        &widgets.button
     }
 }
 

@@ -1,7 +1,7 @@
 use gtk::glib::Sender;
-use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
+use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt};
 use relm4::factory::{Factory, FactoryPrototype, FactoryVec};
-use relm4::{send, AppUpdate, Model, RelmApp, WidgetPlus, Widgets};
+use relm4::*;
 
 #[derive(Debug)]
 enum AppMsg {
@@ -63,7 +63,6 @@ impl FactoryPrototype for Data {
         button.connect_clicked(move |_| {
             sender.send(AppMsg::Clicked(index)).unwrap();
         });
-
         FactoryWidgets { button }
     }
 
@@ -77,36 +76,64 @@ impl FactoryPrototype for Data {
     }
 }
 
-#[relm4_macros::widget]
+struct AppWidgets {
+    main: gtk::ApplicationWindow,
+    gen_box: gtk::Box,
+}
+
 impl Widgets<AppModel, ()> for AppWidgets {
-    view! {
-        gtk::ApplicationWindow {
-            set_default_width: 300,
-            set_default_height: 200,
-            set_child = Some(&gtk::Box) {
-                set_orientation: gtk::Orientation::Vertical,
-                set_margin_all: 5,
-                set_spacing: 5,
-                append = &gtk::Button {
-                    set_label: "Add",
-                    connect_clicked(sender) => move |_| {
-                        send!(sender, AppMsg::Add);
-                    }
-                },
-                append = &gtk::Button {
-                    set_label: "Remove",
-                    connect_clicked(sender) => move |_| {
-                        send!(sender, AppMsg::Remove);
-                    }
-                },
-                append = &gtk::Box {
-                    set_orientation: gtk::Orientation::Vertical,
-                    set_margin_all: 5,
-                    set_spacing: 5,
-                    factory!(model.data),
-                }
-            }
-        }
+    type Root = gtk::ApplicationWindow;
+
+    fn init_view(_model: &AppModel, _components: &(), sender: Sender<AppMsg>) -> Self {
+        let main = gtk::ApplicationWindowBuilder::new()
+            .default_width(300)
+            .default_height(200)
+            .build();
+        let main_box = gtk::Box::builder()
+            .orientation(gtk::Orientation::Vertical)
+            .margin_end(5)
+            .margin_top(5)
+            .margin_start(5)
+            .margin_bottom(5)
+            .spacing(5)
+            .build();
+
+        let gen_box = gtk::Box::builder()
+            .orientation(gtk::Orientation::Vertical)
+            .margin_end(5)
+            .margin_top(5)
+            .margin_start(5)
+            .margin_bottom(5)
+            .spacing(5)
+            .build();
+
+        let add = gtk::Button::with_label("Add");
+        let remove = gtk::Button::with_label("Remove");
+
+        main_box.append(&add);
+        main_box.append(&remove);
+        main_box.append(&gen_box);
+
+        main.set_child(Some(&main_box));
+
+        let cloned_sender = sender.clone();
+        add.connect_clicked(move |_| {
+            cloned_sender.send(AppMsg::Add).unwrap();
+        });
+
+        remove.connect_clicked(move |_| {
+            sender.send(AppMsg::Remove).unwrap();
+        });
+
+        AppWidgets { main, gen_box }
+    }
+
+    fn view(&mut self, model: &AppModel, sender: Sender<AppMsg>) {
+        model.data.generate(&self.gen_box, sender);
+    }
+
+    fn root_widget(&self) -> gtk::ApplicationWindow {
+        self.main.clone()
     }
 }
 
