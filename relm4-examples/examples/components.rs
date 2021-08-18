@@ -1,145 +1,149 @@
-use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, WidgetExt};
+use gtk::prelude::{BoxExt, ButtonExt, DialogExt, GtkWindowExt, ToggleButtonExt, WidgetExt};
 use relm4::Sender;
 use relm4::*;
 
-// Implement components that will be part of the main app
-struct Comp1Widgets {
-    button: gtk::Button,
+enum HeaderMsg {
+    View,
+    Edit,
+    Export,
 }
 
-struct Comp2Widgets {
-    button: gtk::Button,
-}
+struct HeaderModel {}
 
-struct Comp1Model {
-    hidden: bool,
-}
-
-struct Comp2Model {
-    hidden: bool,
-}
-
-impl Model for Comp1Model {
-    type Msg = CompMsg;
-    type Widgets = Comp1Widgets;
+impl Model for HeaderModel {
+    type Msg = HeaderMsg;
+    type Widgets = HeaderWidgets;
     type Components = ();
 }
 
-impl Model for Comp2Model {
-    type Msg = CompMsg;
-    type Widgets = Comp2Widgets;
-    type Components = ();
-}
-
-#[derive(PartialEq)]
-enum CompMsg {
-    Hide,
-    Show,
-}
-
-impl Widgets<Comp1Model, AppModel> for Comp1Widgets {
-    type Root = gtk::Button;
-
-    fn init_view(model: &Comp1Model, _parent_widget: &AppWidgets, sender: Sender<CompMsg>) -> Self {
-        // Initialize gtk widgets
-        let button = gtk::Button::with_label("First Component");
-        button.set_visible(!model.hidden);
-
-        button.connect_clicked(move |_button| {
-            sender.send(CompMsg::Hide).unwrap();
-        });
-
-        Comp1Widgets { button }
-    }
-
-    fn view(&mut self, model: &Comp1Model, _sender: Sender<CompMsg>) {
-        self.button.set_visible(!model.hidden);
-    }
-
-    fn root_widget(&self) -> Self::Root {
-        self.button.clone()
-    }
-}
-
-impl Widgets<Comp2Model, AppModel> for Comp2Widgets {
-    type Root = gtk::Button;
-
-    fn init_view(
-        model: &Comp2Model,
-        _parent_widgets: &AppWidgets,
-        sender: Sender<CompMsg>,
-    ) -> Self {
-        let button = gtk::Button::with_label("Second Component");
-        button.set_visible(!model.hidden);
-
-        button.connect_clicked(move |_button| {
-            sender.send(CompMsg::Hide).unwrap();
-        });
-
-        Comp2Widgets { button }
-    }
-
-    fn view(&mut self, model: &Comp2Model, _sender: Sender<CompMsg>) {
-        self.button.set_visible(!model.hidden);
-    }
-
-    fn root_widget(&self) -> Self::Root {
-        self.button.clone()
-    }
-}
-
-impl ComponentUpdate<AppModel> for Comp1Model {
+impl ComponentUpdate<AppModel> for HeaderModel {
     fn init_model(_parent_model: &AppModel) -> Self {
-        Comp1Model { hidden: false }
+        HeaderModel {}
     }
 
     fn update(
         &mut self,
-        message: CompMsg,
+        msg: HeaderMsg,
         _components: &(),
-        _sender: Sender<CompMsg>,
+        _sender: Sender<HeaderMsg>,
         parent_sender: Sender<AppMsg>,
     ) {
-        match message {
-            CompMsg::Hide => {
-                self.hidden = true;
-                // Send message to parent
-                parent_sender.send(AppMsg::ShowComp2).unwrap();
+        match msg {
+            HeaderMsg::View => {
+                send!(parent_sender, AppMsg::SetMode(AppMode::View));
             }
-            CompMsg::Show => {
-                self.hidden = false;
+            HeaderMsg::Edit => {
+                send!(parent_sender, AppMsg::SetMode(AppMode::Edit));
+            }
+            HeaderMsg::Export => {
+                send!(parent_sender, AppMsg::SetMode(AppMode::Export));
             }
         }
     }
 }
 
-impl ComponentUpdate<AppModel> for Comp2Model {
+#[relm4_macros::widget]
+impl Widgets<HeaderModel, AppModel> for HeaderWidgets {
+    view! {
+        gtk::HeaderBar {
+            set_title_widget = Some(&gtk::Box) {
+                add_class_name: "linked",
+                append: group = &gtk::ToggleButton {
+                    set_label: "View",
+                    set_active: true,
+                    connect_toggled(sender) => move |btn| {
+                        if btn.is_active() {
+                            send!(sender, HeaderMsg::View);
+                        }
+                    },
+                },
+                append = &gtk::ToggleButton {
+                    set_label: "Edit",
+                    set_group: Some(&group),
+                    connect_toggled(sender) => move |btn| {
+                        if btn.is_active() {
+                            send!(sender, HeaderMsg::Edit);
+                        }
+                    },
+                },
+                append = &gtk::ToggleButton {
+                    set_label: "Export",
+                    set_group: Some(&group),
+                    connect_toggled(sender) => move |btn| {
+                        if btn.is_active() {
+                            send!(sender, HeaderMsg::Export);
+                        }
+                    },
+                },
+            }
+        }
+    }
+}
+
+struct DialogModel {
+    hidden: bool,
+}
+
+enum DialogMsg {
+    Show,
+    Accept,
+    Cancel,
+}
+
+impl Model for DialogModel {
+    type Msg = DialogMsg;
+    type Widgets = DialogWidgets;
+    type Components = ();
+}
+
+impl ComponentUpdate<AppModel> for DialogModel {
     fn init_model(_parent_model: &AppModel) -> Self {
-        Comp2Model { hidden: true }
+        DialogModel { hidden: true }
     }
 
     fn update(
         &mut self,
-        message: CompMsg,
+        msg: DialogMsg,
         _components: &(),
-        _sender: Sender<CompMsg>,
+        _sender: Sender<DialogMsg>,
         parent_sender: Sender<AppMsg>,
     ) {
-        match message {
-            CompMsg::Hide => {
+        match msg {
+            DialogMsg::Show => self.hidden = false,
+            DialogMsg::Accept => {
                 self.hidden = true;
-                parent_sender.send(AppMsg::ShowComp1).unwrap();
+                send!(parent_sender, AppMsg::Close);
             }
-            CompMsg::Show => {
-                self.hidden = false;
+            DialogMsg::Cancel => self.hidden = true,
+        }
+    }
+}
+
+#[relm4_macros::widget]
+impl Widgets<DialogModel, AppModel> for DialogWidgets {
+    view! {
+        gtk::MessageDialog {
+            set_transient_for: Some(&parent_widgets.main_window),
+            set_modal: true,
+            set_visible: watch!(!model.hidden),
+            set_text: Some("Do you want to close before saving?"),
+            set_secondary_text: Some("All unsaved changes will be lost"),
+            add_button: args!("Close", gtk::ResponseType::Accept),
+            add_button: args!("Cancel", gtk::ResponseType::Cancel),
+            connect_response(sender) => move |_, resp| {
+                send!(sender, if resp == gtk::ResponseType::Accept {
+                    DialogMsg::Accept
+                } else {
+                    DialogMsg::Cancel
+                });
             }
         }
     }
 }
 
 struct AppComponents {
-    comp1: RelmComponent<Comp1Model, AppModel>,
-    comp2: RelmComponent<Comp2Model, AppModel>,
+    header: RelmComponent<HeaderModel, AppModel>,
+    dialog: RelmComponent<DialogModel, AppModel>,
 }
 
 impl Components<AppModel> for AppComponents {
@@ -149,31 +153,27 @@ impl Components<AppModel> for AppComponents {
         parent_sender: Sender<AppMsg>,
     ) -> Self {
         AppComponents {
-            comp1: RelmComponent::with_new_thread(
-                parent_model,
-                parent_widgets,
-                parent_sender.clone(),
-            ),
-            comp2: RelmComponent::new(parent_model, parent_widgets, parent_sender),
+            header: RelmComponent::new(parent_model, parent_widgets, parent_sender.clone()),
+            dialog: RelmComponent::new(parent_model, parent_widgets, parent_sender),
         }
     }
 }
 
-struct AppWidgets {
-    main: gtk::ApplicationWindow,
-    text: gtk::Label,
-    vbox: gtk::Box,
+#[derive(Debug)]
+enum AppMode {
+    View,
+    Edit,
+    Export,
 }
 
 enum AppMsg {
-    Increment,
-    Decrement,
-    ShowComp2,
-    ShowComp1,
+    SetMode(AppMode),
+    CloseRequest,
+    Close,
 }
 
 struct AppModel {
-    counter: u8,
+    mode: AppMode,
 }
 
 impl Model for AppModel {
@@ -182,74 +182,45 @@ impl Model for AppModel {
     type Components = AppComponents;
 }
 
+#[relm4_macros::widget]
 impl Widgets<AppModel, ()> for AppWidgets {
-    type Root = gtk::ApplicationWindow;
-
-    fn init_view(model: &AppModel, _parent_widgets: &(), sender: Sender<AppMsg>) -> Self {
-        let main = gtk::ApplicationWindowBuilder::new().build();
-        let vbox = gtk::BoxBuilder::new()
-            .orientation(gtk::Orientation::Vertical)
-            .spacing(10)
-            .build();
-        vbox.set_margin_all(5);
-
-        let text = gtk::Label::new(Some(&model.counter.to_string()));
-
-        let inc_button = gtk::Button::with_label("Increment");
-        let dec_button = gtk::Button::with_label("Decrement");
-
-        vbox.append(&text);
-        vbox.append(&inc_button);
-        vbox.append(&dec_button);
-
-        main.set_child(Some(&vbox));
-
-        let sender2 = sender.clone();
-
-        inc_button.connect_clicked(move |_button| {
-            sender.send(AppMsg::Increment).unwrap();
-        });
-
-        dec_button.connect_clicked(move |_button| {
-            sender2.send(AppMsg::Decrement).unwrap();
-        });
-
-        AppWidgets { main, text, vbox }
-    }
-
-    fn connect_components(&self, components: &AppComponents) {
-        self.vbox.append(components.comp1.root_widget());
-        self.vbox.append(components.comp2.root_widget());
-    }
-
-    fn view(&mut self, model: &AppModel, _sender: Sender<AppMsg>) {
-        self.text.set_label(&model.counter.to_string());
-    }
-
-    fn root_widget(&self) -> gtk::ApplicationWindow {
-        self.main.clone()
+    view! {
+        main_window = gtk::ApplicationWindow {
+            set_default_width: 500,
+            set_default_height: 250,
+            set_titlebar: component!(Some(components.header.root_widget())),
+            set_child = Some(&gtk::Label) {
+                set_label: watch!(&format!("Placeholder for {:?}", model.mode)),
+            },
+            connect_close_request(sender) => move |_| {
+                send!(sender, AppMsg::CloseRequest);
+                gtk::Inhibit(true)
+            }
+        }
     }
 }
 
 impl AppUpdate for AppModel {
     fn update(&mut self, msg: AppMsg, components: &AppComponents, _sender: Sender<AppMsg>) -> bool {
         match msg {
-            AppMsg::Increment => self.counter = self.counter.saturating_add(1),
-            AppMsg::Decrement => self.counter = self.counter.saturating_sub(1),
-            AppMsg::ShowComp1 => {
-                components.comp1.send(CompMsg::Show).unwrap();
+            AppMsg::SetMode(mode) => {
+                self.mode = mode;
             }
-            AppMsg::ShowComp2 => {
-                components.comp2.send(CompMsg::Show).unwrap();
+            AppMsg::CloseRequest => {
+                components.dialog.send(DialogMsg::Show).unwrap();
+            }
+            AppMsg::Close => {
+                return false;
             }
         }
-        println!("counter: {}", self.counter);
         true
     }
 }
 
 fn main() {
-    let model = AppModel { counter: 0 };
+    let model = AppModel {
+        mode: AppMode::View,
+    };
     let relm = RelmApp::new(model);
     relm.run();
 }
