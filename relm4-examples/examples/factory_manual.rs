@@ -10,12 +10,12 @@ enum AppMsg {
     Clicked(usize),
 }
 
-struct Data {
+struct Counter {
     counter: u8,
 }
 
 struct AppModel {
-    data: FactoryVec<Data>,
+    data: FactoryVec<Counter>,
     counter: u8,
 }
 
@@ -29,7 +29,7 @@ impl AppUpdate for AppModel {
     fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) -> bool {
         match msg {
             AppMsg::Add => {
-                self.data.push(Data {
+                self.data.push(Counter {
                     counter: self.counter,
                 });
                 self.counter += 1;
@@ -38,8 +38,9 @@ impl AppUpdate for AppModel {
                 self.data.pop();
             }
             AppMsg::Clicked(index) => {
-                let data = self.data.get_mut(index);
-                data.counter = data.counter.wrapping_sub(1);
+                if let Some(data) = self.data.get_mut(index) {
+                    data.counter = data.counter.wrapping_sub(1);
+                }
             }
         }
         true
@@ -50,7 +51,7 @@ struct FactoryWidgets {
     button: gtk::Button,
 }
 
-impl FactoryPrototype for Data {
+impl FactoryPrototype for Counter {
     type Factory = FactoryVec<Self>;
     type Widgets = FactoryWidgets;
     type Root = gtk::Button;

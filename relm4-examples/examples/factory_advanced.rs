@@ -15,12 +15,12 @@ enum AppMsg {
     InsertAfter(Rc<DynamicIndex>),
 }
 
-struct Data {
+struct Counter {
     counter: u8,
 }
 
 struct AppModel {
-    data: FactoryVecDeque<Data>,
+    data: FactoryVecDeque<Counter>,
     counter: u8,
 }
 
@@ -34,7 +34,7 @@ impl AppUpdate for AppModel {
     fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) -> bool {
         match msg {
             AppMsg::AddFirst => {
-                self.data.push_front(Data {
+                self.data.push_front(Counter {
                     counter: self.counter,
                 });
             }
@@ -42,8 +42,9 @@ impl AppUpdate for AppModel {
                 self.data.pop_back();
             }
             AppMsg::CountAt(index) => {
-                let data = self.data.get_mut(index.current_index());
-                data.counter = data.counter.wrapping_sub(1);
+                if let Some(data) = self.data.get_mut(index.current_index()) {
+                    data.counter = data.counter.wrapping_sub(1);
+                }
             }
             AppMsg::RemoveAt(index) => {
                 self.data.remove(index.current_index());
@@ -51,7 +52,7 @@ impl AppUpdate for AppModel {
             AppMsg::InsertBefore(index) => {
                 self.data.insert(
                     index.current_index(),
-                    Data {
+                    Counter {
                         counter: self.counter,
                     },
                 );
@@ -59,7 +60,7 @@ impl AppUpdate for AppModel {
             AppMsg::InsertAfter(index) => {
                 self.data.insert(
                     index.current_index() + 1,
-                    Data {
+                    Counter {
                         counter: self.counter,
                     },
                 );
@@ -75,7 +76,7 @@ struct FctryWidgets {
     counter_button: gtk::Button,
 }
 
-impl FactoryPrototype for Data {
+impl FactoryPrototype for Counter {
     type Factory = FactoryVecDeque<Self>;
     type Widgets = FctryWidgets;
     type Root = gtk::Box;

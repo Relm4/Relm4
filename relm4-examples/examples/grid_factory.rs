@@ -101,8 +101,9 @@ impl AppUpdate for AppModel {
                 self.data.pop();
             }
             AppMsg::Clicked(index) => {
-                let data = self.data.get_mut(index);
-                data.counter = data.counter.wrapping_sub(1);
+                if let Some(data) = self.data.get_mut(index) {
+                    data.counter = data.counter.wrapping_sub(1);
+                }
             }
         }
         true

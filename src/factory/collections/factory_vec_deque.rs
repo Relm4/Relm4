@@ -159,6 +159,16 @@ where
         }
     }
 
+    /// Returns the length as amount of elements stored in this type.
+    pub fn len(&self) -> usize {
+        self.data.len()
+    }
+
+    /// Returns [`true`] if the length of this type is `0`.
+    pub fn is_empty(&self) -> bool {
+        self.data.is_empty()
+    }
+
     /// Insert an element at the end of a [`FactoryVecDeque`].
     pub fn push_back(&mut self, data: Data) {
         let index = self.data.len();
@@ -231,18 +241,18 @@ where
     }
 
     /// Get a reference to data stored at `index`.
-    pub fn get(&self, index: usize) -> &Data {
-        &self.data[index].inner
+    pub fn get(&self, index: usize) -> Option<&Data> {
+        self.data.get(index).map(|data| &data.inner)
     }
 
     /// Get a mutable reference to data stored at `index`.
     ///
     /// Assumes that the data will be modified and the corresponding widget
     /// needs to be updated.
-    pub fn get_mut(&mut self, index: usize) -> &mut Data {
+    pub fn get_mut(&mut self, index: usize) -> Option<&mut Data> {
         self.add_change(Change::new(index, ChangeType::Update));
 
-        &mut self.data[index].inner
+        self.data.get_mut(index).map(|data| &mut data.inner)
     }
 
     fn add_change(&mut self, change: Change) {
