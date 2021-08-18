@@ -69,7 +69,7 @@ impl PropertyType {
 
     fn component_tokens(&self) -> Option<TokenStream2> {
         if let PropertyType::Component(expr) = self {
-            Some(quote_spanned! { expr.span() => #expr.root_widget() })
+            Some(quote_spanned! { expr.span() => #expr })
         } else {
             None
         }
