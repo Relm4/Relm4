@@ -53,7 +53,7 @@ impl DynamicIndex {
 enum ChangeType {
     Unchanged,
     Add,
-    Remove,
+    Remove(u16),
     Recreate,
     Update,
 }
@@ -69,9 +69,9 @@ impl ChangeType {
                     *self = other;
                 }
             }
-            ChangeType::Add | ChangeType::Recreate => {
-                if other == ChangeType::Remove {
-                    *self = ChangeType::Remove;
+            ChangeType::Add => {
+                if other == ChangeType::Remove(1) {
+                    *self = ChangeType::Unchanged;
                 } else if other != ChangeType::Update {
                     panic!(
                         "Logical error in change tracking. Unexpected change: {:?} <- {:?}",
@@ -79,9 +79,25 @@ impl ChangeType {
                     );
                 }
             }
-            ChangeType::Remove => {
+            ChangeType::Recreate => {
+                if other == ChangeType::Remove(1) {
+                    *self = ChangeType::Remove(1);
+                } else if other != ChangeType::Update {
+                    panic!(
+                        "Logical error in change tracking. Unexpected change: {:?} <- {:?}",
+                        self, other
+                    );
+                }
+            }
+            ChangeType::Remove(num) => {
                 if other == ChangeType::Add {
-                    *self = ChangeType::Recreate;
+                    if *num == 1 {
+                        *self = ChangeType::Recreate;
+                    } else {
+                        *self = ChangeType::Remove(*num - 1);
+                    }
+                } else if other == ChangeType::Remove(1) {
+                    *self = ChangeType::Remove(*num + 1);
                 } else {
                     panic!(
                         "Logical error in change tracking. Unexpected change: {:?} <- {:?}",
@@ -153,10 +169,13 @@ where
 
     /// Remove an element at the end of a [`FactoryVecDeque`].
     pub fn pop_back(&mut self) -> Option<Data> {
-        let data = self.data.pop_back();
-        let index = self.data.len();
-        self.add_change(Change::new(index, ChangeType::Remove));
-        data.map(|data| data.inner)
+        if let Some(data) = self.data.pop_back() {
+            let index = self.data.len();
+            self.add_change(Change::new(index, ChangeType::Remove(1)));
+            Some(data.inner)
+        } else {
+            None
+        }
     }
 
     /// Adds an element at the front.
@@ -172,12 +191,15 @@ where
 
     /// Removes an element from the front.
     pub fn pop_front(&mut self) -> Option<Data> {
-        self.add_change(Change::new(0, ChangeType::Remove));
-        let data = self.data.pop_front();
-        for elem in &self.data {
-            elem.index.decrement();
+        if let Some(data) = self.data.pop_front() {
+            self.add_change(Change::new(0, ChangeType::Remove(1)));
+            for elem in &self.data {
+                elem.index.decrement();
+            }
+            Some(data.inner)
+        } else {
+            None
         }
-        data.map(|data| data.inner)
     }
 
     /// Adds an element at a given index.
@@ -195,14 +217,17 @@ where
 
     /// Removes an element at a given index.
     pub fn remove(&mut self, index: usize) -> Option<Data> {
-        self.add_change(Change::new(index, ChangeType::Remove));
-        let data = self.data.remove(index);
-        for elem in &self.data {
-            if elem.index.current_index() > index {
-                elem.index.decrement();
+        if let Some(data) = self.data.remove(index) {
+            self.add_change(Change::new(index, ChangeType::Remove(1)));
+            for elem in &self.data {
+                if elem.index.current_index() > index {
+                    elem.index.decrement();
+                }
             }
+            Some(data.inner)
+        } else {
+            None
         }
-        data.map(|data| data.inner)
     }
 
     /// Get a reference to data stored at `index`.
@@ -229,10 +254,10 @@ where
                     }
                 }
             }
-            ChangeType::Remove => {
+            ChangeType::Remove(num) => {
                 for elem in self.changes.borrow_mut().iter_mut() {
                     if elem.index > change.index {
-                        elem.index -= 1;
+                        elem.index -= num as usize;
                     }
                 }
             }
@@ -287,10 +312,12 @@ where
                     let data = &self.data[index];
                     data.inner.update(&data.index, &widgets[index]);
                 }
-                ChangeType::Remove => {
-                    let widget = widgets.remove(index).unwrap();
-                    let remove_widget = Data::get_root(&widget);
-                    view.remove(remove_widget);
+                ChangeType::Remove(num) => {
+                    for _ in 0..*num {
+                        let widget = widgets.remove(index).unwrap();
+                        let remove_widget = Data::get_root(&widget);
+                        view.remove(remove_widget);
+                    }
                 }
                 ChangeType::Recreate => {
                     let widget = widgets.pop_back().unwrap();

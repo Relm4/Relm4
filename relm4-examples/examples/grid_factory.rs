@@ -126,9 +126,7 @@ impl FactoryPrototype for Data {
         button.connect_clicked(move |_| {
             sender.send(AppMsg::Clicked(index)).unwrap();
         });
-        FactoryWidgets {
-            button
-        }
+        FactoryWidgets { button }
     }
 
     fn position(&self, index: &usize) -> GridPosition {
