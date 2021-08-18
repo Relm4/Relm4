@@ -2,9 +2,11 @@
 
 ## Unreleased
 
+## 0.1.0-beta.7 - 2021-08-19
+
 ### Added
 
-+ Book: Factory chapters
++ Book: Factory, components, worker and thread + async chapters
 
 ### Changed
 
@@ -12,7 +14,8 @@
 
 ### Fixed
 
-+ Fix unsound removal of elements in FactoryVecDeque
++ Fixed components macro
++ Fixed unsound removal of elements in FactoryVecDeque
 
 
 ## 0.1.0-beta.6 - 2021-08-18

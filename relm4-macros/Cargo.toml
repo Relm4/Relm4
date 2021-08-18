@@ -2,7 +2,7 @@
 name = "relm4-macros"
 authors = ["Aaron Erhardt <aaron.erhardt@t-online.de>"]
 edition = "2018"
-version = "0.1.0-beta.6"
+version = "0.1.0-beta.7"
 description = "An idiomatic GUI library inspired by Elm and based on gtk4-rs"
 repository = "https://github.com/AaronErhardt/relm4"
 readme = "README.md"
