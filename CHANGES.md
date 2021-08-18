@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
++ Fix unsound removal of elements in FactoryVecDeque
+
+
 ## 0.1.0-beta.6 - 2021-08-18
 
 ### Changed
