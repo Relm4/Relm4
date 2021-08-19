@@ -51,7 +51,7 @@ impl Spanned for WidgetFunc {
     fn span(&self) -> Span2 {
         self.path_segments
             .first()
-            .expect("No segments in WidgetFunc")
+            .expect("Expected path segments in WidgetFunc")
             .span()
     }
 }

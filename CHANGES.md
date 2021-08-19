@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Added
+
++ Allow passing additional arguments to widget initialization (useful e.g. for girds)
++ Book: Reusable components and widget macro reference chapters
+
+### Changed
+
++ Improved error messages in relm4-macros
+
 ## 0.1.0-beta.7 - 2021-08-19
 
 ### Added

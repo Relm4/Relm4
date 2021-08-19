@@ -4,7 +4,7 @@ use syn::{
     parse::{Parse, ParseStream},
     punctuated::Punctuated,
     spanned::Spanned,
-    Result, Token,
+    Error, Result, Token,
 };
 
 #[derive(Debug)]
@@ -20,7 +20,10 @@ where
     T: Parse + ToTokens,
 {
     fn parse(input: ParseStream) -> Result<Self> {
-        let punct: Punctuated<T, Token![,]> = input.call(Punctuated::parse_separated_nonempty)?;
+        let punct: Punctuated<T, Token![,]> = input.call(Punctuated::parse_terminated)?;
+        if punct.is_empty() {
+            return Err(Error::new(input.span(), "Expected at least one element. This is probably caused by empty arguments and macros."));
+        }
         let inner = punct.into_pairs().map(|pair| pair.into_value()).collect();
 
         Ok(Args { inner })

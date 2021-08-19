@@ -4,22 +4,6 @@ use syn::{spanned::Spanned, Error};
 
 use super::{PropertyType, Tracker, Widget, WidgetFunc};
 
-/*impl Tracker {
-    fn bool_eqation_tokens(&self) -> TokenStream2 {
-        let mut tokens = TokenStream2::new();
-
-        let mut iter = self.items.iter();
-        let first = iter.next().expect("No items to be tracked");
-        tokens.extend(quote_spanned! { first.span() => #first });
-
-        for item in iter {
-            tokens.extend(quote_spanned! { item.span() => || #item });
-        }
-
-        tokens
-    }
-}*/
-
 impl PropertyType {
     fn init_assign_tokens(&self) -> Option<TokenStream2> {
         match self {
@@ -79,26 +63,38 @@ impl PropertyType {
 impl WidgetFunc {
     pub fn type_token_stream(&self) -> TokenStream2 {
         let mut tokens = TokenStream2::new();
+
+        // If type was specified, use it
         let segments = if let Some(ty) = &self.ty {
             &ty[..]
         } else if self.args.is_some() {
+            // If for example gtk::Box::new() was used, ignore ::new()
+            // and use gtk::Box as type.
             let len = self.path_segments.len();
-            if len < 1 {
-                return Error::new(self.span().unwrap().into(), "TODO").into_compile_error();
+            if len == 0 {
+                return Error::new(self.span().unwrap().into(), "Expected path here.")
+                    .into_compile_error();
+            } else if len == 1 {
+                return Error::new(self.span().unwrap().into(), &format!("You need to specify a type of your function. Use this instead: {}() -> type {{", self.path_segments.first().unwrap())).into_compile_error();
+            } else {
+                let last_index = len - 1;
+                &self.path_segments[0..last_index]
             }
-            let last_index = len - 1;
-            &self.path_segments[0..last_index]
         } else {
             &self.path_segments[..]
         };
 
         let mut seg_iter = segments.iter();
-        tokens.extend(
-            seg_iter
-                .next()
-                .expect("No path segments in WidgetFunc")
-                .to_token_stream(),
-        );
+        let first = if let Some(first) = seg_iter.next() {
+            first
+        } else {
+            return Error::new(
+                self.span().unwrap().into(),
+                "No path segments in WidgetFunc.",
+            )
+            .into_compile_error();
+        };
+        tokens.extend(first.to_token_stream());
 
         for segment in seg_iter {
             tokens.extend(quote! {::});
@@ -115,7 +111,7 @@ impl WidgetFunc {
         tokens.extend(
             seg_iter
                 .next()
-                .expect("No path segments in WidgetFunc")
+                .expect("No path segments in WidgetFunc. Can't generate function tokens.")
                 .to_token_stream(),
         );
 
@@ -218,24 +214,29 @@ impl Widget {
             if let Some(p_assign) = p_assign_opt {
                 let p_name = &prop.name;
                 let p_span = p_name.span().unwrap().into();
+                let args_stream = if let Some(args) = &prop.args {
+                    quote! { ,#args }
+                } else {
+                    TokenStream2::new()
+                };
 
                 property_stream.extend(match (prop.optional_assign, prop.iterative) {
                     (false, false) => {
                         quote_spanned! {
-                            p_span => #w_name.#p_name(#p_assign);
+                            p_span => #w_name.#p_name(#p_assign #args_stream);
                         }
                     }
                     (true, false) => {
                         quote_spanned! {
                             p_span => if let Some(__p_assign) = #p_assign {
-                                #w_name.#p_name(__p_assign);
+                                #w_name.#p_name(__p_assign #args_stream);
                             }
                         }
                     }
                     (false, true) => {
                         quote_spanned! {
                             p_span => for __elem in #p_assign {
-                                #w_name.#p_name(__elem);
+                                #w_name.#p_name(__elem #args_stream );
                             }
                         }
                     }
@@ -243,7 +244,7 @@ impl Widget {
                         quote_spanned! {
                             p_span => for __elem in #p_assign {
                                 if let Some(__p_assign) = __elem {
-                                    #w_name.#p_name(__p_assign);
+                                    #w_name.#p_name(__p_assign #args_stream );
                                 }
                             }
                         }
