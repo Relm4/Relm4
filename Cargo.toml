@@ -14,12 +14,14 @@ categories = ["gui"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [workspace]
 members = [
+    "relm4-components",
     "relm4-examples",
     "relm4-macros",
-    "relm4-components",
+    "relm4-examples/libadwaita",
 ]
 
 [dependencies]
+adw = { version = "0.1.0-alpha-3", optional = true, package = "libadwaita" }
 async-trait = { version = "0.1", optional = true }
 fragile = "1"
 futures-core = "0.3"
@@ -30,5 +32,6 @@ tokio = { version = "1.9", optional = true, features = ["rt"] }
 
 [features]
 default = []
+libadwaita = ["adw"]
 tokio-rt = ["tokio", "async-trait"]
-all = ["tokio-rt"]
+all = ["tokio-rt", "libadwaita"]
