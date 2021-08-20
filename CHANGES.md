@@ -4,6 +4,8 @@
 
 ### Added
 
++ Fully qualified syntax for trait disabiguation in relm4-macros
++ Support for libadwaita 🎉
 + Allow passing additional arguments to widget initialization (useful e.g. for girds)
 + Book: Reusable components and widget macro reference chapters
 
