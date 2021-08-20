@@ -1,12 +1,12 @@
 # Changelog
 
-## Unreleased
+## 0.1.0-beta.8 - 2021-08-20
 
 ### Added
 
 + Fully qualified syntax for trait disabiguation in relm4-macros
 + Support for libadwaita 🎉
-+ Allow passing additional arguments to widget initialization (useful e.g. for girds)
++ Allow passing additional arguments to widget initialization (useful e.g. for grids)
 + Book: Reusable components and widget macro reference chapters
 
 ### Changed
