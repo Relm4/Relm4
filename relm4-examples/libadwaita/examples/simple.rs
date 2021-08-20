@@ -1,5 +1,5 @@
 use adw::traits::ApplicationWindowExt;
-use gtk::prelude::{BoxExt, ButtonExt, OrientableExt};
+use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
 use relm4::{send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets};
 
 #[derive(Default)]
@@ -36,7 +36,10 @@ impl AppUpdate for AppModel {
 impl Widgets<AppModel, ()> for AppWidgets {
     view! {
         main_window = adw::ApplicationWindow {
-            set_child: main_box = Some(&gtk::Box) {
+            GtkWindowExt::set_default_width: 300,
+            GtkWindowExt::set_default_height: 200,
+
+            ApplicationWindowExt::set_child: main_box = Some(&gtk::Box) {
                 set_orientation: gtk::Orientation::Vertical,
 
                 append = &adw::HeaderBar {
@@ -68,11 +71,6 @@ impl Widgets<AppModel, ()> for AppWidgets {
                 }
             },
         }
-    }
-
-    fn post_init() {
-        gtk::prelude::GtkWindowExt::set_default_width(&main_window, 300);
-        gtk::prelude::GtkWindowExt::set_default_height(&main_window, 200);
     }
 }
 

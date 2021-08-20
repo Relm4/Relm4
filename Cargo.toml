@@ -16,8 +16,8 @@ categories = ["gui"]
 members = [
     "relm4-components",
     "relm4-examples",
-    "relm4-macros",
     "relm4-examples/libadwaita",
+    "relm4-macros",
 ]
 
 [dependencies]
