@@ -16,15 +16,11 @@ categories = ["gui"]
 bytes = "1"
 gtk = { version = "0.2", package = "gtk4" }
 once_cell = "1.8"
+rand = "0.8"
+relm4 = { path = "../", features = ["tokio-rt"] }
+relm4-components = { path = "../relm4-components" }
+relm4-macros = { path = "../relm4-macros" }
 reqwest = "0.11"
-tracker = "0.1"
 surf = "2.2"
 tokio = { version = "1.9", features = ["rt", "macros", "time"] }
-rand = "0.8"
-
-#relm4 = { version = "0.1.0-beta.7", features = ["tokio-rt"] }
-relm4 = { path = "../", features = ["tokio-rt"] }
-#relm4-macros = "0.1.0-beta.7"
-relm4-macros = { path = "../relm4-macros" }
-#relm4-components = "0.1.0-beta.7"
-relm4-components = { path = "../relm4-components" }
+tracker = "0.1"

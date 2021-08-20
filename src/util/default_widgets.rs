@@ -31,6 +31,39 @@ impl_default_widgets![
     gtk::Printer
 ];
 
+#[cfg(feature = "libadwaita")]
+#[cfg_attr(doc, doc(cfg(feature = "libadwaita")))]
+impl_default_widgets![
+    adw::ActionRow,
+    adw::ApplicationWindow,
+    adw::Avatar,
+    adw::Bin,
+    adw::Carousel,
+    adw::CarouselIndicatorDots,
+    adw::CarouselIndicatorLines,
+    adw::Clamp,
+    adw::ClampLayout,
+    adw::ClampScrollable,
+    adw::ExpanderRow,
+    adw::Flap,
+    adw::HeaderBar,
+    adw::Leaflet,
+    adw::PreferencesGroup,
+    adw::PreferencesPage,
+    adw::PreferencesRow,
+    adw::PreferencesWindow,
+    adw::Squeezer,
+    adw::StatusPage,
+    adw::SwipeTracker,
+    adw::TabBar,
+    adw::TabView,
+    adw::ViewSwitcher,
+    adw::ViewSwitcherBar,
+    adw::ViewSwitcherTitle,
+    adw::Window,
+    adw::WindowTitle
+];
+
 impl_default_widgets![
     gtk::AboutDialog,
     gtk::ActionBar,

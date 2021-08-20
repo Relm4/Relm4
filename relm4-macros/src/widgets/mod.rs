@@ -1,6 +1,6 @@
 use proc_macro2::Span as Span2;
 use proc_macro2::TokenStream as TokenStream2;
-use syn::{punctuated::Punctuated, spanned::Spanned, token, Expr, ExprClosure, Ident, Lit};
+use syn::{punctuated::Punctuated, spanned::Spanned, token, Expr, ExprClosure, Ident, Lit, Path};
 
 use crate::args::Args;
 
@@ -27,8 +27,23 @@ pub(super) enum PropertyType {
 }
 
 #[derive(Debug)]
+pub enum PropertyName {
+    Ident(Ident),
+    Path(Path),
+}
+
+impl Spanned for PropertyName {
+    fn span(&self) -> Span2 {
+        match self {
+            PropertyName::Ident(ident) => ident.span(),
+            PropertyName::Path(path) => path.span(),
+        }
+    }
+}
+
+#[derive(Debug)]
 pub(super) struct Property {
-    pub name: Ident,
+    pub name: PropertyName,
     pub ty: PropertyType,
     pub args: Option<Args<Expr>>,
     pub optional_assign: bool,

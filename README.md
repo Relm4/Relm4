@@ -44,6 +44,13 @@ relm4-macros = "0.1.0-beta.7"
 relm4-components = "0.1.0-beta.7"
 ```
 
+### Features
+
+The relm4 crate has two feature flags:
+
++ tokio-rt: Adds the `AsyncWorker` type that uses an async update function
++ libadwaita: Improved support for [libadwaita](https://gitlab.gnome.org/World/Rust/libadwaita-rs)
+
 ## Examples
 
 Several example applications are available at [relm4-examples/](relm4-examples/).

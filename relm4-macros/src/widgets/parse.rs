@@ -8,7 +8,7 @@ use syn::{
 
 use crate::util;
 
-use super::{Properties, Property, PropertyType, Tracker, Widget, WidgetFunc};
+use super::{Properties, Property, PropertyName, PropertyType, Tracker, Widget, WidgetFunc};
 
 impl Parse for Tracker {
     fn parse(input: ParseStream) -> Result<Self> {
@@ -31,27 +31,38 @@ impl Parse for Tracker {
     }
 }
 
+impl Parse for PropertyName {
+    fn parse(input: ParseStream) -> Result<Self> {
+        Ok(if input.peek(Token![::]) || input.peek2(Token! [::]) {
+            PropertyName::Path(input.parse()?)
+        } else {
+            PropertyName::Ident(input.parse()?)
+        })
+    }
+}
+
 impl Parse for Property {
     fn parse(input: ParseStream) -> Result<Self> {
-        let name: Ident = input.parse()?;
+        let name = input.parse()?;
         let mut optional_assign = false;
         let mut iterative = false;
 
         if input.peek(Token![!]) {
-            return if name == "factory" {
-                let _exclm: Token![!] = input.parse()?;
-                let paren_input;
-                parenthesized!(paren_input in input);
-                Ok(Property {
-                    name,
-                    ty: PropertyType::Factory(paren_input.parse()?),
-                    optional_assign,
-                    iterative,
-                    args: None,
-                })
-            } else {
-                Err(input.error("Expected macro factory"))
-            };
+            if let PropertyName::Ident(ref ident_name) = name {
+                if ident_name == "factory" {
+                    let _exclm: Token![!] = input.parse()?;
+                    let paren_input;
+                    parenthesized!(paren_input in input);
+                    return Ok(Property {
+                        name,
+                        ty: PropertyType::Factory(paren_input.parse()?),
+                        optional_assign,
+                        iterative,
+                        args: None,
+                    });
+                }
+            }
+            return Err(input.error("Expected factory macro"));
         }
 
         // check for property(a, b, c): ...

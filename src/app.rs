@@ -1,5 +1,5 @@
 use gtk::glib;
-use gtk::prelude::{ApplicationExt, ApplicationExtManual, GtkWindowExt};
+use gtk::prelude::{ApplicationExt, ApplicationExtManual, GtkWindowExt, IsA};
 
 use std::marker::PhantomData;
 
@@ -15,7 +15,9 @@ use crate::{AppUpdate, Components, Model as ModelTrait, Widgets as WidgetsTrait}
 pub struct RelmApp<Model>
 where
     Model: ModelTrait + AppUpdate + 'static,
-    Model::Widgets: WidgetsTrait<Model, (), Root = gtk::ApplicationWindow> + 'static,
+    Model::Widgets: WidgetsTrait<Model, ()> + 'static,
+    <Model::Widgets as WidgetsTrait<Model, ()>>::Root:
+        IsA<gtk::ApplicationWindow> + IsA<gtk::Window>,
     Model::Components: Components<Model> + 'static,
 {
     model: PhantomData<Model>,
@@ -25,7 +27,9 @@ where
 impl<Model> RelmApp<Model>
 where
     Model: ModelTrait + AppUpdate + 'static,
-    Model::Widgets: WidgetsTrait<Model, (), Root = gtk::ApplicationWindow> + 'static,
+    Model::Widgets: WidgetsTrait<Model, ()> + 'static,
+    <Model::Widgets as WidgetsTrait<Model, ()>>::Root:
+        IsA<gtk::ApplicationWindow> + IsA<gtk::Window>,
     Model::Components: Components<Model> + 'static,
 {
     /// Runs the application, returns once the application is closed.
