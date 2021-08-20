@@ -1,5 +1,5 @@
+use adw::traits::ApplicationWindowExt;
 use gtk::prelude::{BoxExt, ButtonExt, OrientableExt};
-use adw::prelude::{WindowExt};
 use relm4::{send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets};
 
 #[derive(Default)]
@@ -35,31 +35,44 @@ impl AppUpdate for AppModel {
 #[relm4_macros::widget]
 impl Widgets<AppModel, ()> for AppWidgets {
     view! {
-        adw::ApplicationWindow {
-            //set_title: Some("Simple app"),
-            set_child = Some(&gtk::Box) {
+        main_window = adw::ApplicationWindow {
+            set_child: main_box = Some(&gtk::Box) {
                 set_orientation: gtk::Orientation::Vertical,
-                set_margin_all: 5,
-                set_spacing: 5,
 
-                append = &gtk::Button {
-                    set_label: "Increment",
-                    connect_clicked(sender) => move |_| {
-                        send!(sender, AppMsg::Increment);
-                    },
+                append = &adw::HeaderBar {
+                    set_title_widget = Some(&gtk::Label) {
+                        set_label: "Title!",
+                    }
                 },
-                append = &gtk::Button {
-                    set_label: "Decrement",
-                    connect_clicked(sender) => move |_| {
-                        send!(sender, AppMsg::Decrement);
-                    },
-                },
-                append = &gtk::Label {
+                append = &gtk::Box {
+                    set_orientation: gtk::Orientation::Vertical,
                     set_margin_all: 5,
-                    set_label: watch! { &format!("Counter: {}", model.counter) },
+                    set_spacing: 5,
+
+                    append = &gtk::Button {
+                        set_label: "Increment",
+                        connect_clicked(sender) => move |_| {
+                            send!(sender, AppMsg::Increment);
+                        },
+                    },
+                    append = &gtk::Button {
+                        set_label: "Decrement",
+                        connect_clicked(sender) => move |_| {
+                            send!(sender, AppMsg::Decrement);
+                        },
+                    },
+                    append = &gtk::Label {
+                        set_margin_all: 5,
+                        set_label: watch! { &format!("Counter: {}", model.counter) },
+                    }
                 }
             },
         }
+    }
+
+    fn post_init() {
+        gtk::prelude::GtkWindowExt::set_default_width(&main_window, 300);
+        gtk::prelude::GtkWindowExt::set_default_height(&main_window, 200);
     }
 }
 
