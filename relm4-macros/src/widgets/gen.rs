@@ -1,8 +1,8 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned, ToTokens};
-use syn::{spanned::Spanned, Error};
+use syn::{spanned::Spanned, Error, Ident};
 
-use super::{PropertyType, Tracker, Widget, WidgetFunc};
+use super::{PropertyName, PropertyType, Tracker, Widget, WidgetFunc};
 
 impl PropertyType {
     fn init_assign_tokens(&self) -> Option<TokenStream2> {
@@ -131,6 +131,40 @@ impl WidgetFunc {
     }
 }
 
+impl PropertyName {
+    fn assign_fn_stream(&self, w_name: &Ident) -> TokenStream2 {
+        match self {
+            PropertyName::Ident(ident) => {
+                quote! { #w_name.#ident }
+            }
+            PropertyName::Path(path) => path.to_token_stream(),
+        }
+    }
+
+    fn assign_args_stream(&self, w_name: &Ident) -> Option<TokenStream2> {
+        match self {
+            PropertyName::Ident(_) => None,
+            PropertyName::Path(_) => Some(quote! { &#w_name, }),
+        }
+    }
+
+    fn self_assign_fn_stream(&self, w_name: &Ident) -> TokenStream2 {
+        match self {
+            PropertyName::Ident(ident) => {
+                quote! { self.#w_name.#ident }
+            }
+            PropertyName::Path(path) => path.to_token_stream(),
+        }
+    }
+
+    fn self_assign_args_stream(&self, w_name: &Ident) -> Option<TokenStream2> {
+        match self {
+            PropertyName::Ident(_) => None,
+            PropertyName::Path(_) => Some(quote! { &self.#w_name, }),
+        }
+    }
+}
+
 impl Widget {
     pub fn return_stream(&self) -> TokenStream2 {
         let w_span = self.func.span();
@@ -165,23 +199,26 @@ impl Widget {
             if let Some(p_assign) = p_assign_opt {
                 let p_name = &prop.name;
                 let p_span = p_name.span().unwrap().into();
+                let assign_fn = prop.name.self_assign_fn_stream(w_name);
+                let self_assign_args = prop.name.self_assign_args_stream(w_name);
+
                 property_stream.extend(match (prop.optional_assign, prop.iterative) {
                     (false, false) => {
                         quote_spanned! {
-                            p_span => self.#w_name.#p_name(#p_assign);
+                            p_span => #assign_fn(#self_assign_args #p_assign);
                         }
                     }
                     (true, false) => {
                         quote_spanned! {
                             p_span => if let Some(__p_assign) = #p_assign {
-                                self.#w_name.#p_name(__p_assign);
+                                #assign_fn(#self_assign_args __p_assign);
                             }
                         }
                     }
                     (false, true) => {
                         quote_spanned! {
                             p_span => for __elem in #p_assign {
-                                self.#w_name.#p_name(__elem);
+                                #assign_fn(#self_assign_args __elem);
                             }
                         }
                     }
@@ -189,7 +226,7 @@ impl Widget {
                         quote_spanned! {
                             p_span => for __elem in #p_assign {
                                 if let Some(__p_assign) = __elem {
-                                    self.#w_name.#p_name(__p_assign);
+                                    #assign_fn(#self_assign_args __p_assign);
                                 }
                             }
                         }
@@ -220,23 +257,26 @@ impl Widget {
                     TokenStream2::new()
                 };
 
+                let assign_fn = prop.name.assign_fn_stream(w_name);
+                let self_assign_args = prop.name.assign_args_stream(w_name);
+
                 property_stream.extend(match (prop.optional_assign, prop.iterative) {
                     (false, false) => {
                         quote_spanned! {
-                            p_span => #w_name.#p_name(#p_assign #args_stream);
+                            p_span => #assign_fn(#self_assign_args #p_assign #args_stream);
                         }
                     }
                     (true, false) => {
                         quote_spanned! {
                             p_span => if let Some(__p_assign) = #p_assign {
-                                #w_name.#p_name(__p_assign #args_stream);
+                                #assign_fn(#self_assign_args __p_assign #args_stream);
                             }
                         }
                     }
                     (false, true) => {
                         quote_spanned! {
                             p_span => for __elem in #p_assign {
-                                #w_name.#p_name(__elem #args_stream );
+                                #assign_fn(#self_assign_args __elem #args_stream );
                             }
                         }
                     }
@@ -244,7 +284,7 @@ impl Widget {
                         quote_spanned! {
                             p_span => for __elem in #p_assign {
                                 if let Some(__p_assign) = __elem {
-                                    #w_name.#p_name(__p_assign #args_stream );
+                                    #assign_fn(#self_assign_args __p_assign #args_stream );
                                 }
                             }
                         }
@@ -271,6 +311,9 @@ impl Widget {
                 let p_name = &prop.name;
                 let p_span = p_name.span().unwrap().into();
 
+                let assign_fn = prop.name.assign_fn_stream(w_name);
+                let self_assign_args = prop.name.assign_args_stream(w_name);
+
                 let mut clone_stream = TokenStream2::new();
                 if let Some(args) = &prop.args {
                     for arg in &args.inner {
@@ -284,7 +327,7 @@ impl Widget {
                 stream.extend(quote_spanned! {
                     p_span => {
                         #clone_stream
-                        #w_name.#p_name(#p_assign);
+                        #assign_fn(#self_assign_args #p_assign);
                     }
                 });
             }
@@ -302,9 +345,13 @@ impl Widget {
             if let Some((bool_stream, update_stream)) = p_assign_opt {
                 let p_name = &prop.name;
                 let p_span = p_name.span().unwrap().into();
+
+                let assign_fn = prop.name.self_assign_fn_stream(w_name);
+                let self_assign_args = prop.name.self_assign_args_stream(w_name);
+
                 stream.extend(quote_spanned! {
                     p_span =>  if #bool_stream {
-                        self.#w_name.#p_name(#update_stream);
+                        #assign_fn(#self_assign_args #update_stream);
                 }});
             }
         }
@@ -320,9 +367,13 @@ impl Widget {
             if let Some(component_tokens) = p_assign_opt {
                 let p_name = &prop.name;
                 let p_span = p_name.span().unwrap().into();
+
+                let assign_fn = prop.name.self_assign_fn_stream(w_name);
+                let self_assign_args = prop.name.self_assign_args_stream(w_name);
+
                 stream.extend(quote_spanned! {
                     p_span =>
-                        self.#w_name.#p_name(#component_tokens);
+                        #assign_fn(#self_assign_args #component_tokens);
                 });
             }
         }
