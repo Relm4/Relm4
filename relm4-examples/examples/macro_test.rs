@@ -52,7 +52,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
                     connect_clicked(sender) => move |_| {
                         send!(sender, AppMsg::Increment);
                     },
-                    add_class_name: iterate!(&model.classes),
+                    add_css_class: iterate!(&model.classes),
                 },
                 append = &gtk::Button::new() {
                     set_label: track!(false, "Decrement"),

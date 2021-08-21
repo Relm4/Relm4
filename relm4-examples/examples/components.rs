@@ -1,7 +1,7 @@
 use gtk::prelude::{BoxExt, ButtonExt, DialogExt, GtkWindowExt, ToggleButtonExt, WidgetExt};
 use relm4::{
     send, AppUpdate, ComponentUpdate, Components, Model, RelmApp, RelmComponent, Sender,
-    WidgetPlus, Widgets,
+    Widgets,
 };
 
 enum HeaderMsg {
@@ -49,7 +49,7 @@ impl Widgets<HeaderModel, AppModel> for HeaderWidgets {
     view! {
         gtk::HeaderBar {
             set_title_widget = Some(&gtk::Box) {
-                add_class_name: "linked",
+                add_css_class: "linked",
                 append: group = &gtk::ToggleButton {
                     set_label: "View",
                     set_active: true,

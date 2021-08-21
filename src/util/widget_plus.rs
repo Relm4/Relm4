@@ -9,21 +9,9 @@ pub trait WidgetPlus {
     /// Set margin at start, end, top and bottom all at once.
     fn set_margin_all(&self, margin: i32);
 
-    /// Add class name to self that can be used inside CSS selectors.
-    fn add_class_name(&self, class: &str);
-
-    /// Remove class name from self.
-    fn remove_class_name(&self, class: &str);
-
     /// Add class name if active is [`true`] and
     /// remove class name if active is [`false`]
-    fn set_class_active(&self, class: &str, active: bool) {
-        if active {
-            self.add_class_name(class);
-        } else {
-            self.remove_class_name(class);
-        }
-    }
+    fn set_class_active(&self, class: &str, active: bool);
 
     /// Add inline CSS instructions to a widget.
     /// ```
@@ -42,12 +30,12 @@ impl<W: gtk::prelude::WidgetExt> WidgetPlus for W {
         self.set_margin_bottom(margin);
     }
 
-    fn add_class_name(&self, class: &str) {
-        self.style_context().add_class(class);
-    }
-
-    fn remove_class_name(&self, class: &str) {
-        self.style_context().remove_class(class);
+    fn set_class_active(&self, class: &str, active: bool) {
+        if active {
+            self.add_css_class(class);
+        } else {
+            self.remove_css_class(class);
+        }
     }
 
     fn inline_css(&self, style_data: &[u8]) {
