@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
++ Many minor book improvements by [tronta](https://github.com/tronta)
++ Removed classname methods from WidgetPlus [#14](https://github.com/AaronErhardt/relm4/pull/14)
+
 ## 0.1.0-beta.8 - 2021-08-20
 
 ### Added
