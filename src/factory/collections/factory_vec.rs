@@ -130,3 +130,14 @@ where
         self.changes.borrow_mut().clear();
     }
 }
+
+impl<Data, View> FactoryVec<Data>
+where
+    Data: FactoryPrototype<Factory = Self, View = View>,
+    View: FactoryView<Data::Root>,
+{
+    /// Get an immutable iterator for this type
+    pub fn iter(&self) -> std::slice::Iter<'_, Data> {
+        self.data.iter()
+    }
+}

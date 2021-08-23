@@ -1,5 +1,5 @@
 use gtk::glib;
-use gtk::prelude::{BoxExt, GridExt};
+use gtk::prelude::{BoxExt, GridExt, TreeViewExt};
 
 use crate::factory::{FactoryListView, FactoryView};
 
@@ -73,6 +73,17 @@ where
     }
 }
 
+impl FactoryView<gtk::TreeViewColumn> for gtk::TreeView {
+    type Position = ();
+    fn add(&self, widget: &gtk::TreeViewColumn, _position: &()) {
+        self.insert_column(widget, -1);
+    }
+
+    fn remove(&self, widget: &gtk::TreeViewColumn) {
+        self.remove_column(widget);
+    }
+}
+
 impl<Widget> FactoryView<Widget> for gtk::FlowBox
 where
     Widget: glib::IsA<gtk::Widget>,
@@ -139,5 +150,26 @@ where
 
     fn remove(&self, widget: &Widget) {
         GridExt::remove(self, widget);
+    }
+}
+
+#[cfg(feature = "libadwaita")]
+#[cfg_attr(doc, doc(cfg(feature = "libadwaita")))]
+mod adwaita {
+    use crate::factory::FactoryView;
+    use gtk::glib;
+
+    impl<Widget> FactoryView<Widget> for adw::Carousel
+    where
+        Widget: glib::IsA<gtk::Widget>,
+    {
+        type Position = ();
+        fn add(&self, widget: &Widget, _position: &Self::Position) {
+            self.append(widget);
+        }
+
+        fn remove(&self, widget: &Widget) {
+            self.remove(widget);
+        }
     }
 }

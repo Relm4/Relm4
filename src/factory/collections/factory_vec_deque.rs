@@ -302,7 +302,6 @@ where
         for (index, change) in change_map.iter().enumerate() {
             let mut widgets = self.widgets.borrow_mut();
 
-            dbg!(&change);
             match change {
                 ChangeType::Unchanged => (),
                 ChangeType::Add => {
@@ -348,5 +347,31 @@ where
             }
         }
         self.changes.borrow_mut().clear();
+    }
+}
+
+impl<Data, View> FactoryVecDeque<Data>
+where
+    Data: FactoryPrototype<Factory = Self, View = View>,
+    View: FactoryView<Data::Root>,
+{
+    /// Get an immutable iterator for this type
+    pub fn iter(&self) -> Iter<'_, Data> {
+        Iter {
+            inner: self.data.iter(),
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct Iter<'a, Data> {
+    inner: std::collections::vec_deque::Iter<'a, IndexedData<Data>>,
+}
+
+impl<'a, Data> std::iter::Iterator for Iter<'a, Data> {
+    type Item = &'a Data;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.inner.next().map(|data| &data.inner)
     }
 }
