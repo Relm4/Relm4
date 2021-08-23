@@ -1,6 +1,6 @@
-//! Reusable and easily configurable save dialog component.
+//! Reusable and easily configurable open dialog component.
 //!
-//! **[Example implementation](https://github.com/AaronErhardt/relm4/blob/main/relm4-examples/examples/save_dialog.rs)**
+//! **[Example implementation](https://github.com/AaronErhardt/relm4/blob/main/relm4-examples/examples/open_dialog.rs)**
 
 use gtk::prelude::{FileChooserExt, FileExt, NativeDialogExt};
 use relm4::{send, ComponentUpdate, Model, Sender};
@@ -10,7 +10,7 @@ use std::path::PathBuf;
 use crate::ParentWindow;
 
 #[derive(Clone, Debug)]
-pub struct SaveDialogSettings {
+pub struct OpenDialogSettings {
     /// Label for cancel button
     pub cancel_label: String,
     /// Label for accept button
@@ -24,19 +24,15 @@ pub struct SaveDialogSettings {
 }
 
 #[tracker::track]
-pub struct SaveDialogModel {
+pub struct OpenDialogModel {
     #[do_not_track]
-    settings: SaveDialogSettings,
-    suggestion: Option<String>,
+    settings: OpenDialogSettings,
     is_active: bool,
-    name: String,
 }
 
-pub enum SaveDialogMsg {
+pub enum OpenDialogMsg {
     /// Opens the dialog
-    Save,
-    /// Opens the dialog with a suggested file name
-    SaveAs(String),
+    Open,
     #[doc(hidden)]
     Accept(PathBuf),
     #[doc(hidden)]
@@ -45,62 +41,56 @@ pub enum SaveDialogMsg {
     Cancel,
 }
 
-impl Model for SaveDialogModel {
-    type Msg = SaveDialogMsg;
-    type Widgets = SaveDialogWidgets;
+impl Model for OpenDialogModel {
+    type Msg = OpenDialogMsg;
+    type Widgets = OpenDialogWidgets;
     type Components = ();
 }
 
 /// Interface for the parent model
-pub trait SaveDialogParent: Model
+pub trait OpenDialogParent: Model
 where
     Self::Widgets: ParentWindow,
 {
-    /// Configure the save dialog
-    fn dialog_config(&self) -> SaveDialogSettings;
+    /// Configure the open dialog
+    fn dialog_config(&self) -> OpenDialogSettings;
 
-    /// Tell the save dialog how to response if the user wants to save
-    fn save_msg(path: PathBuf) -> Self::Msg;
+    /// Tell the open dialog how to response if the user wants to open a file
+    fn open_msg(path: PathBuf) -> Self::Msg;
 }
 
-impl<ParentModel> ComponentUpdate<ParentModel> for SaveDialogModel
+impl<ParentModel> ComponentUpdate<ParentModel> for OpenDialogModel
 where
-    ParentModel: SaveDialogParent,
+    ParentModel: OpenDialogParent,
     <ParentModel as relm4::Model>::Widgets: ParentWindow,
 {
     fn init_model(parent_model: &ParentModel) -> Self {
-        SaveDialogModel {
+        OpenDialogModel {
             settings: parent_model.dialog_config(),
             is_active: false,
-            suggestion: None,
-            name: String::new(),
             tracker: 0,
         }
     }
 
     fn update(
         &mut self,
-        msg: SaveDialogMsg,
+        msg: OpenDialogMsg,
         _components: &(),
-        _sender: Sender<SaveDialogMsg>,
+        _sender: Sender<OpenDialogMsg>,
         parent_sender: Sender<ParentModel::Msg>,
     ) {
         self.reset();
 
         match msg {
-            SaveDialogMsg::Save => {
+            OpenDialogMsg::Open => {
                 self.is_active = true;
             }
-            SaveDialogMsg::SaveAs(name) => {
-                self.is_active = true;
-                self.set_name(name);
-            }
-            SaveDialogMsg::Cancel => {
+            OpenDialogMsg::Cancel => {
                 self.is_active = false;
             }
-            SaveDialogMsg::Accept(path) => {
+            OpenDialogMsg::Accept(path) => {
                 self.is_active = false;
-                parent_sender.send(ParentModel::save_msg(path)).unwrap();
+                parent_sender.send(ParentModel::open_msg(path)).unwrap();
             }
             _ => (),
         }
@@ -108,16 +98,15 @@ where
 }
 
 #[relm4_macros::widget(pub)]
-impl<ParentModel> relm4::Widgets<SaveDialogModel, ParentModel> for SaveDialogWidgets
+impl<ParentModel> relm4::Widgets<OpenDialogModel, ParentModel> for OpenDialogWidgets
 where
     ParentModel: Model,
     ParentModel::Widgets: ParentWindow,
 {
     view! {
         gtk::FileChooserNative {
-            set_action: gtk::FileChooserAction::Save,
+            set_action: gtk::FileChooserAction::Open,
             set_visible: watch!(model.is_active),
-            set_current_name: track!(model.changed(SaveDialogModel::name()), &model.name),
             add_filter: iterate!(&model.settings.filters),
             set_create_folders: model.settings.create_folders,
             set_cancel_label: Some(&model.settings.cancel_label),
@@ -129,14 +118,14 @@ where
                     gtk::ResponseType::Accept => {
                         if let Some(file) = dialog.file() {
                             if let Some(path) = file.path() {
-                                send!(sender, SaveDialogMsg::Accept(path));
+                                send!(sender, OpenDialogMsg::Accept(path));
                                 return;
                             }
                         }
-                        send!(sender, SaveDialogMsg::InvalidInput);
+                        send!(sender, OpenDialogMsg::InvalidInput);
                     },
                     gtk::ResponseType::Cancel => {
-                        send!(sender, SaveDialogMsg::Cancel)
+                        send!(sender, OpenDialogMsg::Cancel)
                     },
                     _ => (),
                 }
