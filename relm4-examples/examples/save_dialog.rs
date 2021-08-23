@@ -3,8 +3,9 @@ use relm4::{
     send, AppUpdate, Components, Model, RelmApp, RelmComponent, Sender, WidgetPlus, Widgets,
 };
 use relm4_components::save_dialog::{
-    SaveDialogModel, SaveDialogMsg, SaveDialogParent, SaveDialogParentWidgets, SaveDialogSettings,
+    SaveDialogModel, SaveDialogMsg, SaveDialogParent, SaveDialogSettings,
 };
+use relm4_components::ParentWindow;
 
 use std::path::PathBuf;
 
@@ -65,7 +66,7 @@ impl SaveDialogParent for AppModel {
     }
 }
 
-impl SaveDialogParentWidgets for AppWidgets {
+impl ParentWindow for AppWidgets {
     fn parent_window(&self) -> Option<gtk::Window> {
         Some(self.main_window.clone().upcast::<gtk::Window>())
     }
