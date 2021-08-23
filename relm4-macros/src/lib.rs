@@ -1,14 +1,14 @@
 use proc_macro::{self, TokenStream};
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote, quote_spanned};
-use syn::{parse_macro_input, spanned::Spanned, PathArguments};
+use quote::{quote, quote_spanned, ToTokens};
+use syn::{parse_macro_input, spanned::Spanned, Error, PathArguments};
 
+mod additional_fields;
 mod args;
 mod attrs;
 mod funcs;
 mod item_impl;
 mod macros;
-mod struct_field;
 mod types;
 mod util;
 mod widgets;
@@ -104,7 +104,13 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
     {
         generics
     } else {
-        panic!();
+        return TokenStream::from(
+            Error::new(
+                data.trait_.segments.span(),
+                "Expected generic parameters for model and parent model",
+            )
+            .to_compile_error(),
+        );
     };
 
     let ModelTypes {
@@ -176,10 +182,12 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let impl_generics = data.impl_generics;
     let where_clause = data.where_clause;
 
+    // Extract identifiers from additional fields for struct initialization: "test: u8" => "test"
     let additional_fields_return_stream = if let Some(fields) = &additional_fields {
         let mut tokens = TokenStream2::new();
-        for field in &fields.inner {
-            tokens.extend(field.ident_token());
+        for field in fields.inner.pairs() {
+            tokens.extend(field.value().ident.to_token_stream());
+            tokens.extend(quote! {,});
         }
         tokens
     } else {

@@ -1,13 +1,12 @@
 use proc_macro::Span;
 use syn::{spanned::Spanned, Error, Macro, Result};
 
-use crate::args::Args;
-use crate::struct_field::StructField;
+use crate::additional_fields::AdditionalFields;
 use crate::widgets::Widget;
 
 pub(super) struct Macros {
     pub widgets: Widget,
-    pub additional_fields: Option<Args<StructField>>,
+    pub additional_fields: Option<AdditionalFields>,
 }
 
 impl Macros {
@@ -45,7 +44,7 @@ impl Macros {
                         "additional_fields macro defined multiple times",
                     ));
                 }
-                additional_fields = Some(syn::parse_macro_input::parse::<Args<StructField>>(
+                additional_fields = Some(syn::parse_macro_input::parse::<AdditionalFields>(
                     tokens.into(),
                 )?);
             } else {
