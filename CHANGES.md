@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.1.0-beta.9
+
 ## Added
 
 + relm4-components: Open button with automatic recent files list
