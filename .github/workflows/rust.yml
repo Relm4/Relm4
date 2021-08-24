@@ -28,7 +28,7 @@ jobs:
         TZ: America/New_York
     steps:
       - run: apt-get update -y
-      - run: apt-get install -y libgtk-4-dev
+      - run: apt-get install -y libgtk-4-dev curl
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
