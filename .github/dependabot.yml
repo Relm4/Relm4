@@ -9,18 +9,3 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-      
-  - package-ecosystem: "cargo"
-    directory: "/relm4-components"
-    schedule:
-      interval: "daily"
-
-  - package-ecosystem: "cargo"
-    directory: "/relm4-macros"
-    schedule:
-      interval: "daily"
-
-  - package-ecosystem: "cargo"
-    directory: "/relm4-examples"
-    schedule:
-      interval: "daily"
