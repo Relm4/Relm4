@@ -2,15 +2,15 @@
 
 A collection of small example apps using relm4.
 
-## Run examples
-
-If you're not already in the examples directory run:
+## Setup
 
 ```bash
+git clone https://github.com/AaronErhardt/relm4.git
+cd relm4
 cd relm4-examples
 ```
 
-Execute examples by running:
+## Run examples
 
 ```bash
 cargo run --example NAME
@@ -22,15 +22,16 @@ cargo run --example NAME
 
 + simple_manual: A simple counter app that doesn't use relm4-macros.
 
-+ components: A simple app that counts up or down and also has two components that hide and show each other. 
-This demonstrates how to use components that can send messages to each other but are fully independent apart from that.
-
 + tracker: A simple app that shows two images that can are randomly selected from a list of icons.
 The app uses a tracker for efficient UI updates.
 
 + factory and grid_factory: Simple apps that use a factory to create and update widgets. Factories brings the concept of trackers to collections.
 A `FactoryVec` can be modified during the update method just like a normal vector and during the view function the factory will update only the affected widgets.
 To know how to update the widgets the `FactoryPrototype` trait is used to define the functions needed to generate, update and remove widgets.
+
++ factory_advanced: A more advanced factoy example that uses a `FactoryVecDeque`
+
++ components: A simple app that uses a component for the header bar and a component for a close alert dialog.
 
 + future: A small app that demonstrates how futures can be executed in relm4 by using the surf crate to download HTML from websites.
 Sadly this doesn't work for tokio (async-std and similar are fine though) but you can still spawn a thread that runs your asynchronous code inside a tokio runtime.
@@ -47,6 +48,11 @@ To disable the delays comment the two lines starting with `tokio::time::delay`.
 
 + alert: A simple app that uses the alert provided by relm4-components.
 
++ open_button: A simple app that uses the open button provided by relm4-components.
+
 + popover: A simple app that uses a popover.
 
 + drawing: A simple app that draws moving circles on a canvas.
+
++ components_old: A simple app that counts up or down and also has two components that hide and show each other. 
+This demonstrates how to use components that can send messages to each other but are fully independent apart from that.
