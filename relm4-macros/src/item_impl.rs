@@ -1,12 +1,14 @@
-use proc_macro2::Span;
+use proc_macro2::{Span, TokenStream as TokenStream2};
 use syn::{
     braced,
     parse::{Parse, ParseStream},
-    Generics, ImplItemMethod, Macro, Path, Result, Token, Type, WhereClause,
+    Generics, ImplItemMethod, Macro, Path, Result, Token, Type, WhereClause, Attribute,
 };
+use quote::quote;
 
 #[derive(Debug)]
 pub(super) struct ItemImpl {
+    pub outer_attrs: Option<TokenStream2>,
     pub impl_generics: Generics,
     pub trait_: Path,
     pub self_ty: Box<Type>,
@@ -18,6 +20,12 @@ pub(super) struct ItemImpl {
 
 impl Parse for ItemImpl {
     fn parse(input: ParseStream) -> Result<Self> {
+        let outer_attrs = if !input.peek(Token![impl]) {
+            let attrs = input.call(Attribute::parse_outer)?;
+            Some(quote! { #(#attrs)* })
+        } else {
+            None
+        };
         let _impl: Token![impl] = input.parse()?;
 
         let impl_generics = input.parse()?;
@@ -49,6 +57,7 @@ impl Parse for ItemImpl {
         }
 
         Ok(ItemImpl {
+            outer_attrs,
             impl_generics,
             trait_,
             self_ty,

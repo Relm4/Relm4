@@ -17,6 +17,7 @@
 ### Fixed
 
 + relm4-macros: parsing additional fields should be more stable now
++ relm4-macros: widgets can not include comments at the top 
 
 ## 0.1.0-beta.8 - 2021-08-20
 

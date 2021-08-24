@@ -1,3 +1,10 @@
+#![doc(
+    html_logo_url = "https://raw.githubusercontent.com/AaronErhardt/relm4/main/assets/Relm_logo.svg"
+)]
+#![doc(
+    html_favicon_url = "https://raw.githubusercontent.com/AaronErhardt/relm4/main/assets/Relm_logo.svg"
+)]
+
 use proc_macro::{self, TokenStream};
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned, ToTokens};
@@ -122,8 +129,8 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
     };
 
     let trt = data.trait_;
-
     let ty = data.self_ty;
+    let outer_attrs = &data.outer_attrs;
 
     let Macros {
         widgets,
@@ -196,6 +203,7 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
 
     let out = quote! {
         #[allow(dead_code)]
+        #outer_attrs
         #attrs struct #ty {
             #struct_stream
             #additional_fields
