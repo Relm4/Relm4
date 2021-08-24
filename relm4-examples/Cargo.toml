@@ -20,7 +20,7 @@ rand = "0.8"
 relm4 = { path = "../", features = ["tokio-rt"] }
 relm4-components = { path = "../relm4-components" }
 relm4-macros = { path = "../relm4-macros" }
-reqwest = "0.11"
-surf = "2.2"
+reqwest = { version = "0.11", features = ["rustls-tls"] }
+surf = { version = "2.2", features = ["h1-client-rustls"] }
 tokio = { version = "1.9", features = ["rt", "macros", "time"] }
 tracker = "0.1"
