@@ -11,12 +11,12 @@ enum AppMsg {
 }
 
 struct Counter {
-    counter: u8,
+    value: u8,
 }
 
 struct AppModel {
-    data: FactoryVec<Counter>,
-    counter: u8,
+    counters: FactoryVec<Counter>,
+    created_counters: u8,
 }
 
 impl Model for AppModel {
@@ -29,17 +29,17 @@ impl AppUpdate for AppModel {
     fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) -> bool {
         match msg {
             AppMsg::Add => {
-                self.data.push(Counter {
-                    counter: self.counter,
+                self.counters.push(Counter {
+                    value: self.created_counters,
                 });
-                self.counter += 1;
+                self.created_counters += 1;
             }
             AppMsg::Remove => {
-                self.data.pop();
+                self.counters.pop();
             }
             AppMsg::Clicked(index) => {
-                if let Some(data) = self.data.get_mut(index) {
-                    data.counter = data.counter.wrapping_sub(1);
+                if let Some(counter) = self.counters.get_mut(index) {
+                    counter.value = counter.value.wrapping_sub(1);
                 }
             }
         }
@@ -59,7 +59,7 @@ impl FactoryPrototype for Counter {
     type Msg = AppMsg;
 
     fn generate(&self, index: &usize, sender: Sender<AppMsg>) -> FactoryWidgets {
-        let button = gtk::Button::with_label(&self.counter.to_string());
+        let button = gtk::Button::with_label(&self.value.to_string());
         let index = *index;
         button.connect_clicked(move |_| {
             sender.send(AppMsg::Clicked(index)).unwrap();
@@ -71,7 +71,7 @@ impl FactoryPrototype for Counter {
     fn position(&self, _index: &usize) {}
 
     fn update(&self, _index: &usize, widgets: &FactoryWidgets) {
-        widgets.button.set_label(&self.counter.to_string());
+        widgets.button.set_label(&self.value.to_string());
     }
 
     fn get_root(widgets: &FactoryWidgets) -> &gtk::Button {
@@ -105,7 +105,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
                     set_orientation: gtk::Orientation::Vertical,
                     set_margin_all: 5,
                     set_spacing: 5,
-                    factory!(model.data),
+                    factory!(model.counters),
                 }
             }
         }
@@ -114,8 +114,8 @@ impl Widgets<AppModel, ()> for AppWidgets {
 
 fn main() {
     let model = AppModel {
-        data: FactoryVec::new(),
-        counter: 0,
+        counters: FactoryVec::new(),
+        created_counters: 0,
     };
 
     let relm = RelmApp::new(model);
