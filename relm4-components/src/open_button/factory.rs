@@ -8,11 +8,12 @@ use std::path::PathBuf;
 use std::rc::Rc;
 
 #[derive(Debug)]
-pub struct FileListItem {
-    pub path: PathBuf,
+pub(crate) struct FileListItem {
+    pub(crate) path: PathBuf,
 }
 
-pub struct FileListItemWidgets {
+#[derive(Debug)]
+pub(crate) struct FileListItemWidgets {
     label: gtk::Button,
     row: gtk::ListBoxRow,
 }

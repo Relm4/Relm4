@@ -5,6 +5,9 @@
 use gtk::prelude::{DialogExt, GtkWindowExt, WidgetExt};
 use relm4::{send, ComponentUpdate, Model, Sender};
 
+use crate::ParentWindow;
+
+/// Configuration for the alert dialog component
 pub struct AlertSettings {
     /// Large text
     pub text: String,
@@ -22,11 +25,13 @@ pub struct AlertSettings {
     pub option_label: Option<String>,
 }
 
+/// Model of the alert dialog component
 pub struct AlertModel {
     settings: AlertSettings,
     is_active: bool,
 }
 
+/// Messages that can be sent to the alert dialog component
 pub enum AlertMsg {
     /// Message sent by the parent to view the dialog
     Show,
@@ -43,7 +48,7 @@ impl Model for AlertModel {
 /// Interface for the parent model
 pub trait AlertParent: Model
 where
-    Self::Widgets: AlertParentWidgets,
+    Self::Widgets: ParentWindow,
 {
     /// Configuration for alert component.
     fn alert_config(&self) -> AlertSettings;
@@ -58,16 +63,10 @@ where
     fn option_msg() -> Self::Msg;
 }
 
-/// Get the parent window that allows setting the parent window of the dialog with
-/// [`gtk::prelude::GtkWindowExt::set_transient_for`].
-pub trait AlertParentWidgets {
-    fn parent_window(&self) -> Option<gtk::Window>;
-}
-
 impl<ParentModel> ComponentUpdate<ParentModel> for AlertModel
 where
     ParentModel: AlertParent,
-    ParentModel::Widgets: AlertParentWidgets,
+    ParentModel::Widgets: ParentWindow,
 {
     fn init_model(parent_model: &ParentModel) -> Self {
         AlertModel {
@@ -102,10 +101,11 @@ where
 }
 
 #[relm4_macros::widget(pub)]
+/// Widgets of the alert component
 impl<ParentModel> relm4::Widgets<AlertModel, ParentModel> for AlertWidgets
 where
     ParentModel: AlertParent,
-    ParentModel::Widgets: AlertParentWidgets,
+    ParentModel::Widgets: ParentWindow,
 {
     view! {
         dialog = gtk::MessageDialog {

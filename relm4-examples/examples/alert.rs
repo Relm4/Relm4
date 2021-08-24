@@ -3,8 +3,9 @@ use relm4::{
     send, AppUpdate, Components, Model, RelmApp, RelmComponent, Sender, WidgetPlus, Widgets,
 };
 use relm4_components::alert::{
-    AlertModel, AlertMsg, AlertParent, AlertParentWidgets, AlertSettings,
+    AlertModel, AlertMsg, AlertParent, AlertSettings,
 };
+use relm4_components::ParentWindow;
 
 #[derive(Default)]
 struct AppModel {
@@ -81,7 +82,7 @@ impl AlertParent for AppModel {
     }
 }
 
-impl AlertParentWidgets for AppWidgets {
+impl ParentWindow for AppWidgets {
     fn parent_window(&self) -> Option<gtk::Window> {
         Some(self.main_window.clone().upcast::<gtk::Window>())
     }

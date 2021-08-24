@@ -1,7 +1,4 @@
 //! Reusable and easily configurable open dialog component.
-//!
-//! **[Example implementation](https://github.com/AaronErhardt/relm4/blob/main/relm4-examples/examples/open_dialog.rs)**
-
 use gtk::prelude::{FileChooserExt, FileExt, NativeDialogExt};
 use relm4::{send, ComponentUpdate, Model, Sender};
 
@@ -10,6 +7,7 @@ use std::path::PathBuf;
 use crate::ParentWindow;
 
 #[derive(Clone, Debug)]
+/// Configuration for the open dialog component
 pub struct OpenDialogSettings {
     /// Label for cancel button
     pub cancel_label: String,
@@ -24,12 +22,16 @@ pub struct OpenDialogSettings {
 }
 
 #[tracker::track]
+#[derive(Debug)]
+/// Model of the open dialog component
 pub struct OpenDialogModel {
     #[do_not_track]
     settings: OpenDialogSettings,
     is_active: bool,
 }
 
+#[derive(Debug)]
+/// Messages that can be sent to the open dialog component
 pub enum OpenDialogMsg {
     /// Opens the dialog
     Open,
@@ -98,6 +100,7 @@ where
 }
 
 #[relm4_macros::widget(pub)]
+/// Widgets of the open dialog component
 impl<ParentModel> relm4::Widgets<OpenDialogModel, ParentModel> for OpenDialogWidgets
 where
     ParentModel: Model,

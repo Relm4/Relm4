@@ -32,7 +32,6 @@ impl_default_widgets![
 ];
 
 #[cfg(feature = "libadwaita")]
-#[cfg_attr(doc, doc(cfg(feature = "libadwaita")))]
 impl_default_widgets![
     adw::ActionRow,
     adw::ApplicationWindow,

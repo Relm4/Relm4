@@ -10,6 +10,7 @@ use std::path::PathBuf;
 use crate::ParentWindow;
 
 #[derive(Clone, Debug)]
+/// Configuration for the save dialog component
 pub struct SaveDialogSettings {
     /// Label for cancel button
     pub cancel_label: String,
@@ -24,6 +25,8 @@ pub struct SaveDialogSettings {
 }
 
 #[tracker::track]
+#[derive(Debug)]
+/// Model of the save dialog component
 pub struct SaveDialogModel {
     #[do_not_track]
     settings: SaveDialogSettings,
@@ -32,6 +35,8 @@ pub struct SaveDialogModel {
     name: String,
 }
 
+#[derive(Debug)]
+/// Messages that can be sent to the save dialog component
 pub enum SaveDialogMsg {
     /// Opens the dialog
     Save,
@@ -51,7 +56,7 @@ impl Model for SaveDialogModel {
     type Components = ();
 }
 
-/// Interface for the parent model
+/// Interface for the parent model of the save dialog
 pub trait SaveDialogParent: Model
 where
     Self::Widgets: ParentWindow,
@@ -108,6 +113,7 @@ where
 }
 
 #[relm4_macros::widget(pub)]
+/// Widgets for the save dialog
 impl<ParentModel> relm4::Widgets<SaveDialogModel, ParentModel> for SaveDialogWidgets
 where
     ParentModel: Model,

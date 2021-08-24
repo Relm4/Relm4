@@ -5,13 +5,14 @@
 ## Added
 
 + relm4-components: Open button with automatic recent files list
-+ relm4: Iterators added to factory data sturctures
++ relm4-components: Removed trait duplication and added more docs
++ relm4: Iterators added to factory data structures
 + relm4: More widgets added as FactoryView
 
 ### Changed
 
 + Many book improvements by [tronta](https://github.com/tronta)
-+ relm4: Removed classname methods from WidgetPlus [#14](https://github.com/AaronErhardt/relm4/pull/14)
++ relm4: Removed class name methods from WidgetPlus [#14](https://github.com/AaronErhardt/relm4/pull/14)
 
 ### Fixed
 

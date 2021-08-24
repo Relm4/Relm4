@@ -1,3 +1,6 @@
+//! Reusable and easily configurable open button dialog component.
+//!
+//! **[Example implementation](https://github.com/AaronErhardt/relm4/blob/main/relm4-examples/examples/open_button.rs)**
 use gtk::prelude::{BoxExt, ButtonExt, PopoverExt, WidgetExt};
 use relm4::factory::{DynamicIndex, Factory, FactoryVecDeque};
 use relm4::{send, ComponentUpdate, Components, Model, RelmComponent, Widgets};
@@ -14,6 +17,8 @@ mod factory;
 use factory::FileListItem;
 
 #[tracker::track]
+#[derive(Debug)]
+/// Model of the open button component
 pub struct OpenButtonModel {
     #[do_not_track]
     config: OpenButtonSettings,
@@ -26,6 +31,8 @@ pub struct OpenButtonModel {
     reset_popover: bool,
 }
 
+#[derive(Debug)]
+/// Configuration for the open button component
 pub struct OpenButtonSettings {
     /// Text of the open button.
     pub text: &'static str,
@@ -38,6 +45,7 @@ pub struct OpenButtonSettings {
 }
 
 #[doc(hidden)]
+#[derive(Debug)]
 pub enum OpenButtonMsg {
     Open(PathBuf),
     OpenRecent(Rc<DynamicIndex>),
@@ -51,6 +59,7 @@ impl Model for OpenButtonModel {
     type Components = OpenButtonComponents;
 }
 
+/// Interface for the parent model of the open button component
 pub trait OpenButtonParent: Model
 where
     Self::Widgets: ParentWindow,
@@ -180,6 +189,7 @@ impl ParentWindow for OpenButtonWidgets {
     }
 }
 
+/// Components of the open button component
 pub struct OpenButtonComponents {
     dialog: RelmComponent<OpenDialogModel, OpenButtonModel>,
 }
@@ -197,6 +207,7 @@ impl Components<OpenButtonModel> for OpenButtonComponents {
 }
 
 #[relm4_macros::widget(pub)]
+/// Widgets of the open button component
 impl<ParentModel> Widgets<OpenButtonModel, ParentModel> for OpenButtonWidgets
 where
     ParentModel: Model + OpenButtonParent,
