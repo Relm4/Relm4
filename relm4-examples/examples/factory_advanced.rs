@@ -3,16 +3,18 @@ use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt};
 use relm4::factory::{DynamicIndex, Factory, FactoryPrototype, FactoryVecDeque};
 use relm4::*;
 
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
+
+type MsgIndex = Weak<DynamicIndex>;
 
 #[derive(Debug)]
 enum AppMsg {
     AddFirst,
     RemoveLast,
-    CountAt(Rc<DynamicIndex>),
-    RemoveAt(Rc<DynamicIndex>),
-    InsertBefore(Rc<DynamicIndex>),
-    InsertAfter(Rc<DynamicIndex>),
+    CountAt(MsgIndex),
+    RemoveAt(MsgIndex),
+    InsertBefore(MsgIndex),
+    InsertAfter(MsgIndex),
 }
 
 struct Counter {
@@ -41,29 +43,37 @@ impl AppUpdate for AppModel {
             AppMsg::RemoveLast => {
                 self.counters.pop_back();
             }
-            AppMsg::CountAt(index) => {
-                if let Some(counter) = self.counters.get_mut(index.current_index()) {
-                    counter.value = counter.value.wrapping_sub(1);
+            AppMsg::CountAt(weak_index) => {
+                if let Some(index) = weak_index.upgrade() {
+                    if let Some(counter) = self.counters.get_mut(index.current_index()) {
+                        counter.value = counter.value.wrapping_sub(1);
+                    }
                 }
             }
-            AppMsg::RemoveAt(index) => {
-                self.counters.remove(index.current_index());
+            AppMsg::RemoveAt(weak_index) => {
+                if let Some(index) = weak_index.upgrade() {
+                    self.counters.remove(index.current_index());
+                }
             }
-            AppMsg::InsertBefore(index) => {
-                self.counters.insert(
-                    index.current_index(),
-                    Counter {
-                        value: self.received_messages,
-                    },
-                );
+            AppMsg::InsertBefore(weak_index) => {
+                if let Some(index) = weak_index.upgrade() {
+                    self.counters.insert(
+                        index.current_index(),
+                        Counter {
+                            value: self.received_messages,
+                        },
+                    );
+                }
             }
-            AppMsg::InsertAfter(index) => {
-                self.counters.insert(
-                    index.current_index() + 1,
-                    Counter {
-                        value: self.received_messages,
-                    },
-                );
+            AppMsg::InsertAfter(weak_index) => {
+                if let Some(index) = weak_index.upgrade() {
+                    self.counters.insert(
+                        index.current_index() + 1,
+                        Counter {
+                            value: self.received_messages,
+                        },
+                    );
+                }
             }
         }
         self.received_messages += 1;
@@ -105,7 +115,7 @@ impl FactoryPrototype for Counter {
             let sender = sender.clone();
             let index = index.clone();
             counter_button.connect_clicked(move |_| {
-                send!(sender, AppMsg::CountAt(index.clone()));
+                send!(sender, AppMsg::CountAt(Rc::downgrade(&index)));
             });
         }
 
@@ -113,7 +123,7 @@ impl FactoryPrototype for Counter {
             let sender = sender.clone();
             let index = index.clone();
             remove_button.connect_clicked(move |_| {
-                send!(sender, AppMsg::RemoveAt(index.clone()));
+                send!(sender, AppMsg::RemoveAt(Rc::downgrade(&index)));
             });
         }
 
@@ -121,12 +131,12 @@ impl FactoryPrototype for Counter {
             let sender = sender.clone();
             let index = index.clone();
             ins_above_button.connect_clicked(move |_| {
-                send!(sender, AppMsg::InsertBefore(index.clone()));
+                send!(sender, AppMsg::InsertBefore(Rc::downgrade(&index)));
             });
         }
 
         ins_below_button.connect_clicked(move |_| {
-            send!(sender, AppMsg::InsertAfter(index.clone()));
+            send!(sender, AppMsg::InsertAfter(Rc::downgrade(&index)));
         });
 
         FactoryWidgets {
