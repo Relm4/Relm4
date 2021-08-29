@@ -159,6 +159,42 @@ where
         }
     }
 
+    /// Initialize a new [`FactoryVecDeque`] with a normal [`VecDeque`].
+    #[must_use]
+    pub fn from_vec_deque(mut data: VecDeque<Data>) -> Self {
+        let mut indexed_data = VecDeque::with_capacity(data.len());
+        let mut changes = Vec::with_capacity(data.len());
+        for (num, item) in data.drain(..).enumerate() {
+            indexed_data.push_back(IndexedData::new(item, num));
+            changes.push(Change {
+                ty: ChangeType::Add,
+                index: num,
+            });
+        }
+        FactoryVecDeque {
+            data: indexed_data,
+            widgets: RefCell::new(VecDeque::with_capacity(data.len())),
+            changes: RefCell::new(changes),
+        }
+    }
+
+    /// Get the internal data of the [`FactoryVecDeque`].
+    #[must_use]
+    pub fn to_vec_deque(mut self) -> VecDeque<Data> {
+        self.data.drain(..).map(|data| data.inner).collect()
+    }
+
+    /// Remove all data from the [`FactoryVecDeque`].
+    pub fn clear(&mut self) {
+        for index in 0..self.data.len() {
+            self.add_change(Change {
+                ty: ChangeType::Remove(1),
+                index,
+            })
+        }
+        self.data.clear();
+    }
+
     /// Returns the length as amount of elements stored in this type.
     pub fn len(&self) -> usize {
         self.data.len()

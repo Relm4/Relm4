@@ -4,7 +4,16 @@
 //!
 //! Use [`FactoryVec`] if you only need to push and pop at the back.
 //! If you need more flexibility for example for pushing or removing items at
-//! arbitraty indices use [`FactoryVecDeque`].
+//! arbitrary indices use [`FactoryVecDeque`].
+//!
+//! Also, [`FactoryVec`] works with all container widgets that implement
+//! [`FactoryView`](super::FactoryView) such as [`gtk::Box`] or [`gtk::Grid`].
+//!
+//! [`FactoryVecDeque`] additionally needs container widgets to implement the
+//! [`FactoryListView`](super::FactoryListView) trait that's implements support
+//! for adding and removing widgets at arbitrary positions.
+//! [`gtk::Grid`] for example only works with [`FactoryVec`] but not with
+//! [`FactoryVecDeque`] because widgets can't be inserted at arbitrary positions.
 
 mod factory_vec;
 mod factory_vec_deque;

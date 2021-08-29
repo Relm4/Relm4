@@ -38,6 +38,40 @@ where
         }
     }
 
+    /// Initialize a new [`FactoryVec`] with a normal [`Vec`].
+    #[must_use]
+    pub fn from_vec(data: Vec<Data>) -> Self {
+        let changes = (0..data.len())
+            .map(|data| (data, ChangeType::Add))
+            .collect();
+        let length = data.len();
+        FactoryVec {
+            data,
+            widgets: RefCell::new(Vec::with_capacity(length)),
+            changes: RefCell::new(changes),
+        }
+    }
+
+    /// Get a slice of the internal data of a [`FactoryVec`].
+    #[must_use]
+    pub fn as_slice(&self) -> &[Data] {
+        self.data.as_slice()
+    }
+
+    /// Get the internal data of the [`FactoryVec`].
+    #[must_use]
+    pub fn to_vec(self) -> Vec<Data> {
+        self.data
+    }
+
+    /// Remove all data from the [`FactoryVec`].
+    pub fn clear(&mut self) {
+        for item in self.changes.borrow_mut().values_mut() {
+            *item = ChangeType::Remove;
+        }
+        self.data.clear();
+    }
+
     /// Returns the length as amount of elements stored in this type.
     pub fn len(&self) -> usize {
         self.data.len()

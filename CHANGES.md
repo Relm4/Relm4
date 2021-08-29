@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
++ relm4: More methods for factory data structures
+
 ## 0.1.0-beta.9
 
 ## Added
