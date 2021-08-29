@@ -180,7 +180,7 @@ where
 
     /// Get the internal data of the [`FactoryVecDeque`].
     #[must_use]
-    pub fn to_vec_deque(mut self) -> VecDeque<Data> {
+    pub fn into_vec_deque(mut self) -> VecDeque<Data> {
         self.data.drain(..).map(|data| data.inner).collect()
     }
 

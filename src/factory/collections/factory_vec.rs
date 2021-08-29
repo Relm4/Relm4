@@ -60,7 +60,7 @@ where
 
     /// Get the internal data of the [`FactoryVec`].
     #[must_use]
-    pub fn to_vec(self) -> Vec<Data> {
+    pub fn into_vec(self) -> Vec<Data> {
         self.data
     }
 
