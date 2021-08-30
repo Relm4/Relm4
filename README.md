@@ -7,22 +7,22 @@
 [![Relm4 on crates.io](https://img.shields.io/crates/v/relm4.svg)](https://crates.io/crates/relm4)
 [![Relm4 docs](https://img.shields.io/badge/rust-documentation-blue)](https://aaronerhardt.github.io/docs/relm4/relm4/)
 [![Relm4 book](https://img.shields.io/badge/rust-book-fc0060)](https://aaronerhardt.github.io/relm4-book/book/)
-![Miminum Rust version 1.53](https://img.shields.io/badge/rustc-1.53+-06a096.svg)
+![Minimum Rust version 1.53](https://img.shields.io/badge/rustc-1.53+-06a096.svg)
 
 An idiomatic GUI library inspired by [Elm](https://elm-lang.org/) and based on [gtk4-rs](https://crates.io/crates/gtk4). 
 Relm4 is a new version of [relm](https://github.com/antoyo/relm) that's built from scratch and is compatible with [GTK4](https://www.gtk.org/) and [libadwaita](https://gitlab.gnome.org/GNOME/libadwaita).
 
 ## Goals
 
-+ ⏱️ **Productivity:** Writing an application should require as few overhead as possible
-+ ⚡ **Flexibility:** Anything that's possible to do with GTK4 should be possible in Relm4 as well
-+ ✨ **Simplicity:** Writing an application should be as easy and straight forward as possible
++ ⏱️ **Productivity:** Writing Relm4 applications should be intuitive and efficient
++ ⚡ **Flexibility:** Anything that’s possible in GTK4 should work well in Relm4, too
++ ✨ **Simplicity:** Writing applications should be as easy and straightforward as possible
 + 🔧 **Maintainability**: The Elm programming model used by Relm4 provides a simple and clear structure for app development
 
 ## Documentation
 
 + 📖 **[Book](https://aaronerhardt.github.io/relm4-book/book/)**
-+ **[Rust documenation](https://aaronerhardt.github.io/docs/relm4/relm4/)**
++ **[Rust documentation](https://aaronerhardt.github.io/docs/relm4/relm4/)**
 
 ## Dependencies
 
