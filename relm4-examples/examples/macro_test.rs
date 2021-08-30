@@ -1,9 +1,13 @@
 use gtk::prelude::{BoxExt, ButtonExt, GridExt, GtkWindowExt, OrientableExt, WidgetExt};
-use relm4::{send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets};
+use relm4::{
+    send, AppUpdate, ComponentUpdate, Components, Model, RelmApp, RelmComponent, Sender,
+    WidgetPlus, Widgets,
+};
 
 struct AppModel {
     counter: u8,
     classes: Vec<&'static str>,
+    decrement: bool,
 }
 
 enum AppMsg {
@@ -14,20 +18,77 @@ enum AppMsg {
 impl Model for AppModel {
     type Msg = AppMsg;
     type Widgets = AppWidgets;
-    type Components = ();
+    type Components = AppComponents;
 }
 
 impl AppUpdate for AppModel {
-    fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) -> bool {
+    fn update(
+        &mut self,
+        msg: AppMsg,
+        _components: &AppComponents,
+        _sender: Sender<AppMsg>,
+    ) -> bool {
         match msg {
             AppMsg::Increment => {
                 self.counter = self.counter.wrapping_add(1);
+                self.decrement = false;
             }
             AppMsg::Decrement => {
                 self.counter = self.counter.wrapping_sub(1);
+                self.decrement = true;
             }
         }
         true
+    }
+}
+
+enum ButtonMsg {}
+
+struct ButtonModel {}
+
+impl Model for ButtonModel {
+    type Msg = ButtonMsg;
+    type Widgets = ButtonWidgets;
+    type Components = ();
+}
+
+impl ComponentUpdate<AppModel> for ButtonModel {
+    fn init_model(_parent_model: &AppModel) -> Self {
+        ButtonModel {}
+    }
+
+    fn update(
+        &mut self,
+        _msg: ButtonMsg,
+        _components: &(),
+        _sender: Sender<ButtonMsg>,
+        _parent_sender: Sender<AppMsg>,
+    ) {
+    }
+}
+
+#[relm4_macros::widget]
+impl Widgets<ButtonModel, AppModel> for ButtonWidgets {
+    view! {
+        gtk::Button {
+            set_label: "ButtonComponent!",
+        }
+    }
+}
+
+pub struct AppComponents {
+    button: RelmComponent<ButtonModel, AppModel>,
+}
+
+impl Components<AppModel> for AppComponents {
+    fn init_components(
+        model: &AppModel,
+        parent_widgets: &AppWidgets,
+        sender: Sender<AppMsg>,
+    ) -> Self {
+        AppComponents {
+            button: RelmComponent::new(model, parent_widgets, sender),
+        }
     }
 }
 
@@ -38,16 +99,16 @@ fn new_label() -> gtk::Label {
 #[relm4_macros::widget]
 impl Widgets<AppModel, ()> for AppWidgets {
     view! {
-        gtk::ApplicationWindow {
+        main_window = gtk::ApplicationWindow {
             gtk::prelude::GtkWindowExt::set_title: Some("Simple app"),
             set_default_width: 300,
             set_default_height: 100,
             set_child = Some(&gtk::Box) {
                 set_orientation: gtk::Orientation::Vertical,
-                set_margin_all: 5,
+                set_margin_all?: Some(5),
                 set_spacing: 5,
 
-                append = &gtk::Button {
+                append: inc_button = &gtk::Button {
                     set_label: "Increment",
                     connect_clicked(sender) => move |_| {
                         send!(sender, AppMsg::Increment);
@@ -55,7 +116,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
                     add_css_class: iterate!(&model.classes),
                 },
                 append = &gtk::Button::new() {
-                    set_label: track!(false, "Decrement"),
+                    set_label: track!(model.decrement, &format!("Last decrement at {}", model.counter)),
                     connect_clicked(sender) => move |_| {
                         send!(sender, AppMsg::Decrement);
                     },
@@ -79,30 +140,30 @@ impl Widgets<AppModel, ()> for AppWidgets {
                     attach(2, 1, 1, 1) = &gtk::Label {
                         set_label: "grid test 3",
                     },
-                    attach(2, 2, 1, 1) = &gtk::Label {
-                        set_label: "grid test 4",
-                    },
+                    attach(2, 2, 1, 1): component!(components.button.root_widget())
                 }
             },
         }
     }
 
     additional_fields! {
-        test: u8,
+        test_field: u8,
     }
 
     fn pre_init() {
-        let test = 0;
-        println!("Pre init!");
+        let mut test_field = 0;
+        println!("Pre init! test_field: {}", test_field);
     }
 
     fn post_init() {
         relm4::set_global_css(b".first { color: green; } .second { border: 1px solid orange; }");
-        println!("Post init!");
+        test_field = 42;
+        println!("Post init! test_field: {}", test_field);
     }
 
     fn manual_view() {
-        println!("Manual view!");
+        self.test_field += 1;
+        println!("Manual view! test_field: {}", self.test_field);
     }
 }
 
@@ -110,6 +171,7 @@ fn main() {
     let model = AppModel {
         counter: 0,
         classes: vec!["first", "second"],
+        decrement: false,
     };
     let app = RelmApp::new(model);
     app.run();
