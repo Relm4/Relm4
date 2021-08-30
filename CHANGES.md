@@ -5,6 +5,16 @@
 ### Added
 
 + relm4: More methods for factory data structures
++ book: Added macro expansion chapter
+
+### Changed
+
++ book: Many book improvements by [tronta](https://github.com/tronta)
++ relm4-examples: Many improvements
+
+### Fixed
+
++ relm4-macros: Passing additional arguments now works for components and other properties, too.
 
 ## 0.1.0-beta.9
 
@@ -17,56 +27,56 @@
 
 ### Changed
 
-+ Many book improvements by [tronta](https://github.com/tronta)
++ book: Many book improvements by [tronta](https://github.com/tronta)
 + relm4: Removed class name methods from WidgetPlus [#14](https://github.com/AaronErhardt/relm4/pull/14)
 
 ### Fixed
 
-+ relm4-macros: parsing additional fields should be more stable now
-+ relm4-macros: widgets can not include comments at the top 
++ relm4-macros: Parsing additional fields should be more stable now
++ relm4-macros: Widgets can not include comments at the top 
 
 ## 0.1.0-beta.8 - 2021-08-20
 
 ### Added
 
-+ Fully qualified syntax for trait disabiguation in relm4-macros
-+ Support for libadwaita 🎉
-+ Allow passing additional arguments to widget initialization (useful e.g. for grids)
-+ Book: Reusable components and widget macro reference chapters
++ relm4: Support for libadwaita 🎉
++ relm4-macros: Fully qualified syntax for trait disabiguation
++ relm4-macros: Allow passing additional arguments to widget initialization (useful e.g. for grids)
++ book: Reusable components and widget macro reference chapters
 
 ### Changed
 
-+ Improved error messages in relm4-macros
++ relm4-macros: Improved error messages
 
 ## 0.1.0-beta.7 - 2021-08-19
 
 ### Added
 
-+ Book: Factory, components, worker and thread + async chapters
++ book: Factory, components, worker and thread + async chapters
 
 ### Changed
 
-+ get and get_mut of FactoryVec and FactoryVecDeque now return an Option to prevent panics
++ relm4: get and get_mut of FactoryVec and FactoryVecDeque now return an Option to prevent panics
 
 ### Fixed
 
-+ Fixed components macro
-+ Fixed unsound removal of elements in FactoryVecDeque
++ relm4-macros: Fixed components
++ relm4: Fixed unsound removal of elements in FactoryVecDeque
 
 
 ## 0.1.0-beta.6 - 2021-08-18
 
 ### Changed
 
-+ Improved and adjusted the FactoryPrototype trait
++ relm4: Improved and adjusted the FactoryPrototype trait
 
 ### Added 
 
-+ Added the FactoryListView trait for more flexibility
-+ Added a FactoryVecDeque container
-+ Implemented FactoryView and FactoryListView for more widgets
-+ More examples
++ relm4: Added the FactoryListView trait for more flexibility
++ relm4: Added a FactoryVecDeque container
++ relm4: Implemented FactoryView and FactoryListView for more widgets
++ relm4-examples: More examples
 
 ### Fixed
 
-+ Fixed the factory! macro in relm4-macros
++ relm4-macros: Fixed the factory! macro 
