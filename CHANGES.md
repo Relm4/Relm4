@@ -5,6 +5,7 @@
 ### Added
 
 + relm4: More methods for factory data structures
++ relm4-examples: Stack example
 + book: Added macro expansion chapter
 
 ### Changed
