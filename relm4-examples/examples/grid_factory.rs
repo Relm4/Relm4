@@ -130,9 +130,15 @@ impl FactoryPrototype for Data {
         FactoryWidgets { button }
     }
 
+    // create a chess grid pattern
     fn position(&self, index: &usize) -> GridPosition {
-        let row = *index as i32 / 5;
-        let column = (*index as i32 % 5) * 2 + row % 2;
+        let index = *index as i32;
+
+        // add a new row for every 5 elements
+        let row = index / 5;
+        // use every second column and move columns in uneven rows by 1
+        let column = (index % 5) * 2 + row % 2;
+
         GridPosition {
             column,
             row,
