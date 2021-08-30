@@ -171,7 +171,9 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
         let w_func = widget.func.func_token_stream();
 
         struct_stream.extend(quote_spanned! {
-            w_span => #w_name: #w_ty,
+            w_span =>
+            #[allow(missing_docs)]
+            #attrs #w_name: #w_ty,
         });
 
         init_stream.extend(quote_spanned! {

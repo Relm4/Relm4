@@ -11,6 +11,7 @@
 ### Changed
 
 + book: Many book improvements by [tronta](https://github.com/tronta)
++ relm4-macros: Make fields of public widgets public
 + relm4-examples: Many improvements
 
 ### Fixed
