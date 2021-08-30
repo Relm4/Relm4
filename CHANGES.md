@@ -79,4 +79,17 @@
 
 ### Fixed
 
-+ relm4-macros: Fixed the factory! macro 
++ relm4-macros: Fixed the factory! macro
+
+## 0.1.0-beta.5 - 2021-08-15
+
+### Added
+
++ relm4: Drawing handler for gtk::DrawingArea
++ relm4: New CSS methods in WidgetPlus trait
++ relm4-examples: Many new examples
+
+### Changed
+
++ relm4: Many doc improvements
++ relm4-macros: Improved tracker! macro
