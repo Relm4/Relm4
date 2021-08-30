@@ -74,17 +74,22 @@ impl Parse for Property {
             None
         };
 
+        // look for event handlers: property(a, ...) => move |a, ...| { ... }
         let ty = if input.peek(Token! [=>]) {
             let _arrow: Token![=>] = input.parse()?;
             input.parse().map(PropertyType::Connect)?
-        } else if input.peek(Token![=]) || input.peek3(Token![=]) {
+        }
+        // look for widgets
+        else if input.peek(Token![=]) || input.peek3(Token![=]) {
             if input.peek(Token![=]) {
                 let _token: Token![=] = input.parse()?;
             } else {
                 let _colon: Token! [:] = input.parse()?;
             }
             input.parse().map(PropertyType::Widget)?
-        } else if input.peek(Token! [:]) || input.peek(Token! [?]) {
+        }
+        // look for properties or optional properties (?)
+        else if input.peek(Token! [:]) || input.peek(Token! [?]) {
             // look for ? at beginning for optional assign
             if input.peek(Token! [?]) {
                 let _question_mark: Token![?] = input.parse()?;
@@ -132,7 +137,7 @@ impl Parse for Property {
                 input.parse().map(PropertyType::Expr)?
             }
         } else {
-            return Err(input.error("TODO"));
+            return Err(input.error("Unexpected token. Expected =>, =, : or ?:"));
         };
 
         Ok(Property {
