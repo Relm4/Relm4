@@ -2,7 +2,7 @@ use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned, ToTokens};
 use syn::{spanned::Spanned, Error, Ident};
 
-use super::{PropertyName, Property, PropertyType, Tracker, Widget, WidgetFunc};
+use super::{Property, PropertyName, PropertyType, Tracker, Widget, WidgetFunc};
 
 impl PropertyType {
     fn init_assign_tokens(&self) -> Option<TokenStream2> {
@@ -62,11 +62,11 @@ impl PropertyType {
 
 impl Property {
     fn args_stream(&self) -> TokenStream2 {
-      if let Some(args) = &self.args {
-                    quote! { ,#args }
-                } else {
-                    TokenStream2::new()
-                }
+        if let Some(args) = &self.args {
+            quote! { ,#args }
+        } else {
+            TokenStream2::new()
+        }
     }
 }
 
@@ -261,7 +261,7 @@ impl Widget {
             if let Some(p_assign) = p_assign_opt {
                 let p_name = &prop.name;
                 let p_span = p_name.span().unwrap().into();
-                let args_stream =  prop.args_stream();
+                let args_stream = prop.args_stream();
 
                 let assign_fn = prop.name.assign_fn_stream(w_name);
                 let self_assign_args = prop.name.assign_args_stream(w_name);
@@ -354,7 +354,7 @@ impl Widget {
 
                 let assign_fn = prop.name.self_assign_fn_stream(w_name);
                 let self_assign_args = prop.name.self_assign_args_stream(w_name);
-                let args_stream =  prop.args_stream();
+                let args_stream = prop.args_stream();
 
                 stream.extend(quote_spanned! {
                     p_span =>  if #bool_stream {
@@ -375,7 +375,7 @@ impl Widget {
                 let p_name = &prop.name;
                 let p_span = p_name.span().unwrap().into();
 
-                let args_stream =  prop.args_stream();
+                let args_stream = prop.args_stream();
                 let assign_fn = prop.name.self_assign_fn_stream(w_name);
                 let self_assign_args = prop.name.self_assign_args_stream(w_name);
 
