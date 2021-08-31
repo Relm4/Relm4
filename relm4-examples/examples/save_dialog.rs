@@ -53,8 +53,8 @@ impl AppUpdate for AppModel {
 impl SaveDialogParent for AppModel {
     fn dialog_config(&self) -> SaveDialogSettings {
         SaveDialogSettings {
-            accept_label: "Open".to_string(),
-            cancel_label: "Cancel".to_string(),
+            accept_label: "Open",
+            cancel_label: "Cancel",
             create_folders: true,
             is_modal: true,
             filters: Vec::new(),

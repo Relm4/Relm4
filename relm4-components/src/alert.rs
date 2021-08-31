@@ -10,19 +10,19 @@ use crate::ParentWindow;
 /// Configuration for the alert dialog component
 pub struct AlertSettings {
     /// Large text
-    pub text: String,
+    pub text: &'static str,
     /// Optional secondary, smaller text
-    pub secondary_text: Option<String>,
+    pub secondary_text: Option<&'static str>,
     /// Modal dialogs freeze other windows as long they are visible
     pub is_modal: bool,
     /// Sets color of the accept button to red if the theme supports it
     pub destructive_accept: bool,
     /// Text for confirm button
-    pub confirm_label: String,
+    pub confirm_label: &'static str,
     /// Text for cancel button
-    pub cancel_label: String,
+    pub cancel_label: &'static str,
     /// Text for third option button. If [`None`] the third button won't be created.
-    pub option_label: Option<String>,
+    pub option_label: Option<&'static str>,
 }
 
 /// Model of the alert dialog component
@@ -117,11 +117,11 @@ where
             },
 
             // Apply configuration
-            set_text: Some(&model.settings.text),
+            set_text: Some(model.settings.text),
             set_secondary_text: model.settings.secondary_text.as_deref(),
             set_modal: model.settings.is_modal,
-            add_button: args!(&model.settings.confirm_label, gtk::ResponseType::Accept),
-            add_button: args!(&model.settings.cancel_label, gtk::ResponseType::Cancel),
+            add_button: args!(model.settings.confirm_label, gtk::ResponseType::Accept),
+            add_button: args!(model.settings.cancel_label, gtk::ResponseType::Cancel),
         }
     }
 

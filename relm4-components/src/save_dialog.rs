@@ -13,9 +13,9 @@ use crate::ParentWindow;
 /// Configuration for the save dialog component
 pub struct SaveDialogSettings {
     /// Label for cancel button
-    pub cancel_label: String,
+    pub cancel_label: &'static str,
     /// Label for accept button
-    pub accept_label: String,
+    pub accept_label: &'static str,
     /// Allow or disallow creating folders
     pub create_folders: bool,
     /// Modal dialogs freeze other windows as long they are visible
@@ -126,8 +126,8 @@ where
             set_current_name: track!(model.changed(SaveDialogModel::name()), &model.name),
             add_filter: iterate!(&model.settings.filters),
             set_create_folders: model.settings.create_folders,
-            set_cancel_label: Some(&model.settings.cancel_label),
-            set_accept_label: Some(&model.settings.accept_label),
+            set_cancel_label: Some(model.settings.cancel_label),
+            set_accept_label: Some(model.settings.accept_label),
             set_modal: model.settings.is_modal,
             set_transient_for: parent_widgets.parent_window().as_ref(),
             connect_response => move |dialog, res_ty| {

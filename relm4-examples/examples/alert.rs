@@ -57,11 +57,11 @@ impl AppUpdate for AppModel {
 impl AlertParent for AppModel {
     fn alert_config(&self) -> AlertSettings {
         AlertSettings {
-            text: "Do you want to quit without saving?".to_string(),
-            secondary_text: Some("Your counter hasn't reached 42 yet".to_string()),
-            confirm_label: "Close without saving".to_string(),
-            cancel_label: "Cancel".to_string(),
-            option_label: Some("Save".to_string()),
+            text: "Do you want to quit without saving?",
+            secondary_text: Some("Your counter hasn't reached 42 yet"),
+            confirm_label: "Close without saving",
+            cancel_label: "Cancel",
+            option_label: Some("Save"),
             is_modal: true,
             destructive_accept: true,
         }
