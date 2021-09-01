@@ -23,5 +23,5 @@ relm4-components = { path = "../relm4-components" }
 relm4-macros = { path = "../relm4-macros" }
 reqwest = { version = "0.11", features = ["rustls-tls"], default-features = false }
 surf = { version = "2.2", features = ["h1-client-rustls"], default-features = false }
-tokio = { version = "1.9", features = ["rt", "macros", "time"] }
+tokio = { version = "1.9", features = ["rt", "macros", "time", "rt-multi-thread"] }
 tracker = "0.1"

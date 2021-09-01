@@ -29,7 +29,7 @@ The app uses a tracker for efficient UI updates.
 A `FactoryVec` can be modified during the update method just like a normal vector and during the view function the factory will update only the affected widgets.
 To know how to update the widgets the `FactoryPrototype` trait is used to define the functions needed to generate, update and remove widgets.
 
-+ factory_advanced: A more advanced factoy example that uses a `FactoryVecDeque`
++ factory_advanced: A more advanced factory example that uses a `FactoryVecDeque`
 
 + components: A simple app that uses a component for the header bar and a component for a close alert dialog.
 
@@ -41,6 +41,8 @@ Sadly this doesn't work for tokio (async-std and similar are fine though) but yo
 + tokio: An app using the tokio-rt feature and an `AsyncRelmWorker` to efficiently fetch favicons and HTML text from websites.
 Note that by default delays for the HTTP-requests are enabled that makes UI updates better visible.
 To disable the delays comment the two lines starting with `tokio::time::delay`.
+
++ non_blocking_async: An app that uses a custom tokio runtime to handle many messages asynchronously at the same time. This is used to update a counter with an delay of one second.
 
 + macro: A simple app with a counter that demonstrates how to use the `relm4-macros::widget` macro.
 
