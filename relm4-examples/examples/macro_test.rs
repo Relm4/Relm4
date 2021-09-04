@@ -105,7 +105,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
             set_default_height: 100,
             set_child = Some(&gtk::Box) {
                 set_orientation: gtk::Orientation::Vertical,
-                set_margin_all?: Some(5),
+                set_margin_all: 5,
                 set_spacing: 5,
 
                 append: inc_button = &gtk::Button {
