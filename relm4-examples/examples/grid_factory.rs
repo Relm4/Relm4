@@ -134,7 +134,7 @@ impl FactoryPrototype for Data {
     fn position(&self, index: &usize) -> GridPosition {
         let index = *index as i32;
 
-        // add a new row for every 5th elements
+        // add a new row for every 5 elements
         let row = index / 5;
         // use every second column and move columns in uneven rows by 1
         let column = (index % 5) * 2 + row % 2;
