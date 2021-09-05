@@ -7,59 +7,6 @@ use relm4::{
 use tokio::runtime::{Builder, Runtime};
 use tokio::sync::mpsc::{channel, Sender as TokioSender};
 
-struct AsyncHandler {
-    _rt: Runtime,
-    sender: TokioSender<AsyncHandlerMsg>,
-}
-
-#[derive(Debug)]
-enum AsyncHandlerMsg {
-    IncrementRequest,
-    DecrementRequest,
-}
-
-impl MessageHandler<AppModel> for AsyncHandler {
-    type Msg = AsyncHandlerMsg;
-    type Sender = TokioSender<AsyncHandlerMsg>;
-
-    fn init(_parent_model: &AppModel, parent_sender: Sender<AppMsg>) -> Self {
-        let (sender, mut rx) = channel::<AsyncHandlerMsg>(10);
-
-        let rt = Builder::new_multi_thread()
-            .worker_threads(8)
-            .enable_time()
-            .build()
-            .unwrap();
-
-        rt.spawn(async move {
-            while let Some(msg) = rx.recv().await {
-                let parent_sender = parent_sender.clone();
-                tokio::spawn(async move {
-                    tokio::time::sleep(std::time::Duration::from_secs(1)).await;
-                    match msg {
-                        AsyncHandlerMsg::IncrementRequest => {
-                            send!(parent_sender, AppMsg::Increment);
-                        }
-                        AsyncHandlerMsg::DecrementRequest => {
-                            send!(parent_sender, AppMsg::Decrement);
-                        }
-                    }
-                });
-            }
-        });
-
-        AsyncHandler { _rt: rt, sender }
-    }
-
-    fn send(&self, msg: Self::Msg) {
-        self.sender.blocking_send(msg).unwrap();
-    }
-
-    fn sender(&self) -> Self::Sender {
-        self.sender.clone()
-    }
-}
-
 struct AppModel {
     counter: u8,
 }
@@ -68,22 +15,6 @@ struct AppModel {
 enum AppMsg {
     Increment,
     Decrement,
-}
-
-struct AppComponents {
-    async_handler: RelmMsgHandler<AsyncHandler, AppModel>,
-}
-
-impl Components<AppModel> for AppComponents {
-    fn init_components(
-        parent_model: &AppModel,
-        _parent_widget: &AppWidgets,
-        parent_sender: Sender<AppMsg>,
-    ) -> Self {
-        AppComponents {
-            async_handler: RelmMsgHandler::new(parent_model, parent_sender),
-        }
-    }
 }
 
 impl Model for AppModel {
@@ -111,6 +42,75 @@ impl AppUpdate for AppModel {
     }
 }
 
+struct AsyncHandler {
+    _rt: Runtime,
+    sender: TokioSender<AsyncHandlerMsg>,
+}
+
+#[derive(Debug)]
+enum AsyncHandlerMsg {
+    DelayedIncrement,
+    DelayedDecrement,
+}
+
+impl MessageHandler<AppModel> for AsyncHandler {
+    type Msg = AsyncHandlerMsg;
+    type Sender = TokioSender<AsyncHandlerMsg>;
+
+    fn init(_parent_model: &AppModel, parent_sender: Sender<AppMsg>) -> Self {
+        let (sender, mut rx) = channel::<AsyncHandlerMsg>(10);
+
+        let rt = Builder::new_multi_thread()
+            .worker_threads(8)
+            .enable_time()
+            .build()
+            .unwrap();
+
+        rt.spawn(async move {
+            while let Some(msg) = rx.recv().await {
+                let parent_sender = parent_sender.clone();
+                tokio::spawn(async move {
+                    tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+                    match msg {
+                        AsyncHandlerMsg::DelayedIncrement => {
+                            send!(parent_sender, AppMsg::Increment);
+                        }
+                        AsyncHandlerMsg::DelayedDecrement => {
+                            send!(parent_sender, AppMsg::Decrement);
+                        }
+                    }
+                });
+            }
+        });
+
+        AsyncHandler { _rt: rt, sender }
+    }
+
+    fn send(&self, msg: Self::Msg) {
+        self.sender.blocking_send(msg).unwrap();
+    }
+
+    fn sender(&self) -> Self::Sender {
+        self.sender.clone()
+    }
+}
+
+struct AppComponents {
+    async_handler: RelmMsgHandler<AsyncHandler, AppModel>,
+}
+
+impl Components<AppModel> for AppComponents {
+    fn init_components(
+        parent_model: &AppModel,
+        _parent_widget: &AppWidgets,
+        parent_sender: Sender<AppMsg>,
+    ) -> Self {
+        AppComponents {
+            async_handler: RelmMsgHandler::new(parent_model, parent_sender),
+        }
+    }
+}
+
 #[relm4_macros::widget]
 impl Widgets<AppModel, ()> for AppWidgets {
     view! {
@@ -126,12 +126,12 @@ impl Widgets<AppModel, ()> for AppWidgets {
                 append = &gtk::Button {
                     set_label: "Increment",
                     connect_clicked[sender = components.async_handler.sender()] => move |_| {
-                        sender.blocking_send(AsyncHandlerMsg::IncrementRequest).expect("Receiver dropped");
+                        sender.blocking_send(AsyncHandlerMsg::DelayedIncrement).expect("Receiver dropped");
                     },
                 },
                 append = &gtk::Button::with_label("Decrement") {
                     connect_clicked[sender = components.async_handler.sender()] => move |_| {
-                        sender.blocking_send(AsyncHandlerMsg::DecrementRequest).expect("Receiver dropped");
+                        sender.blocking_send(AsyncHandlerMsg::DelayedDecrement).expect("Receiver dropped");
                     },
                 },
                 append = &gtk::Label {
