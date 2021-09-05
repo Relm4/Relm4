@@ -1,3 +1,4 @@
 .vscode
 target/
 Cargo.lock
+relm4-examples/.recent_files
