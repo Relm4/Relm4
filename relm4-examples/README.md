@@ -58,3 +58,5 @@ To disable the delays comment the two lines starting with `tokio::time::delay`.
 
 + components_old: A simple app that counts up or down and also has two components that hide and show each other. 
 This demonstrates how to use components that can send messages to each other but are fully independent apart from that.
+
++ to_do: A simple To-Do app. It's a re-implementation of the [To-Do example of the gtk-rs book](https://gtk-rs.org/gtk4-rs/git/book/todo_app_1.html).
