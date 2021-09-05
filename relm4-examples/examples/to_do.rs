@@ -114,7 +114,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
                 append = &gtk::ScrolledWindow {
                     set_hscrollbar_policy: gtk::PolicyType::Never,
                     set_min_content_height: 360,
-
+                    set_vexpand: true,
                     set_child = Some(&gtk::ListBox) {
                         factory!(model.tasks),
                     }
