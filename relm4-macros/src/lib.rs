@@ -163,6 +163,7 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let mut connect_stream = TokenStream2::new();
     let mut track_stream = TokenStream2::new();
     let mut component_stream = TokenStream2::new();
+    let mut connect_component_stream = TokenStream2::new();
 
     for widget in widget_list {
         let w_name = &widget.name;
@@ -186,6 +187,7 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
         connect_stream.extend(widget.connect_stream());
         track_stream.extend(widget.track_stream());
         component_stream.extend(widget.component_stream());
+        connect_component_stream.extend(widget.connect_component_stream());
     }
 
     let impl_generics = data.impl_generics;
@@ -229,6 +231,7 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
 
             fn connect_components(&self, components: &<#model as ::relm4::Model>::Components) {
                 #component_stream
+                #connect_component_stream
             }
 
             /// Return the root widget.

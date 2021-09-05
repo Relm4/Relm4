@@ -58,6 +58,14 @@ impl PropertyType {
             None
         }
     }
+
+    fn connect_component_tokens(&self) -> Option<TokenStream2> {
+        if let PropertyType::ConnectComponent(closure) = self {
+            Some(closure.to_token_stream())
+        } else {
+            None
+        }
+    }
 }
 
 impl Property {
@@ -333,6 +341,40 @@ impl Widget {
                 stream.extend(quote_spanned! {
                     p_span => {
                         #clone_stream
+                        #assign_fn(#self_assign_args #p_assign);
+                    }
+                });
+            }
+        }
+
+        stream
+    }
+
+    pub fn connect_component_stream(&self) -> TokenStream2 {
+        let w_name = &self.name;
+        let mut stream = TokenStream2::new();
+
+        for prop in &self.properties.properties {
+            let p_assign_opt = prop.ty.connect_component_tokens();
+            if let Some(p_assign) = p_assign_opt {
+                let p_name = &prop.name;
+                let p_span = p_name.span().unwrap().into();
+
+                let assign_fn = prop.name.self_assign_fn_stream(w_name);
+                let self_assign_args = prop.name.self_assign_args_stream(w_name);
+
+                let mut arg_stream = TokenStream2::new();
+                if let Some(args) = &prop.args {
+                    for arg in &args.inner {
+                        arg_stream.extend(quote_spanned! { arg.span() =>
+                            let #arg;
+                        });
+                    }
+                }
+
+                stream.extend(quote_spanned! {
+                    p_span => {
+                        #arg_stream
                         #assign_fn(#self_assign_args #p_assign);
                     }
                 });

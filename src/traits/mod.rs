@@ -119,6 +119,25 @@ pub trait ComponentUpdate<ParentModel: Model>: Model {
     );
 }
 
+/// A message handler that can be used in situations where a [`RelmWorker`](crate::RelmWorker)
+/// isn't flexible enough.
+pub trait MessageHandler<ParentModel: Model> {
+    /// The message type of this message handler.
+    type Msg;
+
+    /// The sender type that can be used to send a message to a [`RelmMsgHandler`](crate::RelmMsgHandler).
+    type Sender;
+
+    /// Initialize this message handler.
+    fn init(parent_model: &ParentModel, parent_sender: Sender<ParentModel::Msg>) -> Self;
+
+    /// Sends a message to the message handler.
+    fn send(&self, msg: Self::Msg);
+
+    /// Get a sender for sending messages to this [`RelmMsgHandler`](crate::RelmMsgHandler).
+    fn sender(&self) -> Self::Sender;
+}
+
 /// Define behavior to turn the data of you model into widgets.
 ///
 /// This trait and the associated struct can also be implemented by the `relm4-macros::widget` macro.

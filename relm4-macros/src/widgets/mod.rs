@@ -21,6 +21,7 @@ pub(super) enum PropertyType {
     Component(Expr),
     Args(Args<Expr>),
     Connect(ExprClosure),
+    ConnectComponent(ExprClosure),
     Watch(TokenStream2),
     Factory(Expr),
     Widget(Widget),

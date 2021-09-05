@@ -17,12 +17,14 @@ mod app;
 mod component;
 pub mod drawing;
 pub mod factory;
+mod msg_handler;
 mod traits;
 pub mod util;
 mod worker;
 
 pub use app::RelmApp;
 pub use component::RelmComponent;
+pub use msg_handler::RelmMsgHandler;
 pub use traits::*;
 pub use util::widget_plus::WidgetPlus;
 pub use worker::*;

@@ -4,7 +4,9 @@
 
 ### Added
 
++ relm4: Added message handler type
 + relm4: More methods for factory data structures
++ relm4-macros: Add syntax for connecting events with components
 + relm4-examples: Stack example
 + book: Added macro expansion chapter
 

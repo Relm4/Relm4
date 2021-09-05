@@ -1,5 +1,5 @@
 use syn::{
-    braced, parenthesized,
+    braced, bracketed, parenthesized,
     parse::{Parse, ParseBuffer, ParseStream},
     parse_macro_input,
     punctuated::Punctuated,
@@ -46,6 +46,7 @@ impl Parse for Property {
         let name = input.parse()?;
         let mut optional_assign = false;
         let mut iterative = false;
+        let mut braced_args = false;
 
         if input.peek(Token![!]) {
             if let PropertyName::Ident(ref ident_name) = name {
@@ -70,6 +71,13 @@ impl Parse for Property {
             let paren_input;
             parenthesized!(paren_input in input);
             Some(paren_input.parse()?)
+        }
+        // check for property[a, b, c]: ...
+        else if input.peek(token::Bracket) {
+            let paren_input;
+            bracketed!(paren_input in input);
+            braced_args = true;
+            Some(paren_input.parse()?)
         } else {
             None
         };
@@ -77,7 +85,11 @@ impl Parse for Property {
         // look for event handlers: property(a, ...) => move |a, ...| { ... }
         let ty = if input.peek(Token! [=>]) {
             let _arrow: Token![=>] = input.parse()?;
-            input.parse().map(PropertyType::Connect)?
+            if braced_args {
+                input.parse().map(PropertyType::ConnectComponent)?
+            } else {
+                input.parse().map(PropertyType::Connect)?
+            }
         }
         // look for widgets
         else if input.peek(Token![=]) || input.peek3(Token![=]) {
