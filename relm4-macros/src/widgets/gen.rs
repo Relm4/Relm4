@@ -255,7 +255,7 @@ impl Widget {
             let fact_assign_opt = prop.ty.factory_expr();
             if let Some(f_expr) = fact_assign_opt {
                 property_stream.extend(quote! {
-                    #f_expr.generate(&self.#w_name, sender.clone());
+                    ::relm4::factory::Factory::generate(&#f_expr, &self.#w_name, sender.clone());
                 });
             }
         }
@@ -309,7 +309,7 @@ impl Widget {
             let fact_assign_opt = prop.ty.factory_expr();
             if let Some(f_expr) = fact_assign_opt {
                 property_stream.extend(quote! {
-                    #f_expr.generate(&#w_name, sender.clone());
+                    ::relm4::factory::Factory::generate(&#f_expr, &#w_name, sender.clone());
                 });
             }
         }

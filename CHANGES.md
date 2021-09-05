@@ -19,6 +19,7 @@
 
 ### Fixed
 
++ relm4-macros: Use fully qualified syntax for factories
 + relm4-macros: Passing additional arguments now works for components and other properties, too.
 
 ## 0.1.0-beta.9
