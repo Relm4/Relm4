@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.1.0 - 2021-09-06
+
 ### Added
 
 + relm4: Added message handler type
@@ -24,7 +26,7 @@
 + relm4-macros: Use fully qualified syntax for factories
 + relm4-macros: Passing additional arguments now works for components and other properties, too.
 
-## 0.1.0-beta.9
+## 0.1.0-beta.9 - 2021-08-24
 
 ## Added
 
