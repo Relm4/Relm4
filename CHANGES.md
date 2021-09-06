@@ -12,7 +12,9 @@
 
 ### Changed
 
++ book: Added message handler chapter and reworked the threads and async chapter
 + book: Many book improvements by [tronta](https://github.com/tronta)
++ relm4: The send! macro no longer clones the sender
 + relm4-macros: Make fields of public widgets public
 + relm4-components: Use &'static str instead of String for configurations
 + relm4-examples: Many improvements

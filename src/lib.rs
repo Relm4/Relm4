@@ -108,6 +108,6 @@ pub fn spawn_future<F: futures_core::future::Future<Output = ()> + Send + 'stati
 #[macro_export]
 macro_rules! send {
     ($sender:ident, $msg:expr) => {
-        $sender.clone().send($msg).expect("Receiver was dropped!")
+        $sender.send($msg).expect("Receiver was dropped!")
     };
 }
