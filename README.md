@@ -22,7 +22,7 @@ Relm4 is a new version of [relm](https://github.com/antoyo/relm) that's built fr
 ## Documentation
 
 + 📖 **[Book](https://aaronerhardt.github.io/relm4-book/book/)**
-+ **[Rust documentation](https://aaronerhardt.github.io/docs/relm4/relm4/)**
++ 📜 **[Rust documentation](https://aaronerhardt.github.io/docs/relm4/relm4/)**
 
 ## Dependencies
 
@@ -39,9 +39,9 @@ Add this to your `Cargo.toml`:
 
 ```toml
 gtk = { version = "0.2", package = "gtk4" }
-relm4 = "0.1.0"
-relm4-macros = "0.1.0"
-relm4-components = "0.1.0"
+relm4 = "0.1"
+relm4-macros = "0.1"
+relm4-components = "0.1"
 ```
 
 ### Features
