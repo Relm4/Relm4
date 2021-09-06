@@ -4,17 +4,12 @@ use std::marker::PhantomData;
 
 use crate::{MessageHandler, Model};
 
-/// [`RelmMsgHandler`]s are like [`RelmComponent`](crate::RelmComponent)s but they don't have any widgets.
-///
-/// They are usually used to run expansive tasks on different threads and report back when they are finished
+/// [`RelmMsgHandler`]s are usually used to run expansive tasks on different threads and report back when they are finished
 /// so that their parent components can keep handling UI events in the meantime.
 /// For example you could use a [`RelmMsgHandler`] for sending a HTTP request or for copying files.
 ///
-/// A [`RelmMsgHandler`] has its own model and message type
-/// and can send messages to its parent and its children components.
-///
 /// Multiple [`RelmMsgHandler`]s that have the same parent are usually bundled along with [`RelmComponent`](crate::RelmComponent)s
-/// in a struct that implements [`Components`].
+/// and [`RelmWorker`](crate::RelmWorker)s in a struct that implements [`Components`](crate::Components).
 #[derive(Clone, Debug)]
 pub struct RelmMsgHandler<Data, ParentModel>
 where
