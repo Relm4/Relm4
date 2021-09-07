@@ -57,6 +57,9 @@ Several example applications are available at [relm4-examples/](relm4-examples/)
 
 ### A simple counter app
 
+![Simple app screenshot light](assets/screenshots/simple-light.png)
+![Simple app screenshot dark](assets/screenshots/simple-dark.png)
+
 ```rust
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
 use relm4::{send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets};
