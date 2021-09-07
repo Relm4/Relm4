@@ -55,6 +55,8 @@ The relm4 crate has two feature flags:
 
 Several example applications are available at [relm4-examples/](relm4-examples/).
 
+#### [📸 Screenshots from the example apps](assets/screenshots)
+
 ### A simple counter app
 
 ![Simple app screenshot light](assets/screenshots/simple-light.png)
