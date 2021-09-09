@@ -35,6 +35,7 @@ use once_cell::sync::OnceCell;
 static APP: OnceCell<Fragile<gtk::Application>> = OnceCell::new();
 
 pub use gtk::glib::Sender;
+pub use gtk;
 
 #[cfg(feature = "tokio-rt")]
 #[cfg_attr(doc, doc(cfg(feature = "tokio-rt")))]
