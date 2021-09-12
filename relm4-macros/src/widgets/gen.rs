@@ -9,7 +9,6 @@ impl PropertyType {
         match self {
             PropertyType::Expr(expr) => Some(expr.to_token_stream()),
             PropertyType::Value(lit) => Some(lit.to_token_stream()),
-            PropertyType::Widget(widget) => Some(widget.widget_assignment()),
             PropertyType::Watch(tokens) => Some(tokens.to_token_stream()),
             PropertyType::Args(args) => Some(args.to_token_stream()),
             PropertyType::Track(Tracker { update_fns, .. }) => Some(quote! { #(#update_fns),* }),
@@ -52,10 +51,10 @@ impl PropertyType {
     }
 
     fn component_tokens(&self) -> Option<TokenStream2> {
-        if let PropertyType::Component(expr) = self {
-            Some(quote_spanned! { expr.span() => #expr })
-        } else {
-            None
+        match self {
+            PropertyType::Widget(widget) => Some(widget.widget_assignment()),
+            PropertyType::Component(expr) => Some(quote_spanned! { expr.span() => #expr }),
+            _ => None,
         }
     }
 
@@ -196,9 +195,9 @@ impl Widget {
         let w_span = self.func.span();
         let w_name = &self.name;
         let out_stream = if self.assign_as_ref {
-            quote_spanned! { w_span => & #w_name}
+            quote_spanned! { w_span => & self.#w_name}
         } else {
-            quote! { #w_name}
+            quote! { self.#w_name}
         };
         if let Some(wrapper) = &self.wrapper {
             quote_spanned! {
@@ -215,41 +214,17 @@ impl Widget {
         for prop in &self.properties.properties {
             let p_assign_opt = prop.ty.view_assign_tokens();
             if let Some(p_assign) = p_assign_opt {
-                let p_name = &prop.name;
-                let p_span = p_name.span().unwrap().into();
                 let assign_fn = prop.name.self_assign_fn_stream(w_name);
                 let self_assign_args = prop.name.self_assign_args_stream(w_name);
 
-                property_stream.extend(match (prop.optional_assign, prop.iterative) {
-                    (false, false) => {
-                        quote_spanned! {
-                            p_span => #assign_fn(#self_assign_args #p_assign);
-                        }
-                    }
-                    (true, false) => {
-                        quote_spanned! {
-                            p_span => if let Some(__p_assign) = #p_assign {
-                                #assign_fn(#self_assign_args __p_assign);
-                            }
-                        }
-                    }
-                    (false, true) => {
-                        quote_spanned! {
-                            p_span => for __elem in #p_assign {
-                                #assign_fn(#self_assign_args __elem);
-                            }
-                        }
-                    }
-                    (true, true) => {
-                        quote_spanned! {
-                            p_span => for __elem in #p_assign {
-                                if let Some(__p_assign) = __elem {
-                                    #assign_fn(#self_assign_args __p_assign);
-                                }
-                            }
-                        }
-                    }
-                });
+                property_assign_tokens(
+                    property_stream,
+                    prop,
+                    assign_fn,
+                    self_assign_args,
+                    p_assign,
+                    None,
+                );
             }
 
             let fact_assign_opt = prop.ty.factory_expr();
@@ -267,43 +242,19 @@ impl Widget {
         for prop in &self.properties.properties {
             let p_assign_opt = prop.ty.init_assign_tokens();
             if let Some(p_assign) = p_assign_opt {
-                let p_name = &prop.name;
-                let p_span = p_name.span().unwrap().into();
                 let args_stream = prop.args_stream();
 
                 let assign_fn = prop.name.assign_fn_stream(w_name);
                 let self_assign_args = prop.name.assign_args_stream(w_name);
 
-                property_stream.extend(match (prop.optional_assign, prop.iterative) {
-                    (false, false) => {
-                        quote_spanned! {
-                            p_span => #assign_fn(#self_assign_args #p_assign #args_stream);
-                        }
-                    }
-                    (true, false) => {
-                        quote_spanned! {
-                            p_span => if let Some(__p_assign) = #p_assign {
-                                #assign_fn(#self_assign_args __p_assign #args_stream);
-                            }
-                        }
-                    }
-                    (false, true) => {
-                        quote_spanned! {
-                            p_span => for __elem in #p_assign {
-                                #assign_fn(#self_assign_args __elem #args_stream );
-                            }
-                        }
-                    }
-                    (true, true) => {
-                        quote_spanned! {
-                            p_span => for __elem in #p_assign {
-                                if let Some(__p_assign) = __elem {
-                                    #assign_fn(#self_assign_args __p_assign #args_stream );
-                                }
-                            }
-                        }
-                    }
-                });
+                property_assign_tokens(
+                    property_stream,
+                    prop,
+                    assign_fn,
+                    self_assign_args,
+                    p_assign,
+                    Some(args_stream),
+                );
             }
 
             let fact_assign_opt = prop.ty.factory_expr();
@@ -414,19 +365,62 @@ impl Widget {
         for prop in &self.properties.properties {
             let p_assign_opt = prop.ty.component_tokens();
             if let Some(component_tokens) = p_assign_opt {
-                let p_name = &prop.name;
-                let p_span = p_name.span().unwrap().into();
-
                 let args_stream = prop.args_stream();
                 let assign_fn = prop.name.self_assign_fn_stream(w_name);
                 let self_assign_args = prop.name.self_assign_args_stream(w_name);
 
-                stream.extend(quote_spanned! {
-                    p_span =>
-                        #assign_fn(#self_assign_args #component_tokens #args_stream);
-                });
+                property_assign_tokens(
+                    &mut stream,
+                    prop,
+                    assign_fn,
+                    self_assign_args,
+                    component_tokens,
+                    Some(args_stream),
+                );
             }
         }
         stream
     }
+}
+
+fn property_assign_tokens(
+    stream: &mut TokenStream2,
+    prop: &Property,
+    assign_fn: TokenStream2,
+    self_assign_args: Option<TokenStream2>,
+    p_assign: TokenStream2,
+    args_stream: Option<TokenStream2>,
+) {
+    let p_name = &prop.name;
+    let p_span = p_name.span().unwrap().into();
+    stream.extend(match (prop.optional_assign, prop.iterative) {
+        (false, false) => {
+            quote_spanned! {
+                p_span => #assign_fn(#self_assign_args #p_assign #args_stream);
+            }
+        }
+        (true, false) => {
+            quote_spanned! {
+                p_span => if let Some(__p_assign) = #p_assign {
+                    #assign_fn(#self_assign_args __p_assign #args_stream);
+                }
+            }
+        }
+        (false, true) => {
+            quote_spanned! {
+                p_span => for __elem in #p_assign {
+                    #assign_fn(#self_assign_args __elem #args_stream );
+                }
+            }
+        }
+        (true, true) => {
+            quote_spanned! {
+                p_span => for __elem in #p_assign {
+                    if let Some(__p_assign) = __elem {
+                        #assign_fn(#self_assign_args __p_assign #args_stream );
+                    }
+                }
+            }
+        }
+    });
 }

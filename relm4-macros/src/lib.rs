@@ -229,7 +229,7 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
                 }
             }
 
-            fn connect_components(&self, components: &<#model as ::relm4::Model>::Components) {
+            fn connect_components(&self, model: &#model, components: &<#model as ::relm4::Model>::Components) {
                 #component_stream
                 #connect_component_stream
             }

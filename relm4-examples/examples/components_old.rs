@@ -217,7 +217,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
         AppWidgets { main, text, vbox }
     }
 
-    fn connect_components(&self, components: &AppComponents) {
+    fn connect_components(&self, _model: &AppModel, components: &AppComponents) {
         self.vbox.append(components.comp1.root_widget());
         self.vbox.append(components.comp2.root_widget());
     }

@@ -21,7 +21,7 @@ where
     ) -> Self {
     }
 
-    fn connect_components(&self, _components: &ModelType::Components) {}
+    fn connect_components(&self, _model: &ModelType, _components: &ModelType::Components) {}
 
     fn root_widget(&self) -> Self::Root {}
 

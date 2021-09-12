@@ -46,7 +46,7 @@ where
         let components = Model::Components::init_components(&model, &widgets, sender.clone());
         let cloned_sender = sender.clone();
 
-        widgets.connect_components(&components);
+        widgets.connect_components(&model, &components);
 
         {
             let context = glib::MainContext::default();
@@ -114,7 +114,7 @@ where
         let components = Model::Components::init_components(&model, &widgets, sender.clone());
         let cloned_sender = sender.clone();
 
-        widgets.connect_components(&components);
+        widgets.connect_components(&model, &components);
 
         let update_sender = sender.clone();
         let view_sender = sender;

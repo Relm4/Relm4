@@ -2,9 +2,18 @@
 
 ## Unreleased
 
+## Changed
+
++ relm4: Pass model in connect_components function of the Widgets trait
++ book: Many book improvements by [tronta](https://github.com/tronta)
+
 ## Added
 
 + relm4: Re-export for gtk
+
+## Fixed
+
++ relm4-macros: [#20](https://github.com/AaronErhardt/relm4/issues/20) Fix wrong order when using components in the widget macro
 
 ## 0.1.0 - 2021-09-06
 

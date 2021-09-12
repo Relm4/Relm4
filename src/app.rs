@@ -52,7 +52,7 @@ where
 
         let components = Model::Components::init_components(&model, &widgets, sender.clone());
 
-        widgets.connect_components(&components);
+        widgets.connect_components(&model, &components);
 
         // Initialize GTK
         app.connect_activate(move |app| {
