@@ -37,10 +37,16 @@ where
         self.app.run();
     }
 
-    /// Create an application.
-    pub fn new(mut model: Model) -> Self {
+    /// Create a Relm4 application.
+    pub fn new(model: Model) -> Self {
         gtk::init().expect("Couln't initialize GTK");
         let app = gtk::Application::builder().build();
+
+        Self::with_app(model, app)
+    }
+
+    /// Create a new Relm4 application with an existing [`gtk::Application`].
+    pub fn with_app(mut model: Model, app: gtk::Application) -> Self {
         crate::APP
             .set(fragile::Fragile::new(app.clone()))
             .expect("APP was alredy set");
