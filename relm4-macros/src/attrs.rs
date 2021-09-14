@@ -1,13 +1,13 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote, ToTokens};
+use quote::ToTokens;
 use syn::{
     parse::{Parse, ParseStream},
-    Result, Token,
+    Result, Visibility,
 };
 
 #[derive(Debug)]
 pub struct Attrs {
-    pub_vis: Option<Token![pub]>,
+    pub_vis: Option<Visibility>,
 }
 
 impl Parse for Attrs {
@@ -25,7 +25,7 @@ impl Parse for Attrs {
 impl ToTokens for Attrs {
     fn to_tokens(&self, out: &mut TokenStream2) {
         if let Some(vis_pub) = &self.pub_vis {
-            out.extend(quote! { #vis_pub });
+            vis_pub.to_tokens(out);
         }
     }
 }

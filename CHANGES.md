@@ -10,6 +10,7 @@
 ## Added
 
 + relm4: Re-export for gtk
++ relm4-macros: Allow usage of visibilities other than pub
 
 ## Fixed
 
