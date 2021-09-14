@@ -27,8 +27,9 @@ jobs:
         DEBIAN_FRONTEND: noninteractive
         TZ: America/New_York
     steps:
-      - run: apt-get update -y
-      - run: apt-get install -y libgtk-4-dev curl
+      - run: apt update -y
+      - run: apt upgrade -y
+      - run: apt install -y libgtk-4-dev curl
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
