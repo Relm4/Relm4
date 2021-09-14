@@ -38,7 +38,7 @@ where
     }
 
     /// Create an application.
-    pub fn new(mut model: Model) -> Self {
+    pub fn new(mut model: Model, settings: &Model::Settings) -> Self {
         gtk::init().expect("Couln't initialize GTK");
         let app = gtk::Application::builder().build();
         crate::APP
@@ -50,7 +50,7 @@ where
         let mut widgets = Model::Widgets::init_view(&model, &(), sender.clone());
         let root = widgets.root_widget();
 
-        let components = Model::Components::init_components(&model, &widgets, sender.clone());
+        let components = Model::Components::init_components(&model, &widgets, sender.clone(), settings);
 
         widgets.connect_components(&model, &components);
 

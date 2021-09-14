@@ -31,7 +31,7 @@ pub struct OpenButtonModel {
     reset_popover: bool,
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone)]
 /// Configuration for the open button component
 pub struct OpenButtonSettings {
     /// Text of the open button.
@@ -42,6 +42,9 @@ pub struct OpenButtonSettings {
     /// Maximum amount of recent files to store.
     /// This is only used if a path for storing the recently opened files was set.
     pub max_recent_files: usize,
+
+    /// Settings for dialog window
+    pub dialog: OpenDialogSettings
 }
 
 #[doc(hidden)]
@@ -57,6 +60,7 @@ impl Model for OpenButtonModel {
     type Msg = OpenButtonMsg;
     type Widgets = OpenButtonWidgets;
     type Components = OpenButtonComponents;
+    type Settings = OpenButtonSettings;
 }
 
 /// Interface for the parent model of the open button component
@@ -64,8 +68,6 @@ pub trait OpenButtonParent: Model
 where
     Self::Widgets: ParentWindow,
 {
-    /// Returns a configuration for the open dialog.
-    fn dialog_config(&self) -> OpenDialogSettings;
     /// Returns a configuration for the open button.
     fn open_button_config(&self) -> OpenButtonSettings;
 
@@ -79,10 +81,10 @@ where
     ParentModel: Model + OpenButtonParent,
     ParentModel::Widgets: ParentWindow,
 {
-    fn init_model(parent_model: &ParentModel) -> Self {
+    fn init_model(_parent_model: &ParentModel, settings: &OpenButtonSettings) -> Self {
         OpenButtonModel {
-            config: parent_model.open_button_config(),
-            dialog_config: parent_model.dialog_config(),
+            config: settings.clone(),
+            dialog_config: settings.dialog.clone(),
             recent_files: None,
             initialized: false,
             reset_popover: false,
@@ -199,9 +201,10 @@ impl Components<OpenButtonModel> for OpenButtonComponents {
         parent_model: &OpenButtonModel,
         parent_widget: &OpenButtonWidgets,
         parent_sender: relm4::Sender<OpenButtonMsg>,
+        settings: &OpenButtonSettings,
     ) -> Self {
         OpenButtonComponents {
-            dialog: RelmComponent::new(parent_model, parent_widget, parent_sender),
+            dialog: RelmComponent::new(parent_model, parent_widget, parent_sender, &settings.dialog),
         }
     }
 }

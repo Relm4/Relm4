@@ -22,6 +22,7 @@ impl Model for AppModel {
     type Msg = AppMsg;
     type Widgets = AppWidgets;
     type Components = AppComponents;
+    type Settings = ();
 }
 
 impl AppUpdate for AppModel {
@@ -112,6 +113,7 @@ impl Components<AppModel> for AppComponents {
         parent_model: &AppModel,
         _parent_widget: &AppWidgets,
         parent_sender: Sender<AppMsg>,
+        _settings: &(),
     ) -> Self {
         AppComponents {
             async_handler: RelmMsgHandler::new(parent_model, parent_sender),
@@ -153,6 +155,6 @@ impl Widgets<AppModel, ()> for AppWidgets {
 
 fn main() {
     let model = AppModel { counter: 0 };
-    let app = RelmApp::new(model);
+    let app = RelmApp::new(model, &());
     app.run();
 }

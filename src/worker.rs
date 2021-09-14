@@ -32,12 +32,16 @@ where
     ParentModel: ModelTrait,
 {
     /// Create a new [`RelmWorker`] that runs on the main thread.
-    pub fn new(parent_model: &ParentModel, parent_sender: Sender<ParentModel::Msg>) -> Self {
+    pub fn new(
+        parent_model: &ParentModel, 
+        parent_sender: Sender<ParentModel::Msg>,
+        settings: &Model::Settings,
+    ) -> Self {
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
-        let mut model = Model::init_model(parent_model);
+        let mut model = Model::init_model(parent_model, settings);
 
-        let components = Model::Components::init_components(&model, &(), sender.clone());
+        let components = Model::Components::init_components(&model, &(), sender.clone(), settings);
         let cloned_sender = sender.clone();
 
         {
@@ -78,12 +82,13 @@ where
     pub fn with_new_thread(
         parent_model: &ParentModel,
         parent_sender: Sender<ParentModel::Msg>,
+        settings: &Model::Settings,
     ) -> Self {
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
-        let mut model = Model::init_model(parent_model);
+        let mut model = Model::init_model(parent_model, settings);
 
-        let components = Model::Components::init_components(&model, &(), sender.clone());
+        let components = Model::Components::init_components(&model, &(), sender.clone(), settings);
         let cloned_sender = sender.clone();
 
         std::thread::spawn(move || {
@@ -149,12 +154,13 @@ where
     pub fn with_new_tokio_rt(
         parent_model: &ParentModel,
         parent_sender: Sender<ParentModel::Msg>,
+        settings: &Model::Settings
     ) -> Self {
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
         let mut model = Model::init_model(parent_model);
 
-        let components = Model::Components::init_components(&model, &(), sender.clone());
+        let components = Model::Components::init_components(&model, &(), sender.clone(), settings);
         let cloned_sender = sender.clone();
 
         std::thread::spawn(move || {

@@ -15,10 +15,11 @@ impl Model for HeaderModel {
     type Msg = HeaderMsg;
     type Widgets = HeaderWidgets;
     type Components = ();
+    type Settings = ();
 }
 
 impl ComponentUpdate<AppModel> for HeaderModel {
-    fn init_model(_parent_model: &AppModel) -> Self {
+    fn init_model(_parent_model: &AppModel, _settings: &()) -> Self {
         HeaderModel {}
     }
 
@@ -95,10 +96,11 @@ impl Model for DialogModel {
     type Msg = DialogMsg;
     type Widgets = DialogWidgets;
     type Components = ();
+    type Settings = ();
 }
 
 impl ComponentUpdate<AppModel> for DialogModel {
-    fn init_model(_parent_model: &AppModel) -> Self {
+    fn init_model(_parent_model: &AppModel, _settings: &()) -> Self {
         DialogModel { hidden: true }
     }
 
@@ -152,10 +154,11 @@ impl Components<AppModel> for AppComponents {
         parent_model: &AppModel,
         parent_widgets: &AppWidgets,
         parent_sender: Sender<AppMsg>,
+        _settings: &(),
     ) -> Self {
         AppComponents {
-            header: RelmComponent::new(parent_model, parent_widgets, parent_sender.clone()),
-            dialog: RelmComponent::new(parent_model, parent_widgets, parent_sender),
+            header: RelmComponent::new(parent_model, parent_widgets, parent_sender.clone(), &()),
+            dialog: RelmComponent::new(parent_model, parent_widgets, parent_sender, &()),
         }
     }
 }
@@ -181,6 +184,7 @@ impl Model for AppModel {
     type Msg = AppMsg;
     type Widgets = AppWidgets;
     type Components = AppComponents;
+    type Settings = ();
 }
 
 #[relm4_macros::widget]
@@ -222,6 +226,6 @@ fn main() {
     let model = AppModel {
         mode: AppMode::View,
     };
-    let relm = RelmApp::new(model);
+    let relm = RelmApp::new(model, &());
     relm.run();
 }

@@ -22,6 +22,7 @@ impl Model for AppModel {
     type Msg = AppMsg;
     type Widgets = AppWidgets;
     type Components = ();
+    type Settings = ();
 }
 
 impl AppUpdate for AppModel {
@@ -181,6 +182,6 @@ fn main() {
         points: Vec::new(),
         reset: false,
     };
-    let relm = RelmApp::new(model);
+    let relm = RelmApp::new(model, &());
     relm.run();
 }

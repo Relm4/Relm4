@@ -7,6 +7,7 @@ use relm4::{send, ComponentUpdate, Model, Sender};
 
 use crate::ParentWindow;
 
+#[derive(Clone)]
 /// Configuration for the alert dialog component
 pub struct AlertSettings {
     /// Large text
@@ -43,6 +44,7 @@ impl Model for AlertModel {
     type Msg = AlertMsg;
     type Widgets = AlertWidgets;
     type Components = ();
+    type Settings = AlertSettings;
 }
 
 /// Interface for the parent model
@@ -50,9 +52,6 @@ pub trait AlertParent: Model
 where
     Self::Widgets: ParentWindow,
 {
-    /// Configuration for alert component.
-    fn alert_config(&self) -> AlertSettings;
-
     /// Message sent to parent if user clicks confirm button
     fn confirm_msg() -> Self::Msg;
 
@@ -68,9 +67,9 @@ where
     ParentModel: AlertParent,
     ParentModel::Widgets: ParentWindow,
 {
-    fn init_model(parent_model: &ParentModel) -> Self {
+    fn init_model(_parent_model: &ParentModel, settings: &AlertSettings) -> Self {
         AlertModel {
-            settings: parent_model.alert_config(),
+            settings: settings.clone(),
             is_active: false,
         }
     }

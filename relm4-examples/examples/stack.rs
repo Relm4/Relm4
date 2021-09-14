@@ -39,6 +39,7 @@ impl Model for AppModel {
     type Msg = AppMsg;
     type Widgets = AppWidgets;
     type Components = ();
+    type Settings = ();
 }
 
 impl AppUpdate for AppModel {
@@ -108,6 +109,6 @@ impl Widgets<AppModel, ()> for AppWidgets {
 
 fn main() {
     let model = AppModel { page: Page::Hello };
-    let app = RelmApp::new(model);
+    let app = RelmApp::new(model, &());
     app.run();
 }

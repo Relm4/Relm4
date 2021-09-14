@@ -23,12 +23,14 @@ impl Model for Comp1Model {
     type Msg = CompMsg;
     type Widgets = Comp1Widgets;
     type Components = ();
+    type Settings = ();
 }
 
 impl Model for Comp2Model {
     type Msg = CompMsg;
     type Widgets = Comp2Widgets;
     type Components = ();
+    type Settings = ();
 }
 
 #[derive(PartialEq)]
@@ -89,7 +91,7 @@ impl Widgets<Comp2Model, AppModel> for Comp2Widgets {
 }
 
 impl ComponentUpdate<AppModel> for Comp1Model {
-    fn init_model(_parent_model: &AppModel) -> Self {
+    fn init_model(_parent_model: &AppModel, _parent_settings: &()) -> Self {
         Comp1Model { hidden: false }
     }
 
@@ -114,7 +116,7 @@ impl ComponentUpdate<AppModel> for Comp1Model {
 }
 
 impl ComponentUpdate<AppModel> for Comp2Model {
-    fn init_model(_parent_model: &AppModel) -> Self {
+    fn init_model(_parent_model: &AppModel, _parent_settings: &()) -> Self {
         Comp2Model { hidden: true }
     }
 
@@ -147,14 +149,16 @@ impl Components<AppModel> for AppComponents {
         parent_model: &AppModel,
         parent_widgets: &AppWidgets,
         parent_sender: Sender<AppMsg>,
+        _parent_settings: &(),
     ) -> Self {
         AppComponents {
             comp1: RelmComponent::with_new_thread(
                 parent_model,
                 parent_widgets,
                 parent_sender.clone(),
+                &(),
             ),
-            comp2: RelmComponent::new(parent_model, parent_widgets, parent_sender),
+            comp2: RelmComponent::new(parent_model, parent_widgets, parent_sender, &()),
         }
     }
 }
@@ -180,6 +184,7 @@ impl Model for AppModel {
     type Msg = AppMsg;
     type Widgets = AppWidgets;
     type Components = AppComponents;
+    type Settings = ();
 }
 
 impl Widgets<AppModel, ()> for AppWidgets {
@@ -250,6 +255,6 @@ impl AppUpdate for AppModel {
 
 fn main() {
     let model = AppModel { counter: 0 };
-    let relm = RelmApp::new(model);
+    let relm = RelmApp::new(model, &());
     relm.run();
 }

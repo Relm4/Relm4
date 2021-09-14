@@ -25,6 +25,7 @@ impl Model for AppModel {
     type Msg = AppMsg;
     type Widgets = AppWidgets;
     type Components = AppComponents;
+    type Settings = ();
 }
 
 impl AppUpdate for AppModel {
@@ -81,9 +82,10 @@ impl Components<AppModel> for AppComponents {
         model: &AppModel,
         parent_widgets: &AppWidgets,
         sender: Sender<AppMsg>,
+        _settings: &(),
     ) -> Self {
         AppComponents {
-            dialog: RelmComponent::new(model, parent_widgets, sender),
+            dialog: RelmComponent::new(model, parent_widgets, sender, &model.dialog_config()),
         }
     }
 }
@@ -129,6 +131,6 @@ impl Widgets<AppModel, ()> for AppWidgets {
 
 fn main() {
     let model = AppModel::default();
-    let app = RelmApp::new(model);
+    let app = RelmApp::new(model, &());
     app.run();
 }

@@ -25,6 +25,7 @@ mod impls;
 ///     type Msg = AppMsg;
 ///     type Widgets = AppWidgets;
 ///     type Components = ();
+///     type Settings = ();
 /// }
 /// ```
 pub trait Model: std::marker::Sized {
@@ -40,6 +41,9 @@ pub trait Model: std::marker::Sized {
     ///
     /// If you don't want any component associated with this model just use `()`.
     type Components: Components<Self>;
+
+    /// Settings used to initialize component
+    type Settings;
 }
 
 /// Define the behavior to update the model of the main app.
@@ -63,6 +67,7 @@ pub trait Model: std::marker::Sized {
 /// #     type Msg = AppMsg;
 /// #     type Widgets = AppWidgets;
 /// #     type Components = ();
+/// #     type Settings = ();
 /// # }
 /// #
 /// impl AppUpdate for AppModel {
@@ -101,7 +106,7 @@ pub trait ComponentUpdate<ParentModel: Model>: Model {
     ///
     /// In case you want to share information or settings with the parent component you
     /// get the parent's model passed as parameter.
-    fn init_model(parent_model: &ParentModel) -> Self;
+    fn init_model(parent_model: &ParentModel, settings: &Self::Settings) -> Self;
 
     /// Updates the model.
     /// Typically a `match` statement is used to process the message.
@@ -200,26 +205,31 @@ where
 /// #     type Msg = AppMsg;
 /// #     type Widgets = AppWidgets;
 /// #     type Components = ();
+/// #     type Settings = ();
 /// # }
 /// #
 /// # struct CompMsg {};
-/// # struct Comp1Model {};
+/// # struct Comp1Settings {};
+/// # struct Comp1Model {}
+/// # struct Comp2Settings {};
 /// # struct Comp2Model {};
 /// #
 /// # impl Model for Comp1Model {
 /// #     type Msg = CompMsg;
 /// #     type Widgets = ();
 /// #     type Components = ();
+/// #     type Settings = Comp1Settings;
 /// # }
 /// #
 /// # impl Model for Comp2Model {
 /// #     type Msg = CompMsg;
 /// #     type Widgets = ();
 /// #     type Components = ();
+/// #     type Settings = Comp2Settings;
 /// # }
 /// #
 /// # impl ComponentUpdate<AppModel> for Comp1Model {
-/// #     fn init_model(_parent_model: &AppModel) -> Self {
+/// #     fn init_model(_parent_model: &AppModel, _settings: &Self::Settings) -> Self {
 /// #         Comp1Model {}
 /// #     }
 /// #
@@ -233,7 +243,7 @@ where
 /// # }
 /// #
 /// # impl ComponentUpdate<AppModel> for Comp2Model {
-/// #     fn init_model(_parent_model: &AppModel) -> Self {
+/// #     fn init_model(_parent_model: &AppModel, _settings: &Self::Settings) -> Self {
 /// #         Comp2Model {}
 /// #     }
 /// #
@@ -252,10 +262,10 @@ where
 /// }
 ///
 /// impl Components<AppModel> for AppComponents {
-///     fn init_components(parent_model: &AppModel, parent_widgets: &AppWidgets, parent_sender: Sender<AppMsg>) -> Self {
+///     fn init_components(parent_model: &AppModel, parent_widgets: &AppWidgets, parent_sender: Sender<AppMsg>, _settings: &()) -> Self {
 ///         AppComponents {
-///             comp1: RelmComponent::with_new_thread(parent_model, parent_widgets, parent_sender.clone()),
-///             comp2: RelmComponent::new(parent_model, parent_widgets, parent_sender),
+///             comp1: RelmComponent::with_new_thread(parent_model, parent_widgets, parent_sender.clone(), &Comp1Settings{}),
+///             comp2: RelmComponent::new(parent_model, parent_widgets, parent_sender, &Comp2Settings{}),
 ///         }
 ///     }
 /// }
@@ -266,6 +276,7 @@ pub trait Components<ParentModel: ?Sized + Model> {
         parent_model: &ParentModel,
         parent_widget: &ParentModel::Widgets,
         parent_sender: Sender<ParentModel::Msg>,
+        parent_settings: &ParentModel::Settings,
     ) -> Self;
 }
 

@@ -19,6 +19,7 @@ impl Model for AppModel {
     type Msg = AppMsg;
     type Widgets = AppWidgets;
     type Components = AppComponents;
+    type Settings = ();
 }
 
 impl AppUpdate for AppModel {
@@ -50,10 +51,11 @@ impl Model for ButtonModel {
     type Msg = ButtonMsg;
     type Widgets = ButtonWidgets;
     type Components = ();
+    type Settings = ();
 }
 
 impl ComponentUpdate<AppModel> for ButtonModel {
-    fn init_model(_parent_model: &AppModel) -> Self {
+    fn init_model(_parent_model: &AppModel, _parent_settings: &Self::Settings) -> Self {
         ButtonModel {}
     }
 
@@ -86,10 +88,11 @@ impl Components<AppModel> for AppComponents {
         model: &AppModel,
         parent_widgets: &AppWidgets,
         sender: Sender<AppMsg>,
+        _settings: &(),
     ) -> Self {
         AppComponents {
-            button1: RelmComponent::new(model, parent_widgets, sender.clone()),
-            button2: RelmComponent::new(model, parent_widgets, sender),
+            button1: RelmComponent::new(model, parent_widgets, sender.clone(), &()),
+            button2: RelmComponent::new(model, parent_widgets, sender, &()),
         }
     }
 }
@@ -176,6 +179,6 @@ fn main() {
         classes: vec!["first", "second"],
         decrement: false,
     };
-    let app = RelmApp::new(model);
+    let app = RelmApp::new(model, &());
     app.run();
 }

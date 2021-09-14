@@ -25,6 +25,7 @@ impl Model for AppModel {
     type Msg = AppMsg;
     type Widgets = AppWidgets;
     type Components = ();
+    type Settings = ();
 }
 
 impl AppUpdate for AppModel {
@@ -106,6 +107,6 @@ fn main() {
         counter: 0,
         async_handler: rx,
     };
-    let app = RelmApp::new(model);
+    let app = RelmApp::new(model, &());
     app.run();
 }

@@ -35,15 +35,16 @@ where
         parent_model: &ParentModel,
         parent_widgets: &ParentModel::Widgets,
         parent_sender: Sender<ParentModel::Msg>,
+        settings: &Model::Settings,
     ) -> Self {
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
-        let mut model = Model::init_model(parent_model);
+        let mut model = Model::init_model(parent_model, settings);
 
         let mut widgets = Model::Widgets::init_view(&model, parent_widgets, sender.clone());
         let root_widget = widgets.root_widget();
 
-        let components = Model::Components::init_components(&model, &widgets, sender.clone());
+        let components = Model::Components::init_components(&model, &widgets, sender.clone(), settings);
         let cloned_sender = sender.clone();
 
         widgets.connect_components(&model, &components);
@@ -102,16 +103,17 @@ where
         parent_model: &ParentModel,
         parent_widgets: &ParentModel::Widgets,
         parent_sender: Sender<ParentModel::Msg>,
+        settings: &Model::Settings,
     ) -> Self {
         let (global_sender, global_receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
-        let model = Model::init_model(parent_model);
+        let model = Model::init_model(parent_model, settings);
 
         let mut widgets = Model::Widgets::init_view(&model, parent_widgets, sender.clone());
         let root_widget = widgets.root_widget();
 
-        let components = Model::Components::init_components(&model, &widgets, sender.clone());
+        let components = Model::Components::init_components(&model, &widgets, sender.clone(), settings);
         let cloned_sender = sender.clone();
 
         widgets.connect_components(&model, &components);

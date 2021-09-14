@@ -16,6 +16,7 @@ impl Model for AppModel {
     type Msg = AppMsg;
     type Widgets = AppWidgets;
     type Components = AppComponents;
+    type Settings = ();
 }
 
 impl AppUpdate for AppModel {
@@ -41,16 +42,13 @@ impl OpenButtonParent for AppModel {
             text: "Open file",
             recently_opened_files: Some(".recent_files"),
             max_recent_files: 10,
-        }
-    }
-
-    fn dialog_config(&self) -> OpenDialogSettings {
-        OpenDialogSettings {
-            accept_label: "Open",
-            cancel_label: "Cancel",
-            create_folders: true,
-            is_modal: true,
-            filters: Vec::new(),
+            dialog: OpenDialogSettings {
+                accept_label: "Open",
+                cancel_label: "Cancel",
+                create_folders: true,
+                is_modal: true,
+                filters: Vec::new(),
+            }
         }
     }
 
@@ -74,9 +72,10 @@ impl Components<AppModel> for AppComponents {
         model: &AppModel,
         parent_widgets: &AppWidgets,
         sender: Sender<AppMsg>,
+        _settings: &(),
     ) -> Self {
         AppComponents {
-            open_button: RelmComponent::new(model, parent_widgets, sender),
+            open_button: RelmComponent::new(model, parent_widgets, sender, &model.open_button_config()),
         }
     }
 }
@@ -96,6 +95,6 @@ impl Widgets<AppModel, ()> for AppWidgets {
 
 fn main() {
     let model = AppModel {};
-    let app = RelmApp::new(model);
+    let app = RelmApp::new(model, &());
     app.run();
 }

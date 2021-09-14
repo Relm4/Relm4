@@ -5,6 +5,7 @@ impl Model for () {
     type Msg = ();
     type Widgets = ();
     type Components = ();
+    type Settings = ();
 }
 
 impl<ModelType, ParentModel> Widgets<ModelType, ParentModel> for ()
@@ -33,6 +34,7 @@ impl<ParentModel: Model> Components<ParentModel> for () {
         _parent_model: &ParentModel,
         _widgets: &ParentModel::Widgets,
         _sender: Sender<ParentModel::Msg>,
+        _parent_settings: &ParentModel::Settings,
     ) {
     }
 }

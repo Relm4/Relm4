@@ -23,6 +23,7 @@ impl Model for AppModel {
     type Msg = AppMsg;
     type Widgets = AppWidgets;
     type Components = AppComponents;
+    type Settings = ();
 }
 
 impl AppUpdate for AppModel {
@@ -55,18 +56,6 @@ impl AppUpdate for AppModel {
 }
 
 impl AlertParent for AppModel {
-    fn alert_config(&self) -> AlertSettings {
-        AlertSettings {
-            text: "Do you want to quit without saving?",
-            secondary_text: Some("Your counter hasn't reached 42 yet"),
-            confirm_label: "Close without saving",
-            cancel_label: "Cancel",
-            option_label: Some("Save"),
-            is_modal: true,
-            destructive_accept: true,
-        }
-    }
-
     fn confirm_msg() -> Self::Msg {
         AppMsg::Close
     }
@@ -95,9 +84,20 @@ impl Components<AppModel> for AppComponents {
         model: &AppModel,
         parent_widgets: &AppWidgets,
         sender: Sender<AppMsg>,
+        _settings: &(),
     ) -> Self {
+        let dialog_settings = AlertSettings {
+            text: "Do you want to quit without saving?",
+            secondary_text: Some("Your counter hasn't reached 42 yet"),
+            confirm_label: "Close without saving",
+            cancel_label: "Cancel",
+            option_label: Some("Save"),
+            is_modal: true,
+            destructive_accept: true,
+        };
+
         AppComponents {
-            dialog: RelmComponent::new(model, parent_widgets, sender),
+            dialog: RelmComponent::new(model, parent_widgets, sender, &dialog_settings),
         }
     }
 }
@@ -147,6 +147,6 @@ impl Widgets<AppModel, ()> for AppWidgets {
 
 fn main() {
     let model = AppModel::default();
-    let app = RelmApp::new(model);
+    let app = RelmApp::new(model, &());
     app.run();
 }

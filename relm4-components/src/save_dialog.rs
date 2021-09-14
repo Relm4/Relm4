@@ -54,6 +54,7 @@ impl Model for SaveDialogModel {
     type Msg = SaveDialogMsg;
     type Widgets = SaveDialogWidgets;
     type Components = ();
+    type Settings = SaveDialogSettings;
 }
 
 /// Interface for the parent model of the save dialog
@@ -73,7 +74,7 @@ where
     ParentModel: SaveDialogParent,
     <ParentModel as relm4::Model>::Widgets: ParentWindow,
 {
-    fn init_model(parent_model: &ParentModel) -> Self {
+    fn init_model(parent_model: &ParentModel, _settings: &Self::Settings) -> Self {
         SaveDialogModel {
             settings: parent_model.dialog_config(),
             is_active: false,

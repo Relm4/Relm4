@@ -47,6 +47,7 @@ impl Model for OpenDialogModel {
     type Msg = OpenDialogMsg;
     type Widgets = OpenDialogWidgets;
     type Components = ();
+    type Settings = OpenDialogSettings;
 }
 
 /// Interface for the parent model
@@ -66,7 +67,7 @@ where
     ParentModel: OpenDialogParent,
     <ParentModel as relm4::Model>::Widgets: ParentWindow,
 {
-    fn init_model(parent_model: &ParentModel) -> Self {
+    fn init_model(parent_model: &ParentModel, _settings: &Self::Settings) -> Self {
         OpenDialogModel {
             settings: parent_model.dialog_config(),
             is_active: false,

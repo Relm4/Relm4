@@ -52,6 +52,7 @@ use types::ModelTypes;
 ///     type Msg = AppMsg;
 ///     type Widgets = AppWidgets;
 ///     type Components = ();
+///     type Settings = ();
 /// }
 ///
 /// impl AppUpdate for AppModel {

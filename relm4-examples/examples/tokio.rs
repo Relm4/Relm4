@@ -12,6 +12,7 @@ impl Model for HttpModel {
     type Msg = HttpMsg;
     type Widgets = ();
     type Components = ();
+    type Settings = ();
 }
 
 enum HttpMsg {
@@ -74,9 +75,10 @@ impl Components<AppModel> for AppComponents {
         parent_model: &AppModel,
         _parent_widgets: &AppWidgets,
         parent_sender: Sender<AppMsg>,
+        _settings: &(),
     ) -> Self {
         AppComponents {
-            http: AsyncRelmWorker::with_new_tokio_rt(parent_model, parent_sender),
+            http: AsyncRelmWorker::with_new_tokio_rt(parent_model, parent_sender, &()),
         }
     }
 }
@@ -100,6 +102,7 @@ impl Model for AppModel {
     type Msg = AppMsg;
     type Widgets = AppWidgets;
     type Components = AppComponents;
+    type Settings = ();
 }
 
 impl AppUpdate for AppModel {
@@ -267,6 +270,6 @@ fn main() {
         image_waiting: false,
         tracker: 0,
     };
-    let relm = RelmApp::new(model);
+    let relm = RelmApp::new(model, &());
     relm.run();
 }
