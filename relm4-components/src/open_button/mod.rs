@@ -17,26 +17,27 @@ mod factory;
 
 use factory::FileListItem;
 
+/// Builds configuration for OpenButton
 pub trait OpenButtonConfig: OpenDialogConfig {
     /// Returns a configuration for the open button.
     fn open_button_config(model: &Self::Model) -> OpenButtonSettings;
 }
 
-// #[tracker::track]
+#[tracker::track]
 #[derive(Debug)]
 /// Model of the open button component
 pub struct OpenButtonModel<Conf: OpenButtonConfig + 'static>
 {
-    // #[do_not_track]
+    #[do_not_track]
     config: OpenButtonSettings,
-    // #[do_not_track]
+    #[do_not_track]
     dialog_config: OpenDialogSettings,
-    // #[do_not_track]
+    #[do_not_track]
     recent_files: Option<FactoryVecDeque<FileListItem>>,
     initialized: bool,
-    // #[do_not_track]
+    #[do_not_track]
     reset_popover: bool,
-    // #[do_not_track]
+    #[do_not_track]
     _conf_provider: PhantomData<*const Conf> //we don't own Conf, there is no instance of Conf
 }
 
@@ -104,7 +105,7 @@ where
             recent_files: None,
             initialized: false,
             reset_popover: false,
-            // tracker: 0,
+            tracker: 0,
             _conf_provider: PhantomData,
         }
     }

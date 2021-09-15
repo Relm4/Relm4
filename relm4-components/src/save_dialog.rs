@@ -25,41 +25,25 @@ pub struct SaveDialogSettings {
     pub filters: Vec<gtk::FileFilter>,
 }
 
+///Interface for building the configuration for SaveDialog
 pub trait SaveDialogConfig {
+    /// Model from which configuration should be built
     type Model: Model;
     /// Configure the save dialog
     fn dialog_config(model: &Self::Model) -> SaveDialogSettings;
 }
 
-// #[tracker::track]
+#[tracker::track]
 #[derive(Debug)]
 /// Model of the save dialog component
 pub struct SaveDialogModel<Config: SaveDialogConfig> {
-    // #[do_not_track]
+    #[do_not_track]
     settings: SaveDialogSettings,
     suggestion: Option<String>,
     is_active: bool,
     name: String,
-    // #[do_not_track]
+    #[do_not_track]
     _config_provider: PhantomData<*const Config>, //we don't own Conf, there is no instance of Conf
-
-
-    tracker: u64,
-}
-
-impl<Config: SaveDialogConfig> SaveDialogModel<Config> {
-    pub fn changed(&self, str: &str) -> bool {
-        false
-    }
-
-    pub fn name() -> &'static str {
-        "name"
-    }
-
-    pub fn set_name(&mut self, name: String) {
-        self.name = name;
-    }
-
 }
 
 #[derive(Debug)]
