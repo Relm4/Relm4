@@ -22,30 +22,33 @@ pub trait OpenButtonConfig: OpenDialogConfig {
     fn open_button_config(model: &Self::Model) -> OpenButtonSettings;
 }
 
-#[tracker::track]
+// #[tracker::track]
 #[derive(Debug)]
 /// Model of the open button component
-pub struct OpenButtonModel<Conf: OpenButtonConfig>
+pub struct OpenButtonModel<Conf: OpenButtonConfig + 'static>
 {
-    #[do_not_track]
+    // #[do_not_track]
     config: OpenButtonSettings,
-    #[do_not_track]
+    // #[do_not_track]
     dialog_config: OpenDialogSettings,
-    #[do_not_track]
+    // #[do_not_track]
     recent_files: Option<FactoryVecDeque<FileListItem>>,
     initialized: bool,
-    #[do_not_track]
+    // #[do_not_track]
     reset_popover: bool,
-    #[do_not_track]
+    // #[do_not_track]
     _conf_provider: PhantomData<*const Conf> //we don't own Conf, there is no instance of Conf
 }
 
-struct DialogConfig<Conf> {}
-impl<Conf: OpenButtonConfig> OpenDialogConfig for DialogConfig<Conf> {
+struct DialogConfig<Conf> {
+    _config_provider: PhantomData<*const Conf>
+}
+
+impl<Conf: OpenButtonConfig + 'static> OpenDialogConfig for DialogConfig<Conf> {
     type Model = OpenButtonModel<Conf>;
 
     fn open_dialog_config(model: &Self::Model) -> OpenDialogSettings {
-        model.dialog_config
+        model.dialog_config.clone()
     }
 }
 
@@ -71,7 +74,7 @@ pub enum OpenButtonMsg {
     Ignore,
 }
 
-impl<Conf: OpenButtonConfig> Model for OpenButtonModel<Conf> {
+impl<Conf: OpenButtonConfig + 'static> Model for OpenButtonModel<Conf> {
     type Msg = OpenButtonMsg;
     type Widgets = OpenButtonWidgets;
     type Components = OpenButtonComponents<Conf>;
@@ -101,7 +104,7 @@ where
             recent_files: None,
             initialized: false,
             reset_popover: false,
-            tracker: 0,
+            // tracker: 0,
             _conf_provider: PhantomData,
         }
     }
@@ -113,11 +116,11 @@ where
         sender: relm4::Sender<Self::Msg>,
         parent_sender: relm4::Sender<ParentModel::Msg>,
     ) {
-        self.reset();
+        // self.reset();
         self.reset_popover = false;
 
         if !self.initialized {
-            self.set_initialized(true);
+            // self.set_initialized(true);
             if let Some(path) = self.config.recently_opened_files {
                 let mut file = std::fs::OpenOptions::new()
                     .create(true)
@@ -202,7 +205,7 @@ impl ParentWindow for OpenButtonWidgets {
 }
 
 /// Components of the open button component
-pub struct OpenButtonComponents<Conf: OpenButtonConfig>
+pub struct OpenButtonComponents<Conf: OpenButtonConfig + 'static>
 {
     dialog: RelmComponent<OpenDialogModel<DialogConfig<Conf>>, OpenButtonModel<Conf>>,
 }

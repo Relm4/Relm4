@@ -25,23 +25,41 @@ pub struct SaveDialogSettings {
     pub filters: Vec<gtk::FileFilter>,
 }
 
-trait SaveDialogConfig {
+pub trait SaveDialogConfig {
     type Model: Model;
     /// Configure the save dialog
     fn dialog_config(model: &Self::Model) -> SaveDialogSettings;
 }
 
-#[tracker::track]
+// #[tracker::track]
 #[derive(Debug)]
 /// Model of the save dialog component
 pub struct SaveDialogModel<Config: SaveDialogConfig> {
-    #[do_not_track]
+    // #[do_not_track]
     settings: SaveDialogSettings,
     suggestion: Option<String>,
     is_active: bool,
     name: String,
-    #[do_not_track]
-    _config_provider: PhantomData<*const Config> //we don't own Conf, there is no instance of Conf
+    // #[do_not_track]
+    _config_provider: PhantomData<*const Config>, //we don't own Conf, there is no instance of Conf
+
+
+    tracker: u64,
+}
+
+impl<Config: SaveDialogConfig> SaveDialogModel<Config> {
+    pub fn changed(&self, str: &str) -> bool {
+        false
+    }
+
+    pub fn name() -> &'static str {
+        "name"
+    }
+
+    pub fn set_name(&mut self, name: String) {
+        self.name = name;
+    }
+
 }
 
 #[derive(Debug)]
@@ -81,12 +99,13 @@ where
     Conf: SaveDialogConfig<Model=ParentModel>
 {
     fn init_model(parent_model: &ParentModel) -> Self {
-        SaveDialogModel {
-            settings: parent_model.dialog_config(),
+        Self {
+            settings: Conf::dialog_config(parent_model),
             is_active: false,
             suggestion: None,
             name: String::new(),
             tracker: 0,
+            _config_provider: PhantomData,
         }
     }
 
@@ -97,7 +116,7 @@ where
         _sender: Sender<SaveDialogMsg>,
         parent_sender: Sender<ParentModel::Msg>,
     ) {
-        self.reset();
+        // self.reset();
 
         match msg {
             SaveDialogMsg::Save => {
@@ -131,7 +150,7 @@ where
         gtk::FileChooserNative {
             set_action: gtk::FileChooserAction::Save,
             set_visible: watch!(model.is_active),
-            set_current_name: track!(model.changed(SaveDialogModel::name()), &model.name),
+            set_current_name: track!(model.changed(SaveDialogModel::<Conf>::name()), &model.name),
             add_filter: iterate!(&model.settings.filters),
             set_create_folders: model.settings.create_folders,
             set_cancel_label: Some(model.settings.cancel_label),

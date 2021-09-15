@@ -1,7 +1,7 @@
 use gtk::prelude::{Cast, GtkWindowExt};
 use relm4::{AppUpdate, Components, Model, RelmApp, RelmComponent, Sender, Widgets};
-use relm4_components::open_button::{OpenButtonModel, OpenButtonParent, OpenButtonSettings};
-use relm4_components::open_dialog::OpenDialogSettings;
+use relm4_components::open_button::{OpenButtonModel, OpenButtonParent, OpenButtonSettings, OpenButtonConfig};
+use relm4_components::open_dialog::{OpenDialogSettings, OpenDialogConfig};
 use relm4_components::ParentWindow;
 
 use std::path::PathBuf;
@@ -35,16 +35,12 @@ impl AppUpdate for AppModel {
     }
 }
 
-impl OpenButtonParent for AppModel {
-    fn open_button_config(&self) -> OpenButtonSettings {
-        OpenButtonSettings {
-            text: "Open file",
-            recently_opened_files: Some(".recent_files"),
-            max_recent_files: 10,
-        }
-    }
+struct OpenFileButtonConfig{}
 
-    fn dialog_config(&self) -> OpenDialogSettings {
+impl OpenDialogConfig for OpenFileButtonConfig {
+    type Model = AppModel;
+
+    fn open_dialog_config(_model: &Self::Model) -> OpenDialogSettings {
         OpenDialogSettings {
             accept_label: "Open",
             cancel_label: "Cancel",
@@ -53,7 +49,19 @@ impl OpenButtonParent for AppModel {
             filters: Vec::new(),
         }
     }
+}   
 
+impl OpenButtonConfig for OpenFileButtonConfig {
+    fn open_button_config(_model: &Self::Model) -> OpenButtonSettings {
+        OpenButtonSettings {
+            text: "Open file",
+            recently_opened_files: Some(".recent_files"),
+            max_recent_files: 10,
+        }
+    }
+}
+
+impl OpenButtonParent for AppModel {
     fn open_msg(path: PathBuf) -> Self::Msg {
         AppMsg::Open(path)
     }
@@ -66,7 +74,7 @@ impl ParentWindow for AppWidgets {
 }
 
 pub struct AppComponents {
-    open_button: RelmComponent<OpenButtonModel, AppModel>,
+    open_button: RelmComponent<OpenButtonModel<OpenFileButtonConfig>, AppModel>,
 }
 
 impl Components<AppModel> for AppComponents {

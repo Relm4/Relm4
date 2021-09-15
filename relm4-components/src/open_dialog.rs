@@ -30,14 +30,14 @@ pub trait OpenDialogConfig {
     fn open_dialog_config(model: &Self::Model) -> OpenDialogSettings;
 }
 
-#[tracker::track]
+// #[tracker::track]
 #[derive(Debug)]
 /// Model of the open dialog component
 pub struct OpenDialogModel<Conf> {
-    #[do_not_track]
+    // #[do_not_track]
     settings: OpenDialogSettings,
     is_active: bool,
-    #[do_not_track]
+    // #[do_not_track]
     _conf_provider: PhantomData<*const Conf>, //we don't own Conf, there is no instance of Conf
 }
 
@@ -80,7 +80,7 @@ where
         Self {
             settings: Conf::open_dialog_config(parent_model),
             is_active: false,
-            tracker: 0,
+            // tracker: 0,
             _conf_provider: PhantomData,
         }
     }
@@ -92,7 +92,7 @@ where
         _sender: Sender<OpenDialogMsg>,
         parent_sender: Sender<ParentModel::Msg>,
     ) {
-        self.reset();
+        // self.reset();
 
         match msg {
             OpenDialogMsg::Open => {
