@@ -12,7 +12,6 @@
 #![doc(
     html_favicon_url = "https://raw.githubusercontent.com/AaronErhardt/relm4/main/assets/Relm_logo.svg"
 )]
-#![feature(doc_cfg)]
 
 mod app;
 mod component;

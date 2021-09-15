@@ -117,11 +117,11 @@ where
         sender: relm4::Sender<Self::Msg>,
         parent_sender: relm4::Sender<ParentModel::Msg>,
     ) {
-        // self.reset();
+        self.reset();
         self.reset_popover = false;
 
         if !self.initialized {
-            // self.set_initialized(true);
+            self.set_initialized(true);
             if let Some(path) = self.config.recently_opened_files {
                 let mut file = std::fs::OpenOptions::new()
                     .create(true)

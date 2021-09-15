@@ -92,7 +92,7 @@ where
         _sender: Sender<OpenDialogMsg>,
         parent_sender: Sender<ParentModel::Msg>,
     ) {
-        // self.reset();
+        self.reset();
 
         match msg {
             OpenDialogMsg::Open => {
