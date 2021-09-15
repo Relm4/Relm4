@@ -3,6 +3,7 @@ use gtk::prelude::{FileChooserExt, FileExt, NativeDialogExt};
 use relm4::{send, ComponentUpdate, Model, Sender};
 
 use std::path::PathBuf;
+use std::marker::PhantomData;
 
 use crate::ParentWindow;
 
@@ -21,14 +22,24 @@ pub struct OpenDialogSettings {
     pub filters: Vec<gtk::FileFilter>,
 }
 
+// Interface for creating OpenDialogSettings
+pub trait OpenDialogConfig {
+    /// Model from which OpenDialogSettings will be built
+    type Model: Model;
+    //Configuration for 
+    fn open_dialog_config(model: &Self::Model) -> OpenDialogSettings;
+}
+
 #[tracker::track]
 #[derive(Debug)]
 /// Model of the open dialog component
-pub struct OpenDialogModel {
+pub struct OpenDialogModel<Conf> {
     #[do_not_track]
     settings: OpenDialogSettings,
     is_active: bool,
+    _conf_provider: PhantomData<*const Conf>, //we don't own Conf, there is no instance of Conf
 }
+
 
 #[derive(Debug)]
 /// Messages that can be sent to the open dialog component
@@ -43,7 +54,7 @@ pub enum OpenDialogMsg {
     Cancel,
 }
 
-impl Model for OpenDialogModel {
+impl<C: OpenDialogConfig> Model for OpenDialogModel<C> {
     type Msg = OpenDialogMsg;
     type Widgets = OpenDialogWidgets;
     type Components = ();
@@ -54,23 +65,22 @@ pub trait OpenDialogParent: Model
 where
     Self::Widgets: ParentWindow,
 {
-    /// Configure the open dialog
-    fn dialog_config(&self) -> OpenDialogSettings;
-
     /// Tell the open dialog how to response if the user wants to open a file
     fn open_msg(path: PathBuf) -> Self::Msg;
 }
 
-impl<ParentModel> ComponentUpdate<ParentModel> for OpenDialogModel
+impl<ParentModel, Conf> ComponentUpdate<ParentModel> for OpenDialogModel<Conf>
 where
     ParentModel: OpenDialogParent,
     <ParentModel as relm4::Model>::Widgets: ParentWindow,
+    Conf: OpenDialogConfig<Model = ParentModel>
 {
     fn init_model(parent_model: &ParentModel) -> Self {
-        OpenDialogModel {
-            settings: parent_model.dialog_config(),
+        Self {
+            settings: Conf::open_dialog_config(parent_model),
             is_active: false,
             tracker: 0,
+            _conf_provider: PhantomData,
         }
     }
 
@@ -101,10 +111,11 @@ where
 
 #[relm4_macros::widget(pub)]
 /// Widgets of the open dialog component
-impl<ParentModel> relm4::Widgets<OpenDialogModel, ParentModel> for OpenDialogWidgets
+impl<ParentModel, Conf> relm4::Widgets<OpenDialogModel<Conf>, ParentModel> for OpenDialogWidgets
 where
     ParentModel: Model,
     ParentModel::Widgets: ParentWindow,
+    Conf: OpenDialogConfig,
 {
     view! {
         gtk::FileChooserNative {

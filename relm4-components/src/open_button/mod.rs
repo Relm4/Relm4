@@ -5,21 +5,28 @@ use gtk::prelude::{BoxExt, ButtonExt, PopoverExt, WidgetExt};
 use relm4::factory::{DynamicIndex, Factory, FactoryVecDeque};
 use relm4::{send, ComponentUpdate, Components, Model, RelmComponent, Widgets};
 
-use crate::open_dialog::{OpenDialogModel, OpenDialogMsg, OpenDialogParent, OpenDialogSettings};
+use crate::open_dialog::{OpenDialogModel, OpenDialogMsg, OpenDialogParent, OpenDialogSettings, OpenDialogConfig};
 use crate::ParentWindow;
 
 use std::io::Read;
 use std::path::PathBuf;
 use std::rc::Rc;
+use std::marker::PhantomData;
 
 mod factory;
 
 use factory::FileListItem;
 
+pub trait OpenButtonConfig: OpenDialogConfig {
+    /// Returns a configuration for the open button.
+    fn open_button_config(model: &Self::Model) -> OpenButtonSettings;
+}
+
 #[tracker::track]
 #[derive(Debug)]
 /// Model of the open button component
-pub struct OpenButtonModel {
+pub struct OpenButtonModel<Conf: OpenButtonConfig>
+{
     #[do_not_track]
     config: OpenButtonSettings,
     #[do_not_track]
@@ -29,6 +36,17 @@ pub struct OpenButtonModel {
     initialized: bool,
     #[do_not_track]
     reset_popover: bool,
+
+    _conf_provider: PhantomData<*const Conf> //we don't own Conf, there is no instance of Conf
+}
+
+struct DialogConfig<Conf> {}
+impl<Conf: OpenButtonConfig> OpenDialogConfig for DialogConfig<Conf> {
+    type Model = OpenButtonModel<Conf>;
+
+    fn open_dialog_config(model: &Self::Model) -> OpenDialogSettings {
+        model.dialog_config
+    }
 }
 
 #[derive(Debug)]
@@ -53,40 +71,38 @@ pub enum OpenButtonMsg {
     Ignore,
 }
 
-impl Model for OpenButtonModel {
+impl<Conf: OpenButtonConfig> Model for OpenButtonModel<Conf> {
     type Msg = OpenButtonMsg;
     type Widgets = OpenButtonWidgets;
-    type Components = OpenButtonComponents;
+    type Components = OpenButtonComponents<Conf>;
 }
+
 
 /// Interface for the parent model of the open button component
 pub trait OpenButtonParent: Model
 where
     Self::Widgets: ParentWindow,
 {
-    /// Returns a configuration for the open dialog.
-    fn dialog_config(&self) -> OpenDialogSettings;
-    /// Returns a configuration for the open button.
-    fn open_button_config(&self) -> OpenButtonSettings;
-
     /// Returns the message the button will send to the parent
     /// with the file path the user wants to open.
     fn open_msg(path: PathBuf) -> Self::Msg;
 }
 
-impl<ParentModel> ComponentUpdate<ParentModel> for OpenButtonModel
+impl<ParentModel, Conf> ComponentUpdate<ParentModel> for OpenButtonModel<Conf>
 where
     ParentModel: Model + OpenButtonParent,
     ParentModel::Widgets: ParentWindow,
+    Conf: OpenButtonConfig<Model=ParentModel>
 {
     fn init_model(parent_model: &ParentModel) -> Self {
-        OpenButtonModel {
-            config: parent_model.open_button_config(),
-            dialog_config: parent_model.dialog_config(),
+        Self {
+            config: Conf::open_button_config(parent_model),
+            dialog_config: Conf::open_dialog_config(parent_model),
             recent_files: None,
             initialized: false,
             reset_popover: false,
             tracker: 0,
+            _conf_provider: PhantomData,
         }
     }
 
@@ -173,11 +189,7 @@ where
     }
 }
 
-impl OpenDialogParent for OpenButtonModel {
-    fn dialog_config(&self) -> OpenDialogSettings {
-        self.dialog_config.clone()
-    }
-
+impl<C: OpenButtonConfig> OpenDialogParent for OpenButtonModel<C> {
     fn open_msg(path: PathBuf) -> OpenButtonMsg {
         OpenButtonMsg::Open(path)
     }
@@ -190,17 +202,21 @@ impl ParentWindow for OpenButtonWidgets {
 }
 
 /// Components of the open button component
-pub struct OpenButtonComponents {
-    dialog: RelmComponent<OpenDialogModel, OpenButtonModel>,
+pub struct OpenButtonComponents<Conf: OpenButtonConfig>
+{
+    dialog: RelmComponent<OpenDialogModel<DialogConfig<Conf>>, OpenButtonModel<Conf>>,
 }
 
-impl Components<OpenButtonModel> for OpenButtonComponents {
+impl<Conf> Components<OpenButtonModel<Conf>> for OpenButtonComponents<Conf> 
+where
+    Conf: OpenDialogConfig + OpenButtonConfig
+{
     fn init_components(
-        parent_model: &OpenButtonModel,
+        parent_model: &OpenButtonModel<Conf>,
         parent_widget: &OpenButtonWidgets,
         parent_sender: relm4::Sender<OpenButtonMsg>,
     ) -> Self {
-        OpenButtonComponents {
+        Self {
             dialog: RelmComponent::new(parent_model, parent_widget, parent_sender),
         }
     }
@@ -208,10 +224,11 @@ impl Components<OpenButtonModel> for OpenButtonComponents {
 
 #[relm4_macros::widget(pub)]
 /// Widgets of the open button component
-impl<ParentModel> Widgets<OpenButtonModel, ParentModel> for OpenButtonWidgets
+impl<ParentModel, Conf> Widgets<OpenButtonModel<Conf>, ParentModel> for OpenButtonWidgets
 where
     ParentModel: Model + OpenButtonParent,
     ParentModel::Widgets: ParentWindow,
+    Conf: OpenButtonConfig<Model=ParentModel> + OpenDialogConfig<Model=ParentModel>
 {
     view! {
         open_box = gtk::Box {
