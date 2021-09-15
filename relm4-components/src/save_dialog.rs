@@ -40,6 +40,7 @@ pub struct SaveDialogModel<Config: SaveDialogConfig> {
     suggestion: Option<String>,
     is_active: bool,
     name: String,
+    #[do_not_track]
     _config_provider: PhantomData<*const Config> //we don't own Conf, there is no instance of Conf
 }
 

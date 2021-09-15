@@ -36,7 +36,7 @@ pub struct OpenButtonModel<Conf: OpenButtonConfig>
     initialized: bool,
     #[do_not_track]
     reset_popover: bool,
-
+    #[do_not_track]
     _conf_provider: PhantomData<*const Conf> //we don't own Conf, there is no instance of Conf
 }
 

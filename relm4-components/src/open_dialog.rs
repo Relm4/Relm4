@@ -37,6 +37,7 @@ pub struct OpenDialogModel<Conf> {
     #[do_not_track]
     settings: OpenDialogSettings,
     is_active: bool,
+    #[do_not_track]
     _conf_provider: PhantomData<*const Conf>, //we don't own Conf, there is no instance of Conf
 }
 
