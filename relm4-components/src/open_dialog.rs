@@ -54,7 +54,7 @@ pub enum OpenDialogMsg {
     Cancel,
 }
 
-impl<C: OpenDialogConfig> Model for OpenDialogModel<C> {
+impl<Conf: OpenDialogConfig> Model for OpenDialogModel<Conf> {
     type Msg = OpenDialogMsg;
     type Widgets = OpenDialogWidgets;
     type Components = ();

@@ -36,14 +36,14 @@ pub trait SaveDialogConfig {
 #[tracker::track]
 #[derive(Debug)]
 /// Model of the save dialog component
-pub struct SaveDialogModel<Config: SaveDialogConfig> {
+pub struct SaveDialogModel<Conf: SaveDialogConfig> {
     #[do_not_track]
     settings: SaveDialogSettings,
     suggestion: Option<String>,
     is_active: bool,
     name: String,
     #[do_not_track]
-    _config_provider: PhantomData<*const Config>, //we don't own Conf, there is no instance of Conf
+    _config_provider: PhantomData<*const Conf>, //we don't own Conf, there is no instance of Conf
 }
 
 #[derive(Debug)]
@@ -61,7 +61,7 @@ pub enum SaveDialogMsg {
     Cancel,
 }
 
-impl<C: SaveDialogConfig> Model for SaveDialogModel<C> {
+impl<Conf: SaveDialogConfig> Model for SaveDialogModel<Conf> {
     type Msg = SaveDialogMsg;
     type Widgets = SaveDialogWidgets;
     type Components = ();

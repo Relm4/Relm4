@@ -193,7 +193,7 @@ where
     }
 }
 
-impl<C: OpenButtonConfig> OpenDialogParent for OpenButtonModel<C> {
+impl<Conf: OpenButtonConfig + 'static> OpenDialogParent for OpenButtonModel<Conf> {
     fn open_msg(path: PathBuf) -> OpenButtonMsg {
         OpenButtonMsg::Open(path)
     }
