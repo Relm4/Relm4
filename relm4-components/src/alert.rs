@@ -7,6 +7,8 @@ use relm4::{send, ComponentUpdate, Model, Sender};
 
 use crate::ParentWindow;
 
+use std::marker::PhantomData;
+
 /// Configuration for the alert dialog component
 pub struct AlertSettings {
     /// Large text
@@ -26,9 +28,10 @@ pub struct AlertSettings {
 }
 
 /// Model of the alert dialog component
-pub struct AlertModel {
+pub struct AlertModel<Conf: AlertConfig> {
     settings: AlertSettings,
     is_active: bool,
+    _conf_provider: PhantomData<*const Conf>,
 }
 
 /// Messages that can be sent to the alert dialog component
@@ -39,10 +42,18 @@ pub enum AlertMsg {
     Response(gtk::ResponseType),
 }
 
-impl Model for AlertModel {
+impl<C: AlertConfig> Model for AlertModel<C> {
     type Msg = AlertMsg;
     type Widgets = AlertWidgets;
     type Components = ();
+}
+
+/// Interface for creating AlertSettings
+pub trait AlertConfig {
+    /// Model from which AlertSettings will be built
+    type Model: Model;
+    /// Configuration for alert component.
+    fn alert_config(model: &Self::Model) -> AlertSettings;
 }
 
 /// Interface for the parent model
@@ -50,9 +61,6 @@ pub trait AlertParent: Model
 where
     Self::Widgets: ParentWindow,
 {
-    /// Configuration for alert component.
-    fn alert_config(&self) -> AlertSettings;
-
     /// Message sent to parent if user clicks confirm button
     fn confirm_msg() -> Self::Msg;
 
@@ -63,15 +71,17 @@ where
     fn option_msg() -> Self::Msg;
 }
 
-impl<ParentModel> ComponentUpdate<ParentModel> for AlertModel
+impl<ParentModel, Conf> ComponentUpdate<ParentModel> for AlertModel<Conf>
 where
     ParentModel: AlertParent,
     ParentModel::Widgets: ParentWindow,
+    Conf: AlertConfig<Model = ParentModel>,
 {
     fn init_model(parent_model: &ParentModel) -> Self {
         AlertModel {
-            settings: parent_model.alert_config(),
+            settings: Conf::alert_config(parent_model),
             is_active: false,
+            _conf_provider: PhantomData,
         }
     }
 
@@ -102,10 +112,11 @@ where
 
 #[relm4_macros::widget(pub)]
 /// Widgets of the alert component
-impl<ParentModel> relm4::Widgets<AlertModel, ParentModel> for AlertWidgets
+impl<ParentModel, Conf> relm4::Widgets<AlertModel<Conf>, ParentModel> for AlertWidgets
 where
     ParentModel: AlertParent,
     ParentModel::Widgets: ParentWindow,
+    Conf: AlertConfig,
 {
     view! {
         dialog = gtk::MessageDialog {

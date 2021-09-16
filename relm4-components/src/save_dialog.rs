@@ -6,6 +6,7 @@ use gtk::prelude::{FileChooserExt, FileExt, NativeDialogExt};
 use relm4::{send, ComponentUpdate, Model, Sender};
 
 use std::path::PathBuf;
+use std::marker::PhantomData;
 
 use crate::ParentWindow;
 
@@ -24,15 +25,25 @@ pub struct SaveDialogSettings {
     pub filters: Vec<gtk::FileFilter>,
 }
 
+///Interface for building the configuration for SaveDialog
+pub trait SaveDialogConfig {
+    /// Model from which configuration should be built
+    type Model: Model;
+    /// Configure the save dialog
+    fn dialog_config(model: &Self::Model) -> SaveDialogSettings;
+}
+
 #[tracker::track]
 #[derive(Debug)]
 /// Model of the save dialog component
-pub struct SaveDialogModel {
+pub struct SaveDialogModel<Config: SaveDialogConfig> {
     #[do_not_track]
     settings: SaveDialogSettings,
     suggestion: Option<String>,
     is_active: bool,
     name: String,
+    #[do_not_track]
+    _config_provider: PhantomData<*const Config>, //we don't own Conf, there is no instance of Conf
 }
 
 #[derive(Debug)]
@@ -50,7 +61,7 @@ pub enum SaveDialogMsg {
     Cancel,
 }
 
-impl Model for SaveDialogModel {
+impl<C: SaveDialogConfig> Model for SaveDialogModel<C> {
     type Msg = SaveDialogMsg;
     type Widgets = SaveDialogWidgets;
     type Components = ();
@@ -61,25 +72,24 @@ pub trait SaveDialogParent: Model
 where
     Self::Widgets: ParentWindow,
 {
-    /// Configure the save dialog
-    fn dialog_config(&self) -> SaveDialogSettings;
-
     /// Tell the save dialog how to response if the user wants to save
     fn save_msg(path: PathBuf) -> Self::Msg;
 }
 
-impl<ParentModel> ComponentUpdate<ParentModel> for SaveDialogModel
+impl<ParentModel, Conf> ComponentUpdate<ParentModel> for SaveDialogModel<Conf>
 where
     ParentModel: SaveDialogParent,
     <ParentModel as relm4::Model>::Widgets: ParentWindow,
+    Conf: SaveDialogConfig<Model=ParentModel>
 {
     fn init_model(parent_model: &ParentModel) -> Self {
-        SaveDialogModel {
-            settings: parent_model.dialog_config(),
+        Self {
+            settings: Conf::dialog_config(parent_model),
             is_active: false,
             suggestion: None,
             name: String::new(),
             tracker: 0,
+            _config_provider: PhantomData,
         }
     }
 
@@ -114,16 +124,17 @@ where
 
 #[relm4_macros::widget(pub)]
 /// Widgets for the save dialog
-impl<ParentModel> relm4::Widgets<SaveDialogModel, ParentModel> for SaveDialogWidgets
+impl<ParentModel, Conf> relm4::Widgets<SaveDialogModel<Conf>, ParentModel> for SaveDialogWidgets
 where
     ParentModel: Model,
     ParentModel::Widgets: ParentWindow,
+    Conf: SaveDialogConfig<Model=ParentModel>
 {
     view! {
         gtk::FileChooserNative {
             set_action: gtk::FileChooserAction::Save,
             set_visible: watch!(model.is_active),
-            set_current_name: track!(model.changed(SaveDialogModel::name()), &model.name),
+            set_current_name: track!(model.changed(SaveDialogModel::<Conf>::name()), &model.name),
             add_filter: iterate!(&model.settings.filters),
             set_create_folders: model.settings.create_folders,
             set_cancel_label: Some(model.settings.cancel_label),
