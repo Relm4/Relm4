@@ -2,12 +2,13 @@ use gtk::prelude::{BoxExt, ButtonExt, Cast, GtkWindowExt, OrientableExt};
 use relm4::{
     send, AppUpdate, Components, Model, RelmApp, RelmComponent, Sender, WidgetPlus, Widgets,
 };
-use relm4_components::alert::{AlertModel, AlertMsg, AlertParent, AlertSettings};
+use relm4_components::alert::{AlertConfig, AlertModel, AlertMsg, AlertParent, AlertSettings};
 use relm4_components::ParentWindow;
 
 #[derive(Default)]
 struct AppModel {
     counter: u8,
+    alert_toggle: bool,
 }
 
 enum AppMsg {
@@ -38,7 +39,12 @@ impl AppUpdate for AppModel {
                 if self.counter == 42 {
                     return false;
                 } else {
-                    components.dialog.send(AlertMsg::Show).unwrap();
+                    self.alert_toggle = !self.alert_toggle;
+                    if self.alert_toggle {
+                        components.dialog.send(AlertMsg::Show).unwrap();
+                    } else {
+                        components.second_dialog.send(AlertMsg::Show).unwrap();
+                    }
                 }
             }
             AppMsg::Save => {
@@ -54,10 +60,14 @@ impl AppUpdate for AppModel {
     }
 }
 
-impl AlertParent for AppModel {
-    fn alert_config(&self) -> AlertSettings {
+struct FirstAlert {}
+
+impl AlertConfig for FirstAlert {
+    type Model = AppModel;
+
+    fn alert_config(_model: &AppModel) -> AlertSettings {
         AlertSettings {
-            text: "Do you want to quit without saving?",
+            text: "Do you want to quit without saving? (First alert)",
             secondary_text: Some("Your counter hasn't reached 42 yet"),
             confirm_label: "Close without saving",
             cancel_label: "Cancel",
@@ -66,7 +76,27 @@ impl AlertParent for AppModel {
             destructive_accept: true,
         }
     }
+}
 
+struct SecondAlert {}
+
+impl AlertConfig for SecondAlert {
+    type Model = AppModel;
+
+    fn alert_config(_model: &AppModel) -> AlertSettings {
+        AlertSettings {
+            text: "Do you want to quit without saving? (Second alert)",
+            secondary_text: Some("Your counter hasn't reached 42 yet"),
+            confirm_label: "Close without saving",
+            cancel_label: "Cancel",
+            option_label: Some("Save"),
+            is_modal: true,
+            destructive_accept: true,
+        }
+    }
+}
+
+impl AlertParent for AppModel {
     fn confirm_msg() -> Self::Msg {
         AppMsg::Close
     }
@@ -87,7 +117,8 @@ impl ParentWindow for AppWidgets {
 }
 
 pub struct AppComponents {
-    dialog: RelmComponent<AlertModel, AppModel>,
+    dialog: RelmComponent<AlertModel<FirstAlert>, AppModel>,
+    second_dialog: RelmComponent<AlertModel<SecondAlert>, AppModel>,
 }
 
 impl Components<AppModel> for AppComponents {
@@ -97,7 +128,8 @@ impl Components<AppModel> for AppComponents {
         sender: Sender<AppMsg>,
     ) -> Self {
         AppComponents {
-            dialog: RelmComponent::new(model, parent_widgets, sender),
+            dialog: RelmComponent::new(model, parent_widgets, sender.clone()),
+            second_dialog: RelmComponent::new(model, parent_widgets, sender),
         }
     }
 }
