@@ -5,8 +5,8 @@
 use gtk::prelude::{FileChooserExt, FileExt, NativeDialogExt};
 use relm4::{send, ComponentUpdate, Model, Sender};
 
-use std::path::PathBuf;
 use std::marker::PhantomData;
+use std::path::PathBuf;
 
 use crate::ParentWindow;
 
@@ -80,7 +80,7 @@ impl<ParentModel, Conf> ComponentUpdate<ParentModel> for SaveDialogModel<Conf>
 where
     ParentModel: SaveDialogParent,
     <ParentModel as relm4::Model>::Widgets: ParentWindow,
-    Conf: SaveDialogConfig<Model=ParentModel>
+    Conf: SaveDialogConfig<Model = ParentModel>,
 {
     fn init_model(parent_model: &ParentModel) -> Self {
         Self {
@@ -128,7 +128,7 @@ impl<ParentModel, Conf> relm4::Widgets<SaveDialogModel<Conf>, ParentModel> for S
 where
     ParentModel: Model,
     ParentModel::Widgets: ParentWindow,
-    Conf: SaveDialogConfig<Model=ParentModel>
+    Conf: SaveDialogConfig<Model = ParentModel>,
 {
     view! {
         gtk::FileChooserNative {

@@ -50,8 +50,8 @@ impl AppUpdate for AppModel {
     }
 }
 
-struct SaveDialogConfig{} 
-impl relm4_components::save_dialog::SaveDialogConfig for SaveDialogConfig{
+struct SaveDialogConfig {}
+impl relm4_components::save_dialog::SaveDialogConfig for SaveDialogConfig {
     type Model = AppModel;
 
     fn dialog_config(_model: &Self::Model) -> SaveDialogSettings {

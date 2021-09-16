@@ -1,7 +1,9 @@
 use gtk::prelude::{Cast, GtkWindowExt};
 use relm4::{AppUpdate, Components, Model, RelmApp, RelmComponent, Sender, Widgets};
-use relm4_components::open_button::{OpenButtonModel, OpenButtonParent, OpenButtonSettings, OpenButtonConfig};
-use relm4_components::open_dialog::{OpenDialogSettings, OpenDialogConfig};
+use relm4_components::open_button::{
+    OpenButtonConfig, OpenButtonModel, OpenButtonParent, OpenButtonSettings,
+};
+use relm4_components::open_dialog::{OpenDialogConfig, OpenDialogSettings};
 use relm4_components::ParentWindow;
 
 use std::path::PathBuf;
@@ -35,7 +37,7 @@ impl AppUpdate for AppModel {
     }
 }
 
-struct OpenFileButtonConfig{}
+struct OpenFileButtonConfig {}
 
 impl OpenDialogConfig for OpenFileButtonConfig {
     type Model = AppModel;
@@ -49,7 +51,7 @@ impl OpenDialogConfig for OpenFileButtonConfig {
             filters: Vec::new(),
         }
     }
-}   
+}
 
 impl OpenButtonConfig for OpenFileButtonConfig {
     fn open_button_config(_model: &Self::Model) -> OpenButtonSettings {

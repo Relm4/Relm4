@@ -2,8 +2,8 @@
 use gtk::prelude::{FileChooserExt, FileExt, NativeDialogExt};
 use relm4::{send, ComponentUpdate, Model, Sender};
 
-use std::path::PathBuf;
 use std::marker::PhantomData;
+use std::path::PathBuf;
 
 use crate::ParentWindow;
 
@@ -41,7 +41,6 @@ pub struct OpenDialogModel<Conf> {
     _conf_provider: PhantomData<*const Conf>, //we don't own Conf, there is no instance of Conf
 }
 
-
 #[derive(Debug)]
 /// Messages that can be sent to the open dialog component
 pub enum OpenDialogMsg {
@@ -74,7 +73,7 @@ impl<ParentModel, Conf> ComponentUpdate<ParentModel> for OpenDialogModel<Conf>
 where
     ParentModel: OpenDialogParent,
     <ParentModel as relm4::Model>::Widgets: ParentWindow,
-    Conf: OpenDialogConfig<Model = ParentModel>
+    Conf: OpenDialogConfig<Model = ParentModel>,
 {
     fn init_model(parent_model: &ParentModel) -> Self {
         Self {

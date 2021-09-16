@@ -5,13 +5,15 @@ use gtk::prelude::{BoxExt, ButtonExt, PopoverExt, WidgetExt};
 use relm4::factory::{DynamicIndex, Factory, FactoryVecDeque};
 use relm4::{send, ComponentUpdate, Components, Model, RelmComponent, Widgets};
 
-use crate::open_dialog::{OpenDialogModel, OpenDialogMsg, OpenDialogParent, OpenDialogSettings, OpenDialogConfig};
+use crate::open_dialog::{
+    OpenDialogConfig, OpenDialogModel, OpenDialogMsg, OpenDialogParent, OpenDialogSettings,
+};
 use crate::ParentWindow;
 
 use std::io::Read;
+use std::marker::PhantomData;
 use std::path::PathBuf;
 use std::rc::Rc;
-use std::marker::PhantomData;
 
 mod factory;
 
@@ -26,8 +28,7 @@ pub trait OpenButtonConfig: OpenDialogConfig {
 #[tracker::track]
 #[derive(Debug)]
 /// Model of the open button component
-pub struct OpenButtonModel<Conf: OpenButtonConfig + 'static>
-{
+pub struct OpenButtonModel<Conf: OpenButtonConfig + 'static> {
     #[do_not_track]
     config: OpenButtonSettings,
     #[do_not_track]
@@ -38,11 +39,11 @@ pub struct OpenButtonModel<Conf: OpenButtonConfig + 'static>
     #[do_not_track]
     reset_popover: bool,
     #[do_not_track]
-    _conf_provider: PhantomData<*const Conf> //we don't own Conf, there is no instance of Conf
+    _conf_provider: PhantomData<*const Conf>, //we don't own Conf, there is no instance of Conf
 }
 
 struct DialogConfig<Conf> {
-    _config_provider: PhantomData<*const Conf>
+    _config_provider: PhantomData<*const Conf>,
 }
 
 impl<Conf: OpenButtonConfig + 'static> OpenDialogConfig for DialogConfig<Conf> {
@@ -81,7 +82,6 @@ impl<Conf: OpenButtonConfig + 'static> Model for OpenButtonModel<Conf> {
     type Components = OpenButtonComponents<Conf>;
 }
 
-
 /// Interface for the parent model of the open button component
 pub trait OpenButtonParent: Model
 where
@@ -96,7 +96,7 @@ impl<ParentModel, Conf> ComponentUpdate<ParentModel> for OpenButtonModel<Conf>
 where
     ParentModel: Model + OpenButtonParent,
     ParentModel::Widgets: ParentWindow,
-    Conf: OpenButtonConfig<Model=ParentModel>
+    Conf: OpenButtonConfig<Model = ParentModel>,
 {
     fn init_model(parent_model: &ParentModel) -> Self {
         Self {
@@ -206,14 +206,13 @@ impl ParentWindow for OpenButtonWidgets {
 }
 
 /// Components of the open button component
-pub struct OpenButtonComponents<Conf: OpenButtonConfig + 'static>
-{
+pub struct OpenButtonComponents<Conf: OpenButtonConfig + 'static> {
     dialog: RelmComponent<OpenDialogModel<DialogConfig<Conf>>, OpenButtonModel<Conf>>,
 }
 
-impl<Conf> Components<OpenButtonModel<Conf>> for OpenButtonComponents<Conf> 
+impl<Conf> Components<OpenButtonModel<Conf>> for OpenButtonComponents<Conf>
 where
-    Conf: OpenDialogConfig + OpenButtonConfig
+    Conf: OpenDialogConfig + OpenButtonConfig,
 {
     fn init_components(
         parent_model: &OpenButtonModel<Conf>,
@@ -232,7 +231,7 @@ impl<ParentModel, Conf> Widgets<OpenButtonModel<Conf>, ParentModel> for OpenButt
 where
     ParentModel: Model + OpenButtonParent,
     ParentModel::Widgets: ParentWindow,
-    Conf: OpenButtonConfig<Model=ParentModel> + OpenDialogConfig<Model=ParentModel>
+    Conf: OpenButtonConfig<Model = ParentModel> + OpenDialogConfig<Model = ParentModel>,
 {
     view! {
         open_box = gtk::Box {
