@@ -31,7 +31,7 @@ pub struct AlertSettings {
 pub struct AlertModel<Conf: AlertConfig> {
     settings: AlertSettings,
     is_active: bool,
-    _conf_provider: PhantomData<Conf>,
+    _conf_provider: PhantomData<*const Conf>,
 }
 
 /// Messages that can be sent to the alert dialog component
@@ -48,7 +48,9 @@ impl<C: AlertConfig> Model for AlertModel<C> {
     type Components = ();
 }
 
+/// Interface for creating AlertSettings
 pub trait AlertConfig {
+    /// Model from which AlertSettings will be built
     type Model: Model;
     /// Configuration for alert component.
     fn alert_config(model: &Self::Model) -> AlertSettings;

@@ -50,8 +50,11 @@ impl AppUpdate for AppModel {
     }
 }
 
-impl SaveDialogParent for AppModel {
-    fn dialog_config(&self) -> SaveDialogSettings {
+struct SaveDialogConfig{} 
+impl relm4_components::save_dialog::SaveDialogConfig for SaveDialogConfig{
+    type Model = AppModel;
+
+    fn dialog_config(_model: &Self::Model) -> SaveDialogSettings {
         SaveDialogSettings {
             accept_label: "Open",
             cancel_label: "Cancel",
@@ -60,7 +63,9 @@ impl SaveDialogParent for AppModel {
             filters: Vec::new(),
         }
     }
+}
 
+impl SaveDialogParent for AppModel {
     fn save_msg(path: PathBuf) -> Self::Msg {
         AppMsg::SaveResponse(path)
     }
@@ -73,7 +78,7 @@ impl ParentWindow for AppWidgets {
 }
 
 pub struct AppComponents {
-    dialog: RelmComponent<SaveDialogModel, AppModel>,
+    dialog: RelmComponent<SaveDialogModel<SaveDialogConfig>, AppModel>,
 }
 
 impl Components<AppModel> for AppComponents {

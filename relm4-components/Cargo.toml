@@ -21,4 +21,4 @@ once_cell = "1.8"
 relm4 = { path = "../" }
 #relm4-macros = "0.1.0"
 relm4-macros = { path = "../relm4-macros" }
-tracker = "0.1"
+tracker = "0.1.1"
