@@ -12,6 +12,7 @@
 
 + relm4: Re-export for gtk
 + relm4-macros: Allow usage of visibilities other than pub
++ relm4-macros: New pre_connect_components and post_connect_components for manuall components code
 
 ## Fixed
 

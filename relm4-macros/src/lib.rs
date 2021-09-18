@@ -143,6 +143,8 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let Funcs {
         pre_init,
         post_init,
+        pre_connect_components,
+        post_connect_components,
         manual_view,
     } = match Funcs::new(&data.funcs) {
         Ok(macros) => macros,
@@ -230,8 +232,10 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
             }
 
             fn connect_components(&self, model: &#model, components: &<#model as ::relm4::Model>::Components) {
+                #pre_connect_components
                 #component_stream
                 #connect_component_stream
+                #post_connect_components
             }
 
             /// Return the root widget.
