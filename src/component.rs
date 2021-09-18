@@ -18,7 +18,7 @@ where
     ParentModel: ModelTrait,
     Model::Widgets: WidgetsTrait<Model, ParentModel> + 'static,
 {
-    widgets: PhantomData<Model>,
+    model: PhantomData<Model>,
     parent_model: PhantomData<ParentModel>,
     sender: Sender<Model::Msg>,
     root_widget: <Model::Widgets as WidgetsTrait<Model, ParentModel>>::Root,
@@ -62,7 +62,7 @@ where
         }
 
         RelmComponent {
-            widgets: PhantomData,
+            model: PhantomData,
             parent_model: PhantomData,
             sender: cloned_sender,
             root_widget,
@@ -156,7 +156,7 @@ where
         });
 
         RelmComponent {
-            widgets: PhantomData,
+            model: PhantomData,
             parent_model: PhantomData,
             sender: cloned_sender,
             root_widget,
