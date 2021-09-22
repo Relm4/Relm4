@@ -9,7 +9,7 @@ use std::ops::Deref;
 use std::rc::Rc;
 
 use gtk::cairo::{self, Context, Format, ImageSurface};
-use gtk::prelude::{DrawingAreaExt, WidgetExt};
+use gtk::prelude::{DrawingAreaExtManual, WidgetExt};
 
 #[derive(Clone, Debug)]
 struct Surface {
