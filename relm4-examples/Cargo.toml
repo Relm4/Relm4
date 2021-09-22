@@ -15,7 +15,7 @@ categories = ["gui"]
 
 [dev-dependencies]
 bytes = "1"
-gtk = { version = "0.2", package = "gtk4" }
+gtk = { version = "0.3", package = "gtk4" }
 once_cell = "1.8"
 rand = "0.8"
 relm4 = { path = "../", features = ["tokio-rt"] }
