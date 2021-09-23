@@ -69,7 +69,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
 
                 append: stack = &gtk::Stack {
                     set_margin_all: 5,
-                    set_transition_type: gtk::StackTransitionType::SlideLeftRight,
+                    set_transition_type: gtk::StackTransitionType::RotateLeft,
 
                     add_child: hello_label = &gtk::Label {
                         set_label: "Hello! Welcome to this application!",
