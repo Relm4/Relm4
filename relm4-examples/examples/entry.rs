@@ -119,8 +119,6 @@ impl Widgets<AppModel, ()> for AppWidgets {
                 set_margin_all: 5,
                 set_spacing: 5,
                 append = &gtk::Entry {
-                    // not sure why this does not work
-                    set_input_purpose: InputPurpose::Number,
                     // here we track if entry gets cleared and delete the buffer accordingly
                     set_buffer: track!(model.entry.is_empty(), &EntryBuffer::new(None)),
                     connect_activate(sender) => move |e| {
