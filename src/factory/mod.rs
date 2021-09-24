@@ -7,7 +7,7 @@ pub mod collections;
 mod widgets;
 
 pub use collections::*;
-pub use widgets::GridPosition;
+pub use widgets::{GridPosition, FixedPosition};
 
 /// Define behavior to create, update and remove widgets according to
 /// data stored in a factory.
@@ -72,7 +72,7 @@ where
 pub trait FactoryView<Widget> {
     /// Position type used by this widget.
     ///
-    /// For example [`GridPosition`] for [`gtk::Grid`] or `()` for [`gtk::Box`]
+    /// For example [`GridPosition`] for [`gtk::Grid`] or `()` for [`gtk::Box`] or [`FixedPosition`] for [`gtk::Fixed`]
     type Position;
 
     /// Adds a new widget to self at the end.
