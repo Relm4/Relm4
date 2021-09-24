@@ -112,9 +112,13 @@ where
     }
 }
 
+/// Storing information about where new widgets can be placed
+/// inside a [`gtk::Fixed`].
 #[derive(Debug)]
 pub struct FixedPosition {
+    /// the horizontal position to place the widget at.
     pub x: f64,
+    /// the vertical position to place the widget at.
     pub y: f64,
 }
 
