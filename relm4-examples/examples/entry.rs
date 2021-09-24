@@ -1,7 +1,7 @@
 use gtk::glib::Sender;
 use gtk::prelude::EntryBufferExtManual;
-use gtk::prelude::{BoxExt, ButtonExt, EntryExt, GtkWindowExt, OrientableExt};
-use gtk::{InputPurpose, EntryBuffer};
+use gtk::prelude::{BoxExt, ButtonExt, EntryExt, GtkWindowExt, OrientableExt, WidgetExt};
+use gtk::{EntryBuffer, InputPurpose};
 use relm4::factory::{FactoryPrototype, FactoryVec};
 use relm4::{AppUpdate, Model, RelmApp, WidgetPlus, Widgets};
 
@@ -38,32 +38,24 @@ impl AppUpdate for AppModel {
             AppMsg::Modify(value) => {
                 self.entry = value;
                 if let Ok(v) = self.entry.parse::<i32>() {
-                    match v {
-                        // positive value
-                        1.. => {
-                            // add as many counters as entered
-                            for _ in 0..v {
-                                self.counters.push(Counter {
-                                    value: self.created_counters,
-                                });
-                                self.created_counters += 1;
-                            }
-                            self.entry.clear();
+                    if v.is_positive() {
+                        // add as many counters as user entered
+                        for _ in 0..v {
+                            self.counters.push(Counter {
+                                value: self.created_counters,
+                            });
+                            self.created_counters += 1;
                         }
-                        0 => {
-                            // clearing the entry value clears the entry widget,
-                            //  as it is tracked in view! on empty
-                            self.entry.clear();
-                        }
-                        // negative value
-                        _ => {
-                            // remove as many counters as entered
-                            for _ in v..0 {
-                                self.counters.pop();
-                            }
-                            self.entry.clear();
+                    } else if v.is_negative() {
+                        // remove counters
+                        for _ in v..0 {
+                            self.counters.pop();
                         }
                     }
+
+                    // clearing the entry value clears the entry widget,
+                    //  as it tracks in view! if is empty
+                    self.entry.clear();
                 }
             }
             AppMsg::Clicked(index) => {
@@ -119,6 +111,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
                 set_margin_all: 5,
                 set_spacing: 5,
                 append = &gtk::Entry {
+                    set_tooltip_text: Some("How many counters shall be added/removed?"),
                     // here we track if entry gets cleared and delete the buffer accordingly
                     set_buffer: track!(model.entry.is_empty(), &EntryBuffer::new(None)),
                     connect_activate(sender) => move |e| {
