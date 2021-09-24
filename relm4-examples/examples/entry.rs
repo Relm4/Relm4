@@ -54,7 +54,7 @@ impl AppUpdate for AppModel {
                     }
 
                     // clearing the entry value clears the entry widget,
-                    // as it is tracked in view! when empty
+                    // as it is tracked in view! if empty
                     self.entry.clear();
                 }
             }
