@@ -46,7 +46,7 @@ impl Funcs {
                         "pre_connect_components method defined multiple times",
                     ));
                 }
-                pre_connect_components= Some(tokens);
+                pre_connect_components = Some(tokens);
             } else if ident == "post_connect_components" {
                 if post_connect_components.is_some() {
                     return Err(Error::new(

@@ -13,10 +13,11 @@
 
 + relm4: Re-export for gtk
 + relm4-macros: Allow usage of visibilities other than pub
-+ relm4-macros: New pre_connect_components and post_connect_components for manuall components code
++ relm4-macros: New pre_connect_components and post_connect_components for manual components code
 
 ## Fixed
 
++ relm4-macros: Parsing the first widget should now always work as expected
 + relm4-macros: [#20](https://github.com/AaronErhardt/relm4/issues/20) Fix wrong order when using components in the widget macro
 
 ## 0.1.0 - 2021-09-06

@@ -227,7 +227,17 @@ impl Parse for Widget {
 
         let inner_input: Option<ParseBuffer>;
 
-        let wrapper = if input.peek(Ident) && input.peek2(token::Paren) {
+        let upcomming_some = {
+            let forked_input = input.fork();
+            if forked_input.peek(Ident) {
+                let ident: Ident = forked_input.parse()?;
+                ident == "Some"
+            } else {
+                false
+            }
+        };
+
+        let wrapper = if upcomming_some && input.peek2(token::Paren) {
             let ident = input.parse()?;
             let paren_input;
             parenthesized!(paren_input in input);
