@@ -2,20 +2,22 @@
 
 ## Unreleased
 
-## Changed
+### Changed
 
 + relm4: Pass model in connect_components function of the Widgets trait
-+ relm4: Added with_app method that allows passing an existing gtk::Appliaction to Relm4
 + relm4: Mini rework of factories
++ relm4: Removed DefaultWidgets trait in favor of Default implementations in gkt4-rs
 + book: Many book improvements by [tronta](https://github.com/tronta)
 
-## Added
+### Added
 
++ relm4: Added with_app method that allows passing an existing gtk::Appliaction to Relm4
++ relm4: Methods to access the widgets of components
 + relm4: Re-export for gtk
 + relm4-macros: Allow usage of visibilities other than pub
 + relm4-macros: New pre_connect_components and post_connect_components for manual components code
 
-## Fixed
+### Fixed
 
 + relm4-macros: Parsing the first widget should now always work as expected
 + relm4-macros: [#20](https://github.com/AaronErhardt/relm4/issues/20) Fix wrong order when using components in the widget macro
@@ -46,7 +48,7 @@
 
 ## 0.1.0-beta.9 - 2021-08-24
 
-## Added
+### Added
 
 + relm4-components: Open button with automatic recent files list
 + relm4-components: Removed trait duplication and added more docs

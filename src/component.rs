@@ -1,6 +1,8 @@
 use gtk::glib::{self, Sender};
 
+use std::cell::{RefCell, RefMut};
 use std::marker::{PhantomData, Send};
+use std::rc::Rc;
 use std::sync::mpsc::channel;
 
 use crate::{ComponentUpdate, Components, Model as ModelTrait, Widgets as WidgetsTrait};
@@ -22,6 +24,7 @@ where
     parent_model: PhantomData<ParentModel>,
     sender: Sender<Model::Msg>,
     root_widget: <Model::Widgets as WidgetsTrait<Model, ParentModel>>::Root,
+    shared_widgets: Option<Rc<RefCell<Model::Widgets>>>,
 }
 
 impl<Model, ParentModel> RelmComponent<Model, ParentModel>
@@ -40,13 +43,16 @@ where
 
         let mut model = Model::init_model(parent_model);
 
-        let mut widgets = Model::Widgets::init_view(&model, parent_widgets, sender.clone());
+        let widgets = Model::Widgets::init_view(&model, parent_widgets, sender.clone());
         let root_widget = widgets.root_widget();
 
         let components = Model::Components::init_components(&model, &widgets, sender.clone());
         let cloned_sender = sender.clone();
 
         widgets.connect_components(&model, &components);
+
+        let shared_widgets = Rc::new(RefCell::new(widgets));
+        let handler_widgets = shared_widgets.clone();
 
         {
             let context = glib::MainContext::default();
@@ -56,7 +62,11 @@ where
             // The main loop executes the closure as soon as it receives the message
             receiver.attach(Some(&context), move |msg: Model::Msg| {
                 model.update(msg, &components, sender.clone(), parent_sender.clone());
-                widgets.view(&model, sender.clone());
+                if let Ok(ref mut widgets) = handler_widgets.try_borrow_mut() {
+                    widgets.view(&model, sender.clone());
+                } else {
+                    log::warn!("Could not mutably borrow the widgets. Make sure you drop all references to widgets after use");
+                }
                 glib::Continue(true)
             });
         }
@@ -66,6 +76,7 @@ where
             parent_model: PhantomData,
             sender: cloned_sender,
             root_widget,
+            shared_widgets: Some(shared_widgets),
         }
     }
 
@@ -80,6 +91,19 @@ where
     /// to the parent's widgets.
     pub fn root_widget(&self) -> &<Model::Widgets as WidgetsTrait<Model, ParentModel>>::Root {
         &self.root_widget
+    }
+
+    /// Returns a mutable reference to the widgets of this component or [`None`] if
+    /// you already have a refernce to the widgets.
+    ///
+    /// Use this carefully and make sure the reference to the widgets is dropped after use because
+    /// otherwise the view function can't be called as long you own the widgets (it uses [`RefCell`] internally).
+    pub fn widgets(&self) -> Option<RefMut<'_, Model::Widgets>> {
+        self.shared_widgets
+            .as_ref()
+            .expect("Component wasn't initialized correctly: shared widgets are missing")
+            .try_borrow_mut()
+            .ok()
     }
 }
 
@@ -108,13 +132,16 @@ where
 
         let model = Model::init_model(parent_model);
 
-        let mut widgets = Model::Widgets::init_view(&model, parent_widgets, sender.clone());
+        let widgets = Model::Widgets::init_view(&model, parent_widgets, sender.clone());
         let root_widget = widgets.root_widget();
 
         let components = Model::Components::init_components(&model, &widgets, sender.clone());
         let cloned_sender = sender.clone();
 
         widgets.connect_components(&model, &components);
+
+        let shared_widgets = Rc::new(RefCell::new(widgets));
+        let handler_widgets = shared_widgets.clone();
 
         let update_sender = sender.clone();
         let view_sender = sender;
@@ -150,7 +177,11 @@ where
         let global_context = glib::MainContext::default();
         let _global_guard = global_context.acquire().unwrap();
         global_receiver.attach(Some(&global_context), move |model: Model| {
-            widgets.view(&model, view_sender.clone());
+            if let Ok(ref mut widgets) = handler_widgets.try_borrow_mut() {
+                widgets.view(&model, view_sender.clone());
+            } else {
+                log::warn!("Could not mutably borrow the widgets. Make sure you drop all references to widgets after use");
+            }
             model_tx.send(model).unwrap();
             glib::Continue(true)
         });
@@ -160,6 +191,7 @@ where
             parent_model: PhantomData,
             sender: cloned_sender,
             root_widget,
+            shared_widgets: Some(shared_widgets),
         }
     }
 }
