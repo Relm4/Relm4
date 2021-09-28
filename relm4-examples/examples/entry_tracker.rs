@@ -1,7 +1,7 @@
 use gtk::glib::Sender;
 use gtk::prelude::EntryBufferExtManual;
 use gtk::prelude::{BoxExt, ButtonExt, EntryExt, GtkWindowExt, OrientableExt, WidgetExt};
-use gtk::{EntryBuffer, InputPurpose};
+use gtk::EntryBuffer;
 use relm4::factory::{FactoryPrototype, FactoryVec};
 use relm4::{AppUpdate, Model, RelmApp, WidgetPlus, Widgets};
 
@@ -34,6 +34,8 @@ impl Model for AppModel {
 
 impl AppUpdate for AppModel {
     fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) -> bool {
+        self.reset();
+
         match msg {
             AppMsg::Modify(value) => {
                 self.entry = value;
@@ -114,7 +116,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
                 append = &gtk::Entry {
                     set_tooltip_text: Some("How many counters shall be added/removed?"),
                     // here we track if entry gets cleared and delete the buffer accordingly
-                    set_buffer: track!(model.entry.is_empty(), &EntryBuffer::new(None)),
+                    set_buffer: track!(model.changed(AppModel::entry()) && model.entry.is_empty(), &EntryBuffer::new(None)),
                     connect_activate(sender) => move |e| {
                         sender.send(AppMsg::Modify(e.buffer().text())).unwrap();
                     }
