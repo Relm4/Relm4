@@ -9,6 +9,7 @@ struct Task {
     completed: bool,
 }
 
+#[derive(Debug)]
 struct TaskWidgets {
     label: gtk::Label,
     hbox: gtk::Box,

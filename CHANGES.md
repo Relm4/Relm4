@@ -6,6 +6,7 @@
 
 + relm4: Pass model in connect_components function of the Widgets trait
 + relm4: Added with_app method that allows passing an existing gtk::Appliaction to Relm4
++ relm4: Mini rework of factories
 + book: Many book improvements by [tronta](https://github.com/tronta)
 
 ## Added

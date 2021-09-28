@@ -7,7 +7,7 @@
 //! arbitrary indices use [`FactoryVecDeque`].
 //!
 //! Also, [`FactoryVec`] works with all container widgets that implement
-//! [`FactoryView`](super::FactoryView) such as [`gtk::Box`] or [`gtk::Grid`].
+//! [`SimpleFactoryView`](super::SimpleFactoryView) such as [`gtk::Box`] or [`gtk::Grid`].
 //!
 //! [`FactoryVecDeque`] additionally needs container widgets to implement the
 //! [`FactoryListView`](super::FactoryListView) trait that's implements support
@@ -20,3 +20,16 @@ mod factory_vec_deque;
 
 pub use factory_vec::FactoryVec;
 pub use factory_vec_deque::{DynamicIndex, FactoryVecDeque};
+
+use std::fmt::Debug;
+
+struct Widgets<Widgets: Debug, Root: Debug> {
+    widgets: Widgets,
+    root: Root,
+}
+
+impl<WidgetsType: Debug, Root: Debug> Debug for Widgets <WidgetsType, Root>{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Widgets").field("widgets", &self.widgets).field("root", &self.root).finish()
+    }
+}

@@ -1,5 +1,5 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt};
-use relm4::factory::{Factory, FactoryPrototype, FactoryVec, GridPosition};
+use relm4::factory::{positions::GridPosition, Factory, FactoryPrototype, FactoryVec};
 use relm4::Sender;
 use relm4::*;
 
@@ -110,6 +110,7 @@ impl AppUpdate for AppModel {
     }
 }
 
+#[derive(Debug)]
 struct FactoryWidgets {
     button: gtk::Button,
 }
