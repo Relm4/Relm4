@@ -3,7 +3,8 @@ use syn::{
     parse::{Parse, ParseBuffer, ParseStream},
     parse_macro_input,
     punctuated::Punctuated,
-    token, Expr, ExprMacro, Ident, Lit, Macro, Result, Token,
+    spanned::Spanned,
+    token, Error, Expr, ExprMacro, Ident, Lit, Macro, Result, Token,
 };
 
 use crate::util;
@@ -107,7 +108,9 @@ impl Parse for Property {
                 let _question_mark: Token![?] = input.parse()?;
                 optional_assign = true;
             }
-            let _colon: Token! [:] = input.parse()?;
+            let colon: Token! [:] = input.parse()?;
+            let colon_span = colon.span();
+
             if input.peek(Lit) {
                 input.parse().map(PropertyType::Value)?
             } else if input.peek2(Token![!]) {
@@ -146,19 +149,30 @@ impl Parse for Property {
                     input.parse().map(PropertyType::Expr)?
                 }
             } else {
-                input.parse().map(PropertyType::Expr)?
+                match input.parse().map(PropertyType::Expr) {
+                    Ok(expr) => expr,
+                    Err(parse_err) => {
+                        let mut err = Error::new(colon_span, "Did you confuse `=` with`:`?");
+                        err.combine(parse_err);
+                        return Err(err);
+                    }
+                }
             }
         } else {
             return Err(input.error("Unexpected token. Expected =>, =, : or ?:"));
         };
 
-        Ok(Property {
-            name,
-            ty,
-            args,
-            optional_assign,
-            iterative,
-        })
+        if !input.is_empty() && !input.peek(Token![,]) {
+            Err(input.error("expected `,`. Did you confuse `=` with`:`?"))
+        } else {
+            Ok(Property {
+                name,
+                ty,
+                args,
+                optional_assign,
+                iterative,
+            })
+        }
     }
 }
 
