@@ -29,7 +29,7 @@ where
         widget.clone()
     }
 
-    fn push_front(&self, widget: &Widget) -> Widget{
+    fn push_front(&self, widget: &Widget) -> Widget {
         self.prepend(widget);
         widget.clone()
     }
