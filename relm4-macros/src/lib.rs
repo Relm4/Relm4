@@ -103,7 +103,9 @@ use types::ModelTypes;
 /// ```
 #[proc_macro_attribute]
 pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
-    let attrs = parse_macro_input!(attributes as Attrs);
+    let Attrs{
+        visibility,
+    } = parse_macro_input!(attributes as Attrs);
     let data = parse_macro_input!(input as ItemImpl);
 
     let trait_generics = if let PathArguments::AngleBracketed(generics) =
@@ -176,7 +178,7 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
         struct_stream.extend(quote_spanned! {
             w_span =>
             #[allow(missing_docs)]
-            #attrs #w_name: #w_ty,
+            #visibility #w_name: #w_ty,
         });
 
         init_stream.extend(quote_spanned! {
@@ -210,7 +212,7 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let out = quote! {
         #[allow(dead_code)]
         #outer_attrs
-        #attrs struct #ty {
+        #visibility struct #ty {
             #struct_stream
             #additional_fields
         }

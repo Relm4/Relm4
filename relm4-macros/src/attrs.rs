@@ -6,8 +6,20 @@ use syn::{
 };
 
 #[derive(Debug)]
-pub struct Attrs {
+pub struct WidgetVisibility {
     pub_vis: Option<Visibility>,
+}
+
+impl ToTokens for WidgetVisibility {
+    fn to_tokens(&self, out: &mut TokenStream2) {
+        if let Some(vis_pub) = &self.pub_vis {
+            vis_pub.to_tokens(out);
+        }
+    }
+}
+
+pub struct Attrs {
+    pub visibility: WidgetVisibility,
 }
 
 impl Parse for Attrs {
@@ -18,14 +30,11 @@ impl Parse for Attrs {
             Some(input.parse()?)
         };
 
-        Ok(Attrs { pub_vis })
+        let visibility = WidgetVisibility{
+            pub_vis,
+        };
+
+        Ok(Attrs { visibility })
     }
 }
 
-impl ToTokens for Attrs {
-    fn to_tokens(&self, out: &mut TokenStream2) {
-        if let Some(vis_pub) = &self.pub_vis {
-            vis_pub.to_tokens(out);
-        }
-    }
-}
