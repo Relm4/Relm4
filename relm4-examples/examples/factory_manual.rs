@@ -47,6 +47,7 @@ impl AppUpdate for AppModel {
     }
 }
 
+#[derive(Debug)]
 struct FactoryWidgets {
     button: gtk::Button,
 }

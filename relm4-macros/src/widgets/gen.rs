@@ -142,7 +142,7 @@ impl WidgetFunc {
             tokens
         } else {
             quote! {
-                <#tokens as relm4::util::default_widgets::DefaultWidget>::default_widget()
+                #tokens::default()
             }
         }
     }

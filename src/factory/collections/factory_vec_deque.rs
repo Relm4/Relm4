@@ -4,6 +4,7 @@ use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::rc::Rc;
 
+use super::Widgets;
 use crate::factory::{Factory, FactoryListView, FactoryPrototype, FactoryView};
 
 #[derive(Debug, PartialEq, Eq)]
@@ -136,12 +137,14 @@ impl<T> IndexedData<T> {
 
 /// A container similar to [`VecDeque`] that implements [`Factory`].
 #[derive(Default, Debug)]
+#[allow(clippy::type_complexity)]
 pub struct FactoryVecDeque<Data>
 where
     Data: FactoryPrototype,
 {
     data: VecDeque<IndexedData<Data>>,
-    widgets: RefCell<VecDeque<Data::Widgets>>,
+    widgets:
+        RefCell<VecDeque<Widgets<Data::Widgets, <Data::View as FactoryView<Data::Root>>::Root>>>,
     changes: RefCell<Vec<Change>>,
 }
 
@@ -330,6 +333,7 @@ impl<Data, View> Factory<Data, View> for FactoryVecDeque<Data>
 where
     Data: FactoryPrototype<Factory = Self, View = View>,
     View: FactoryView<Data::Root> + FactoryListView<Data::Root>,
+    <Data as FactoryPrototype>::Root: std::clone::Clone,
 {
     type Key = Rc<DynamicIndex>;
 
@@ -342,43 +346,49 @@ where
                 ChangeType::Unchanged => (),
                 ChangeType::Add => {
                     let data = &self.data[index];
-                    let widget = data.inner.generate(&data.index, sender.clone());
-                    if widgets.is_empty() || index == 0 {
-                        view.push_front(Data::get_root(&widget));
+                    let new_widgets = data.inner.generate(&data.index, sender.clone());
+                    let root = Data::get_root(&new_widgets);
+                    let root = if widgets.is_empty() || index == 0 {
+                        view.push_front(root)
                     } else {
-                        view.insert_after(
-                            Data::get_root(&widget),
-                            Data::get_root(&widgets[index - 1]),
-                        );
-                    }
-                    widgets.insert(index, widget);
+                        view.insert_after(root, &widgets[index - 1].root)
+                    };
+                    widgets.insert(
+                        index,
+                        Widgets {
+                            widgets: new_widgets,
+                            root,
+                        },
+                    );
                 }
                 ChangeType::Update => {
                     let data = &self.data[index];
-                    data.inner.update(&data.index, &widgets[index]);
+                    data.inner.update(&data.index, &widgets[index].widgets);
                 }
                 ChangeType::Remove(num) => {
                     for _ in 0..*num {
-                        let widget = widgets.remove(index).unwrap();
-                        let remove_widget = Data::get_root(&widget);
-                        view.remove(remove_widget);
+                        let remove_widget = widgets.remove(index).unwrap();
+                        view.remove(&remove_widget.root);
                     }
                 }
                 ChangeType::Recreate => {
-                    let widget = widgets.pop_back().unwrap();
-                    let remove_widget = Data::get_root(&widget);
-                    view.remove(remove_widget);
+                    let remove_widget = widgets.pop_back().unwrap();
+                    view.remove(&remove_widget.root);
                     let data = &self.data[index];
-                    let widget = data.inner.generate(&data.index, sender.clone());
-                    if widgets.is_empty() || index == 0 {
-                        view.push_front(Data::get_root(&widget));
+                    let new_widgets = data.inner.generate(&data.index, sender.clone());
+                    let root = Data::get_root(&new_widgets);
+                    let root = if widgets.is_empty() || index == 0 {
+                        view.push_front(root)
                     } else {
-                        view.insert_after(
-                            Data::get_root(&widget),
-                            Data::get_root(&widgets[index - 1]),
-                        );
-                    }
-                    widgets.insert(index, widget);
+                        view.insert_after(root, &widgets[index - 1].root)
+                    };
+                    widgets.insert(
+                        index,
+                        Widgets {
+                            widgets: new_widgets,
+                            root,
+                        },
+                    );
                 }
             }
         }

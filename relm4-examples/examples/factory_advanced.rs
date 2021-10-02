@@ -81,6 +81,7 @@ impl AppUpdate for AppModel {
     }
 }
 
+#[derive(Debug)]
 struct FactoryWidgets {
     hbox: gtk::Box,
     counter_button: gtk::Button,

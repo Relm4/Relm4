@@ -4,10 +4,10 @@ use gtk::glib::Sender;
 use gtk::prelude::WidgetExt;
 
 pub mod collections;
+pub mod positions;
 mod widgets;
 
 pub use collections::*;
-pub use widgets::GridPosition;
 
 /// Define behavior to create, update and remove widgets according to
 /// data stored in a factory.
@@ -17,7 +17,7 @@ pub trait FactoryPrototype: Sized {
 
     /// Type that stores all widgets needed to update them
     /// in the [`update`](FactoryPrototype::update) function.
-    type Widgets;
+    type Widgets: std::fmt::Debug;
 
     /// Outermost type of the newly created widgets.
     /// Similar to the `Root` type in [`crate::Widgets`].
@@ -68,8 +68,9 @@ where
     fn generate(&self, view: &View, sender: Sender<Data::Msg>);
 }
 
-/// A trait implemented for GTK4 widgets that allows a factory to create and remove widgets.
-pub trait FactoryView<Widget> {
+/*/// A trait to simplify the implementation of [`FactoryView`] for most
+/// GTK4 widgets.
+trait SimpleFactoryView<Widget: std::fmt::Debug> {
     /// Position type used by this widget.
     ///
     /// For example [`GridPosition`] for [`gtk::Grid`] or `()` for [`gtk::Box`]
@@ -80,7 +81,42 @@ pub trait FactoryView<Widget> {
 
     /// Removes a widget from self at the end.
     fn remove(&self, widget: &Widget);
+}*/
+
+/// A trait implemented for GTK4 widgets that allows a factory to create and remove widgets.
+pub trait FactoryView<Widget> {
+    /// Widget type that's stored inside a factory data type.
+    type Root: std::fmt::Debug;
+
+    /// Position type used by this widget.
+    ///
+    /// For example [`GridPosition`] for [`gtk::Grid`] or `()` for [`gtk::Box`]
+    type Position;
+
+    /// Adds a new widget to self at the end.
+    fn add(&self, widget: &Widget, position: &Self::Position) -> Self::Root;
+
+    /// Removes a widget from self at the end.
+    fn remove(&self, widget: &Self::Root);
 }
+
+/*impl<Widget, M> FactoryView<Widget> for M
+where
+    M: SimpleFactoryView<Widget>,
+    Widget: Clone + std::fmt::Debug,
+{
+    type Position = M::Position;
+    type Root = Widget;
+
+    fn add(&self, widget: &Widget, position: &Self::Position) -> Self::Root {
+        self.add(widget, position);
+        widget.clone()
+    }
+
+    fn remove(&self, widget: &Widget) {
+        self.remove(widget);
+    }
+}*/
 
 /// Extends [`FactoryView`] for containers that work similar to lists.
 /// This means that the container can insert widgets before and after other
@@ -90,8 +126,8 @@ where
     Self: FactoryView<Widget>,
 {
     /// Insert a widget after another widget.
-    fn insert_after(&self, widget: &Widget, other: &Widget);
+    fn insert_after(&self, widget: &Widget, other: &Self::Root) -> Self::Root;
 
     /// Add an widget to the front.
-    fn push_front(&self, widget: &Widget);
+    fn push_front(&self, widget: &Widget) -> Self::Root;
 }

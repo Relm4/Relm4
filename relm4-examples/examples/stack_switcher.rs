@@ -3,13 +3,9 @@ use relm4::{
     AppUpdate, ComponentUpdate, Components, Model, RelmApp, RelmComponent, Sender, Widgets,
 };
 
-enum HeaderMsg {
-    SetStack(gtk::Stack),
-}
+enum HeaderMsg {}
 
-struct HeaderModel {
-    stack: Option<gtk::Stack>,
-}
+struct HeaderModel {}
 
 impl Model for HeaderModel {
     type Msg = HeaderMsg;
@@ -19,18 +15,16 @@ impl Model for HeaderModel {
 
 impl ComponentUpdate<AppModel> for HeaderModel {
     fn init_model(_parent_model: &AppModel) -> Self {
-        HeaderModel { stack: None }
+        HeaderModel {}
     }
 
     fn update(
         &mut self,
-        msg: HeaderMsg,
+        _msg: HeaderMsg,
         _components: &(),
         _sender: Sender<HeaderMsg>,
         _parent_sender: Sender<AppMsg>,
     ) {
-        let HeaderMsg::SetStack(stack) = msg;
-        self.stack = Some(stack);
     }
 }
 
@@ -40,9 +34,7 @@ impl Widgets<HeaderModel, AppModel> for HeaderWidgets {
         gtk::HeaderBar {
             set_title_widget = Some(&gtk::Box) {
                 add_css_class: "linked",
-                append: switcher = &gtk::StackSwitcher {
-                    set_stack: watch!(model.stack.as_ref()),
-                }
+                append: switcher = &gtk::StackSwitcher {}
             }
         }
     }
@@ -130,10 +122,10 @@ impl Widgets<AppModel, ()> for AppWidgets {
     }
 
     fn post_connect_components() {
-        components
-            .header
-            .send(HeaderMsg::SetStack(components.stack.root_widget().clone()))
-            .unwrap();
+        let header_widgets = components.header.widgets().unwrap();
+        header_widgets
+            .switcher
+            .set_stack(Some(components.stack.root_widget()));
     }
 }
 

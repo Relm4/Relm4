@@ -1,13 +1,13 @@
 use gtk::glib::Sender;
-use gtk::prelude::EntryBufferExtManual;
-use gtk::prelude::{BoxExt, ButtonExt, EntryExt, GtkWindowExt, OrientableExt, WidgetExt};
-use gtk::{EntryBuffer, InputPurpose};
+use gtk::prelude::{
+    BoxExt, ButtonExt, EntryBufferExtManual, EntryExt, GtkWindowExt, OrientableExt, WidgetExt,
+};
 use relm4::factory::{FactoryPrototype, FactoryVec};
-use relm4::{AppUpdate, Model, RelmApp, WidgetPlus, Widgets};
+use relm4::{send, AppUpdate, Model, RelmApp, WidgetPlus, Widgets};
 
 #[derive(Debug)]
 enum AppMsg {
-    Modify(String),
+    AddCounters,
     Clicked(usize),
 }
 
@@ -15,15 +15,11 @@ struct Counter {
     value: u8,
 }
 
-#[tracker::track]
 struct AppModel {
-    #[do_not_track]
     counters: FactoryVec<Counter>,
-    #[do_not_track]
     created_counters: u8,
     // stores entered values
-    #[no_eq]
-    entry: String,
+    entry: gtk::EntryBuffer,
 }
 
 impl Model for AppModel {
@@ -35,9 +31,9 @@ impl Model for AppModel {
 impl AppUpdate for AppModel {
     fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) -> bool {
         match msg {
-            AppMsg::Modify(value) => {
-                self.entry = value;
-                if let Ok(v) = self.entry.parse::<i32>() {
+            AppMsg::AddCounters => {
+                let text = self.entry.text();
+                if let Ok(v) = text.parse::<i32>() {
                     if v.is_positive() {
                         // add as many counters as user entered
                         for _ in 0..v {
@@ -53,9 +49,8 @@ impl AppUpdate for AppModel {
                         }
                     }
 
-                    // clearing the entry value clears the entry widget,
-                    // as it is tracked in view! if empty
-                    self.entry.clear();
+                    // clearing the entry value clears the entry widget
+                    self.entry.set_text("");
                 }
             }
             AppMsg::Clicked(index) => {
@@ -68,6 +63,7 @@ impl AppUpdate for AppModel {
     }
 }
 
+#[derive(Debug)]
 struct FactoryWidgets {
     button: gtk::Button,
 }
@@ -111,11 +107,10 @@ impl Widgets<AppModel, ()> for AppWidgets {
                 set_margin_all: 5,
                 set_spacing: 5,
                 append = &gtk::Entry {
+                    set_buffer: &model.entry,
                     set_tooltip_text: Some("How many counters shall be added/removed?"),
-                    // here we track if entry gets cleared and delete the buffer accordingly
-                    set_buffer: track!(model.entry.is_empty(), &EntryBuffer::new(None)),
-                    connect_activate(sender) => move |e| {
-                        sender.send(AppMsg::Modify(e.buffer().text())).unwrap();
+                    connect_activate(sender) => move |_| {
+                        send!(sender, AppMsg::AddCounters);
                     }
                 },
                 append = &gtk::Box {
@@ -130,11 +125,12 @@ impl Widgets<AppModel, ()> for AppWidgets {
 }
 
 fn main() {
+    gtk::init().unwrap();
+
     let model = AppModel {
         counters: FactoryVec::new(),
         created_counters: 0,
-        entry: String::new(),
-        tracker: 0,
+        entry: gtk::EntryBuffer::new(None),
     };
 
     let relm = RelmApp::new(model);

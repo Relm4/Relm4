@@ -3,6 +3,7 @@ use gtk::glib::Sender;
 use std::cell::RefCell;
 use std::collections::BTreeMap;
 
+use super::Widgets;
 use crate::factory::{Factory, FactoryPrototype, FactoryView};
 
 #[derive(Debug)]
@@ -14,13 +15,14 @@ enum ChangeType {
 }
 
 /// A container similar to [`Vec`] that implements [`Factory`].
+#[allow(clippy::type_complexity)]
 #[derive(Default, Debug)]
 pub struct FactoryVec<Data>
 where
     Data: FactoryPrototype,
 {
     data: Vec<Data>,
-    widgets: RefCell<Vec<Data::Widgets>>,
+    widgets: RefCell<Vec<Widgets<Data::Widgets, <Data::View as FactoryView<Data::Root>>::Root>>>,
     changes: RefCell<BTreeMap<usize, ChangeType>>,
 }
 
@@ -106,6 +108,7 @@ where
     }
 
     /// Get a reference to data stored at `index`.
+    #[must_use]
     pub fn get(&self, index: usize) -> Option<&Data> {
         self.data.get(index)
     }
@@ -114,6 +117,7 @@ where
     ///
     /// Assumes that the data will be modified and the corresponding widget
     /// needs to be updated.
+    #[must_use]
     pub fn get_mut(&mut self, index: usize) -> Option<&mut Data> {
         let mut changes = self.changes.borrow_mut();
         changes.entry(index).or_insert(ChangeType::Update);
@@ -130,34 +134,38 @@ where
     type Key = usize;
 
     fn generate(&self, view: &View, sender: Sender<Data::Msg>) {
-        for (index, change) in self.changes.borrow().iter().rev() {
+        for (index, change) in self.changes.borrow().iter() {
             let mut widgets = self.widgets.borrow_mut();
 
             match change {
                 ChangeType::Add => {
                     let data = &self.data[*index];
-                    let widget = data.generate(index, sender.clone());
+                    let new_widgets = data.generate(index, sender.clone());
                     let position = data.position(index);
-                    view.add(Data::get_root(&widget), &position);
-                    widgets.push(widget);
+                    let root = view.add(Data::get_root(&new_widgets), &position);
+                    widgets.push(Widgets {
+                        widgets: new_widgets,
+                        root,
+                    });
                 }
                 ChangeType::Update => {
-                    self.data[*index].update(index, &widgets[*index]);
+                    self.data[*index].update(index, &widgets[*index].widgets);
                 }
                 ChangeType::Remove => {
-                    let widget = widgets.pop().unwrap();
-                    let remove_widget = Data::get_root(&widget);
-                    view.remove(remove_widget);
+                    let remove_widget = widgets.pop().unwrap();
+                    view.remove(&remove_widget.root);
                 }
                 ChangeType::Recreate => {
-                    let widget = widgets.pop().unwrap();
-                    let remove_widget = Data::get_root(&widget);
-                    view.remove(remove_widget);
+                    let remove_widget = widgets.pop().unwrap();
+                    view.remove(&remove_widget.root);
                     let data = &self.data[*index];
-                    let widget = data.generate(index, sender.clone());
+                    let new_widgets = data.generate(index, sender.clone());
                     let position = data.position(index);
-                    view.add(Data::get_root(&widget), &position);
-                    widgets.push(widget);
+                    let root = view.add(Data::get_root(&new_widgets), &position);
+                    widgets.push(Widgets {
+                        widgets: new_widgets,
+                        root,
+                    });
                 }
             }
         }

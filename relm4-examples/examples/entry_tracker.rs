@@ -1,12 +1,13 @@
 use gtk::glib::Sender;
-use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
+use gtk::prelude::EntryBufferExtManual;
+use gtk::prelude::{BoxExt, ButtonExt, EntryExt, GtkWindowExt, OrientableExt, WidgetExt};
+use gtk::EntryBuffer;
 use relm4::factory::{FactoryPrototype, FactoryVec};
-use relm4::{send, AppUpdate, Model, RelmApp, WidgetPlus, Widgets};
+use relm4::{AppUpdate, Model, RelmApp, WidgetPlus, Widgets};
 
 #[derive(Debug)]
 enum AppMsg {
-    Add,
-    Remove,
+    Modify(String),
     Clicked(usize),
 }
 
@@ -14,9 +15,15 @@ struct Counter {
     value: u8,
 }
 
+#[tracker::track]
 struct AppModel {
+    #[do_not_track]
     counters: FactoryVec<Counter>,
+    #[do_not_track]
     created_counters: u8,
+    // stores entered values
+    #[no_eq]
+    entry: String,
 }
 
 impl Model for AppModel {
@@ -27,15 +34,31 @@ impl Model for AppModel {
 
 impl AppUpdate for AppModel {
     fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) -> bool {
+        self.reset();
+
         match msg {
-            AppMsg::Add => {
-                self.counters.push(Counter {
-                    value: self.created_counters,
-                });
-                self.created_counters += 1;
-            }
-            AppMsg::Remove => {
-                self.counters.pop();
+            AppMsg::Modify(value) => {
+                self.entry = value;
+                if let Ok(v) = self.entry.parse::<i32>() {
+                    if v.is_positive() {
+                        // add as many counters as user entered
+                        for _ in 0..v {
+                            self.counters.push(Counter {
+                                value: self.created_counters,
+                            });
+                            self.created_counters += 1;
+                        }
+                    } else if v.is_negative() {
+                        // remove counters
+                        for _ in v..0 {
+                            self.counters.pop();
+                        }
+                    }
+
+                    // clearing the entry value clears the entry widget,
+                    // as it is tracked in view! if empty
+                    self.entry.clear();
+                }
             }
             AppMsg::Clicked(index) => {
                 if let Some(counter) = self.counters.get_mut(index) {
@@ -90,16 +113,12 @@ impl Widgets<AppModel, ()> for AppWidgets {
                 set_orientation: gtk::Orientation::Vertical,
                 set_margin_all: 5,
                 set_spacing: 5,
-                append = &gtk::Button {
-                    set_label: "Add",
-                    connect_clicked(sender) => move |_| {
-                        send!(sender, AppMsg::Add);
-                    }
-                },
-                append = &gtk::Button {
-                    set_label: "Remove",
-                    connect_clicked(sender) => move |_| {
-                        send!(sender, AppMsg::Remove);
+                append = &gtk::Entry {
+                    set_tooltip_text: Some("How many counters shall be added/removed?"),
+                    // here we track if entry gets cleared and delete the buffer accordingly
+                    set_buffer: track!(model.changed(AppModel::entry()) && model.entry.is_empty(), &EntryBuffer::new(None)),
+                    connect_activate(sender) => move |e| {
+                        sender.send(AppMsg::Modify(e.buffer().text())).unwrap();
                     }
                 },
                 append = &gtk::Box {
@@ -107,7 +126,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
                     set_margin_all: 5,
                     set_spacing: 5,
                     factory!(model.counters),
-                }
+                },
             }
         }
     }
@@ -117,6 +136,8 @@ fn main() {
     let model = AppModel {
         counters: FactoryVec::new(),
         created_counters: 0,
+        entry: String::new(),
+        tracker: 0,
     };
 
     let relm = RelmApp::new(model);

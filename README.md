@@ -14,10 +14,10 @@ Relm4 is a new version of [relm](https://github.com/antoyo/relm) that's built fr
 
 ## Goals
 
-+ ⏱️ **Productivity:** Writing Relm4 applications should be intuitive and efficient
-+ ⚡ **Flexibility:** Anything that’s possible in GTK4 should work well in Relm4, too
-+ ✨ **Simplicity:** Writing applications should be as easy and straightforward as possible
-+ 🔧 **Maintainability**: The Elm programming model used by Relm4 provides a simple and clear structure for app development
++ ⏱️ **Productivity**
++ ⚡ **Flexibility**
++ ✨ **Simplicity**
++ 🔧 **Maintainability**
 
 ## Documentation
 

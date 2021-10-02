@@ -1,6 +1,6 @@
 use gtk::glib::Sender;
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
-use relm4::factory::{FactoryPrototype, FactoryVec};
+use relm4::factory::{positions::StackPageInfo, FactoryPrototype, FactoryVec};
 use relm4::{send, AppUpdate, Model, RelmApp, WidgetPlus, Widgets};
 
 #[derive(Debug)]
@@ -56,7 +56,7 @@ impl FactoryPrototype for Counter {
     type Factory = FactoryVec<Self>;
     type Widgets = FactoryWidgets;
     type Root = gtk::Button;
-    type View = gtk::Box;
+    type View = gtk::Stack;
     type Msg = AppMsg;
 
     fn generate(&self, index: &usize, sender: Sender<AppMsg>) -> FactoryWidgets {
@@ -69,7 +69,12 @@ impl FactoryPrototype for Counter {
         FactoryWidgets { button }
     }
 
-    fn position(&self, _index: &usize) {}
+    fn position(&self, index: &usize) -> StackPageInfo {
+        StackPageInfo {
+            name: Some(index.to_string()),
+            title: Some(format!("{}th page", index)),
+        }
+    }
 
     fn update(&self, _index: &usize, widgets: &FactoryWidgets) {
         widgets.button.set_label(&self.value.to_string());
@@ -102,10 +107,10 @@ impl Widgets<AppModel, ()> for AppWidgets {
                         send!(sender, AppMsg::Remove);
                     }
                 },
-                append = &gtk::Box {
-                    set_orientation: gtk::Orientation::Vertical,
-                    set_margin_all: 5,
-                    set_spacing: 5,
+                append = &gtk::StackSwitcher {
+                    set_stack: Some(&stack),
+                },
+                append: stack = &gtk::Stack {
                     factory!(model.counters),
                 }
             }
