@@ -32,14 +32,18 @@ impl AppUpdate for AppModel {
     }
 }
 
+fn application_window() -> adw::ApplicationWindow {
+    adw::ApplicationWindow::builder().build()
+}
+
 #[relm4_macros::widget]
 impl Widgets<AppModel, ()> for AppWidgets {
     view! {
-        main_window = adw::ApplicationWindow {
-            GtkWindowExt::set_default_width: 300,
-            GtkWindowExt::set_default_height: 200,
+        main_window = application_window() -> adw::ApplicationWindow {
+            set_default_width: 300,
+            set_default_height: 200,
 
-            ApplicationWindowExt::set_child: main_box = Some(&gtk::Box) {
+            set_content: main_box = Some(&gtk::Box) {
                 set_orientation: gtk::Orientation::Vertical,
 
                 append = &adw::HeaderBar {
