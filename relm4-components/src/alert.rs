@@ -133,7 +133,7 @@ where
 
             // Apply configuration
             set_text: Some(model.settings.text),
-            set_secondary_text: model.settings.secondary_text.as_deref(),
+            set_secondary_text: model.settings.secondary_text,
             set_modal: model.settings.is_modal,
             add_button: args!(model.settings.confirm_label, gtk::ResponseType::Accept),
             add_button: args!(model.settings.cancel_label, gtk::ResponseType::Cancel),
