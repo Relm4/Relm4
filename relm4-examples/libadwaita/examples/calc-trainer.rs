@@ -1,6 +1,7 @@
 use adw::traits::ApplicationWindowExt;
 use gtk::prelude::{
-    BoxExt, ButtonExt, EntryBufferExtManual, EntryExt, GtkWindowExt, OrientableExt, ToggleButtonExt, WidgetExt
+    BoxExt, ButtonExt, EntryBufferExtManual, EntryExt, GtkWindowExt, OrientableExt,
+    ToggleButtonExt, WidgetExt,
 };
 use gtk::EntryBuffer;
 use rand::Rng;
@@ -106,10 +107,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
 
             ApplicationWindowExt::set_child: main_box = Some(&gtk::Box) {
                 set_orientation: gtk::Orientation::Vertical,
-                append = &gtk::Box {
-                    set_orientation: gtk::Orientation::Horizontal,
-                    set_spacing: 5,
-                },
+                
                 append = &adw::HeaderBar {
                     set_title_widget = Some(&gtk::Label) {
                         set_label: "Practice mental arithmetic!",
