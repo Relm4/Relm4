@@ -109,7 +109,7 @@ where
     }
 }
 
-#[relm4_macros::widget(pub)]
+#[relm4_macros::widget(visibility = pub)]
 /// Widgets of the open dialog component
 impl<ParentModel, Conf> relm4::Widgets<OpenDialogModel<Conf>, ParentModel> for OpenDialogWidgets
 where
