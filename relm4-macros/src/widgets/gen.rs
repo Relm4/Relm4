@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned, ToTokens};
-use syn::{spanned::Spanned, Error, Ident};
+use syn::{spanned::Spanned, Error, Ident, Path};
 
 use super::{Property, PropertyName, PropertyType, Tracker, Widget, WidgetFunc};
 
@@ -208,7 +208,7 @@ impl Widget {
         }
     }
 
-    pub fn view_stream(&self, property_stream: &mut TokenStream2) {
+    pub fn view_stream(&self, relm4_path: &Path, property_stream: &mut TokenStream2) {
         let w_name = &self.name;
 
         for prop in &self.properties.properties {
@@ -230,13 +230,13 @@ impl Widget {
             let fact_assign_opt = prop.ty.factory_expr();
             if let Some(f_expr) = fact_assign_opt {
                 property_stream.extend(quote! {
-                    ::relm4::factory::Factory::generate(&#f_expr, &self.#w_name, sender.clone());
+                    #relm4_path::factory::Factory::generate(&#f_expr, &self.#w_name, sender.clone());
                 });
             }
         }
     }
 
-    pub fn property_assign_stream(&self, property_stream: &mut TokenStream2) {
+    pub fn property_assign_stream(&self, relm4_path: &Path, property_stream: &mut TokenStream2) {
         let w_name = &self.name;
 
         for prop in &self.properties.properties {
@@ -260,7 +260,7 @@ impl Widget {
             let fact_assign_opt = prop.ty.factory_expr();
             if let Some(f_expr) = fact_assign_opt {
                 property_stream.extend(quote! {
-                    ::relm4::factory::Factory::generate(&#f_expr, &#w_name, sender.clone());
+                    #relm4_path::factory::Factory::generate(&#f_expr, &#w_name, sender.clone());
                 });
             }
         }
