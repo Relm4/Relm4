@@ -73,20 +73,26 @@ impl ChangeType {
             ChangeType::Add => {
                 if other == ChangeType::Remove(1) {
                     *self = ChangeType::Unchanged;
-                } else if other != ChangeType::Update {
-                    panic!(
+                } else {
+                    assert_eq!(
+                        other,
+                        ChangeType::Update,
                         "Logical error in change tracking. Unexpected change: {:?} <- {:?}",
-                        self, other
+                        self,
+                        other
                     );
-                }
+                };
             }
             ChangeType::Recreate => {
                 if other == ChangeType::Remove(1) {
                     *self = ChangeType::Remove(1);
-                } else if other != ChangeType::Update {
-                    panic!(
+                } else {
+                    assert_eq!(
+                        other,
+                        ChangeType::Update,
                         "Logical error in change tracking. Unexpected change: {:?} <- {:?}",
-                        self, other
+                        self,
+                        other
                     );
                 }
             }
