@@ -105,6 +105,7 @@ use types::ModelTypes;
 pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let Attrs{
         visibility,
+        ..
     } = parse_macro_input!(attributes as Attrs);
     let data = parse_macro_input!(input as ItemImpl);
 
