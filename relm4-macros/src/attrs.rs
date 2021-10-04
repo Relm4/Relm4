@@ -1,4 +1,5 @@
 use proc_macro2::Span;
+use syn::Error;
 use syn::Ident;
 use syn::Path;
 use syn::PathArguments;
@@ -10,26 +11,13 @@ use syn::Visibility;
 use syn::parse::Parse;
 use syn::parse::ParseStream;
 use syn::punctuated::Punctuated;
+use syn::spanned::Spanned;
 use syn::token::Colon2;
 
 #[derive(Debug)]
 pub struct Attrs {
     /// Keeps information about visibility of the widget
     pub visibility: Option<Visibility>,
-    /// Allows to track if visibility was ever set
-    /// 
-    /// You can't set visibility twice.
-    /// 
-    /// This will fail
-    /// ```rust
-    /// #[widget(visibility = pub, visibility = pun( in my::path ) ) ]
-    /// ```
-    /// with error
-    ///
-    /// ```
-    /// ```
-    /// 
-    visibility_set: bool,
 
     /// Path to relm4
     /// 
@@ -63,7 +51,6 @@ impl Attrs {
 
         Attrs {
             visibility: None,
-            visibility_set: false,
 
             relm4_path,
             relm4_path_set: false,
@@ -125,7 +112,7 @@ impl Parse for Attrs {
             // Attrs::stream_peek(input.cursor());
 
             if input.peek(Token![pub]) {
-                if attrs.visibility_set {
+                if attrs.visibility.is_some() {
                     return Err(input.error("You can't assign visibility twice"));
                 }
                 let pub_vis = if input.is_empty() {
@@ -134,43 +121,35 @@ impl Parse for Attrs {
                     Some(input.parse()?)
                 };
                 attrs.visibility = pub_vis;
-                attrs.visibility_set = true;
             }
             else if input.peek(Ident) && input.peek2(Token![=]){
-                // This allows to report errors at the argument name instead of value
-                let visibility_error = Err(input.error("You can't assign visibility twice"));
-                let relm4_error = Err(input.error("You can't assign relm4 path twice"));
-                let unknown_identifier_error = Err(input.error("Unknown argument. Valid arguments are: `visibility`, `relm4` and `gtk` "));
-
                 let ident: Ident = input.parse()?;
-                let _eq: Token![=] = input.parse()?;
+                let eq: Token![=] = input.parse()?;
 
-                let ident_value: String = ident.to_string();
-
-                if ident_value == "visibility" {
-                    if attrs.visibility_set {
-                        return visibility_error;
+                if ident == "visibility" {
+                    let pub_vis: Visibility = input.parse()?;
+                    if attrs.visibility.is_some() {
+                        let error_span = ident.span().join(eq.span).unwrap()
+                                            .join(pub_vis.span()).unwrap();
+                        return Err(Error::new(error_span, "You can't assign visibility twice"));
                     }
-                    let pub_vis = if input.is_empty() {
-                        None
-                    } else {
-                        Some(input.parse()?)
-                    };
-                    attrs.visibility = pub_vis;
-                    attrs.visibility_set = true;
-                } 
-                else if ident_value == "relm4" {
-                    if attrs.relm4_path_set {
-                        return relm4_error;
-                    }
-
-                    let path: Path = input.parse()?;
                     
+                    attrs.visibility = Some(pub_vis);
+                }
+                else if ident == "relm4" {
+                    let path: Path = input.parse()?;
+                    if attrs.relm4_path_set {
+                        let error_span = ident.span().join(eq.span).unwrap()
+                                            .join(path.span()).unwrap();
+
+                        return Err(Error::new(error_span, "You can't assign relm4 path twice"));
+                    }
+
                     attrs.relm4_path = path;
                     attrs.relm4_path_set = true;
                 }
                 else {
-                    return unknown_identifier_error;
+                    return Err(input.error("Unknown argument. Valid arguments are: `visibility` or `relm4`"));
                 }
             }
 
