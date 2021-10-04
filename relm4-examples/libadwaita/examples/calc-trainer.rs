@@ -22,7 +22,7 @@ struct AppModel {
 }
 
 impl AppModel {
-    fn calc_taks(&mut self) {
+    fn calculate_taks(&mut self) {
         match self.mode {
             PracticeMode::Plus => {
                 self.correct_value = rand::thread_rng().gen_range(1..=self.range);
@@ -37,10 +37,8 @@ impl AppModel {
                 self.display_task = format!("<big>{} - {} = </big>", v1, v2);
             }
             PracticeMode::Multiply => {
-                let v = rand::thread_rng().gen_range(0..=self.range);
-                let v1 = rand::thread_rng().gen_range(1..=v);
-                let v2 = v / v1;
-                println!("v: {}, v1: {}, v2: {}", v, v1, v2);
+                let v1 = rand::thread_rng().gen_range(0..=self.range);
+                let v2 = rand::thread_rng().gen_range(0..=self.range);
                 self.correct_value = v1 * v2;
                 self.display_task = format!("<big>{} ∙ {} = </big>", v1, v2);
             }
@@ -68,24 +66,24 @@ impl AppUpdate for AppModel {
         match msg {
             AppMsg::Plus => {
                 self.mode = PracticeMode::Plus;
-                self.calc_taks();
+                self.calculate_taks();
             }
             AppMsg::Multiply => {
                 self.mode = PracticeMode::Multiply;
-                self.calc_taks();
+                self.calculate_taks();
             }
             AppMsg::Minus => {
                 self.mode = PracticeMode::Minus;
-                self.calc_taks();
+                self.calculate_taks();
             }
             AppMsg::MaxValue(v) => {
                 self.range = v;
-                self.calc_taks();
+                self.calculate_taks();
             }
             AppMsg::Entry(v) => {
                 if self.correct_value == v as u32 {
                     self.feedback = "<big>😀 That was right!! 💓</big>".to_string();
-                    self.calc_taks();
+                    self.calculate_taks();
                 } else {
                     self.feedback = "<big>😕 Unfortunately wrong. 😓</big>".to_string();
                 }
@@ -199,7 +197,7 @@ fn main() {
         correct_value: 0,
         feedback: "<big>Welcome to the mental math trainer!</big>".to_string(),
     };
-    model.calc_taks();
+    model.calculate_taks();
 
     let app = RelmApp::new(model);
     app.run();
