@@ -105,20 +105,22 @@ impl Widgets<AppModel, ()> for AppWidgets {
             GtkWindowExt::set_default_width: 300,
             GtkWindowExt::set_default_height: 200,
 
-            ApplicationWindowExt::set_child: main_box = Some(&gtk::Box) {
+            ApplicationWindowExt::set_content: main_box = Some(&gtk::Box) {
                 set_orientation: gtk::Orientation::Vertical,
                 
                 append = &adw::HeaderBar {
-                    set_title_widget = Some(&gtk::Label) {
-                        set_label: "Practice mental arithmetic!",
+                    set_title_widget = Some(&adw::WindowTitle) {
+                        set_title: "Practice mental arithmetic!",
+                        set_subtitle: "Challenge yourself with math",
                     }
+
                 },
                 append = &gtk::Label {
                     set_text: "Calculation Type:"
                 },
                 append = &gtk::Box {
                     set_orientation: gtk::Orientation::Horizontal,
-                    set_valign: gtk::Align::Center,
+                    set_halign: gtk::Align::Center,
                     set_margin_all: 5,
                     set_spacing: 5,
                     append: plus_button = &gtk::ToggleButton {
@@ -164,6 +166,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
                     set_orientation: gtk::Orientation::Horizontal,
                     set_margin_all: 5,
                     set_spacing: 5,
+                    set_halign: gtk::Align::Center,
                     append = &gtk::Label {
                         set_markup: watch! { &model.display_task.as_str() },
 
