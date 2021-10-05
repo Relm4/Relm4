@@ -15,6 +15,15 @@ use syn::spanned::Spanned;
 use syn::token::Colon2;
 
 #[derive(Debug)]
+enum AttributeType {
+    None,
+    Named,
+    Unnamed{
+        span: Span
+    },
+}
+
+#[derive(Debug)]
 pub struct Attrs {
     /// Keeps information about visibility of the widget
     pub visibility: Option<Visibility>,
@@ -91,8 +100,6 @@ impl Attrs {
     //         }
     //     }
     // }
-
-
 }
 
 impl Parse for Attrs {
@@ -106,21 +113,36 @@ impl Parse for Attrs {
         // eprintln!("\tis empty: {}", input.is_empty());
 
         let mut attrs = Attrs::new();
+        let mut attrs_type = AttributeType::None;
+
+        let mixed_use_error_message = 
+            "You can't mix named and unnamed arguments while using `relm4_macros::widget`. \n\
+            \n\
+            You can use one of\n\
+            \n\
+            1. `#[relm4_macros::widget()]` to define widget with private visibility\n\
+            2. `#[relm4_macros::widget(pub)]` to define widget with public visibility\n\
+            3. `#[relm4_macros::widget( visibility = pub )]` to define widget with public visibility and potentially other arguments\n\
+            \n\
+            Please use `visibility = pub` to fix this error";
 
         while !input.is_empty() {
 
             // Attrs::stream_peek(input.cursor());
 
             if input.peek(Token![pub]) {
+                if matches!(attrs_type, AttributeType::Named) {
+                    return Err(input.error(mixed_use_error_message));
+                }
                 if attrs.visibility.is_some() {
                     return Err(input.error("You can't assign visibility twice"));
                 }
-                let pub_vis = if input.is_empty() {
-                    None
-                } else {
-                    Some(input.parse()?)
+                let pub_vis: Visibility = input.parse()?;
+
+                attrs_type = AttributeType::Unnamed{
+                    span: pub_vis.span(),
                 };
-                attrs.visibility = pub_vis;
+                attrs.visibility = Some(pub_vis);
             }
             else if input.peek(Ident) && input.peek2(Token![=]){
                 let ident: Ident = input.parse()?;
@@ -128,25 +150,34 @@ impl Parse for Attrs {
 
                 if ident == "visibility" {
                     let pub_vis: Visibility = input.parse()?;
+                    let error_span = ident.span().join(eq.span).unwrap()
+                                        .join(pub_vis.span()).unwrap();
+
+                    if let AttributeType::Unnamed{ span } = attrs_type {
+                        return Err(Error::new(span, mixed_use_error_message));
+                    }
                     if attrs.visibility.is_some() {
-                        let error_span = ident.span().join(eq.span).unwrap()
-                                            .join(pub_vis.span()).unwrap();
                         return Err(Error::new(error_span, "You can't assign visibility twice"));
                     }
                     
                     attrs.visibility = Some(pub_vis);
+                    attrs_type = AttributeType::Named;
                 }
                 else if ident == "relm4" {
                     let path: Path = input.parse()?;
+                    
+                    if let AttributeType::Unnamed{ span } = attrs_type {
+                        return Err(Error::new(span, mixed_use_error_message));
+                    }
                     if attrs.relm4_path_set {
                         let error_span = ident.span().join(eq.span).unwrap()
                                             .join(path.span()).unwrap();
-
                         return Err(Error::new(error_span, "You can't assign relm4 path twice"));
                     }
 
                     attrs.relm4_path = path;
                     attrs.relm4_path_set = true;
+                    attrs_type = AttributeType::Named;
                 }
                 else {
                     return Err(input.error("Unknown argument. Valid arguments are: `visibility` or `relm4`"));
