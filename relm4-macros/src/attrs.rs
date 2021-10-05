@@ -150,13 +150,13 @@ impl Parse for Attrs {
 
                 if ident == "visibility" {
                     let pub_vis: Visibility = input.parse()?;
-                    let error_span = ident.span().join(eq.span).unwrap()
-                                        .join(pub_vis.span()).unwrap();
 
                     if let AttributeType::Unnamed{ span } = attrs_type {
                         return Err(Error::new(span, mixed_use_error_message));
                     }
                     if attrs.visibility.is_some() {
+                        let error_span = ident.span().join(eq.span).unwrap()
+                                            .join(pub_vis.span()).unwrap();
                         return Err(Error::new(error_span, "You can't assign visibility twice"));
                     }
                     
