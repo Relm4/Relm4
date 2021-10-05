@@ -74,7 +74,6 @@ impl Parse for Attrs {
     /// 3. `relm4` argument must be named. Always
     ///
     fn parse(input: ParseStream) -> Result<Self> {
-        // eprintln!("Input:");
         let mut attrs = Attrs::new();
         let mut attrs_type = AttributeType::None;
         let mut dangling_comma;
