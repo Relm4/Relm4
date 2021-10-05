@@ -30,7 +30,9 @@ use types::ModelTypes;
 ///
 /// # Attributes
 ///
-/// Use `#[widget(pub)]` to create a public struct.
+/// To create public struct use `#[widget(pub)]` or `#[widget(visibility = pub)]`.
+/// 
+/// If you use reexports to provide relm4, then you can use `#[widget(relm4= ::myreexports::my_relm)]` to override relm4 used during generating struct.
 ///
 /// # Example
 ///

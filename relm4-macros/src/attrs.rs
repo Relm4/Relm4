@@ -7,7 +7,6 @@ use syn::PathSegment;
 use syn::Result;
 use syn::Token;
 use syn::Visibility;
-// use syn::buffer::Cursor;
 use syn::parse::Parse;
 use syn::parse::ParseStream;
 use syn::punctuated::Punctuated;
@@ -65,55 +64,20 @@ impl Attrs {
             relm4_path_set: false,
         }
     }
-
-    // fn stream_peek(c: Cursor) {
-    //     eprintln!("\tpeek: ");
-    //     Attrs::stream_peek_print(c);
-    // }
-
-    // fn stream_peek_print(c: Cursor) {
-    //     if !c.eof() {
-    //         //group it is not
-    //         if let Some( (ident, cursor) ) = c.ident() {
-    //             eprintln!("\t\t ident: {}", ident);
-    //             return Attrs::stream_peek_print(cursor);
-    //         }
-
-    //         if let Some( (punct, cursor) ) = c.punct() {
-    //             eprintln!("\t\t punct: {}", punct);
-    //             return Attrs::stream_peek_print(cursor);
-    //         }
-
-    //         if let Some( (literal, cursor) ) = c.literal() {
-    //             eprintln!("\t\t literal: {}", literal);
-    //             return Attrs::stream_peek_print(cursor);
-    //         }
-
-    //         if let Some( (lifetime, cursor) ) = c.lifetime() {
-    //             eprintln!("\t\t lifetime: {}", lifetime);
-    //             return Attrs::stream_peek_print(cursor);
-    //         }
-
-    //         if let Some( (tree, cursor) ) = c.token_tree() {
-    //             eprintln!("\t\t tree: {}", tree);
-    //             Attrs::stream_peek_print(cursor);
-    //         }
-    //     }
-    // }
 }
 
 impl Parse for Attrs {
     /// Rules for parsing attributes
     /// 
-    /// 1. It's fine if visibility is used unnamed so `#[widget(pub)]` must be valid
+    /// 1. It's fine if visibility is used unnamed so `#[widget(pub)]` must be valid but thats the only case
     /// 2. Widget visibility might be named `#[widget(visibility = pub)]`
+    /// 3. `relm4` argument must be named. Always
     ///
     fn parse(input: ParseStream) -> Result<Self> {
         // eprintln!("Input:");
-        // eprintln!("\tis empty: {}", input.is_empty());
-
         let mut attrs = Attrs::new();
         let mut attrs_type = AttributeType::None;
+        let mut dangling_comma;
 
         let mixed_use_error_message = 
             "You can't mix named and unnamed arguments while using `relm4_macros::widget`. \n\
@@ -126,9 +90,8 @@ impl Parse for Attrs {
             \n\
             Please use `visibility = pub` to fix this error";
 
-        while !input.is_empty() {
-
-            // Attrs::stream_peek(input.cursor());
+        while !input.is_empty() {            
+            dangling_comma = true;
 
             if input.peek(Token![pub]) {
                 if matches!(attrs_type, AttributeType::Named) {
@@ -143,6 +106,7 @@ impl Parse for Attrs {
                     span: pub_vis.span(),
                 };
                 attrs.visibility = Some(pub_vis);
+                dangling_comma = false;
             }
             else if input.peek(Ident) && input.peek2(Token![=]){
                 let ident: Ident = input.parse()?;
@@ -155,6 +119,7 @@ impl Parse for Attrs {
                         return Err(Error::new(span, mixed_use_error_message));
                     }
                     if attrs.visibility.is_some() {
+                        //unwrap's here are safe since all spans are from the same file always
                         let error_span = ident.span().join(eq.span).unwrap()
                                             .join(pub_vis.span()).unwrap();
                         return Err(Error::new(error_span, "You can't assign visibility twice"));
@@ -162,6 +127,7 @@ impl Parse for Attrs {
                     
                     attrs.visibility = Some(pub_vis);
                     attrs_type = AttributeType::Named;
+                    dangling_comma = false;
                 }
                 else if ident == "relm4" {
                     let path: Path = input.parse()?;
@@ -170,6 +136,7 @@ impl Parse for Attrs {
                         return Err(Error::new(span, mixed_use_error_message));
                     }
                     if attrs.relm4_path_set {
+                        //unwrap's here are safe since all spans are from the same file always
                         let error_span = ident.span().join(eq.span).unwrap()
                                             .join(path.span()).unwrap();
                         return Err(Error::new(error_span, "You can't assign relm4 path twice"));
@@ -178,16 +145,27 @@ impl Parse for Attrs {
                     attrs.relm4_path = path;
                     attrs.relm4_path_set = true;
                     attrs_type = AttributeType::Named;
+                    dangling_comma = false;
                 }
                 else {
                     return Err(input.error("Unknown argument. Valid arguments are: `visibility` or `relm4`"));
                 }
             }
 
-            if input.peek(Token![,]) {
-                let _comma: Token![,] = input.parse()?;
-            } else {
-                break;
+            if input.peek(Token![,]) && dangling_comma {
+                // dangling_coma == true
+                // if we are here that means we hit one of the two cases 
+                //   #[widget(, ...)]
+                // or
+                //   #[widget(... bla = blah,, ...)]
+                return Err(input.error("Unexpected comma found"))
+            }
+            else if input.peek(Token![,]) {
+                let comma: Token![,] = input.parse()?;
+                if input.is_empty() {
+                    // We've just consumed last token in stream (which is comma) and that's wrong
+                    return Err(Error::new(comma.span, "Unexpected comma found"));
+                }
             }
         }
 
