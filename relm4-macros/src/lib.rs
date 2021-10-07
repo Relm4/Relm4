@@ -30,7 +30,9 @@ use types::ModelTypes;
 ///
 /// # Attributes
 ///
-/// Use `#[widget(pub)]` to create a public struct.
+/// To create public struct use `#[widget(pub)]` or `#[widget(visibility = pub)]`.
+/// 
+/// If you use reexports to provide relm4, then you can use `#[widget(relm4= ::myreexports::my_relm)]` to override relm4 used during generating struct.
 ///
 /// # Example
 ///
@@ -103,7 +105,11 @@ use types::ModelTypes;
 /// ```
 #[proc_macro_attribute]
 pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
-    let attrs = parse_macro_input!(attributes as Attrs);
+    let Attrs{
+        visibility,
+        relm4_path,
+        ..
+    } = parse_macro_input!(attributes as Attrs);
     let data = parse_macro_input!(input as ItemImpl);
 
     let trait_generics = if let PathArguments::AngleBracketed(generics) =
@@ -176,7 +182,7 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
         struct_stream.extend(quote_spanned! {
             w_span =>
             #[allow(missing_docs)]
-            #attrs #w_name: #w_ty,
+            #visibility #w_name: #w_ty,
         });
 
         init_stream.extend(quote_spanned! {
@@ -184,8 +190,8 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
         });
 
         return_stream.extend(widget.return_stream());
-        widget.property_assign_stream(&mut property_stream);
-        widget.view_stream(&mut view_stream);
+        widget.property_assign_stream(&relm4_path, &mut property_stream);
+        widget.view_stream(&relm4_path, &mut view_stream);
         connect_stream.extend(widget.connect_stream());
         track_stream.extend(widget.track_stream());
         component_stream.extend(widget.component_stream());
@@ -210,7 +216,7 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let out = quote! {
         #[allow(dead_code)]
         #outer_attrs
-        #attrs struct #ty {
+        #visibility struct #ty {
             #struct_stream
             #additional_fields
         }
@@ -219,7 +225,7 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
             type Root = #root_widget_type;
 
             /// Initialize the UI.
-            fn init_view(model: &#model, parent_widgets: &<#parent_model as ::relm4::Model>::Widgets, sender: ::gtk::glib::Sender<<#model as ::relm4::Model>::Msg>) -> Self {
+            fn init_view(model: &#model, parent_widgets: &<#parent_model as #relm4_path::Model>::Widgets, sender: #relm4_path::Sender<<#model as #relm4_path::Model>::Msg>) -> Self {
                 #pre_init
                 #init_stream
                 #property_stream
@@ -231,7 +237,7 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
                 }
             }
 
-            fn connect_components(&self, model: &#model, components: &<#model as ::relm4::Model>::Components) {
+            fn connect_components(&self, model: &#model, components: &<#model as #relm4_path::Model>::Components) {
                 #pre_connect_components
                 #component_stream
                 #connect_component_stream
@@ -244,7 +250,7 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
             }
 
             /// Update the view to represent the updated model.
-            fn view(&mut self, model: &#model, sender: ::gtk::glib::Sender<<#model as ::relm4::Model>::Msg>) {
+            fn view(&mut self, model: &#model, sender: #relm4_path::Sender<<#model as #relm4_path::Model>::Msg>) {
                 #manual_view
                 #view_stream
                 #track_stream
