@@ -110,10 +110,6 @@ where
     }
 }
 
-fn dialog() -> gtk::MessageDialog {
-    gtk::MessageDialog::builder().build()
-}
-
 #[relm4_macros::widget(pub)]
 /// Widgets of the alert component
 impl<ParentModel, Conf> relm4::Widgets<AlertModel<Conf>, ParentModel> for AlertWidgets
@@ -123,7 +119,7 @@ where
     Conf: AlertConfig,
 {
     view! {
-        dialog = dialog() -> gtk::MessageDialog {
+        dialog = gtk::MessageDialog {
             set_transient_for: parent_widgets.parent_window().as_ref(),
             set_message_type: gtk::MessageType::Question,
             set_visible: watch!(model.is_active),
