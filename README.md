@@ -14,7 +14,7 @@ Relm4 is a new version of [relm](https://github.com/antoyo/relm) that's built fr
 
 ## Why Relm4
 
-We believe that GUI development should be easy, productive and delightful. 
+We believe that GUI development should be easy, productive and delightful.  
 The [gtk4-rs](https://crates.io/crates/gtk4) crate already provides everything you need to write modern, beautiful and cross-platform applications.
 Built on top of this foundation, Relm4 makes developing more idiomatic, simpler and faster and enables you to become productive in just a few hours.
 
