@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.2.0 - 2021-10-09
+
 ### Changed
 
 + relm4: Pass model in connect_components function of the Widgets trait
@@ -14,8 +16,8 @@
 + relm4: Added with_app method that allows passing an existing gtk::Appliaction to Relm4
 + relm4: Methods to access the widgets of components
 + relm4: Re-export for gtk
-+ relm4-macros: Support named arguments in the widget macro (by [mskorkowski](https://github.com/mskorkowski)
-+ relm4-macros: Support usage of re-export paths in the widget macro (by [mskorkowski](https://github.com/mskorkowski)
++ relm4-macros: Support named arguments in the widget macro (by [mskorkowski](https://github.com/mskorkowski))
++ relm4-macros: Support usage of re-export paths in the widget macro (by [mskorkowski](https://github.com/mskorkowski))
 + relm4-macros: Added error message when confusing `=` and `:`
 + relm4-macros: Allow usage of visibilities other than pub
 + relm4-macros: New pre_connect_components and post_connect_components for manual components code
