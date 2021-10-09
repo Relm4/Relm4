@@ -96,20 +96,24 @@ impl AppUpdate for AppModel {
     }
 }
 
+fn application_window() -> adw::ApplicationWindow {
+    adw::ApplicationWindow::builder().build()
+}
+
 #[relm4_macros::widget]
 impl Widgets<AppModel, ()> for AppWidgets {
     view! {
-        main_window = adw::ApplicationWindow {
-            GtkWindowExt::set_default_width: 300,
-            GtkWindowExt::set_default_height: 200,
+        main_window = application_window() -> adw::ApplicationWindow {
+            set_default_width: 300,
+            set_default_height: 200,
+            set_resizable: false,
 
-            ApplicationWindowExt::set_content: main_box = Some(&gtk::Box) {
+            set_content: main_box = Some(&gtk::Box) {
                 set_orientation: gtk::Orientation::Vertical,
-                
+
                 append = &adw::HeaderBar {
-                    set_title_widget = Some(&adw::WindowTitle) {
-                        set_title: "Practice mental arithmetic!",
-                        set_subtitle: "Challenge yourself with math",
+                    set_title_widget = Some(&adw::WindowTitle::new("Practice mental arithmetic!",
+                        "Challenge yourself with math")) {
                     }
 
                 },
@@ -125,7 +129,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
                         set_label: "+",
                         set_active: true,
                         connect_toggled(sender) => move |b| {
-                            if b.is_active() == true {
+                            if b.is_active() {
                                 send!(sender, AppMsg::Plus);
                             }
                         },
@@ -134,7 +138,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
                         set_label: "-",
                         set_group: Some(&plus_button),
                         connect_toggled(sender) => move |b| {
-                            if b.is_active() == true {
+                            if b.is_active() {
                                 send!(sender, AppMsg::Minus);
                             }
                         },
@@ -143,7 +147,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
                         set_label: "∙",
                         set_group: Some(&plus_button),
                         connect_toggled(sender) => move |b| {
-                            if b.is_active() == true {
+                            if b.is_active() {
                                 send!(sender, AppMsg::Multiply);
                             }
                         },
@@ -160,31 +164,32 @@ impl Widgets<AppModel, ()> for AppWidgets {
                         }
                     }
                 },
-                append = &gtk::Box {
-                    set_orientation: gtk::Orientation::Horizontal,
-                    set_margin_all: 5,
-                    set_spacing: 5,
-                    set_halign: gtk::Align::Center,
-                    append = &gtk::Label {
-                        set_markup: watch! { &model.display_task.as_str() },
-
-                    },
-                    append = &gtk::Entry {
-                        connect_activate(sender) => move |entry| {
-                            let value = entry.buffer().text().parse::<i32>();
-                            if let Ok(v) = value {
-                                send!(sender, AppMsg::Entry(v));
-                            } else {
-                                send!(sender, AppMsg::EntryError);
+                append = &gtk::Stack {
+                    add_child = &gtk::Box {
+                        set_orientation: gtk::Orientation::Horizontal,
+                        set_margin_all: 5,
+                        set_spacing: 5,
+                        set_halign: gtk::Align::Center,
+                        append = &gtk::Label {
+                            set_markup: watch! { model.display_task.as_str() },
+                        },
+                        append = &gtk::Entry {
+                            connect_activate(sender) => move |entry| {
+                                let value = entry.buffer().text().parse::<i32>();
+                                if let Ok(v) = value {
+                                    send!(sender, AppMsg::Entry(v));
+                                } else {
+                                    send!(sender, AppMsg::EntryError);
+                                }
+                                entry.set_buffer(&EntryBuffer::new(None));
                             }
-                            entry.set_buffer(&EntryBuffer::new(None));
                         }
-                    },
+                    }
                 },
                 append: feedback = &gtk::Label {
                     set_markup: watch!( &model.feedback ),
                 }
-            },
+            }
         }
     }
 }
