@@ -120,14 +120,10 @@ impl ComponentUpdate<AppModel> for DialogModel {
     }
 }
 
-fn new_dialog() -> gtk::MessageDialog {
-    gtk::MessageDialog::builder().build()
-}
-
 #[relm4_macros::widget]
 impl Widgets<DialogModel, AppModel> for DialogWidgets {
     view! {
-        dialog = new_dialog() -> gtk::MessageDialog {
+        dialog = gtk::MessageDialog {
             set_transient_for: Some(&parent_widgets.main_window),
             set_modal: true,
             set_visible: watch!(!model.hidden),

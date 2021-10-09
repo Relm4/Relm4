@@ -12,21 +12,27 @@
 An idiomatic GUI library inspired by [Elm](https://elm-lang.org/) and based on [gtk4-rs](https://crates.io/crates/gtk4). 
 Relm4 is a new version of [relm](https://github.com/antoyo/relm) that's built from scratch and is compatible with [GTK4](https://www.gtk.org/) and [libadwaita](https://gitlab.gnome.org/GNOME/libadwaita).
 
-## Goals
+## Why Relm4
+
+We believe that GUI development should be easy, productive and delightful.  
+The [gtk4-rs](https://crates.io/crates/gtk4) crate already provides everything you need to write modern, beautiful and cross-platform applications.
+Built on top of this foundation, Relm4 makes developing more idiomatic, simpler and faster and enables you to become productive in just a few hours.
+
+## Our goals
 
 + ⏱️ **Productivity**
-+ ⚡ **Flexibility**
 + ✨ **Simplicity**
++ 📎 **Outstanding documentation**
 + 🔧 **Maintainability**
 
 ## Documentation
 
-+ 📖 **[Book](https://aaronerhardt.github.io/relm4-book/book/)**
++ 📖 **[The Relm4 book](https://aaronerhardt.github.io/relm4-book/book/)**
 + 📜 **[Rust documentation](https://aaronerhardt.github.io/docs/relm4/relm4/)**
 
 ## Dependencies
 
-Relm4 only depends on GTK4: [How to install GTK4](https://www.gtk.org/docs/installations/)
+Relm4 depends on GTK4: [How to install GTK4](https://www.gtk.org/docs/installations/).
 
 ## Ecosystem
 
@@ -38,10 +44,10 @@ Relm4 has two crates that extend the core functionality:
 Add this to your `Cargo.toml`:
 
 ```toml
-gtk = { version = "0.2", package = "gtk4" }
-relm4 = "0.1"
-relm4-macros = "0.1"
-relm4-components = "0.1"
+gtk = { version = "0.3", package = "gtk4" }
+relm4 = "0.2"
+relm4-macros = "0.2"
+relm4-components = "0.2"
 ```
 
 ### Features
