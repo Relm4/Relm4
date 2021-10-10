@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
++ relm4-macros: Allow generic function parameters in properties
+
 ## 0.2.0 - 2021-10-09
 
 ### Changed

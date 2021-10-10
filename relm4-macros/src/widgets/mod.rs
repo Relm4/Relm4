@@ -1,6 +1,6 @@
 use proc_macro2::Span as Span2;
 use proc_macro2::TokenStream as TokenStream2;
-use syn::{punctuated::Punctuated, spanned::Spanned, token, Expr, ExprClosure, Ident, Lit, Path};
+use syn::{punctuated::Punctuated, spanned::Spanned, token, Expr, ExprClosure, Ident, Lit, Path, Generics};
 
 use crate::args::Args;
 
@@ -46,6 +46,7 @@ impl Spanned for PropertyName {
 pub(super) struct Property {
     pub name: PropertyName,
     pub ty: PropertyType,
+    pub generics: Option<Generics>,
     pub args: Option<Args<Expr>>,
     pub optional_assign: bool,
     pub iterative: bool,

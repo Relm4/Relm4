@@ -58,6 +58,7 @@ impl Parse for Property {
                     return Ok(Property {
                         name,
                         ty: PropertyType::Factory(paren_input.parse()?),
+                        generics: None,
                         optional_assign,
                         iterative,
                         args: None,
@@ -79,6 +80,12 @@ impl Parse for Property {
             bracketed!(paren_input in input);
             braced_args = true;
             Some(paren_input.parse()?)
+        } else {
+            None
+        };
+
+        let generics = if input.peek(Token![<]) {
+            Some(input.parse()?)
         } else {
             None
         };
@@ -168,6 +175,7 @@ impl Parse for Property {
             Ok(Property {
                 name,
                 ty,
+                generics,
                 args,
                 optional_assign,
                 iterative,

@@ -2,7 +2,7 @@ use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned, ToTokens};
 use syn::{spanned::Spanned, Error, Ident, Path};
 
-use super::{Property, PropertyName, PropertyType, Tracker, Widget, WidgetFunc};
+use super::{Property, PropertyName, PropertyType, Tracker, Widget, WidgetFunc, Generics};
 
 impl PropertyType {
     fn init_assign_tokens(&self) -> Option<TokenStream2> {
@@ -149,13 +149,19 @@ impl WidgetFunc {
 }
 
 impl PropertyName {
-    fn assign_fn_stream(&self, w_name: &Ident) -> TokenStream2 {
-        match self {
+    fn assign_fn_stream(&self, p_generics: &Option<Generics>, w_name: &Ident) -> TokenStream2 {
+        let mut tokens = match self {
             PropertyName::Ident(ident) => {
                 quote! { #w_name.#ident }
             }
-            PropertyName::Path(path) => path.to_token_stream(),
+            PropertyName::Path(path) => quote! { #path },
+        };
+
+        if let Some(generics) = p_generics {
+            tokens.extend(quote! { :: #generics });
         }
+
+        tokens
     }
 
     fn assign_args_stream(&self, w_name: &Ident) -> Option<TokenStream2> {
@@ -165,13 +171,19 @@ impl PropertyName {
         }
     }
 
-    fn self_assign_fn_stream(&self, w_name: &Ident) -> TokenStream2 {
-        match self {
+    fn self_assign_fn_stream(&self, p_generics: &Option<Generics>, w_name: &Ident) -> TokenStream2 {
+        let mut tokens = match self {
             PropertyName::Ident(ident) => {
                 quote! { self.#w_name.#ident }
             }
-            PropertyName::Path(path) => path.to_token_stream(),
+            PropertyName::Path(path) => quote! { #path },
+        };
+
+        if let Some(generics) = p_generics {
+            tokens.extend(quote! { :: #generics });
         }
+
+        tokens
     }
 
     fn self_assign_args_stream(&self, w_name: &Ident) -> Option<TokenStream2> {
@@ -214,7 +226,7 @@ impl Widget {
         for prop in &self.properties.properties {
             let p_assign_opt = prop.ty.view_assign_tokens();
             if let Some(p_assign) = p_assign_opt {
-                let assign_fn = prop.name.self_assign_fn_stream(w_name);
+                let assign_fn = prop.name.self_assign_fn_stream(&prop.generics, w_name);
                 let self_assign_args = prop.name.self_assign_args_stream(w_name);
 
                 property_assign_tokens(
@@ -244,7 +256,7 @@ impl Widget {
             if let Some(p_assign) = p_assign_opt {
                 let args_stream = prop.args_stream();
 
-                let assign_fn = prop.name.assign_fn_stream(w_name);
+                let assign_fn = prop.name.assign_fn_stream(&prop.generics, w_name);
                 let self_assign_args = prop.name.assign_args_stream(w_name);
 
                 property_assign_tokens(
@@ -276,7 +288,7 @@ impl Widget {
                 let p_name = &prop.name;
                 let p_span = p_name.span().unwrap().into();
 
-                let assign_fn = prop.name.assign_fn_stream(w_name);
+                let assign_fn = prop.name.assign_fn_stream(&prop.generics, w_name);
                 let self_assign_args = prop.name.assign_args_stream(w_name);
 
                 let mut clone_stream = TokenStream2::new();
@@ -311,7 +323,7 @@ impl Widget {
                 let p_name = &prop.name;
                 let p_span = p_name.span().unwrap().into();
 
-                let assign_fn = prop.name.self_assign_fn_stream(w_name);
+                let assign_fn = prop.name.self_assign_fn_stream(&prop.generics, w_name);
                 let self_assign_args = prop.name.self_assign_args_stream(w_name);
 
                 let mut arg_stream = TokenStream2::new();
@@ -345,7 +357,7 @@ impl Widget {
                 let p_name = &prop.name;
                 let p_span = p_name.span().unwrap().into();
 
-                let assign_fn = prop.name.self_assign_fn_stream(w_name);
+                let assign_fn = prop.name.self_assign_fn_stream(&prop.generics, w_name);
                 let self_assign_args = prop.name.self_assign_args_stream(w_name);
                 let args_stream = prop.args_stream();
 
@@ -366,7 +378,7 @@ impl Widget {
             let p_assign_opt = prop.ty.component_tokens();
             if let Some(component_tokens) = p_assign_opt {
                 let args_stream = prop.args_stream();
-                let assign_fn = prop.name.self_assign_fn_stream(w_name);
+                let assign_fn = prop.name.self_assign_fn_stream(&prop.generics, w_name);
                 let self_assign_args = prop.name.self_assign_args_stream(w_name);
 
                 property_assign_tokens(
