@@ -10,3 +10,4 @@ gtk = { version = "0.3", package = "gtk4" }
 relm4 = { path = "../../", features = ["libadwaita"] }
 relm4-components = { path = "../../relm4-components" }
 relm4-macros = { path = "../../relm4-macros" }
+rand = "0.8.4"
