@@ -32,75 +32,69 @@ struct AppModel {
 impl AppModel {
     fn calculate_task(&mut self) {
         match self.mode {
-            PracticeMode::Plus => {
-                match self.task_type {
-                    TaskType::ValueValueEntry => {
-                        self.correct_value = rand::thread_rng().gen_range(1..=self.range);
-                        let v1 = rand::thread_rng().gen_range(1..=self.correct_value);
-                        let v2 = self.correct_value - v1;
-                        self.display_task_1 = format!("<big>{} + {} = </big>", v1, v2);
-                    }
-                    TaskType::ValueEntryValue => {
-                        let result = rand::thread_rng().gen_range(1..=self.range);
-                        let v1 = rand::thread_rng().gen_range(1..=result);
-                        self.correct_value = result - v1;
-                        self.display_task_1 = format!("<big>{} + </big>", v1);
-                        self.display_task_2 = format!("<big> = {}</big>", result);
-                    }
-                    TaskType::EntryValueValue => {
-                        let result = rand::thread_rng().gen_range(1..=self.range);
-                        self.correct_value = rand::thread_rng().gen_range(1..=result);
-                        let v2 = result - self.correct_value;
-                        self.display_task_2 = format!("<big> + {} = {}</big>", v2, result);
-                    }
+            PracticeMode::Plus => match self.task_type {
+                TaskType::ValueValueEntry => {
+                    self.correct_value = rand::thread_rng().gen_range(1..=self.range);
+                    let v1 = rand::thread_rng().gen_range(1..=self.correct_value);
+                    let v2 = self.correct_value - v1;
+                    self.display_task_1 = format!("<big>{} + {} = </big>", v1, v2);
                 }
-            }
-            PracticeMode::Minus => {
-                match self.task_type {
-                    TaskType::ValueValueEntry => {
-                        let v1 = rand::thread_rng().gen_range(1..=self.range);
-                        let v2 = rand::thread_rng().gen_range(0..=v1);
-                        self.correct_value = v1 - v2;
-                        self.display_task_1 = format!("<big>{} - {} = </big>", v1, v2);
-                    }
-                    TaskType::ValueEntryValue => {
-                        let v1 = rand::thread_rng().gen_range(1..=self.range);
-                        self.correct_value = rand::thread_rng().gen_range(0..=v1);
-                        let result = v1 - self.correct_value;
-                        self.display_task_1 = format!("<big>{} - </big>", v1);
-                        self.display_task_2 = format!("<big> = {}</big>", result); 
-                    }
-                    TaskType::EntryValueValue => {
-                        self.correct_value = rand::thread_rng().gen_range(1..=self.range);
-                        let v2 = rand::thread_rng().gen_range(0..=self.correct_value);
-                        let result = self.correct_value - v2;
-                        self.display_task_2 = format!("<big> - {} = {}</big>", v2, result); 
-                    }
+                TaskType::ValueEntryValue => {
+                    let result = rand::thread_rng().gen_range(1..=self.range);
+                    let v1 = rand::thread_rng().gen_range(1..=result);
+                    self.correct_value = result - v1;
+                    self.display_task_1 = format!("<big>{} + </big>", v1);
+                    self.display_task_2 = format!("<big> = {}</big>", result);
                 }
-            }
-            PracticeMode::Multiply => {
-                match self.task_type {
-                    TaskType::ValueValueEntry => {
-                        let v1 = rand::thread_rng().gen_range(0..=self.range);
-                        let v2 = rand::thread_rng().gen_range(0..=self.range);
-                        self.correct_value = v1 * v2;
-                        self.display_task_1 = format!("<big>{} ∙ {} = </big>", v1, v2);
-                    }
-                    TaskType::ValueEntryValue => {
-                        let v1 = rand::thread_rng().gen_range(0..=self.range);
-                        self.correct_value = rand::thread_rng().gen_range(0..=self.range);
-                        let result = v1 * self.correct_value;
-                        self.display_task_1 = format!("<big>{} ∙ </big>", v1);
-                        self.display_task_2 = format!("<big> = {}</big>", result);
-                    }
-                    TaskType::EntryValueValue => {
-                        self.correct_value = rand::thread_rng().gen_range(0..=self.range);
-                        let v2 = rand::thread_rng().gen_range(0..=self.range);
-                        let result = self.correct_value * v2;
-                        self.display_task_2 = format!("<big> ∙ {} = {}</big>", v2, result);
-                    }
+                TaskType::EntryValueValue => {
+                    let result = rand::thread_rng().gen_range(1..=self.range);
+                    self.correct_value = rand::thread_rng().gen_range(1..=result);
+                    let v2 = result - self.correct_value;
+                    self.display_task_2 = format!("<big> + {} = {}</big>", v2, result);
                 }
-            }
+            },
+            PracticeMode::Minus => match self.task_type {
+                TaskType::ValueValueEntry => {
+                    let v1 = rand::thread_rng().gen_range(1..=self.range);
+                    let v2 = rand::thread_rng().gen_range(0..=v1);
+                    self.correct_value = v1 - v2;
+                    self.display_task_1 = format!("<big>{} - {} = </big>", v1, v2);
+                }
+                TaskType::ValueEntryValue => {
+                    let v1 = rand::thread_rng().gen_range(1..=self.range);
+                    self.correct_value = rand::thread_rng().gen_range(0..=v1);
+                    let result = v1 - self.correct_value;
+                    self.display_task_1 = format!("<big>{} - </big>", v1);
+                    self.display_task_2 = format!("<big> = {}</big>", result);
+                }
+                TaskType::EntryValueValue => {
+                    self.correct_value = rand::thread_rng().gen_range(1..=self.range);
+                    let v2 = rand::thread_rng().gen_range(0..=self.correct_value);
+                    let result = self.correct_value - v2;
+                    self.display_task_2 = format!("<big> - {} = {}</big>", v2, result);
+                }
+            },
+            PracticeMode::Multiply => match self.task_type {
+                TaskType::ValueValueEntry => {
+                    let v1 = rand::thread_rng().gen_range(0..=self.range);
+                    let v2 = rand::thread_rng().gen_range(0..=self.range);
+                    self.correct_value = v1 * v2;
+                    self.display_task_1 = format!("<big>{} ∙ {} = </big>", v1, v2);
+                }
+                TaskType::ValueEntryValue => {
+                    let v1 = rand::thread_rng().gen_range(0..=self.range);
+                    self.correct_value = rand::thread_rng().gen_range(0..=self.range);
+                    let result = v1 * self.correct_value;
+                    self.display_task_1 = format!("<big>{} ∙ </big>", v1);
+                    self.display_task_2 = format!("<big> = {}</big>", result);
+                }
+                TaskType::EntryValueValue => {
+                    self.correct_value = rand::thread_rng().gen_range(0..=self.range);
+                    let v2 = rand::thread_rng().gen_range(0..=self.range);
+                    let result = self.correct_value * v2;
+                    self.display_task_2 = format!("<big> ∙ {} = {}</big>", v2, result);
+                }
+            },
         }
     }
 
