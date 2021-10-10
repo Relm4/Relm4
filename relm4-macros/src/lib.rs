@@ -31,7 +31,7 @@ use types::ModelTypes;
 /// # Attributes
 ///
 /// To create public struct use `#[widget(pub)]` or `#[widget(visibility = pub)]`.
-/// 
+///
 /// If you use reexports to provide relm4, then you can use `#[widget(relm4= ::myreexports::my_relm)]` to override relm4 used during generating struct.
 ///
 /// # Example
@@ -105,7 +105,7 @@ use types::ModelTypes;
 /// ```
 #[proc_macro_attribute]
 pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
-    let Attrs{
+    let Attrs {
         visibility,
         relm4_path,
         ..
