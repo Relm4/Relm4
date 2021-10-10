@@ -13,6 +13,7 @@
     html_favicon_url = "https://raw.githubusercontent.com/AaronErhardt/relm4/main/assets/Relm_logo.svg"
 )]
 
+pub mod actions;
 mod app;
 mod component;
 pub mod drawing;
