@@ -1,9 +1,8 @@
-use gtk::prelude::{
-    ActionableExt, BoxExt, ButtonExt, GtkWindowExt, OrientableExt,
-    WidgetExt,
-};
+use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
 use relm4::{
-    actions::{RelmActionGroup, ActionGroupName, ActionName, RelmAction, ActionablePlus, AccelsPlus},
+    actions::{
+        AccelsPlus, ActionGroupName, ActionName, ActionablePlus, RelmAction, RelmActionGroup,
+    },
     send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets,
 };
 
@@ -93,35 +92,10 @@ impl Widgets<AppModel, ()> for AppWidgets {
     }
 }
 
-struct WindowActionGroup {}
+relm4::new_action_group!(WindowActionGroup, "win");
 
-impl ActionGroupName for WindowActionGroup {
-    fn group_name() -> &'static str {
-        "win"
-    }
-}
-
-struct TestAction {}
-
-impl ActionName for TestAction {
-    type Group = WindowActionGroup;
-    type Value = (); // stateless
-
-    fn name() -> &'static str {
-        "test"
-    }
-}
-
-struct TestU8Action {}
-
-impl ActionName for TestU8Action {
-    type Group = WindowActionGroup;
-    type Value = u8;
-
-    fn name() -> &'static str {
-        "test2"
-    }
-}
+relm4::new_statless_action!(TestAction, WindowActionGroup, "test");
+relm4::new_statful_action!(TestU8Action, WindowActionGroup, "test2", u8);
 
 fn main() {
     let model = AppModel::default();

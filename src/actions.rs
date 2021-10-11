@@ -1,9 +1,58 @@
 //! Action utility.
 
-use gtk::prelude::{ActionExt, ActionMapExt, ToVariant};
+use gtk::prelude::{ActionExt, ActionMapExt, ToVariant, StaticVariantType};
 use gtk::{gio, glib};
+use glib::variant;
 
 use std::marker::PhantomData;
+
+#[macro_export]
+/// Create a new type that implements [`ActionGroupName`].
+macro_rules! new_action_group {
+    ($ty:ident, $name:expr) => {
+        struct $ty;
+
+        impl ActionGroupName for $ty {
+            fn group_name() -> &'static str {
+                $name
+            }
+        }
+    };
+}
+
+#[macro_export]
+/// Create a new type that implements [`ActionGroupName`].
+macro_rules! new_statless_action {
+    ($ty:ident, $group:ty, $name:expr) => {
+        struct $ty;
+
+        impl ActionName for $ty {
+            type Group = $group;
+            type Value = ();
+
+            fn name() -> &'static str {
+                $name
+            }
+        }
+    };
+}
+
+#[macro_export]
+/// Create a new type that implements [`ActionGroupName`].
+macro_rules! new_statful_action {
+    ($ty:ident, $group:ty, $name:expr, $value:ty) => {
+        struct $ty;
+
+        impl ActionName for $ty {
+            type Group = $group;
+            type Value = $value;
+
+            fn name() -> &'static str {
+                $name
+            }
+        }
+    };
+}
 
 /// Trait used to specify the group name in [`ActionName`].
 pub trait ActionGroupName {
@@ -45,7 +94,7 @@ pub struct RelmAction<Name: ActionName> {
 
 impl<Name: ActionName> RelmAction<Name>
 where
-    Name::Value: glib::variant::ToVariant + glib::variant::FromVariant + Default,
+    Name::Value: variant::ToVariant + variant::FromVariant + variant::StaticVariantType + Default,
 {
     /// Create a new stateful action.
     pub fn new_stateful<
@@ -54,12 +103,10 @@ where
         start_value: &Name::Value,
         callback: Callback,
     ) -> Self {
-        let value = Name::Value::default();
-        let variant = value.to_variant();
-        let ty = variant.type_();
+        let ty = Name::Value::static_variant_type();
 
         let action =
-            gio::SimpleAction::new_stateful(Name::name(), Some(ty), &start_value.to_variant());
+            gio::SimpleAction::new_stateful(Name::name(), Some(&ty), &start_value.to_variant());
 
         action.connect_activate(move |action, variant| {
             let value = variant.unwrap().get::<Name::Value>().unwrap();
@@ -107,6 +154,7 @@ impl<GroupName: ActionGroupName> RelmActionGroup<GroupName> {
         self.group.add_action(&action.action);
     }
 
+    /// Convert [`RelmActionGroup`] into a [`gio::SimpleActionGroup`].
     pub fn into_action_group(self) -> gio::SimpleActionGroup {
         self.group
     }
@@ -126,10 +174,14 @@ impl<GroupName: ActionGroupName> Default for RelmActionGroup<GroupName> {
     }
 }
 
+/// Type safe interface for [`gtk::prelude::ActionableExt`].
 pub trait ActionablePlus {
+    /// Set a new stateful action with a default state value.
     fn set_action<A: ActionName>(&self, value: A::Value)
     where
         A::Value: ToVariant;
+
+    /// Set a new stateless action.
     fn set_stateless_action<A: ActionName>(&self)
     where
         A::Value: EmptyType;
@@ -152,7 +204,9 @@ impl<W: gtk::prelude::ActionableExt> ActionablePlus for W {
     }
 }
 
+/// Safe interface for [`gtk::prelude::GtkApplicationExt`].
 pub trait AccelsPlus {
+    /// Set keyboard accelerator for a certain action.
     fn set_accelerators_for_action<A: ActionName>(&self, value: &[&str])
     where
         A::Value: EmptyType;
