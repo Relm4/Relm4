@@ -322,5 +322,6 @@ fn main() {
     model.calculate_task();
 
     let app = RelmApp::new(model);
+    adw::init();
     app.run();
 }
