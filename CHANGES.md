@@ -6,6 +6,10 @@
 
 + relm4-macros: Allow generic function parameters in properties
 
+### Changed
+
++ relm4: Use adw::Application when "libadwaita" feature is active
+
 ## 0.2.0 - 2021-10-09
 
 ### Changed
