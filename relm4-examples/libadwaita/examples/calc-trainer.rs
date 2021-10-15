@@ -149,13 +149,25 @@ impl AppUpdate for AppModel {
     fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) -> bool {
         match msg {
             AppMsg::Plus(v) => {
-                self.plus = v;
+                if !self.minus && !self.multiply {
+                    self.plus = true;
+                } else {
+                    self.plus = v;
+                }
             }
             AppMsg::Multiply(v) => {
-                self.multiply = v;
+                if !self.minus && !self.plus {
+                    self.multiply = true;
+                } else {
+                    self.multiply = v;
+                }
             }
             AppMsg::Minus(v) => {
-                self.minus = v;
+                if !self.plus && !self.multiply {
+                    self.minus = true;
+                } else {
+                    self.minus = v;
+                }
             }
             AppMsg::MaxValue(v) => {
                 self.range = v;
@@ -209,19 +221,21 @@ impl Widgets<AppModel, ()> for AppWidgets {
                     set_spacing: 5,
                     append = &gtk::ToggleButton {
                         set_label: "+",
-                        set_active: true,
+                        set_active: watch!(model.plus),
                         connect_toggled(sender) => move |b| {
                             send!(sender, AppMsg::Plus(b.is_active()));
                         },
                     },
                     append = &gtk::ToggleButton {
                         set_label: "-",
+                        set_active: watch!(model.minus),
                         connect_toggled(sender) => move |b| {
                             send!(sender, AppMsg::Minus(b.is_active()));
                         },
                     },
                     append = &gtk::ToggleButton {
                         set_label: "∙",
+                        set_active: watch!(model.multiply),
                         connect_toggled(sender) => move |b| {
                             send!(sender, AppMsg::Multiply(b.is_active()));
                         },
