@@ -5,8 +5,10 @@ use gtk::prelude::{
 };
 use gtk::EntryBuffer;
 use rand::Rng;
+use rand::prelude::SliceRandom;
 use relm4::{send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets};
 
+#[derive(Clone)]
 enum PracticeMode {
     Plus,
     Minus,
@@ -20,6 +22,9 @@ enum TaskType {
 }
 
 struct AppModel {
+    plus: bool,
+    minus: bool,
+    multiply: bool,
     mode: PracticeMode,
     task_type: TaskType,
     range: u32,
@@ -99,8 +104,24 @@ impl AppModel {
     }
 
     fn pick_random_task_type(&mut self) {
-        let task_type = rand::thread_rng().gen_range(0..3);
+        let mut v = Vec::new();
+        if self.minus {
+            v.push(PracticeMode::Minus);
+        }
+        if self.plus {
+            v.push(PracticeMode::Plus);
+        }
+        if self.multiply {
+            v.push(PracticeMode::Multiply);
+        }
 
+        if !v.is_empty() {
+            self.mode = v.choose(&mut rand::thread_rng()).unwrap().clone();
+        } else {
+            return;
+        }
+        
+        let task_type = rand::thread_rng().gen_range(0..3);
         match task_type {
             0 => self.task_type = TaskType::ValueValueEntry,
             1 => self.task_type = TaskType::ValueEntryValue,
@@ -110,9 +131,9 @@ impl AppModel {
 }
 
 enum AppMsg {
-    Plus,
-    Minus,
-    Multiply,
+    Plus(bool),
+    Minus(bool),
+    Multiply(bool),
     MaxValue(u32),
     Entry(i32),
     EntryError,
@@ -127,17 +148,14 @@ impl Model for AppModel {
 impl AppUpdate for AppModel {
     fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) -> bool {
         match msg {
-            AppMsg::Plus => {
-                self.mode = PracticeMode::Plus;
-                self.calculate_task();
+            AppMsg::Plus(v) => {
+                self.plus = v;
             }
-            AppMsg::Multiply => {
-                self.mode = PracticeMode::Multiply;
-                self.calculate_task();
+            AppMsg::Multiply(v) => {
+                self.multiply = v;
             }
-            AppMsg::Minus => {
-                self.mode = PracticeMode::Minus;
-                self.calculate_task();
+            AppMsg::Minus(v) => {
+                self.minus = v;
             }
             AppMsg::MaxValue(v) => {
                 self.range = v;
@@ -189,31 +207,23 @@ impl Widgets<AppModel, ()> for AppWidgets {
                     set_halign: gtk::Align::Center,
                     set_margin_all: 5,
                     set_spacing: 5,
-                    append: plus_button = &gtk::ToggleButton {
+                    append = &gtk::ToggleButton {
                         set_label: "+",
                         set_active: true,
                         connect_toggled(sender) => move |b| {
-                            if b.is_active() {
-                                send!(sender, AppMsg::Plus);
-                            }
+                            send!(sender, AppMsg::Plus(b.is_active()));
                         },
                     },
                     append = &gtk::ToggleButton {
                         set_label: "-",
-                        set_group: Some(&plus_button),
                         connect_toggled(sender) => move |b| {
-                            if b.is_active() {
-                                send!(sender, AppMsg::Minus);
-                            }
+                            send!(sender, AppMsg::Minus(b.is_active()));
                         },
                     },
                     append = &gtk::ToggleButton {
                         set_label: "∙",
-                        set_group: Some(&plus_button),
                         connect_toggled(sender) => move |b| {
-                            if b.is_active() {
-                                send!(sender, AppMsg::Multiply);
-                            }
+                            send!(sender, AppMsg::Multiply(b.is_active()));
                         },
                     },
                     append = &gtk::DropDown::from_strings(&["0-10", "0-20", "0-100", "0-1000"]) {
@@ -318,6 +328,9 @@ fn main() {
         correct_value: 0,
         feedback: "<big>Welcome to the mental math trainer!</big>".to_string(),
         task_type: TaskType::ValueValueEntry,
+        plus: true,
+        minus: false,
+        multiply: false,
     };
     model.calculate_task();
 
