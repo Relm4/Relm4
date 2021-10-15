@@ -149,23 +149,17 @@ impl AppUpdate for AppModel {
     fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) -> bool {
         match msg {
             AppMsg::Plus(v) => {
-                if !self.minus && !self.multiply {
-                    self.plus = true;
-                } else {
+                if self.minus || self.multiply {
                     self.plus = v;
                 }
             }
             AppMsg::Multiply(v) => {
-                if !self.minus && !self.plus {
-                    self.multiply = true;
-                } else {
+                if self.minus || self.plus {
                     self.multiply = v;
                 }
             }
             AppMsg::Minus(v) => {
-                if !self.plus && !self.multiply {
-                    self.minus = true;
-                } else {
+                if self.plus || self.multiply {
                     self.minus = v;
                 }
             }
