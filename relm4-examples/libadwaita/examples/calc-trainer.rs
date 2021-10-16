@@ -1,12 +1,14 @@
 use adw::traits::ApplicationWindowExt;
 use gtk::prelude::{
-    BoxExt, ButtonExt, EntryBufferExtManual, EntryExt, GtkWindowExt, OrientableExt,
-    ToggleButtonExt, WidgetExt,
+    BoxExt, ButtonExt, CheckButtonExt, EntryBufferExtManual, EntryExt, GtkWindowExt, OrientableExt,
+    PopoverExt, ToggleButtonExt, WidgetExt,
 };
 use gtk::EntryBuffer;
-use rand::Rng;
 use rand::prelude::SliceRandom;
-use relm4::{send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets};
+use rand::Rng;
+use relm4::{AppUpdate, Components, MessageHandler, Model, RelmApp, RelmMsgHandler, Sender, WidgetPlus, Widgets, send};
+
+use tokio::runtime::{Builder, Runtime};
 
 #[derive(Clone)]
 enum PracticeMode {
@@ -32,6 +34,8 @@ struct AppModel {
     display_task_2: String,
     correct_value: u32,
     feedback: String,
+    timer: u32,
+    timer_init_value: u32,
 }
 
 impl AppModel {
@@ -120,7 +124,7 @@ impl AppModel {
         } else {
             return;
         }
-        
+
         let task_type = rand::thread_rng().gen_range(0..3);
         match task_type {
             0 => self.task_type = TaskType::ValueValueEntry,
@@ -137,6 +141,9 @@ enum AppMsg {
     MaxValue(u32),
     Entry(i32),
     EntryError,
+    SetTimer(u32),
+    StartTimer,
+    CountDown,
 }
 
 impl Model for AppModel {
@@ -172,12 +179,26 @@ impl AppUpdate for AppModel {
                     self.feedback = "<big>😀 That was right!! 💓</big>".to_string();
                     self.pick_random_task_type();
                     self.calculate_task();
+                    if self.timer > 0 {
+                        self.timer -= 1;
+                    }
                 } else {
                     self.feedback = "<big>😕 Unfortunately wrong. 😓</big>".to_string();
                 }
             }
             AppMsg::EntryError => {
                 self.feedback = "<big>Please enter a valid number.</big>".to_string();
+            }
+            AppMsg::SetTimer(v) => {
+                self.timer_init_value = v;
+            }
+            AppMsg::StartTimer => {
+                self.timer = self.timer_init_value;
+            }
+            AppMsg::CountDown => {
+                if self.timer > 0 {
+                    self.timer -= 1;
+                }
             }
         }
         true
@@ -188,11 +209,27 @@ fn application_window() -> adw::ApplicationWindow {
     adw::ApplicationWindow::builder().build()
 }
 
+struct AppComponents {
+    async_handler: RelmMsgHandler<AsyncHandler, AppModel>,
+}
+
+impl Components<AppModel> for AppComponents {
+    fn init_components(
+        parent_model: &AppModel,
+        _parent_widget: &AppWidgets,
+        parent_sender: Sender<AppMsg>,
+    ) -> Self {
+        AppComponents {
+            async_handler: RelmMsgHandler::new(parent_model, parent_sender),
+        }
+    }
+}
+
 #[relm4_macros::widget]
 impl Widgets<AppModel, ()> for AppWidgets {
     view! {
         main_window = application_window() -> adw::ApplicationWindow {
-            set_default_width: 300,
+            set_default_width: 350,
             set_default_height: 200,
             set_resizable: false,
 
@@ -202,8 +239,47 @@ impl Widgets<AppModel, ()> for AppWidgets {
                 append = &adw::HeaderBar {
                     set_title_widget = Some(&adw::WindowTitle::new("Practice mental arithmetic!",
                         "Challenge yourself with math")) {
+                    },
+                    pack_start = &adw::SplitButton {
+                        set_label: watch!({
+                            &*if model.timer > 0 {
+                                format!("{}s", model.timer)
+                            } else {
+                                "Start".to_string()
+                            }
+                        }),
+                        connect_clicked(sender) => move |_| {
+                            send!(sender, AppMsg::StartTimer)
+                        },
+                        set_popover: popover = Some(&gtk::Popover) {
+                            set_child = Some(&gtk::Box) {
+                                set_orientation: gtk::Orientation::Vertical,
+                                append: timer = &gtk::CheckButton::with_label("30s") {
+                                    connect_toggled(sender) => move |b| {
+                                        if b.is_active() {
+                                            send!(sender, AppMsg::SetTimer(30))
+                                        }
+                                    }
+                                },
+                                append = &gtk::CheckButton::with_label("60s") {
+                                    set_group: Some(&timer),
+                                    connect_toggled(sender) => move |b| {
+                                        if b.is_active() {
+                                            send!(sender, AppMsg::SetTimer(60))
+                                        }
+                                    }
+                                },
+                                append = &gtk::CheckButton::with_label("180s") {
+                                    set_group: Some(&timer),
+                                    connect_toggled(sender) => move |b| {
+                                        if b.is_active() {
+                                            send!(sender, AppMsg::SetTimer(180))
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
-
                 },
                 append = &gtk::Label {
                     set_text: "Calculation Type:"
@@ -325,6 +401,46 @@ impl Widgets<AppModel, ()> for AppWidgets {
             TaskType::ValueValueEntry => self.stack.set_visible_child(&self.value_value_entry),
         }
     }
+
+    fn post_init() {
+        // Set radio button initial to 30s
+        timer.set_active(true);
+    }
+}
+struct AsyncHandler {
+    _rt: Runtime,
+    _sender:(),
+}
+
+impl MessageHandler<AppModel> for AsyncHandler {
+    type Msg = ();
+    type Sender = ();
+
+    fn init(_parent_model: &AppModel, parent_sender: Sender<AppMsg>) -> Self {
+        let rt = Builder::new_multi_thread()
+            .worker_threads(8)
+            .enable_time()
+            .build()
+            .unwrap();
+
+        rt.spawn(async move {
+            loop {
+                let parent_sender = parent_sender.clone();
+                tokio::spawn(async move {
+                    tokio::time::sleep(std::time::Duration::from_secs(1)).await;
+                    send!(parent_sender, AppMsg::CountDown);
+                });
+            }
+        });
+
+        AsyncHandler { _rt: rt, _sender: () }
+    }
+
+    fn send(&self, _msg: Self::Msg) {
+    }
+
+    fn sender(&self) -> Self::Sender {
+    }
 }
 
 fn main() {
@@ -339,6 +455,8 @@ fn main() {
         plus: true,
         minus: false,
         multiply: false,
+        timer_init_value: 30,
+        timer: 0,
     };
     model.calculate_task();
 
