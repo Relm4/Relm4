@@ -195,7 +195,13 @@ impl AppUpdate for AppModel {
                 self.timer_init_value = v;
             }
             AppMsg::StartTimer => {
-                self.timer = self.timer_init_value;
+                // if timer is running a press on the button will reset button
+                // otherwise initialize the timer with the selected init value
+                if self.timer > 0 {
+                    self.timer = 0;
+                } else {
+                    self.timer = self.timer_init_value;
+                }
             }
             AppMsg::CountDown => {
                 if self.timer > 0 {
