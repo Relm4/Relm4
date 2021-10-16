@@ -179,6 +179,8 @@ impl AppUpdate for AppModel {
                     self.feedback = "<big>😀 That was right!! 💓</big>".to_string();
                     self.pick_random_task_type();
                     self.calculate_task();
+
+                    // ToDo: Temporary code to test counter
                     if self.timer > 0 {
                         self.timer -= 1;
                     }
