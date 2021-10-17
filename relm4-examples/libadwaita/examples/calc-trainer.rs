@@ -154,11 +154,11 @@ enum AppMsg {
 impl Model for AppModel {
     type Msg = AppMsg;
     type Widgets = AppWidgets;
-    type Components = ();
+    type Components = AppComponents;
 }
 
 impl AppUpdate for AppModel {
-    fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) -> bool {
+    fn update(&mut self, msg: AppMsg, _components: &AppComponents, _sender: Sender<AppMsg>) -> bool {
         match msg {
             AppMsg::Plus(v) => {
                 if self.minus || self.multiply {
@@ -438,7 +438,7 @@ impl MessageHandler<AppModel> for TimerHandler {
 }
 
 struct AppComponents {
-    timer_handler: RelmMsgHandler<TimerHandler, AppModel>,
+    _timer_handler: RelmMsgHandler<TimerHandler, AppModel>,
 }
 
 impl Components<AppModel> for AppComponents {
@@ -448,7 +448,7 @@ impl Components<AppModel> for AppComponents {
         parent_sender: Sender<AppMsg>,
     ) -> Self {
         AppComponents {
-            timer_handler: RelmMsgHandler::new(parent_model, parent_sender),
+            _timer_handler: RelmMsgHandler::new(parent_model, parent_sender),
         }
     }
 }
