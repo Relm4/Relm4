@@ -1,8 +1,8 @@
 //! Action utility.
 
-use gtk::prelude::{ActionExt, ActionMapExt, ToVariant, StaticVariantType};
-use gtk::{gio, glib};
 use glib::variant;
+use gtk::prelude::{ActionExt, ActionMapExt, StaticVariantType, ToVariant};
+use gtk::{gio, glib};
 
 use std::marker::PhantomData;
 
@@ -212,10 +212,11 @@ pub trait AccelsPlus {
         A::Value: EmptyType;
 }
 
-impl <W: gtk::prelude::GtkApplicationExt>  AccelsPlus for W {
+impl<W: gtk::prelude::GtkApplicationExt> AccelsPlus for W {
     fn set_accelerators_for_action<A: ActionName>(&self, accel_codes: &[&str])
     where
-        A::Value: EmptyType {
+        A::Value: EmptyType,
+    {
         self.set_accels_for_action(A::action_name().as_str(), accel_codes);
     }
 }
