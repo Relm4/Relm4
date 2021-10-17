@@ -415,7 +415,6 @@ impl MessageHandler<AppModel> for TimerHandler {
     type Sender = ();
 
     fn init(parent_model: &AppModel, parent_sender: Sender<AppMsg>) -> Self {
-        println!("Not being called");
         let mutex = parent_model.timer_mutex.clone();
         let one_sec = time::Duration::from_secs(1);
 
