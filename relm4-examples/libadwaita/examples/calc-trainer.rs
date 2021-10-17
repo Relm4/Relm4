@@ -1,3 +1,6 @@
+use std::sync::{Arc, Mutex};
+use std::{thread, time};
+
 use adw::traits::ApplicationWindowExt;
 use gtk::prelude::{
     BoxExt, ButtonExt, CheckButtonExt, EntryBufferExtManual, EntryExt, GtkWindowExt, OrientableExt,
@@ -6,9 +9,10 @@ use gtk::prelude::{
 use gtk::EntryBuffer;
 use rand::prelude::SliceRandom;
 use rand::Rng;
-use relm4::{AppUpdate, Components, MessageHandler, Model, RelmApp, RelmMsgHandler, Sender, WidgetPlus, Widgets, send};
-
-use tokio::runtime::{Builder, Runtime};
+use relm4::{
+    send, AppUpdate, Components, MessageHandler, Model, RelmApp, RelmMsgHandler, Sender,
+    WidgetPlus, Widgets,
+};
 
 #[derive(Clone)]
 enum PracticeMode {
@@ -36,6 +40,7 @@ struct AppModel {
     feedback: String,
     timer: u32,
     timer_init_value: u32,
+    timer_mutex: Arc<Mutex<()>>,
 }
 
 impl AppModel {
@@ -215,22 +220,6 @@ impl AppUpdate for AppModel {
 
 fn application_window() -> adw::ApplicationWindow {
     adw::ApplicationWindow::builder().build()
-}
-
-struct AppComponents {
-    async_handler: RelmMsgHandler<AsyncHandler, AppModel>,
-}
-
-impl Components<AppModel> for AppComponents {
-    fn init_components(
-        parent_model: &AppModel,
-        _parent_widget: &AppWidgets,
-        parent_sender: Sender<AppMsg>,
-    ) -> Self {
-        AppComponents {
-            async_handler: RelmMsgHandler::new(parent_model, parent_sender),
-        }
-    }
 }
 
 #[relm4_macros::widget]
@@ -415,39 +404,52 @@ impl Widgets<AppModel, ()> for AppWidgets {
         timer.set_active(true);
     }
 }
-struct AsyncHandler {
-    _rt: Runtime,
-    _sender:(),
+
+struct TimerHandler {
+    _rt: (),
+    _sender: (),
 }
 
-impl MessageHandler<AppModel> for AsyncHandler {
+impl MessageHandler<AppModel> for TimerHandler {
     type Msg = ();
     type Sender = ();
 
-    fn init(_parent_model: &AppModel, parent_sender: Sender<AppMsg>) -> Self {
-        let rt = Builder::new_multi_thread()
-            .worker_threads(8)
-            .enable_time()
-            .build()
-            .unwrap();
+    fn init(parent_model: &AppModel, parent_sender: Sender<AppMsg>) -> Self {
+        println!("Not being called");
+        let mutex = parent_model.timer_mutex.clone();
+        let one_sec = time::Duration::from_secs(1);
 
-        rt.spawn(async move {
+        thread::spawn(move || {
             loop {
-                let parent_sender = parent_sender.clone();
-                tokio::spawn(async move {
-                    tokio::time::sleep(std::time::Duration::from_secs(1)).await;
-                    send!(parent_sender, AppMsg::CountDown);
-                });
+                let _m = mutex.lock().unwrap();
+                send!(parent_sender, AppMsg::CountDown);
+                thread::sleep(one_sec);
             }
         });
 
-        AsyncHandler { _rt: rt, _sender: () }
+        TimerHandler {
+            _rt: (),
+            _sender: (),
+        }
     }
 
-    fn send(&self, _msg: Self::Msg) {
-    }
+    fn send(&self, _msg: Self::Msg) {}
+    fn sender(&self) -> Self::Sender {}
+}
 
-    fn sender(&self) -> Self::Sender {
+struct AppComponents {
+    timer_handler: RelmMsgHandler<TimerHandler, AppModel>,
+}
+
+impl Components<AppModel> for AppComponents {
+    fn init_components(
+        parent_model: &AppModel,
+        _parent_widget: &AppWidgets,
+        parent_sender: Sender<AppMsg>,
+    ) -> Self {
+        AppComponents {
+            timer_handler: RelmMsgHandler::new(parent_model, parent_sender),
+        }
     }
 }
 
@@ -465,7 +467,9 @@ fn main() {
         multiply: false,
         timer_init_value: 30,
         timer: 0,
+        timer_mutex: Arc::new(Mutex::new(())),
     };
+
     model.calculate_task();
 
     let app = RelmApp::new(model);
