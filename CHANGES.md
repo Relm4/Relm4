@@ -4,6 +4,7 @@
 
 ### Added
 
++ relm4: Added sender method to RelmComponent
 + relm4-macros: Allow generic function parameters in properties
 
 ### Changed
