@@ -14,9 +14,8 @@ use super::{Properties, Property, PropertyName, PropertyType, Tracker, Widget, W
 impl Parse for Tracker {
     fn parse(input: ParseStream) -> Result<Self> {
         let bool_fn = input.parse()?;
-        let _comma: Token![,] = input.parse()?;
-        let mut update_fns = vec![input.parse()?];
 
+        let mut update_fns = Vec::new();
         while !input.is_empty() {
             let _comma: Token![,] = input.parse()?;
             // allow comma at the end of the macro

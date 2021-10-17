@@ -1,10 +1,11 @@
 # Changelog
 
-## Unreleased
+## 0.2.1 - 2021-10-17
 
 ### Added
 
 + relm4: Added sender method to RelmComponent
++ relm4-macros: New shorthand tracker syntax
 + relm4-macros: Allow generic function parameters in properties
 
 ### Changed
