@@ -1,4 +1,4 @@
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, MutexGuard};
 use std::{thread, time};
 
 use adw::traits::ApplicationWindowExt;
@@ -41,6 +41,7 @@ struct AppModel {
     timer: u32,
     timer_init_value: u32,
     timer_mutex: Arc<Mutex<()>>,
+    mutex_guard: Option<MutexGuard<'static, ()>>,
 }
 
 impl AppModel {
@@ -158,7 +159,12 @@ impl Model for AppModel {
 }
 
 impl AppUpdate for AppModel {
-    fn update(&mut self, msg: AppMsg, _components: &AppComponents, _sender: Sender<AppMsg>) -> bool {
+    fn update(
+        &mut self,
+        msg: AppMsg,
+        _components: &AppComponents,
+        _sender: Sender<AppMsg>,
+    ) -> bool {
         match msg {
             AppMsg::Plus(v) => {
                 if self.minus || self.multiply {
@@ -418,12 +424,10 @@ impl MessageHandler<AppModel> for TimerHandler {
         let mutex = parent_model.timer_mutex.clone();
         let one_sec = time::Duration::from_secs(1);
 
-        thread::spawn(move || {
-            loop {
-                let _m = mutex.lock().unwrap();
-                send!(parent_sender, AppMsg::CountDown);
-                thread::sleep(one_sec);
-            }
+        thread::spawn(move || loop {
+            let _m = mutex.lock().unwrap();
+            send!(parent_sender, AppMsg::CountDown);
+            thread::sleep(one_sec);
         });
 
         TimerHandler {
@@ -467,9 +471,12 @@ fn main() {
         timer_init_value: 30,
         timer: 0,
         timer_mutex: Arc::new(Mutex::new(())),
+        mutex_guard: None,
     };
 
-    model.calculate_task();
+    let mutex = model.timer_mutex.clone();
+
+    model.mutex_guard = Some(mutex.lock().unwrap());
 
     let app = RelmApp::new(model);
     app.run();
