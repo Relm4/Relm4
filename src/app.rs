@@ -3,7 +3,7 @@ use gtk::prelude::{ApplicationExt, ApplicationExtManual, GtkWindowExt, IsA};
 
 use std::marker::PhantomData;
 
-use crate::{AppUpdate, Components, Model as ModelTrait, Widgets as WidgetsTrait, Application};
+use crate::{AppUpdate, Application, Components, Model as ModelTrait, Widgets as WidgetsTrait};
 
 /// The app that runs the main application.
 /// A [`RelmApp`] consists of a model that stores the application state

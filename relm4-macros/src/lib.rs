@@ -8,7 +8,7 @@
 use proc_macro::{self, TokenStream};
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned, ToTokens};
-use syn::{parse_macro_input, spanned::Spanned, Error, PathArguments};
+use syn::{parse_macro_input, spanned::Spanned, Error, GenericArgument, PathArguments};
 
 mod additional_fields;
 mod args;
@@ -134,9 +134,39 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
         Err(err) => return TokenStream::from(err.to_compile_error()),
     };
 
-    let trt = data.trait_;
+    let trait_ = data.trait_;
     let ty = data.self_ty;
     let outer_attrs = &data.outer_attrs;
+
+    // Find the type of the model
+
+    // This can be unwrapped savely because the path must have at least one segement after parsing successful.
+    let path_args = trait_
+        .segments
+        .last()
+        .map(|segment| &segment.arguments)
+        .unwrap();
+
+    let model_ty_opt = if let PathArguments::AngleBracketed(angle_args) = path_args {
+        if let Some(GenericArgument::Type(model_ty)) = angle_args.args.first() {
+            Some(model_ty)
+        } else {
+            None
+        }
+    } else {
+        None
+    };
+
+    let model_ty = if let Some(model_ty) = model_ty_opt {
+        model_ty
+    } else {
+        return Error::new(
+            path_args.span(),
+            "Expected generic parameters for the model and the parent model",
+        )
+        .to_compile_error()
+        .into();
+    };
 
     let Macros {
         widgets,
@@ -193,7 +223,7 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
         widget.property_assign_stream(&relm4_path, &mut property_stream);
         widget.view_stream(&relm4_path, &mut view_stream);
         connect_stream.extend(widget.connect_stream());
-        track_stream.extend(widget.track_stream());
+        track_stream.extend(widget.track_stream(model_ty));
         component_stream.extend(widget.component_stream());
         connect_component_stream.extend(widget.connect_component_stream());
     }
@@ -221,7 +251,7 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
             #additional_fields
         }
 
-        impl #impl_generics #trt for #ty #where_clause {
+        impl #impl_generics #trait_ for #ty #where_clause {
             type Root = #root_widget_type;
 
             /// Initialize the UI.
