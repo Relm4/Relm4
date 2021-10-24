@@ -1,5 +1,5 @@
-use std::sync::{Arc, Mutex, MutexGuard};
-use std::{thread, time};
+use async_io::Timer;
+use std::time::Duration;
 
 use adw::traits::ApplicationWindowExt;
 use gtk::prelude::{
@@ -40,8 +40,6 @@ struct AppModel {
     feedback: String,
     timer: u32,
     timer_init_value: u32,
-    timer_mutex: Arc<Mutex<()>>,
-    mutex_guard: Option<MutexGuard<'static, ()>>,
 }
 
 impl AppModel {
@@ -91,13 +89,13 @@ impl AppModel {
             },
             PracticeMode::Multiply => match self.task_type {
                 TaskType::ValueValueEntry => {
-                    let v1 = rand::thread_rng().gen_range(0..=self.range);
+                    let v1 = rand::thread_rng().gen_range(1..=self.range);
                     let v2 = rand::thread_rng().gen_range(0..=self.range);
                     self.correct_value = v1 * v2;
                     self.display_task_1 = format!("<big>{} ∙ {} = </big>", v1, v2);
                 }
                 TaskType::ValueEntryValue => {
-                    let v1 = rand::thread_rng().gen_range(0..=self.range);
+                    let v1 = rand::thread_rng().gen_range(1..=self.range);
                     self.correct_value = rand::thread_rng().gen_range(0..=self.range);
                     let result = v1 * self.correct_value;
                     self.display_task_1 = format!("<big>{} ∙ </big>", v1);
@@ -159,12 +157,7 @@ impl Model for AppModel {
 }
 
 impl AppUpdate for AppModel {
-    fn update(
-        &mut self,
-        msg: AppMsg,
-        _components: &AppComponents,
-        _sender: Sender<AppMsg>,
-    ) -> bool {
+    fn update(&mut self, msg: AppMsg, components: &AppComponents, _sender: Sender<AppMsg>) -> bool {
         match msg {
             AppMsg::Plus(v) => {
                 if self.minus || self.multiply {
@@ -208,6 +201,7 @@ impl AppUpdate for AppModel {
             AppMsg::StartTimer => {
                 // if timer is running a press on the button will reset button
                 // otherwise initialize the timer with the selected init value
+                components.timer_handler.send(TimerMsg::StartStopTimer);
                 if self.timer > 0 {
                     self.timer = 0;
                 } else {
@@ -413,35 +407,51 @@ impl Widgets<AppModel, ()> for AppWidgets {
 
 struct TimerHandler {
     _rt: (),
-    _sender: (),
+    sender: smol::channel::Sender<TimerMsg>,
+}
+
+#[derive(Debug)]
+enum TimerMsg {
+    StartStopTimer,
 }
 
 impl MessageHandler<AppModel> for TimerHandler {
-    type Msg = ();
-    type Sender = ();
+    type Msg = TimerMsg;
+    type Sender = smol::channel::Sender<TimerMsg>;
 
-    fn init(parent_model: &AppModel, parent_sender: Sender<AppMsg>) -> Self {
-        let mutex = parent_model.timer_mutex.clone();
-        let one_sec = time::Duration::from_secs(1);
+    fn init(_parent_model: &AppModel, parent_sender: Sender<AppMsg>) -> Self {
+        let (sender, receiver) = smol::channel::unbounded();
 
-        thread::spawn(move || loop {
-            let _m = mutex.lock().unwrap();
-            send!(parent_sender, AppMsg::CountDown);
-            thread::sleep(one_sec);
-        });
+        smol::spawn(async move {
+            loop {
+                // Wait for the first message
+                let _ = receiver.recv().await;
+                while receiver.is_empty() {
+                    send!(parent_sender, AppMsg::CountDown);
+                    Timer::after(Duration::from_secs(1)).await;
+                }
+                // remove message from queue
+                let _ = receiver.recv().await;
+            }
+        })
+        .detach();
 
-        TimerHandler {
-            _rt: (),
-            _sender: (),
-        }
+        TimerHandler { _rt: (), sender }
     }
 
-    fn send(&self, _msg: Self::Msg) {}
-    fn sender(&self) -> Self::Sender {}
+    fn send(&self, msg: Self::Msg) {
+        smol::block_on(async {
+            self.sender.send(msg).await.unwrap();
+        })
+    }
+
+    fn sender(&self) -> Self::Sender {
+        self.sender.clone()
+    }
 }
 
 struct AppComponents {
-    _timer_handler: RelmMsgHandler<TimerHandler, AppModel>,
+    timer_handler: RelmMsgHandler<TimerHandler, AppModel>,
 }
 
 impl Components<AppModel> for AppComponents {
@@ -451,7 +461,7 @@ impl Components<AppModel> for AppComponents {
         parent_sender: Sender<AppMsg>,
     ) -> Self {
         AppComponents {
-            _timer_handler: RelmMsgHandler::new(parent_model, parent_sender),
+            timer_handler: RelmMsgHandler::new(parent_model, parent_sender),
         }
     }
 }
@@ -470,13 +480,9 @@ fn main() {
         multiply: false,
         timer_init_value: 30,
         timer: 0,
-        timer_mutex: Arc::new(Mutex::new(())),
-        mutex_guard: None,
     };
 
-    let mutex = model.timer_mutex.clone();
-
-    model.mutex_guard = Some(mutex.lock().unwrap());
+    model.calculate_task();
 
     let app = RelmApp::new(model);
     app.run();
