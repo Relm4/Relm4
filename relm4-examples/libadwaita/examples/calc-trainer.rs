@@ -4,16 +4,80 @@ use std::thread;
 
 use adw::traits::ApplicationWindowExt;
 use gtk::prelude::{
-    BoxExt, ButtonExt, CheckButtonExt, EntryBufferExtManual, EntryExt, GtkWindowExt, OrientableExt,
-    PopoverExt, ToggleButtonExt, WidgetExt,
+    BoxExt, ButtonExt, CheckButtonExt, DialogExt, EntryBufferExtManual, EntryExt, GtkWindowExt,
+    OrientableExt, PopoverExt, ToggleButtonExt, WidgetExt,
 };
 use gtk::EntryBuffer;
 use rand::prelude::SliceRandom;
 use rand::Rng;
 use relm4::{
-    send, AppUpdate, Components, MessageHandler, Model, RelmApp, RelmMsgHandler, Sender,
-    WidgetPlus, Widgets,
+    send, AppUpdate, ComponentUpdate, Components, MessageHandler, Model, RelmApp, RelmComponent,
+    RelmMsgHandler, Sender, WidgetPlus, Widgets,
 };
+
+struct DialogModel {
+    hidden: bool,
+    correct: u32,
+    incorrect: u32,
+}
+
+enum DialogMsg {
+    Show(u32, u32),
+    Accept,
+}
+
+impl Model for DialogModel {
+    type Msg = DialogMsg;
+    type Widgets = DialogWidgets;
+    type Components = ();
+}
+
+impl ComponentUpdate<AppModel> for DialogModel {
+    fn init_model(_parent_model: &AppModel) -> Self {
+        DialogModel {
+            hidden: true,
+            correct: 0,
+            incorrect: 0,
+        }
+    }
+
+    fn update(
+        &mut self,
+        msg: DialogMsg,
+        _components: &(),
+        _sender: Sender<DialogMsg>,
+        _parent_sender: Sender<AppMsg>,
+    ) {
+        match msg {
+            DialogMsg::Show(correct, incorrect) => {
+                self.hidden = false;
+                self.correct = correct;
+                self.incorrect = incorrect;
+            }
+            DialogMsg::Accept => {
+                self.hidden = true;
+            }
+        }
+    }
+}
+
+#[relm4_macros::widget]
+impl Widgets<DialogModel, AppModel> for DialogWidgets {
+    view! {
+        dialog = gtk::MessageDialog {
+            set_transient_for: Some(&parent_widgets.main_window),
+            set_modal: true,
+            set_visible: watch!(!model.hidden),
+            set_text: Some("Congratulation"),
+            set_secondary_text: watch!(Some(&format!("You got {} correct and {} incorrect results.\nThat are {} points",
+                model.correct, model.incorrect, model.correct - model.incorrect * 2))),
+            add_button: args!("Ok", gtk::ResponseType::Accept),
+            connect_response(sender) => move |_, _| {
+                send!(sender,DialogMsg::Accept);
+            }
+        }
+    }
+}
 
 #[derive(Clone)]
 enum PracticeMode {
@@ -41,6 +105,8 @@ struct AppModel {
     feedback: String,
     timer: Option<u32>,
     timer_init_value: u32,
+    correct_calculations: u32,
+    incorrect_calculations: u32,
 }
 
 impl AppModel {
@@ -184,8 +250,10 @@ impl AppUpdate for AppModel {
                     self.feedback = "<big>😀 That was right!! 💓</big>".to_string();
                     self.pick_random_task_type();
                     self.calculate_task();
+                    self.correct_calculations += 1;
                 } else {
                     self.feedback = "<big>😕 Unfortunately wrong. 😓</big>".to_string();
+                    self.incorrect_calculations += 1;
                 }
             }
             AppMsg::EntryError => {
@@ -202,16 +270,27 @@ impl AppUpdate for AppModel {
                     self.timer = None;
                 } else {
                     self.timer = Some(self.timer_init_value);
+                    self.correct_calculations = 0;
+                    self.incorrect_calculations = 0;
                 }
             }
             AppMsg::CountDown => {
                 if let Some(t) = &mut self.timer {
                     *t -= 1;
 
+                    // check if time is up
                     if *t == 0 {
                         self.timer = None;
                         // stop timer
                         components.timer_handler.send(TimerMsg::StartStopTimer);
+                        // display results
+                        components
+                            .dialog
+                            .send(DialogMsg::Show(
+                                self.correct_value,
+                                self.incorrect_calculations,
+                            ))
+                            .unwrap();
                     }
                 }
             }
@@ -449,16 +528,18 @@ impl MessageHandler<AppModel> for TimerHandler {
 
 struct AppComponents {
     timer_handler: RelmMsgHandler<TimerHandler, AppModel>,
+    dialog: RelmComponent<DialogModel, AppModel>,
 }
 
 impl Components<AppModel> for AppComponents {
     fn init_components(
         parent_model: &AppModel,
-        _parent_widget: &AppWidgets,
+        parent_widgets: &AppWidgets,
         parent_sender: Sender<AppMsg>,
     ) -> Self {
         AppComponents {
-            timer_handler: RelmMsgHandler::new(parent_model, parent_sender),
+            timer_handler: RelmMsgHandler::new(parent_model, parent_sender.clone()),
+            dialog: RelmComponent::new(parent_model, parent_widgets, parent_sender),
         }
     }
 }
@@ -477,6 +558,8 @@ fn main() {
         multiply: false,
         timer_init_value: 30,
         timer: None,
+        correct_calculations: 0,
+        incorrect_calculations: 0,
     };
 
     model.calculate_task();
