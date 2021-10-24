@@ -269,6 +269,8 @@ impl AppUpdate for AppModel {
                 if self.timer.is_some() {
                     self.timer = None;
                 } else {
+                    self.pick_random_task_type();
+                    self.calculate_task();
                     self.timer = Some(self.timer_init_value);
                     self.correct_calculations = 0;
                     self.incorrect_calculations = 0;
