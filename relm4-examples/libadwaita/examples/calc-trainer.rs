@@ -1,5 +1,6 @@
-use async_io::Timer;
-use std::time::Duration;
+use core::time;
+use std::sync::mpsc::{channel, TryRecvError};
+use std::thread;
 
 use adw::traits::ApplicationWindowExt;
 use gtk::prelude::{
@@ -408,7 +409,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
 
 struct TimerHandler {
     _rt: (),
-    sender: smol::channel::Sender<TimerMsg>,
+    sender: std::sync::mpsc::Sender<TimerMsg>,
 }
 
 #[derive(Debug)]
@@ -418,32 +419,28 @@ enum TimerMsg {
 
 impl MessageHandler<AppModel> for TimerHandler {
     type Msg = TimerMsg;
-    type Sender = smol::channel::Sender<TimerMsg>;
+    type Sender = std::sync::mpsc::Sender<TimerMsg>;
 
     fn init(_parent_model: &AppModel, parent_sender: Sender<AppMsg>) -> Self {
-        let (sender, receiver) = smol::channel::unbounded();
+        let (sender, receiver) = channel();
 
-        smol::spawn(async move {
+        thread::spawn(move || {
             loop {
                 // Wait for start message
-                let _ = receiver.recv().await;
-                while receiver.is_empty() {
-                    Timer::after(Duration::from_secs(1)).await;
+                let _ = receiver.recv();
+                // loop as long channel is empty
+                while receiver.try_recv().err() == Some(TryRecvError::Empty) {
+                    thread::sleep(time::Duration::from_secs(1));
                     send!(parent_sender, AppMsg::CountDown);
                 }
-                // remove message from queue
-                let _ = receiver.recv().await;
             }
-        })
-        .detach();
+        });
 
         TimerHandler { _rt: (), sender }
     }
 
     fn send(&self, msg: Self::Msg) {
-        smol::block_on(async {
-            self.sender.send(msg).await.unwrap();
-        })
+        self.sender.send(msg).unwrap();
     }
 
     fn sender(&self) -> Self::Sender {

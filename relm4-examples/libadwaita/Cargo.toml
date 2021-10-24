@@ -11,5 +11,3 @@ relm4 = { path = "../../", features = ["libadwaita"] }
 relm4-components = { path = "../../relm4-components" }
 relm4-macros = { path = "../../relm4-macros" }
 rand = "0.8.4"
-smol = "1.2.5"
-async-io = "1.6.0"
