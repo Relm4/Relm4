@@ -68,7 +68,7 @@ impl Widgets<DialogModel, AppModel> for DialogWidgets {
             set_transient_for: Some(&parent_widgets.main_window),
             set_modal: true,
             set_visible: watch!(!model.hidden),
-            set_text: Some("Congratulation"),
+            set_text: Some("Congratulations!"),
             set_secondary_text: watch!(Some(&format!("You got {} correct and {} incorrect results.\nThat are {} points",
                 model.correct, model.incorrect, model.correct - model.incorrect * 2))),
             add_button: args!("Ok", gtk::ResponseType::Accept),
