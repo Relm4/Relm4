@@ -70,7 +70,7 @@ impl Widgets<DialogModel, AppModel> for DialogWidgets {
             set_visible: watch!(!model.hidden),
             set_text: Some("Congratulations!"),
             set_secondary_text: watch!(Some(&format!("You got {} correct and {} incorrect results.\nThat are {} points",
-                model.correct, model.incorrect, model.correct - model.incorrect * 2))),
+                model.correct, model.incorrect, model.correct as i32 - model.incorrect as i32 * 2))),
             add_button: args!("Ok", gtk::ResponseType::Accept),
             connect_response(sender) => move |_, _| {
                 send!(sender,DialogMsg::Accept);
@@ -287,7 +287,7 @@ impl AppUpdate for AppModel {
                         components
                             .dialog
                             .send(DialogMsg::Show(
-                                self.correct_value,
+                                self.correct_calculations,
                                 self.incorrect_calculations,
                             ))
                             .unwrap();
