@@ -408,7 +408,6 @@ impl Widgets<AppModel, ()> for AppWidgets {
 }
 
 struct TimerHandler {
-    _rt: (),
     sender: std::sync::mpsc::Sender<TimerMsg>,
 }
 
@@ -436,7 +435,7 @@ impl MessageHandler<AppModel> for TimerHandler {
             }
         });
 
-        TimerHandler { _rt: (), sender }
+        TimerHandler { sender }
     }
 
     fn send(&self, msg: Self::Msg) {
