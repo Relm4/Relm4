@@ -38,7 +38,7 @@ struct AppModel {
     display_task_2: String,
     correct_value: u32,
     feedback: String,
-    timer: u32,
+    timer: Option<u32>,
     timer_init_value: u32,
 }
 
@@ -197,15 +197,21 @@ impl AppUpdate for AppModel {
                 // if timer is running a press on the button will reset button
                 // otherwise initialize the timer with the selected init value
                 components.timer_handler.send(TimerMsg::StartStopTimer);
-                if self.timer > 0 {
-                    self.timer = 0;
+                if self.timer.is_some() {
+                    self.timer = None;
                 } else {
-                    self.timer = self.timer_init_value;
+                    self.timer = Some(self.timer_init_value);
                 }
             }
             AppMsg::CountDown => {
-                if self.timer > 0 {
-                    self.timer -= 1;
+                if let Some(t) = &mut self.timer {
+                    *t -= 1;
+
+                    if *t == 0 {
+                        self.timer = None;
+                        // stop timer
+                        components.timer_handler.send(TimerMsg::StartStopTimer);
+                    }
                 }
             }
         }
@@ -234,8 +240,8 @@ impl Widgets<AppModel, ()> for AppWidgets {
                     },
                     pack_start = &adw::SplitButton {
                         set_label: watch!({
-                            &*if model.timer > 0 {
-                                format!("{}s", model.timer)
+                            &*if let Some(t) = model.timer {
+                                format!("{}s", t)
                             } else {
                                 "Start".to_string()
                             }
@@ -419,11 +425,11 @@ impl MessageHandler<AppModel> for TimerHandler {
 
         smol::spawn(async move {
             loop {
-                // Wait for the first message
+                // Wait for start message
                 let _ = receiver.recv().await;
                 while receiver.is_empty() {
-                    send!(parent_sender, AppMsg::CountDown);
                     Timer::after(Duration::from_secs(1)).await;
+                    send!(parent_sender, AppMsg::CountDown);
                 }
                 // remove message from queue
                 let _ = receiver.recv().await;
@@ -474,7 +480,7 @@ fn main() {
         minus: false,
         multiply: false,
         timer_init_value: 30,
-        timer: 0,
+        timer: None,
     };
 
     model.calculate_task();
