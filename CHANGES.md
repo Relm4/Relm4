@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
++ relm4-macros: New shorthand component syntax
+
 ## 0.2.1 - 2021-10-17
 
 ### Added

@@ -116,7 +116,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
         main_window = gtk::ApplicationWindow {
             set_default_width: 500,
             set_default_height: 250,
-            set_titlebar: component!(Some(components.header.root_widget())),
+            set_titlebar: component!(Some(header)),
             set_child: component!(Some(components.stack.root_widget())),
         }
     }
