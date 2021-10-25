@@ -4,7 +4,19 @@
 
 ### Added
 
++ relm4-macros: New shorthand component syntax
+
+## 0.2.1 - 2021-10-17
+
+### Added
+
++ relm4: Added sender method to RelmComponent
++ relm4-macros: New shorthand tracker syntax
 + relm4-macros: Allow generic function parameters in properties
+
+### Changed
+
++ relm4: Use adw::Application when "libadwaita" feature is active
 
 ## 0.2.0 - 2021-10-09
 

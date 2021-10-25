@@ -1,6 +1,8 @@
 use proc_macro2::Span as Span2;
 use proc_macro2::TokenStream as TokenStream2;
-use syn::{punctuated::Punctuated, spanned::Spanned, token, Expr, ExprClosure, Ident, Lit, Path, Generics};
+use syn::{
+    punctuated::Punctuated, spanned::Spanned, token, Expr, ExprClosure, Generics, Ident, Lit, Path,
+};
 
 use crate::args::Args;
 

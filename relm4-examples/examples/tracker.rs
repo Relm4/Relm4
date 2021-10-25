@@ -74,8 +74,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
                     set_spacing: 10,
                     append = &gtk::Image {
                         set_pixel_size: 50,
-                        set_icon_name: track!(model.changed(AppModel::first_icon()),
-                            Some(model.first_icon)),
+                        set_icon_name: track!(Some(model.first_icon)),
                     },
                     append = &gtk::Button {
                         set_label: "New random image",

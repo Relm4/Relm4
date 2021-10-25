@@ -3,7 +3,7 @@ use gtk::prelude::{ApplicationExt, ApplicationExtManual, GtkWindowExt, IsA};
 
 use std::marker::PhantomData;
 
-use crate::{AppUpdate, Components, Model as ModelTrait, Widgets as WidgetsTrait};
+use crate::{AppUpdate, Application, Components, Model as ModelTrait, Widgets as WidgetsTrait};
 
 /// The app that runs the main application.
 /// A [`RelmApp`] consists of a model that stores the application state
@@ -21,7 +21,7 @@ where
     Model::Components: Components<Model> + 'static,
 {
     model: PhantomData<Model>,
-    app: gtk::Application,
+    app: Application,
 }
 
 impl<Model> RelmApp<Model>
@@ -40,13 +40,13 @@ where
     /// Create a Relm4 application.
     pub fn new(model: Model) -> Self {
         gtk::init().expect("Couln't initialize GTK");
-        let app = gtk::Application::builder().build();
+        let app = Application::builder().build();
 
         Self::with_app(model, app)
     }
 
     /// Create a new Relm4 application with an existing [`gtk::Application`].
-    pub fn with_app(mut model: Model, app: gtk::Application) -> Self {
+    pub fn with_app(mut model: Model, app: Application) -> Self {
         crate::APP
             .set(fragile::Fragile::new(app.clone()))
             .expect("APP was alredy set");

@@ -4,6 +4,7 @@ use relm4::{
     WidgetPlus, Widgets,
 };
 
+#[tracker::track]
 struct AppModel {
     counter: u8,
     classes: Vec<&'static str>,
@@ -28,13 +29,14 @@ impl AppUpdate for AppModel {
         _components: &AppComponents,
         _sender: Sender<AppMsg>,
     ) -> bool {
+        self.reset();
         match msg {
             AppMsg::Increment => {
-                self.counter = self.counter.wrapping_add(1);
+                self.set_counter(self.counter.wrapping_add(1));
                 self.decrement = false;
             }
             AppMsg::Decrement => {
-                self.counter = self.counter.wrapping_sub(1);
+                self.set_counter(self.counter.wrapping_sub(1));
                 self.decrement = true;
             }
         }
@@ -110,7 +112,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
                 set_margin_all?: Some(5),
                 set_spacing: 5,
 
-                append: component!(components.button1.root_widget()),
+                append: component!(button1),
                 append: inc_button = &gtk::Button {
                     set_label: "Increment",
                     connect_clicked(sender) => move |_| {
@@ -135,7 +137,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
                     set_column_spacing: 10,
                     set_column_homogeneous: true,
                     attach(1, 1, 1, 1) = &gtk::Label {
-                        set_label: "grid test 1",
+                        set_label: track! {&model.counter.to_string()},
                     },
                     attach(1, 2, 1, 1) = &gtk::Label {
                         set_label: "grid test 2",
@@ -175,6 +177,7 @@ fn main() {
         counter: 0,
         classes: vec!["first", "second"],
         decrement: false,
+        tracker: 0,
     };
     let app = RelmApp::new(model);
     app.run();

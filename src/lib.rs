@@ -33,10 +33,16 @@ pub use worker::*;
 use fragile::Fragile;
 use once_cell::sync::OnceCell;
 
-static APP: OnceCell<Fragile<gtk::Application>> = OnceCell::new();
+static APP: OnceCell<Fragile<Application>> = OnceCell::new();
 
 pub use gtk;
 pub use gtk::glib::Sender;
+
+#[cfg(feature = "libadwaita")]
+type Application = adw::Application;
+
+#[cfg(not(feature = "libadwaita"))]
+type Application = gtk::Application;
 
 #[cfg(feature = "tokio-rt")]
 #[cfg_attr(doc, doc(cfg(feature = "tokio-rt")))]
@@ -50,7 +56,7 @@ pub use async_trait::async_trait;
 ///
 /// This function panics if [`RelmApp::new`] wasn't called before
 /// or this function is not called on the thread that also called [`RelmApp::new`].
-pub fn gtk_application() -> gtk::Application {
+pub fn gtk_application() -> Application {
     APP.get()
         .expect("The gloabl gtk application hasn't been initialized yet")
         .try_get()
@@ -104,9 +110,9 @@ pub fn spawn_future<F: futures_core::future::Future<Output = ()> + Send + 'stati
     gtk::glib::MainContext::ref_thread_default().spawn(f);
 }
 
-/// Send a message with a sender.
+/// A short macro for conveniently sending messages.
 ///
-/// The sender is automatically cloned and the [`Result`] is unwrapped.
+/// The message is sent using the sender and the [`Result`] is unwrapped automatically.
 #[macro_export]
 macro_rules! send {
     ($sender:ident, $msg:expr) => {
