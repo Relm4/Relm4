@@ -112,7 +112,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
                 set_margin_all?: Some(5),
                 set_spacing: 5,
 
-                append: component!(components.button1.root_widget()),
+                append: component!(button1),
                 append: inc_button = &gtk::Button {
                     set_label: "Increment",
                     connect_clicked(sender) => move |_| {

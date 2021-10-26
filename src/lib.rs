@@ -109,9 +109,9 @@ pub fn spawn_future<F: futures_core::future::Future<Output = ()> + Send + 'stati
     gtk::glib::MainContext::ref_thread_default().spawn(f);
 }
 
-/// Send a message with a sender.
+/// A short macro for conveniently sending messages.
 ///
-/// The sender is automatically cloned and the [`Result`] is unwrapped.
+/// The message is sent using the sender and the [`Result`] is unwrapped automatically.
 #[macro_export]
 macro_rules! send {
     ($sender:ident, $msg:expr) => {

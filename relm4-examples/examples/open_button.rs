@@ -98,7 +98,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
             set_default_width: 300,
             set_default_height: 100,
             set_titlebar = Some(&gtk::HeaderBar) {
-                pack_start: component!(components.open_button.root_widget()),
+                pack_start: component!(open_button),
             }
         }
     }
