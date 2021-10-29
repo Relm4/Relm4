@@ -1,12 +1,83 @@
+use core::time;
+use std::sync::mpsc::{channel, TryRecvError};
+use std::thread;
+
 use adw::traits::ApplicationWindowExt;
 use gtk::prelude::{
-    BoxExt, ButtonExt, EntryBufferExtManual, EntryExt, GtkWindowExt, OrientableExt,
-    ToggleButtonExt, WidgetExt,
+    BoxExt, ButtonExt, CheckButtonExt, DialogExt, EntryBufferExtManual, EntryExt, GtkWindowExt,
+    OrientableExt, PopoverExt, ToggleButtonExt, WidgetExt,
 };
 use gtk::EntryBuffer;
-use rand::Rng;
 use rand::prelude::SliceRandom;
-use relm4::{send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets};
+use rand::Rng;
+use relm4::{
+    send, AppUpdate, ComponentUpdate, Components, MessageHandler, Model, RelmApp, RelmComponent,
+    RelmMsgHandler, Sender, WidgetPlus, Widgets,
+};
+
+struct DialogModel {
+    hidden: bool,
+    correct: u32,
+    incorrect: u32,
+}
+
+enum DialogMsg {
+    Show(u32, u32),
+    Accept,
+}
+
+impl Model for DialogModel {
+    type Msg = DialogMsg;
+    type Widgets = DialogWidgets;
+    type Components = ();
+}
+
+impl ComponentUpdate<AppModel> for DialogModel {
+    fn init_model(_parent_model: &AppModel) -> Self {
+        DialogModel {
+            hidden: true,
+            correct: 0,
+            incorrect: 0,
+        }
+    }
+
+    fn update(
+        &mut self,
+        msg: DialogMsg,
+        _components: &(),
+        _sender: Sender<DialogMsg>,
+        _parent_sender: Sender<AppMsg>,
+    ) {
+        match msg {
+            DialogMsg::Show(correct, incorrect) => {
+                self.hidden = false;
+                self.correct = correct;
+                self.incorrect = incorrect;
+            }
+            DialogMsg::Accept => {
+                self.hidden = true;
+            }
+        }
+    }
+}
+
+#[relm4_macros::widget]
+impl Widgets<DialogModel, AppModel> for DialogWidgets {
+    view! {
+        dialog = gtk::MessageDialog {
+            set_transient_for: Some(&parent_widgets.main_window),
+            set_modal: true,
+            set_visible: watch!(!model.hidden),
+            set_text: Some("Congratulations!"),
+            set_secondary_text: watch!(Some(&format!("You got {} correct and {} incorrect results.\nThat are {} points",
+                model.correct, model.incorrect, model.correct as i32 - model.incorrect as i32 * 2))),
+            add_button: args!("Ok", gtk::ResponseType::Accept),
+            connect_response(sender) => move |_, _| {
+                send!(sender,DialogMsg::Accept);
+            }
+        }
+    }
+}
 
 #[derive(Clone)]
 enum PracticeMode {
@@ -32,6 +103,10 @@ struct AppModel {
     display_task_2: String,
     correct_value: u32,
     feedback: String,
+    timer: Option<u32>,
+    timer_init_value: u32,
+    correct_calculations: u32,
+    incorrect_calculations: u32,
 }
 
 impl AppModel {
@@ -81,13 +156,13 @@ impl AppModel {
             },
             PracticeMode::Multiply => match self.task_type {
                 TaskType::ValueValueEntry => {
-                    let v1 = rand::thread_rng().gen_range(0..=self.range);
+                    let v1 = rand::thread_rng().gen_range(1..=self.range);
                     let v2 = rand::thread_rng().gen_range(0..=self.range);
                     self.correct_value = v1 * v2;
                     self.display_task_1 = format!("<big>{} ∙ {} = </big>", v1, v2);
                 }
                 TaskType::ValueEntryValue => {
-                    let v1 = rand::thread_rng().gen_range(0..=self.range);
+                    let v1 = rand::thread_rng().gen_range(1..=self.range);
                     self.correct_value = rand::thread_rng().gen_range(0..=self.range);
                     let result = v1 * self.correct_value;
                     self.display_task_1 = format!("<big>{} ∙ </big>", v1);
@@ -120,7 +195,7 @@ impl AppModel {
         } else {
             return;
         }
-        
+
         let task_type = rand::thread_rng().gen_range(0..3);
         match task_type {
             0 => self.task_type = TaskType::ValueValueEntry,
@@ -137,16 +212,19 @@ enum AppMsg {
     MaxValue(u32),
     Entry(i32),
     EntryError,
+    SetTimer(u32),
+    StartTimer,
+    CountDown,
 }
 
 impl Model for AppModel {
     type Msg = AppMsg;
     type Widgets = AppWidgets;
-    type Components = ();
+    type Components = AppComponents;
 }
 
 impl AppUpdate for AppModel {
-    fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) -> bool {
+    fn update(&mut self, msg: AppMsg, components: &AppComponents, _sender: Sender<AppMsg>) -> bool {
         match msg {
             AppMsg::Plus(v) => {
                 if self.minus || self.multiply {
@@ -172,12 +250,51 @@ impl AppUpdate for AppModel {
                     self.feedback = "<big>😀 That was right!! 💓</big>".to_string();
                     self.pick_random_task_type();
                     self.calculate_task();
+                    self.correct_calculations += 1;
                 } else {
                     self.feedback = "<big>😕 Unfortunately wrong. 😓</big>".to_string();
+                    self.incorrect_calculations += 1;
                 }
             }
             AppMsg::EntryError => {
                 self.feedback = "<big>Please enter a valid number.</big>".to_string();
+            }
+            AppMsg::SetTimer(v) => {
+                self.timer_init_value = v;
+            }
+            AppMsg::StartTimer => {
+                // if timer is running a press on the button will reset button
+                // otherwise initialize the timer with the selected init value
+                components.timer_handler.send(TimerMsg::StartStopTimer);
+                if self.timer.is_some() {
+                    self.timer = None;
+                } else {
+                    self.pick_random_task_type();
+                    self.calculate_task();
+                    self.timer = Some(self.timer_init_value);
+                    self.correct_calculations = 0;
+                    self.incorrect_calculations = 0;
+                }
+            }
+            AppMsg::CountDown => {
+                if let Some(t) = &mut self.timer {
+                    *t -= 1;
+
+                    // check if time is up
+                    if *t == 0 {
+                        self.timer = None;
+                        // stop timer
+                        components.timer_handler.send(TimerMsg::StartStopTimer);
+                        // display results
+                        components
+                            .dialog
+                            .send(DialogMsg::Show(
+                                self.correct_calculations,
+                                self.incorrect_calculations,
+                            ))
+                            .unwrap();
+                    }
+                }
             }
         }
         true
@@ -192,7 +309,7 @@ fn application_window() -> adw::ApplicationWindow {
 impl Widgets<AppModel, ()> for AppWidgets {
     view! {
         main_window = application_window() -> adw::ApplicationWindow {
-            set_default_width: 300,
+            set_default_width: 350,
             set_default_height: 200,
             set_resizable: false,
 
@@ -202,8 +319,47 @@ impl Widgets<AppModel, ()> for AppWidgets {
                 append = &adw::HeaderBar {
                     set_title_widget = Some(&adw::WindowTitle::new("Practice mental arithmetic!",
                         "Challenge yourself with math")) {
+                    },
+                    pack_start = &adw::SplitButton {
+                        set_label: watch!({
+                            &*if let Some(t) = model.timer {
+                                format!("{}s", t)
+                            } else {
+                                "Start".to_string()
+                            }
+                        }),
+                        connect_clicked(sender) => move |_| {
+                            send!(sender, AppMsg::StartTimer)
+                        },
+                        set_popover: popover = Some(&gtk::Popover) {
+                            set_child = Some(&gtk::Box) {
+                                set_orientation: gtk::Orientation::Vertical,
+                                append: timer = &gtk::CheckButton::with_label("30s") {
+                                    connect_toggled(sender) => move |b| {
+                                        if b.is_active() {
+                                            send!(sender, AppMsg::SetTimer(30))
+                                        }
+                                    }
+                                },
+                                append = &gtk::CheckButton::with_label("60s") {
+                                    set_group: Some(&timer),
+                                    connect_toggled(sender) => move |b| {
+                                        if b.is_active() {
+                                            send!(sender, AppMsg::SetTimer(60))
+                                        }
+                                    }
+                                },
+                                append = &gtk::CheckButton::with_label("180s") {
+                                    set_group: Some(&timer),
+                                    connect_toggled(sender) => move |b| {
+                                        if b.is_active() {
+                                            send!(sender, AppMsg::SetTimer(180))
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
-
                 },
                 append = &gtk::Label {
                     set_text: "Calculation Type:"
@@ -325,6 +481,69 @@ impl Widgets<AppModel, ()> for AppWidgets {
             TaskType::ValueValueEntry => self.stack.set_visible_child(&self.value_value_entry),
         }
     }
+
+    fn post_init() {
+        // Set radio button initial to 30s
+        timer.set_active(true);
+    }
+}
+
+struct TimerHandler {
+    sender: std::sync::mpsc::Sender<TimerMsg>,
+}
+
+#[derive(Debug)]
+enum TimerMsg {
+    StartStopTimer,
+}
+
+impl MessageHandler<AppModel> for TimerHandler {
+    type Msg = TimerMsg;
+    type Sender = std::sync::mpsc::Sender<TimerMsg>;
+
+    fn init(_parent_model: &AppModel, parent_sender: Sender<AppMsg>) -> Self {
+        let (sender, receiver) = channel();
+
+        thread::spawn(move || {
+            loop {
+                // Wait for start message
+                let _ = receiver.recv();
+                // loop as long channel is empty
+                while receiver.try_recv().err() == Some(TryRecvError::Empty) {
+                    thread::sleep(time::Duration::from_secs(1));
+                    send!(parent_sender, AppMsg::CountDown);
+                }
+            }
+        });
+
+        TimerHandler { sender }
+    }
+
+    fn send(&self, msg: Self::Msg) {
+        self.sender.send(msg).unwrap();
+    }
+
+    fn sender(&self) -> Self::Sender {
+        self.sender.clone()
+    }
+}
+
+struct AppComponents {
+    timer_handler: RelmMsgHandler<TimerHandler, AppModel>,
+    dialog: RelmComponent<DialogModel, AppModel>,
+}
+
+impl Components<AppModel> for AppComponents {
+    fn init_components(
+        parent_model: &AppModel,
+        parent_widgets: &AppWidgets,
+        parent_sender: Sender<AppMsg>,
+    ) -> Self {
+        AppComponents {
+            timer_handler: RelmMsgHandler::new(parent_model, parent_sender.clone()),
+            dialog: RelmComponent::new(parent_model, parent_widgets, parent_sender),
+        }
+    }
 }
 
 fn main() {
@@ -339,7 +558,12 @@ fn main() {
         plus: true,
         minus: false,
         multiply: false,
+        timer_init_value: 30,
+        timer: None,
+        correct_calculations: 0,
+        incorrect_calculations: 0,
     };
+
     model.calculate_task();
 
     let app = RelmApp::new(model);
