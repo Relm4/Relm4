@@ -56,12 +56,15 @@ impl Widgets<AppModel, ()> for AppWidgets {
                 },
                 
                 append: stack = &adw::ViewStack {
-                    add_titled: args!(
-                        &gtk::Label::new(Some("This is the start page")), Some("First"), "First Page"),
-                    add_titled: args!(&gtk::Label::new(Some("An other page")),
-                        Some("Second"), "Second Page"),
-                    add_titled: args!(&gtk::Label::new(Some("This is the last page.")),
-                        Some("Last"), "Last Page"),
+                    add_titled(Some("First"), "First Page") = &gtk::Label {
+                        set_label: "This is the start page",
+                    },
+                    add_titled(Some("Second"), "Second Page") = &gtk::Label {
+                        set_label: "This is the second page"
+                    },
+                    add_titled(Some("Third"), "Third Page") = &gtk::Label {
+                        set_label: "This is the last page"
+                    },
                 }
             },
         }
