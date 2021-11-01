@@ -90,7 +90,7 @@ pub trait FactoryView<Widget> {
 
     /// Position type used by this widget.
     ///
-    /// For example [`GridPosition`] for [`gtk::Grid`] or `()` for [`gtk::Box`]
+    /// For example [`GridPosition`](positions::GridPosition) for [`gtk::Grid`] or `()` for [`gtk::Box`]
     type Position;
 
     /// Adds a new widget to self at the end.
