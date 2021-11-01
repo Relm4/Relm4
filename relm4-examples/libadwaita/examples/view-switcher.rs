@@ -56,16 +56,12 @@ impl Widgets<AppModel, ()> for AppWidgets {
                 },
                 
                 append: stack = &adw::ViewStack {
-                        add_titled: args!(
-                            &gtk::Label {
-                            set_label: "Start",
-                        }, Some("Title"), "title"),
-                        add: intro_label = &gtk::Label {
-                            set_label: "To get started click on \"Next page\".",
-                        },
-                        add: overview_label = &gtk::Label {
-                            set_label: "* Insert overview here *",
-                        },
+                    add_titled: args!(
+                        &gtk::Label::new(Some("This is the start page")), Some("First"), "First Page"),
+                    add_titled: args!(&gtk::Label::new(Some("An other page")),
+                        Some("Second"), "Second Page"),
+                    add_titled: args!(&gtk::Label::new(Some("This is the last page.")),
+                        Some("Last"), "Last Page"),
                 }
             },
         }
