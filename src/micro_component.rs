@@ -78,7 +78,8 @@ pub struct MicroComponent<Model: MicroModel> {
     model: Rc<RefCell<Model>>,
     widgets: Rc<RefCell<Model::Widgets>>,
     root_widget: <Model::Widgets as MicroWidgets<Model>>::Root,
-    data: Rc<RefCell<Model::Data>>, // for additional data such as senders to other components
+    /// for additional data such as senders to other components
+    // data: Rc<RefCell<Model::Data>>, 
     sender: Sender<Model::Msg>,
 }
 
@@ -101,8 +102,8 @@ where
         let handler_widgets = shared_widgets.clone();
         let shared_model = Rc::new(RefCell::new(model));
         let handler_model = shared_model.clone();
-        let shared_data = Rc::new(RefCell::new(data));
-        let handler_data = shared_data.clone();
+        // let shared_data = Rc::new(RefCell::new(data));
+        // let handler_data = shared_data.clone();
 
         {
             let context = glib::MainContext::default();
@@ -112,17 +113,17 @@ where
             // The main loop executes the closure as soon as it receives the message
             receiver.attach(Some(&context), move |msg: Model::Msg| {
                 if let Ok(ref mut model) = handler_model.try_borrow_mut() {
-                    if let Ok(ref data) = handler_data.try_borrow() {
-                        model.update(msg, data, sender.clone());
+                    // if let Ok(ref data) = handler_data.try_borrow() {
+                        model.update(msg, &data, sender.clone());
                         if let Ok(ref mut widgets) = handler_widgets.try_borrow_mut() {
                             widgets.view(model, sender.clone());
                         } else {
                             log::warn!("Could not mutably borrow the widgets. Make sure you drop all references to widgets after use");
                         }
-                    }
-                    else {
-                        log::warn!("Could not borrow the data. Make sure you drop all references to data after use");
-                    }
+                    // }
+                    // else {
+                    //     log::warn!("Could not borrow the data. Make sure you drop all references to data after use");
+                    // }
                 }
                 else {
                     log::warn!("Could not mutably borrow the model. Make sure you drop all references to model after use")
@@ -136,7 +137,7 @@ where
             model: shared_model,
             widgets: shared_widgets,
             root_widget,
-            data: shared_data,
+            // data: shared_data,
             sender: cloned_sender,
         }
     }
