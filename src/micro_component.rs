@@ -113,9 +113,9 @@ where
             receiver.attach(Some(&context), move |msg: Model::Msg| {
                 if let Ok(ref mut model) = handler_model.try_borrow_mut() {
                     if let Ok(ref data) = handler_data.try_borrow() {
-                        model.update(msg, &data, sender.clone());
+                        model.update(msg, data, sender.clone());
                         if let Ok(ref mut widgets) = handler_widgets.try_borrow_mut() {
-                            widgets.view(&model, sender.clone());
+                            widgets.view(model, sender.clone());
                         } else {
                             log::warn!("Could not mutably borrow the widgets. Make sure you drop all references to widgets after use");
                         }
