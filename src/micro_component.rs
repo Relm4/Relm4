@@ -9,36 +9,51 @@ use std::fmt::Debug;
 use std::fmt::Display;
 use std::rc::Rc;
 
+/// Errors which might get returned from [`MicroComponent::update_view`] method
+/// 
+/// Both [`std::fmt::Display`] and [`std::fmt::Debug`] are implemented for this
+/// enum so if you just would like to show an error you don't need to do the
+/// matching.
 pub enum MicroComponentError {
+    /// Error returned if borrow failed
     Borrow(BorrowError),
+    /// Error returned if borrowing mutably failed
     BorrowMut(BorrowMutError),
 }
 
+/// Helper to convert values of [`std::cell::BorrowError`] into [`MicroComponentError`]
 impl From<BorrowError> for MicroComponentError {
     fn from(err: BorrowError) -> Self {
         MicroComponentError::Borrow(err)
     }
 }
 
+/// Helper to convert values of [`std::cell::BorrowMutError`] into [`MicroComponentError`]
 impl From<BorrowMutError> for MicroComponentError {
     fn from(err: BorrowMutError) -> Self {
         MicroComponentError::BorrowMut(err)
     }
 }
 
+/// Formats [`MicroComponentError`] for empty format `{}`
+/// 
+/// This allows you to print errors without doing `matching` or `if let` statements
 impl Display for MicroComponentError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             MicroComponentError::Borrow(err) => {
-                f.write_fmt(format_args!("MicroComponentError::Borrow({})", err))
+                f.write_fmt(format_args!("{}", err))
             },
             MicroComponentError::BorrowMut(err) => {
-                f.write_fmt(format_args!("MicroComponentError::BorrowMut({})", err))
+                f.write_fmt(format_args!("{}", err))
             }
         }
     }
 }
 
+/// Formats [`MicroComponentError`] for debug format `{:?}`
+/// 
+/// This allows you to print errors without doing `matching` or `if let` statements
 impl Debug for MicroComponentError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -56,6 +71,9 @@ impl Debug for MicroComponentError {
     }
 }
 
+/// MicroComponent is a small component that lives in their parents model, can be modified from their 
+/// parents model but at the same time have their own widgets and update function
+#[derive(Debug)]
 pub struct MicroComponent<Model: MicroModel> {
     model: Rc<RefCell<Model>>,
     widgets: Rc<RefCell<Model::Widgets>>,
@@ -72,6 +90,7 @@ where
     Model::Data: 'static,
     Model: MicroModel + 'static,
 {
+    /// Creates new [`MicroComponent`]
     pub fn new(model: Model, data: Model::Data) -> Self { 
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
         let widgets = Model::Widgets::init_view(&model, sender.clone());
@@ -121,6 +140,8 @@ where
             sender: cloned_sender,
         }
     }
+
+    /// Updates a view of this [`MicroComponent`]
     pub fn update_view(&self) -> Result<(), MicroComponentError> { 
         let mut widgets = self.widgets()?;
         let model = self.model()?;
@@ -130,48 +151,86 @@ where
         Result::Ok( () )
     }
 
-
+    /// Returns model for this [`MicroComponent`]
+    /// 
+    /// Use this carefully and make sure reference is dropped. It's using [`RefCell`] internally.
     pub fn model(&self) -> Result<Ref<'_, Model>, BorrowError> {
         self.model
             .as_ref()
             .try_borrow()
     }
 
+    /// Returns mutable reference to model for this [`MicroComponent`]
+    /// 
+    /// Use this carefully and make sure reference is dropped. It's using [`RefCell`] internally.
+    /// If you don't drop the reference any call to [`MicroComponent::update_view`] will fail.
     pub fn model_mut(&self) -> Result<RefMut<'_, Model>, BorrowMutError> { 
         self.model
             .as_ref()
             .try_borrow_mut()
     }
+
+    /// Returns a mutable reference to the widgets of this [`MicroComponent`] or will fail
+    /// when you already have a reference to the widgets
+    /// 
+    /// Use this carefully and make sure the reference to the widgets is dropped after use because
+    /// otherwise the view function can't be called as long you own the widgets (it uses [`RefCell`] internally).
     pub fn widgets(&self) -> Result<RefMut<'_, Model::Widgets>, BorrowMutError> { 
         self.widgets
             .as_ref()
             .try_borrow_mut()
     }
+
+    /// Send a message to this [`MicroComponent`].
+    /// This can be used by the parent to send messages to this.
     pub fn send(&self, msg: Model::Msg) -> Result<(), std::sync::mpsc::SendError<Model::Msg>> { 
         self.sender.send(msg)
     }
 
+    /// Get a sender to send messages to this [`MicroComponent`].
     pub fn sender(&self) -> Sender<Model::Msg> { 
         self.sender.clone()
     }
 
+    /// Returns the root widget of this component's widgets.
     pub fn root_widget(&self) -> &<Model::Widgets as MicroWidgets<Model>>::Root {
         &self.root_widget
     }
 }
 
+/// Trait that defines the types associated with model used by [`MicroComponent`]
+/// 
+/// It can be anything that stores application state. 
 pub trait MicroModel {
-    type Msg;
+    /// The message type that defines the messages that can be sent to modify the model.
+    type Msg: 'static;
+
+    /// The widgets type that can initialize and update the GUI with the data the model provides.
+    ///
+    /// If you don't want any widgets (for example for defining a worker), just use `()` here.
     type Widgets: MicroWidgets<Self>;
+
+    /// Data that can be used to store senders and other stuff according to the needs of the user 
     type Data;
     
+    /// Updates the model.
+    /// Typically a `match` statement is used to process the message.
     fn update(&mut self, msg: Self::Msg, data: &Self::Data, sender: Sender<Self::Msg>);
 }
 
+/// Define behavior to turn the data of your [`MicroModel`] into widgets.
 pub trait MicroWidgets<Model: MicroModel + ?Sized> {
-    type Root;
+    /// The root represents the first widget that all other widgets of this [`MicroComponent`] are attached to.
+    type Root: std::fmt::Debug;
     
+    /// Initialize the UI.
+    ///
+    /// Use the sender to connect UI events and send messages back to modify the model.
     fn init_view(model: &Model, sender: Sender<Model::Msg>) -> Self;
+
+    /// Update the view to represent the updated model.
     fn view(&mut self, model: &Model, sender: Sender<Model::Msg>);
+
+    /// Return a clone of the root widget. This is typically a GTK4 widget.
     fn root_widget(&self) -> Self::Root;
 }

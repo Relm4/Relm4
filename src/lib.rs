@@ -25,9 +25,7 @@ mod worker;
 
 pub use app::RelmApp;
 pub use component::RelmComponent;
-pub use micro_component::MicroComponent;
-pub use micro_component::MicroModel;
-pub use micro_component::MicroWidgets;
+pub use micro_component::{MicroComponent, MicroModel, MicroWidgets, MicroComponentError};
 pub use msg_handler::RelmMsgHandler;
 pub use traits::*;
 pub use util::widget_plus::WidgetPlus;
