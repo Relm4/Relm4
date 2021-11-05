@@ -1,17 +1,69 @@
 use gtk::glib::{self, Sender};
 
+use std::cell::BorrowError;
+use std::cell::BorrowMutError;
 use std::cell::Ref;
 use std::cell::RefCell;
 use std::cell::RefMut;
+use std::fmt::Debug;
+use std::fmt::Display;
 use std::rc::Rc;
 
+pub enum MicroComponentError {
+    Borrow(BorrowError),
+    BorrowMut(BorrowMutError),
+}
+
+impl From<BorrowError> for MicroComponentError {
+    fn from(err: BorrowError) -> Self {
+        MicroComponentError::Borrow(err)
+    }
+}
+
+impl From<BorrowMutError> for MicroComponentError {
+    fn from(err: BorrowMutError) -> Self {
+        MicroComponentError::BorrowMut(err)
+    }
+}
+
+impl Display for MicroComponentError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            MicroComponentError::Borrow(err) => {
+                f.write_fmt(format_args!("MicroComponentError::Borrow({})", err))
+            },
+            MicroComponentError::BorrowMut(err) => {
+                f.write_fmt(format_args!("MicroComponentError::BorrowMut({})", err))
+            }
+        }
+    }
+}
+
+impl Debug for MicroComponentError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            MicroComponentError::Borrow(err) => {
+                f.debug_tuple("MicroComponentError::Borrow")
+                    .field(err)
+                    .finish()
+            },
+            MicroComponentError::BorrowMut(err) => {
+                f.debug_tuple("MicroCompomponentError::BorrowMut")
+                    .field(err)
+                    .finish()
+            }
+        }
+    }
+}
+
 pub struct MicroComponent<Model: MicroModel> {
-    model: Option<Rc<RefCell<Model>>>,
-    widgets: Option<Rc<RefCell<Model::Widgets>>>,
+    model: Rc<RefCell<Model>>,
+    widgets: Rc<RefCell<Model::Widgets>>,
     root_widget: <Model::Widgets as MicroWidgets<Model>>::Root,
     data: Rc<RefCell<Model::Data>>, // for additional data such as senders to other components
     sender: Sender<Model::Msg>,
 }
+
 
 impl<Model> MicroComponent<Model> 
 where
@@ -62,39 +114,38 @@ where
         }
 
         MicroComponent {
-            model: Some(shared_model),
-            widgets: Some(shared_widgets),
+            model: shared_model,
+            widgets: shared_widgets,
             root_widget,
             data: shared_data,
             sender: cloned_sender,
         }
     }
-    pub fn update_view(&self) { 
-        todo!()
+    pub fn update_view(&self) -> Result<(), MicroComponentError> { 
+        let mut widgets = self.widgets()?;
+        let model = self.model()?;
+
+        widgets.view(&model, self.sender());
+
+        Result::Ok( () )
     }
 
 
-    pub fn model(&self) -> Option<Ref<'_, Model>> {
+    pub fn model(&self) -> Result<Ref<'_, Model>, BorrowError> {
         self.model
             .as_ref()
-            .expect("MicroComponent wasn't initialized correctly: model is missing")
             .try_borrow()
-            .ok()
     }
 
-    pub fn model_mut(&self) -> Option<RefMut<'_, Model>> { 
+    pub fn model_mut(&self) -> Result<RefMut<'_, Model>, BorrowMutError> { 
         self.model
             .as_ref()
-            .expect("MicroComponent wasn't initialized correctly: model is missing")
             .try_borrow_mut()
-            .ok()
     }
-    pub fn widgets(&self) -> Option<RefMut<'_, Model::Widgets>> { 
+    pub fn widgets(&self) -> Result<RefMut<'_, Model::Widgets>, BorrowMutError> { 
         self.widgets
             .as_ref()
-            .expect("MicroComponent wasn't initialized correctly: widgets are missing")
             .try_borrow_mut()
-            .ok()
     }
     pub fn send(&self, msg: Model::Msg) -> Result<(), std::sync::mpsc::SendError<Model::Msg>> { 
         self.sender.send(msg)
