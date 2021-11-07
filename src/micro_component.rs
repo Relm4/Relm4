@@ -209,7 +209,7 @@ pub trait MicroModel {
     /// The widgets type that can initialize and update the GUI with the data the model provides.
     ///
     /// If you don't want any widgets (for example for defining a worker), just use `()` here.
-    type Widgets: MicroWidgets<Self>;
+    type Widgets: MicroWidgets<Self> + Debug;
 
     /// Data that can be used to store senders and other stuff according to the needs of the user 
     type Data;
