@@ -1,13 +1,10 @@
 use gtk::glib::{self, Sender};
 
-use std::cell::BorrowError;
-use std::cell::BorrowMutError;
-use std::cell::Ref;
-use std::cell::RefCell;
-use std::cell::RefMut;
-use std::fmt::Debug;
-use std::fmt::Display;
-use std::rc::Rc;
+use std::{
+    cell::{BorrowError, BorrowMutError, Ref, RefCell, RefMut}, 
+    fmt::{Debug, Display}, 
+    rc::Rc
+};
 
 /// Errors which might get returned from [`MicroComponent::update_view`] method
 /// 
@@ -63,7 +60,7 @@ impl Debug for MicroComponentError {
                     .finish()
             },
             MicroComponentError::BorrowMut(err) => {
-                f.debug_tuple("MicroCompomponentError::BorrowMut")
+                f.debug_tuple("MicroComponentError::BorrowMut")
                     .field(err)
                     .finish()
             }
