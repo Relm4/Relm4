@@ -62,7 +62,7 @@ where
     View: FactoryView<Data::Root>,
 {
     /// Key that provides additional information for the [`FactoryPrototype`] functions.
-    type Key;
+    type Key: ?Sized;
 
     /// Efficiently update the view according to data changes.
     fn generate(&self, view: &View, sender: Sender<Data::Msg>);
