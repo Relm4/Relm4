@@ -1,5 +1,5 @@
 <h1>
-  <img src="assets/Relm_logo_with_text.svg" height="67" alt="Relm4">
+  <img src="assets/Relm_logo_with_text.png" height="67" alt="Relm4">
 </h1>
 
 [![CI](https://github.com/AaronErhardt/relm4/actions/workflows/rust.yml/badge.svg)](https://github.com/AaronErhardt/relm4/actions/workflows/rust.yml)
