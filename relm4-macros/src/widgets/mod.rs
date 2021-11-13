@@ -9,6 +9,19 @@ use crate::args::Args;
 mod gen;
 mod parse;
 
+#[derive(Debug, Default)]
+pub struct TokenStreams {
+    pub struct_fields: TokenStream2,
+    pub init_widgets: TokenStream2,
+    pub init_properties: TokenStream2,
+    pub return_fields: TokenStream2,
+    pub view: TokenStream2,
+    pub connect: TokenStream2,
+    pub track: TokenStream2,
+    pub components: TokenStream2,
+    pub connect_components: TokenStream2,
+}
+
 #[derive(Debug)]
 pub(super) struct Tracker {
     bool_fn: Expr,
@@ -35,22 +48,17 @@ pub enum PropertyName {
     Path(Path),
 }
 
-impl Spanned for PropertyName {
-    fn span(&self) -> Span2 {
-        match self {
-            PropertyName::Ident(ident) => ident.span(),
-            PropertyName::Path(path) => path.span(),
-        }
-    }
-}
-
 #[derive(Debug)]
 pub(super) struct Property {
+    /// Either a path or just an ident
     pub name: PropertyName,
     pub ty: PropertyType,
     pub generics: Option<Generics>,
+    /// Optional arguments like param_name(arg1, arg2, ...)
     pub args: Option<Args<Expr>>,
+    /// Assign with an ?
     pub optional_assign: bool,
+    /// Iterate through elements to generate tokens
     pub iterative: bool,
 }
 
@@ -66,15 +74,6 @@ pub(super) struct WidgetFunc {
     pub ty: Option<Vec<Ident>>,
 }
 
-impl Spanned for WidgetFunc {
-    fn span(&self) -> Span2 {
-        self.path_segments
-            .first()
-            .expect("Expected path segments in WidgetFunc")
-            .span()
-    }
-}
-
 #[derive(Debug)]
 pub(super) struct Widget {
     pub name: Ident,
@@ -82,17 +81,31 @@ pub(super) struct Widget {
     pub properties: Properties,
     pub wrapper: Option<Ident>,
     pub assign_as_ref: bool,
+    pub returned_widget: Option<ReturnedWidget>,
 }
 
-impl<'a> Widget {
-    pub fn get_widget_list(&'a self, widgets: &mut Vec<&'a Widget>) {
-        widgets.push(self);
+#[derive(Debug)]
+pub(super) struct ReturnedWidget {
+    pub name: Option<Ident>,
+    pub ty: Option<Path>,
+    pub properties: Properties,
+    pub is_optional: bool,
+}
 
-        for prop in &self.properties.properties {
-            let ty = &prop.ty;
-            if let PropertyType::Widget(widget) = ty {
-                widget.get_widget_list(widgets);
-            }
+impl Spanned for PropertyName {
+    fn span(&self) -> Span2 {
+        match self {
+            PropertyName::Ident(ident) => ident.span(),
+            PropertyName::Path(path) => path.span(),
         }
+    }
+}
+
+impl Spanned for WidgetFunc {
+    fn span(&self) -> Span2 {
+        self.path_segments
+            .first()
+            .expect("Expected path segments in WidgetFunc")
+            .span()
     }
 }

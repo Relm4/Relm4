@@ -9,7 +9,9 @@ use syn::{
 
 use crate::util;
 
-use super::{Properties, Property, PropertyName, PropertyType, Tracker, Widget, WidgetFunc};
+use super::{
+    Properties, Property, PropertyName, PropertyType, ReturnedWidget, Tracker, Widget, WidgetFunc,
+};
 
 impl Parse for Tracker {
     fn parse(input: ParseStream) -> Result<Self> {
@@ -294,12 +296,57 @@ impl Parse for Widget {
             util::idents_to_snake_case(&func.path_segments)
         };
 
+        let returned_widget = if input.peek(Token![->]) {
+            let _arrow: Token![->] = input.parse()?;
+            Some(input.parse()?)
+        } else {
+            None
+        };
+
         Ok(Widget {
             name,
             func,
             properties,
             wrapper,
             assign_as_ref,
+            returned_widget,
+        })
+    }
+}
+
+impl Parse for ReturnedWidget {
+    fn parse(input: ParseStream) -> Result<Self> {
+        let mut is_optional = false;
+
+        let (name, ty) = if input.peek(Ident) {
+            let name = input.parse()?;
+
+            if input.peek(Token![?]) {
+                let _mark: Token![?] = input.parse()?;
+                is_optional = true;
+            }
+
+            let _colon: Token![:] = input.parse()?;
+            let ty = input.parse()?;
+            (Some(name), Some(ty))
+        } else {
+            if input.peek(Token![?]) {
+                let _mark: Token![?] = input.parse()?;
+                is_optional = true;
+            }
+
+            (None, None)
+        };
+
+        let inner;
+        let _token = braced!(inner in input);
+        let properties = inner.parse()?;
+
+        Ok(ReturnedWidget {
+            name,
+            ty,
+            properties,
+            is_optional,
         })
     }
 }
