@@ -64,11 +64,7 @@ impl Widgets<Comp1Model, AppModel> for Comp1Widgets {
 impl Widgets<Comp2Model, AppModel> for Comp2Widgets {
     type Root = gtk::Button;
 
-    fn init_view(
-        model: &Comp2Model,
-        _components: &(),
-        sender: Sender<CompMsg>,
-    ) -> Self {
+    fn init_view(model: &Comp2Model, _components: &(), sender: Sender<CompMsg>) -> Self {
         let button = gtk::Button::with_label("Second Component");
         button.set_visible(!model.hidden);
 
@@ -143,15 +139,9 @@ struct AppComponents {
 }
 
 impl Components<AppModel> for AppComponents {
-    fn init_components(
-        parent_model: &AppModel,
-        parent_sender: Sender<AppMsg>,
-    ) -> Self {
+    fn init_components(parent_model: &AppModel, parent_sender: Sender<AppMsg>) -> Self {
         AppComponents {
-            comp1: RelmComponent::with_new_thread(
-                parent_model,
-                parent_sender.clone(),
-            ),
+            comp1: RelmComponent::with_new_thread(parent_model, parent_sender.clone()),
             comp2: RelmComponent::new(parent_model, parent_sender),
         }
     }
