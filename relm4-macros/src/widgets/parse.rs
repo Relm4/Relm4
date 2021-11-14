@@ -105,7 +105,7 @@ impl Parse for Property {
             if input.peek(Token![=]) {
                 let _token: Token![=] = input.parse()?;
             } else {
-                let _colon: Token! [:] = input.parse()?;
+                let _colon: Token![:] = input.parse()?;
             }
             input.parse().map(PropertyType::Widget)?
         }

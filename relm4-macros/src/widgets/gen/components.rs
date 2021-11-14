@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote_spanned, quote, ToTokens};
+use quote::{quote, quote_spanned, ToTokens};
 use syn::{spanned::Spanned, Expr, ExprPath, Ident};
 
 use super::{util, Property, PropertyType};
@@ -18,8 +18,10 @@ impl Property {
     pub fn component_stream(&self, stream: &mut TokenStream2, w_name: &Ident) {
         if let Some(component_tokens) = self.ty.component_tokens() {
             let args_stream = self.args_stream();
-            let assign_fn = self.name.self_assign_fn_stream(&self.generics, w_name);
-            let self_assign_args = self.name.self_assign_args_stream(w_name);
+            let assign_fn = self.name.assign_fn_stream(&self.generics, w_name);
+            let self_assign_args = self.name.assign_args_stream(w_name);
+
+            assert!(self_assign_args.is_none());
 
             let mut inner_stream = TokenStream2::new();
             util::property_assign_tokens(
@@ -32,13 +34,13 @@ impl Property {
                 Some(args_stream),
             );
 
-            if let Some(return_stream) = self.ty.return_assign_tokens() {
-                stream.extend(quote! {
-                    #return_stream = #inner_stream;
-                })
-            } else {
-                stream.extend(inner_stream);
-            }
+            // if let Some(return_stream) = self.ty.return_assign_tokens() {
+            //     stream.extend(quote! {
+            //         #return_stream = #inner_stream;
+            //     })
+            // } else {
+            stream.extend(inner_stream);
+            // }
         }
     }
 }

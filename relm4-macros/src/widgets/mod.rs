@@ -1,7 +1,5 @@
 use proc_macro2::TokenStream as TokenStream2;
-use syn::{
-    punctuated::Punctuated, token, Expr, ExprClosure, Generics, Ident, Lit, Path,
-};
+use syn::{punctuated::Punctuated, token, Expr, ExprClosure, Generics, Ident, Lit, Path};
 
 use crate::args::Args;
 

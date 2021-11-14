@@ -232,9 +232,10 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
             type Root = #root_widget_type;
 
             /// Initialize the UI.
-            fn init_view(model: &#model, parent_widgets: &<#parent_model as #relm4_path::Model>::Widgets, sender: #relm4_path::Sender<<#model as #relm4_path::Model>::Msg>) -> Self {
+            fn init_view(model: &#model, components: &<#model as #relm4_path::Model>::Components, sender: #relm4_path::Sender<<#model as #relm4_path::Model>::Msg>) -> Self {
                 #pre_init
                 #init_widgets
+                #components
                 #init_properties
                 #connect
                 #post_init
@@ -244,9 +245,8 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
                 }
             }
 
-            fn connect_components(&self, model: &#model, components: &<#model as #relm4_path::Model>::Components) {
+            fn connect_parent(&self, parent_widgets: &<#parent_model as #relm4_path::Model>::Widgets) {
                 #pre_connect_components
-                #components
                 #connect_components
                 #post_connect_components
             }
