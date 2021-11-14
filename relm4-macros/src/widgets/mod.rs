@@ -1,7 +1,6 @@
-use proc_macro2::Span as Span2;
 use proc_macro2::TokenStream as TokenStream2;
 use syn::{
-    punctuated::Punctuated, spanned::Spanned, token, Expr, ExprClosure, Generics, Ident, Lit, Path,
+    punctuated::Punctuated, token, Expr, ExprClosure, Generics, Ident, Lit, Path,
 };
 
 use crate::args::Args;
@@ -90,22 +89,4 @@ pub(super) struct ReturnedWidget {
     pub ty: Option<Path>,
     pub properties: Properties,
     pub is_optional: bool,
-}
-
-impl Spanned for PropertyName {
-    fn span(&self) -> Span2 {
-        match self {
-            PropertyName::Ident(ident) => ident.span(),
-            PropertyName::Path(path) => path.span(),
-        }
-    }
-}
-
-impl Spanned for WidgetFunc {
-    fn span(&self) -> Span2 {
-        self.path_segments
-            .first()
-            .expect("Expected path segments in WidgetFunc")
-            .span()
-    }
 }

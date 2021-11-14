@@ -1,4 +1,4 @@
-use proc_macro2::TokenStream as TokenStream2;
+use proc_macro2::{Span as Span2, TokenStream as TokenStream2};
 use quote::{quote, ToTokens};
 use syn::{spanned::Spanned, Error};
 
@@ -74,5 +74,14 @@ impl WidgetFunc {
                 #tokens::default()
             }
         }
+    }
+}
+
+impl Spanned for WidgetFunc {
+    fn span(&self) -> Span2 {
+        self.path_segments
+            .first()
+            .expect("Expected path segments in WidgetFunc")
+            .span()
     }
 }

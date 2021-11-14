@@ -2,7 +2,9 @@ use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned};
 use syn::{spanned::Spanned, Path, Type, Visibility};
 
-use super::{Property, PropertyName, PropertyType, TokenStreams, Tracker, Widget, WidgetFunc};
+use super::{
+    Property, PropertyName, PropertyType, ReturnedWidget, TokenStreams, Tracker, Widget, WidgetFunc,
+};
 
 /// Utility methods and functions.
 mod util;
@@ -65,6 +67,7 @@ impl Widget {
             prop.component_stream(&mut streams.components, &self.name);
         }
     }
+
     pub fn widget_assignment(&self) -> TokenStream2 {
         let w_span = self.func.span();
         let w_name = &self.name;
