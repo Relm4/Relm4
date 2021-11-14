@@ -34,22 +34,18 @@ where
     Model: ComponentUpdate<ParentModel> + 'static,
 {
     /// Create a new [`RelmComponent`].
-    pub fn new(
-        parent_model: &ParentModel,
-        parent_widgets: &ParentModel::Widgets,
-        parent_sender: Sender<ParentModel::Msg>,
-    ) -> Self {
+    pub fn new(parent_model: &ParentModel, parent_sender: Sender<ParentModel::Msg>) -> Self {
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
         let mut model = Model::init_model(parent_model);
+        let mut components = Model::Components::init_components(&model, sender.clone());
 
-        let widgets = Model::Widgets::init_view(&model, parent_widgets, sender.clone());
+        let widgets = Model::Widgets::init_view(&model, &components, sender.clone());
         let root_widget = widgets.root_widget();
 
-        let components = Model::Components::init_components(&model, &widgets, sender.clone());
-        let cloned_sender = sender.clone();
+        components.connect_parent(&widgets);
 
-        widgets.connect_components(&model, &components);
+        let cloned_sender = sender.clone();
 
         let shared_widgets = Rc::new(RefCell::new(widgets));
         let handler_widgets = shared_widgets.clone();
@@ -78,6 +74,13 @@ where
             root_widget,
             shared_widgets: Some(shared_widgets),
         }
+    }
+
+    /// Connect the widgets to the widgets of the parent widget.
+    pub fn connect_parent(&mut self, parent_widgets: &ParentModel::Widgets) {
+        self.widgets()
+            .expect("TODO: ADD MESSAGE")
+            .connect_parent(parent_widgets);
     }
 
     /// Send a message to this component.
@@ -129,21 +132,20 @@ where
     /// So if you look want to send a lot of messages to self using a [`RelmWorker`](crate::RelmWorker) will perform better.
     pub fn with_new_thread(
         parent_model: &ParentModel,
-        parent_widgets: &ParentModel::Widgets,
         parent_sender: Sender<ParentModel::Msg>,
     ) -> Self {
         let (global_sender, global_receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
         let model = Model::init_model(parent_model);
+        let mut components = Model::Components::init_components(&model, sender.clone());
 
-        let widgets = Model::Widgets::init_view(&model, parent_widgets, sender.clone());
+        let widgets = Model::Widgets::init_view(&model, &components, sender.clone());
         let root_widget = widgets.root_widget();
 
-        let components = Model::Components::init_components(&model, &widgets, sender.clone());
-        let cloned_sender = sender.clone();
+        components.connect_parent(&widgets);
 
-        widgets.connect_components(&model, &components);
+        let cloned_sender = sender.clone();
 
         let shared_widgets = Rc::new(RefCell::new(widgets));
         let handler_widgets = shared_widgets.clone();

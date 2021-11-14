@@ -16,12 +16,12 @@ where
 
     fn init_view(
         _model: &ModelType,
-        _parent_widgets: &ParentModel::Widgets,
+        _components: &ModelType::Components,
         _sender: Sender<ModelType::Msg>,
     ) -> Self {
     }
 
-    fn connect_components(&self, _model: &ModelType, _components: &ModelType::Components) {}
+    fn connect_parent(&self, _parent_widgets: &ParentModel::Widgets) {}
 
     fn root_widget(&self) -> Self::Root {}
 
@@ -29,10 +29,7 @@ where
 }
 
 impl<ParentModel: Model> Components<ParentModel> for () {
-    fn init_components(
-        _parent_model: &ParentModel,
-        _widgets: &ParentModel::Widgets,
-        _sender: Sender<ParentModel::Msg>,
-    ) {
-    }
+    fn init_components(_parent_model: &ParentModel, _sender: Sender<ParentModel::Msg>) {}
+
+    fn connect_parent(&mut self, _parent_widget: &ParentModel::Widgets) {}
 }

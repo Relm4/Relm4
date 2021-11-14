@@ -40,7 +40,7 @@ enum CompMsg {
 impl Widgets<Comp1Model, AppModel> for Comp1Widgets {
     type Root = gtk::Button;
 
-    fn init_view(model: &Comp1Model, _parent_widget: &AppWidgets, sender: Sender<CompMsg>) -> Self {
+    fn init_view(model: &Comp1Model, _components: &(), sender: Sender<CompMsg>) -> Self {
         // Initialize gtk widgets
         let button = gtk::Button::with_label("First Component");
         button.set_visible(!model.hidden);
@@ -66,7 +66,7 @@ impl Widgets<Comp2Model, AppModel> for Comp2Widgets {
 
     fn init_view(
         model: &Comp2Model,
-        _parent_widgets: &AppWidgets,
+        _components: &(),
         sender: Sender<CompMsg>,
     ) -> Self {
         let button = gtk::Button::with_label("Second Component");
@@ -145,17 +145,20 @@ struct AppComponents {
 impl Components<AppModel> for AppComponents {
     fn init_components(
         parent_model: &AppModel,
-        parent_widgets: &AppWidgets,
         parent_sender: Sender<AppMsg>,
     ) -> Self {
         AppComponents {
             comp1: RelmComponent::with_new_thread(
                 parent_model,
-                parent_widgets,
                 parent_sender.clone(),
             ),
-            comp2: RelmComponent::new(parent_model, parent_widgets, parent_sender),
+            comp2: RelmComponent::new(parent_model, parent_sender),
         }
+    }
+
+    fn connect_parent(&mut self, parent_widgets: &AppWidgets) {
+        self.comp1.connect_parent(parent_widgets);
+        self.comp2.connect_parent(parent_widgets);
     }
 }
 
@@ -185,7 +188,7 @@ impl Model for AppModel {
 impl Widgets<AppModel, ()> for AppWidgets {
     type Root = gtk::ApplicationWindow;
 
-    fn init_view(model: &AppModel, _parent_widgets: &(), sender: Sender<AppMsg>) -> Self {
+    fn init_view(model: &AppModel, components: &AppComponents, sender: Sender<AppMsg>) -> Self {
         let main = gtk::ApplicationWindowBuilder::new().build();
         let vbox = gtk::BoxBuilder::new()
             .orientation(gtk::Orientation::Vertical)
@@ -214,12 +217,10 @@ impl Widgets<AppModel, ()> for AppWidgets {
             sender2.send(AppMsg::Decrement).unwrap();
         });
 
-        AppWidgets { main, text, vbox }
-    }
+        vbox.append(components.comp1.root_widget());
+        vbox.append(components.comp2.root_widget());
 
-    fn connect_components(&self, _model: &AppModel, components: &AppComponents) {
-        self.vbox.append(components.comp1.root_widget());
-        self.vbox.append(components.comp2.root_widget());
+        AppWidgets { main, text, vbox }
     }
 
     fn view(&mut self, model: &AppModel, _sender: Sender<AppMsg>) {

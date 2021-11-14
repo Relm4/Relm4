@@ -53,12 +53,12 @@ where
 
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
-        let mut widgets = Model::Widgets::init_view(&model, &(), sender.clone());
+        let mut components = Model::Components::init_components(&model, sender.clone());
+
+        let mut widgets = Model::Widgets::init_view(&model, &components, sender.clone());
         let root = widgets.root_widget();
 
-        let components = Model::Components::init_components(&model, &widgets, sender.clone());
-
-        widgets.connect_components(&model, &components);
+        components.connect_parent(&widgets);
 
         // Initialize GTK
         app.connect_activate(move |app| {
