@@ -266,7 +266,7 @@ pub trait Components<ParentModel: ?Sized + Model> {
         -> Self;
 
     /// Connect the components to their parent components widgets (to set the parent window for example).
-    fn connect_parent(&mut self, _parent_widget: &ParentModel::Widgets);
+    fn connect_parent(&mut self, _parent_widgets: &ParentModel::Widgets);
 }
 
 #[cfg(feature = "tokio-rt")]

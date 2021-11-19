@@ -179,8 +179,8 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let Funcs {
         pre_init,
         post_init,
-        pre_connect_components,
-        post_connect_components,
+        pre_connect_parent,
+        post_connect_parent,
         manual_view,
     } = match Funcs::new(&data.funcs) {
         Ok(macros) => macros,
@@ -248,9 +248,9 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
             }
 
             fn connect_parent(&self, parent_widgets: &<#parent_model as #relm4_path::Model>::Widgets) {
-                #pre_connect_components
+                #pre_connect_parent
                 #parent
-                #post_connect_components
+                #post_connect_parent
             }
 
             /// Return the root widget.
