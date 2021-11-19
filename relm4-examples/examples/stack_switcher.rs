@@ -1,7 +1,5 @@
 use gtk::prelude::{BoxExt, GtkWindowExt, WidgetExt};
-use relm4::{
-    AppUpdate, ComponentUpdate, Components, Model, RelmApp, RelmComponent, Sender, Widgets,
-};
+use relm4::{AppUpdate, ComponentUpdate, Model, RelmApp, RelmComponent, Sender, Widgets};
 
 enum HeaderMsg {}
 
@@ -79,22 +77,10 @@ impl Widgets<StackModel, AppModel> for StackWidgets {
     }
 }
 
+#[derive(relm4_macros::Components)]
 struct AppComponents {
     header: RelmComponent<HeaderModel, AppModel>,
     stack: RelmComponent<StackModel, AppModel>,
-}
-
-impl Components<AppModel> for AppComponents {
-    fn init_components(
-        parent_model: &AppModel,
-        parent_widgets: &AppWidgets,
-        parent_sender: Sender<AppMsg>,
-    ) -> Self {
-        AppComponents {
-            header: RelmComponent::new(parent_model, parent_widgets, parent_sender.clone()),
-            stack: RelmComponent::new(parent_model, parent_widgets, parent_sender),
-        }
-    }
 }
 
 #[derive(Debug)]
@@ -116,12 +102,12 @@ impl Widgets<AppModel, ()> for AppWidgets {
         main_window = gtk::ApplicationWindow {
             set_default_width: 500,
             set_default_height: 250,
-            set_titlebar: component!(Some(header)),
-            set_child: component!(Some(components.stack.root_widget())),
+            set_titlebar: Some(components.header.root_widget()),
+            set_child: Some(components.stack.root_widget()),
         }
     }
 
-    fn post_connect_components() {
+    fn post_init() {
         let header_widgets = components.header.widgets().unwrap();
         header_widgets
             .switcher

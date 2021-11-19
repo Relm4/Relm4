@@ -21,7 +21,7 @@ where
     ) -> Self {
     }
 
-    fn connect_parent(&self, _parent_widgets: &ParentModel::Widgets) {}
+    fn connect_parent(&mut self, _parent_widgets: &ParentModel::Widgets) {}
 
     fn root_widget(&self) -> Self::Root {}
 

@@ -216,12 +216,15 @@ where
 {
     fn init_components(
         parent_model: &OpenButtonModel<Conf>,
-        parent_widget: &OpenButtonWidgets,
         parent_sender: relm4::Sender<OpenButtonMsg>,
     ) -> Self {
         Self {
-            dialog: RelmComponent::new(parent_model, parent_widget, parent_sender),
+            dialog: RelmComponent::new(parent_model, parent_sender),
         }
+    }
+
+    fn connect_parent(&mut self, parent_widgets: &OpenButtonWidgets) {
+        self.dialog.connect_parent(parent_widgets);
     }
 }
 
@@ -253,7 +256,7 @@ where
     }
 
     fn post_init() {
-        let parent_window = parent_widgets.parent_window();
+        let parent_window = None; //parent_widgets.parent_window();
 
         let (view, popover, scroll_window) = if model.config.recently_opened_files.is_some() {
             let drop_down_button = gtk::MenuButton::new();
@@ -282,6 +285,10 @@ where
         } else {
             (None, None, None)
         };
+    }
+
+    fn post_connect_parent() {
+        self.parent_window = parent_widgets.parent_window();
     }
 
     fn manual_view() {

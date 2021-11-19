@@ -78,7 +78,6 @@ impl Widgets<ButtonModel, AppModel> for ButtonWidgets {
 }
 
 #[derive(relm4_macros::Components)]
-#[components(parent_model = AppModel)]
 pub struct AppComponents {
     button1: RelmComponent<ButtonModel, AppModel>,
     button2: RelmComponent<ButtonModel, AppModel>,

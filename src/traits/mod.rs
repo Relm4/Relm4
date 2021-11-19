@@ -167,7 +167,7 @@ where
 
     /// Optional method to initialize components.
     /// This is only useful if you want to attach the widgets of a component to the widgets of this model.
-    fn connect_parent(&self, _parent_widgets: &ParentModel::Widgets) {}
+    fn connect_parent(&mut self, _parent_widgets: &ParentModel::Widgets) {}
 
     /// Return a clone of the root widget. This is typically a GTK4 widget.
     fn root_widget(&self) -> Self::Root;

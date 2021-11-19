@@ -155,6 +155,7 @@ impl Components<AppModel> for AppComponents {
 struct AppWidgets {
     main: gtk::ApplicationWindow,
     text: gtk::Label,
+    #[allow(dead_code)]
     vbox: gtk::Box,
 }
 

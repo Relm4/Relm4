@@ -2,7 +2,8 @@ use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
 use syn::{
     parenthesized, parse::Parse, parse_macro_input, spanned::Spanned, Data, DeriveInput, Error,
-    Fields, GenericParam, Ident, Path, PathArguments, Result, Token, Type,
+    Fields, GenericArgument, GenericParam, Ident, Path, PathArguments, Result, Token, Type,
+    TypePath,
 };
 
 #[derive(Debug)]
@@ -58,9 +59,6 @@ pub(super) fn generate_stream(input: &DeriveInput) -> Result<TokenStream2> {
         }
     }
 
-    let model =
-        model.ok_or_else(|| Error::new(ident.span(), "Expected attribute for model parameter"))?;
-
     // Remove default type parameters (like <Type=DefaultType>).
     let mut generics = input.generics.clone();
     for param in generics.params.iter_mut() {
@@ -74,12 +72,12 @@ pub(super) fn generate_stream(input: &DeriveInput) -> Result<TokenStream2> {
     let mut connect_parent_stream = TokenStream2::new();
 
     for field in fields.named.iter() {
-        if let Type::Path(path) = &field.ty {
-            let last_segment = path.path.segments.last().unwrap();
+        if let Type::Path(type_path) = &field.ty {
+            let last_segment = type_path.path.segments.last().unwrap();
             let ident = &field.ident;
 
             // Remove path arguments
-            let mut path = path.clone();
+            let mut path = type_path.clone();
             path.path
                 .segments
                 .iter_mut()
@@ -96,13 +94,31 @@ pub(super) fn generate_stream(input: &DeriveInput) -> Result<TokenStream2> {
                 }
                 "RelmWorker" => {
                     init_stream.extend(quote! {
+                        #ident: #path ::with_new_thread(model, sender.clone()),
+                    });
+                }
+                "AsyncRelmWorker" => {
+                    init_stream.extend(quote! {
+                        #ident: #path ::with_new_tokio_rt(model, sender.clone()),
+                    });
+                }
+                "RelmMsgHandler" => {
+                    init_stream.extend(quote! {
                         #ident: #path ::new(model, sender.clone()),
                     });
                 }
-                _ => (),
+                _ => {
+                    return Err(Error::new(path.span(), "Expected a Relm4 component type here (such as RelmComponent or RelmWorker). For other types please manually implement the trait."));
+                }
+            }
+            if model.is_none() {
+                model = Some(last_path_generics(type_path)?);
             }
         }
     }
+
+    let model =
+        model.ok_or_else(|| Error::new(ident.span(), "Expected attribute for model parameter"))?;
 
     let stream = quote! {
         impl #generics #relm4_path ::Components< #model > for #ident {
@@ -119,5 +135,23 @@ pub(super) fn generate_stream(input: &DeriveInput) -> Result<TokenStream2> {
     };
 
     Ok(stream)
-    //Ok(quote! {})
+}
+
+fn last_path_generics(path: &TypePath) -> Result<Path> {
+    if let PathArguments::AngleBracketed(generics) = &path.path.segments.last().unwrap().arguments {
+        let last_arg = generics.args.last().unwrap();
+        if let GenericArgument::Type(Type::Path(path)) = last_arg {
+            Ok(path.path.clone())
+        } else {
+            Err(Error::new(
+                last_arg.span(),
+                "Expected the last generic argument to be a type path.",
+            ))
+        }
+    } else {
+        Err(Error::new(
+            path.span(),
+            "Expected to find angle bracketed generics.",
+        ))
+    }
 }

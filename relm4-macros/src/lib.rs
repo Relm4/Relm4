@@ -248,7 +248,7 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
                 }
             }
 
-            fn connect_parent(&self, parent_widgets: &<#parent_model as #relm4_path::Model>::Widgets) {
+            fn connect_parent(&mut self, parent_widgets: &<#parent_model as #relm4_path::Model>::Widgets) {
                 #pre_connect_parent
                 #parent
                 #post_connect_parent
