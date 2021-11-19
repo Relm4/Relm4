@@ -196,10 +196,11 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let widgets::TokenStreams {
         struct_fields,
         init_widgets,
+        connect_widgets,
         init_properties,
         connect,
         return_fields,
-        components,
+        parent,
         connect_components,
         view,
         track,
@@ -235,9 +236,10 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
             fn init_view(model: &#model, components: &<#model as #relm4_path::Model>::Components, sender: #relm4_path::Sender<<#model as #relm4_path::Model>::Msg>) -> Self {
                 #pre_init
                 #init_widgets
-                #components
+                #connect_widgets
                 #init_properties
                 #connect
+                #connect_components
                 #post_init
                 Self {
                     #return_fields
@@ -247,7 +249,7 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
 
             fn connect_parent(&self, parent_widgets: &<#parent_model as #relm4_path::Model>::Widgets) {
                 #pre_connect_components
-                #connect_components
+                #parent
                 #post_connect_components
             }
 

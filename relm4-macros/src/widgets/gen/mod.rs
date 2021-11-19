@@ -30,11 +30,14 @@ mod view;
 /// Additional view stream for track!.
 mod track;
 
-/// Component intitialization.
-mod components;
+/// Connect the widgets.
+mod connect_widgets;
 
 /// Connect components and widgets.
 mod connect_components;
+
+/// Connect to parent properties.
+mod parent;
 
 impl Widget {
     pub fn generate_tokens_recursively(
@@ -49,22 +52,25 @@ impl Widget {
         self.return_stream(&mut streams.return_fields);
 
         for prop in &self.properties.properties {
+            prop.connect_widgets_stream(&mut streams.connect_widgets, &self.name);
+
             if let PropertyType::Widget(widget) = &prop.ty {
                 widget.generate_tokens_recursively(streams, vis, model_type, relm4_path);
-                // if let Some(returned_widget) = widget.returned_widget {
-                //     returned_widget.get_widget_list(widgets);
-                // }
+                if let Some(returned_widget) = &widget.returned_widget {
+                    returned_widget
+                        .generate_tokens_recursively(streams, vis, model_type, relm4_path);
+                }
             } else {
                 prop.property_init_stream(&mut streams.init_properties, &self.name, relm4_path);
-                prop.connect_stream(&mut streams.connect, &self.name);
 
                 prop.view_stream(&mut streams.view, &self.name, relm4_path);
                 prop.track_stream(&mut streams.track, &self.name, model_type);
 
+                prop.connect_stream(&mut streams.connect, &self.name);
                 prop.connect_component_stream(&mut streams.connect_components, &self.name);
+
+                prop.connect_parent_stream(&mut streams.parent, &self.name);
             }
-            // Component stream needs to be generated for widgets, too.
-            prop.component_stream(&mut streams.components, &self.name);
         }
     }
 
@@ -86,35 +92,31 @@ impl Widget {
     }
 }
 
-// impl ReturnedWidget {
-//     pub fn generate_tokens_recursively(
-//         &self,
-//         streams: &mut TokenStreams,
-//         vis: &Option<Visibility>,
-//         model_type: &Type,
-//         relm4_path: &Path,
-//     ) {
-//         self.struct_fields_stream(&mut streams.struct_fields, vis);
-//         self.init_widgets_stream(&mut streams.init_widgets);
-//         self.return_stream(&mut streams.return_fields);
+impl ReturnedWidget {
+    pub fn generate_tokens_recursively(
+        &self,
+        streams: &mut TokenStreams,
+        vis: &Option<Visibility>,
+        model_type: &Type,
+        relm4_path: &Path,
+    ) {
+        self.struct_fields_stream(&mut streams.struct_fields, vis);
+        self.return_stream(&mut streams.return_fields);
 
-//         for prop in &self.properties.properties {
-//             if let PropertyType::Widget(widget) = &prop.ty {
-//                 widget.generate_tokens_recursively(streams, vis, model_type, relm4_path);
-// if let Some(returned_widget) = widget.returned_widget {
-//     returned_widget.get_widget_list(widgets);
-// }
-//             } else {
-//                 prop.property_init_stream(&mut streams.init_properties, &self.name, relm4_path);
-//                 prop.connect_stream(&mut streams.connect, &self.name);
+        for prop in &self.properties.properties {
+            prop.connect_widgets_stream(&mut streams.connect_widgets, &self.name);
 
-//                 prop.view_stream(&mut streams.view, &self.name, relm4_path);
-//                 prop.track_stream(&mut streams.track, &self.name, model_type);
+            if let PropertyType::Widget(widget) = &prop.ty {
+                widget.generate_tokens_recursively(streams, vis, model_type, relm4_path);
+            } else {
+                prop.property_init_stream(&mut streams.init_properties, &self.name, relm4_path);
+                prop.connect_stream(&mut streams.connect, &self.name);
 
-//                 prop.connect_component_stream(&mut streams.connect_components, &self.name);
-//             }
-// Component stream needs to be generated for widgets, too.
-//             prop.component_stream(&mut streams.components, &self.name);
-//         }
-//     }
-// }
+                prop.view_stream(&mut streams.view, &self.name, relm4_path);
+                prop.track_stream(&mut streams.track, &self.name, model_type);
+
+                prop.connect_component_stream(&mut streams.connect_components, &self.name);
+            }
+        }
+    }
+}

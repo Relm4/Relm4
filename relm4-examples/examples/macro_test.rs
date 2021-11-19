@@ -84,15 +84,16 @@ pub struct AppComponents {
 }
 
 impl Components<AppModel> for AppComponents {
-    fn init_components(
-        model: &AppModel,
-        parent_widgets: &AppWidgets,
-        sender: Sender<AppMsg>,
-    ) -> Self {
+    fn init_components(model: &AppModel, sender: Sender<AppMsg>) -> Self {
         AppComponents {
-            button1: RelmComponent::new(model, parent_widgets, sender.clone()),
-            button2: RelmComponent::new(model, parent_widgets, sender),
+            button1: RelmComponent::new(model, sender.clone()),
+            button2: RelmComponent::new(model, sender),
         }
+    }
+
+    fn connect_parent(&mut self, parent_widgets: &AppWidgets) {
+        self.button1.connect_parent(parent_widgets);
+        self.button2.connect_parent(parent_widgets);
     }
 }
 
@@ -112,7 +113,8 @@ impl Widgets<AppModel, ()> for AppWidgets {
                 set_margin_all?: Some(5),
                 set_spacing: 5,
 
-                append: component!(button1),
+                //append: component_root!(button1),
+                append: components.button1.root_widget(),
                 append: inc_button = &gtk::Button {
                     set_label: "Increment",
                     connect_clicked(sender) => move |_| {
@@ -145,7 +147,22 @@ impl Widgets<AppModel, ()> for AppWidgets {
                     attach(2, 1, 1, 1) = &gtk::Label {
                         set_label: "grid test 3",
                     },
-                    attach(2, 2, 1, 1): component!(components.button2.root_widget())
+                    attach(2, 2, 1, 1): components.button2.root_widget(),
+                },
+                append: stack = &gtk::Stack {
+                    add_child = &gtk::Label {
+                        set_label: "Testing StackPage 1",
+                    } -> {
+                        set_title: "Test page 1",
+                    },
+                    add_child = &gtk::Label {
+                        set_label: "Testing StackPage 2",
+                    } -> {
+                        set_title: "Test page 2",
+                    },
+                },
+                append = &gtk::StackSwitcher {
+                    set_stack: Some(&stack)
                 }
             },
         }

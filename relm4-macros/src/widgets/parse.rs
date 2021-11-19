@@ -1,3 +1,4 @@
+use proc_macro2::Span as Span2;
 use syn::{
     braced, bracketed, parenthesized,
     parse::{Parse, ParseBuffer, ParseStream},
@@ -131,9 +132,9 @@ impl Parse for Property {
                     if ident == "track" {
                         let tokens = mac.tokens.into();
                         PropertyType::Track(parse_macro_input::parse(tokens)?)
-                    } else if ident == "component" {
+                    } else if ident == "parent" {
                         let tokens = mac.tokens.into();
-                        PropertyType::Component(parse_macro_input::parse(tokens)?)
+                        PropertyType::Parent(parse_macro_input::parse(tokens)?)
                     } else if ident == "args" {
                         let tokens = mac.tokens.into();
                         PropertyType::Args(parse_macro_input::parse(tokens)?)
@@ -337,6 +338,10 @@ impl Parse for ReturnedWidget {
 
             (None, None)
         };
+
+        let name = name.unwrap_or_else(|| {
+            crate::util::idents_to_snake_case(&[Ident::new("_returned_widget", Span2::call_site())])
+        });
 
         let inner;
         let _token = braced!(inner in input);

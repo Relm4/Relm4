@@ -8,15 +8,26 @@ mod parse;
 
 #[derive(Debug, Default)]
 pub struct TokenStreams {
+    /// The tokens for the struct fields -> name: Type,
     pub struct_fields: TokenStream2,
+    /// The tokens initializing the widgets.
     pub init_widgets: TokenStream2,
+    /// The tokens connecting widgets.
+    pub connect_widgets: TokenStream2,
+    /// The tokens initializing the properties.
     pub init_properties: TokenStream2,
+    /// The tokens for the returned struct fields -> name,
     pub return_fields: TokenStream2,
+    /// The view tokens (watch! macro)
     pub view: TokenStream2,
-    pub connect: TokenStream2,
+    /// The view tokens (track! macro)
     pub track: TokenStream2,
-    pub components: TokenStream2,
+    /// The tokens for connecting events.
+    pub connect: TokenStream2,
+    /// The tokens for connecting events to components.
     pub connect_components: TokenStream2,
+    /// The tokens for using the parent stream.
+    pub parent: TokenStream2,
 }
 
 #[derive(Debug)]
@@ -30,7 +41,7 @@ pub(super) enum PropertyType {
     Expr(Expr),
     Value(Lit),
     Track(Tracker),
-    Component(Expr),
+    Parent(Expr),
     Args(Args<Expr>),
     Connect(ExprClosure),
     ConnectComponent(ExprClosure),
@@ -83,7 +94,7 @@ pub(super) struct Widget {
 
 #[derive(Debug)]
 pub(super) struct ReturnedWidget {
-    pub name: Option<Ident>,
+    pub name: Ident,
     pub ty: Option<Path>,
     pub properties: Properties,
     pub is_optional: bool,
