@@ -13,6 +13,7 @@ use syn::{parse_macro_input, spanned::Spanned, Error, GenericArgument, PathArgum
 mod additional_fields;
 mod args;
 mod attrs;
+mod derive_components;
 mod funcs;
 mod item_impl;
 mod macros;
@@ -268,4 +269,15 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
     };
 
     out.into()
+}
+
+#[proc_macro_derive(Components, attributes(components))]
+pub fn derive(input: TokenStream) -> TokenStream {
+    let derive_input = parse_macro_input!(input);
+    let output = derive_components::generate_stream(&derive_input);
+
+    match output {
+        Ok(output) => output.into(),
+        Err(error) => error.into_compile_error().into(),
+    }
 }

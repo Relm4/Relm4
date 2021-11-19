@@ -1,7 +1,6 @@
 use gtk::prelude::{BoxExt, ButtonExt, GridExt, GtkWindowExt, OrientableExt, WidgetExt};
 use relm4::{
-    send, AppUpdate, ComponentUpdate, Components, Model, RelmApp, RelmComponent, Sender,
-    WidgetPlus, Widgets,
+    send, AppUpdate, ComponentUpdate, Model, RelmApp, RelmComponent, Sender, WidgetPlus, Widgets,
 };
 
 #[tracker::track]
@@ -78,23 +77,11 @@ impl Widgets<ButtonModel, AppModel> for ButtonWidgets {
     }
 }
 
+#[derive(relm4_macros::Components)]
+#[components(parent_model = AppModel)]
 pub struct AppComponents {
     button1: RelmComponent<ButtonModel, AppModel>,
     button2: RelmComponent<ButtonModel, AppModel>,
-}
-
-impl Components<AppModel> for AppComponents {
-    fn init_components(model: &AppModel, sender: Sender<AppMsg>) -> Self {
-        AppComponents {
-            button1: RelmComponent::new(model, sender.clone()),
-            button2: RelmComponent::new(model, sender),
-        }
-    }
-
-    fn connect_parent(&mut self, parent_widgets: &AppWidgets) {
-        self.button1.connect_parent(parent_widgets);
-        self.button2.connect_parent(parent_widgets);
-    }
 }
 
 fn new_label() -> gtk::Label {
