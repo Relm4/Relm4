@@ -16,8 +16,8 @@
 mod app;
 mod component;
 pub mod drawing;
-mod micro_component;
 pub mod factory;
+mod micro_component;
 mod msg_handler;
 mod traits;
 pub mod util;
@@ -25,7 +25,7 @@ mod worker;
 
 pub use app::RelmApp;
 pub use component::RelmComponent;
-pub use micro_component::{MicroComponent, MicroModel, MicroWidgets, MicroComponentError};
+pub use micro_component::{MicroComponent, MicroComponentError, MicroModel, MicroWidgets};
 pub use msg_handler::RelmMsgHandler;
 pub use traits::*;
 pub use util::widget_plus::WidgetPlus;

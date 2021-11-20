@@ -1,5 +1,7 @@
 //! Trait that extends [`gtk::prelude::WidgetExt`].
-use gtk::prelude::StyleContextExt;
+
+use gtk::prelude::{BoxExt, Cast, FixedExt, GridExt, IsA, StyleContextExt, TextViewExt, WidgetExt};
+use gtk::Widget;
 
 /// Trait that extends [`gtk::prelude::WidgetExt`].
 ///
@@ -20,9 +22,15 @@ pub trait WidgetPlus {
     /// # let widget = gtk::Button::new();
     /// widget.inline_css(b"border: 1px solid red");
     fn inline_css(&self, style_data: &[u8]);
+
+    /// Try to remove a widget from a widget.
+    ///
+    /// Returns [`true`] if the removal was successful and
+    /// [`false`] if nothing was done.
+    fn try_remove(&self, widget: &impl IsA<Widget>) -> bool;
 }
 
-impl<W: gtk::prelude::WidgetExt> WidgetPlus for W {
+impl<W: IsA<Widget> + WidgetExt> WidgetPlus for W {
     fn set_margin_all(&self, margin: i32) {
         self.set_margin_start(margin);
         self.set_margin_end(margin);
@@ -43,5 +51,38 @@ impl<W: gtk::prelude::WidgetExt> WidgetPlus for W {
         let provider = gtk::CssProvider::new();
         provider.load_from_data(&[b"*{", style_data, b"}"].concat());
         context.add_provider(&provider, gtk::STYLE_PROVIDER_PRIORITY_APPLICATION + 1);
+    }
+
+    fn try_remove(&self, widget: &impl IsA<Widget>) -> bool {
+        if let Some(box_) = self.as_ref().downcast_ref::<gtk::Box>() {
+            box_.remove(widget);
+            true
+        } else if let Some(grid) = self.as_ref().downcast_ref::<gtk::Grid>() {
+            grid.remove(widget);
+            true
+        } else if let Some(stack) = self.as_ref().downcast_ref::<gtk::Stack>() {
+            stack.remove(widget);
+            true
+        } else if let Some(fixed) = self.as_ref().downcast_ref::<gtk::Fixed>() {
+            fixed.remove(widget);
+            true
+        } else if let Some(text_view) = self.as_ref().downcast_ref::<gtk::TextView>() {
+            text_view.remove(widget);
+            true
+        } else if let Some(action_bar) = self.as_ref().downcast_ref::<gtk::ActionBar>() {
+            action_bar.remove(widget);
+            true
+        } else if let Some(flow_box) = self.as_ref().downcast_ref::<gtk::FlowBox>() {
+            flow_box.remove(widget);
+            true
+        } else if let Some(header_bar) = self.as_ref().downcast_ref::<gtk::HeaderBar>() {
+            header_bar.remove(widget);
+            true
+        } else if let Some(list_box) = self.as_ref().downcast_ref::<gtk::ListBox>() {
+            list_box.remove(widget);
+            true
+        } else {
+            false
+        }
     }
 }
