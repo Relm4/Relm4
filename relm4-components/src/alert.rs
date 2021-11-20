@@ -120,7 +120,7 @@ where
 {
     view! {
         dialog = gtk::MessageDialog {
-            set_transient_for: parent_widgets.parent_window().as_ref(),
+            set_transient_for: parent!(parent_widgets.parent_window().as_ref()),
             set_message_type: gtk::MessageType::Question,
             set_visible: watch!(model.is_active),
             connect_response(sender) => move |_, response| {

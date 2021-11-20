@@ -126,7 +126,7 @@ where
             set_cancel_label: Some(model.settings.cancel_label),
             set_accept_label: Some(model.settings.accept_label),
             set_modal: model.settings.is_modal,
-            set_transient_for: parent_widgets.parent_window().as_ref(),
+            set_transient_for: parent!(parent_widgets.parent_window().as_ref()),
             connect_response => move |dialog, res_ty| {
                 match res_ty {
                     gtk::ResponseType::Accept => {

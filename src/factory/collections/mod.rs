@@ -7,7 +7,7 @@
 //! arbitrary indices use [`FactoryVecDeque`].
 //!
 //! Also, [`FactoryVec`] works with all container widgets that implement
-//! [`SimpleFactoryView`](super::SimpleFactoryView) such as [`gtk::Box`] or [`gtk::Grid`].
+//! [`FactoryView`](super::FactoryView) such as [`gtk::Box`] or [`gtk::Grid`].
 //!
 //! [`FactoryVecDeque`] additionally needs container widgets to implement the
 //! [`FactoryListView`](super::FactoryListView) trait that's implements support

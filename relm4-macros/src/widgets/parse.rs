@@ -1,3 +1,4 @@
+use proc_macro2::Span as Span2;
 use syn::{
     braced, bracketed, parenthesized,
     parse::{Parse, ParseBuffer, ParseStream},
@@ -9,7 +10,9 @@ use syn::{
 
 use crate::util;
 
-use super::{Properties, Property, PropertyName, PropertyType, Tracker, Widget, WidgetFunc};
+use super::{
+    Properties, Property, PropertyName, PropertyType, ReturnedWidget, Tracker, Widget, WidgetFunc,
+};
 
 impl Parse for Tracker {
     fn parse(input: ParseStream) -> Result<Self> {
@@ -103,7 +106,7 @@ impl Parse for Property {
             if input.peek(Token![=]) {
                 let _token: Token![=] = input.parse()?;
             } else {
-                let _colon: Token! [:] = input.parse()?;
+                let _colon: Token![:] = input.parse()?;
             }
             input.parse().map(PropertyType::Widget)?
         }
@@ -129,9 +132,9 @@ impl Parse for Property {
                     if ident == "track" {
                         let tokens = mac.tokens.into();
                         PropertyType::Track(parse_macro_input::parse(tokens)?)
-                    } else if ident == "component" {
+                    } else if ident == "parent" {
                         let tokens = mac.tokens.into();
-                        PropertyType::Component(parse_macro_input::parse(tokens)?)
+                        PropertyType::Parent(parse_macro_input::parse(tokens)?)
                     } else if ident == "args" {
                         let tokens = mac.tokens.into();
                         PropertyType::Args(parse_macro_input::parse(tokens)?)
@@ -294,12 +297,61 @@ impl Parse for Widget {
             util::idents_to_snake_case(&func.path_segments)
         };
 
+        let returned_widget = if input.peek(Token![->]) {
+            let _arrow: Token![->] = input.parse()?;
+            Some(input.parse()?)
+        } else {
+            None
+        };
+
         Ok(Widget {
             name,
             func,
             properties,
             wrapper,
             assign_as_ref,
+            returned_widget,
+        })
+    }
+}
+
+impl Parse for ReturnedWidget {
+    fn parse(input: ParseStream) -> Result<Self> {
+        let mut is_optional = false;
+
+        let (name, ty) = if input.peek(Ident) {
+            let name = input.parse()?;
+
+            if input.peek(Token![?]) {
+                let _mark: Token![?] = input.parse()?;
+                is_optional = true;
+            }
+
+            let _colon: Token![:] = input.parse()?;
+            let ty = input.parse()?;
+            (Some(name), Some(ty))
+        } else {
+            if input.peek(Token![?]) {
+                let _mark: Token![?] = input.parse()?;
+                is_optional = true;
+            }
+
+            (None, None)
+        };
+
+        let name = name.unwrap_or_else(|| {
+            crate::util::idents_to_snake_case(&[Ident::new("_returned_widget", Span2::call_site())])
+        });
+
+        let inner;
+        let _token = braced!(inner in input);
+        let properties = inner.parse()?;
+
+        Ok(ReturnedWidget {
+            name,
+            ty,
+            properties,
+            is_optional,
         })
     }
 }

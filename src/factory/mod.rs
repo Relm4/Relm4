@@ -62,7 +62,7 @@ where
     View: FactoryView<Data::Root>,
 {
     /// Key that provides additional information for the [`FactoryPrototype`] functions.
-    type Key;
+    type Key: ?Sized;
 
     /// Efficiently update the view according to data changes.
     fn generate(&self, view: &View, sender: Sender<Data::Msg>);
@@ -90,7 +90,7 @@ pub trait FactoryView<Widget> {
 
     /// Position type used by this widget.
     ///
-    /// For example [`GridPosition`] for [`gtk::Grid`] or `()` for [`gtk::Box`]
+    /// For example [`GridPosition`](positions::GridPosition) for [`gtk::Grid`] or `()` for [`gtk::Box`]
     type Position;
 
     /// Adds a new widget to self at the end.

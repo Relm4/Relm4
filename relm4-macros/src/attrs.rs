@@ -28,7 +28,7 @@ pub struct Attrs {
     ///
     /// You can't set relm4 path twice
     ///
-    /// ```rust
+    /// ```rust, ignore
     /// #[widget(relm4 = ::my::path, relm4 = ::my::other::path ) ]
     /// ```
     /// is illegal
