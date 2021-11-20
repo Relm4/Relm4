@@ -7,6 +7,8 @@
 ### Added
 
 + relm4-macros: New returned widget syntax
++ relm4: Micro components
++ relm4-examples: Micro components example
 
 ### Changed
 
