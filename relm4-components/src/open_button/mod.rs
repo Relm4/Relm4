@@ -287,7 +287,7 @@ where
         };
     }
 
-    fn post_connect_parent() {
+    fn pre_connect_parent() {
         self.parent_window = parent_widgets.parent_window();
     }
 

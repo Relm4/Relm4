@@ -141,7 +141,7 @@ struct AppComponents {
 impl Components<AppModel> for AppComponents {
     fn init_components(parent_model: &AppModel, parent_sender: Sender<AppMsg>) -> Self {
         AppComponents {
-            comp1: RelmComponent::with_new_thread(parent_model, parent_sender.clone()),
+            comp1: RelmComponent::new(parent_model, parent_sender.clone()),
             comp2: RelmComponent::new(parent_model, parent_sender),
         }
     }

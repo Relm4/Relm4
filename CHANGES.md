@@ -4,7 +4,18 @@
 
 ### Added
 
-+ relm4-macros: New shorthand component syntax
+### Added
+
++ relm4-macros: New returned widget syntax
+
+### Changed
+
++ relm4: Initialize widgets from the outermost components to the app
++ relm4-macros: component! is now unnecessary and parent! was added
+
+### Removed
+
++ relm4: RelmComponent::with_new_thread
 
 ## 0.2.1 - 2021-10-17
 

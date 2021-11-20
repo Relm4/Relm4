@@ -1,9 +1,9 @@
 use gtk::glib::{self, Sender};
 
 use std::cell::{RefCell, RefMut};
-use std::marker::{PhantomData, Send};
+use std::marker::PhantomData;
 use std::rc::Rc;
-use std::sync::mpsc::channel;
+// use std::sync::mpsc::channel;
 
 use crate::{ComponentUpdate, Components, Model as ModelTrait, Widgets as WidgetsTrait};
 
@@ -22,9 +22,10 @@ where
 {
     model: PhantomData<Model>,
     parent_model: PhantomData<ParentModel>,
+    components: Rc<RefCell<Model::Components>>,
     sender: Sender<Model::Msg>,
     root_widget: <Model::Widgets as WidgetsTrait<Model, ParentModel>>::Root,
-    shared_widgets: Option<Rc<RefCell<Model::Widgets>>>,
+    shared_widgets: Rc<RefCell<Model::Widgets>>,
 }
 
 impl<Model, ParentModel> RelmComponent<Model, ParentModel>
@@ -38,12 +39,13 @@ where
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 
         let mut model = Model::init_model(parent_model);
-        let mut components = Model::Components::init_components(&model, sender.clone());
+        let components = Model::Components::init_components(&model, sender.clone());
 
         let widgets = Model::Widgets::init_view(&model, &components, sender.clone());
         let root_widget = widgets.root_widget();
 
-        components.connect_parent(&widgets);
+        let components = Rc::new(RefCell::new(components));
+        let handler_components = components.clone();
 
         let cloned_sender = sender.clone();
 
@@ -57,7 +59,8 @@ where
                 .expect("Couldn't acquire glib main context");
             // The main loop executes the closure as soon as it receives the message
             receiver.attach(Some(&context), move |msg: Model::Msg| {
-                model.update(msg, &components, sender.clone(), parent_sender.clone());
+                let components: &Model::Components = &handler_components.borrow();
+                model.update(msg, components, sender.clone(), parent_sender.clone());
                 if let Ok(ref mut widgets) = handler_widgets.try_borrow_mut() {
                     widgets.view(&model, sender.clone());
                 } else {
@@ -70,9 +73,10 @@ where
         RelmComponent {
             model: PhantomData,
             parent_model: PhantomData,
+            components,
             sender: cloned_sender,
             root_widget,
-            shared_widgets: Some(shared_widgets),
+            shared_widgets,
         }
     }
 
@@ -81,6 +85,9 @@ where
         self.widgets()
             .expect("TODO: ADD MESSAGE")
             .connect_parent(parent_widgets);
+        self.components
+            .borrow_mut()
+            .connect_parent(&self.shared_widgets.borrow());
     }
 
     /// Send a message to this component.
@@ -108,18 +115,19 @@ where
     /// otherwise the view function can't be called as long you own the widgets (it uses [`RefCell`] internally).
     pub fn widgets(&self) -> Option<RefMut<'_, Model::Widgets>> {
         self.shared_widgets
-            .as_ref()
-            .expect("Component wasn't initialized correctly: shared widgets are missing")
+            // .as_ref()
+            // .expect("Component wasn't initialized correctly: shared widgets are missing")
             .try_borrow_mut()
             .ok()
     }
 }
 
+/*
 impl<Model, ParentModel> RelmComponent<Model, ParentModel>
 where
     Model: ComponentUpdate<ParentModel> + Send + 'static,
     Model::Widgets: WidgetsTrait<Model, ParentModel> + 'static,
-    Model::Components: Send,
+    Model::Components: Send + Sync,
     Model::Msg: Send,
     ParentModel: ModelTrait,
     ParentModel::Msg: Send,
@@ -143,7 +151,8 @@ where
         let widgets = Model::Widgets::init_view(&model, &components, sender.clone());
         let root_widget = widgets.root_widget();
 
-        components.connect_parent(&widgets);
+        //components.connect_parent(&widgets);
+        let components = Arc::new(components);
 
         let cloned_sender = sender.clone();
 
@@ -196,9 +205,11 @@ where
         RelmComponent {
             model: PhantomData,
             parent_model: PhantomData,
+            components,
             sender: cloned_sender,
             root_widget,
-            shared_widgets: Some(shared_widgets),
+            shared_widgets,
         }
     }
 }
+*/
