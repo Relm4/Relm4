@@ -11,7 +11,7 @@ use gtk::EntryBuffer;
 use rand::prelude::SliceRandom;
 use rand::Rng;
 use relm4::{
-    send, AppUpdate, ComponentUpdate, Components, MessageHandler, Model, RelmApp, RelmComponent,
+    send, AppUpdate, ComponentUpdate, MessageHandler, Model, RelmApp, RelmComponent,
     RelmMsgHandler, Sender, WidgetPlus, Widgets,
 };
 
@@ -65,7 +65,7 @@ impl ComponentUpdate<AppModel> for DialogModel {
 impl Widgets<DialogModel, AppModel> for DialogWidgets {
     view! {
         dialog = gtk::MessageDialog {
-            set_transient_for: Some(&parent_widgets.main_window),
+            set_transient_for: parent!(Some(&parent_widgets.main_window)),
             set_modal: true,
             set_visible: watch!(!model.hidden),
             set_text: Some("Congratulations!"),
@@ -528,22 +528,10 @@ impl MessageHandler<AppModel> for TimerHandler {
     }
 }
 
+#[derive(relm4_macros::Components)]
 struct AppComponents {
     timer_handler: RelmMsgHandler<TimerHandler, AppModel>,
     dialog: RelmComponent<DialogModel, AppModel>,
-}
-
-impl Components<AppModel> for AppComponents {
-    fn init_components(
-        parent_model: &AppModel,
-        parent_widgets: &AppWidgets,
-        parent_sender: Sender<AppMsg>,
-    ) -> Self {
-        AppComponents {
-            timer_handler: RelmMsgHandler::new(parent_model, parent_sender.clone()),
-            dialog: RelmComponent::new(parent_model, parent_widgets, parent_sender),
-        }
-    }
 }
 
 fn main() {

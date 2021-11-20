@@ -1,32 +1,31 @@
-use proc_macro2::{Span as Span2, TokenStream as TokenStream2};
+use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens};
-use syn::Ident;
 
 use crate::widgets::gen::PropertyType;
 impl PropertyType {
-    pub fn return_assign_tokens(&self) -> TokenStream2 {
-        let mut stream = TokenStream2::new();
-
+    pub fn return_assign_tokens(&self) -> Option<TokenStream2> {
         if let PropertyType::Widget(widget) = self {
             if let Some(returned_widget) = &widget.returned_widget {
-                let name = if let Some(name) = &returned_widget.name {
-                    name.clone()
-                } else {
-                    Ident::new("placeholder", Span2::call_site())
-                };
+                let mut stream = TokenStream2::new();
+
+                let name = &returned_widget.name;
 
                 if let Some(ty) = &returned_widget.ty {
                     stream.extend(quote! {
-                        #name : #ty =
+                        let #name : #ty
                     });
                 } else {
                     stream.extend(quote! {
-                        let #name =
+                        let #name
                     });
                 }
+                Some(stream)
+            } else {
+                None
             }
+        } else {
+            None
         }
-        stream
     }
 
     pub fn factory_expr(&self) -> Option<TokenStream2> {

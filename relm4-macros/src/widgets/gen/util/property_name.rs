@@ -1,6 +1,6 @@
-use proc_macro2::TokenStream as TokenStream2;
+use proc_macro2::{Span as Span2, TokenStream as TokenStream2};
 use quote::quote;
-use syn::{Generics, Ident};
+use syn::{spanned::Spanned, Generics, Ident};
 
 use crate::widgets::gen::PropertyName;
 
@@ -50,6 +50,15 @@ impl PropertyName {
         match self {
             PropertyName::Ident(_) => None,
             PropertyName::Path(_) => Some(quote! { &self.#w_name, }),
+        }
+    }
+}
+
+impl Spanned for PropertyName {
+    fn span(&self) -> Span2 {
+        match self {
+            PropertyName::Ident(ident) => ident.span(),
+            PropertyName::Path(path) => path.span(),
         }
     }
 }

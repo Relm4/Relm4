@@ -1,5 +1,5 @@
 use gtk::prelude::{Cast, GtkWindowExt};
-use relm4::{AppUpdate, Components, Model, RelmApp, RelmComponent, Sender, Widgets};
+use relm4::{AppUpdate, Model, RelmApp, RelmComponent, Sender, Widgets};
 use relm4_components::open_button::{
     OpenButtonConfig, OpenButtonModel, OpenButtonParent, OpenButtonSettings,
 };
@@ -75,20 +75,9 @@ impl ParentWindow for AppWidgets {
     }
 }
 
+#[derive(relm4_macros::Components)]
 pub struct AppComponents {
     open_button: RelmComponent<OpenButtonModel<OpenFileButtonConfig>, AppModel>,
-}
-
-impl Components<AppModel> for AppComponents {
-    fn init_components(
-        model: &AppModel,
-        parent_widgets: &AppWidgets,
-        sender: Sender<AppMsg>,
-    ) -> Self {
-        AppComponents {
-            open_button: RelmComponent::new(model, parent_widgets, sender),
-        }
-    }
 }
 
 #[relm4_macros::widget]
@@ -98,7 +87,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
             set_default_width: 300,
             set_default_height: 100,
             set_titlebar = Some(&gtk::HeaderBar) {
-                pack_start: component!(open_button),
+                pack_start: components.open_button.root_widget(),
             }
         }
     }

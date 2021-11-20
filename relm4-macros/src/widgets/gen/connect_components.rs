@@ -21,9 +21,8 @@ impl Property {
             let p_name = &self.name;
             let p_span = p_name.span().unwrap().into();
 
-            let assign_fn = self.name.self_assign_fn_stream(&self.generics, w_name);
-            let self_assign_args = self.name.self_assign_args_stream(w_name);
-            let return_assign_stream = self.ty.return_assign_tokens();
+            let assign_fn = self.name.assign_fn_stream(&self.generics, w_name);
+            let self_assign_args = self.name.assign_args_stream(w_name);
 
             let mut arg_stream = TokenStream2::new();
             if let Some(args) = &self.args {

@@ -13,6 +13,7 @@ use syn::{parse_macro_input, spanned::Spanned, Error, GenericArgument, PathArgum
 mod additional_fields;
 mod args;
 mod attrs;
+mod derive_components;
 mod funcs;
 mod item_impl;
 mod macros;
@@ -179,8 +180,8 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let Funcs {
         pre_init,
         post_init,
-        pre_connect_components,
-        post_connect_components,
+        pre_connect_parent,
+        post_connect_parent,
         manual_view,
     } = match Funcs::new(&data.funcs) {
         Ok(macros) => macros,
@@ -196,10 +197,11 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let widgets::TokenStreams {
         struct_fields,
         init_widgets,
+        connect_widgets,
         init_properties,
         connect,
         return_fields,
-        components,
+        parent,
         connect_components,
         view,
         track,
@@ -232,11 +234,13 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
             type Root = #root_widget_type;
 
             /// Initialize the UI.
-            fn init_view(model: &#model, parent_widgets: &<#parent_model as #relm4_path::Model>::Widgets, sender: #relm4_path::Sender<<#model as #relm4_path::Model>::Msg>) -> Self {
+            fn init_view(model: &#model, components: &<#model as #relm4_path::Model>::Components, sender: #relm4_path::Sender<<#model as #relm4_path::Model>::Msg>) -> Self {
                 #pre_init
                 #init_widgets
+                #connect_widgets
                 #init_properties
                 #connect
+                #connect_components
                 #post_init
                 Self {
                     #return_fields
@@ -244,11 +248,10 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
                 }
             }
 
-            fn connect_components(&self, model: &#model, components: &<#model as #relm4_path::Model>::Components) {
-                #pre_connect_components
-                #components
-                #connect_components
-                #post_connect_components
+            fn connect_parent(&mut self, parent_widgets: &<#parent_model as #relm4_path::Model>::Widgets) {
+                #pre_connect_parent
+                #parent
+                #post_connect_parent
             }
 
             /// Return the root widget.
@@ -266,4 +269,15 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
     };
 
     out.into()
+}
+
+#[proc_macro_derive(Components, attributes(components))]
+pub fn derive(input: TokenStream) -> TokenStream {
+    let derive_input = parse_macro_input!(input);
+    let output = derive_components::generate_stream(&derive_input);
+
+    match output {
+        Ok(output) => output.into(),
+        Err(error) => error.into_compile_error().into(),
+    }
 }

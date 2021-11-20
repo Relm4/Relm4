@@ -1,7 +1,5 @@
 use gtk::prelude::{BoxExt, ButtonExt, DialogExt, GtkWindowExt, ToggleButtonExt, WidgetExt};
-use relm4::{
-    send, AppUpdate, ComponentUpdate, Components, Model, RelmApp, RelmComponent, Sender, Widgets,
-};
+use relm4::{send, AppUpdate, ComponentUpdate, Model, RelmApp, RelmComponent, Sender, Widgets};
 
 enum HeaderMsg {
     View,
@@ -124,7 +122,7 @@ impl ComponentUpdate<AppModel> for DialogModel {
 impl Widgets<DialogModel, AppModel> for DialogWidgets {
     view! {
         dialog = gtk::MessageDialog {
-            set_transient_for: Some(&parent_widgets.main_window),
+            set_transient_for: parent!(Some(&parent_widgets.main_window)),
             set_modal: true,
             set_visible: watch!(!model.hidden),
             set_text: Some("Do you want to close before saving?"),
@@ -142,22 +140,10 @@ impl Widgets<DialogModel, AppModel> for DialogWidgets {
     }
 }
 
+#[derive(relm4_macros::Components)]
 struct AppComponents {
     header: RelmComponent<HeaderModel, AppModel>,
     dialog: RelmComponent<DialogModel, AppModel>,
-}
-
-impl Components<AppModel> for AppComponents {
-    fn init_components(
-        parent_model: &AppModel,
-        parent_widgets: &AppWidgets,
-        parent_sender: Sender<AppMsg>,
-    ) -> Self {
-        AppComponents {
-            header: RelmComponent::new(parent_model, parent_widgets, parent_sender.clone()),
-            dialog: RelmComponent::new(parent_model, parent_widgets, parent_sender),
-        }
-    }
 }
 
 #[derive(Debug)]
@@ -189,7 +175,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
         main_window = gtk::ApplicationWindow {
             set_default_width: 500,
             set_default_height: 250,
-            set_titlebar: component!(Some(header)),
+            set_titlebar: Some(components.header.root_widget()),
             set_child = Some(&gtk::Label) {
                 set_label: watch!(&format!("Placeholder for {:?}", model.mode)),
             },
