@@ -46,6 +46,7 @@ impl Parse for ItemImpl {
 
         let mut macros = Vec::new();
         let mut funcs = Vec::new();
+
         while !braced_input.is_empty() {
             if braced_input.peek2(Token![!]) {
                 macros.push(braced_input.parse()?);

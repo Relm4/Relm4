@@ -65,18 +65,35 @@ impl Widgets<AppModel, ()> for AppWidgets {
                     set_label: watch! { &format!("Counter: {}", model.counter) },
                 },
                 append = &gtk::MenuButton {
-                    set_menu_model: Some(&menu_model),
+                    set_menu_model: Some(&main_menu),
                 }
             },
         }
     }
 
-    fn pre_init() {
-        let menu_model = gtk::gio::Menu::new();
-        menu_model.append(Some("Stateless"), Some(&TestAction::action_name()));
+    menu! {
+        main_menu: {
+            "Test" => TestAction,
+            "Test2" => TestAction,
+            "Test toggle" => TestU8Action(1_u8),
+            section! {
+                "Section test" => TestAction,
+                "Test toggle" => TestU8Action(1_u8),
+            },
+            section! {
+                "Test" => TestAction,
+                "Test2" => TestAction,
+                "Test Value" => TestU8Action(1_u8),
+            }
+        }
     }
 
     fn post_init() {
+        // main_menu.append(Some("Stateless"), Some(&TestAction::action_name()));
+        // let entry = gtk::gio::MenuItem::new(Some("Test"), Some(&TestU8Action::action_name()));
+        // entry.set_action_and_target_value(Some(&TestU8Action::action_name()), Some(&1_u8.to_variant()));
+        // main_menu.append_item(&entry);
+
         let app = relm4::gtk_application();
         app.set_accelerators_for_action::<TestAction>(&["<primary>W"]);
 
@@ -88,9 +105,10 @@ impl Widgets<AppModel, ()> for AppWidgets {
         });
 
         let action2: RelmAction<TestU8Action> =
-            RelmAction::new_stateful_with_target_value(&0, |_, state, value| {
-                println!("Stateful action -> state: {}, value: {}", state, value);
-                *state += value;
+            RelmAction::new_stateful_with_target_value(&0, |_, state, _value| {
+                //println!("Stateful action -> state: {}, value: {}", state, value);
+                *state ^= 1;
+                dbg!(state);
             });
 
         group.add_action(action);
