@@ -77,8 +77,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
             "Test2" => TestAction,
             "Test toggle" => TestU8Action(1_u8),
             section! {
-                "Test" => TestAction,
-                "Test2" => TestAction,
+                "Section test" => TestAction,
                 "Test toggle" => TestU8Action(1_u8),
             },
             section! {

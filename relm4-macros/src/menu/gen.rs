@@ -54,13 +54,12 @@ impl MenuEntry {
         let ty = &self.action_ty;
         if let Some(value) = &self.value {
             quote! {
-                let new_entry = #relm4_path::gtk::gio::MenuItem::new(Some(#string), Some(& #ty::action_name()));
-                new_entry.set_action_and_target_value(Some(&#ty::action_name()), Some(&#relm4_path::gtk::glib::variant::ToVariant::to_variant(&#value)));
+                let new_entry = #relm4_path::actions::RelmAction::<#ty>::to_menu_item_with_target_value(#string, &#value);
                 #parent_ident.append_item(&new_entry);
             }
         } else {
             quote! {
-                let new_entry = #relm4_path::gtk::gio::MenuItem::new(Some(#string), Some(& #ty::action_name()));
+                let new_entry = #relm4_path::actions::RelmAction::<#ty>::to_menu_item(#string);
                 #parent_ident.append_item(&new_entry);
             }
         }
