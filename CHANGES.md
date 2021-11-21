@@ -4,10 +4,10 @@
 
 ### Added
 
-### Added
-
-+ relm4-macros: New returned widget syntax
 + relm4: Micro components
++ relm4: Type safe actions API
++ relm4-macros: Menu macro for creating menus
++ relm4-macros: New returned widget syntax
 + relm4-examples: Micro components example
 
 ### Changed
