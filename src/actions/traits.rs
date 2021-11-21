@@ -16,11 +16,15 @@ pub trait ActionName {
     /// The group of this action.
     type Group: ActionGroupName;
 
-    /// Value used for storing the state of this action and
-    /// for passing values to it.
+    /// Target value type for passing values to this action.
+    ///
+    /// Use [`()`] for actions without target value.
+    type Target;
+
+    /// State type of this action.
     ///
     /// Use [`()`] for stateless actions.
-    type Value;
+    type State;
 
     /// Returns the actions name.
     fn name() -> &'static str;
@@ -34,28 +38,28 @@ pub trait ActionName {
 /// Type safe interface for [`gtk::prelude::ActionableExt`].
 pub trait ActionablePlus {
     /// Set a new stateful action with a default state value.
-    fn set_action<A: ActionName>(&self, value: A::Value)
+    fn set_action<A: ActionName>(&self, value: A::Target)
     where
-        A::Value: ToVariant;
+        A::Target: ToVariant;
 
     /// Set a new stateless action.
-    fn set_stateless_action<A: ActionName>(&self)
+    fn set_stateless_action<A: ActionName>(&self, unit_type: &())
     where
-        A::Value: EmptyType;
+        A::Target: EmptyType;
 }
 
 impl<W: gtk::prelude::ActionableExt> ActionablePlus for W {
-    fn set_action<A: ActionName>(&self, value: A::Value)
+    fn set_action<A: ActionName>(&self, value: A::Target)
     where
-        A::Value: ToVariant,
+        A::Target: ToVariant,
     {
         self.set_action_name(Some(A::action_name().as_str()));
         self.set_action_target_value(Some(&value.to_variant()));
     }
 
-    fn set_stateless_action<A: ActionName>(&self)
+    fn set_stateless_action<A: ActionName>(&self, _unit_type: &())
     where
-        A::Value: EmptyType,
+        A::Target: EmptyType,
     {
         self.set_action_name(Some(A::action_name().as_str()));
     }
@@ -66,13 +70,13 @@ pub trait AccelsPlus {
     /// Set keyboard accelerator for a certain action.
     fn set_accelerators_for_action<A: ActionName>(&self, value: &[&str])
     where
-        A::Value: EmptyType;
+        A::Target: EmptyType;
 }
 
 impl<W: gtk::prelude::GtkApplicationExt> AccelsPlus for W {
     fn set_accelerators_for_action<A: ActionName>(&self, accel_codes: &[&str])
     where
-        A::Value: EmptyType,
+        A::Target: EmptyType,
     {
         self.set_accels_for_action(A::action_name().as_str(), accel_codes);
     }
