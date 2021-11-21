@@ -94,7 +94,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
         });
 
         let action2: RelmAction<TestU8Action> =
-            RelmAction::new_stateful(&false, |_, state: &mut bool, value| {
+            RelmAction::new_stateful_with_target_value(&false, |_, state: &mut bool, value| {
                 println!("Stateful action -> state: {}, value: {}", state, value);
                 *state = !*state;
             });
@@ -110,7 +110,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
 relm4::new_action_group!(WindowActionGroup, "win");
 
 relm4::new_statless_action!(TestAction, WindowActionGroup, "test");
-relm4::new_statful_action!(TestU8Action, WindowActionGroup, "test2", bool);
+relm4::new_statful_action!(TestU8Action, WindowActionGroup, "test2", bool, bool);
 
 fn main() {
     let model = AppModel::default();
