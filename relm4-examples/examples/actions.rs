@@ -1,8 +1,10 @@
-use gtk::gio;
-use gtk::prelude::{
-    ActionMapExt, BoxExt, ButtonExt, GtkApplicationExt, GtkWindowExt, OrientableExt, WidgetExt,
+use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
+use relm4::{
+    actions::{
+        AccelsPlus, ActionGroupName, ActionName, ActionablePlus, RelmAction, RelmActionGroup,
+    },
+    send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets,
 };
-use relm4::{send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets};
 
 #[derive(Default)]
 struct AppModel {
@@ -48,6 +50,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
 
                 append = &gtk::Button {
                     set_label: "Increment",
+                    set_action<TestU8Action>: 1,
                     connect_clicked(sender) => move |_| {
                         send!(sender, AppMsg::Increment);
                     },
@@ -60,25 +63,48 @@ impl Widgets<AppModel, ()> for AppWidgets {
                 append = &gtk::Label {
                     set_margin_all: 5,
                     set_label: watch! { &format!("Counter: {}", model.counter) },
+                },
+                append = &gtk::MenuButton {
+                    set_menu_model: Some(&menu_model),
                 }
             },
         }
     }
 
+    fn pre_init() {
+        let menu_model = gtk::gio::Menu::new();
+        menu_model.append(Some("Stateless"), Some(&TestAction::action_name()));
+    }
+
     fn post_init() {
-        let action = gio::SimpleAction::new("test", None);
-        action.connect_activate(|_, _| {
-            println!("ACTION!");
+        let app = relm4::gtk_application();
+        app.set_accelerators_for_action::<TestAction>(&["<primary>W"]);
+
+        let group = RelmActionGroup::<WindowActionGroup>::new();
+
+        let action: RelmAction<TestAction> = RelmAction::new_statelesss(move |_| {
+            println!("Statelesss action!");
+            send!(sender, AppMsg::Increment);
         });
 
-        let app = relm4::gtk_application();
-        app.set_accels_for_action("win.test", &["<primary>W"]);
+        let action2: RelmAction<TestU8Action> =
+            RelmAction::new_stateful_with_target_value(&0, |_, state, value| {
+                println!("Stateful action -> state: {}, value: {}", state, value);
+                *state += value;
+            });
 
-        let actions = gio::SimpleActionGroup::new();
+        group.add_action(action);
+        group.add_action(action2);
+
+        let actions = group.into_action_group();
         main_window.insert_action_group("win", Some(&actions));
-        actions.add_action(&action);
     }
 }
+
+relm4::new_action_group!(WindowActionGroup, "win");
+
+relm4::new_statless_action!(TestAction, WindowActionGroup, "test");
+relm4::new_statful_action!(TestU8Action, WindowActionGroup, "test2", u8, u8);
 
 fn main() {
     let model = AppModel::default();

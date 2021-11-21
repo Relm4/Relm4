@@ -7,15 +7,17 @@
 
 use proc_macro::{self, TokenStream};
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote, quote_spanned, ToTokens};
+use quote::{quote, ToTokens};
 use syn::{parse_macro_input, spanned::Spanned, Error, GenericArgument, PathArguments};
 
 mod additional_fields;
 mod args;
 mod attrs;
+mod derive_components;
 mod funcs;
 mod item_impl;
 mod macros;
+mod menu;
 mod types;
 mod util;
 mod widgets;
@@ -157,8 +159,8 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
         None
     };
 
-    let model_ty = if let Some(model_ty) = model_ty_opt {
-        model_ty
+    let model_type = if let Some(model_type) = model_ty_opt {
+        model_type
     } else {
         return Error::new(
             path_args.span(),
@@ -171,16 +173,20 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let Macros {
         widgets,
         additional_fields,
+        menus,
     } = match Macros::new(&data.macros, data.brace_span.unwrap()) {
         Ok(macros) => macros,
         Err(err) => return TokenStream::from(err.to_compile_error()),
     };
 
+    // Generate menu tokens
+    let menus_stream = menus.map(|m| m.menus_stream(&relm4_path));
+
     let Funcs {
         pre_init,
         post_init,
-        pre_connect_components,
-        post_connect_components,
+        pre_connect_parent,
+        post_connect_parent,
         manual_view,
     } = match Funcs::new(&data.funcs) {
         Ok(macros) => macros,
@@ -190,43 +196,21 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let root_widget_name = &widgets.name;
     let root_widget_type = widgets.func.type_token_stream();
 
-    let mut widget_list = Vec::new();
-    widgets.get_widget_list(&mut widget_list);
+    let mut streams = widgets::TokenStreams::default();
+    widgets.generate_tokens_recursively(&mut streams, &visibility, model_type, &relm4_path);
 
-    let mut struct_stream = TokenStream2::new();
-    let mut init_stream = TokenStream2::new();
-    let mut return_stream = TokenStream2::new();
-    let mut property_stream = TokenStream2::new();
-    let mut view_stream = TokenStream2::new();
-    let mut connect_stream = TokenStream2::new();
-    let mut track_stream = TokenStream2::new();
-    let mut component_stream = TokenStream2::new();
-    let mut connect_component_stream = TokenStream2::new();
-
-    for widget in widget_list {
-        let w_name = &widget.name;
-        let w_ty = widget.func.type_token_stream();
-        let w_span = widget.func.span();
-        let w_func = widget.func.func_token_stream();
-
-        struct_stream.extend(quote_spanned! {
-            w_span =>
-            #[allow(missing_docs)]
-            #visibility #w_name: #w_ty,
-        });
-
-        init_stream.extend(quote_spanned! {
-            w_span => let #w_name = #w_func;
-        });
-
-        return_stream.extend(widget.return_stream());
-        widget.property_assign_stream(&relm4_path, &mut property_stream);
-        widget.view_stream(&relm4_path, &mut view_stream);
-        connect_stream.extend(widget.connect_stream());
-        track_stream.extend(widget.track_stream(model_ty));
-        component_stream.extend(widget.component_stream());
-        connect_component_stream.extend(widget.connect_component_stream());
-    }
+    let widgets::TokenStreams {
+        struct_fields,
+        init_widgets,
+        connect_widgets,
+        init_properties,
+        connect,
+        return_fields,
+        parent,
+        connect_components,
+        view,
+        track,
+    } = streams;
 
     let impl_generics = data.impl_generics;
     let where_clause = data.where_clause;
@@ -247,7 +231,7 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
         #[allow(dead_code)]
         #outer_attrs
         #visibility struct #ty {
-            #struct_stream
+            #struct_fields
             #additional_fields
         }
 
@@ -255,23 +239,25 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
             type Root = #root_widget_type;
 
             /// Initialize the UI.
-            fn init_view(model: &#model, parent_widgets: &<#parent_model as #relm4_path::Model>::Widgets, sender: #relm4_path::Sender<<#model as #relm4_path::Model>::Msg>) -> Self {
+            fn init_view(model: &#model, components: &<#model as #relm4_path::Model>::Components, sender: #relm4_path::Sender<<#model as #relm4_path::Model>::Msg>) -> Self {
                 #pre_init
-                #init_stream
-                #property_stream
-                #connect_stream
+                #init_widgets
+                #connect_widgets
+                #menus_stream
+                #init_properties
+                #connect
+                #connect_components
                 #post_init
                 Self {
-                    #return_stream
+                    #return_fields
                     #additional_fields_return_stream
                 }
             }
 
-            fn connect_components(&self, model: &#model, components: &<#model as #relm4_path::Model>::Components) {
-                #pre_connect_components
-                #component_stream
-                #connect_component_stream
-                #post_connect_components
+            fn connect_parent(&mut self, parent_widgets: &<#parent_model as #relm4_path::Model>::Widgets) {
+                #pre_connect_parent
+                #parent
+                #post_connect_parent
             }
 
             /// Return the root widget.
@@ -282,11 +268,22 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
             /// Update the view to represent the updated model.
             fn view(&mut self, model: &#model, sender: #relm4_path::Sender<<#model as #relm4_path::Model>::Msg>) {
                 #manual_view
-                #view_stream
-                #track_stream
+                #view
+                #track
             }
         }
     };
 
     out.into()
+}
+
+#[proc_macro_derive(Components, attributes(components))]
+pub fn derive(input: TokenStream) -> TokenStream {
+    let derive_input = parse_macro_input!(input);
+    let output = derive_components::generate_stream(&derive_input);
+
+    match output {
+        Ok(output) => output.into(),
+        Err(error) => error.into_compile_error().into(),
+    }
 }

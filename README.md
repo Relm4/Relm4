@@ -1,5 +1,5 @@
 <h1>
-  <img src="assets/Relm_logo_with_text.svg" height="65" alt="Relm4">
+  <img src="assets/Relm_logo_with_text.png" height="67" alt="Relm4">
 </h1>
 
 [![CI](https://github.com/AaronErhardt/relm4/actions/workflows/rust.yml/badge.svg)](https://github.com/AaronErhardt/relm4/actions/workflows/rust.yml)
@@ -7,7 +7,7 @@
 [![Relm4 on crates.io](https://img.shields.io/crates/v/relm4.svg)](https://crates.io/crates/relm4)
 [![Relm4 docs](https://img.shields.io/badge/rust-documentation-blue)](https://aaronerhardt.github.io/docs/relm4/relm4/)
 [![Relm4 book](https://img.shields.io/badge/rust-book-fc0060)](https://aaronerhardt.github.io/relm4-book/book/)
-![Minimum Rust version 1.54](https://img.shields.io/badge/rustc-1.54+-06a096.svg)
+![Minimum Rust version 1.56](https://img.shields.io/badge/rustc-1.56+-06a096.svg)
 
 An idiomatic GUI library inspired by [Elm](https://elm-lang.org/) and based on [gtk4-rs](https://crates.io/crates/gtk4). 
 Relm4 is a new version of [relm](https://github.com/antoyo/relm) that's built from scratch and is compatible with [GTK4](https://www.gtk.org/) and [libadwaita](https://gitlab.gnome.org/GNOME/libadwaita).

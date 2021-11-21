@@ -65,20 +65,9 @@ impl AsyncComponentUpdate<AppModel> for HttpModel {
     }
 }
 
+#[derive(relm4_macros::Components)]
 struct AppComponents {
     http: AsyncRelmWorker<HttpModel, AppModel>,
-}
-
-impl Components<AppModel> for AppComponents {
-    fn init_components(
-        parent_model: &AppModel,
-        _parent_widgets: &AppWidgets,
-        parent_sender: Sender<AppMsg>,
-    ) -> Self {
-        AppComponents {
-            http: AsyncRelmWorker::with_new_tokio_rt(parent_model, parent_sender),
-        }
-    }
 }
 
 #[tracker::track]
@@ -148,7 +137,7 @@ struct AppWidgets {
 impl Widgets<AppModel, ()> for AppWidgets {
     type Root = gtk::ApplicationWindow;
 
-    fn init_view(model: &AppModel, _parent_widgets: &(), sender: Sender<AppMsg>) -> Self {
+    fn init_view(model: &AppModel, _components: &AppComponents, sender: Sender<AppMsg>) -> Self {
         let main = gtk::ApplicationWindowBuilder::new()
             .default_width(300)
             .default_height(200)

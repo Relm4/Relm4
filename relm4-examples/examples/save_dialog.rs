@@ -1,7 +1,5 @@
 use gtk::prelude::{BoxExt, ButtonExt, Cast, GtkWindowExt, OrientableExt};
-use relm4::{
-    send, AppUpdate, Components, Model, RelmApp, RelmComponent, Sender, WidgetPlus, Widgets,
-};
+use relm4::{send, AppUpdate, Model, RelmApp, RelmComponent, Sender, WidgetPlus, Widgets};
 use relm4_components::save_dialog::{
     SaveDialogModel, SaveDialogMsg, SaveDialogParent, SaveDialogSettings,
 };
@@ -77,20 +75,9 @@ impl ParentWindow for AppWidgets {
     }
 }
 
+#[derive(relm4_macros::Components)]
 pub struct AppComponents {
     dialog: RelmComponent<SaveDialogModel<SaveDialogConfig>, AppModel>,
-}
-
-impl Components<AppModel> for AppComponents {
-    fn init_components(
-        model: &AppModel,
-        parent_widgets: &AppWidgets,
-        sender: Sender<AppMsg>,
-    ) -> Self {
-        AppComponents {
-            dialog: RelmComponent::new(model, parent_widgets, sender),
-        }
-    }
 }
 
 #[relm4_macros::widget]

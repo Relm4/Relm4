@@ -2,9 +2,24 @@
 
 ## Unreleased
 
+## 0.4.0-beta.1 - 2021-11-21
+
 ### Added
 
-+ relm4-macros: New shorthand component syntax
++ relm4: Micro components
++ relm4: Type safe actions API
++ relm4-macros: Menu macro for creating menus
++ relm4-macros: New returned widget syntax
++ relm4-examples: Micro components example
+
+### Changed
+
++ relm4: Initialize widgets from the outermost components to the app
++ relm4-macros: component! removed and parent! was added instead
+
+### Removed
+
++ relm4: RelmComponent::with_new_thread
 
 ## 0.2.1 - 2021-10-17
 

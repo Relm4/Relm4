@@ -13,10 +13,12 @@
     html_favicon_url = "https://raw.githubusercontent.com/AaronErhardt/relm4/main/assets/Relm_logo.svg"
 )]
 
+pub mod actions;
 mod app;
 mod component;
 pub mod drawing;
 pub mod factory;
+mod micro_component;
 mod msg_handler;
 mod traits;
 pub mod util;
@@ -24,6 +26,7 @@ mod worker;
 
 pub use app::RelmApp;
 pub use component::RelmComponent;
+pub use micro_component::{MicroComponent, MicroComponentError, MicroModel, MicroWidgets};
 pub use msg_handler::RelmMsgHandler;
 pub use traits::*;
 pub use util::widget_plus::WidgetPlus;

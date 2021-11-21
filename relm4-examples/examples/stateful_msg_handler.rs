@@ -1,7 +1,6 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
 use relm4::{
-    send, AppUpdate, Components, MessageHandler, Model, RelmApp, RelmMsgHandler, Sender,
-    WidgetPlus, Widgets,
+    send, AppUpdate, MessageHandler, Model, RelmApp, RelmMsgHandler, Sender, WidgetPlus, Widgets,
 };
 
 use std::sync::Mutex;
@@ -103,20 +102,9 @@ impl MessageHandler<AppModel> for AsyncHandler {
     }
 }
 
+#[derive(relm4_macros::Components)]
 struct AppComponents {
     async_handler: RelmMsgHandler<AsyncHandler, AppModel>,
-}
-
-impl Components<AppModel> for AppComponents {
-    fn init_components(
-        parent_model: &AppModel,
-        _parent_widget: &AppWidgets,
-        parent_sender: Sender<AppMsg>,
-    ) -> Self {
-        AppComponents {
-            async_handler: RelmMsgHandler::new(parent_model, parent_sender),
-        }
-    }
 }
 
 #[relm4_macros::widget]
