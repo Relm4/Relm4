@@ -17,6 +17,7 @@ mod derive_components;
 mod funcs;
 mod item_impl;
 mod macros;
+mod menu;
 mod types;
 mod util;
 mod widgets;
@@ -172,10 +173,14 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let Macros {
         widgets,
         additional_fields,
+        menus,
     } = match Macros::new(&data.macros, data.brace_span.unwrap()) {
         Ok(macros) => macros,
         Err(err) => return TokenStream::from(err.to_compile_error()),
     };
+
+    // Generate menu tokens
+    let menus_stream = menus.map(|m| m.menus_stream(&relm4_path));
 
     let Funcs {
         pre_init,
@@ -238,6 +243,7 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
                 #pre_init
                 #init_widgets
                 #connect_widgets
+                #menus_stream
                 #init_properties
                 #connect
                 #connect_components
