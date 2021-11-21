@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.4.0-beta.1 - 2021-11-21
+
 ### Added
 
 + relm4: Micro components
@@ -13,7 +15,7 @@
 ### Changed
 
 + relm4: Initialize widgets from the outermost components to the app
-+ relm4-macros: component! is now unnecessary and parent! was added
++ relm4-macros: component! removed and parent! was added instead
 
 ### Removed
 
