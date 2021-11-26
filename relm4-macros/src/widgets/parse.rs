@@ -322,13 +322,14 @@ impl Parse for ReturnedWidget {
         let (name, ty) = if input.peek(Ident) {
             let name = input.parse()?;
 
+            let _colon: Token![:] = input.parse()?;
+            let ty = input.parse()?;
+
             if input.peek(Token![?]) {
                 let _mark: Token![?] = input.parse()?;
                 is_optional = true;
             }
 
-            let _colon: Token![:] = input.parse()?;
-            let ty = input.parse()?;
             (Some(name), Some(ty))
         } else {
             if input.peek(Token![?]) {
