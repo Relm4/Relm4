@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.4.0-beta.2 - 2021-11-26
+
++ relm4-macros: Add optional returned widget syntax
+
 ## 0.4.0-beta.1 - 2021-11-21
 
 ### Added

@@ -23,8 +23,14 @@ pub(crate) fn property_assign_tokens(
     let p_span = p_name.span().unwrap().into();
     stream.extend(match (prop.optional_assign, prop.iterative) {
         (false, false) => {
-            quote_spanned! {
-                p_span => #return_assign_stream #assign_fn(#self_assign_args #p_assign #args_stream);
+            if prop.ty.connect_widget_with_unwrap() {
+                quote_spanned! {
+                    p_span => #return_assign_stream #assign_fn(#self_assign_args #p_assign #args_stream).unwrap();
+                }
+            } else {
+                quote_spanned! {
+                    p_span => #return_assign_stream #assign_fn(#self_assign_args #p_assign #args_stream);
+                }
             }
         }
         (true, false) => {
