@@ -1,6 +1,9 @@
 use adw::{traits::ApplicationWindowExt, CenteringPolicy, ViewStackPage};
-use gtk::{Orientation, prelude::{BoxExt, ButtonExt, GtkWindowExt, ToggleButtonExt, OrientableExt, WidgetExt}};
-use relm4::{send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets};
+use gtk::{
+    prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, ToggleButtonExt, WidgetExt},
+    BaselinePosition, Orientation,
+};
+use relm4::{send, AppUpdate, Model, RelmApp, Sender, Widgets};
 
 #[derive(Default)]
 struct AppModel {
@@ -60,7 +63,8 @@ impl Widgets<AppModel, ()> for AppWidgets {
                     set_vexpand: true,
                     add_titled(Some("First"), "First Page") = &gtk::Box {
                         set_orientation: Orientation::Vertical,
-                        set_hexpand: false,
+                        set_baseline_position: BaselinePosition::Center,
+                        set_spacing: 10,
                         append = &gtk::Label {
                             set_label: "This is the start page",
 
@@ -107,7 +111,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
 }
 
 fn main() {
-    let model = AppModel{
+    let model = AppModel {
         counter: 5,
         attention: true,
     };
