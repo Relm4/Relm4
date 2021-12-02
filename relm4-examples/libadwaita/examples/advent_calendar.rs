@@ -226,13 +226,29 @@ fn main() {
 
     let verses = vec![
         ("Come unto me, all ye that labour and are heavy laden, and I will give you rest. Take my yoke upon you, and learn of me; for I am meek and lowly in heart: and ye shall find rest unto your souls. For my yoke is easy, and my burden is light.", "Matthew 11, 28-30"),
-        ("Vers2", "P2"),
-        ("V3", "P3"),
+        ("For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life. For God sent not his Son into the world to condemn the world; but that the world through him might be saved.", "John 3, 16-17"),
+        ("If any man thirst, let him come unto me, and drink. He that believeth on me, as the scripture hath said, out of his belly shall flow rivers of living water.", "John 8, 37-38"),
         ("V4", "P4"),
         ("V5", "P5"),
         ("V6", "P6"),
         ("V7", "P7"),
         ("V8", "P8"),
+        ("V9", "P9"),
+        ("V10", "P10"),
+        ("V11", "P11"),
+        ("V12", "P12"),
+        ("V13", "P13"),
+        ("V14", "P14"),
+        ("V15", "P15"),
+        ("V16", "P16"),
+        ("V17", "P17"),
+        ("V18", "P18"),
+        ("V19", "P19"),
+        ("V20", "P20"),
+        ("V21", "P21"),
+        ("V22", "P22"),
+        ("V23", "P23"),
+        ("V24", "P24"),
     ];
 
     // Fill factory with the verses
