@@ -1,6 +1,11 @@
 use adw::{traits::ApplicationWindowExt, CenteringPolicy, ViewStackPage};
-use gtk::{Orientation, prelude::{BoxExt, ButtonExt, GtkWindowExt, ToggleButtonExt, OrientableExt, WidgetExt}};
-use relm4::{send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets};
+use gtk::{
+    prelude::{
+        BoxExt, ButtonExt, GtkWindowExt, ObjectExt, OrientableExt, ToggleButtonExt, WidgetExt,
+    },
+    Orientation,
+};
+use relm4::{send, AppUpdate, Model, RelmApp, Sender, Widgets};
 
 #[derive(Default)]
 struct AppModel {
@@ -45,12 +50,12 @@ fn application_window() -> adw::ApplicationWindow {
 impl Widgets<AppModel, ()> for AppWidgets {
     view! {
         main_window = application_window() -> adw::ApplicationWindow {
-            set_default_width: 300,
+            set_default_width: 450,
             set_default_height: 200,
             set_content = Some(&gtk::Box) {
                 set_orientation: gtk::Orientation::Vertical,
                 append = &adw::HeaderBar {
-                    set_title_widget = Some(&adw::ViewSwitcherTitle) {
+                    set_title_widget: title = Some(&adw::ViewSwitcherTitle) {
                         set_title: "A stack switcher App",
                         set_stack: Some(&stack),
                     },
@@ -100,14 +105,24 @@ impl Widgets<AppModel, ()> for AppWidgets {
                     } -> ? {
                         set_icon_name: Some("mypaint-brushes-symbolic")
                     },
+                },
+                append: bottom_bar = &adw::ViewSwitcherBar {
+                    set_stack: Some(&stack),
                 }
             },
         }
     }
+
+    fn post_init() {
+        title
+            .bind_property("title-visible", &bottom_bar, "reveal")
+            .flags(gtk::glib::BindingFlags::SYNC_CREATE)
+            .build();
+    }
 }
 
 fn main() {
-    let model = AppModel{
+    let model = AppModel {
         counter: 5,
         attention: true,
     };
