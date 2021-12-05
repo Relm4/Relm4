@@ -1,8 +1,6 @@
 use adw::traits::ApplicationWindowExt;
 use gtk::glib::BindingFlags;
-use gtk::prelude::{
-    BoxExt, ButtonExt, GtkWindowExt, ObjectExt, OrientableExt, ToggleButtonExt, WidgetExt,
-};
+use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, ObjectExt, OrientableExt, ToggleButtonExt};
 
 use relm4::{
     factory::{positions::StackPageInfo, FactoryPrototype, FactoryVec},
@@ -120,6 +118,7 @@ impl FactoryPrototype for CalendarEntry {
 
 struct AppModel {
     calendar_entries: FactoryVec<CalendarEntry>,
+    start_page: u8,
 }
 
 enum AppMsg {
@@ -162,8 +161,8 @@ fn application_window() -> adw::ApplicationWindow {
 impl Widgets<AppModel, ()> for AppWidgets {
     view! {
         main_window = application_window() -> adw::ApplicationWindow {
-            set_default_width: 300,
-            set_default_height: 200,
+            set_default_width: 400,
+            set_default_height: 240,
 
             set_content: main_box = Some(&gtk::Box) {
                 set_orientation: gtk::Orientation::Vertical,
@@ -173,21 +172,16 @@ impl Widgets<AppModel, ()> for AppWidgets {
                         set_label: "Relm4 advent calendar",
                     },
                     pack_start: flap_toggle = &gtk::ToggleButton {
-                        set_label: "Expand"
+                        set_label: "Expand",
+                        set_icon_name: "sidebar-show",
                     }
                 },
                 append: flap = &adw::Flap {
                     set_content: main_view = Some(&gtk::Stack) {
                         factory!(model.calendar_entries)
                     },
-                    set_flap = Some(&gtk::ScrolledWindow) {
-                        set_vexpand: true,
-                        set_hscrollbar_policy: gtk::PolicyType::Never,
-                        set_child = Some(&gtk::StackSwitcher) {
-                            set_stack: Some(&main_view),
-                            set_orientation: gtk::Orientation::Vertical,
-                            set_margin_all: 4,
-                        },
+                    set_flap = Some(&gtk::StackSidebar) {
+                        set_stack: &main_view,
                     },
                     set_separator = Some(&gtk::Separator) {}
                 }
@@ -204,6 +198,8 @@ impl Widgets<AppModel, ()> for AppWidgets {
 
         flap_toggle.set_active(true);
 
+        main_view.set_visible_child_name(&model.start_page.to_string());
+
         std::thread::spawn(move || loop {
             std::thread::sleep(std::time::Duration::from_secs(1));
             send!(sender, AppMsg::Update);
@@ -212,9 +208,8 @@ impl Widgets<AppModel, ()> for AppWidgets {
 }
 
 fn main() {
-    let mut model = AppModel {
-        calendar_entries: FactoryVec::new(),
-    };
+    let mut calendar_entries = FactoryVec::new();
+    let mut start_page = 0;
 
     // Time since midnight December the 1st.
     let time_since_first_dec = SystemTime::now()
@@ -228,9 +223,9 @@ fn main() {
         ("Come unto me, all ye that labour and are heavy laden, and I will give you rest. Take my yoke upon you, and learn of me; for I am meek and lowly in heart: and ye shall find rest unto your souls. For my yoke is easy, and my burden is light.", "Matthew 11, 28-30"),
         ("For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life. For God sent not his Son into the world to condemn the world; but that the world through him might be saved.", "John 3, 16-17"),
         ("If any man thirst, let him come unto me, and drink. He that believeth on me, as the scripture hath said, out of his belly shall flow rivers of living water.", "John 8, 37-38"),
-        ("V4", "P4"),
-        ("V5", "P5"),
-        ("V6", "P6"),
+        ("For the LORD God is a sun and shield: the LORD will give grace and glory: no good thing will he withhold from them that walk uprightly.", "Psalm 84, 11"),
+        ("Trust in the LORD with all thine heart; and lean not unto thine own understanding. In all thy ways acknowledge him, and he shall direct thy paths.", "Proverbs 3, 5-6"),
+        ("Blessed be the God and Father of our Lord Jesus Christ, who has blessed us with every spiritual blessing in the heavenly places in Christ, just as He chose us in Him before the foundation of the world, that we should be holy and without blame before Him in love.", "Ephesians 1,3-4"),
         ("V7", "P7"),
         ("V8", "P8"),
         ("V9", "P9"),
@@ -257,24 +252,25 @@ fn main() {
         let time_left = if time_difference > 0 {
             time_difference as u32
         } else {
+            start_page = idx as u8;
             0
         };
 
-        model.calendar_entries.push(CalendarEntry {
+        calendar_entries.push(CalendarEntry {
             verse: verse.to_string(),
             passage: passage.to_string(),
             time_left,
         });
     }
 
-    let app = RelmApp::new(model);
+    let app = RelmApp::new(AppModel {
+        calendar_entries,
+        start_page,
+    });
 
+    // Style the verse labels
     relm4::set_global_css(
         b"\
-        stackswitcher > button { \
-             border-radius: 2px; \
-             margin-bottom: 3px; \
-        } \
         .verse { \
             font-weight: bold; \
             font-size: 1.4em; \
