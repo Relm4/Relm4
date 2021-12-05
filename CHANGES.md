@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
++ relm4: A factory view implementation for libadwaita's StackView
+
 ## 0.4.0-beta.2 - 2021-11-26
 
 + relm4-macros: Add optional returned widget syntax

@@ -1,4 +1,4 @@
-use crate::factory::{FactoryListView, FactoryView};
+use crate::factory::{FactoryListView, FactoryView, positions::StackPageInfo};
 use gtk::glib;
 
 impl<Widget> FactoryView<Widget> for adw::Carousel
@@ -45,5 +45,26 @@ where
 
     fn push_front(&self, widget: &Widget) -> adw::TabPage {
         self.prepend(widget).unwrap()
+    }
+}
+
+impl<Widget> FactoryView<Widget> for adw::ViewStack
+where
+    Widget: glib::IsA<gtk::Widget>,
+{
+    type Position = StackPageInfo;
+    type Root = Widget;
+
+    fn add(&self, widget: &Widget, position: &StackPageInfo) -> Widget {
+        if let Some(title) = &position.title {
+            self.add_titled(widget, position.name.as_deref(), title);
+        } else {
+            self.add_named(widget, position.name.as_deref());
+        }
+        widget.clone()
+    }
+
+    fn remove(&self, widget: &Widget) {
+        self.remove(widget);
     }
 }
