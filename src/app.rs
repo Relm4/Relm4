@@ -33,13 +33,23 @@ where
     Model::Components: Components<Model> + 'static,
 {
     /// Runs the application, returns once the application is closed.
+    ///
+    /// Unlike [`gtk::Application::run`](../gtk4/struct.Application.html#method.run), this function
+    /// does not handle command-line arguments. To pass arguments to GTK, use
+    /// [`RelmApp::run_with_args`].
     pub fn run(&self) {
-        self.app.run();
+        self.app.run_with_args::<&str>(&[]);
+    }
+
+    /// Runs the application with the provided command-line arguments, returns once the application
+    /// is closed.
+    pub fn run_with_args<S>(&self, args: &[S]) where S: AsRef<str> {
+        self.app.run_with_args(args);
     }
 
     /// Create a Relm4 application.
     pub fn new(model: Model) -> Self {
-        gtk::init().expect("Couln't initialize GTK");
+        gtk::init().expect("Couldn't initialize GTK");
         let app = Application::builder().build();
 
         Self::with_app(model, app)
