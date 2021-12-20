@@ -267,7 +267,8 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
 
             /// Update the view to represent the updated model.
             fn view(&mut self, model: &#model, sender: #relm4_path::Sender<<#model as #relm4_path::Model>::Msg>) {
-                #manual_view
+                // Wrap manual view code to prevent early returns from skipping other view code.
+                (|| { #manual_view })();
                 #view
                 #track
             }
