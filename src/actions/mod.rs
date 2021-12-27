@@ -216,7 +216,7 @@ impl<GroupName: ActionGroupName> RelmActionGroup<GroupName> {
         self.group
     }
 
-    /// Create a new [`ActionGroup`].
+    /// Create a new [`SimpleActionGroup`](gio::SimpleActionGroup).
     pub fn new() -> Self {
         Self {
             group_name: PhantomData,

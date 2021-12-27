@@ -102,7 +102,7 @@ where
     }
 
     /// Returns the root widget of this component's widgets.
-    /// Can be used by the parent [`Widgets::connect_components`](fn@crate::Widgets::connect_components) to connect the root widget
+    /// Can be used by the parent to connect the root widget
     /// to the parent's widgets.
     pub fn root_widget(&self) -> &<Model::Widgets as WidgetsTrait<Model, ParentModel>>::Root {
         &self.root_widget

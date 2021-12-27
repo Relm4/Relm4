@@ -143,7 +143,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
                     },
                     add_child = &gtk::Label {
                         set_label: "Testing StackPage 2",
-                    } -> {
+                    } -> test_page: gtk::StackPage {
                         set_title: "Test page 2",
                     },
                 },
@@ -170,6 +170,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
     }
 
     fn manual_view() {
+        self.test_page.set_title("Manually set title in view!");
         self.test_field += 1;
         println!("Manual view! test_field: {}", self.test_field);
     }

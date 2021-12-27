@@ -43,7 +43,10 @@ where
 
     /// Runs the application with the provided command-line arguments, returns once the application
     /// is closed.
-    pub fn run_with_args<S>(&self, args: &[S]) where S: AsRef<str> {
+    pub fn run_with_args<S>(&self, args: &[S])
+    where
+        S: AsRef<str>,
+    {
         self.app.run_with_args(args);
     }
 
