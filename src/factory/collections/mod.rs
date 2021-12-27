@@ -19,7 +19,7 @@ mod factory_vec;
 mod factory_vec_deque;
 
 pub use factory_vec::FactoryVec;
-pub use factory_vec_deque::{DynamicIndex, FactoryVecDeque};
+pub use factory_vec_deque::{DynamicIndex, FactoryVecDeque, WeakDynamicIndex};
 
 use std::fmt::Debug;
 

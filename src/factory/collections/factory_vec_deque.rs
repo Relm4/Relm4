@@ -2,12 +2,12 @@ use gtk::glib::Sender;
 
 use std::cell::RefCell;
 use std::collections::VecDeque;
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 
 use super::Widgets;
 use crate::factory::{Factory, FactoryListView, FactoryPrototype, FactoryView};
+use fragile::Fragile;
 
-#[derive(Debug, PartialEq, Eq)]
 /// A dynamic index that updates automatically when items are shifted inside a [`Factory`].
 ///
 /// For example a [`FactoryVecDeque`] has an [`insert`](FactoryVecDeque::insert) method that allows users
@@ -16,12 +16,26 @@ use crate::factory::{Factory, FactoryListView, FactoryPrototype, FactoryView};
 /// invalidate their indices.
 /// To allow widgets in a [`Factory`] to still send messages with valid indices
 /// this type ensures that the indices is always up to date.
-/// Never send this index as [`usize`] but always inside of a [`Rc`] to the update function
-/// because messages can be queued up and stale by the time they are handled.
 ///
-/// In short: only call [`current_index`](DynamicIndex::current_index) from the update function where you actually need the index as [`usize`].
+/// Never send an index as [`usize`] but always as [`DynamicIndex`] or even better as [`WeakDynamicIndex`]
+/// to the update function because messages can be queued up and stale by the time they are handled.
+///
+/// **[`DynamicIndex`] is a smart pointer so cloning will work similar to [`Rc`] and will create
+/// a pointer to the same data.**
+///
+/// In short: only call [`current_index`](DynamicIndex::current_index) from the update function
+/// where you actually need the index as [`usize`].
+#[derive(Debug, PartialEq, Eq)]
 pub struct DynamicIndex {
-    inner: RefCell<usize>,
+    inner: Fragile<Rc<RefCell<usize>>>,
+}
+
+impl Clone for DynamicIndex {
+    fn clone(&self) -> Self {
+        DynamicIndex {
+            inner: Fragile::new(self.inner.get().clone()),
+        }
+    }
 }
 
 impl DynamicIndex {
@@ -29,24 +43,63 @@ impl DynamicIndex {
     ///
     /// This value is updated by the [`Factory`] and might change after each update function.
     pub fn current_index(&self) -> usize {
-        *self.inner.borrow()
+        *self.inner.get().borrow()
+    }
+
+    /// Creates a [`WeakDynamicIndex`] for sending in messages.
+    pub fn downgrade(&self) -> WeakDynamicIndex {
+        WeakDynamicIndex {
+            inner: Fragile::new(Rc::downgrade(self.inner.get())),
+        }
     }
 
     #[doc(hidden)]
     fn increment(&self) {
-        *self.inner.borrow_mut() += 1;
+        *self.inner.get().borrow_mut() += 1;
     }
 
     #[doc(hidden)]
     fn decrement(&self) {
-        *self.inner.borrow_mut() -= 1;
+        *self.inner.get().borrow_mut() -= 1;
     }
 
     #[doc(hidden)]
     fn new(index: usize) -> Self {
         DynamicIndex {
-            inner: RefCell::new(index),
+            inner: Fragile::new(Rc::new(RefCell::new(index))),
         }
+    }
+}
+
+/// A weak version of [`DynamicIndex`].
+///
+/// Use this to send messages to the update function and call [`upgrade`](WeakDynamicIndex::upgrade)
+/// to receive the actual [`DynamicIndex`].
+///
+/// A weak index is preferred for sending in messages because messages can be stale by the time they
+/// are handled and the element already deleted. A weak reference doesn't keep the index alive
+/// if the element was deleted which allows you to properly handle invalid indices.
+#[derive(Debug)]
+pub struct WeakDynamicIndex {
+    inner: Fragile<Weak<RefCell<usize>>>,
+}
+
+impl Clone for WeakDynamicIndex {
+    fn clone(&self) -> Self {
+        WeakDynamicIndex {
+            inner: Fragile::new(self.inner.get().clone()),
+        }
+    }
+}
+
+impl WeakDynamicIndex {
+    /// Attempts to upgrade the [`WeakDynamicIndex`] to a [`DynamicIndex`].
+    ///
+    /// Returns [`None`] if the index has since been dropped.
+    pub fn upgrade(&self) -> Option<DynamicIndex> {
+        self.inner.get().upgrade().map(|rc| DynamicIndex {
+            inner: Fragile::new(rc),
+        })
     }
 }
 
@@ -341,7 +394,7 @@ where
     View: FactoryView<Data::Root> + FactoryListView<Data::Root>,
     <Data as FactoryPrototype>::Root: std::clone::Clone,
 {
-    type Key = Rc<DynamicIndex>;
+    type Key = DynamicIndex;
 
     fn generate(&self, view: &View, sender: Sender<Data::Msg>) {
         let change_map = self.compile_changes();

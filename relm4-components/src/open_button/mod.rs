@@ -13,7 +13,6 @@ use crate::ParentWindow;
 use std::io::Read;
 use std::marker::PhantomData;
 use std::path::PathBuf;
-use std::rc::Rc;
 
 mod factory;
 
@@ -71,7 +70,7 @@ pub struct OpenButtonSettings {
 #[derive(Debug)]
 pub enum OpenButtonMsg {
     Open(PathBuf),
-    OpenRecent(Rc<DynamicIndex>),
+    OpenRecent(DynamicIndex),
     ShowDialog,
     Ignore,
 }

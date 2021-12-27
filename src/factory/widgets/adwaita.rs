@@ -1,4 +1,4 @@
-use crate::factory::{FactoryListView, FactoryView, positions::StackPageInfo};
+use crate::factory::{positions::StackPageInfo, FactoryListView, FactoryView};
 use gtk::glib;
 
 impl<Widget> FactoryView<Widget> for adw::Carousel

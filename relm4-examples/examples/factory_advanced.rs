@@ -1,20 +1,16 @@
 use gtk::glib::Sender;
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt};
-use relm4::factory::{DynamicIndex, Factory, FactoryPrototype, FactoryVecDeque};
+use relm4::factory::{DynamicIndex, Factory, FactoryPrototype, FactoryVecDeque, WeakDynamicIndex};
 use relm4::*;
-
-use std::rc::{Rc, Weak};
-
-type MsgIndex = Weak<DynamicIndex>;
 
 #[derive(Debug)]
 enum AppMsg {
     AddFirst,
     RemoveLast,
-    CountAt(MsgIndex),
-    RemoveAt(MsgIndex),
-    InsertBefore(MsgIndex),
-    InsertAfter(MsgIndex),
+    CountAt(WeakDynamicIndex),
+    RemoveAt(WeakDynamicIndex),
+    InsertBefore(WeakDynamicIndex),
+    InsertAfter(WeakDynamicIndex),
 }
 
 struct Counter {
@@ -94,14 +90,14 @@ impl FactoryPrototype for Counter {
     type View = gtk::Box;
     type Msg = AppMsg;
 
-    fn generate(&self, index: &Rc<DynamicIndex>, sender: Sender<AppMsg>) -> FactoryWidgets {
+    fn generate(&self, index: &DynamicIndex, sender: Sender<AppMsg>) -> FactoryWidgets {
         let hbox = gtk::Box::builder()
             .orientation(gtk::Orientation::Horizontal)
             .spacing(5)
             .build();
 
         let counter_button = gtk::Button::with_label(&self.value.to_string());
-        let index: Rc<DynamicIndex> = index.clone();
+        let index: DynamicIndex = index.clone();
 
         let remove_button = gtk::Button::with_label("Remove");
         let ins_above_button = gtk::Button::with_label("Add above");
@@ -116,7 +112,7 @@ impl FactoryPrototype for Counter {
             let sender = sender.clone();
             let index = index.clone();
             counter_button.connect_clicked(move |_| {
-                send!(sender, AppMsg::CountAt(Rc::downgrade(&index)));
+                send!(sender, AppMsg::CountAt(index.downgrade()));
             });
         }
 
@@ -124,7 +120,7 @@ impl FactoryPrototype for Counter {
             let sender = sender.clone();
             let index = index.clone();
             remove_button.connect_clicked(move |_| {
-                send!(sender, AppMsg::RemoveAt(Rc::downgrade(&index)));
+                send!(sender, AppMsg::RemoveAt(index.downgrade()));
             });
         }
 
@@ -132,12 +128,12 @@ impl FactoryPrototype for Counter {
             let sender = sender.clone();
             let index = index.clone();
             ins_above_button.connect_clicked(move |_| {
-                send!(sender, AppMsg::InsertBefore(Rc::downgrade(&index)));
+                send!(sender, AppMsg::InsertBefore(index.downgrade()));
             });
         }
 
         ins_below_button.connect_clicked(move |_| {
-            send!(sender, AppMsg::InsertAfter(Rc::downgrade(&index)));
+            send!(sender, AppMsg::InsertAfter(index.downgrade()));
         });
 
         FactoryWidgets {
@@ -146,9 +142,9 @@ impl FactoryPrototype for Counter {
         }
     }
 
-    fn position(&self, _index: &Rc<DynamicIndex>) {}
+    fn position(&self, _index: &DynamicIndex) {}
 
-    fn update(&self, _index: &Rc<DynamicIndex>, widgets: &FactoryWidgets) {
+    fn update(&self, _index: &DynamicIndex, widgets: &FactoryWidgets) {
         widgets.counter_button.set_label(&self.value.to_string());
     }
 
