@@ -248,12 +248,10 @@ where
 
     /// Remove all data from the [`FactoryVecDeque`].
     pub fn clear(&mut self) {
-        for index in 0..self.data.len() {
-            self.add_change(Change {
-                ty: ChangeType::Remove(1),
-                index,
-            })
-        }
+        self.add_change(Change {
+            ty: ChangeType::Remove(self.data.len() as u16),
+            index: 0,
+        });
         self.data.clear();
     }
 

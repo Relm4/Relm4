@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Fixed
+
++ relm4: Fix panic caused by the clear method of FactoryVecDeque
+
+## 0.4.0-beta.3 - 2021-12-28
+
 ### Added
 
 + relm4: A factory view implementation for libadwaita's StackView
