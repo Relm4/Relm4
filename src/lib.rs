@@ -117,7 +117,7 @@ pub fn spawn_future<F: futures_core::future::Future<Output = ()> + Send + 'stati
 /// The message is sent using the sender and the [`Result`] is unwrapped automatically.
 #[macro_export]
 macro_rules! send {
-    ($sender:ident, $msg:expr) => {
+    ($sender:expr, $msg:expr) => {
         $sender.send($msg).expect("Receiver was dropped!")
     };
 }
