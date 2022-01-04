@@ -150,7 +150,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
         }
     }
 
-    fn manual_view() {
+    fn pre_view() {
         for num in &model.numbers {
             if !num.is_connected() {
                 self.main_box.append(num.root_widget());

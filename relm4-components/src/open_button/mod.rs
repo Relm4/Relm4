@@ -290,7 +290,7 @@ where
         self.parent_window = parent_widgets.parent_window();
     }
 
-    fn manual_view() {
+    fn pre_view() {
         if let Some(model) = &model.recent_files {
             model.generate(self.view.as_ref().expect("Box wasn't generated"), sender);
         }

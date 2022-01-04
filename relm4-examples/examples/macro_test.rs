@@ -169,7 +169,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
         println!("Post init! test_field: {}", test_field);
     }
 
-    fn manual_view() {
+    fn pre_view() {
         self.test_page.set_title("Manually set title in view!");
         self.test_field += 1;
         println!("Manual view! test_field: {}", self.test_field);

@@ -187,7 +187,8 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
         post_init,
         pre_connect_parent,
         post_connect_parent,
-        manual_view,
+        pre_view,
+        post_view,
     } = match Funcs::new(&data.funcs) {
         Ok(macros) => macros,
         Err(err) => return TokenStream::from(err.to_compile_error()),
@@ -267,10 +268,11 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
 
             /// Update the view to represent the updated model.
             fn view(&mut self, model: &#model, sender: #relm4_path::Sender<<#model as #relm4_path::Model>::Msg>) {
-                // Wrap manual view code to prevent early returns from skipping other view code.
-                (|| { #manual_view })();
+                // Wrap pre_view and post_view code to prevent early returns from skipping other view code.
+                (|| { #pre_view })();
                 #view
                 #track
+                (|| { #post_view })();
             }
         }
     };

@@ -97,7 +97,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
         }
     }
 
-    fn manual_view() {
+    fn pre_view() {
         match model.page {
             Page::Hello => self.stack.set_visible_child(&self.hello_label),
             Page::Intro => self.stack.set_visible_child(&self.intro_label),

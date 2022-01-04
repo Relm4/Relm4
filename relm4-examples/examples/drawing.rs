@@ -163,7 +163,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
         });
     }
 
-    fn manual_view() {
+    fn pre_view() {
         let cx = self.handler.get_context().unwrap();
         if model.reset {
             cx.set_operator(Operator::Clear);

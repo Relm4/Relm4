@@ -7,7 +7,20 @@ pub(super) struct Funcs {
     pub post_init: Option<TokenStream2>,
     pub pre_connect_parent: Option<TokenStream2>,
     pub post_connect_parent: Option<TokenStream2>,
-    pub manual_view: Option<TokenStream2>,
+    pub pre_view: Option<TokenStream2>,
+    pub post_view: Option<TokenStream2>,
+}
+
+macro_rules! parse_func {
+    ($name:ident, $func:ident, $tokens:ident) => {
+        if $name.is_some() {
+            return Err(Error::new(
+                $func.span().unwrap().into(),
+                &format!("{} method defined multiple times", stringify!($name)),
+            ));
+        }
+        $name = Some($tokens);
+    };
 }
 
 impl Funcs {
@@ -16,7 +29,8 @@ impl Funcs {
         let mut post_init = None;
         let mut pre_connect_parent = None;
         let mut post_connect_parent = None;
-        let mut manual_view = None;
+        let mut pre_view = None;
+        let mut post_view = None;
 
         for func in funcs {
             let ident = &func.sig.ident;
@@ -24,49 +38,21 @@ impl Funcs {
             let tokens = quote! { #(#stmts)* };
 
             if ident == "pre_init" {
-                if pre_init.is_some() {
-                    return Err(Error::new(
-                        func.span().unwrap().into(),
-                        "pre_init method defined multiple times",
-                    ));
-                }
-                pre_init = Some(tokens);
+                parse_func!(pre_init, func, tokens);
             } else if ident == "post_init" {
-                if post_init.is_some() {
-                    return Err(Error::new(
-                        func.span().unwrap().into(),
-                        "post_init method defined multiple times",
-                    ));
-                }
-                post_init = Some(tokens);
+                parse_func!(post_init, func, tokens);
             } else if ident == "pre_connect_parent" {
-                if pre_connect_parent.is_some() {
-                    return Err(Error::new(
-                        func.span().unwrap().into(),
-                        "pre_connect_parent method defined multiple times",
-                    ));
-                }
-                pre_connect_parent = Some(tokens);
+                parse_func!(pre_connect_parent, func, tokens);
             } else if ident == "post_connect_parent" {
-                if post_connect_parent.is_some() {
-                    return Err(Error::new(
-                        func.span().unwrap().into(),
-                        "post_connect_parent method defined multiple times",
-                    ));
-                }
-                post_connect_parent = Some(tokens);
-            } else if ident == "manual_view" {
-                if manual_view.is_some() {
-                    return Err(Error::new(
-                        func.span().unwrap().into(),
-                        "manual_view method defined multiple times",
-                    ));
-                }
-                manual_view = Some(tokens);
+                parse_func!(post_connect_parent, func, tokens);
+            } else if ident == "pre_view" {
+                parse_func!(pre_view, func, tokens);
+            } else if ident == "post_view" {
+                parse_func!(post_view, func, tokens);
             } else {
                 return Err(Error::new(
                     func.span().unwrap().into(),
-                    "Expected identifier pre_init, post_init or manual_view",
+                    "Expected identifier `pre_init`, `post_init`, `pre_connect_parent`, `post_connect_parent`, `pre_view` or `post_view`.",
                 ));
             }
         }
@@ -76,7 +62,8 @@ impl Funcs {
             post_init,
             pre_connect_parent,
             post_connect_parent,
-            manual_view,
+            pre_view,
+            post_view,
         })
     }
 }

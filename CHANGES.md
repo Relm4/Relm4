@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+### Added
+
++ relm4-macros: post_view function to execute code after the view code of the macro
+
+### Changed
+
++ relm4-macros: manual_view is now called pre_view
+
 ### Fixed
 
 + relm4: Fix panic caused by the clear method of FactoryVecDeque
