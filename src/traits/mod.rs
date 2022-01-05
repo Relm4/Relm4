@@ -252,11 +252,16 @@ where
 /// }
 ///
 /// impl Components<AppModel> for AppComponents {
-///     fn init_components(parent_model: &AppModel, parent_widgets: &AppWidgets, parent_sender: Sender<AppMsg>) -> Self {
+///     fn init_components(parent_model: &AppModel, parent_sender: Sender<AppMsg>) -> Self {
 ///         AppComponents {
-///             comp1: RelmComponent::with_new_thread(parent_model, parent_widgets, parent_sender.clone()),
-///             comp2: RelmComponent::new(parent_model, parent_widgets, parent_sender),
+///             comp1: RelmComponent::new(parent_model, parent_sender.clone()),
+///             comp2: RelmComponent::new(parent_model, parent_sender),
 ///         }
+///     }
+///
+///     fn connect_parent(&mut self, parent_widgets: &AppWidgets) {
+///         self.comp1.connect_parent(parent_widgets);
+///         self.comp2.connect_parent(parent_widgets);
 ///     }
 /// }
 /// ```
