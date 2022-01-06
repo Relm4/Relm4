@@ -42,12 +42,12 @@ jobs:
         run: cargo clippy -- --deny warnings
 
       # nightly
-      - name: "relm: build nightly"
-        run: cargo build
+      - name: "relm: test nightly"
+        run: xvfb-run --auto-servernum cargo test
         if: matrix.rust == 'nightly'
       # not nightly
-      - name: "relm: build"
-        run: cargo build
+      - name: "relm: test"
+        run: xvfb-run --auto-servernum cargo test
         if: matrix.rust != 'nightly'
 
       - name: "relm: check examples"
