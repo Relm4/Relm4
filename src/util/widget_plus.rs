@@ -21,6 +21,7 @@ pub trait WidgetPlus {
     /// # gtk::init().unwrap();
     /// # let widget = gtk::Button::new();
     /// widget.inline_css(b"border: 1px solid red");
+    /// ```
     fn inline_css(&self, style_data: &[u8]);
 
     /// Try to remove a widget from a widget.

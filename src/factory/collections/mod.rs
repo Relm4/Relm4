@@ -14,6 +14,11 @@
 //! for adding and removing widgets at arbitrary positions.
 //! [`gtk::Grid`] for example only works with [`FactoryVec`] but not with
 //! [`FactoryVecDeque`] because widgets can't be inserted at arbitrary positions.
+//!
+//! Another difference is that [`FactoryVecDeque`] will insert widgets
+//! at the beginning if the container used for the factory contains other widgets
+//! that were inserted independently from the factory.
+//! Yet, [`FactoryVec`] will insert widgets at the end in the same scenario.
 
 mod factory_vec;
 mod factory_vec_deque;

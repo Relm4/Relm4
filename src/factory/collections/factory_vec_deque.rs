@@ -25,6 +25,10 @@ use fragile::Fragile;
 ///
 /// In short: only call [`current_index`](DynamicIndex::current_index) from the update function
 /// where you actually need the index as [`usize`].
+///
+/// # Panics
+///
+/// Sending a [`DynamicIndex`] to a different thread and accessing it will panic.
 #[derive(Debug, PartialEq, Eq)]
 pub struct DynamicIndex {
     inner: Fragile<Rc<RefCell<usize>>>,
@@ -79,6 +83,10 @@ impl DynamicIndex {
 /// A weak index is preferred for sending in messages because messages can be stale by the time they
 /// are handled and the element already deleted. A weak reference doesn't keep the index alive
 /// if the element was deleted which allows you to properly handle invalid indices.
+///
+/// # Panics
+///
+/// Sending a [`WeakDynamicIndex`] to a different thread and accessing it will panic.
 #[derive(Debug)]
 pub struct WeakDynamicIndex {
     inner: Fragile<Weak<RefCell<usize>>>,
