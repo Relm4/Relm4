@@ -26,7 +26,7 @@ macro_rules! new_action_group {
 
 #[macro_export]
 /// Create a new type that implements [`ActionGroupName`].
-macro_rules! new_statless_action {
+macro_rules! new_stateless_action {
     ($ty:ident, $group:ty, $name:expr) => {
         struct $ty;
 
@@ -44,7 +44,7 @@ macro_rules! new_statless_action {
 
 #[macro_export]
 /// Create a new type that implements [`ActionGroupName`].
-macro_rules! new_statful_action {
+macro_rules! new_stateful_action {
     ($ty:ident, $group:ty, $name:expr, $value:ty, $state:ty) => {
         struct $ty;
 
@@ -155,7 +155,7 @@ where
     Name::State: EmptyType,
 {
     /// Create a new stateless action.
-    pub fn new_statelesss<Callback: Fn(&gio::SimpleAction) + 'static>(callback: Callback) -> Self {
+    pub fn new_stateless<Callback: Fn(&gio::SimpleAction) + 'static>(callback: Callback) -> Self {
         let action = gio::SimpleAction::new(Name::name(), None);
 
         action.connect_activate(move |action, _variant| {

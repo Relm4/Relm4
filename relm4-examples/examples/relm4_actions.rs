@@ -88,8 +88,8 @@ impl Widgets<AppModel, ()> for AppWidgets {
 
         let group = RelmActionGroup::<WindowActionGroup>::new();
 
-        let action: RelmAction<TestAction> = RelmAction::new_statelesss(move |_| {
-            println!("Statelesss action!");
+        let action: RelmAction<TestAction> = RelmAction::new_stateless(move |_| {
+            println!("Stateless action!");
             send!(sender, AppMsg::Increment);
         });
 
@@ -109,8 +109,8 @@ impl Widgets<AppModel, ()> for AppWidgets {
 
 relm4::new_action_group!(WindowActionGroup, "win");
 
-relm4::new_statless_action!(TestAction, WindowActionGroup, "test");
-relm4::new_statful_action!(TestU8Action, WindowActionGroup, "test2", bool, bool);
+relm4::new_stateless_action!(TestAction, WindowActionGroup, "test");
+relm4::new_stateful_action!(TestU8Action, WindowActionGroup, "test2", bool, bool);
 
 fn main() {
     let model = AppModel::default();
