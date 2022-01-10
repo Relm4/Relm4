@@ -13,8 +13,8 @@ pub use traits::*;
 #[macro_export]
 /// Create a new type that implements [`ActionGroupName`].
 macro_rules! new_action_group {
-    ($ty:ident, $name:expr) => {
-        struct $ty;
+    ($vis:vis $ty:ident, $name:expr) => {
+        $vis struct $ty;
 
         impl ActionGroupName for $ty {
             fn group_name() -> &'static str {
@@ -27,8 +27,8 @@ macro_rules! new_action_group {
 #[macro_export]
 /// Create a new type that implements [`ActionGroupName`].
 macro_rules! new_stateless_action {
-    ($ty:ident, $group:ty, $name:expr) => {
-        struct $ty;
+    ($vis:vis $ty:ident, $group:ty, $name:expr) => {
+        $vis struct $ty;
 
         impl ActionName for $ty {
             type Group = $group;
@@ -45,8 +45,8 @@ macro_rules! new_stateless_action {
 #[macro_export]
 /// Create a new type that implements [`ActionGroupName`].
 macro_rules! new_stateful_action {
-    ($ty:ident, $group:ty, $name:expr, $value:ty, $state:ty) => {
-        struct $ty;
+    ($vis:vis $ty:ident, $group:ty, $name:expr, $value:ty, $state:ty) => {
+        $vis struct $ty;
 
         impl ActionName for $ty {
             type Group = $group;
