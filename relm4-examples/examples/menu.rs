@@ -88,12 +88,33 @@ impl Widgets<AppModel, ()> for AppWidgets {
         }
     }
 
-    fn post_init() {
-        // main_menu.append(Some("Stateless"), Some(&TestAction::action_name()));
-        // let entry = gtk::gio::MenuItem::new(Some("Test"), Some(&TestU8Action::action_name()));
-        // entry.set_action_and_target_value(Some(&TestU8Action::action_name()), Some(&1_u8.to_variant()));
-        // main_menu.append_item(&entry);
+    // ============================================================
+    //
+    // You can also use menu! outside of the widget macro.
+    // This is the manual equivalent to the the menu! macro above.
+    //
+    // ============================================================
+    //
+    // fn pre_init() {
+    //     relm4_macros::menu! {
+    //         main_menu: {
+    //             "Test" => TestAction,
+    //             "Test2" => TestAction,
+    //             "Test toggle" => TestU8Action(1_u8),
+    //             section! {
+    //                 "Section test" => TestAction,
+    //                 "Test toggle" => TestU8Action(1_u8),
+    //             },
+    //             section! {
+    //                 "Test" => TestAction,
+    //                 "Test2" => TestAction,
+    //                 "Test Value" => TestU8Action(1_u8),
+    //             }
+    //         }
+    //     };
+    // }
 
+    fn post_init() {
         let app = relm4::gtk_application();
         app.set_accelerators_for_action::<TestAction>(&["<primary>W"]);
 
@@ -106,7 +127,6 @@ impl Widgets<AppModel, ()> for AppWidgets {
 
         let action2: RelmAction<TestU8Action> =
             RelmAction::new_stateful_with_target_value(&0, |_, state, _value| {
-                //println!("Stateful action -> state: {}, value: {}", state, value);
                 *state ^= 1;
                 dbg!(state);
             });
@@ -123,6 +143,7 @@ relm4::new_action_group!(WindowActionGroup, "win");
 
 relm4::new_stateless_action!(TestAction, WindowActionGroup, "test");
 relm4::new_stateful_action!(TestU8Action, WindowActionGroup, "test2", u8, u8);
+
 
 fn main() {
     let model = AppModel::default();

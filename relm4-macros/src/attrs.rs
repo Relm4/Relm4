@@ -1,11 +1,11 @@
 use proc_macro2::Span;
 use syn::{
     parse::{Parse, ParseStream},
-    punctuated::Punctuated,
     spanned::Spanned,
-    token::Colon2,
-    Error, Ident, Path, PathArguments, PathSegment, Result, Token, Visibility,
+    Error, Ident, Path, Result, Token, Visibility,
 };
+
+use crate::util::default_relm4_path;
 
 #[derive(Debug)]
 enum AttributeType {
@@ -37,23 +37,9 @@ pub struct Attrs {
 
 impl Attrs {
     fn new() -> Self {
-        let relm4_path_segment = PathSegment {
-            ident: Ident::new("relm4", Span::call_site()),
-            arguments: PathArguments::None,
-        };
-
-        let mut relm4_segments: Punctuated<PathSegment, Colon2> = Punctuated::new();
-        relm4_segments.push(relm4_path_segment);
-
-        let relm4_path: Path = Path {
-            leading_colon: Some(Token![::](Span::call_site())),
-            segments: relm4_segments,
-        };
-
         Attrs {
             visibility: None,
-
-            relm4_path,
+            relm4_path: default_relm4_path(),
             relm4_path_set: false,
         }
     }

@@ -16,7 +16,7 @@ struct Menu {
 
 #[derive(Debug)]
 enum MenuItem {
-    Entry(MenuEntry),
+    Entry(Box<MenuEntry>),
     Section(MenuSection),
 }
 

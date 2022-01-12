@@ -26,6 +26,7 @@ use attrs::Attrs;
 use funcs::Funcs;
 use item_impl::ItemImpl;
 use macros::Macros;
+use menu::Menus;
 use types::ModelTypes;
 
 /// Macro that implemements [relm4::Widgets](https://aaronerhardt.github.io/docs/relm4/relm4/trait.Widgets.html) and generates the corresponding struct.
@@ -289,4 +290,12 @@ pub fn derive(input: TokenStream) -> TokenStream {
         Ok(output) => output.into(),
         Err(error) => error.into_compile_error().into(),
     }
+}
+
+#[proc_macro]
+pub fn menu(input: TokenStream) -> TokenStream {
+    let menus = parse_macro_input!(input as Menus);
+    let default_relm4_path = util::default_relm4_path();
+
+    menus.menus_stream(&default_relm4_path).into()
 }

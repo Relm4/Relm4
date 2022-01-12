@@ -1,7 +1,8 @@
 use proc_macro::Span;
-use syn::Ident;
+use proc_macro2::Span as Span2;
+use syn::{punctuated::Punctuated, token::Colon2, Ident, Path, PathArguments, PathSegment, Token};
 
-pub(super) fn idents_to_snake_case(idents: &[Ident]) -> Ident {
+pub(crate) fn idents_to_snake_case(idents: &[Ident]) -> Ident {
     use std::sync::atomic::{AtomicU16, Ordering};
     static COUNTER: AtomicU16 = AtomicU16::new(0);
     let val = COUNTER.fetch_add(1, Ordering::Relaxed);
@@ -23,4 +24,19 @@ pub(super) fn idents_to_snake_case(idents: &[Ident]) -> Ident {
     name.push_str(&index_str);
 
     Ident::new(&name, Span::call_site().into())
+}
+
+pub(crate) fn default_relm4_path() -> Path {
+    let relm4_path_segment = PathSegment {
+        ident: Ident::new("relm4", Span2::call_site()),
+        arguments: PathArguments::None,
+    };
+
+    let mut relm4_segments: Punctuated<PathSegment, Colon2> = Punctuated::new();
+    relm4_segments.push(relm4_path_segment);
+
+    Path {
+        leading_colon: Some(Token![::](Span2::call_site())),
+        segments: relm4_segments,
+    }
 }

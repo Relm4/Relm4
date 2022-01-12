@@ -5,10 +5,12 @@
 ### Added
 
 + relm4-macros: post_view function to execute code after the view code of the macro
++ relm4-macros: allow using the menu macro independent from the widget macro
 
 ### Changed
 
 + relm4-macros: manual_view is now called pre_view
++ book: reworked introduction and first chapter
 
 ### Fixed
 
