@@ -28,6 +28,7 @@ use item_impl::ItemImpl;
 use macros::Macros;
 use menu::Menus;
 use types::ModelTypes;
+use widgets::Widget;
 
 /// Macro that implemements [relm4::Widgets](https://aaronerhardt.github.io/docs/relm4/relm4/trait.Widgets.html) and generates the corresponding struct.
 ///
@@ -298,4 +299,25 @@ pub fn menu(input: TokenStream) -> TokenStream {
     let default_relm4_path = util::default_relm4_path();
 
     menus.menus_stream(&default_relm4_path).into()
+}
+
+#[proc_macro]
+pub fn view(input: TokenStream) -> TokenStream {
+    let widgets = parse_macro_input!(input as Widget);
+    let default_relm4_path = util::default_relm4_path();
+
+    let model_type = syn::Type::Tuple(syn::TypeTuple {
+        paren_token: syn::token::Paren::default(),
+        elems: syn::punctuated::Punctuated::new(),
+    });
+
+    let mut streams = widgets::TokenStreams::default();
+    widgets.generate_tokens_recursively(&mut streams, &None, &model_type, &default_relm4_path);
+    let widgets::TokenStreams { init_widgets, connect_widgets, init_properties, .. } = streams;
+
+    quote! {
+        #init_widgets
+        #connect_widgets
+        #init_properties
+    }.into()
 }

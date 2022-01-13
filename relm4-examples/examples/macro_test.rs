@@ -149,7 +149,8 @@ impl Widgets<AppModel, ()> for AppWidgets {
                 },
                 append = &gtk::StackSwitcher {
                     set_stack: Some(&stack)
-                }
+                },
+                append: &vbox,
             },
         }
     }
@@ -161,6 +162,14 @@ impl Widgets<AppModel, ()> for AppWidgets {
     fn pre_init() {
         let mut test_field = 0;
         println!("Pre init! test_field: {}", test_field);
+
+        relm4_macros::view! {
+            vbox = gtk::Box {
+                append = &gtk::Label {
+                    set_label: "It works!",
+                }
+            }
+        }
     }
 
     fn post_init() {

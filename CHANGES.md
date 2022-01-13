@@ -5,7 +5,7 @@
 ### Added
 
 + relm4-macros: post_view function to execute code after the view code of the macro
-+ relm4-macros: allow using the menu macro independent from the widget macro
++ relm4-macros: allow using the view and menu macros independently from the widget macro
 
 ### Changed
 
