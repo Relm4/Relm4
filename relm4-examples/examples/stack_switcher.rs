@@ -1,5 +1,5 @@
 use gtk::prelude::{BoxExt, GtkWindowExt, WidgetExt};
-use relm4::{AppUpdate, ComponentUpdate, Model, RelmApp, RelmComponent, Sender, Widgets};
+use relm4::{gtk, AppUpdate, ComponentUpdate, Model, RelmApp, RelmComponent, Sender, Widgets};
 
 enum HeaderMsg {}
 

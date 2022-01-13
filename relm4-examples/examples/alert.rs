@@ -1,5 +1,5 @@
 use gtk::prelude::{BoxExt, ButtonExt, Cast, GtkWindowExt, OrientableExt};
-use relm4::{send, AppUpdate, Model, RelmApp, RelmComponent, Sender, WidgetPlus, Widgets};
+use relm4::{gtk, send, AppUpdate, Model, RelmApp, RelmComponent, Sender, WidgetPlus, Widgets};
 use relm4_components::alert::{AlertConfig, AlertModel, AlertMsg, AlertParent, AlertSettings};
 use relm4_components::ParentWindow;
 

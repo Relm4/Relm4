@@ -1,7 +1,7 @@
 use gtk::glib::Sender;
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt};
 use relm4::factory::{Factory, FactoryPrototype, FactoryVec};
-use relm4::*;
+use relm4::{gtk, AppUpdate, Model, RelmApp, Widgets};
 
 #[derive(Debug)]
 enum AppMsg {
@@ -87,7 +87,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
     type Root = gtk::ApplicationWindow;
 
     fn init_view(_model: &AppModel, _components: &(), sender: Sender<AppMsg>) -> Self {
-        let main = gtk::ApplicationWindowBuilder::new()
+        let main = gtk::ApplicationWindow::builder()
             .default_width(300)
             .default_height(200)
             .build();

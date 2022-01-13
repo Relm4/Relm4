@@ -2,7 +2,7 @@ use gtk::prelude::{
     BoxExt, CheckButtonExt, EntryBufferExtManual, EntryExt, GtkWindowExt, OrientableExt, WidgetExt,
 };
 use relm4::factory::{FactoryPrototype, FactoryVec};
-use relm4::{send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets};
+use relm4::{gtk, send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets};
 
 struct Task {
     name: String,
@@ -49,7 +49,7 @@ impl FactoryPrototype for Task {
 
     fn update(&self, _key: &usize, widgets: &Self::Widgets) {
         let attrs = widgets.label.attributes().unwrap_or_default();
-        attrs.change(gtk::pango::Attribute::new_strikethrough(self.completed));
+        attrs.change(gtk::pango::AttrInt::new_strikethrough(self.completed));
         widgets.label.set_attributes(Some(&attrs));
     }
 

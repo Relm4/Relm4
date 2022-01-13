@@ -313,7 +313,12 @@ pub fn view(input: TokenStream) -> TokenStream {
 
     let mut streams = widgets::TokenStreams::default();
     widgets.generate_tokens_recursively(&mut streams, &None, &model_type, &default_relm4_path);
-    let widgets::TokenStreams { init_widgets, connect_widgets, init_properties, .. } = streams;
+    let widgets::TokenStreams {
+        init_widgets,
+        connect_widgets,
+        init_properties,
+        ..
+    } = streams;
 
     let output = quote! {
         #init_widgets

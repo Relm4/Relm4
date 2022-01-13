@@ -1,5 +1,5 @@
 use gtk::prelude::{BoxExt, ButtonExt, Cast, GtkWindowExt, OrientableExt};
-use relm4::{send, AppUpdate, Model, RelmApp, RelmComponent, Sender, WidgetPlus, Widgets};
+use relm4::{gtk, send, AppUpdate, Model, RelmApp, RelmComponent, Sender, WidgetPlus, Widgets};
 use relm4_components::save_dialog::{
     SaveDialogModel, SaveDialogMsg, SaveDialogParent, SaveDialogSettings,
 };

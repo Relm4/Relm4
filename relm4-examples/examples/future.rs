@@ -1,8 +1,7 @@
 use gtk::prelude::{
-    BoxExt, ButtonExt, EditableExt, GtkWindowExt, TextBufferExt, TextViewExt, WidgetExt,
+    BoxExt, ButtonExt, EditableExt, EntryExt, GtkWindowExt, TextBufferExt, TextViewExt, WidgetExt,
 };
-use relm4::Sender;
-use relm4::*;
+use relm4::{gtk, spawn_future, AppUpdate, Model, RelmApp, Sender, Widgets};
 
 struct AppWidgets {
     main: gtk::ApplicationWindow,
@@ -31,7 +30,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
     type Root = gtk::ApplicationWindow;
 
     fn init_view(_model: &AppModel, _components: &(), sender: Sender<AppMsg>) -> Self {
-        let main = gtk::ApplicationWindowBuilder::new()
+        let main = gtk::ApplicationWindow::builder()
             .default_width(300)
             .default_height(200)
             .build();
@@ -62,7 +61,16 @@ impl Widgets<AppModel, ()> for AppWidgets {
 
         main.set_child(Some(&main_box));
 
-        submit.connect_clicked(move |_| {
+        {
+            let sender = sender.clone();
+            let url = url.clone();
+            submit.connect_clicked(move |_| {
+                let text: String = url.text().into();
+                sender.send(AppMsg::Request(text)).unwrap();
+            });
+        }
+
+        url.connect_activate(move |url| {
             let text: String = url.text().into();
             sender.send(AppMsg::Request(text)).unwrap();
         });
@@ -94,15 +102,19 @@ impl AppUpdate for AppModel {
                 self.set_waiting(true);
 
                 let fut = async move {
-                    let mut text = "Connection error".to_string();
-
-                    if surf::Url::parse(&url).is_ok() {
+                    let text = if surf::Url::parse(&url).is_ok() {
                         if let Ok(mut req) = surf::get(url).await {
                             if let Ok(resp) = req.body_string().await {
-                                text = resp;
+                                resp
+                            } else {
+                                "Couldn't get response body".to_string()
                             }
+                        } else {
+                            "Couldn't send request".to_string()
                         }
-                    }
+                    } else {
+                        "Couldn't parse URL".to_string()
+                    };
                     sender.send(AppMsg::Response(text)).unwrap();
                 };
 

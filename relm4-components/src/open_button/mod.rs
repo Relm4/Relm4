@@ -3,7 +3,7 @@
 //! **[Example implementation](https://github.com/AaronErhardt/relm4/blob/main/relm4-examples/examples/open_button.rs)**
 use gtk::prelude::{BoxExt, ButtonExt, PopoverExt, WidgetExt};
 use relm4::factory::{DynamicIndex, Factory, FactoryVecDeque};
-use relm4::{send, ComponentUpdate, Components, Model, RelmComponent, Widgets};
+use relm4::{gtk, send, ComponentUpdate, Components, Model, RelmComponent, Widgets};
 
 use crate::open_dialog::{
     OpenDialogConfig, OpenDialogModel, OpenDialogMsg, OpenDialogParent, OpenDialogSettings,

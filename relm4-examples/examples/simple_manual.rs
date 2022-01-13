@@ -1,5 +1,5 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt};
-use relm4::{send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets};
+use relm4::{gtk, send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets};
 
 struct AppModel {
     counter: u8,

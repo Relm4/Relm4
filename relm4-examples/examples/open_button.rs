@@ -1,5 +1,5 @@
 use gtk::prelude::{Cast, GtkWindowExt};
-use relm4::{AppUpdate, Model, RelmApp, RelmComponent, Sender, Widgets};
+use relm4::{gtk, AppUpdate, Model, RelmApp, RelmComponent, Sender, Widgets};
 use relm4_components::open_button::{
     OpenButtonConfig, OpenButtonModel, OpenButtonParent, OpenButtonSettings,
 };

@@ -3,7 +3,7 @@ use gtk::prelude::EntryBufferExtManual;
 use gtk::prelude::{BoxExt, ButtonExt, EntryExt, GtkWindowExt, OrientableExt, WidgetExt};
 use gtk::EntryBuffer;
 use relm4::factory::{FactoryPrototype, FactoryVec};
-use relm4::{AppUpdate, Model, RelmApp, WidgetPlus, Widgets};
+use relm4::{gtk, AppUpdate, Model, RelmApp, WidgetPlus, Widgets};
 
 #[derive(Debug)]
 enum AppMsg {

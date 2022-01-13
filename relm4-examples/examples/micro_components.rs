@@ -1,7 +1,7 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
 use relm4::{
-    send, AppUpdate, MicroComponent, MicroModel, MicroWidgets, Model, RelmApp, Sender, WidgetPlus,
-    Widgets,
+    gtk, send, AppUpdate, MicroComponent, MicroModel, MicroWidgets, Model, RelmApp, Sender,
+    WidgetPlus, Widgets,
 };
 
 #[derive(Debug)]

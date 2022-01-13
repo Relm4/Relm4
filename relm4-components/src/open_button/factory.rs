@@ -1,6 +1,6 @@
 use gtk::prelude::ButtonExt;
 use relm4::factory::{DynamicIndex, FactoryPrototype, FactoryVecDeque};
-use relm4::{send, WidgetPlus};
+use relm4::{gtk, send, WidgetPlus};
 
 use super::OpenButtonMsg;
 

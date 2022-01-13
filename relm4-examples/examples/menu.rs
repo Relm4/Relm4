@@ -3,7 +3,7 @@ use relm4::{
     actions::{
         AccelsPlus, ActionGroupName, ActionName, ActionablePlus, RelmAction, RelmActionGroup,
     },
-    send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets,
+    gtk, send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets,
 };
 
 #[derive(Default)]
@@ -143,7 +143,6 @@ relm4::new_action_group!(WindowActionGroup, "win");
 
 relm4::new_stateless_action!(TestAction, WindowActionGroup, "test");
 relm4::new_stateful_action!(TestU8Action, WindowActionGroup, "test2", u8, u8);
-
 
 fn main() {
     let model = AppModel::default();

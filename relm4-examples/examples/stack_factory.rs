@@ -1,7 +1,7 @@
 use gtk::glib::Sender;
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
 use relm4::factory::{positions::StackPageInfo, FactoryPrototype, FactoryVec};
-use relm4::{send, AppUpdate, Model, RelmApp, WidgetPlus, Widgets};
+use relm4::{gtk, send, AppUpdate, Model, RelmApp, WidgetPlus, Widgets};
 
 #[derive(Debug)]
 enum AppMsg {

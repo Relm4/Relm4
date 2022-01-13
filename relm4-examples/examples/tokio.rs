@@ -3,8 +3,9 @@ use gtk::gdk_pixbuf::Pixbuf;
 use gtk::prelude::{
     BoxExt, ButtonExt, EditableExt, GtkWindowExt, TextBufferExt, TextViewExt, WidgetExt,
 };
-use relm4::Sender;
-use relm4::*;
+use relm4::{
+    gtk, AppUpdate, AsyncComponentUpdate, AsyncRelmWorker, Model, RelmApp, Sender, Widgets,
+};
 
 struct HttpModel {}
 
@@ -138,7 +139,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
     type Root = gtk::ApplicationWindow;
 
     fn init_view(model: &AppModel, _components: &AppComponents, sender: Sender<AppMsg>) -> Self {
-        let main = gtk::ApplicationWindowBuilder::new()
+        let main = gtk::ApplicationWindow::builder()
             .default_width(300)
             .default_height(200)
             .build();

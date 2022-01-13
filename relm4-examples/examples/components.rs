@@ -1,5 +1,7 @@
 use gtk::prelude::{BoxExt, ButtonExt, DialogExt, GtkWindowExt, ToggleButtonExt, WidgetExt};
-use relm4::{send, AppUpdate, ComponentUpdate, Model, RelmApp, RelmComponent, Sender, Widgets};
+use relm4::{
+    gtk, send, AppUpdate, ComponentUpdate, Model, RelmApp, RelmComponent, Sender, Widgets,
+};
 
 enum HeaderMsg {
     View,

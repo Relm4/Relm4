@@ -2,7 +2,7 @@ use gtk::cairo::{Context, Operator};
 use gtk::prelude::{
     BoxExt, DrawingAreaExt, GestureSingleExt, GtkWindowExt, OrientableExt, WidgetExt,
 };
-use relm4::{send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets};
+use relm4::{gtk, send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets};
 
 enum AppMsg {
     AddPoint((f64, f64)),

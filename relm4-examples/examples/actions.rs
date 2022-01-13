@@ -3,7 +3,7 @@ use relm4::{
     actions::{
         AccelsPlus, ActionGroupName, ActionName, ActionablePlus, RelmAction, RelmActionGroup,
     },
-    send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets,
+    gtk, send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets,
 };
 
 #[derive(Default)]

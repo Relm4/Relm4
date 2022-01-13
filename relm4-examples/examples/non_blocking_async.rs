@@ -1,6 +1,7 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
 use relm4::{
-    send, AppUpdate, MessageHandler, Model, RelmApp, RelmMsgHandler, Sender, WidgetPlus, Widgets,
+    gtk, send, AppUpdate, MessageHandler, Model, RelmApp, RelmMsgHandler, Sender, WidgetPlus,
+    Widgets,
 };
 
 use tokio::runtime::{Builder, Runtime};
