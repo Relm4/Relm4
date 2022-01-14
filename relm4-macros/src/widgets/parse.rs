@@ -102,7 +102,7 @@ impl Parse for Property {
             }
         }
         // look for widgets
-        else if input.peek(Token![=]) || input.peek3(Token![=]) {
+        else if input.peek(Token![=]) || input.peek3(Token![=]) || (input.peek(Token![:]) && input.peek2(Token![mut]) && input.peek3(Ident)) {
             if input.peek(Token![=]) {
                 let _token: Token![=] = input.parse()?;
             } else {
@@ -244,6 +244,10 @@ impl Parse for Widget {
     fn parse(input: ParseStream) -> Result<Self> {
         let mut name_opt: Option<Ident> = None;
 
+        // Check if first token is `mut`
+        let mutable = input.parse().ok();
+
+        // Look for name = Widget syntax
         if input.peek2(Token![=]) {
             name_opt = Some(input.parse()?);
             let _token: Token![=] = input.parse()?;
@@ -305,6 +309,7 @@ impl Parse for Widget {
         };
 
         Ok(Widget {
+            mutable,
             name,
             func,
             properties,

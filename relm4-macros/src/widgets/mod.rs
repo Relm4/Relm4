@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream as TokenStream2;
-use syn::{punctuated::Punctuated, token, Expr, ExprClosure, Generics, Ident, Lit, Path};
+use syn::{punctuated::Punctuated, token, Expr, ExprClosure, Generics, Ident, Lit, Path, token::Mut};
 
 use crate::args::Args;
 
@@ -84,6 +84,7 @@ pub(super) struct WidgetFunc {
 
 #[derive(Debug)]
 pub(super) struct Widget {
+    pub mutable: Option<Mut>,
     pub name: Ident,
     pub func: WidgetFunc,
     pub properties: Properties,

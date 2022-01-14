@@ -42,7 +42,7 @@ use widgets::Widget;
 ///
 /// ```
 /// use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
-/// use relm4::{send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets};
+/// use relm4::{gtk, send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets};
 ///
 /// #[derive(Default)]
 /// struct AppModel {
@@ -301,6 +301,47 @@ pub fn menu(input: TokenStream) -> TokenStream {
     menus.menus_stream(&default_relm4_path).into()
 }
 
+
+/// The [`view`] macro works allows you to construct your UI easily and cleanly.
+///
+/// It does the same as inside the [`widget`] attribute macro,
+/// but with less features of course (no factories, components, etc).
+/// You can even use `relm4-macros` independently from Relm4 to build your GTK4 UI.
+///
+/// ```no_run
+/// use relm4::gtk;
+/// use gtk::prelude::BoxExt;
+///
+/// relm4_macros::view! {
+///     vbox = gtk::Box {
+///         append = &gtk::Label {
+///             set_label: "It works!",
+///         }
+///     }
+/// }
+///
+/// // You can simply use the vbox created in the macro.
+/// let spacing = vbox.spacing();
+/// ```
+///
+/// Technically, you could even use the macro for other purposes,
+/// but that's not recommended unless you really know what the macro does.
+///
+/// ```
+/// use std::process::Command;
+///
+/// let path = "/";
+///
+/// relm4_macros::view! {
+///     mut process = Command::new("ls") {
+///         args: ["-la"],
+///         current_dir: path,
+///         env: args!("HOME", "/home/relm4"),
+///     }
+/// }
+///
+/// dbg!(process.output());
+/// ```
 #[proc_macro]
 pub fn view(input: TokenStream) -> TokenStream {
     let widgets = parse_macro_input!(input as Widget);

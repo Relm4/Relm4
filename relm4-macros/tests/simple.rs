@@ -1,5 +1,5 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
-use relm4::{send, AppUpdate, Model, Sender, WidgetPlus, Widgets};
+use relm4::{send, gtk, AppUpdate, Model, Sender, WidgetPlus, Widgets};
 
 #[derive(Default)]
 struct AppModel {
