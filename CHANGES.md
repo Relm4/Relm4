@@ -4,6 +4,8 @@
 
 ### Added
 
++ all: Add support for gtk4-rs v0.4
++ relm4: Introduce the "macro" feature as alternative to using relm4-macros separately
 + relm4-macros: post_view function to execute code after the view code of the macro
 + relm4-macros: allow using the view and menu macros independently from the widget macro
 
