@@ -26,7 +26,7 @@ impl ComponentUpdate<AppModel> for HeaderModel {
     }
 }
 
-#[relm4_macros::widget]
+#[relm4::widget]
 impl Widgets<HeaderModel, AppModel> for HeaderWidgets {
     view! {
         gtk::HeaderBar {
@@ -63,7 +63,7 @@ impl ComponentUpdate<AppModel> for StackModel {
     }
 }
 
-#[relm4_macros::widget]
+#[relm4::widget]
 impl Widgets<StackModel, AppModel> for StackWidgets {
     view! {
         gtk::Stack {
@@ -77,7 +77,7 @@ impl Widgets<StackModel, AppModel> for StackWidgets {
     }
 }
 
-#[derive(relm4_macros::Components)]
+#[derive(relm4::Components)]
 struct AppComponents {
     header: RelmComponent<HeaderModel, AppModel>,
     stack: RelmComponent<StackModel, AppModel>,
@@ -96,7 +96,7 @@ impl Model for AppModel {
     type Components = AppComponents;
 }
 
-#[relm4_macros::widget]
+#[relm4::widget]
 impl Widgets<AppModel, ()> for AppWidgets {
     view! {
         main_window = gtk::ApplicationWindow {

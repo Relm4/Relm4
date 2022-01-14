@@ -110,7 +110,7 @@ where
     }
 }
 
-#[relm4_macros::widget(pub)]
+#[relm4::widget(pub)]
 /// Widgets of the alert component
 impl<ParentModel, Conf> relm4::Widgets<AlertModel<Conf>, ParentModel> for AlertWidgets
 where

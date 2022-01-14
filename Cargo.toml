@@ -21,7 +21,7 @@ members = [
 ]
 
 [dependencies]
-#adw = { version = "0.1.0-beta-1", optional = true, package = "libadwaita" }
+adw = { git = "https://gitlab.gnome.org/World/Rust/libadwaita-rs.git", optional = true, package = "libadwaita" }
 async-trait = { version = "0.1", optional = true }
 fragile = "1"
 futures-core = "0.3"
@@ -29,11 +29,12 @@ gtk = { git = "https://github.com/gtk-rs/gtk4-rs", package = "gtk4" }
 log = "0.4.14"
 once_cell = "1.8"
 tokio = { version = "1.15", optional = true, features = ["rt"] }
-relm4-macros = { version = "0.4.0-beta.3", optional = true }
+#relm4-macros = { version = "0.4.0-beta.3", optional = true }
+relm4-macros = { path = "relm4-macros", optional = true }
 
 [features]
 default = []
-#libadwaita = ["adw"]
+libadwaita = ["adw"]
 tokio-rt = ["tokio", "async-trait"]
 macros = ["relm4-macros"]
-#all = ["tokio-rt", "libadwaita", "macros"]
+all = ["tokio-rt", "libadwaita", "macros"]

@@ -95,12 +95,12 @@ impl MessageHandler<AppModel> for AsyncHandler {
     }
 }
 
-#[derive(relm4_macros::Components)]
+#[derive(relm4::Components)]
 struct AppComponents {
     async_handler: RelmMsgHandler<AsyncHandler, AppModel>,
 }
 
-#[relm4_macros::widget]
+#[relm4::widget]
 impl Widgets<AppModel, ()> for AppWidgets {
     view! {
         gtk::ApplicationWindow {

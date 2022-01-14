@@ -69,7 +69,7 @@ impl ComponentUpdate<AppModel> for ButtonModel {
     }
 }
 
-#[relm4_macros::widget]
+#[relm4::widget]
 impl Widgets<ButtonModel, AppModel> for ButtonWidgets {
     view! {
         gtk::Button {
@@ -78,7 +78,7 @@ impl Widgets<ButtonModel, AppModel> for ButtonWidgets {
     }
 }
 
-#[derive(relm4_macros::Components)]
+#[derive(relm4::Components)]
 pub struct AppComponents {
     button1: RelmComponent<ButtonModel, AppModel>,
     button2: RelmComponent<ButtonModel, AppModel>,
@@ -88,7 +88,7 @@ fn new_label() -> gtk::Label {
     gtk::Label::new(Some("test"))
 }
 
-#[relm4_macros::widget]
+#[relm4::widget]
 impl Widgets<AppModel, ()> for AppWidgets {
     view! {
         main_window = gtk::ApplicationWindow {
@@ -164,7 +164,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
         let mut test_field = 0;
         println!("Pre init! test_field: {}", test_field);
 
-        relm4_macros::view! {
+        relm4::view! {
             vbox = gtk::Box {
                 append = &gtk::Label {
                     set_label: "It works!",

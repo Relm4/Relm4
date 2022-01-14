@@ -66,7 +66,7 @@ impl AsyncComponentUpdate<AppModel> for HttpModel {
     }
 }
 
-#[derive(relm4_macros::Components)]
+#[derive(relm4::Components)]
 struct AppComponents {
     http: AsyncRelmWorker<HttpModel, AppModel>,
 }

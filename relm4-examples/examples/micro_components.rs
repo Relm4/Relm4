@@ -114,7 +114,7 @@ impl AppUpdate for AppModel {
     }
 }
 
-#[relm4_macros::widget]
+#[relm4::widget]
 impl Widgets<AppModel, ()> for AppWidgets {
     view! {
         gtk::ApplicationWindow {

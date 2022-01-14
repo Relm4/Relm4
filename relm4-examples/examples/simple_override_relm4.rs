@@ -35,7 +35,7 @@ impl AppUpdate for AppModel {
     }
 }
 
-#[relm4_macros::widget(relm4 = myreexports::custom_relm)]
+#[relm4::widget(relm4 = myreexports::custom_relm)]
 impl Widgets<AppModel, ()> for AppWidgets {
     view! {
         gtk::ApplicationWindow {

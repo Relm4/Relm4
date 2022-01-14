@@ -1,10 +1,11 @@
-use adw::traits::ApplicationWindowExt;
+use adw::prelude::AdwApplicationWindowExt;
 use gtk::glib::BindingFlags;
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, ObjectExt, OrientableExt, ToggleButtonExt};
 
 use relm4::{
+    adw,
     factory::{positions::StackPageInfo, FactoryPrototype, FactoryVec},
-    send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets,
+    gtk, send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets,
 };
 
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -157,7 +158,7 @@ fn application_window() -> adw::ApplicationWindow {
     adw::ApplicationWindow::builder().build()
 }
 
-#[relm4_macros::widget]
+#[relm4::widget]
 impl Widgets<AppModel, ()> for AppWidgets {
     view! {
         main_window = application_window() -> adw::ApplicationWindow {

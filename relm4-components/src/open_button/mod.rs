@@ -227,7 +227,7 @@ where
     }
 }
 
-#[relm4_macros::widget(pub)]
+#[relm4::widget(pub)]
 /// Widgets of the open button component
 impl<ParentModel, Conf> Widgets<OpenButtonModel<Conf>, ParentModel> for OpenButtonWidgets
 where

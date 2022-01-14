@@ -114,13 +114,13 @@ impl ParentWindow for AppWidgets {
     }
 }
 
-#[derive(relm4_macros::Components)]
+#[derive(relm4::Components)]
 pub struct AppComponents {
     dialog: RelmComponent<AlertModel<FirstAlert>, AppModel>,
     second_dialog: RelmComponent<AlertModel<SecondAlert>, AppModel>,
 }
 
-#[relm4_macros::widget]
+#[relm4::widget]
 impl Widgets<AppModel, ()> for AppWidgets {
     view! {
         main_window = gtk::ApplicationWindow {

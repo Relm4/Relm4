@@ -2,16 +2,15 @@ use core::time;
 use std::sync::mpsc::{channel, TryRecvError};
 use std::thread;
 
-use adw::traits::ApplicationWindowExt;
+use adw::prelude::AdwApplicationWindowExt;
 use gtk::prelude::{
     BoxExt, ButtonExt, CheckButtonExt, DialogExt, EntryBufferExtManual, EntryExt, GtkWindowExt,
     OrientableExt, PopoverExt, ToggleButtonExt, WidgetExt,
 };
-use gtk::EntryBuffer;
 use rand::prelude::SliceRandom;
 use rand::Rng;
 use relm4::{
-    send, AppUpdate, ComponentUpdate, MessageHandler, Model, RelmApp, RelmComponent,
+    adw, gtk, send, AppUpdate, ComponentUpdate, MessageHandler, Model, RelmApp, RelmComponent,
     RelmMsgHandler, Sender, WidgetPlus, Widgets,
 };
 
@@ -61,7 +60,7 @@ impl ComponentUpdate<AppModel> for DialogModel {
     }
 }
 
-#[relm4_macros::widget]
+#[relm4::widget]
 impl Widgets<DialogModel, AppModel> for DialogWidgets {
     view! {
         dialog = gtk::MessageDialog {
@@ -301,14 +300,10 @@ impl AppUpdate for AppModel {
     }
 }
 
-fn application_window() -> adw::ApplicationWindow {
-    adw::ApplicationWindow::builder().build()
-}
-
-#[relm4_macros::widget]
+#[relm4::widget]
 impl Widgets<AppModel, ()> for AppWidgets {
     view! {
-        main_window = application_window() -> adw::ApplicationWindow {
+        main_window = adw::ApplicationWindow {
             set_default_width: 350,
             set_default_height: 200,
             set_resizable: false,
@@ -419,7 +414,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
                                 } else {
                                     send!(sender, AppMsg::EntryError);
                                 }
-                                entry.set_buffer(&EntryBuffer::new(None));
+                                entry.set_buffer(&gtk::EntryBuffer::new(None));
                             }
                         }
                     },
@@ -439,7 +434,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
                                 } else {
                                     send!(sender, AppMsg::EntryError);
                                 }
-                                entry.set_buffer(&EntryBuffer::new(None));
+                                entry.set_buffer(&gtk::EntryBuffer::new(None));
                             }
                         },
                         append = &gtk::Label {
@@ -459,7 +454,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
                                 } else {
                                     send!(sender, AppMsg::EntryError);
                                 }
-                                entry.set_buffer(&EntryBuffer::new(None));
+                                entry.set_buffer(&gtk::EntryBuffer::new(None));
                             }
                         },
                         append = &gtk::Label {
@@ -528,7 +523,7 @@ impl MessageHandler<AppModel> for TimerHandler {
     }
 }
 
-#[derive(relm4_macros::Components)]
+#[derive(relm4::Components)]
 struct AppComponents {
     timer_handler: RelmMsgHandler<TimerHandler, AppModel>,
     dialog: RelmComponent<DialogModel, AppModel>,

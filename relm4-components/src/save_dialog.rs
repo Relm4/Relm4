@@ -122,7 +122,7 @@ where
     }
 }
 
-#[relm4_macros::widget(pub)]
+#[relm4::widget(pub)]
 /// Widgets for the save dialog
 impl<ParentModel, Conf> relm4::Widgets<SaveDialogModel<Conf>, ParentModel> for SaveDialogWidgets
 where
