@@ -24,7 +24,7 @@ impl FactoryPrototype for FileListItem {
     type Root = gtk::ListBoxRow;
     type Msg = OpenButtonMsg;
 
-    fn generate(&self, key: &DynamicIndex, sender: relm4::Sender<Self::Msg>) -> Self::Widgets {
+    fn init_view(&self, key: &DynamicIndex, sender: relm4::Sender<Self::Msg>) -> Self::Widgets {
         let label = gtk::Button::with_label(
             self.path
                 .iter()
@@ -44,7 +44,7 @@ impl FactoryPrototype for FileListItem {
         FileListItemWidgets { label, row }
     }
 
-    fn update(&self, _key: &DynamicIndex, widgets: &Self::Widgets) {
+    fn view(&self, _key: &DynamicIndex, widgets: &Self::Widgets) {
         widgets.label.set_label(
             self.path
                 .iter()
@@ -57,7 +57,7 @@ impl FactoryPrototype for FileListItem {
 
     fn position(&self, _key: &DynamicIndex) {}
 
-    fn get_root(widgets: &Self::Widgets) -> &Self::Root {
+    fn root_widget(widgets: &Self::Widgets) -> &Self::Root {
         &widgets.row
     }
 }

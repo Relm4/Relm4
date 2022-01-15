@@ -16,7 +16,7 @@ pub trait FactoryPrototype: Sized {
     type Factory: Factory<Self, Self::View>;
 
     /// Type that stores all widgets needed to update them
-    /// in the [`update`](FactoryPrototype::update) function.
+    /// in the [`view`](FactoryPrototype::view) function.
     type Widgets: std::fmt::Debug;
 
     /// Outermost type of the newly created widgets.
@@ -31,7 +31,7 @@ pub trait FactoryPrototype: Sized {
     type Msg;
 
     /// Create new widgets when self is inserted into the factory.
-    fn generate(
+    fn init_view(
         &self,
         key: &<Self::Factory as Factory<Self, Self::View>>::Key,
         sender: Sender<Self::Msg>,
@@ -44,14 +44,14 @@ pub trait FactoryPrototype: Sized {
     ) -> <Self::View as FactoryView<Self::Root>>::Position;
 
     /// Function called when self is modified.
-    fn update(
+    fn view(
         &self,
         key: &<Self::Factory as Factory<Self, Self::View>>::Key,
         widgets: &Self::Widgets,
     );
 
     /// Get the outermost widget from the widgets.
-    fn get_root(widgets: &Self::Widgets) -> &Self::Root;
+    fn root_widget(widgets: &Self::Widgets) -> &Self::Root;
 }
 
 /// A container that is a able to efficiently update, generate and remove widgets

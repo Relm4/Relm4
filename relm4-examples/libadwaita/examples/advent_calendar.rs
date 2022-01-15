@@ -51,7 +51,7 @@ impl FactoryPrototype for CalendarEntry {
     type View = gtk::Stack;
     type Msg = AppMsg;
 
-    fn generate(&self, _key: &usize, _sender: Sender<AppMsg>) -> Self::Widgets {
+    fn init_view(&self, _key: &usize, _sender: Sender<AppMsg>) -> Self::Widgets {
         // Create widgets.
         let root = gtk::Stack::builder()
             .vexpand(true)
@@ -108,11 +108,11 @@ impl FactoryPrototype for CalendarEntry {
         }
     }
 
-    fn update(&self, _key: &usize, widgets: &CalendarWidgets) {
+    fn view(&self, _key: &usize, widgets: &CalendarWidgets) {
         widgets.update(self.time_left);
     }
 
-    fn get_root(widgets: &Self::Widgets) -> &Self::Root {
+    fn root_widget(widgets: &Self::Widgets) -> &Self::Root {
         &widgets.root
     }
 }

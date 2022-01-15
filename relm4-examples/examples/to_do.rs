@@ -22,7 +22,7 @@ impl FactoryPrototype for Task {
     type Widgets = TaskWidgets;
     type Root = gtk::Box;
 
-    fn generate(&self, key: &usize, sender: Sender<Self::Msg>) -> Self::Widgets {
+    fn init_view(&self, key: &usize, sender: Sender<Self::Msg>) -> Self::Widgets {
         let hbox = gtk::Box::builder()
             .orientation(gtk::Orientation::Horizontal)
             .build();
@@ -47,13 +47,13 @@ impl FactoryPrototype for Task {
 
     fn position(&self, _key: &usize) {}
 
-    fn update(&self, _key: &usize, widgets: &Self::Widgets) {
+    fn view(&self, _key: &usize, widgets: &Self::Widgets) {
         let attrs = widgets.label.attributes().unwrap_or_default();
         attrs.change(gtk::pango::AttrInt::new_strikethrough(self.completed));
         widgets.label.set_attributes(Some(&attrs));
     }
 
-    fn get_root(widgets: &Self::Widgets) -> &Self::Root {
+    fn root_widget(widgets: &Self::Widgets) -> &Self::Root {
         &widgets.hbox
     }
 }
