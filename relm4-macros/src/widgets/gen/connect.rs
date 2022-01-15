@@ -28,6 +28,7 @@ impl Property {
                 for arg in &args.inner {
                     clone_stream.extend(quote_spanned! { arg.span() =>
                         #[allow(clippy::redundant_clone)]
+                        #[allow(clippy::clone_on_copy)]
                         let #arg = #arg.clone();
                     });
                 }

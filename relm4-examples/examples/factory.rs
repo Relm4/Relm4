@@ -47,11 +47,7 @@ impl AppUpdate for AppModel {
     }
 }
 
-#[derive(Debug)]
-struct FactoryWidgets {
-    button: gtk::Button,
-}
-
+#[relm4::factory_prototype]
 impl FactoryPrototype for Counter {
     type Factory = FactoryVec<Self>;
     type Widgets = FactoryWidgets;
@@ -59,25 +55,16 @@ impl FactoryPrototype for Counter {
     type View = gtk::Box;
     type Msg = AppMsg;
 
-    fn generate(&self, index: &usize, sender: Sender<AppMsg>) -> FactoryWidgets {
-        let button = gtk::Button::with_label(&self.value.to_string());
-        let index = *index;
-        button.connect_clicked(move |_| {
-            sender.send(AppMsg::Clicked(index)).unwrap();
-        });
-
-        FactoryWidgets { button }
+    view! {
+        gtk::Button {
+            set_label: watch!(&self.value.to_string()),
+            connect_clicked(key) => move |_| {
+                sender.send(AppMsg::Clicked(key)).unwrap();
+            }
+        }
     }
 
     fn position(&self, _index: &usize) {}
-
-    fn update(&self, _index: &usize, widgets: &FactoryWidgets) {
-        widgets.button.set_label(&self.value.to_string());
-    }
-
-    fn get_root(widgets: &FactoryWidgets) -> &gtk::Button {
-        &widgets.button
-    }
 }
 
 #[relm4::widget]

@@ -1,34 +1,12 @@
-use proc_macro2::TokenStream as TokenStream2;
-use syn::{punctuated::Punctuated, token, Expr, ExprClosure, Generics, Ident, Lit, Path, token::Mut};
+use proc_macro2::{Span as Span2, TokenStream as TokenStream2};
+use syn::{
+    punctuated::Punctuated, token, token::Mut, Expr, ExprClosure, Generics, Ident, Lit, Path,
+};
 
 use crate::args::Args;
 
 mod gen;
 mod parse;
-
-#[derive(Debug, Default)]
-pub struct TokenStreams {
-    /// The tokens for the struct fields -> name: Type,
-    pub struct_fields: TokenStream2,
-    /// The tokens initializing the widgets.
-    pub init_widgets: TokenStream2,
-    /// The tokens connecting widgets.
-    pub connect_widgets: TokenStream2,
-    /// The tokens initializing the properties.
-    pub init_properties: TokenStream2,
-    /// The tokens for the returned struct fields -> name,
-    pub return_fields: TokenStream2,
-    /// The view tokens (watch! macro)
-    pub view: TokenStream2,
-    /// The view tokens (track! macro)
-    pub track: TokenStream2,
-    /// The tokens for connecting events.
-    pub connect: TokenStream2,
-    /// The tokens for connecting events to components.
-    pub connect_components: TokenStream2,
-    /// The tokens for using the parent stream.
-    pub parent: TokenStream2,
-}
 
 #[derive(Debug)]
 pub(super) struct Tracker {
@@ -80,6 +58,7 @@ pub(super) struct WidgetFunc {
     pub path_segments: Vec<Ident>,
     pub args: Option<Punctuated<Expr, token::Comma>>,
     pub ty: Option<Vec<Ident>>,
+    pub span: Span2,
 }
 
 #[derive(Debug)]

@@ -17,10 +17,10 @@ impl WidgetFunc {
             // and use gtk::Box as type.
             let len = self.path_segments.len();
             if len == 0 {
-                return Error::new(self.span().unwrap().into(), "Expected path here.")
+                return Error::new(self.span.unwrap().into(), "Expected path here.")
                     .into_compile_error();
             } else if len == 1 {
-                return Error::new(self.span().unwrap().into(), &format!("You need to specify a type of your function. Use this instead: {}() -> type {{", self.path_segments.first().unwrap())).into_compile_error();
+                return Error::new(self.span.unwrap().into(), &format!("You need to specify a type of your function. Use this instead: {}() -> type {{", self.path_segments.first().unwrap())).into_compile_error();
             } else {
                 let last_index = len - 1;
                 &self.path_segments[0..last_index]
@@ -79,9 +79,6 @@ impl WidgetFunc {
 
 impl Spanned for WidgetFunc {
     fn span(&self) -> Span2 {
-        self.path_segments
-            .first()
-            .expect("Expected path segments in WidgetFunc")
-            .span()
+        self.span
     }
 }

@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::quote;
+use quote::quote_spanned;
 
 use super::Widget;
 
@@ -8,8 +8,10 @@ impl Widget {
         let mutability = &self.mutable;
         let name = &self.name;
         let func = self.func.func_token_stream();
-        stream.extend(quote! {
-            let #mutability #name = #func;
+        let span = self.name.span();
+
+        stream.extend(quote_spanned! {
+            span => let #mutability #name = #func;
         });
     }
 }
