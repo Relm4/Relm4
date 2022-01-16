@@ -1,7 +1,7 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
 use relm4::{
     actions::{
-        AccelsPlus, ActionGroupName, ActionName, ActionablePlus, RelmAction, RelmActionGroup,
+        AccelsPlus, ActionablePlus, RelmAction, RelmActionGroup,
     },
     gtk, send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets,
 };

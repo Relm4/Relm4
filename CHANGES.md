@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased 
+
+### Fixed
+
++ relm4: action macros now include the required traits themselves
+
 ## 0.4.0 - 2022-1-16
 
 ### Added
