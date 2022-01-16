@@ -169,7 +169,7 @@ impl AppModel {
                 }
                 TaskType::EntryValueValue => {
                     self.correct_value = rand::thread_rng().gen_range(0..=self.range);
-                    let v2 = rand::thread_rng().gen_range(0..=self.range);
+                    let v2 = rand::thread_rng().gen_range(1..=self.range);
                     let result = self.correct_value * v2;
                     self.display_task_2 = format!("<big> ∙ {} = {}</big>", v2, result);
                 }
