@@ -51,7 +51,6 @@ impl AppUpdate for AppModel {
 impl FactoryPrototype for Counter {
     type Factory = FactoryVec<Self>;
     type Widgets = FactoryWidgets;
-    type Root = gtk::Button;
     type View = gtk::Box;
     type Msg = AppMsg;
 

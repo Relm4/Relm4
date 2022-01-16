@@ -81,7 +81,6 @@ impl AppUpdate for AppModel {
 impl FactoryPrototype for Counter {
     type Factory = FactoryVecDeque<Self>;
     type Widgets = FactoryWidgets;
-    type Root = gtk::Box;
     type View = gtk::Box;
     type Msg = AppMsg;
 
