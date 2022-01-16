@@ -166,9 +166,12 @@ impl Widgets<AppModel, ()> for AppWidgets {
 
         relm4::view! {
             vbox = gtk::Box {
-                append = &gtk::Label {
-                    set_label: "It works!",
-                }
+                append = &gtk::Button {
+                    set_label: "Click me!",
+                    connect_clicked => |_| {
+                        println!("Hello world!");
+                    },
+                },
             }
         }
     }

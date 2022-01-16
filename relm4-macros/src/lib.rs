@@ -204,13 +204,16 @@ pub fn menu(input: TokenStream) -> TokenStream {
 ///
 /// ```no_run
 /// use relm4::gtk;
-/// use gtk::prelude::BoxExt;
+/// use gtk::prelude::{BoxExt, ButtonExt};
 ///
 /// relm4_macros::view! {
 ///     vbox = gtk::Box {
-///         append = &gtk::Label {
-///             set_label: "It works!",
-///         }
+///         append = &gtk::Button {
+///             set_label: "Click me!",
+///             connect_clicked => |_| {
+///                 println!("Hello world!");
+///             }
+///         },
 ///     }
 /// }
 ///
@@ -259,12 +262,14 @@ pub fn view(input: TokenStream) -> TokenStream {
         init_widgets,
         connect_widgets,
         init_properties,
+        connect,
         ..
     } = streams;
 
     let output = quote! {
         #init_widgets
         #init_properties
+        #connect
         #connect_widgets
     };
     output.into()
