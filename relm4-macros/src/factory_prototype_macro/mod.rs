@@ -1,6 +1,8 @@
-use proc_macro2::{TokenStream as TokenStream2, Span as Span2};
+use proc_macro2::{Span as Span2, TokenStream as TokenStream2};
 use quote::{quote, ToTokens};
-use syn::{PathArguments, Path, Type, TypePath, punctuated::Punctuated, Ident, PathSegment, Visibility};
+use syn::{
+    punctuated::Punctuated, Ident, Path, PathArguments, PathSegment, Type, TypePath, Visibility,
+};
 
 use crate::{macros::Macros, ItemImpl};
 
@@ -28,11 +30,7 @@ pub(crate) fn generate_tokens(
         segments,
         leading_colon: None,
     };
-    let model_type: Type = TypePath {
-        path,
-        qself: None
-    }.into();
-
+    let model_type: Type = TypePath { path, qself: None }.into();
 
     let types::Types {
         factory: factory_ty,

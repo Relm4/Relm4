@@ -51,12 +51,20 @@ impl PropertyType {
 }
 
 impl Property {
-    pub fn track_stream(&self, stream: &mut TokenStream2, w_name: &Ident, model_type: &Type, self_as_widgets: bool) {
+    pub fn track_stream(
+        &self,
+        stream: &mut TokenStream2,
+        w_name: &Ident,
+        model_type: &Type,
+        self_as_widgets: bool,
+    ) {
         if let Some((bool_stream, update_stream)) = self.ty.track_tokens(model_type) {
             let p_name = &self.name;
             let p_span = p_name.span().unwrap().into();
 
-            let assign_fn = self.name.self_assign_fn_stream(&self.generics, w_name, self_as_widgets);
+            let assign_fn =
+                self.name
+                    .self_assign_fn_stream(&self.generics, w_name, self_as_widgets);
             let self_assign_args = self.name.self_assign_args_stream(w_name, self_as_widgets);
             let args_stream = self.args_stream();
 

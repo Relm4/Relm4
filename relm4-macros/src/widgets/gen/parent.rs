@@ -21,7 +21,9 @@ impl Property {
             let args_stream = self.args_stream();
 
             // Parents are only for the widget macro, therefore self is never the widgets
-            let assign_fn = self.name.self_assign_fn_stream(&self.generics, parent_name, false);
+            let assign_fn = self
+                .name
+                .self_assign_fn_stream(&self.generics, parent_name, false);
             let self_assign_args = self.name.assign_args_stream(parent_name);
 
             util::property_assign_tokens(

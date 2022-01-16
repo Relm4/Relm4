@@ -4,7 +4,6 @@
 #![doc(
     html_favicon_url = "https://raw.githubusercontent.com/AaronErhardt/relm4/main/assets/Relm_logo.svg"
 )]
-
 #![allow(clippy::single_component_path_imports)]
 
 use proc_macro::{self, TokenStream};

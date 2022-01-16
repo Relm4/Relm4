@@ -53,7 +53,11 @@ impl PropertyName {
         tokens
     }
 
-    pub fn self_assign_args_stream(&self, w_name: &Ident, widgets_as_self: bool) -> Option<TokenStream2> {
+    pub fn self_assign_args_stream(
+        &self,
+        w_name: &Ident,
+        widgets_as_self: bool,
+    ) -> Option<TokenStream2> {
         let self_token = if widgets_as_self {
             quote! { widgets }
         } else {
@@ -62,7 +66,9 @@ impl PropertyName {
 
         match self {
             PropertyName::Ident(_) => None,
-            PropertyName::Path(_) => Some(quote_spanned! { w_name.span() =>  & #self_token.#w_name, }),
+            PropertyName::Path(_) => {
+                Some(quote_spanned! { w_name.span() =>  & #self_token.#w_name, })
+            }
         }
     }
 }

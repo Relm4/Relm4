@@ -1,4 +1,4 @@
-use proc_macro2::{TokenStream as TokenStream2, Span as Span2};
+use proc_macro2::{Span as Span2, TokenStream as TokenStream2};
 use quote::quote;
 use syn::{spanned::Spanned, Error, ImplItemMethod, Result};
 
@@ -43,9 +43,9 @@ impl Funcs {
             }
         }
 
-        let position =
-            position.ok_or_else(|| Error::new(Span2::call_site(), "Did not find method `position`"))?.clone();
-
+        let position = position
+            .ok_or_else(|| Error::new(Span2::call_site(), "Did not find method `position`"))?
+            .clone();
 
         Ok(Funcs {
             pre_init,
