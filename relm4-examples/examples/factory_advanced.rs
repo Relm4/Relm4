@@ -1,7 +1,7 @@
 use gtk::glib::Sender;
-use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt};
+use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
 use relm4::factory::{DynamicIndex, Factory, FactoryPrototype, FactoryVecDeque, WeakDynamicIndex};
-use relm4::*;
+use relm4::{gtk, send, AppUpdate, Model, RelmApp, Widgets};
 
 #[derive(Debug)]
 enum AppMsg {
@@ -77,12 +77,7 @@ impl AppUpdate for AppModel {
     }
 }
 
-#[derive(Debug)]
-struct FactoryWidgets {
-    hbox: gtk::Box,
-    counter_button: gtk::Button,
-}
-
+#[relm4::factory_prototype]
 impl FactoryPrototype for Counter {
     type Factory = FactoryVecDeque<Self>;
     type Widgets = FactoryWidgets;
@@ -90,67 +85,38 @@ impl FactoryPrototype for Counter {
     type View = gtk::Box;
     type Msg = AppMsg;
 
-    fn generate(&self, index: &DynamicIndex, sender: Sender<AppMsg>) -> FactoryWidgets {
-        let hbox = gtk::Box::builder()
-            .orientation(gtk::Orientation::Horizontal)
-            .spacing(5)
-            .build();
-
-        let counter_button = gtk::Button::with_label(&self.value.to_string());
-        let index: DynamicIndex = index.clone();
-
-        let remove_button = gtk::Button::with_label("Remove");
-        let ins_above_button = gtk::Button::with_label("Add above");
-        let ins_below_button = gtk::Button::with_label("Add below");
-
-        hbox.append(&counter_button);
-        hbox.append(&remove_button);
-        hbox.append(&ins_above_button);
-        hbox.append(&ins_below_button);
-
-        {
-            let sender = sender.clone();
-            let index = index.clone();
-            counter_button.connect_clicked(move |_| {
-                send!(sender, AppMsg::CountAt(index.downgrade()));
-            });
-        }
-
-        {
-            let sender = sender.clone();
-            let index = index.clone();
-            remove_button.connect_clicked(move |_| {
-                send!(sender, AppMsg::RemoveAt(index.downgrade()));
-            });
-        }
-
-        {
-            let sender = sender.clone();
-            let index = index.clone();
-            ins_above_button.connect_clicked(move |_| {
-                send!(sender, AppMsg::InsertBefore(index.downgrade()));
-            });
-        }
-
-        ins_below_button.connect_clicked(move |_| {
-            send!(sender, AppMsg::InsertAfter(index.downgrade()));
-        });
-
-        FactoryWidgets {
-            hbox,
-            counter_button,
+    view! {
+        gtk::Box {
+            set_orientation: gtk::Orientation::Horizontal,
+            set_spacing: 5,
+            append: counter_button = &gtk::Button {
+                set_label: watch!(&self.value.to_string()),
+                connect_clicked(sender, key) => move |_| {
+                    send!(sender, AppMsg::CountAt(key.downgrade()));
+                }
+            },
+            append: remove_button = &gtk::Button {
+                set_label: "Remove",
+                connect_clicked(sender, key) => move |_| {
+                    send!(sender, AppMsg::RemoveAt(key.downgrade()));
+                }
+            },
+            append: ins_above_button = &gtk::Button {
+                set_label: "Add above",
+                connect_clicked(sender, key) => move |_| {
+                    send!(sender, AppMsg::InsertBefore(key.downgrade()));
+                }
+            },
+            append: ins_below_button = &gtk::Button {
+                set_label: "Add below",
+                connect_clicked(key) => move |_| {
+                    send!(sender, AppMsg::InsertAfter(key.downgrade()));
+                }
+            }
         }
     }
 
     fn position(&self, _index: &DynamicIndex) {}
-
-    fn update(&self, _index: &DynamicIndex, widgets: &FactoryWidgets) {
-        widgets.counter_button.set_label(&self.value.to_string());
-    }
-
-    fn get_root(widget: &FactoryWidgets) -> &gtk::Box {
-        &widget.hbox
-    }
 }
 
 struct AppWidgets {
@@ -162,7 +128,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
     type Root = gtk::ApplicationWindow;
 
     fn init_view(_model: &AppModel, _components: &(), sender: Sender<AppMsg>) -> Self {
-        let main = gtk::ApplicationWindowBuilder::new()
+        let main = gtk::ApplicationWindow::builder()
             .default_width(300)
             .default_height(200)
             .build();

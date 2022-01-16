@@ -1,13 +1,14 @@
 use gtk::gio;
 use gtk::glib::{
-    self, Cast, Object, ObjectExt, ParamFlags, ParamSpec, Sender, StaticType, ToValue, Value,
+    self, Cast, Object, ObjectExt, ParamFlags, ParamSpec, ParamSpecInt, Sender, StaticType,
+    ToValue, Value,
 };
 use gtk::prelude::{
     BoxExt, ButtonExt, EditableExt, FilterExt, GtkWindowExt, ListModelExt, SorterExt,
 };
 use gtk::subclass::prelude::*;
 use once_cell::sync::Lazy;
-use relm4::*;
+use relm4::{gtk, AppUpdate, Model, RelmApp, Widgets};
 
 use std::cell::Cell;
 
@@ -29,7 +30,7 @@ impl ObjectSubclass for GIntegerObject {
 impl ObjectImpl for GIntegerObject {
     fn properties() -> &'static [ParamSpec] {
         static PROPERTIES: Lazy<Vec<ParamSpec>> = Lazy::new(|| {
-            vec![ParamSpec::new_int(
+            vec![ParamSpecInt::new(
                 // Name
                 "number",
                 // Nickname
@@ -77,14 +78,9 @@ impl IntegerObject {
     }
 
     pub fn increase_number(self) {
-        let old_number = self
-            .property("number")
-            .expect("The property needs to exist and be readable.")
-            .get::<i32>()
-            .expect("The property needs to be of type `i32`.");
+        let old_number: i32 = self.property("number");
 
-        self.set_property("number", old_number + 1)
-            .expect("Could not set property.");
+        self.set_property("number", old_number + 1);
     }
 }
 
@@ -112,7 +108,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
     type Root = gtk::ApplicationWindow;
 
     fn init_view(model: &AppModel, _components: &(), sender: Sender<AppMsg>) -> Self {
-        let main = gtk::ApplicationWindowBuilder::new()
+        let main = gtk::ApplicationWindow::builder()
             .default_width(300)
             .default_height(200)
             .build();
@@ -181,11 +177,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
                 .expect("The object needs to be of type `IntegerObject`.");
 
             // Get property "number" from `IntegerObject`
-            let _number = integer_object
-                .property("number")
-                .expect("The property needs to exist and be readable.")
-                .get::<i32>()
-                .expect("The property needs to be of type `i32`.");
+            let _number: i32 = integer_object.property("number");
 
             // Uncomment to only allow even numbers
             // _number % 2 == 0
@@ -203,16 +195,8 @@ impl Widgets<AppModel, ()> for AppWidgets {
                 .expect("The object needs to be of type `IntegerObject`.");
 
             // Get property "number" from `IntegerObject`
-            let number_1 = integer_object_1
-                .property("number")
-                .expect("The property needs to exist and be readable.")
-                .get::<i32>()
-                .expect("The property needs to be of type `i32`.");
-            let number_2 = integer_object_2
-                .property("number")
-                .expect("The property needs to exist and be readable.")
-                .get::<i32>()
-                .expect("The property needs to be of type `i32`.");
+            let number_1: i32 = integer_object_1.property("number");
+            let number_2: i32 = integer_object_2.property("number");
 
             // Reverse sorting order -> large numbers come first
             number_2.cmp(&number_1).into()

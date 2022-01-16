@@ -1,7 +1,7 @@
 use gtk::glib::Sender;
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
 use relm4::factory::{positions::StackPageInfo, FactoryPrototype, FactoryVec};
-use relm4::{send, AppUpdate, Model, RelmApp, WidgetPlus, Widgets};
+use relm4::{gtk, send, AppUpdate, Model, RelmApp, WidgetPlus, Widgets};
 
 #[derive(Debug)]
 enum AppMsg {
@@ -59,7 +59,7 @@ impl FactoryPrototype for Counter {
     type View = gtk::Stack;
     type Msg = AppMsg;
 
-    fn generate(&self, index: &usize, sender: Sender<AppMsg>) -> FactoryWidgets {
+    fn init_view(&self, index: &usize, sender: Sender<AppMsg>) -> FactoryWidgets {
         let button = gtk::Button::with_label(&self.value.to_string());
         let index = *index;
         button.connect_clicked(move |_| {
@@ -76,16 +76,16 @@ impl FactoryPrototype for Counter {
         }
     }
 
-    fn update(&self, _index: &usize, widgets: &FactoryWidgets) {
+    fn view(&self, _index: &usize, widgets: &FactoryWidgets) {
         widgets.button.set_label(&self.value.to_string());
     }
 
-    fn get_root(widgets: &FactoryWidgets) -> &gtk::Button {
+    fn root_widget(widgets: &FactoryWidgets) -> &gtk::Button {
         &widgets.button
     }
 }
 
-#[relm4_macros::widget]
+#[relm4::widget]
 impl Widgets<AppModel, ()> for AppWidgets {
     view! {
         gtk::ApplicationWindow {

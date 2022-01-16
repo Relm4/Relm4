@@ -26,7 +26,7 @@ where
     type Root = adw::TabPage;
 
     fn add(&self, widget: &Widget, _position: &()) -> adw::TabPage {
-        self.append(widget).unwrap()
+        self.append(widget)
     }
 
     fn remove(&self, widget: &adw::TabPage) {
@@ -40,11 +40,11 @@ where
 {
     fn insert_after(&self, widget: &Widget, other: &adw::TabPage) -> adw::TabPage {
         let position = self.page_position(other) + 1;
-        self.insert(widget, position).unwrap()
+        self.insert(widget, position)
     }
 
     fn push_front(&self, widget: &Widget) -> adw::TabPage {
-        self.prepend(widget).unwrap()
+        self.prepend(widget)
     }
 }
 

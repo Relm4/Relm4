@@ -20,7 +20,10 @@ impl Property {
         if let Some(p_assign) = self.ty.connect_parent_tokens() {
             let args_stream = self.args_stream();
 
-            let assign_fn = self.name.self_assign_fn_stream(&self.generics, parent_name);
+            // Parents are only for the widget macro, therefore self is never the widgets
+            let assign_fn = self
+                .name
+                .self_assign_fn_stream(&self.generics, parent_name, false);
             let self_assign_args = self.name.assign_args_stream(parent_name);
 
             util::property_assign_tokens(
@@ -30,7 +33,7 @@ impl Property {
                 self_assign_args,
                 p_assign,
                 None,
-                Some(args_stream),
+                args_stream,
             );
         }
     }

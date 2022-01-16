@@ -4,11 +4,7 @@ use quote::quote;
 use crate::widgets::gen::Property;
 
 impl Property {
-    pub fn args_stream(&self) -> TokenStream2 {
-        if let Some(args) = &self.args {
-            quote! { ,#args }
-        } else {
-            TokenStream2::new()
-        }
+    pub fn args_stream(&self) -> Option<TokenStream2> {
+        self.args.as_ref().map(|args| quote! { ,#args })
     }
 }

@@ -23,16 +23,6 @@ pub struct Attrs {
     ///
     /// Defaults to `::relm4`
     pub relm4_path: Path,
-
-    /// Allows to track if relm4 path was already set
-    ///
-    /// You can't set relm4 path twice
-    ///
-    /// ```rust, ignore
-    /// #[widget(relm4 = ::my::path, relm4 = ::my::other::path ) ]
-    /// ```
-    /// is illegal
-    relm4_path_set: bool,
 }
 
 impl Attrs {
@@ -40,21 +30,29 @@ impl Attrs {
         Attrs {
             visibility: None,
             relm4_path: default_relm4_path(),
-            relm4_path_set: false,
         }
     }
 }
 
 impl Parse for Attrs {
-    /// Rules for parsing attributes
+    /// Rules for parsing attributes.
     ///
-    /// 1. It's fine if visibility is used unnamed so `#[widget(pub)]` must be valid but thats the only case
-    /// 2. Widget visibility might be named `#[widget(visibility = pub)]`
-    /// 3. `relm4` argument must be named. Always
+    /// 1. It's fine if visibility is used unnamed so `#[widget(pub)]` must be valid but thats the only case.
+    /// 2. Widget visibility might be named `#[widget(visibility = pub)]`.
+    /// 3. `relm4` argument must be named. Always.
     ///
     fn parse(input: ParseStream) -> Result<Self> {
         let mut attrs = Attrs::new();
         let mut attrs_type = AttributeType::None;
+
+        // Allows to track if relm4 path was already set.
+        // You can't set relm4 path twice.
+        //
+        // ```rust, ignore
+        // #[widget(relm4 = ::my::path, relm4 = ::my::other::path ) ]
+        // ```
+        // is illegal.
+        let mut relm4_path_set = false;
 
         let mixed_use_error_message =
             "You can't mix named and unnamed arguments while using `relm4_macros::widget`. \n\
@@ -106,12 +104,12 @@ impl Parse for Attrs {
                     if let AttributeType::Unnamed { span } = attrs_type {
                         return Err(Error::new(span, mixed_use_error_message));
                     }
-                    if attrs.relm4_path_set {
+                    if relm4_path_set {
                         return Err(Error::new(path.span(), "You can't assign relm4 path twice"));
                     }
 
                     attrs.relm4_path = path;
-                    attrs.relm4_path_set = true;
+                    relm4_path_set = true;
                     attrs_type = AttributeType::Named;
                 } else {
                     return Err(input

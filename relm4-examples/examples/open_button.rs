@@ -1,5 +1,5 @@
 use gtk::prelude::{Cast, GtkWindowExt};
-use relm4::{AppUpdate, Model, RelmApp, RelmComponent, Sender, Widgets};
+use relm4::{gtk, AppUpdate, Model, RelmApp, RelmComponent, Sender, Widgets};
 use relm4_components::open_button::{
     OpenButtonConfig, OpenButtonModel, OpenButtonParent, OpenButtonSettings,
 };
@@ -75,12 +75,12 @@ impl ParentWindow for AppWidgets {
     }
 }
 
-#[derive(relm4_macros::Components)]
+#[derive(relm4::Components)]
 pub struct AppComponents {
     open_button: RelmComponent<OpenButtonModel<OpenFileButtonConfig>, AppModel>,
 }
 
-#[relm4_macros::widget]
+#[relm4::widget]
 impl Widgets<AppModel, ()> for AppWidgets {
     view! {
         main_window = gtk::ApplicationWindow {

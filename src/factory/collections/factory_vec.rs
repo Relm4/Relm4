@@ -140,16 +140,16 @@ where
             match change {
                 ChangeType::Add => {
                     let data = &self.data[*index];
-                    let new_widgets = data.generate(index, sender.clone());
+                    let new_widgets = data.init_view(index, sender.clone());
                     let position = data.position(index);
-                    let root = view.add(Data::get_root(&new_widgets), &position);
+                    let root = view.add(Data::root_widget(&new_widgets), &position);
                     widgets.push(Widgets {
                         widgets: new_widgets,
                         root,
                     });
                 }
                 ChangeType::Update => {
-                    self.data[*index].update(index, &widgets[*index].widgets);
+                    self.data[*index].view(index, &widgets[*index].widgets);
                 }
                 ChangeType::Remove => {
                     let remove_widget = widgets.pop().unwrap();
@@ -159,9 +159,9 @@ where
                     let remove_widget = widgets.pop().unwrap();
                     view.remove(&remove_widget.root);
                     let data = &self.data[*index];
-                    let new_widgets = data.generate(index, sender.clone());
+                    let new_widgets = data.init_view(index, sender.clone());
                     let position = data.position(index);
-                    let root = view.add(Data::get_root(&new_widgets), &position);
+                    let root = view.add(Data::root_widget(&new_widgets), &position);
                     widgets.push(Widgets {
                         widgets: new_widgets,
                         root,

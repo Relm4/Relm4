@@ -1,3 +1,5 @@
+use relm4::gtk;
+
 /// Get the parent window that allows setting the parent window of a dialog with
 /// [`gtk::prelude::GtkWindowExt::set_transient_for`].
 pub trait ParentWindow {

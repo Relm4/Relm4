@@ -1,8 +1,19 @@
-use proc_macro::Span;
 use proc_macro2::Span as Span2;
 use syn::{punctuated::Punctuated, token::Colon2, Ident, Path, PathArguments, PathSegment, Token};
 
-pub(crate) fn idents_to_snake_case(idents: &[Ident]) -> Ident {
+macro_rules! parse_func {
+    ($name:ident, $func:ident, $tokens:ident) => {
+        if $name.is_some() {
+            return Err(::syn::Error::new(
+                $func.span().unwrap().into(),
+                &format!("Method `{}` defined multiple times", stringify!($name)),
+            ));
+        }
+        $name = Some($tokens);
+    };
+}
+
+pub(crate) fn idents_to_snake_case(idents: &[Ident], span: Span2) -> Ident {
     use std::sync::atomic::{AtomicU16, Ordering};
     static COUNTER: AtomicU16 = AtomicU16::new(0);
     let val = COUNTER.fetch_add(1, Ordering::Relaxed);
@@ -23,7 +34,7 @@ pub(crate) fn idents_to_snake_case(idents: &[Ident]) -> Ident {
     name.push('_');
     name.push_str(&index_str);
 
-    Ident::new(&name, Span::call_site().into())
+    Ident::new(&name, span)
 }
 
 pub(crate) fn default_relm4_path() -> Path {

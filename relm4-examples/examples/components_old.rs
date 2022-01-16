@@ -1,6 +1,8 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, WidgetExt};
-use relm4::Sender;
-use relm4::*;
+use relm4::{
+    gtk, AppUpdate, ComponentUpdate, Components, Model, RelmApp, RelmComponent, Sender, WidgetPlus,
+    Widgets,
+};
 
 // Implement components that will be part of the main app
 struct Comp1Widgets {
@@ -180,8 +182,8 @@ impl Widgets<AppModel, ()> for AppWidgets {
     type Root = gtk::ApplicationWindow;
 
     fn init_view(model: &AppModel, components: &AppComponents, sender: Sender<AppMsg>) -> Self {
-        let main = gtk::ApplicationWindowBuilder::new().build();
-        let vbox = gtk::BoxBuilder::new()
+        let main = gtk::ApplicationWindow::default();
+        let vbox = gtk::Box::builder()
             .orientation(gtk::Orientation::Vertical)
             .spacing(10)
             .build();

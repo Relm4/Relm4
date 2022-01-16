@@ -3,7 +3,8 @@ use quote::quote;
 use syn::{
     braced,
     parse::{Parse, ParseStream},
-    Attribute, Generics, ImplItemMethod, Macro, Path, Result, Token, Type, WhereClause,
+    Attribute, Generics, ImplItemMethod, ImplItemType, Macro, Path, Result, Token, Type,
+    WhereClause,
 };
 
 #[derive(Debug)]
@@ -13,6 +14,7 @@ pub(super) struct ItemImpl {
     pub trait_: Path,
     pub self_ty: Box<Type>,
     pub where_clause: Option<WhereClause>,
+    pub types: Vec<ImplItemType>,
     pub macros: Vec<Macro>,
     pub funcs: Vec<ImplItemMethod>,
     pub brace_span: Span,
@@ -44,6 +46,13 @@ impl Parse for ItemImpl {
         let braced_input;
         braced!(braced_input in input);
 
+        // Parse types
+        let mut types = Vec::new();
+
+        while braced_input.peek(Token![type]) {
+            types.push(braced_input.parse()?);
+        }
+
         let mut macros = Vec::new();
         let mut funcs = Vec::new();
 
@@ -63,6 +72,7 @@ impl Parse for ItemImpl {
             trait_,
             self_ty,
             where_clause,
+            types,
             macros,
             funcs,
             brace_span,

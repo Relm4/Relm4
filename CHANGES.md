@@ -1,16 +1,22 @@
 # Changelog
 
-## Unreleased
+## 0.4.0 - 2022-1-16
 
 ### Added
 
-+ relm4-macros: post_view function to execute code after the view code of the macro
-+ relm4-macros: allow using the view and menu macros independently from the widget macro
++ all: Add support for gtk4-rs v0.4
++ relm4: Introduce the "macro" feature as alternative to using relm4-macros separately
++ relm4-macros: Add a macros for MicroComponents and Factories
++ relm4-macros: Add a post_view function to execute code after the view code of the macro
++ relm4-macros: Allow using the view and menu macros independently from the widget macro
++ relm4-macros: Allow using mutable widgets in view
++ relm4-macros: Improve error messages for anonymous widgets
 
 ### Changed
 
++ relm4: Renamed methods of the FactoryPrototype trait to better match with the rest of Relm4
 + relm4-macros: manual_view is now called pre_view
-+ book: reworked introduction and first chapter
++ book: Reworked introduction and first chapter
 
 ### Fixed
 

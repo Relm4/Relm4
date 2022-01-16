@@ -1,11 +1,11 @@
-use adw::{traits::ApplicationWindowExt, CenteringPolicy, ViewStackPage};
+use adw::{prelude::AdwApplicationWindowExt, CenteringPolicy, ViewStackPage};
 use gtk::{
     prelude::{
         BoxExt, ButtonExt, GtkWindowExt, ObjectExt, OrientableExt, ToggleButtonExt, WidgetExt,
     },
     Orientation,
 };
-use relm4::{send, AppUpdate, Model, RelmApp, Sender, Widgets};
+use relm4::{adw, gtk, send, AppUpdate, Model, RelmApp, Sender, Widgets};
 
 #[derive(Default)]
 struct AppModel {
@@ -42,14 +42,10 @@ impl AppUpdate for AppModel {
     }
 }
 
-fn application_window() -> adw::ApplicationWindow {
-    adw::ApplicationWindow::builder().build()
-}
-
-#[relm4_macros::widget]
+#[relm4::widget]
 impl Widgets<AppModel, ()> for AppWidgets {
     view! {
-        main_window = application_window() -> adw::ApplicationWindow {
+        main_window = adw::ApplicationWindow {
             set_default_width: 450,
             set_default_height: 200,
             set_content = Some(&gtk::Box) {
@@ -89,20 +85,20 @@ impl Widgets<AppModel, ()> for AppWidgets {
                                 send!(sender, AppMsg::Attention(v.is_active()))
                             }
                         },
-                    } -> first_page:ViewStackPage? {
+                    } -> first_page: ViewStackPage {
                         set_icon_name: Some("document-print-symbolic"),
                         set_needs_attention: watch!(model.attention),
                         set_badge_number: watch!(model.counter as u32),
                     },
                     add_titled(Some("Second"), "Second Page") = &gtk::Label {
                         set_label: "This is the second page"
-                    } -> ? {
+                    } -> {
                         set_icon_name: Some("media-playback-start-symbolic"),
                         set_badge_number: 3,
                     },
                     add_titled(Some("Third"), "Third Page") = &gtk::Label {
                         set_label: "This is the last page"
-                    } -> ? {
+                    } -> {
                         set_icon_name: Some("mypaint-brushes-symbolic")
                     },
                 },

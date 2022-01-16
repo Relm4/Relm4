@@ -1,5 +1,7 @@
 use gtk::prelude::{BoxExt, ButtonExt, DialogExt, GtkWindowExt, ToggleButtonExt, WidgetExt};
-use relm4::{send, AppUpdate, ComponentUpdate, Model, RelmApp, RelmComponent, Sender, Widgets};
+use relm4::{
+    gtk, send, AppUpdate, ComponentUpdate, Model, RelmApp, RelmComponent, Sender, Widgets,
+};
 
 enum HeaderMsg {
     View,
@@ -41,7 +43,7 @@ impl ComponentUpdate<AppModel> for HeaderModel {
     }
 }
 
-#[relm4_macros::widget]
+#[relm4::widget]
 impl Widgets<HeaderModel, AppModel> for HeaderWidgets {
     view! {
         gtk::HeaderBar {
@@ -118,7 +120,7 @@ impl ComponentUpdate<AppModel> for DialogModel {
     }
 }
 
-#[relm4_macros::widget]
+#[relm4::widget]
 impl Widgets<DialogModel, AppModel> for DialogWidgets {
     view! {
         dialog = gtk::MessageDialog {
@@ -140,7 +142,7 @@ impl Widgets<DialogModel, AppModel> for DialogWidgets {
     }
 }
 
-#[derive(relm4_macros::Components)]
+#[derive(relm4::Components)]
 struct AppComponents {
     header: RelmComponent<HeaderModel, AppModel>,
     dialog: RelmComponent<DialogModel, AppModel>,
@@ -169,7 +171,7 @@ impl Model for AppModel {
     type Components = AppComponents;
 }
 
-#[relm4_macros::widget]
+#[relm4::widget]
 impl Widgets<AppModel, ()> for AppWidgets {
     view! {
         main_window = gtk::ApplicationWindow {
