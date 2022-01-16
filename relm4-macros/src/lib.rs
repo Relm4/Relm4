@@ -239,6 +239,7 @@ pub fn menu(input: TokenStream) -> TokenStream {
 ///     }
 /// }
 ///
+/// // Output of "ls -la" at "/"
 /// dbg!(process.output());
 /// ```
 #[proc_macro]
