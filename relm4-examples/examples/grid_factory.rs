@@ -1,7 +1,6 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt};
 use relm4::factory::{positions::GridPosition, Factory, FactoryPrototype, FactoryVec};
-use relm4::Sender;
-use relm4::*;
+use relm4::{gtk, AppUpdate, Model, RelmApp, Sender, Widgets};
 
 struct AppWidgets {
     main: gtk::ApplicationWindow,
@@ -34,7 +33,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
     type Root = gtk::ApplicationWindow;
 
     fn init_view(_model: &AppModel, _components: &(), sender: Sender<AppMsg>) -> Self {
-        let main = gtk::ApplicationWindowBuilder::new()
+        let main = gtk::ApplicationWindow::builder()
             .default_width(300)
             .default_height(200)
             .build();
@@ -122,7 +121,7 @@ impl FactoryPrototype for Data {
     type View = gtk::Grid;
     type Msg = AppMsg;
 
-    fn generate(&self, index: &usize, sender: Sender<AppMsg>) -> FactoryWidgets {
+    fn init_view(&self, index: &usize, sender: Sender<AppMsg>) -> FactoryWidgets {
         let button = gtk::Button::with_label(&self.counter.to_string());
         let index = *index;
         button.connect_clicked(move |_| {
@@ -148,11 +147,11 @@ impl FactoryPrototype for Data {
         }
     }
 
-    fn update(&self, _index: &usize, widgets: &FactoryWidgets) {
+    fn view(&self, _index: &usize, widgets: &FactoryWidgets) {
         widgets.button.set_label(&self.counter.to_string());
     }
 
-    fn get_root(widgets: &FactoryWidgets) -> &gtk::Button {
+    fn root_widget(widgets: &FactoryWidgets) -> &gtk::Button {
         &widgets.button
     }
 }

@@ -44,7 +44,7 @@ impl Property {
                 self_assign_args,
                 p_assign,
                 None,
-                Some(args_stream),
+                args_stream,
             );
         }
 

@@ -5,29 +5,34 @@
     html_favicon_url = "https://raw.githubusercontent.com/AaronErhardt/relm4/main/assets/Relm_logo.svg"
 )]
 
+#![allow(clippy::single_component_path_imports)]
+
 use proc_macro::{self, TokenStream};
-use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote, ToTokens};
-use syn::{parse_macro_input, spanned::Spanned, Error, GenericArgument, PathArguments};
+use quote::quote;
+use syn::parse_macro_input;
 
 mod additional_fields;
 mod args;
 mod attrs;
 mod derive_components;
-mod funcs;
+mod factory_prototype_macro;
 mod item_impl;
 mod macros;
 mod menu;
-mod types;
+mod micro_widget_macro;
+
+#[macro_use]
 mod util;
+
+mod widget_macro;
 mod widgets;
 
+// Hack to make the macro visibile for other parts of this crate.
+pub(crate) use parse_func;
+
 use attrs::Attrs;
-use funcs::Funcs;
 use item_impl::ItemImpl;
-use macros::Macros;
 use menu::Menus;
-use types::ModelTypes;
 use widgets::Widget;
 
 /// Macro that implemements [relm4::Widgets](https://aaronerhardt.github.io/docs/relm4/relm4/trait.Widgets.html) and generates the corresponding struct.
@@ -42,7 +47,7 @@ use widgets::Widget;
 ///
 /// ```
 /// use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
-/// use relm4::{send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets};
+/// use relm4::{gtk, send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets};
 ///
 /// #[derive(Default)]
 /// struct AppModel {
@@ -112,174 +117,32 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let Attrs {
         visibility,
         relm4_path,
-        ..
     } = parse_macro_input!(attributes as Attrs);
     let data = parse_macro_input!(input as ItemImpl);
 
-    let trait_generics = if let PathArguments::AngleBracketed(generics) =
-        &data.trait_.segments.last().unwrap().arguments
-    {
-        generics
-    } else {
-        return TokenStream::from(
-            Error::new(
-                data.trait_.segments.span(),
-                "Expected generic parameters for model and parent model",
-            )
-            .to_compile_error(),
-        );
-    };
+    widget_macro::generate_tokens(visibility, relm4_path, data).into()
+}
 
-    let ModelTypes {
-        model,
-        parent_model,
-    } = match ModelTypes::new(trait_generics) {
-        Ok(model) => model,
-        Err(err) => return TokenStream::from(err.to_compile_error()),
-    };
+#[proc_macro_attribute]
+pub fn micro_widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
+    let Attrs {
+        visibility,
+        relm4_path,
+    } = parse_macro_input!(attributes as Attrs);
+    let data = parse_macro_input!(input as ItemImpl);
 
-    let trait_ = data.trait_;
-    let ty = data.self_ty;
-    let outer_attrs = &data.outer_attrs;
+    micro_widget_macro::generate_tokens(visibility, relm4_path, data).into()
+}
 
-    // Find the type of the model
+#[proc_macro_attribute]
+pub fn factory_prototype(attributes: TokenStream, input: TokenStream) -> TokenStream {
+    let Attrs {
+        visibility,
+        relm4_path,
+    } = parse_macro_input!(attributes as Attrs);
+    let data = parse_macro_input!(input as ItemImpl);
 
-    // This can be unwrapped savely because the path must have at least one segement after parsing successful.
-    let path_args = trait_
-        .segments
-        .last()
-        .map(|segment| &segment.arguments)
-        .unwrap();
-
-    let model_ty_opt = if let PathArguments::AngleBracketed(angle_args) = path_args {
-        if let Some(GenericArgument::Type(model_ty)) = angle_args.args.first() {
-            Some(model_ty)
-        } else {
-            None
-        }
-    } else {
-        None
-    };
-
-    let model_type = if let Some(model_type) = model_ty_opt {
-        model_type
-    } else {
-        return Error::new(
-            path_args.span(),
-            "Expected generic parameters for the model and the parent model",
-        )
-        .to_compile_error()
-        .into();
-    };
-
-    let Macros {
-        widgets,
-        additional_fields,
-        menus,
-    } = match Macros::new(&data.macros, data.brace_span.unwrap()) {
-        Ok(macros) => macros,
-        Err(err) => return TokenStream::from(err.to_compile_error()),
-    };
-
-    // Generate menu tokens
-    let menus_stream = menus.map(|m| m.menus_stream(&relm4_path));
-
-    let Funcs {
-        pre_init,
-        post_init,
-        pre_connect_parent,
-        post_connect_parent,
-        pre_view,
-        post_view,
-    } = match Funcs::new(&data.funcs) {
-        Ok(macros) => macros,
-        Err(err) => return TokenStream::from(err.to_compile_error()),
-    };
-
-    let root_widget_name = &widgets.name;
-    let root_widget_type = widgets.func.type_token_stream();
-
-    let mut streams = widgets::TokenStreams::default();
-    widgets.generate_tokens_recursively(&mut streams, &visibility, model_type, &relm4_path);
-
-    let widgets::TokenStreams {
-        struct_fields,
-        init_widgets,
-        connect_widgets,
-        init_properties,
-        connect,
-        return_fields,
-        parent,
-        connect_components,
-        view,
-        track,
-    } = streams;
-
-    let impl_generics = data.impl_generics;
-    let where_clause = data.where_clause;
-
-    // Extract identifiers from additional fields for struct initialization: "test: u8" => "test"
-    let additional_fields_return_stream = if let Some(fields) = &additional_fields {
-        let mut tokens = TokenStream2::new();
-        for field in fields.inner.pairs() {
-            tokens.extend(field.value().ident.to_token_stream());
-            tokens.extend(quote! {,});
-        }
-        tokens
-    } else {
-        TokenStream2::new()
-    };
-
-    let out = quote! {
-        #[allow(dead_code)]
-        #outer_attrs
-        #visibility struct #ty {
-            #struct_fields
-            #additional_fields
-        }
-
-        impl #impl_generics #trait_ for #ty #where_clause {
-            type Root = #root_widget_type;
-
-            /// Initialize the UI.
-            fn init_view(model: &#model, components: &<#model as #relm4_path::Model>::Components, sender: #relm4_path::Sender<<#model as #relm4_path::Model>::Msg>) -> Self {
-                #pre_init
-                #init_widgets
-                #connect_widgets
-                #menus_stream
-                #init_properties
-                #connect
-                #connect_components
-                #post_init
-                Self {
-                    #return_fields
-                    #additional_fields_return_stream
-                }
-            }
-
-            fn connect_parent(&mut self, parent_widgets: &<#parent_model as #relm4_path::Model>::Widgets) {
-                #pre_connect_parent
-                #parent
-                #post_connect_parent
-            }
-
-            /// Return the root widget.
-            fn root_widget(&self) -> Self::Root {
-                self.#root_widget_name.clone()
-            }
-
-            /// Update the view to represent the updated model.
-            fn view(&mut self, model: &#model, sender: #relm4_path::Sender<<#model as #relm4_path::Model>::Msg>) {
-                // Wrap pre_view and post_view code to prevent early returns from skipping other view code.
-                (|| { #pre_view })();
-                #view
-                #track
-                (|| { #post_view })();
-            }
-        }
-    };
-
-    out.into()
+    factory_prototype_macro::generate_tokens(visibility, relm4_path, data).into()
 }
 
 #[proc_macro_derive(Components, attributes(components))]
@@ -301,6 +164,48 @@ pub fn menu(input: TokenStream) -> TokenStream {
     menus.menus_stream(&default_relm4_path).into()
 }
 
+/// The [`view`] macro works allows you to construct your UI easily and cleanly.
+///
+/// It does the same as inside the [`widget`] attribute macro,
+/// but with less features of course (no factories, components, etc).
+/// You can even use `relm4-macros` independently from Relm4 to build your GTK4 UI.
+///
+/// ```no_run
+/// use relm4::gtk;
+/// use gtk::prelude::BoxExt;
+///
+/// relm4_macros::view! {
+///     vbox = gtk::Box {
+///         append = &gtk::Label {
+///             set_label: "It works!",
+///         }
+///     }
+/// }
+///
+/// // You can simply use the vbox created in the macro.
+/// let spacing = vbox.spacing();
+/// ```
+///
+/// Technically, you could even use the macro for other purposes,
+/// but that's not recommended unless you really know what the macro does.
+///
+/// ```
+/// use std::process::Command;
+///
+/// let path = "/";
+///
+/// relm4_macros::view! {
+///     mut process = Command::new("ls") {
+///         args: ["-la"],
+///         current_dir = mut &String {
+///             push_str: path,
+///         },
+///         env: args!("HOME", "/home/relm4"),
+///     }
+/// }
+///
+/// dbg!(process.output());
+/// ```
 #[proc_macro]
 pub fn view(input: TokenStream) -> TokenStream {
     let widgets = parse_macro_input!(input as Widget);
@@ -311,14 +216,24 @@ pub fn view(input: TokenStream) -> TokenStream {
         elems: syn::punctuated::Punctuated::new(),
     });
 
-    let mut streams = widgets::TokenStreams::default();
-    widgets.generate_tokens_recursively(&mut streams, &None, &model_type, &default_relm4_path);
-    let widgets::TokenStreams { init_widgets, connect_widgets, init_properties, .. } = streams;
+    let mut streams = widget_macro::token_streams::TokenStreams::default();
+    widgets.generate_widget_tokens_recursively(
+        &mut streams,
+        &None,
+        &model_type,
+        &default_relm4_path,
+    );
+    let widget_macro::token_streams::TokenStreams {
+        init_widgets,
+        connect_widgets,
+        init_properties,
+        ..
+    } = streams;
 
     let output = quote! {
         #init_widgets
-        #connect_widgets
         #init_properties
+        #connect_widgets
     };
     output.into()
 }

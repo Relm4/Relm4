@@ -3,7 +3,7 @@
 //! **[Example implementation](https://github.com/AaronErhardt/relm4/blob/main/relm4-examples/examples/alert.rs)**
 
 use gtk::prelude::{DialogExt, GtkWindowExt, WidgetExt};
-use relm4::{send, ComponentUpdate, Model, Sender};
+use relm4::{gtk, send, ComponentUpdate, Model, Sender};
 
 use crate::ParentWindow;
 
@@ -110,7 +110,7 @@ where
     }
 }
 
-#[relm4_macros::widget(pub)]
+#[relm4::widget(pub)]
 /// Widgets of the alert component
 impl<ParentModel, Conf> relm4::Widgets<AlertModel<Conf>, ParentModel> for AlertWidgets
 where

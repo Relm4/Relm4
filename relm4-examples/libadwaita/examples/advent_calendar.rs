@@ -1,10 +1,11 @@
-use adw::traits::ApplicationWindowExt;
+use adw::prelude::AdwApplicationWindowExt;
 use gtk::glib::BindingFlags;
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, ObjectExt, OrientableExt, ToggleButtonExt};
 
 use relm4::{
+    adw,
     factory::{positions::StackPageInfo, FactoryPrototype, FactoryVec},
-    send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets,
+    gtk, send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets,
 };
 
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -50,7 +51,7 @@ impl FactoryPrototype for CalendarEntry {
     type View = gtk::Stack;
     type Msg = AppMsg;
 
-    fn generate(&self, _key: &usize, _sender: Sender<AppMsg>) -> Self::Widgets {
+    fn init_view(&self, _key: &usize, _sender: Sender<AppMsg>) -> Self::Widgets {
         // Create widgets.
         let root = gtk::Stack::builder()
             .vexpand(true)
@@ -107,11 +108,11 @@ impl FactoryPrototype for CalendarEntry {
         }
     }
 
-    fn update(&self, _key: &usize, widgets: &CalendarWidgets) {
+    fn view(&self, _key: &usize, widgets: &CalendarWidgets) {
         widgets.update(self.time_left);
     }
 
-    fn get_root(widgets: &Self::Widgets) -> &Self::Root {
+    fn root_widget(widgets: &Self::Widgets) -> &Self::Root {
         &widgets.root
     }
 }
@@ -157,7 +158,7 @@ fn application_window() -> adw::ApplicationWindow {
     adw::ApplicationWindow::builder().build()
 }
 
-#[relm4_macros::widget]
+#[relm4::widget]
 impl Widgets<AppModel, ()> for AppWidgets {
     view! {
         main_window = application_window() -> adw::ApplicationWindow {

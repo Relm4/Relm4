@@ -1,5 +1,5 @@
 use gtk::prelude::{BoxExt, ButtonExt, Cast, GtkWindowExt, OrientableExt};
-use relm4::{send, AppUpdate, Model, RelmApp, RelmComponent, Sender, WidgetPlus, Widgets};
+use relm4::{gtk, send, AppUpdate, Model, RelmApp, RelmComponent, Sender, WidgetPlus, Widgets};
 use relm4_components::alert::{AlertConfig, AlertModel, AlertMsg, AlertParent, AlertSettings};
 use relm4_components::ParentWindow;
 
@@ -114,13 +114,13 @@ impl ParentWindow for AppWidgets {
     }
 }
 
-#[derive(relm4_macros::Components)]
+#[derive(relm4::Components)]
 pub struct AppComponents {
     dialog: RelmComponent<AlertModel<FirstAlert>, AppModel>,
     second_dialog: RelmComponent<AlertModel<SecondAlert>, AppModel>,
 }
 
-#[relm4_macros::widget]
+#[relm4::widget]
 impl Widgets<AppModel, ()> for AppWidgets {
     view! {
         main_window = gtk::ApplicationWindow {

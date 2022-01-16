@@ -5,9 +5,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dev-dependencies]
-adw = { version = "0.1.0-alpha-5", package = "libadwaita" }
-gtk = { version = "0.3", package = "gtk4" }
-relm4 = { path = "../../", features = ["libadwaita"] }
+relm4 = { path = "../../", features = ["libadwaita", "macros"] }
 relm4-components = { path = "../../relm4-components" }
-relm4-macros = { path = "../../relm4-macros" }
 rand = "0.8.4"

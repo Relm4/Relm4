@@ -1,6 +1,6 @@
-use adw::traits::ApplicationWindowExt;
+use adw::prelude::AdwApplicationWindowExt;
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
-use relm4::{send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets};
+use relm4::{adw, gtk, send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets};
 
 #[derive(Default)]
 struct AppModel {
@@ -36,7 +36,7 @@ fn application_window() -> adw::ApplicationWindow {
     adw::ApplicationWindow::builder().build()
 }
 
-#[relm4_macros::widget]
+#[relm4::widget]
 impl Widgets<AppModel, ()> for AppWidgets {
     view! {
         main_window = application_window() -> adw::ApplicationWindow {

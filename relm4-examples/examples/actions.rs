@@ -3,7 +3,7 @@ use relm4::{
     actions::{
         AccelsPlus, ActionGroupName, ActionName, ActionablePlus, RelmAction, RelmActionGroup,
     },
-    send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets,
+    gtk, send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets,
 };
 
 #[derive(Default)]
@@ -36,7 +36,7 @@ impl AppUpdate for AppModel {
     }
 }
 
-#[relm4_macros::widget]
+#[relm4::widget]
 impl Widgets<AppModel, ()> for AppWidgets {
     view! {
         main_window = gtk::ApplicationWindow {

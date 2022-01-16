@@ -1,6 +1,6 @@
 //! Reusable and easily configurable open dialog component.
 use gtk::prelude::{FileChooserExt, FileExt, NativeDialogExt};
-use relm4::{send, ComponentUpdate, Model, Sender};
+use relm4::{gtk, send, ComponentUpdate, Model, Sender};
 
 use std::marker::PhantomData;
 use std::path::PathBuf;
@@ -109,7 +109,7 @@ where
     }
 }
 
-#[relm4_macros::widget(visibility = pub)]
+#[relm4::widget(visibility = pub)]
 /// Widgets of the open dialog component
 impl<ParentModel, Conf> relm4::Widgets<OpenDialogModel<Conf>, ParentModel> for OpenDialogWidgets
 where

@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::quote;
-use syn::Ident;
+use quote::{quote, quote_spanned};
+use syn::{spanned::Spanned, Ident};
 
 use super::{util, Property, PropertyType, ReturnedWidget};
 
@@ -52,13 +52,13 @@ impl Property {
                 self_assign_args,
                 component_tokens,
                 None,
-                Some(args_stream),
+                args_stream,
             );
 
             if let Some(returned_widget) = &widget.returned_widget {
                 let return_stream = returned_widget.return_assign_tokens();
-                stream.extend(quote! {
-                    #return_stream = #inner_stream
+                stream.extend(quote_spanned! {
+                    inner_stream.span() => #return_stream = #inner_stream
                 });
             } else {
                 stream.extend(inner_stream);

@@ -46,6 +46,13 @@ type Application = adw::Application;
 #[cfg(not(feature = "libadwaita"))]
 type Application = gtk::Application;
 
+// Re-exports
+#[cfg(feature = "macros")]
+pub use relm4_macros::*;
+
+#[cfg(feature = "libadwaita")]
+pub use adw;
+
 #[cfg(feature = "tokio-rt")]
 #[cfg_attr(doc, doc(cfg(feature = "tokio-rt")))]
 /// Re-export of [`async_trait::async_trait`]

@@ -1,7 +1,7 @@
 use gtk::glib::Sender;
-use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt};
-use relm4::factory::{Factory, FactoryPrototype, FactoryVec};
-use relm4::*;
+use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
+use relm4::factory::{FactoryPrototype, FactoryVec};
+use relm4::{gtk, send, AppUpdate, Model, RelmApp, WidgetPlus, Widgets};
 
 #[derive(Debug)]
 enum AppMsg {
@@ -11,12 +11,12 @@ enum AppMsg {
 }
 
 struct Counter {
-    counter: u8,
+    value: u8,
 }
 
 struct AppModel {
-    data: FactoryVec<Counter>,
-    counter: u8,
+    counters: FactoryVec<Counter>,
+    created_counters: u8,
 }
 
 impl Model for AppModel {
@@ -29,17 +29,17 @@ impl AppUpdate for AppModel {
     fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) -> bool {
         match msg {
             AppMsg::Add => {
-                self.data.push(Counter {
-                    counter: self.counter,
+                self.counters.push(Counter {
+                    value: self.created_counters,
                 });
-                self.counter += 1;
+                self.created_counters += 1;
             }
             AppMsg::Remove => {
-                self.data.pop();
+                self.counters.pop();
             }
             AppMsg::Clicked(index) => {
-                if let Some(data) = self.data.get_mut(index) {
-                    data.counter = data.counter.wrapping_sub(1);
+                if let Some(counter) = self.counters.get_mut(index) {
+                    counter.value = counter.value.wrapping_sub(1);
                 }
             }
         }
@@ -59,90 +59,64 @@ impl FactoryPrototype for Counter {
     type View = gtk::Box;
     type Msg = AppMsg;
 
-    fn generate(&self, index: &usize, sender: Sender<AppMsg>) -> FactoryWidgets {
-        let button = gtk::Button::with_label(&self.counter.to_string());
+    fn init_view(&self, index: &usize, sender: Sender<AppMsg>) -> FactoryWidgets {
+        let button = gtk::Button::with_label(&self.value.to_string());
         let index = *index;
         button.connect_clicked(move |_| {
             sender.send(AppMsg::Clicked(index)).unwrap();
         });
+
         FactoryWidgets { button }
     }
 
     fn position(&self, _index: &usize) {}
 
-    fn update(&self, _index: &usize, widgets: &FactoryWidgets) {
-        widgets.button.set_label(&self.counter.to_string());
+    fn view(&self, _index: &usize, widgets: &FactoryWidgets) {
+        widgets.button.set_label(&self.value.to_string());
     }
-    fn get_root(widgets: &FactoryWidgets) -> &gtk::Button {
+
+    fn root_widget(widgets: &FactoryWidgets) -> &gtk::Button {
         &widgets.button
     }
 }
 
-struct AppWidgets {
-    main: gtk::ApplicationWindow,
-    gen_box: gtk::Box,
-}
-
+#[relm4::widget]
 impl Widgets<AppModel, ()> for AppWidgets {
-    type Root = gtk::ApplicationWindow;
-
-    fn init_view(_model: &AppModel, _components: &(), sender: Sender<AppMsg>) -> Self {
-        let main = gtk::ApplicationWindowBuilder::new()
-            .default_width(300)
-            .default_height(200)
-            .build();
-        let main_box = gtk::Box::builder()
-            .orientation(gtk::Orientation::Vertical)
-            .margin_end(5)
-            .margin_top(5)
-            .margin_start(5)
-            .margin_bottom(5)
-            .spacing(5)
-            .build();
-
-        let gen_box = gtk::Box::builder()
-            .orientation(gtk::Orientation::Vertical)
-            .margin_end(5)
-            .margin_top(5)
-            .margin_start(5)
-            .margin_bottom(5)
-            .spacing(5)
-            .build();
-
-        let add = gtk::Button::with_label("Add");
-        let remove = gtk::Button::with_label("Remove");
-
-        main_box.append(&add);
-        main_box.append(&remove);
-        main_box.append(&gen_box);
-
-        main.set_child(Some(&main_box));
-
-        let cloned_sender = sender.clone();
-        add.connect_clicked(move |_| {
-            cloned_sender.send(AppMsg::Add).unwrap();
-        });
-
-        remove.connect_clicked(move |_| {
-            sender.send(AppMsg::Remove).unwrap();
-        });
-
-        AppWidgets { main, gen_box }
-    }
-
-    fn view(&mut self, model: &AppModel, sender: Sender<AppMsg>) {
-        model.data.generate(&self.gen_box, sender);
-    }
-
-    fn root_widget(&self) -> gtk::ApplicationWindow {
-        self.main.clone()
+    view! {
+        gtk::ApplicationWindow {
+            set_default_width: 300,
+            set_default_height: 200,
+            set_child = Some(&gtk::Box) {
+                set_orientation: gtk::Orientation::Vertical,
+                set_margin_all: 5,
+                set_spacing: 5,
+                append = &gtk::Button {
+                    set_label: "Add",
+                    connect_clicked(sender) => move |_| {
+                        send!(sender, AppMsg::Add);
+                    }
+                },
+                append = &gtk::Button {
+                    set_label: "Remove",
+                    connect_clicked(sender) => move |_| {
+                        send!(sender, AppMsg::Remove);
+                    }
+                },
+                append = &gtk::Box {
+                    set_orientation: gtk::Orientation::Vertical,
+                    set_margin_all: 5,
+                    set_spacing: 5,
+                    factory!(model.counters),
+                }
+            }
+        }
     }
 }
 
 fn main() {
     let model = AppModel {
-        data: FactoryVec::new(),
-        counter: 0,
+        counters: FactoryVec::new(),
+        created_counters: 0,
     };
 
     let relm = RelmApp::new(model);

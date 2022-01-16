@@ -1,7 +1,7 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
 use relm4::{
-    send, AppUpdate, MicroComponent, MicroModel, MicroWidgets, Model, RelmApp, Sender, WidgetPlus,
-    Widgets,
+    gtk, send, AppUpdate, MicroComponent, MicroModel, MicroWidgets, Model, RelmApp, Sender,
+    WidgetPlus, Widgets,
 };
 
 #[derive(Debug)]
@@ -28,43 +28,29 @@ impl MicroModel for NumberModel {
     }
 }
 
+#[relm4::micro_widget]
 #[derive(Debug)]
-struct NumberWidgets {
-    root: gtk::Box,
-    number: gtk::Label,
-}
-
 impl MicroWidgets<NumberModel> for NumberWidgets {
-    type Root = gtk::Box;
-
-    fn init_view(model: &NumberModel, sender: Sender<NumberMsg>) -> Self {
-        let root = gtk::Box::new(gtk::Orientation::Horizontal, 5);
-        let number = gtk::Label::new(Some(&model.num.to_string()));
-        let inc_button = gtk::Button::with_label("Increment");
-        let dec_button = gtk::Button::with_label("Decrement");
-
-        root.append(&number);
-        root.append(&inc_button);
-        root.append(&dec_button);
-
-        number.set_margin_start(10);
-        number.set_margin_end(10);
-        inc_button.set_hexpand(true);
-        dec_button.set_hexpand(true);
-
-        let inc_sender = sender.clone();
-        inc_button.connect_clicked(move |_| send!(inc_sender, NumberMsg::Increment));
-        dec_button.connect_clicked(move |_| send!(sender, NumberMsg::Decrement));
-
-        NumberWidgets { root, number }
-    }
-
-    fn view(&mut self, model: &NumberModel, _sender: Sender<NumberMsg>) {
-        self.number.set_text(&model.num.to_string());
-    }
-
-    fn root_widget(&self) -> Self::Root {
-        self.root.clone()
+    view! {
+        gtk::Box {
+            set_orientation: gtk::Orientation::Horizontal,
+            set_spacing: 5,
+            append = &gtk::Label {
+                set_label: watch!(&model.num.to_string()),
+                set_margin_start: 10,
+                set_margin_end: 10,
+            },
+            append = &gtk::Button {
+                set_label: "Increment",
+                set_hexpand: true,
+                connect_clicked(sender) => move |_| send!(sender, NumberMsg::Increment),
+            },
+            append = &gtk::Button {
+                set_label: "Decrement",
+                set_hexpand: true,
+                connect_clicked(sender) => move |_| send!(sender, NumberMsg::Decrement),
+            },
+        }
     }
 }
 
@@ -114,7 +100,7 @@ impl AppUpdate for AppModel {
     }
 }
 
-#[relm4_macros::widget]
+#[relm4::widget]
 impl Widgets<AppModel, ()> for AppWidgets {
     view! {
         gtk::ApplicationWindow {

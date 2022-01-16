@@ -411,8 +411,8 @@ where
                 ChangeType::Unchanged => (),
                 ChangeType::Add => {
                     let data = &self.data[index];
-                    let new_widgets = data.inner.generate(&data.index, sender.clone());
-                    let root = Data::get_root(&new_widgets);
+                    let new_widgets = data.inner.init_view(&data.index, sender.clone());
+                    let root = Data::root_widget(&new_widgets);
                     let root = if widgets.is_empty() || index == 0 {
                         view.push_front(root)
                     } else {
@@ -428,7 +428,7 @@ where
                 }
                 ChangeType::Update => {
                     let data = &self.data[index];
-                    data.inner.update(&data.index, &widgets[index].widgets);
+                    data.inner.view(&data.index, &widgets[index].widgets);
                 }
                 ChangeType::Remove(num) => {
                     for _ in 0..*num {
@@ -440,8 +440,8 @@ where
                     let remove_widget = widgets.pop_back().unwrap();
                     view.remove(&remove_widget.root);
                     let data = &self.data[index];
-                    let new_widgets = data.inner.generate(&data.index, sender.clone());
-                    let root = Data::get_root(&new_widgets);
+                    let new_widgets = data.inner.init_view(&data.index, sender.clone());
+                    let root = Data::root_widget(&new_widgets);
                     let root = if widgets.is_empty() || index == 0 {
                         view.push_front(root)
                     } else {

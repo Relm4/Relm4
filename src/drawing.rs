@@ -99,8 +99,8 @@ impl DrawHandler {
         if let Some(ref draw_area) = self.draw_area {
             let allocation = draw_area.allocation();
             let scale = draw_area.scale_factor();
-            let width = allocation.width * scale;
-            let height = allocation.height * scale;
+            let width = allocation.width() * scale;
+            let height = allocation.height() * scale;
 
             if (width, height) != (self.edit_surface.width(), self.edit_surface.height()) {
                 // TODO: also copy the old small surface to the new bigger one?

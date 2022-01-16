@@ -92,20 +92,22 @@ where
 
         std::thread::spawn(move || {
             let context = glib::MainContext::new();
-            context.push_thread_default();
             let _guard = context
                 .acquire()
                 .expect("Couldn't acquire glib main context");
 
-            // The main loop executes the closure as soon as it receives the message
-            receiver.attach(Some(&context), move |msg: Model::Msg| {
-                model.update(msg, &components, sender.clone(), parent_sender.clone());
-                glib::Continue(true)
-            });
+            context
+                .with_thread_default(|| {
+                    // The main loop executes the closure as soon as it receives the message
+                    receiver.attach(Some(&context), move |msg: Model::Msg| {
+                        model.update(msg, &components, sender.clone(), parent_sender.clone());
+                        glib::Continue(true)
+                    });
 
-            let main_loop = glib::MainLoop::new(Some(&context), true);
-            main_loop.run();
-            context.pop_thread_default();
+                    let main_loop = glib::MainLoop::new(Some(&context), true);
+                    main_loop.run();
+                })
+                .unwrap();
         });
 
         RelmWorker {
@@ -164,26 +166,33 @@ where
         components.connect_parent(&());
 
         std::thread::spawn(move || {
-            let context = glib::MainContext::new();
-            context.push_thread_default();
-            let _guard = context
-                .acquire()
-                .expect("Couldn't acquire glib main context");
-
             let rt = tokio::runtime::Builder::new_current_thread()
                 .enable_all()
                 .build()
                 .unwrap();
 
-            // The main loop executes the closure as soon as it receives the message
-            receiver.attach(Some(&context), move |msg: Model::Msg| {
-                rt.block_on(model.update(msg, &components, sender.clone(), parent_sender.clone()));
-                glib::Continue(true)
-            });
+            let context = glib::MainContext::new();
+            let _guard = context
+                .acquire()
+                .expect("Couldn't acquire glib main context");
 
-            let main_loop = glib::MainLoop::new(Some(&context), true);
-            main_loop.run();
-            context.pop_thread_default();
+            context
+                .with_thread_default(|| {
+                    // The main loop executes the closure as soon as it receives the message
+                    receiver.attach(Some(&context), move |msg: Model::Msg| {
+                        rt.block_on(model.update(
+                            msg,
+                            &components,
+                            sender.clone(),
+                            parent_sender.clone(),
+                        ));
+                        glib::Continue(true)
+                    });
+
+                    let main_loop = glib::MainLoop::new(Some(&context), true);
+                    main_loop.run();
+                })
+                .unwrap();
         });
 
         AsyncRelmWorker {
