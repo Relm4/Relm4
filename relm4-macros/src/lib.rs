@@ -34,7 +34,7 @@ use item_impl::ItemImpl;
 use menu::Menus;
 use widgets::Widget;
 
-/// Macro that implemements [relm4::Widgets](https://aaronerhardt.github.io/docs/relm4/relm4/trait.Widgets.html) and generates the corresponding struct.
+/// Macro that implements [`relm4::Widgets`](https://aaronerhardt.github.io/docs/relm4/relm4/trait.Widgets.html) and generates the corresponding struct.
 ///
 /// # Attributes
 ///
@@ -122,6 +122,9 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
     widget_macro::generate_tokens(visibility, relm4_path, data).into()
 }
 
+/// Macro that implements [`relm4::MicrosWidgets`](https://aaronerhardt.github.io/docs/relm4/relm4/trait.MicroWidgets.html) and generates the corresponding struct.
+///
+/// It works very similar to [`widget`].
 #[proc_macro_attribute]
 pub fn micro_widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let Attrs {
@@ -133,6 +136,10 @@ pub fn micro_widget(attributes: TokenStream, input: TokenStream) -> TokenStream 
     micro_widget_macro::generate_tokens(visibility, relm4_path, data).into()
 }
 
+/// Macro that implements [`relm4::factory::FactoryPrototype`](https://aaronerhardt.github.io/docs/relm4/relm4/factory/trait.FactoryPrototype.html)
+/// and generates the corresponding widget struct.
+///
+/// It works very similar to [`widget`].
 #[proc_macro_attribute]
 pub fn factory_prototype(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let Attrs {
@@ -155,6 +162,31 @@ pub fn derive(input: TokenStream) -> TokenStream {
     }
 }
 
+/// A macro to create menus.
+///
+/// # Example:
+/// ```
+/// relm4::new_action_group!(WindowActionGroup, "win");
+/// relm4::new_stateless_action!(TestAction, WindowActionGroup, "test");
+/// relm4::new_stateful_action!(TestU8Action, WindowActionGroup, "test2", u8, u8);
+///
+/// relm4_macros::menu! {
+///     main_menu: {
+///         "Test" => TestAction,
+///         "Test2" => TestAction,
+///         "Test toggle" => TestU8Action(1_u8),
+///         section! {
+///             "Section test" => TestAction,
+///             "Test toggle" => TestU8Action(1_u8),
+///         },
+///         section! {
+///             "Test" => TestAction,
+///             "Test2" => TestAction,
+///             "Test Value" => TestU8Action(1_u8),
+///         }
+///     }
+/// };
+/// ```
 #[proc_macro]
 pub fn menu(input: TokenStream) -> TokenStream {
     let menus = parse_macro_input!(input as Menus);
@@ -163,21 +195,25 @@ pub fn menu(input: TokenStream) -> TokenStream {
     menus.menus_stream(&default_relm4_path).into()
 }
 
-/// The [`view`] macro works allows you to construct your UI easily and cleanly.
+/// The [`view`] macro allows you to construct your UI easily and cleanly.
 ///
 /// It does the same as inside the [`widget`] attribute macro,
-/// but with less features of course (no factories, components, etc).
+/// but with less features (no factories, components, etc).
+///
 /// You can even use `relm4-macros` independently from Relm4 to build your GTK4 UI.
 ///
 /// ```no_run
 /// use relm4::gtk;
-/// use gtk::prelude::BoxExt;
+/// use gtk::prelude::{BoxExt, ButtonExt};
 ///
 /// relm4_macros::view! {
 ///     vbox = gtk::Box {
-///         append = &gtk::Label {
-///             set_label: "It works!",
-///         }
+///         append = &gtk::Button {
+///             set_label: "Click me!",
+///             connect_clicked => |_| {
+///                 println!("Hello world!");
+///             }
+///         },
 ///     }
 /// }
 ///
@@ -226,12 +262,14 @@ pub fn view(input: TokenStream) -> TokenStream {
         init_widgets,
         connect_widgets,
         init_properties,
+        connect,
         ..
     } = streams;
 
     let output = quote! {
         #init_widgets
         #init_properties
+        #connect
         #connect_widgets
     };
     output.into()

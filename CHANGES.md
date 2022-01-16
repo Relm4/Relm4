@@ -1,10 +1,21 @@
 # Changelog
 
+## Unreleased 
+
+#### Added
+
++ relm4-macros: more documentation
+
+### Fixed
+
++ relm4: action macros now include the required traits themselves
++ relm4-macros: allow connecting events in the view macro
+
 ## 0.4.0 - 2022-1-16
 
 ### Added
 
-+ all: Add support for gtk4-rs v0.4
++ all: Update gtk4-rs to v0.4
 + relm4: Introduce the "macro" feature as alternative to using relm4-macros separately
 + relm4-macros: Add a macros for MicroComponents and Factories
 + relm4-macros: Add a post_view function to execute code after the view code of the macro

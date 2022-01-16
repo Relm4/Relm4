@@ -16,7 +16,7 @@ macro_rules! new_action_group {
     ($vis:vis $ty:ident, $name:expr) => {
         $vis struct $ty;
 
-        impl ActionGroupName for $ty {
+        impl relm4::actions::ActionGroupName for $ty {
             fn group_name() -> &'static str {
                 $name
             }
@@ -30,7 +30,7 @@ macro_rules! new_stateless_action {
     ($vis:vis $ty:ident, $group:ty, $name:expr) => {
         $vis struct $ty;
 
-        impl ActionName for $ty {
+        impl relm4::actions::ActionName for $ty {
             type Group = $group;
             type Target = ();
             type State = ();
@@ -48,7 +48,7 @@ macro_rules! new_stateful_action {
     ($vis:vis $ty:ident, $group:ty, $name:expr, $value:ty, $state:ty) => {
         $vis struct $ty;
 
-        impl ActionName for $ty {
+        impl relm4::actions::ActionName for $ty {
             type Group = $group;
             type Target = $value;
             type State = $state;
