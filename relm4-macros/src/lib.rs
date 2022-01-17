@@ -164,12 +164,15 @@ pub fn derive(input: TokenStream) -> TokenStream {
 
 /// A macro to create menus.
 ///
-/// # Example:
+/// # Example
+///
 /// ```
+/// // Define some actions
 /// relm4::new_action_group!(WindowActionGroup, "win");
 /// relm4::new_stateless_action!(TestAction, WindowActionGroup, "test");
 /// relm4::new_stateful_action!(TestU8Action, WindowActionGroup, "test2", u8, u8);
 ///
+/// // Create a `MenuModel` called `menu_model`
 /// relm4_macros::menu! {
 ///     main_menu: {
 ///         "Test" => TestAction,
@@ -200,12 +203,13 @@ pub fn menu(input: TokenStream) -> TokenStream {
 /// It does the same as inside the [`widget`] attribute macro,
 /// but with less features (no factories, components, etc).
 ///
-/// You can even use `relm4-macros` independently from Relm4 to build your GTK4 UI.
+/// You can even use the `relm4-macros` crate independently from Relm4 to build your GTK4 UI.
 ///
 /// ```no_run
 /// use relm4::gtk;
 /// use gtk::prelude::{BoxExt, ButtonExt};
 ///
+/// // Creating a box with a button inside.
 /// relm4_macros::view! {
 ///     vbox = gtk::Box {
 ///         append = &gtk::Button {
@@ -221,8 +225,10 @@ pub fn menu(input: TokenStream) -> TokenStream {
 /// let spacing = vbox.spacing();
 /// ```
 ///
-/// Technically, you could even use the macro for other purposes,
-/// but that's not recommended unless you really know what the macro does.
+/// Also, the macro doesn't rely on any special gtk4-rs features
+/// so you can even use the macro for other purposes.
+///
+/// In this example, we use it to construct a [`Command`](std::process::Command).
 ///
 /// ```
 /// use std::process::Command;
