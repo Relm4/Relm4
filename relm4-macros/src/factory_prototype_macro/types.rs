@@ -53,7 +53,10 @@ impl Types {
                     return Err(Error::new(ty.span(), "Expected an Identfier"));
                 }
             } else {
-                return Err(Error::new(ident.span(), "Expected a type called `Factory`, `View`, `Msg` or `Widgets`"));
+                return Err(Error::new(
+                    ident.span(),
+                    "Expected a type called `Factory`, `View`, `Msg` or `Widgets`",
+                ));
             }
         }
 

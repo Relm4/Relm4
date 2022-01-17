@@ -2,14 +2,16 @@
 
 ## Unreleased 
 
+## 0.4.1 - 2022-1-17
+
 #### Added
 
-+ relm4-macros: more documentation
++ relm4-macros: Improved documentation
 
 ### Fixed
 
-+ relm4: action macros now include the required traits themselves
-+ relm4-macros: allow connecting events in the view macro
++ relm4: Action macros now include the required traits themselves
++ relm4-macros: Allow connecting events in the view macro
 
 ## 0.4.0 - 2022-1-16
 
@@ -38,11 +40,11 @@
 ### Added
 
 + relm4: A factory view implementation for libadwaita's StackView
-+ relm4-macros: Allow early returns in manual_view (by [euclio](https://github.com/euclio)
++ relm4-macros: Allow early returns in manual_view (by [euclio](https://github.com/euclio))
 
 ### Changed 
 
-+ relm4: Make GTK's command line argument handling optional (by [euclio](https://github.com/euclio)
++ relm4: Make GTK's command line argument handling optional (by [euclio](https://github.com/euclio))
 + relm4: DynamicIndex now implements Send but panics when used on other threads
 
 ## 0.4.0-beta.2 - 2021-11-26
