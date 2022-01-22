@@ -37,6 +37,7 @@ use once_cell::sync::OnceCell;
 
 static APP: OnceCell<Fragile<Application>> = OnceCell::new();
 
+/// Re-export of gtk4
 pub use gtk;
 pub use gtk::glib::Sender;
 
@@ -51,6 +52,7 @@ type Application = gtk::Application;
 pub use relm4_macros::*;
 
 #[cfg(feature = "libadwaita")]
+/// Re-export of libadwaita
 pub use adw;
 
 #[cfg(feature = "tokio-rt")]

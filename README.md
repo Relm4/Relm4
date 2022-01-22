@@ -42,21 +42,23 @@ Relm4 has two crates that extend the core functionality:
 + [relm4-macros](https://crates.io/crates/relm4-macros) provides a `widget` macro that simplifies UI creation
 + [relm4-components](https://crates.io/crates/relm4-components) is a collections of reusable components you can easily integrate into your application
 
-Add this to your `Cargo.toml`:
+To use all features, just add this to your `Cargo.toml`:
 
 ```toml
-gtk = { version = "0.3", package = "gtk4" }
-relm4 = "0.2"
-relm4-macros = "0.2"
-relm4-components = "0.2"
+relm4 = { version = "0.4", features = ["macros"] }
+relm4-components = "0.4"
 ```
 
 ### Features
 
-The relm4 crate has two feature flags:
+The `relm4` crate has four feature flags:
 
-+ tokio-rt: Adds the `AsyncWorker` type that uses an async update function
-+ libadwaita: Improved support for [libadwaita](https://gitlab.gnome.org/World/Rust/libadwaita-rs)
+| &nbsp;Flag       | &nbsp;Purpose                                                                                                                                                  |
+| :--------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| &nbsp;macros     | &nbsp;Enable macros by re-exporting [`relm4-macros`](https://crates.io/crates/relm4-macros)                                                                    |
+| &nbsp;tokio-rt   | &nbsp;Adds the [`AsyncRelmWorker`](https://aaronerhardt.github.io/docs/relm4/relm4/struct.AsyncRelmWorker.html) type that uses an asynchronous update function |
+| &nbsp;libadwaita | &nbsp;Improved support for [libadwaita](https://gitlab.gnome.org/World/Rust/libadwaita-rs)                                                                     |
+| &nbsp;all        | &nbsp;Enable all features                                                                                                                                      |
 
 ## Examples
 

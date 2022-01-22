@@ -25,7 +25,7 @@ macro_rules! new_action_group {
 }
 
 #[macro_export]
-/// Create a new type that implements [`ActionGroupName`].
+/// Create a new type that implements [`ActionName`] without state or target type.
 macro_rules! new_stateless_action {
     ($vis:vis $ty:ident, $group:ty, $name:expr) => {
         $vis struct $ty;
@@ -43,7 +43,9 @@ macro_rules! new_stateless_action {
 }
 
 #[macro_export]
-/// Create a new type that implements [`ActionGroupName`].
+/// Create a new type that implements [`ActionName`] with state and target type.
+///
+/// The state stores the state of this action and the target type is passed by callers of the action.
 macro_rules! new_stateful_action {
     ($vis:vis $ty:ident, $group:ty, $name:expr, $value:ty, $state:ty) => {
         $vis struct $ty;
