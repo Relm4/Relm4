@@ -43,18 +43,18 @@ impl Parse for Widget {
             None
         };
 
+        // get the inner input as func_input
         let func_input = if let Some(paren_input) = &inner_input {
             &paren_input
         } else {
             input
         };
 
-        let assign_as_ref = if func_input.peek(Token![&]) {
-            let _ref: Token![&] = func_input.parse()?;
-            true
-        } else {
-            false
-        };
+        // Look for &
+        let ref_token = func_input.parse().ok();
+
+        // Look for *
+        let deref_token = func_input.parse().ok();
 
         let func: WidgetFunc = func_input.parse()?;
 
@@ -82,7 +82,8 @@ impl Parse for Widget {
             func,
             properties,
             wrapper,
-            assign_as_ref,
+            ref_token,
+            deref_token,
             returned_widget,
         })
     }
