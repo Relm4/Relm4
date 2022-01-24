@@ -2,6 +2,15 @@
 
 ## Unreleased 
 
+### Added
+
++ relm4-macros: The view macro now allows dereferencing widgets with *
+
+### Fixed
+
++ relm4: Fixed clear method of FactoryVec
++ relm4-macros: micro_component macro now parses post_view correctly
+
 ## 0.4.1 - 2022-1-17
 
 #### Added
