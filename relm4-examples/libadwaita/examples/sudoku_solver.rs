@@ -24,7 +24,7 @@ struct AppModel {
 }
 
 impl AppModel {
-    fn empty() -> Self {
+    fn new() -> Self {
         Self {
             values: FactoryVec::from_vec(vec![Number { value: 0 }; 81]),
         }
@@ -66,7 +66,6 @@ impl AppUpdate for AppModel {
         match msg {
             AppMsg::Solve => {
                 let content = self.to_line_string();
-                println!("Start solving with {content}");
                 let sudoku = Sudoku::from_str_line(content.as_str()).unwrap();
 
                 if let Some(solution) = sudoku.solve_one() {
@@ -76,7 +75,7 @@ impl AppUpdate for AppModel {
             AppMsg::Clear => {
                 // Why does this not work
                 // self.values.clear();
-                // self.values = AppModel::empty().values;
+                //  self.values = AppModel::new().values;
 
                 // workaround
                 for index in 0..self.values.len() {
@@ -190,7 +189,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
 }
 
 fn main() {
-    let model = AppModel::empty();
+    let model = AppModel::new();
 
     let relm = RelmApp::new(model);
     relm.run();
