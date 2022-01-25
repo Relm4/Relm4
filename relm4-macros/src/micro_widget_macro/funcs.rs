@@ -25,7 +25,7 @@ impl Funcs {
 
             if ident == "pre_init" {
                 parse_func!(pre_init, func, tokens);
-            } else if ident == "position" {
+            } else if ident == "post_init" {
                 parse_func!(post_init, func, tokens);
             } else if ident == "pre_view" {
                 parse_func!(pre_view, func, tokens);

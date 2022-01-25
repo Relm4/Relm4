@@ -32,14 +32,10 @@ impl AppUpdate for AppModel {
     }
 }
 
-fn application_window() -> adw::ApplicationWindow {
-    adw::ApplicationWindow::builder().build()
-}
-
 #[relm4::widget]
 impl Widgets<AppModel, ()> for AppWidgets {
     view! {
-        main_window = application_window() -> adw::ApplicationWindow {
+        main_window = adw::ApplicationWindow {
             set_default_width: 300,
             set_default_height: 200,
 

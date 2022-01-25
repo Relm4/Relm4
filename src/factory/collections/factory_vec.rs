@@ -68,8 +68,10 @@ where
 
     /// Remove all data from the [`FactoryVec`].
     pub fn clear(&mut self) {
-        for item in self.changes.borrow_mut().values_mut() {
-            *item = ChangeType::Remove;
+        let changes = &mut self.changes.borrow_mut();
+
+        for idx in 0..self.data.len() {
+            changes.insert(idx, ChangeType::Remove);
         }
         self.data.clear();
     }

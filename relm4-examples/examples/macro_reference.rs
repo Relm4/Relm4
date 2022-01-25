@@ -44,7 +44,7 @@ impl AppUpdate for AppModel {
     }
 }
 
-enum ButtonMsg {}
+struct ButtonMsg;
 
 struct ButtonModel {}
 
@@ -66,6 +66,7 @@ impl ComponentUpdate<AppModel> for ButtonModel {
         _sender: Sender<ButtonMsg>,
         _parent_sender: Sender<AppMsg>,
     ) {
+        println!("Message to component received!");
     }
 }
 
@@ -152,6 +153,11 @@ impl Widgets<AppModel, ()> for AppWidgets {
                     set_stack: Some(&stack)
                 },
                 append: &vbox,
+                append = &gtk::Button {
+                    connect_clicked[sender1 = components.button1.sender()] => move |_| {
+                        send!(sender1, ButtonMsg);
+                    }
+                }
             },
         }
     }

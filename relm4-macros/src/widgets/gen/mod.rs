@@ -1,6 +1,5 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned};
-use syn::spanned::Spanned;
 
 use super::{Property, PropertyName, PropertyType, ReturnedWidget, Tracker, Widget, WidgetFunc};
 
@@ -39,13 +38,13 @@ mod parent;
 
 impl Widget {
     pub fn widget_assignment(&self) -> TokenStream2 {
-        let w_span = self.func.span();
         let w_name = &self.name;
-        let out_stream = if self.assign_as_ref {
-            quote_spanned! { w_span => & #w_name }
-        } else {
-            quote! { #w_name }
-        };
+
+        let ref_token = &self.ref_token;
+        let deref_token = &self.deref_token;
+
+        let out_stream = quote! { #ref_token #deref_token #w_name };
+
         if let Some(wrapper) = &self.wrapper {
             quote_spanned! {
                 wrapper.span() => #wrapper(#out_stream)

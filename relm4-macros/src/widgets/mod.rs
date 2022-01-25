@@ -68,7 +68,8 @@ pub(super) struct Widget {
     pub func: WidgetFunc,
     pub properties: Properties,
     pub wrapper: Option<Ident>,
-    pub assign_as_ref: bool,
+    pub ref_token: Option<token::And>,
+    pub deref_token: Option<token::Star>,
     pub returned_widget: Option<ReturnedWidget>,
 }
 
