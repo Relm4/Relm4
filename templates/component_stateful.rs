@@ -1,7 +1,7 @@
-use relm4::{Component, Fuselage, Sender};
+use relm4::{StatefulComponent, Fuselage, Sender};
 
 fn main() {
-    let component = CustomModel::init().launch(());
+    let component = CustomModel::init().launch_stateful(());
 }
 
 pub struct CustomModel;
@@ -12,7 +12,7 @@ pub enum CustomInputs {}
 
 pub enum CustomOutputs {}
 
-impl Component for CustomModel {
+impl StatefulComponent for CustomModel {
     type Command = ();
     type Payload = ();
     type Input = CustomInputs;
@@ -38,20 +38,12 @@ impl Component for CustomModel {
 
     fn update(
         &mut self,
+        widgets: &mut Self::Widgets,
         message: Self::Input,
         input: &mut Sender<Self::Input>,
         output: &mut Sender<Self::Output>,
     ) -> Option<Self::Command> {
         None
-    }
-
-    fn update_view(
-        &mut self,
-        widgets: &mut Self::Widgets,
-        input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>
-    ) {
-
     }
 
     fn command(message: Self::Command, input: Sender<Self::Input>) -> ComponentFuture {
