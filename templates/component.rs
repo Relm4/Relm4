@@ -1,7 +1,7 @@
 use relm4::{Component, ComponentParts, Sender};
 
 fn main() {
-    let component = CustomModel::init(()).finalize();
+    let component = CustomModel::init().launch(());
 }
 
 pub struct CustomModel;
@@ -12,10 +12,9 @@ pub enum CustomInputs {}
 
 pub enum CustomOutputs {}
 
-#[async_trait::async_trait]
 impl Component for CustomModel {
     type Command = ();
-    type InitParams = ();
+    type Payload = ();
     type Input = CustomInputs;
     type Output = CustomOutputs;
     type Root = gtk::Box;
@@ -25,8 +24,8 @@ impl Component for CustomModel {
         Default::default()
     }
 
-    fn init_inner(
-        params: Self::InitParams,
+    fn dock(
+        params: Self::Payload,
         root: &Self::Root,
         input: &mut Sender<Self::Input>,
         output: &mut Sender<Self::Output>,
@@ -55,7 +54,7 @@ impl Component for CustomModel {
 
     }
 
-    async fn command(message: Self::Command) -> Option<Self::Input> {
-        None
+    fn command(message: Self::Command, input: Sender<Self::Input>) -> ComponentFuture {
+        Box::pin(async move {})
     }
 }
