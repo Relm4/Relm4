@@ -55,7 +55,7 @@ impl<C: Component> Bridge<C, C::Root> {
                         // Runs that command asynchronously in the background using tokio.
                         if let Some(command) = model.update(event, &mut input_, &mut output_tx) {
                             let input = input_.clone();
-                            tokio::spawn(async move {
+                            crate::spawn(async move {
                                 C::command(command, input).await;
                             });
                         }
@@ -122,7 +122,7 @@ impl<C: StatefulComponent> Bridge<C, C::Root> {
                             model.update(&mut widgets, event, &mut input_, &mut output_tx)
                         {
                             let input = input_.clone();
-                            tokio::spawn(async move {
+                            crate::spawn(async move {
                                 C::command(command, input).await;
                             });
                         }

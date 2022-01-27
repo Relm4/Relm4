@@ -15,8 +15,7 @@
 use gtk::prelude::*;
 use relm4::{gtk, CommandFuture, Component, Fuselage, Sender};
 
-#[tokio::main]
-async fn main() {
+fn main() {
     let app = gtk::builders::ApplicationBuilder::new()
         .application_id("org.relm4.SettingsListExample")
         .build();

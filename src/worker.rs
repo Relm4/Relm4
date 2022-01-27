@@ -52,7 +52,7 @@ pub trait Worker: Sized + Send {
                 }
             };
 
-            tokio::spawn(async move {
+            crate::spawn(async move {
                 futures::pin_mut!(drop_notice);
                 futures::pin_mut!(worker);
                 futures::future::select(drop_notice, worker).await;

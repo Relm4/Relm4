@@ -25,14 +25,14 @@ futures = "0.3.19"
 gtk = { version = "0.4.1", package = "gtk4" }
 log = "0.4.14"
 once_cell = "1.8"
-tokio = { version = "1.15", features = ["full"] }
+tokio = { version = "1.15", features = ["rt", "sync"] }
 
 #relm4-macros = { version = "0.4.1", optional = true }
 relm4-macros = { path = "relm4-macros", optional = true }
 
 [dev-dependencies]
 relm4-macros = { path = "relm4-macros" }
-
+tokio = { version = "1.15", features = ["full"] }
 
 [features]
 default = []

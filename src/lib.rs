@@ -22,10 +22,13 @@ mod worker;
 
 pub use self::component::*;
 pub use self::worker::*;
+pub use tokio::task::JoinHandle;
 pub use util::widget_plus::WidgetPlus;
 
 use fragile::Fragile;
 use once_cell::sync::OnceCell;
+use std::future::Future;
+use tokio::runtime::Runtime;
 use tokio::sync::mpsc;
 
 /// Re-export of `tokio::sync::mpsc::UnboundedSender`.
@@ -33,6 +36,11 @@ pub type Sender<T> = mpsc::UnboundedSender<T>;
 
 /// Re-export of `tokio::sync::mpsc::UnboundedReceiver`.
 pub type Receiver<T> = mpsc::UnboundedReceiver<T>;
+
+/// Defines how many threads that Relm should use for background tasks.
+///
+/// NOTE: The default thread count is 1.
+pub static RELM_THREADS: OnceCell<usize> = OnceCell::new();
 
 static APP: OnceCell<Fragile<Application>> = OnceCell::new();
 
@@ -127,13 +135,34 @@ pub fn set_global_css_from_file<P: AsRef<std::path::Path>>(path: P) {
 ///
 /// This function itself doesn't panic but it might panic if you run futures that
 /// expect the tokio runtime. Use the tokio-rt feature and an `AsyncComponent` for this instead.
-pub fn spawn_future<F: std::future::Future<Output = ()> + Send + 'static>(f: F) {
+pub fn spawn_future<F: Future<Output = ()> + Send + 'static>(f: F) {
     gtk::glib::MainContext::ref_thread_default().spawn(f);
 }
 
 /// Spawns a thread-local future on GLib's executor, for non-Send futures.
-pub fn spawn_local<F: std::future::Future<Output = ()> + 'static>(func: F) {
+pub fn spawn_local<F: Future<Output = ()> + 'static>(func: F) {
     gtk::glib::MainContext::ref_thread_default().spawn_local(func);
+}
+
+static RUNTIME: OnceCell<Runtime> = OnceCell::new();
+
+fn runtime() -> &'static Runtime {
+    RUNTIME.get_or_init(|| {
+        tokio::runtime::Builder::new_multi_thread()
+            .enable_all()
+            .worker_threads(*RELM_THREADS.get_or_init(|| 1))
+            .build()
+            .unwrap()
+    })
+}
+
+/// Spawns a `Send`-able future to the shared component runtime.
+pub fn spawn<F>(future: F) -> JoinHandle<F::Output>
+where
+    F: Future + Send + 'static,
+    F::Output: Send + 'static,
+{
+    runtime().spawn(future)
 }
 
 /// A short macro for conveniently sending messages.
