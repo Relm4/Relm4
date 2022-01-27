@@ -73,11 +73,6 @@ impl AppUpdate for AppModel {
                 }
             }
             AppMsg::Clear => {
-                // Why does this not work
-                // self.values.clear();
-                //  self.values = AppModel::new().values;
-
-                // workaround
                 for index in 0..self.values.len() {
                     if let Some(v) = self.values.get_mut(index) {
                         v.value = 0;
