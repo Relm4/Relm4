@@ -42,6 +42,11 @@ pub type Receiver<T> = mpsc::UnboundedReceiver<T>;
 /// NOTE: The default thread count is 1.
 pub static RELM_THREADS: OnceCell<usize> = OnceCell::new();
 
+/// Defines the maximum number of background threads to spawn for handling blocking tasks.
+///
+/// NOTE: The default max is 512.
+pub static RELM_BLOCKING_THREADS: OnceCell<usize> = OnceCell::new();
+
 static APP: OnceCell<Fragile<Application>> = OnceCell::new();
 
 /// Re-export of gtk4
@@ -151,6 +156,7 @@ fn runtime() -> &'static Runtime {
         tokio::runtime::Builder::new_multi_thread()
             .enable_all()
             .worker_threads(*RELM_THREADS.get_or_init(|| 1))
+            .max_blocking_threads(*RELM_BLOCKING_THREADS.get_or_init(|| 512))
             .build()
             .unwrap()
     })
@@ -163,6 +169,15 @@ where
     F::Output: Send + 'static,
 {
     runtime().spawn(future)
+}
+
+/// Spawns a blocking task in a background thread pool
+pub fn spawn_blocking<F, R>(func: F) -> JoinHandle<R>
+where
+    F: FnOnce() -> R + Send + 'static,
+    R: Send + 'static,
+{
+    runtime().spawn_blocking(func)
 }
 
 /// A short macro for conveniently sending messages.
