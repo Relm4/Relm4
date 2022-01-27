@@ -14,9 +14,13 @@ pub use self::controller::Controller;
 pub use self::fairing::Fairing;
 
 use crate::Sender;
+use std::future::Future;
 use std::marker::PhantomData;
+use std::pin::Pin;
 
-#[async_trait::async_trait]
+/// A future returned by a component's command method.
+pub type CommandFuture = Pin<Box<dyn Future<Output = ()> + Send>>;
+
 /// Elm-style variant of a Component with view updates separated from input updates
 pub trait Component: Sized + 'static {
     /// Internal commands to perform
@@ -74,7 +78,9 @@ pub trait Component: Sized + 'static {
 
     /// A command to perform in a background thread.
     #[allow(unused)]
-    async fn command(message: Self::Command, input: Sender<Self::Input>) {}
+    fn command(message: Self::Command, input: Sender<Self::Input>) -> CommandFuture {
+        Box::pin(async move {})
+    }
 }
 
 /// Contains the initial model and widgets being docked into a component.

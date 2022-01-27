@@ -16,7 +16,7 @@ pub struct Bridge<Component, Root> {
     pub(super) component: PhantomData<Component>,
 }
 
-impl<C: Component + Send> Bridge<C, C::Root> {
+impl<C: Component> Bridge<C, C::Root> {
     /// Starts the component, passing ownership to a future attached to a GLib context.
     pub fn launch(self, payload: C::Payload) -> Fairing<C::Root, C::Input, C::Output> {
         let Bridge { root, .. } = self;

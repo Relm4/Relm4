@@ -13,7 +13,7 @@
 //! component, which then issues to reload the widgets again.
 
 use gtk::prelude::*;
-use relm4::{gtk, Component, Fuselage, Sender};
+use relm4::{gtk, CommandFuture, Component, Fuselage, Sender};
 
 #[tokio::main]
 async fn main() {
@@ -104,7 +104,6 @@ pub enum SettingsListCommand {
     Reload,
 }
 
-#[async_trait::async_trait]
 impl Component for SettingsListModel {
     type Command = SettingsListCommand;
     type Input = SettingsListInput;
@@ -230,13 +229,15 @@ impl Component for SettingsListModel {
         }
     }
 
-    async fn command(message: Self::Command, input: Sender<Self::Input>) {
-        match message {
-            SettingsListCommand::Reload => {
-                tokio::time::sleep(std::time::Duration::from_secs(2)).await;
-                let _ = input.send(SettingsListInput::Reload);
+    fn command(message: Self::Command, input: Sender<Self::Input>) -> CommandFuture {
+        Box::pin(async move {
+            match message {
+                SettingsListCommand::Reload => {
+                    tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+                    let _ = input.send(SettingsListInput::Reload);
+                }
             }
-        }
+        })
     }
 }
 
