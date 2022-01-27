@@ -1,210 +1,91 @@
-use gtk::glib::{self, Sender};
+// Copyright 2021-2022 Aaron Erhardt <aaron.erhardt@t-online.de>
+// Copyright 2022 System76 <info@system76.com>
+// SPDX-License-Identifier: MIT or Apache-2.0
 
-use std::marker::{PhantomData, Send};
+use crate::{Receiver, Sender};
+use std::sync::Arc;
+use tokio::sync::{mpsc, Notify};
 
-use crate::{ComponentUpdate, Components, Model as ModelTrait};
+#[async_trait::async_trait]
+/// Receives inputs and outputs in the background.
+pub trait Worker: Sized + Send {
+    /// The initial parameters that will be used to build the worker state.
+    type InputParams: 'static + Send;
+    /// The type of inputs that this worker shall receive.
+    type Input: 'static + Send;
+    /// The typue of outputs that this worker shall send.
+    type Output: 'static + Send;
 
-/// [`RelmWorker`]s are like [`RelmComponent`](crate::RelmComponent)s but they don't have any widgets.
-///
-/// They are usually used to run expansive tasks on different threads and report back when they are finished
-/// so that their parent components can keep handling UI events in the meantime.
-/// For example you could use a [`RelmWorker`] for sending a HTTP request or for copying files.
-///
-/// A [`RelmWorker`] has its own model and message type
-/// and can send messages to its parent and its children components.
-///
-/// Multiple [`RelmWorker`]s that have the same parent are usually bundled along with [`RelmComponent`](crate::RelmComponent)s
-/// in a struct that implements [`Components`].
-#[derive(Clone, Debug)]
-pub struct RelmWorker<Model, ParentModel>
-where
-    Model: ComponentUpdate<ParentModel, Widgets = ()> + 'static,
-    ParentModel: ModelTrait,
-{
-    model: PhantomData<Model>,
-    parent_model: PhantomData<ParentModel>,
-    sender: Sender<Model::Msg>,
-}
+    /// Defines the initial state of the worker.
+    fn init_inner(
+        params: Self::InputParams,
+        input: &mut Sender<Self::Input>,
+        output: &mut Sender<Self::Output>,
+    ) -> Self;
 
-impl<Model, ParentModel> RelmWorker<Model, ParentModel>
-where
-    Model: ComponentUpdate<ParentModel, Widgets = ()> + 'static,
-    ParentModel: ModelTrait,
-{
-    /// Create a new [`RelmWorker`] that runs on the main thread.
-    pub fn new(parent_model: &ParentModel, parent_sender: Sender<ParentModel::Msg>) -> Self {
-        let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
+    /// Spawns the worker task in the background.
+    fn init(params: Self::InputParams) -> WorkerHandle<Self::Input, Self::Output> {
+        let (input_tx, mut input_rx) = mpsc::unbounded_channel::<Self::Input>();
+        let (mut output_tx, output_rx) = mpsc::unbounded_channel::<Self::Output>();
 
-        let mut model = Model::init_model(parent_model);
-
-        let mut components = Model::Components::init_components(&model, sender.clone());
-        let cloned_sender = sender.clone();
-
-        components.connect_parent(&());
+        // This is used to drop the worker when the handle to the worker has been dropped.
+        let drop_notifier = Arc::new(Notify::new());
 
         {
-            let context = glib::MainContext::default();
-            let _guard = context
-                .acquire()
-                .expect("Couldn't acquire glib main context");
-            // The main loop executes the closure as soon as it receives the message
-            receiver.attach(Some(&context), move |msg: Model::Msg| {
-                model.update(msg, &components, sender.clone(), parent_sender.clone());
-                glib::Continue(true)
+            // Future which awaits a drop notice.
+            let drop_notifier = drop_notifier.clone();
+            let drop_notice = async move {
+                drop_notifier.notified().await;
+            };
+
+            // Future which handles inputs.
+            let mut input_tx = input_tx.clone();
+            let worker = async move {
+                let mut worker = Self::init_inner(params, &mut input_tx, &mut output_tx);
+
+                while let Some(input) = input_rx.recv().await {
+                    worker.update(input, &mut input_tx, &mut output_tx).await;
+                }
+            };
+
+            tokio::spawn(async move {
+                futures::pin_mut!(drop_notice);
+                futures::pin_mut!(worker);
+                futures::future::select(drop_notice, worker).await;
             });
         }
 
-        RelmWorker {
-            model: PhantomData,
-            parent_model: PhantomData,
-            sender: cloned_sender,
+        WorkerHandle {
+            sender: input_tx,
+            receiver: output_rx,
+            drop_notifier,
         }
     }
 
-    /// Send a message to this component.
-    /// This can be used by the parent to send messages to this worker.
-    pub fn send(&self, msg: Model::Msg) -> Result<(), std::sync::mpsc::SendError<Model::Msg>> {
-        self.sender.send(msg)
+    /// Defines how inputs will bep processed
+    #[allow(unused)]
+    async fn update(
+        &mut self,
+        message: Self::Input,
+        input: &mut Sender<Self::Input>,
+        output: &mut Sender<Self::Output>,
+    ) {
     }
 }
 
-impl<Model, ParentModel> RelmWorker<Model, ParentModel>
-where
-    Model: ComponentUpdate<ParentModel, Widgets = ()> + Send + 'static,
-    Model::Components: Send + 'static,
-    Model::Msg: Send,
-    ParentModel: ModelTrait,
-    ParentModel::Msg: Send,
-{
-    /// Create a new [`RelmWorker`] that runs the [`ComponentUpdate::update`] function in another thread.
-    pub fn with_new_thread(
-        parent_model: &ParentModel,
-        parent_sender: Sender<ParentModel::Msg>,
-    ) -> Self {
-        let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
+#[derive(Debug)]
+/// Handle to a worker task in the background
+pub struct WorkerHandle<Input, Output> {
+    /// Sends inputs to the worker.
+    pub sender: Sender<Input>,
+    /// Where the worker will send its outputs to.
+    pub receiver: Receiver<Output>,
 
-        let mut model = Model::init_model(parent_model);
-
-        let mut components = Model::Components::init_components(&model, sender.clone());
-        let cloned_sender = sender.clone();
-
-        components.connect_parent(&());
-
-        std::thread::spawn(move || {
-            let context = glib::MainContext::new();
-            let _guard = context
-                .acquire()
-                .expect("Couldn't acquire glib main context");
-
-            context
-                .with_thread_default(|| {
-                    // The main loop executes the closure as soon as it receives the message
-                    receiver.attach(Some(&context), move |msg: Model::Msg| {
-                        model.update(msg, &components, sender.clone(), parent_sender.clone());
-                        glib::Continue(true)
-                    });
-
-                    let main_loop = glib::MainLoop::new(Some(&context), true);
-                    main_loop.run();
-                })
-                .unwrap();
-        });
-
-        RelmWorker {
-            model: PhantomData,
-            parent_model: PhantomData,
-            sender: cloned_sender,
-        }
-    }
+    drop_notifier: Arc<Notify>,
 }
 
-#[cfg(feature = "tokio-rt")]
-#[cfg_attr(doc, doc(cfg(feature = "tokio-rt")))]
-use crate::traits::AsyncComponentUpdate;
-
-#[cfg(feature = "tokio-rt")]
-#[cfg_attr(doc, doc(cfg(feature = "tokio-rt")))]
-/// A [`AsyncRelmWorker`] is like a [`RelmWorker`] but runs the [`AsyncComponentUpdate::update`] function in
-/// a tokio [`Runtime`](tokio::runtime::Runtime).
-#[derive(Clone, Debug)]
-pub struct AsyncRelmWorker<Model, ParentModel>
-where
-    Model: AsyncComponentUpdate<ParentModel, Widgets = ()> + Send + 'static,
-    Model::Components: Send,
-    ParentModel: ModelTrait,
-    ParentModel::Msg: Send,
-    Model::Msg: Send,
-{
-    model: PhantomData<Model>,
-    parent_model: PhantomData<ParentModel>,
-    sender: Sender<Model::Msg>,
-}
-
-#[cfg(feature = "tokio-rt")]
-#[cfg_attr(doc, doc(cfg(feature = "tokio-rt")))]
-impl<Model, ParentModel> AsyncRelmWorker<Model, ParentModel>
-where
-    Model: AsyncComponentUpdate<ParentModel, Widgets = ()> + Send,
-    Model::Components: Send,
-    ParentModel: ModelTrait,
-    ParentModel::Msg: Send,
-    Model::Msg: Send,
-{
-    /// Create a new [`AsyncRelmWorker`] that runs the [`AsyncComponentUpdate::update`] function in
-    /// a tokio [`Runtime`](tokio::runtime::Runtime).
-    pub fn with_new_tokio_rt(
-        parent_model: &ParentModel,
-        parent_sender: Sender<ParentModel::Msg>,
-    ) -> Self {
-        let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
-
-        let mut model = Model::init_model(parent_model);
-
-        let mut components = Model::Components::init_components(&model, sender.clone());
-        let cloned_sender = sender.clone();
-
-        components.connect_parent(&());
-
-        std::thread::spawn(move || {
-            let rt = tokio::runtime::Builder::new_current_thread()
-                .enable_all()
-                .build()
-                .unwrap();
-
-            let context = glib::MainContext::new();
-            let _guard = context
-                .acquire()
-                .expect("Couldn't acquire glib main context");
-
-            context
-                .with_thread_default(|| {
-                    // The main loop executes the closure as soon as it receives the message
-                    receiver.attach(Some(&context), move |msg: Model::Msg| {
-                        rt.block_on(model.update(
-                            msg,
-                            &components,
-                            sender.clone(),
-                            parent_sender.clone(),
-                        ));
-                        glib::Continue(true)
-                    });
-
-                    let main_loop = glib::MainLoop::new(Some(&context), true);
-                    main_loop.run();
-                })
-                .unwrap();
-        });
-
-        AsyncRelmWorker {
-            model: PhantomData,
-            parent_model: PhantomData,
-            sender: cloned_sender,
-        }
-    }
-
-    /// Send a message to this component.
-    /// This can be used by the parent to send messages to this worker.
-    pub fn send(&self, msg: Model::Msg) -> Result<(), std::sync::mpsc::SendError<Model::Msg>> {
-        self.sender.send(msg)
+impl<Input, Output> Drop for WorkerHandle<Input, Output> {
+    fn drop(&mut self) {
+        self.drop_notifier.notify_one();
     }
 }

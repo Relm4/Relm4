@@ -18,9 +18,9 @@ mod component;
 pub mod drawing;
 pub mod factory;
 pub mod util;
-// mod worker;
+mod worker;
 
-// pub use self::worker::*;
+pub use self::worker::*;
 pub use component::{Component, ComponentParts, Finalized, Handle, RawComponent};
 pub use util::widget_plus::WidgetPlus;
 
