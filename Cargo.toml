@@ -20,7 +20,6 @@ members = [
 
 [dependencies]
 adw = { version = "0.1", optional = true, package = "libadwaita" }
-async-trait = "0.1.52"
 fragile = "1.1.0"
 futures = "0.3.19"
 gtk = { version = "0.4.1", package = "gtk4" }

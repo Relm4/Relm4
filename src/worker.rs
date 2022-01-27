@@ -3,10 +3,14 @@
 // SPDX-License-Identifier: MIT or Apache-2.0
 
 use crate::{Receiver, Sender};
+use std::future::Future;
+use std::pin::Pin;
 use std::sync::Arc;
 use tokio::sync::{mpsc, Notify};
 
-#[async_trait::async_trait]
+/// A future returned by a component's command method.
+pub type WorkerFuture = Pin<Box<dyn Future<Output = ()> + Send>>;
+
 /// Receives inputs and outputs in the background.
 pub trait Worker: Sized + Send {
     /// The initial parameters that will be used to build the worker state.
@@ -64,12 +68,13 @@ pub trait Worker: Sized + Send {
 
     /// Defines how inputs will bep processed
     #[allow(unused)]
-    async fn update(
+    fn update(
         &mut self,
         message: Self::Input,
         input: &mut Sender<Self::Input>,
         output: &mut Sender<Self::Output>,
-    ) {
+    ) -> WorkerFuture {
+        Box::pin(async move {})
     }
 }
 

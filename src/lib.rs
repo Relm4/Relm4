@@ -53,9 +53,6 @@ pub use relm4_macros::*;
 /// Re-export of libadwaita
 pub use adw;
 
-/// Re-export of [`async_trait::async_trait`]
-pub use async_trait::async_trait;
-
 /// Forwards an event from one channel to another.
 pub async fn forward<Transformer, Input, Output>(
     mut receiver: Receiver<Input>,
