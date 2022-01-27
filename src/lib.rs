@@ -25,7 +25,6 @@ pub use self::worker::*;
 pub use tokio::task::JoinHandle;
 pub use util::widget_plus::WidgetPlus;
 
-use fragile::Fragile;
 use once_cell::sync::OnceCell;
 use std::future::Future;
 use tokio::runtime::Runtime;
@@ -47,16 +46,8 @@ pub static RELM_THREADS: OnceCell<usize> = OnceCell::new();
 /// NOTE: The default max is 512.
 pub static RELM_BLOCKING_THREADS: OnceCell<usize> = OnceCell::new();
 
-static APP: OnceCell<Fragile<Application>> = OnceCell::new();
-
 /// Re-export of gtk4
 pub use gtk;
-
-#[cfg(feature = "libadwaita")]
-type Application = adw::Application;
-
-#[cfg(not(feature = "libadwaita"))]
-type Application = gtk::Application;
 
 // Re-exports
 #[cfg(feature = "macros")]
@@ -81,21 +72,6 @@ pub async fn forward<Transformer, Input, Output>(
             break;
         }
     }
-}
-
-#[must_use]
-/// Returns the application created by [`RelmApp::new`].
-///
-/// # Panics
-///
-/// This function panics if [`RelmApp::new`] wasn't called before
-/// or this function is not called on the thread that also called [`RelmApp::new`].
-pub fn gtk_application() -> Application {
-    APP.get()
-        .expect("The gloabl gtk application hasn't been initialized yet")
-        .try_get()
-        .expect("The global gtk application can only be read from the main thread")
-        .clone()
 }
 
 /// Sets a custom global stylesheet.
@@ -134,19 +110,9 @@ pub fn set_global_css_from_file<P: AsRef<std::path::Path>>(path: P) {
     }
 }
 
-/// Spawns a future on the main thread in the main event loop.
-///
-/// # Panics
-///
-/// This function itself doesn't panic but it might panic if you run futures that
-/// expect the tokio runtime. Use the tokio-rt feature and an `AsyncComponent` for this instead.
-pub fn spawn_future<F: Future<Output = ()> + Send + 'static>(f: F) {
-    gtk::glib::MainContext::ref_thread_default().spawn(f);
-}
-
 /// Spawns a thread-local future on GLib's executor, for non-Send futures.
-pub fn spawn_local<F: Future<Output = ()> + 'static>(func: F) {
-    gtk::glib::MainContext::ref_thread_default().spawn_local(func);
+pub fn spawn_local<F: Future<Output = ()> + 'static>(func: F) -> gtk::glib::SourceId {
+    gtk::glib::MainContext::ref_thread_default().spawn_local(func)
 }
 
 static RUNTIME: OnceCell<Runtime> = OnceCell::new();
