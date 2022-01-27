@@ -20,6 +20,7 @@ members = [
 
 [dependencies]
 adw = { version = "0.1", optional = true, package = "libadwaita" }
+blocking = "1.1.0"
 fragile = "1.1.0"
 futures = "0.3.19"
 gtk = { version = "0.4.1", package = "gtk4" }
@@ -29,7 +30,6 @@ tokio = { version = "1.15", features = ["rt", "sync"] }
 
 #relm4-macros = { version = "0.4.1", optional = true }
 relm4-macros = { path = "relm4-macros", optional = true }
-blocking = "1.1.0"
 
 [dev-dependencies]
 relm4-macros = { path = "relm4-macros" }

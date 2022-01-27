@@ -5,8 +5,7 @@
 use crate::{Receiver, Sender};
 use std::future::Future;
 use std::pin::Pin;
-use std::sync::Arc;
-use tokio::sync::{mpsc, Notify};
+use tokio::sync::mpsc;
 
 /// A future returned by a component's command method.
 pub type WorkerFuture = Pin<Box<dyn Future<Output = ()> + Send>>;
@@ -32,37 +31,21 @@ pub trait Worker: Sized + Send {
         let (input_tx, mut input_rx) = mpsc::unbounded_channel::<Self::Input>();
         let (mut output_tx, output_rx) = mpsc::unbounded_channel::<Self::Output>();
 
-        // This is used to drop the worker when the handle to the worker has been dropped.
-        let drop_notifier = Arc::new(Notify::new());
-
-        {
-            // Future which awaits a drop notice.
-            let drop_notifier = drop_notifier.clone();
-            let drop_notice = async move {
-                drop_notifier.notified().await;
-            };
-
-            // Future which handles inputs.
+        let worker = {
             let mut input_tx = input_tx.clone();
-            let worker = async move {
+            crate::spawn(async move {
                 let mut worker = Self::init_inner(params, &mut input_tx, &mut output_tx);
 
                 while let Some(input) = input_rx.recv().await {
                     worker.update(input, &mut input_tx, &mut output_tx).await;
                 }
-            };
-
-            crate::spawn(async move {
-                futures::pin_mut!(drop_notice);
-                futures::pin_mut!(worker);
-                futures::future::select(drop_notice, worker).await;
-            });
-        }
+            })
+        };
 
         WorkerHandle {
             sender: input_tx,
             receiver: output_rx,
-            drop_notifier,
+            worker,
         }
     }
 
@@ -86,11 +69,11 @@ pub struct WorkerHandle<Input, Output> {
     /// Where the worker will send its outputs to.
     pub receiver: Receiver<Output>,
 
-    drop_notifier: Arc<Notify>,
+    worker: crate::JoinHandle<()>,
 }
 
 impl<Input, Output> Drop for WorkerHandle<Input, Output> {
     fn drop(&mut self) {
-        self.drop_notifier.notify_one();
+        self.worker.abort();
     }
 }
