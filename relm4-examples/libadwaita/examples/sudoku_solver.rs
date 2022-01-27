@@ -111,8 +111,9 @@ impl FactoryPrototype for Number {
         if (index / 9) % 3 == 0 {
             dropdown.set_margin_top(5);
         }
+        
         // When available:
-        // dropdown.set_sh(false);
+        // dropdown.set_show_arrow(false);
         let index = *index;
         dropdown.connect_selected_notify(move |d| {
             sender
