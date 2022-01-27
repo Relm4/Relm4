@@ -14,32 +14,30 @@
 )]
 
 pub mod actions;
-mod app;
 mod component;
 pub mod drawing;
 pub mod factory;
-mod micro_component;
-mod msg_handler;
-mod traits;
 pub mod util;
-mod worker;
+// mod worker;
 
-pub use app::RelmApp;
-pub use component::RelmComponent;
-pub use micro_component::{MicroComponent, MicroComponentError, MicroModel, MicroWidgets};
-pub use msg_handler::RelmMsgHandler;
-pub use traits::*;
+// pub use self::worker::*;
+pub use component::{Component, ComponentParts, Finalized, Handle, RawComponent};
 pub use util::widget_plus::WidgetPlus;
-pub use worker::*;
 
 use fragile::Fragile;
 use once_cell::sync::OnceCell;
+use tokio::sync::mpsc;
+
+/// Re-export of `tokio::sync::mpsc::UnboundedSender`.
+pub type Sender<T> = mpsc::UnboundedSender<T>;
+
+/// Re-export of `tokio::sync::mpsc::UnboundedReceiver`.
+pub type Receiver<T> = mpsc::UnboundedReceiver<T>;
 
 static APP: OnceCell<Fragile<Application>> = OnceCell::new();
 
 /// Re-export of gtk4
 pub use gtk;
-pub use gtk::glib::Sender;
 
 #[cfg(feature = "libadwaita")]
 type Application = adw::Application;
@@ -55,10 +53,25 @@ pub use relm4_macros::*;
 /// Re-export of libadwaita
 pub use adw;
 
-#[cfg(feature = "tokio-rt")]
-#[cfg_attr(doc, doc(cfg(feature = "tokio-rt")))]
 /// Re-export of [`async_trait::async_trait`]
 pub use async_trait::async_trait;
+
+/// Forwards an event from one channel to another.
+pub async fn forward<Transformer, Input, Output>(
+    mut receiver: Receiver<Input>,
+    sender: Sender<Output>,
+    transformer: Transformer,
+) where
+    Transformer: (Fn(Input) -> Output) + 'static,
+    Input: 'static,
+    Output: 'static,
+{
+    while let Some(event) = receiver.recv().await {
+        if sender.send(transformer(event)).is_err() {
+            break;
+        }
+    }
+}
 
 #[must_use]
 /// Returns the application created by [`RelmApp::new`].
@@ -117,8 +130,13 @@ pub fn set_global_css_from_file<P: AsRef<std::path::Path>>(path: P) {
 ///
 /// This function itself doesn't panic but it might panic if you run futures that
 /// expect the tokio runtime. Use the tokio-rt feature and an `AsyncComponent` for this instead.
-pub fn spawn_future<F: futures_core::future::Future<Output = ()> + Send + 'static>(f: F) {
+pub fn spawn_future<F: std::future::Future<Output = ()> + Send + 'static>(f: F) {
     gtk::glib::MainContext::ref_thread_default().spawn(f);
+}
+
+/// Spawns a thread-local future on GLib's executor, for non-Send futures.
+pub fn spawn_local<F: std::future::Future<Output = ()> + 'static>(func: F) {
+    gtk::glib::MainContext::ref_thread_default().spawn_local(func);
 }
 
 /// A short macro for conveniently sending messages.
