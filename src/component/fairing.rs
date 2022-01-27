@@ -9,7 +9,7 @@ use crate::{Receiver, Sender};
 /// Contains the post-launch input sender and output receivers with the root widget.
 ///
 /// The receiver can be separated from the `Fairing` by choosing a method for handling it.
-pub struct Fairing<W: Clone + AsRef<gtk::Widget>, I, O> {
+pub struct Fairing<W, I, O> {
     /// The widget that this component manages.
     pub widget: W,
 
@@ -20,7 +20,7 @@ pub struct Fairing<W: Clone + AsRef<gtk::Widget>, I, O> {
     pub receiver: Receiver<O>,
 }
 
-impl<W: Clone + AsRef<gtk::Widget>, I: 'static, O: 'static> Fairing<W, I, O> {
+impl<W, I: 'static, O: 'static> Fairing<W, I, O> {
     /// Forwards output events to the designated sender.
     pub fn forward<X: 'static, F: (Fn(O) -> X) + 'static>(
         self,

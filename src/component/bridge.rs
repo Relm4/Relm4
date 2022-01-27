@@ -2,8 +2,7 @@
 // Copyright 2022 System76 <info@system76.com>
 // SPDX-License-Identifier: MIT or Apache-2.0
 
-use super::{Component, Fairing, Fuselage, StatefulComponent};
-use gtk::prelude::*;
+use super::{Component, Fairing, Fuselage, OnDestroy, StatefulComponent};
 use std::marker::PhantomData;
 use tokio::sync::mpsc;
 
@@ -53,13 +52,7 @@ impl<C: Component> Bridge<C, C::Root> {
         });
 
         // When the root widget is destroyed, the spawned service will be removed.
-        let id = std::cell::RefCell::new(Some(id));
-
-        root.as_ref().connect_destroy(move |_| {
-            if let Some(id) = id.borrow_mut().take() {
-                id.remove();
-            }
-        });
+        root.on_destroy(move || id.remove());
 
         Fairing {
             widget: root,
@@ -104,13 +97,7 @@ impl<C: StatefulComponent> Bridge<C, C::Root> {
         });
 
         // When the root widget is destroyed, the spawned service will be removed.
-        let id = std::cell::RefCell::new(Some(id));
-
-        root.as_ref().connect_destroy(move |_| {
-            if let Some(id) = id.borrow_mut().take() {
-                id.remove();
-            }
-        });
+        root.on_destroy(move || id.remove());
 
         Fairing {
             widget: root,

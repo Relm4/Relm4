@@ -33,3 +33,21 @@ pub struct Fuselage<Model, Widgets> {
     /// The widgets created for the view.
     pub widgets: Widgets,
 }
+
+/// Type which supports signaling when it has been destroyed.
+pub trait OnDestroy {
+    /// Runs the given function when destroyed.
+    fn on_destroy<F: FnOnce() + 'static>(&self, func: F);
+}
+
+impl<T: AsRef<gtk::Widget>> OnDestroy for T {
+    fn on_destroy<F: FnOnce() + 'static>(&self, func: F) {
+        use gtk::prelude::WidgetExt;
+        let func = std::cell::RefCell::new(Some(func));
+        self.as_ref().connect_destroy(move |_| {
+            if let Some(func) = func.take() {
+                func();
+            }
+        });
+    }
+}
