@@ -20,8 +20,8 @@ pub mod factory;
 pub mod util;
 mod worker;
 
+pub use self::component::*;
 pub use self::worker::*;
-pub use component::{Component, ComponentParts, Finalized, Handle, RawComponent};
 pub use util::widget_plus::WidgetPlus;
 
 use fragile::Fragile;

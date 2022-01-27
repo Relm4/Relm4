@@ -5,8 +5,8 @@
 use crate::*;
 
 #[derive(Debug)]
-/// Handle to an active widget component in the system.
-pub struct Handle<W, I> {
+/// Controls the component from afar.
+pub struct Controller<W, I> {
     /// The widget that this component manages.
     pub widget: W,
 
@@ -14,7 +14,7 @@ pub struct Handle<W, I> {
     pub sender: Sender<I>,
 }
 
-impl<W, I> Handle<W, I> {
+impl<W, I> Controller<W, I> {
     /// Emits an input to the component.
     pub fn emit(&self, event: I) {
         let _ = self.sender.send(event);

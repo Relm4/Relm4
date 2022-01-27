@@ -13,7 +13,7 @@
 //! component, which then issues to reload the widgets again.
 
 use gtk::prelude::*;
-use relm4::{gtk, Component, ComponentParts, Sender};
+use relm4::{gtk, Component, Fuselage, Sender};
 
 #[tokio::main]
 async fn main() {
@@ -22,8 +22,8 @@ async fn main() {
         .build();
 
     app.connect_activate(move |app| {
-        let component = SettingsListModel::init("Settings List Demo".into())
-            .finalize()
+        let component = SettingsListModel::init()
+            .launch("Settings List Demo".into())
             .connect_receiver(move |sender, message| match message {
                 SettingsListOutput::Clicked(id) => {
                     eprintln!("ID {id} Clicked");
@@ -107,9 +107,9 @@ pub enum SettingsListCommand {
 #[async_trait::async_trait]
 impl Component for SettingsListModel {
     type Command = SettingsListCommand;
-    type InitParams = String;
     type Input = SettingsListInput;
     type Output = SettingsListOutput;
+    type Payload = String;
     type Root = gtk::Box;
     type Widgets = SettingsListWidgets;
 
@@ -121,12 +121,12 @@ impl Component for SettingsListModel {
             .build()
     }
 
-    fn init_inner(
+    fn dock(
         title: String,
         root: &Self::Root,
         _input: &mut Sender<Self::Input>,
         output: &mut Sender<Self::Output>,
-    ) -> ComponentParts<Self, Self::Widgets> {
+    ) -> Fuselage<Self, Self::Widgets> {
         // Request the caller to reload its options.
         let _ = output.send(SettingsListOutput::Reload);
 
@@ -145,7 +145,7 @@ impl Component for SettingsListModel {
         root.append(&label);
         root.append(&list);
 
-        ComponentParts {
+        Fuselage {
             model: SettingsListModel::default(),
             widgets: SettingsListWidgets {
                 list,
@@ -230,11 +230,11 @@ impl Component for SettingsListModel {
         }
     }
 
-    async fn command(message: Self::Command) -> Option<Self::Input> {
+    async fn command(message: Self::Command, input: Sender<Self::Input>) {
         match message {
             SettingsListCommand::Reload => {
                 tokio::time::sleep(std::time::Duration::from_secs(2)).await;
-                Some(SettingsListInput::Reload)
+                let _ = input.send(SettingsListInput::Reload);
             }
         }
     }
