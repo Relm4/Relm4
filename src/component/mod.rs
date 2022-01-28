@@ -18,6 +18,8 @@ pub use self::elm_like::Component;
 pub use self::fairing::Fairing;
 #[allow(unreachable_pub)]
 pub use self::stateful::StatefulComponent;
+#[allow(unreachable_pub)]
+pub use self::fairing::Fairing2;
 
 use std::future::Future;
 use std::pin::Pin;
