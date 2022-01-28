@@ -101,7 +101,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
                 set_margin_all?: Some(5),
                 set_spacing: 5,
 
-                //append: component_root!(button1),
+                append: &start_label,
                 append: components.button1.root_widget(),
                 append: inc_button = &gtk::Button {
                     set_label: "Increment",
@@ -180,6 +180,8 @@ impl Widgets<AppModel, ()> for AppWidgets {
                 },
             }
         }
+
+        let start_label = gtk::Label::builder().label("This should appear at the top").build();
     }
 
     fn post_init() {

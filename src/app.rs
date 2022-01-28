@@ -53,7 +53,7 @@ where
     /// Create a Relm4 application.
     pub fn new(model: Model) -> Self {
         gtk::init().expect("Couldn't initialize GTK");
-        let app = Application::builder().build();
+        let app = Application::default();
 
         Self::with_app(model, app)
     }
