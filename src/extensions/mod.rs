@@ -1,3 +1,8 @@
+mod container;
+
+#[allow(unreachable_pub)]
+pub use self::container::RelmContainerExt;
+
 use gtk::prelude::*;
 
 /// Additional methods for `gtk::builders::ApplicationBuilder`
