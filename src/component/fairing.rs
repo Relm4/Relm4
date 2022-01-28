@@ -35,7 +35,7 @@ pub struct Fairing2<W, I, O, F> {
     connected_receivers: Vec<F>,
 }
 
-impl<W, I: 'static, O: 'static, F: Fn(&mut Sender<I>, &O) + 'static> Fairing2<W, I, O, F> {
+impl<W, I: 'static, O: 'static, F: FnMut(&mut Sender<I>, &O) + 'static> Fairing2<W, I, O, F> {
     pub fn add_receiver(&mut self, func: F) {
         self.connected_receivers.push(func);
     }
@@ -46,14 +46,14 @@ impl<W, I: 'static, O: 'static, F: Fn(&mut Sender<I>, &O) + 'static> Fairing2<W,
             widget,
             sender,
             mut receiver,
-            connected_receivers,
+            mut connected_receivers,
         } = self;
 
         {
             let mut sender = sender.clone();
             crate::spawn_local(async move {
                 while let Some(event) = receiver.recv().await {
-                    for receiver in &connected_receivers {
+                    for receiver in &mut connected_receivers {
                         receiver(&mut sender, &event);
                     }
                 }
