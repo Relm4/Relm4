@@ -204,6 +204,7 @@ impl Component for SettingsListModel {
 
                         append: button = &gtk::Button {
                             set_label: button_label,
+                            set_size_group: &widgets.button_sg,
 
                             connect_clicked(output) => move |_| {
                                 let _ = output.send(SettingsListOutput::Clicked(id));
@@ -212,7 +213,6 @@ impl Component for SettingsListModel {
                     }
                 }
 
-                widgets.button_sg.add_widget(&button);
                 widgets.list.append(&widget);
                 widgets.options.push(widget);
             }
