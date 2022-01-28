@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT or Apache-2.0
 
 use super::{Component, Fairing, Fuselage, OnDestroy, StatefulComponent};
+use crate::RelmContainerExt;
 use std::marker::PhantomData;
 use tokio::sync::mpsc;
 
@@ -16,6 +17,13 @@ pub struct Bridge<Component, Root> {
 }
 
 impl<C: Component> Bridge<C, C::Root> {
+    /// Attach the component's root widget to a given container.
+    pub fn attach_to(self, container: &impl RelmContainerExt) -> Self {
+        container.container_add(self.root.as_ref());
+
+        self
+    }
+
     /// Starts the component, passing ownership to a future attached to a GLib context.
     pub fn launch(self, payload: C::Payload) -> Fairing<C::Root, C::Input, C::Output> {
         let Bridge { root, .. } = self;

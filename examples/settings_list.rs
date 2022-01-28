@@ -19,14 +19,13 @@ fn main() {
     gtk::builders::ApplicationBuilder::new()
         .application_id("org.relm4.SettingsListExample")
         .launch(|_app, window| {
-            let bridge = SettingsListModel::init();
-
-            window.set_child(Some(&bridge.root));
-
-            println!("parent is {:?}", bridge.root.toplevel_window());
-
-            bridge
+            // Intiialize a component's root widget
+            let component = SettingsListModel::init()
+                // Attach the root widget to the given window.
+                .attach_to(&window)
+                // Start the component service with an initial parameter
                 .launch("Settings List Demo".into())
+                // Attach the returned receiver's messages to this closure.
                 .connect_receiver(move |sender, message| match message {
                     SettingsListOutput::Clicked(id) => {
                         eprintln!("ID {id} Clicked");
@@ -63,6 +62,8 @@ fn main() {
                         });
                     }
                 });
+
+            println!("parent is {:?}", component.widget.toplevel_window());
         });
 }
 
