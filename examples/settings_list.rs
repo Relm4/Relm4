@@ -13,64 +13,53 @@
 //! component, which then issues to reload the widgets again.
 
 use gtk::prelude::*;
-use relm4::{gtk, CommandFuture, Component, Fuselage, Sender};
+use relm4::*;
 
 fn main() {
-    let app = gtk::builders::ApplicationBuilder::new()
+    gtk::builders::ApplicationBuilder::new()
         .application_id("org.relm4.SettingsListExample")
-        .build();
+        .launch(|_app, window| {
+            let component = SettingsListModel::init()
+                .launch("Settings List Demo".into())
+                .connect_receiver(move |sender, message| match message {
+                    SettingsListOutput::Clicked(id) => {
+                        eprintln!("ID {id} Clicked");
 
-    app.connect_activate(move |app| {
-        let component = SettingsListModel::init()
-            .launch("Settings List Demo".into())
-            .connect_receiver(move |sender, message| match message {
-                SettingsListOutput::Clicked(id) => {
-                    eprintln!("ID {id} Clicked");
-
-                    match id {
-                        0 => xdg_open("https://github.com/AaronErhardt/Relm4".into()),
-                        1 => xdg_open("https://aaronerhardt.github.io/docs/relm4/relm4/".into()),
-                        2 => {
-                            let _ = sender.send(SettingsListInput::Clear);
+                        match id {
+                            0 => xdg_open("https://github.com/AaronErhardt/Relm4".into()),
+                            1 => {
+                                xdg_open("https://aaronerhardt.github.io/docs/relm4/relm4/".into())
+                            }
+                            2 => {
+                                let _ = sender.send(SettingsListInput::Clear);
+                            }
+                            _ => (),
                         }
-                        _ => (),
                     }
-                }
 
-                SettingsListOutput::Reload => {
-                    let _ = sender.send(SettingsListInput::AddSetting {
-                        description: "Browse GitHub Repository".into(),
-                        button: "GitHub".into(),
-                        id: 0,
-                    });
+                    SettingsListOutput::Reload => {
+                        let _ = sender.send(SettingsListInput::AddSetting {
+                            description: "Browse GitHub Repository".into(),
+                            button: "GitHub".into(),
+                            id: 0,
+                        });
 
-                    let _ = sender.send(SettingsListInput::AddSetting {
-                        description: "Browse Documentation".into(),
-                        button: "Docs".into(),
-                        id: 1,
-                    });
+                        let _ = sender.send(SettingsListInput::AddSetting {
+                            description: "Browse Documentation".into(),
+                            button: "Docs".into(),
+                            id: 1,
+                        });
 
-                    let _ = sender.send(SettingsListInput::AddSetting {
-                        description: "Clear List".into(),
-                        button: "Clear".into(),
-                        id: 2,
-                    });
-                }
-            });
+                        let _ = sender.send(SettingsListInput::AddSetting {
+                            description: "Clear List".into(),
+                            button: "Clear".into(),
+                            id: 2,
+                        });
+                    }
+                });
 
-        relm4_macros::view! {
-            window = gtk::ApplicationWindow {
-                set_application: Some(app),
-                set_child = Some(&gtk::Box) {
-                    append: &component.widget,
-                }
-            }
-        }
-
-        window.show();
-    });
-
-    app.run();
+            window.set_child(Some(&component.widget));
+        });
 }
 
 #[derive(Default)]
@@ -120,7 +109,7 @@ impl Component for SettingsListModel {
     }
 
     fn dock(
-        title: String,
+        title: Self::Payload,
         root: &Self::Root,
         _input: &mut Sender<Self::Input>,
         output: &mut Sender<Self::Output>,
