@@ -181,9 +181,7 @@ impl Component for SettingsListModel {
         output: &mut Sender<Self::Output>,
     ) {
         if self.options.is_empty() && !widgets.options.is_empty() {
-            while let Some(child) = widgets.list.last_child() {
-                widgets.list.remove(&child);
-            }
+            widgets.list.remove_all();
         } else if self.options.len() != widgets.options.len() {
             if let Some((description, button_label, id)) = self.options.last() {
                 let id = *id;

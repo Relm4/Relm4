@@ -52,22 +52,77 @@ impl<T: gtk::glib::IsA<gtk::Widget>> RelmWidgetExt for T {
     }
 
     fn iter_children(&self) -> Box<dyn Iterator<Item = gtk::Widget>> {
-        let mut widget = self.first_child();
-
-        let iterator = std::iter::from_fn(move || {
-            if let Some(child) = widget.take() {
-                widget = child.next_sibling();
-                return Some(child);
-            }
-
-            None
-        });
-
-        Box::new(iterator)
+        Box::new(iter_children(self.as_ref()))
     }
 
     fn toplevel_window(&self) -> Option<gtk::Window> {
         self.ancestor(gtk::Window::static_type())
             .and_then(|widget| widget.dynamic_cast::<gtk::Window>().ok())
     }
+}
+
+/// Additional methods for `gtk::ListBox`.
+pub trait RelmListBoxExt {
+    /// Get the index of a widget attached to a listbox.
+    fn index_of_child(&self, widget: &impl AsRef<gtk::Widget>) -> Option<i32>;
+
+    /// Remove all children from listbox.
+    fn remove_all(&self);
+
+    /// Remove the row of a child attached a listbox.
+    fn remove_row_of_child(&self, widget: &impl AsRef<gtk::Widget>);
+
+    /// Get the row of a widget attached to a listbox.
+    fn row_of_child(&self, widget: &impl AsRef<gtk::Widget>) -> Option<gtk::ListBoxRow>;
+}
+
+impl RelmListBoxExt for gtk::ListBox {
+    fn index_of_child(&self, widget: &impl AsRef<gtk::Widget>) -> Option<i32> {
+        if let Some(row) = self.row_of_child(widget) {
+            return Some(row.index());
+        }
+
+        None
+    }
+
+    fn remove_all(&self) {
+        while let Some(child) = self.last_child() {
+            self.remove(&child);
+        }
+    }
+
+    fn remove_row_of_child(&self, widget: &impl AsRef<gtk::Widget>) {
+        if let Some(row) = self.row_of_child(widget) {
+            self.remove(&row);
+        }
+    }
+
+    fn row_of_child(&self, widget: &impl AsRef<gtk::Widget>) -> Option<gtk::ListBoxRow> {
+        if let Some(row) = widget.as_ref().ancestor(gtk::ListBoxRow::static_type()) {
+            if let Some(row) = row.dynamic_cast_ref::<gtk::ListBoxRow>() {
+                if let Some(parent_widget) = row.parent() {
+                    if let Some(parent_box) = parent_widget.dynamic_cast_ref::<gtk::ListBox>() {
+                        if parent_box == self {
+                            return Some(row.clone());
+                        }
+                    }
+                }
+            }
+        }
+
+        None
+    }
+}
+
+fn iter_children(widget: &gtk::Widget) -> impl Iterator<Item = gtk::Widget> {
+    let mut widget = widget.first_child();
+
+    std::iter::from_fn(move || {
+        if let Some(child) = widget.take() {
+            widget = child.next_sibling();
+            return Some(child);
+        }
+
+        None
+    })
 }
