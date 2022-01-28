@@ -105,8 +105,7 @@ pub(crate) fn generate_tokens(
     let token_streams::TokenStreams {
         struct_fields,
         init_widgets,
-        connect_widgets,
-        init_properties,
+        assign_properties,
         connect,
         return_fields,
         parent,
@@ -144,10 +143,9 @@ pub(crate) fn generate_tokens(
             /// Initialize the UI.
             fn init_view(model: &#model, components: &<#model as #relm4_path::Model>::Components, sender: #relm4_path::Sender<<#model as #relm4_path::Model>::Msg>) -> Self {
                 #pre_init
-                #init_widgets
-                #connect_widgets
                 #menus_stream
-                #init_properties
+                #init_widgets
+                #assign_properties
                 #connect
                 #connect_components
                 #post_init
