@@ -19,7 +19,13 @@ fn main() {
     gtk::builders::ApplicationBuilder::new()
         .application_id("org.relm4.SettingsListExample")
         .launch(|_app, window| {
-            let component = SettingsListModel::init()
+            let bridge = SettingsListModel::init();
+
+            window.set_child(Some(&bridge.root));
+
+            println!("parent is {:?}", bridge.root.toplevel_window());
+
+            bridge
                 .launch("Settings List Demo".into())
                 .connect_receiver(move |sender, message| match message {
                     SettingsListOutput::Clicked(id) => {
@@ -57,8 +63,6 @@ fn main() {
                         });
                     }
                 });
-
-            window.set_child(Some(&component.widget));
         });
 }
 

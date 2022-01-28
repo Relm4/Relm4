@@ -34,6 +34,11 @@ pub trait RelmWidgetExt {
 
     /// Iterates children of a widget with a closure.
     fn for_each_child<F: FnMut(gtk::Widget) + 'static>(&self, func: F);
+
+    /// Locate the top level window this widget is attached to.
+    ///
+    /// Equivalent to `widget.ancestor(gtk::Window::static_type())`, then casting.
+    fn toplevel_window(&self) -> Option<gtk::Window>;
 }
 
 impl<T: gtk::glib::IsA<gtk::Widget>> RelmWidgetExt for T {
@@ -59,5 +64,10 @@ impl<T: gtk::glib::IsA<gtk::Widget>> RelmWidgetExt for T {
         });
 
         Box::new(iterator)
+    }
+
+    fn toplevel_window(&self) -> Option<gtk::Window> {
+        self.ancestor(gtk::Window::static_type())
+            .and_then(|widget| widget.dynamic_cast::<gtk::Window>().ok())
     }
 }
