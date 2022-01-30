@@ -21,7 +21,7 @@ pub trait Component: Sized + 'static {
     type Payload;
 
     /// The widget that was constructed by the component.
-    type Root: Clone + OnDestroy + AsRef<gtk::Widget>;
+    type Root: Clone + OnDestroy;
 
     /// The type that's used for storing widgets created for this component.
     type Widgets: 'static;
