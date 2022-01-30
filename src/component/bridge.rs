@@ -16,6 +16,14 @@ pub struct Bridge<Component, Root> {
     pub(super) component: PhantomData<Component>,
 }
 
+impl<Component, Root> Bridge<Component, Root> {
+    /// Configure the root widget before launching.
+    pub fn preflight<F: FnOnce(&mut Root) + 'static>(mut self, func: F) -> Self {
+        func(&mut self.root);
+        self
+    }
+}
+
 impl<Component, Root: AsRef<gtk::Widget>> Bridge<Component, Root> {
     /// Attach the component's root widget to a given container.
     pub fn attach_to(self, container: &impl RelmContainerExt) -> Self {
