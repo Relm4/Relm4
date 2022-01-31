@@ -68,3 +68,32 @@ where
         self.remove(widget);
     }
 }
+
+impl<Widget> FactoryView<Widget> for adw::Leaflet
+where
+    Widget: glib::IsA<gtk::Widget>,
+{
+    type Position = ();
+    type Root = adw::LeafletPage;
+
+    fn add(&self, widget: &Widget, _position: &()) -> adw::LeafletPage {
+        self.append(widget)
+    }
+
+    fn remove(&self, widget: &adw::LeafletPage) {
+        self.remove(&widget.child());
+    }
+}
+
+impl<Widget> FactoryListView<Widget> for adw::Leaflet
+where
+    Widget: glib::IsA<gtk::Widget>,
+{
+    fn insert_after(&self, widget: &Widget, other: &adw::LeafletPage) -> adw::LeafletPage {
+        self.insert_child_after(widget, Some(&other.child()))
+    }
+
+    fn push_front(&self, widget: &Widget) -> adw::LeafletPage {
+        self.prepend(widget)
+    }
+}
