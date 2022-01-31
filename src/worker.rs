@@ -62,17 +62,72 @@ pub trait Worker: Sized + Send {
 }
 
 #[derive(Debug)]
+#[must_use = "Dropping without aborting or handling the receiver causes the worker to live forever."]
 /// Handle to a worker task in the background
 pub struct WorkerHandle<Input, Output> {
     /// Sends inputs to the worker.
     pub sender: Sender<Input>,
+
     /// Where the worker will send its outputs to.
     pub receiver: Receiver<Output>,
 
     worker: crate::JoinHandle<()>,
 }
 
-impl<Input, Output> Drop for WorkerHandle<Input, Output> {
+impl<Input: 'static, Output: 'static> WorkerHandle<Input, Output> {
+    /// Drops the handle and shuts down the service.
+    pub fn abort(self) {
+        self.worker.abort();
+    }
+
+    /// Given a mutable closure, captures the receiver for handling.
+    pub fn connect_receiver<F: FnMut(&mut Sender<Input>, Output) + 'static>(
+        self,
+        mut func: F,
+    ) -> WorkerController<Input> {
+        let WorkerHandle {
+            worker,
+            sender,
+            mut receiver,
+        } = self;
+
+        let mut sender_ = sender.clone();
+        crate::spawn_local(async move {
+            while let Some(event) = receiver.recv().await {
+                func(&mut sender_, event);
+            }
+        });
+
+        WorkerController { worker, sender }
+    }
+
+    /// Forwards output events to the designated sender.
+    pub fn forward<X: 'static, F: (Fn(Output) -> X) + 'static>(
+        self,
+        sender_: Sender<X>,
+        transform: F,
+    ) -> WorkerController<Input> {
+        let WorkerHandle {
+            sender,
+            receiver,
+            worker,
+        } = self;
+
+        crate::spawn_local(crate::forward(receiver, sender_, transform));
+        WorkerController { sender, worker }
+    }
+}
+
+/// Sends inputs to a worker. On drop, shuts down the worker.
+#[derive(Debug)]
+pub struct WorkerController<Input> {
+    /// Sends inputs to the worker.
+    pub sender: Sender<Input>,
+
+    worker: crate::JoinHandle<()>,
+}
+
+impl<Input> Drop for WorkerController<Input> {
     fn drop(&mut self) {
         self.worker.abort();
     }
