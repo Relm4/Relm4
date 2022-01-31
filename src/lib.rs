@@ -14,6 +14,7 @@
 )]
 
 pub mod actions;
+mod app;
 mod component;
 pub mod drawing;
 mod extensions;
@@ -24,6 +25,7 @@ mod worker;
 pub use self::component::*;
 pub use self::extensions::*;
 pub use self::worker::*;
+pub use app::RelmApp;
 pub use tokio::task::JoinHandle;
 pub use util::widget_plus::WidgetPlus;
 
