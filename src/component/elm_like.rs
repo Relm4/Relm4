@@ -46,20 +46,25 @@ pub trait Component: Sized + 'static {
     ) -> Fuselage<Self, Self::Widgets>;
 
     /// Processes inputs received by the component.
+    #[allow(unused)]
     fn update(
         &mut self,
         message: Self::Input,
         input: &mut Sender<Self::Input>,
         output: &mut Sender<Self::Output>,
-    ) -> Option<Self::Command>;
+    ) -> Option<Self::Command> {
+        None
+    }
 
     /// Updates the view after the model has been updated.
+    #[allow(unused)]
     fn update_view(
         &self,
         widgets: &mut Self::Widgets,
         input: &mut Sender<Self::Input>,
         output: &mut Sender<Self::Output>,
-    );
+    ) {
+    }
 
     /// A command to perform in a background thread.
     #[allow(unused)]
