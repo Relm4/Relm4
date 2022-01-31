@@ -4,6 +4,7 @@
 
 use super::{Component, Fairing, Fuselage, OnDestroy, StatefulComponent};
 use crate::RelmContainerExt;
+use futures::future::Either;
 use std::marker::PhantomData;
 use tokio::sync::mpsc;
 
@@ -44,34 +45,58 @@ impl<C: Component> Bridge<C, C::Root> {
         // Used by this component to send events to be handled externally by the caller.
         let (mut output_tx, output_rx) = mpsc::unbounded_channel::<C::Output>();
 
+        // Sends messages from commands executed from the background.
+        let (cmd_tx, mut cmd_rx) = mpsc::unbounded_channel::<C::CommandOutput>();
+
         // Constructs the initial model and view with the initial payload.
         let Fuselage {
             mut model,
             mut widgets,
         } = C::dock(payload, &root, &mut input_tx, &mut output_tx);
 
-        // The internal service which manages all input requests.
-        let mut input_ = input_tx.clone();
-
-        // Start the internal service.
+        // The main service receives `Self::Input` and `Self::CommandOutput` messages and applies
+        // them to the model and view.
+        let mut input_tx_ = input_tx.clone();
         let id = crate::spawn_local(async move {
-            while let Some(event) = input_rx.recv().await {
-                // Performs the model update, checking if the update requested a command.
-                // Runs that command asynchronously in the background using tokio.
-                if let Some(command) = model.update(event, &mut input_, &mut output_tx) {
-                    let input = input_.clone();
-                    crate::spawn(async move {
-                        C::command(command, input).await;
-                    });
-                }
+            loop {
+                let input_future = input_rx.recv();
+                let cmd_future = cmd_rx.recv();
 
-                model.update_view(&mut widgets, &mut input_, &mut output_tx);
+                futures::pin_mut!(input_future);
+                futures::pin_mut!(cmd_future);
+
+                match futures::future::select(input_future, cmd_future).await {
+                    // Performs the model update, checking if the update requested a command.
+                    // Runs that command asynchronously in the background using tokio.
+                    Either::Left((Some(message), _)) => {
+                        if let Some(command) = model.update(message, &mut input_tx_, &mut output_tx)
+                        {
+                            let input = cmd_tx.clone();
+                            crate::spawn(async move {
+                                if let Some(message) = C::command(command).await {
+                                    let _ = input.send(message);
+                                }
+                            });
+                        }
+
+                        model.update_view(&mut widgets, &mut input_tx_, &mut output_tx);
+                    }
+
+                    // Responds to outputs received by commands.
+                    Either::Right((Some(message), _)) => {
+                        model.update_cmd(message, &mut input_tx_, &mut output_tx);
+                        model.update_view(&mut widgets, &mut input_tx_, &mut output_tx);
+                    }
+
+                    _ => (),
+                }
             }
         });
 
         // When the root widget is destroyed, the spawned service will be removed.
         root.on_destroy(move || id.remove());
 
+        // Give back a type for controlling the component service.
         Fairing {
             widget: root,
             sender: input_tx,
@@ -91,25 +116,48 @@ impl<C: StatefulComponent> Bridge<C, C::Root> {
         // Used by this component to send events to be handled externally by the caller.
         let (mut output_tx, output_rx) = mpsc::unbounded_channel::<C::Output>();
 
+        // Sends messages from commands executed from the background.
+        let (cmd_tx, mut cmd_rx) = mpsc::unbounded_channel::<C::CommandOutput>();
+
         // Constructs the initial model and view with the initial payload.
         let Fuselage {
             mut model,
             mut widgets,
         } = C::dock(payload, &root, &mut input_tx, &mut output_tx);
 
-        // The internal service which manages all input requests.
-        let mut input_ = input_tx.clone();
+        // The main service receives `Self::Input` and `Self::CommandOutput` messages and applies
+        // them to the model and view.
+        let mut input_tx_ = input_tx.clone();
         let id = crate::spawn_local(async move {
-            while let Some(event) = input_rx.recv().await {
-                // Performs the model update, checking if the update requested a command.
-                // Runs that command asynchronously in the background using tokio.
-                if let Some(command) =
-                    model.update(&mut widgets, event, &mut input_, &mut output_tx)
-                {
-                    let input = input_.clone();
-                    crate::spawn(async move {
-                        C::command(command, input).await;
-                    });
+            loop {
+                let input_future = input_rx.recv();
+                let cmd_future = cmd_rx.recv();
+
+                futures::pin_mut!(input_future);
+                futures::pin_mut!(cmd_future);
+
+                match futures::future::select(input_future, cmd_future).await {
+                    // Performs the model update, checking if the update requested a command.
+                    // Runs that command asynchronously in the background using tokio.
+                    Either::Left((Some(message), _)) => {
+                        if let Some(command) =
+                            model.update(&mut widgets, message, &mut input_tx_, &mut output_tx)
+                        {
+                            let cmd_tx = cmd_tx.clone();
+                            crate::spawn(async move {
+                                if let Some(output) = C::command(command).await {
+                                    let _ = cmd_tx.send(output);
+                                }
+                            });
+                        }
+                    }
+
+                    // Responds to outputs received by commands.
+                    Either::Right((Some(message), _)) => {
+                        model.update_cmd(&mut widgets, message, &mut input_tx_, &mut output_tx);
+                    }
+
+                    _ => (),
                 }
             }
         });
@@ -117,6 +165,7 @@ impl<C: StatefulComponent> Bridge<C, C::Root> {
         // When the root widget is destroyed, the spawned service will be removed.
         root.on_destroy(move || id.remove());
 
+        // Give back a type for controlling the component service.
         Fairing {
             widget: root,
             sender: input_tx,

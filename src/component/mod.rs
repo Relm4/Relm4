@@ -23,7 +23,7 @@ use std::future::Future;
 use std::pin::Pin;
 
 /// A future returned by a component's command method.
-pub type CommandFuture = Pin<Box<dyn Future<Output = ()> + Send>>;
+pub type CommandFuture<T> = Pin<Box<dyn Future<Output = Option<T>> + Send>>;
 
 /// Contains the initial model and widgets being docked into a component.
 #[derive(Debug)]

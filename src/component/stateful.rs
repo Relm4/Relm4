@@ -11,8 +11,11 @@ pub trait StatefulComponent: Sized + 'static {
     /// Internal commands to perform
     type Command: 'static + Send;
 
+    /// Messages which are received from commands executing in the background.
+    type CommandOutput: 'static + Send;
+
     /// The message type that the component accepts as inputs.
-    type Input: 'static + Send;
+    type Input: 'static;
 
     /// The message type that the component provides as outputs.
     type Output: 'static;
@@ -57,9 +60,20 @@ pub trait StatefulComponent: Sized + 'static {
         None
     }
 
+    /// Defines how the component should respond to command updates.
+    #[allow(unused)]
+    fn update_cmd(
+        &mut self,
+        widgets: &mut Self::Widgets,
+        message: Self::CommandOutput,
+        input: &mut Sender<Self::Input>,
+        output: &mut Sender<Self::Output>,
+    ) {
+    }
+
     /// A command to perform in a background thread.
     #[allow(unused)]
-    fn command(message: Self::Command, input: Sender<Self::Input>) -> CommandFuture {
-        Box::pin(async move {})
+    fn command(message: Self::Command) -> CommandFuture<Self::CommandOutput> {
+        Box::pin(async move { None })
     }
 }
