@@ -6,6 +6,7 @@ mod bridge;
 mod controller;
 mod elm_like;
 mod fairing;
+mod state_watcher;
 mod stateful;
 
 #[allow(unreachable_pub)]
@@ -16,6 +17,8 @@ pub use self::controller::Controller;
 pub use self::elm_like::Component;
 #[allow(unreachable_pub)]
 pub use self::fairing::Fairing;
+#[allow(unreachable_pub)]
+pub use self::state_watcher::StateWatcher;
 #[allow(unreachable_pub)]
 pub use self::stateful::StatefulComponent;
 

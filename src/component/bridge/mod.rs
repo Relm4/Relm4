@@ -6,7 +6,6 @@ mod elm_like;
 mod stateful;
 
 use crate::RelmContainerExt;
-use futures::future::Either;
 use std::marker::PhantomData;
 use tokio::sync::mpsc;
 

@@ -71,6 +71,16 @@ pub trait StatefulComponent: Sized + 'static {
     ) {
     }
 
+    /// Called after a component's model has been updated externally.
+    #[allow(unused)]
+    fn update_notify(
+        &mut self,
+        widgets: &mut Self::Widgets,
+        input: &mut Sender<Self::Input>,
+        output: &mut Sender<Self::Output>,
+    ) {
+    }
+
     /// A command to perform in a background thread.
     #[allow(unused)]
     fn command(message: Self::Command) -> CommandFuture<Self::CommandOutput> {

@@ -2,46 +2,60 @@
 // Copyright 2022 System76 <info@system76.com>
 // SPDX-License-Identifier: MIT or Apache-2.0
 
-use super::Controller;
+use super::{Controller, StateWatcher};
 use crate::{Receiver, Sender};
+use std::rc::Rc;
 
 #[derive(Debug)]
 /// Contains the post-launch input sender and output receivers with the root widget.
 ///
 /// The receiver can be separated from the `Fairing` by choosing a method for handling it.
-pub struct Fairing<W, I, O> {
+pub struct Fairing<Component, Root, Widgets, Input, Output> {
+    /// The models and widgets maintained by the component.
+    pub state: Rc<StateWatcher<Component, Widgets>>,
+
     /// The widget that this component manages.
-    pub widget: W,
+    pub widget: Root,
 
     /// Used for emitting events to the component.
-    pub sender: Sender<I>,
+    pub sender: Sender<Input>,
 
     /// The outputs being received by the component.
-    pub receiver: Receiver<O>,
+    pub receiver: Receiver<Output>,
 }
 
-impl<W, I: 'static, O: 'static> Fairing<W, I, O> {
+impl<Component, Root, Widgets, Input: 'static, Output: 'static>
+    Fairing<Component, Root, Widgets, Input, Output>
+{
     /// Forwards output events to the designated sender.
-    pub fn forward<X: 'static, F: (Fn(O) -> X) + 'static>(
+    pub fn forward<X: 'static, F: (Fn(Output) -> X) + 'static>(
         self,
         sender_: Sender<X>,
         transform: F,
-    ) -> Controller<W, I> {
+    ) -> Controller<Component, Root, Widgets, Input> {
         let Fairing {
+            state,
             widget,
             sender,
             receiver,
         } = self;
+
         crate::spawn_local(crate::forward(receiver, sender_, transform));
-        Controller { widget, sender }
+
+        Controller {
+            state,
+            widget,
+            sender,
+        }
     }
 
     /// Given a mutable closure, captures the receiver for handling.
-    pub fn connect_receiver<F: FnMut(&mut Sender<I>, O) + 'static>(
+    pub fn connect_receiver<F: FnMut(&mut Sender<Input>, Output) + 'static>(
         self,
         mut func: F,
-    ) -> Controller<W, I> {
+    ) -> Controller<Component, Root, Widgets, Input> {
         let Fairing {
+            state,
             widget,
             sender,
             mut receiver,
@@ -54,12 +68,26 @@ impl<W, I: 'static, O: 'static> Fairing<W, I, O> {
             }
         });
 
-        Controller { widget, sender }
+        Controller {
+            state,
+            widget,
+            sender,
+        }
     }
 
     /// Ignore outputs from the component and take the handle.
-    pub fn detach(self) -> Controller<W, I> {
-        let Self { widget, sender, .. } = self;
-        Controller { widget, sender }
+    pub fn detach(self) -> Controller<Component, Root, Widgets, Input> {
+        let Self {
+            state,
+            widget,
+            sender,
+            ..
+        } = self;
+
+        Controller {
+            state,
+            widget,
+            sender,
+        }
     }
 }
