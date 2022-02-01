@@ -1,5 +1,5 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt};
-use relm4::{gtk, send, Component, Fuselage, RelmApp, Sender, WidgetPlus};
+use relm4::{gtk, send, Fuselage, RelmApp, Sender, SimpleComponent, WidgetPlus};
 
 struct AppModel {
     counter: u8,
@@ -19,7 +19,7 @@ struct AppWidgets {
     label: gtk::Label,
 }
 
-impl Component for AppModel {
+impl SimpleComponent for AppModel {
     type Widgets = AppWidgets;
     type Root = gtk::Window;
 
@@ -27,9 +27,6 @@ impl Component for AppModel {
 
     type Input = AppMsg;
     type Output = ();
-
-    type Command = ();
-    type CommandOutput = ();
 
     fn init_root() -> Self::Root {
         gtk::Window::builder()
@@ -85,7 +82,7 @@ impl Component for AppModel {
         msg: Self::Input,
         _input: &mut Sender<Self::Input>,
         _ouput: &mut Sender<Self::Output>,
-    ) -> Option<Self::Command> {
+    ) {
         match msg {
             AppMsg::Increment => {
                 self.counter = self.counter.wrapping_add(1);
@@ -94,7 +91,6 @@ impl Component for AppModel {
                 self.counter = self.counter.wrapping_sub(1);
             }
         }
-        None
     }
 
     /// Update the view to represent the updated model.

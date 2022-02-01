@@ -16,6 +16,8 @@ pub use self::controller::{ComponentController, Controller};
 #[allow(unreachable_pub)]
 pub use self::elm_like::Component;
 #[allow(unreachable_pub)]
+pub use self::elm_like::SimpleComponent;
+#[allow(unreachable_pub)]
 pub use self::fairing::Fairing;
 #[allow(unreachable_pub)]
 pub use self::state_watcher::StateWatcher;

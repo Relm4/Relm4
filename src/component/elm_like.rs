@@ -85,3 +85,110 @@ pub trait Component: Sized + 'static {
         Box::pin(async move { None })
     }
 }
+
+/// Elm-style variant of a Component with view updates separated from input updates
+pub trait SimpleComponent: Sized + 'static {
+    /// The message type that the component accepts as inputs.
+    type Input: 'static;
+
+    /// The message type that the component provides as outputs.
+    type Output: 'static;
+
+    /// The initial parameter(s) for launch.
+    type Payload;
+
+    /// The widget that was constructed by the component.
+    type Root: OnDestroy;
+
+    /// The type that's used for storing widgets created for this component.
+    type Widgets: 'static;
+
+    /// Initializes the root widget
+    fn init_root() -> Self::Root;
+
+    /// Initializes the root widget and prepares a `Bridge` for docking.
+    fn init() -> Bridge<Self, Self::Root> {
+        Bridge {
+            root: Self::init_root(),
+            component: PhantomData,
+        }
+    }
+
+    /// Creates the initial model and view, docking it into the component.
+    fn dock(
+        params: Self::Payload,
+        root: &Self::Root,
+        input: &mut Sender<Self::Input>,
+        output: &mut Sender<Self::Output>,
+    ) -> Fuselage<Self, Self::Widgets>;
+
+    /// Processes inputs received by the component.
+    #[allow(unused)]
+    fn update(
+        &mut self,
+        message: Self::Input,
+        input: &mut Sender<Self::Input>,
+        output: &mut Sender<Self::Output>,
+    ) {
+    }
+
+    /// Defines how the component should respond to command updates.
+    #[allow(unused)]
+    fn update_cmd(&mut self, input: &mut Sender<Self::Input>, output: &mut Sender<Self::Output>) {}
+
+    /// Updates the view after the model has been updated.
+    #[allow(unused)]
+    fn update_view(
+        &self,
+        widgets: &mut Self::Widgets,
+        input: &mut Sender<Self::Input>,
+        output: &mut Sender<Self::Output>,
+    ) {
+    }
+}
+
+impl<C> Component for C
+where
+    C: SimpleComponent,
+{
+    type Payload = C::Payload;
+    type Input = C::Input;
+    type Output = C::Output;
+    type Root = C::Root;
+    type Widgets = C::Widgets;
+
+    type Command = ();
+    type CommandOutput = ();
+
+    fn init_root() -> Self::Root {
+        C::init_root()
+    }
+
+    fn dock(
+        params: Self::Payload,
+        root: &Self::Root,
+        input: &mut Sender<Self::Input>,
+        output: &mut Sender<Self::Output>,
+    ) -> Fuselage<Self, Self::Widgets> {
+        C::dock(params, root, input, output)
+    }
+
+    fn update(
+        &mut self,
+        message: Self::Input,
+        input: &mut Sender<Self::Input>,
+        output: &mut Sender<Self::Output>,
+    ) -> Option<Self::Command> {
+        C::update(self, message, input, output);
+        None
+    }
+
+    fn update_view(
+        &self,
+        widgets: &mut Self::Widgets,
+        input: &mut Sender<Self::Input>,
+        output: &mut Sender<Self::Output>,
+    ) {
+        C::update_view(self, widgets, input, output)
+    }
+}
