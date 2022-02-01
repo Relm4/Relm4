@@ -3,20 +3,48 @@
 // SPDX-License-Identifier: MIT or Apache-2.0
 
 use crate::*;
+use std::rc::Rc;
+
+/// Shared behavior of component controller types.
+pub trait ComponentController<C: Component> {
+    /// Emits an input to the component.
+    fn emit(&mut self, event: C::Input) {
+        let _ = self.sender().send(event);
+    }
+
+    /// Provides access to the component's sender.
+    fn sender(&self) -> &Sender<C::Input>;
+
+    /// Provides access to the state of a component.
+    fn state(&self) -> &Rc<StateWatcher<C, C::Widgets>>;
+
+    /// The root widget of the component.
+    fn widget(&self) -> &C::Root;
+}
 
 #[derive(Debug)]
 /// Controls the component from afar.
-pub struct Controller<W, I> {
+pub struct Controller<Component, Root, Widgets, Input> {
+    /// The models and widgets maintained by the component.
+    pub(super) state: Rc<StateWatcher<Component, Widgets>>,
+
     /// The widget that this component manages.
-    pub widget: W,
+    pub(super) widget: Root,
 
     /// Used for emitting events to the component.
-    pub sender: Sender<I>,
+    pub(super) sender: Sender<Input>,
 }
 
-impl<W, I> Controller<W, I> {
-    /// Emits an input to the component.
-    pub fn emit(&self, event: I) {
-        let _ = self.sender.send(event);
+impl<C: Component> ComponentController<C> for Controller<C, C::Root, C::Widgets, C::Input> {
+    fn sender(&self) -> &Sender<C::Input> {
+        &self.sender
+    }
+
+    fn state(&self) -> &Rc<StateWatcher<C, C::Widgets>> {
+        &self.state
+    }
+
+    fn widget(&self) -> &C::Root {
+        &self.widget
     }
 }

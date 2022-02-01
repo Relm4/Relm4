@@ -63,7 +63,7 @@ fn main() {
                     }
                 });
 
-            println!("parent is {:?}", component.widget.toplevel_window());
+            println!("parent is {:?}", component.widget().toplevel_window());
         });
 }
 
@@ -97,8 +97,13 @@ pub enum SettingsListCommand {
     Reload,
 }
 
+pub enum SettingsListCmdOutput {
+    Reload,
+}
+
 impl Component for SettingsListModel {
     type Command = SettingsListCommand;
+    type CommandOutput = SettingsListCmdOutput;
     type Input = SettingsListInput;
     type Output = SettingsListOutput;
     type Payload = String;
@@ -175,6 +180,19 @@ impl Component for SettingsListModel {
         None
     }
 
+    fn update_cmd(
+        &mut self,
+        message: Self::CommandOutput,
+        _input: &mut Sender<Self::Input>,
+        output: &mut Sender<Self::Output>,
+    ) {
+        match message {
+            SettingsListCmdOutput::Reload => {
+                let _ = output.send(SettingsListOutput::Reload);
+            }
+        }
+    }
+
     fn update_view(
         &self,
         widgets: &mut Self::Widgets,
@@ -220,12 +238,12 @@ impl Component for SettingsListModel {
         }
     }
 
-    fn command(message: Self::Command, input: Sender<Self::Input>) -> CommandFuture {
+    fn command(message: Self::Command) -> CommandFuture<Self::CommandOutput> {
         Box::pin(async move {
             match message {
                 SettingsListCommand::Reload => {
                     tokio::time::sleep(std::time::Duration::from_secs(2)).await;
-                    let _ = input.send(SettingsListInput::Reload);
+                    Some(SettingsListCmdOutput::Reload)
                 }
             }
         })
