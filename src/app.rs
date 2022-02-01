@@ -1,6 +1,7 @@
-use gtk::prelude::{ApplicationExt, ApplicationExtManual, GtkApplicationExt, IsA};
+use gtk::prelude::{ApplicationExt, ApplicationExtManual, GtkApplicationExt, IsA, WidgetExt};
 
 use crate::component::Component;
+use crate::component::ComponentController;
 use crate::Bridge;
 
 /// An app that runs the main application.
@@ -15,7 +16,7 @@ pub struct RelmApp<C: Component> {
 
 impl<C: Component> RelmApp<C>
 where
-    C::Root: IsA<gtk::Window>,
+    C::Root: IsA<gtk::Window> + WidgetExt,
 {
     /// Create a Relm4 application.
     pub fn new(app_id: &str) -> Self {
@@ -24,7 +25,6 @@ where
         let app = gtk::Application::builder().application_id(app_id).build();
 
         let bridge = C::init();
-        app.add_window(&bridge.root);
 
         Self { bridge, app }
     }
@@ -36,9 +36,13 @@ where
     /// [`RelmApp::run_with_args`].
     pub fn run(self, payload: C::Payload) {
         let RelmApp { bridge, app } = self;
-        let _controller = bridge.launch(payload).detach();
+        let controller = bridge.launch(payload).detach();
+        let window = controller.widget().clone();
 
-        app.connect_activate(|_| {});
+        app.connect_activate(move |app| {
+            app.add_window(&window);
+            window.show();
+        });
 
         app.run_with_args::<&str>(&[]);
     }
@@ -50,9 +54,13 @@ where
         S: AsRef<str>,
     {
         let RelmApp { bridge, app } = self;
-        let _controller = bridge.launch(payload).detach();
+        let controller = bridge.launch(payload).detach();
+        let window = controller.widget().clone();
 
-        app.connect_activate(|_| {});
+        app.connect_activate(move |app| {
+            app.add_window(&window);
+            window.show();
+        });
 
         app.run_with_args(args);
     }
