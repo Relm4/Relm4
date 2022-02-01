@@ -12,16 +12,16 @@ use std::rc::Rc;
 /// The receiver can be separated from the `Fairing` by choosing a method for handling it.
 pub struct Fairing<Component, Root, Widgets, Input, Output> {
     /// The models and widgets maintained by the component.
-    pub state: Rc<StateWatcher<Component, Widgets>>,
+    pub(super) state: Rc<StateWatcher<Component, Widgets>>,
 
     /// The widget that this component manages.
-    pub widget: Root,
+    pub(super) widget: Root,
 
     /// Used for emitting events to the component.
-    pub sender: Sender<Input>,
+    pub(super) sender: Sender<Input>,
 
     /// The outputs being received by the component.
-    pub receiver: Receiver<Output>,
+    pub(super) receiver: Receiver<Output>,
 }
 
 impl<Component, Root, Widgets, Input: 'static, Output: 'static>

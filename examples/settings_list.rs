@@ -63,7 +63,7 @@ fn main() {
                     }
                 });
 
-            println!("parent is {:?}", component.widget.toplevel_window());
+            println!("parent is {:?}", component.widget().toplevel_window());
         });
 }
 

@@ -26,13 +26,13 @@ pub trait ComponentController<C: Component> {
 /// Controls the component from afar.
 pub struct Controller<Component, Root, Widgets, Input> {
     /// The models and widgets maintained by the component.
-    pub state: Rc<StateWatcher<Component, Widgets>>,
+    pub(super) state: Rc<StateWatcher<Component, Widgets>>,
 
     /// The widget that this component manages.
-    pub widget: Root,
+    pub(super) widget: Root,
 
     /// Used for emitting events to the component.
-    pub sender: Sender<Input>,
+    pub(super) sender: Sender<Input>,
 }
 
 impl<C: Component> ComponentController<C> for Controller<C, C::Root, C::Widgets, C::Input> {
