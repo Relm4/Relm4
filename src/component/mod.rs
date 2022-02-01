@@ -12,7 +12,7 @@ mod stateful;
 #[allow(unreachable_pub)]
 pub use self::bridge::Bridge;
 #[allow(unreachable_pub)]
-pub use self::controller::Controller;
+pub use self::controller::{ComponentController, Controller};
 #[allow(unreachable_pub)]
 pub use self::elm_like::Component;
 #[allow(unreachable_pub)]

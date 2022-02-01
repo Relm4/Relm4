@@ -2,7 +2,7 @@
 // Copyright 2022 System76 <info@system76.com>
 // SPDX-License-Identifier: MIT or Apache-2.0
 
-use super::{Controller, StateWatcher};
+use super::{Component, ComponentController, Controller, StateWatcher};
 use crate::{Receiver, Sender};
 use std::rc::Rc;
 
@@ -89,5 +89,19 @@ impl<Component, Root, Widgets, Input: 'static, Output: 'static>
             widget,
             sender,
         }
+    }
+}
+
+impl<C: Component> ComponentController<C> for Fairing<C, C::Root, C::Widgets, C::Input, C::Output> {
+    fn sender(&self) -> &Sender<C::Input> {
+        &self.sender
+    }
+
+    fn state(&self) -> &Rc<StateWatcher<C, C::Widgets>> {
+        &self.state
+    }
+
+    fn widget(&self) -> &C::Root {
+        &self.widget
     }
 }
