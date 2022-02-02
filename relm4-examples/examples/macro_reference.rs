@@ -181,7 +181,9 @@ impl Widgets<AppModel, ()> for AppWidgets {
             }
         }
 
-        let start_label = gtk::Label::builder().label("This should appear at the top").build();
+        let start_label = gtk::Label::builder()
+            .label("This should appear at the top")
+            .build();
     }
 
     fn post_init() {
@@ -205,5 +207,16 @@ fn main() {
         tracker: 0,
     };
     let app = RelmApp::new(model);
+
+    // Test macro ordering
+    relm4::view! {
+         mut vec = Vec::new() {
+             push: gtk::Label::new(Some("5")),
+             push = gtk::Label {
+                 set_label: "6",
+             }
+        }
+    }
+
     app.run();
 }
