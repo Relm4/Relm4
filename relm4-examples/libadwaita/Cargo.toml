@@ -8,3 +8,5 @@ edition = "2021"
 rand = "0.8.4"
 relm4 = { path = "../../", features = ["libadwaita", "macros"] }
 relm4-components = { path = "../../relm4-components" }
+# For Sudoku example
+sudoku = "0.7.0"
