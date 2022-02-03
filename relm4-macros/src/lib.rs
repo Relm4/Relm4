@@ -267,17 +267,15 @@ pub fn view(input: TokenStream) -> TokenStream {
     );
     let widget_macro::token_streams::TokenStreams {
         init_widgets,
-        connect_widgets,
-        init_properties,
+        assign_properties,
         connect,
         ..
     } = streams;
 
     let output = quote! {
         #init_widgets
-        #init_properties
+        #assign_properties
         #connect
-        #connect_widgets
     };
     output.into()
 }
