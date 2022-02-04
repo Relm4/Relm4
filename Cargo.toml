@@ -2,7 +2,7 @@
 name = "relm4"
 authors = ["Aaron Erhardt <aaron.erhardt@t-online.de>"]
 edition = "2021"
-version = "0.4.1"
+version = "0.4.2"
 description = "An idiomatic GUI library inspired by Elm and based on gtk4-rs"
 repository = "https://github.com/AaronErhardt/relm4"
 readme = "README.md"
@@ -29,7 +29,7 @@ gtk = { version = "0.4.1", package = "gtk4" }
 log = "0.4.14"
 once_cell = "1.8"
 
-#relm4-macros = { version = "0.4.1", optional = true }
+#relm4-macros = { version = "0.4.2", optional = true }
 relm4-macros = { path = "relm4-macros", optional = true }
 
 tokio = { version = "1.15", optional = true, features = ["rt"] }
