@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixed
+
++ relm4-macros: Parse whole expressions instead of just literals
+
 ## 0.4.2 - 2022-2-4 
 
 ### Added
