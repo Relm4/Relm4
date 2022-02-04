@@ -3,7 +3,7 @@ use syn::{
     parse::{Parse, ParseStream},
     parse_macro_input,
     spanned::Spanned,
-    token, Error, Expr, ExprMacro, Ident, Lit, Macro, Result, Token,
+    token, Error, Expr, ExprMacro, Ident, Macro, Result, Token,
 };
 
 use crate::widgets::{Property, PropertyName, PropertyType};
@@ -87,9 +87,7 @@ impl Parse for Property {
             let colon: Token! [:] = input.parse()?;
             let colon_span = colon.span();
 
-            if input.peek(Lit) {
-                input.parse().map(PropertyType::Value)?
-            } else if input.peek2(Token![!]) {
+            if input.peek2(Token![!]) {
                 let mac: Macro = input.parse()?;
                 let segs = &mac.path.segments;
 

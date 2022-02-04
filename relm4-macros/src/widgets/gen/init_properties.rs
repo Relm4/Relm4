@@ -8,7 +8,6 @@ impl PropertyType {
     fn init_assign_tokens(&self) -> Option<TokenStream2> {
         match self {
             PropertyType::Expr(expr) => Some(expr.to_token_stream()),
-            PropertyType::Value(lit) => Some(lit.to_token_stream()),
             PropertyType::Watch(tokens) => Some(tokens.to_token_stream()),
             PropertyType::Args(args) => Some(args.to_token_stream()),
             PropertyType::Track(Tracker {
