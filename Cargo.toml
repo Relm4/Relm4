@@ -40,3 +40,7 @@ libadwaita = ["adw"]
 tokio-rt = ["tokio", "async-trait"]
 macros = ["relm4-macros"]
 all = ["tokio-rt", "libadwaita", "macros"]
+
+[dev-dependencies]
+# Macros required to run tests.
+relm4-macros = { path = "relm4-macros" }

@@ -238,3 +238,198 @@ where
         self.data.iter()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use gtk;
+    use gtk::prelude::*;
+
+    enum TestMsg {}
+
+    #[derive(Debug, PartialEq, Eq)]
+    struct TestData(u8);
+
+    fn wrap(data: &[u8]) -> Vec<TestData> {
+        data.iter().map(|d| TestData(*d)).collect()
+    }
+
+    #[relm4_macros::factory_prototype(relm4 = crate)]
+    impl FactoryPrototype for TestData {
+        type Factory = FactoryVec<Self>;
+        type Widgets = FactoryWidgets;
+        type View = gtk::Box;
+        type Msg = TestMsg;
+        view! {
+            gtk::Label {
+                set_text: watch! { &self.0.to_string() },
+            }
+        }
+        fn position(&self, _index: &usize) {}
+    }
+
+    fn child_texts(view: &gtk::Box) -> Vec<String> {
+        view.children::<gtk::Label>()
+            .iter()
+            .map(|l| l.text().into())
+            .collect()
+    }
+
+    /// Trait for easier access to gtk::Box children.
+    trait BoxExt {
+        fn children<R: IsA<gtk::Widget>>(&self) -> Vec<R>;
+        fn len(&self) -> usize;
+    }
+    impl<T: IsA<gtk::Widget>> BoxExt for T {
+        fn children<R: IsA<gtk::Widget>>(&self) -> Vec<R> {
+            let mut children = vec![];
+            let mut next_child = self.first_child();
+            while let Some(child) = next_child {
+                next_child = child.next_sibling();
+                children.push(child.downcast().unwrap());
+            }
+            children
+        }
+        fn len(&self) -> usize {
+            self.children::<gtk::Widget>().len()
+        }
+    }
+
+    /// Returns a dummy sender.
+    fn sender<T>() -> gtk::glib::Sender<T> {
+        let (sender, _) = gtk::glib::MainContext::channel(Default::default());
+        sender
+    }
+
+    /// Mutable and immutable getter functions of FactoryVec.
+    const GET_FUNCS: [fn(&mut FactoryVec<TestData>, usize) -> Option<&TestData>; 2] =
+        [|v, i| v.get(i), |v, i| v.get_mut(i).map(|d| &*d)];
+
+    #[test]
+    fn simple_changes() {
+        gtk::init().unwrap();
+        let view = gtk::Box::new(gtk::Orientation::Horizontal, 0);
+
+        let mut vec = FactoryVec::new();
+        assert_eq!(vec.len(), view.len());
+        assert_eq!(vec.len(), 0);
+        assert_eq!(vec.pop(), None);
+        vec.push(TestData(13));
+        vec.generate(&view, sender());
+        assert_eq!(vec.len(), view.len());
+        assert_eq!(vec.len(), 1);
+        vec.push(TestData(47));
+        vec.push(TestData(48));
+        vec.generate(&view, sender());
+        assert_eq!(vec.len(), view.len());
+        assert_eq!(vec.len(), 3);
+        let el = vec.pop();
+        vec.generate(&view, sender());
+        assert_eq!(el, Some(TestData(48)));
+        assert_eq!(vec.len(), view.len());
+        assert_eq!(vec.len(), 2);
+        vec.clear();
+        vec.generate(&view, sender());
+        assert_eq!(vec.len(), view.len());
+        assert_eq!(vec.len(), 0);
+        assert_eq!(vec.pop(), None);
+        vec.clear();
+        vec.generate(&view, sender());
+        assert_eq!(vec.len(), view.len());
+        assert_eq!(vec.len(), 0);
+    }
+
+    #[test]
+    fn data_consistent() {
+        for get in GET_FUNCS {
+            let vec = &mut FactoryVec::new();
+            vec.push(TestData(128));
+            assert_eq!(get(vec, 0), Some(&TestData(128)));
+            assert_eq!(get(vec, 1), None);
+            vec.push(TestData(222));
+            vec.push(TestData(223));
+            assert_eq!(get(vec, 0), Some(&TestData(128)));
+            assert_eq!(get(vec, 1), Some(&TestData(222)));
+            assert_eq!(get(vec, 2), Some(&TestData(223)));
+            assert_eq!(get(vec, 3), None);
+            vec.pop();
+            vec.get_mut(0).unwrap().0 = 13;
+            assert_eq!(get(vec, 0), Some(&TestData(13)));
+            assert_eq!(get(vec, 1), Some(&TestData(222)));
+            assert_eq!(get(vec, 2), None);
+            assert_eq!(get(vec, 3), None);
+            vec.clear();
+            assert_eq!(get(vec, 0), None);
+            assert_eq!(get(vec, 1), None);
+            assert_eq!(get(vec, 2), None);
+            assert_eq!(get(vec, 3), None);
+        }
+    }
+
+    #[test]
+    fn unrealized_replace() {
+        gtk::init().unwrap();
+        let initial_data = [vec![], vec![1], vec![1, 2, 3]];
+        let control_data = [vec![], vec![5], vec![5, 7], vec![5, 7, 9]];
+
+        let xs = initial_data.iter();
+        let ys = control_data.iter();
+        let test_cases = ys.flat_map(|y| xs.clone().map(move |x| (x, y)));
+
+        for (initial, control) in test_cases {
+            let view = gtk::Box::new(gtk::Orientation::Horizontal, 0);
+            let control_strs = control.iter().map(u8::to_string).collect::<Vec<_>>();
+
+            let mut vec = FactoryVec::from_vec(wrap(initial));
+            vec.generate(&view, sender());
+            vec.clear();
+            for data in control {
+                vec.push(TestData(*data));
+            }
+            vec.generate(&view, sender());
+            assert_eq!(child_texts(&view), control_strs);
+        }
+    }
+
+    #[test]
+    fn all_state_transitions() {
+        gtk::init().unwrap();
+        let view = gtk::Box::new(gtk::Orientation::Horizontal, 0);
+
+        let mut vec = FactoryVec::new();
+        // NoneO → Add
+        vec.push(TestData(13));
+        // Add → NoneO
+        vec.pop();
+        vec.push(TestData(2));
+        vec.push(TestData(23));
+        vec.generate(&view, sender());
+        // NoneX → Update
+        vec.get_mut(0).unwrap();
+        // NoneX → Remove
+        vec.pop().unwrap();
+        // Update → Remove
+        vec.pop().unwrap();
+        // Remove → Recreate
+        vec.push(TestData(7));
+        // Recreate → Remove
+        vec.pop().unwrap();
+        vec.generate(&view, sender());
+    }
+
+    #[test]
+    fn all_states_generated() {
+        gtk::init().unwrap();
+        let view = gtk::Box::new(gtk::Orientation::Horizontal, 0);
+
+        let mut vec = FactoryVec::from_vec(wrap(&[0, 1, 2, 3])); // Add, None0
+        vec.generate(&view, sender());
+        // 0: NoneX
+        vec.get_mut(1).unwrap().0 = 33; // 1: Update
+        vec.pop(); // 3: Remove
+        vec.pop();
+        vec.push(TestData(66)); // 2. Recreate
+        vec.generate(&view, sender());
+        assert_eq!(child_texts(&view), ["0", "33", "66"]);
+    }
+}
