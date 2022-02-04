@@ -242,6 +242,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::test_synced;
     use gtk;
     use gtk::prelude::*;
 
@@ -307,36 +308,37 @@ mod tests {
 
     #[test]
     fn simple_changes() {
-        gtk::init().unwrap();
-        let view = gtk::Box::new(gtk::Orientation::Horizontal, 0);
+        test_synced(move || {
+            let view = gtk::Box::new(gtk::Orientation::Horizontal, 0);
 
-        let mut vec = FactoryVec::new();
-        assert_eq!(vec.len(), view.len());
-        assert_eq!(vec.len(), 0);
-        assert_eq!(vec.pop(), None);
-        vec.push(TestData(13));
-        vec.generate(&view, sender());
-        assert_eq!(vec.len(), view.len());
-        assert_eq!(vec.len(), 1);
-        vec.push(TestData(47));
-        vec.push(TestData(48));
-        vec.generate(&view, sender());
-        assert_eq!(vec.len(), view.len());
-        assert_eq!(vec.len(), 3);
-        let el = vec.pop();
-        vec.generate(&view, sender());
-        assert_eq!(el, Some(TestData(48)));
-        assert_eq!(vec.len(), view.len());
-        assert_eq!(vec.len(), 2);
-        vec.clear();
-        vec.generate(&view, sender());
-        assert_eq!(vec.len(), view.len());
-        assert_eq!(vec.len(), 0);
-        assert_eq!(vec.pop(), None);
-        vec.clear();
-        vec.generate(&view, sender());
-        assert_eq!(vec.len(), view.len());
-        assert_eq!(vec.len(), 0);
+            let mut vec = FactoryVec::new();
+            assert_eq!(vec.len(), view.len());
+            assert_eq!(vec.len(), 0);
+            assert_eq!(vec.pop(), None);
+            vec.push(TestData(13));
+            vec.generate(&view, sender());
+            assert_eq!(vec.len(), view.len());
+            assert_eq!(vec.len(), 1);
+            vec.push(TestData(47));
+            vec.push(TestData(48));
+            vec.generate(&view, sender());
+            assert_eq!(vec.len(), view.len());
+            assert_eq!(vec.len(), 3);
+            let el = vec.pop();
+            vec.generate(&view, sender());
+            assert_eq!(el, Some(TestData(48)));
+            assert_eq!(vec.len(), view.len());
+            assert_eq!(vec.len(), 2);
+            vec.clear();
+            vec.generate(&view, sender());
+            assert_eq!(vec.len(), view.len());
+            assert_eq!(vec.len(), 0);
+            assert_eq!(vec.pop(), None);
+            vec.clear();
+            vec.generate(&view, sender());
+            assert_eq!(vec.len(), view.len());
+            assert_eq!(vec.len(), 0);
+        });
     }
 
     #[test]
@@ -368,68 +370,71 @@ mod tests {
 
     #[test]
     fn unrealized_replace() {
-        gtk::init().unwrap();
-        let initial_data = [vec![], vec![1], vec![1, 2, 3]];
-        let control_data = [vec![], vec![5], vec![5, 7], vec![5, 7, 9]];
+        test_synced(move || {
+            let initial_data = [vec![], vec![1], vec![1, 2, 3]];
+            let control_data = [vec![], vec![5], vec![5, 7], vec![5, 7, 9]];
 
-        let xs = initial_data.iter();
-        let ys = control_data.iter();
-        let test_cases = ys.flat_map(|y| xs.clone().map(move |x| (x, y)));
+            let xs = initial_data.iter();
+            let ys = control_data.iter();
+            let test_cases = ys.flat_map(|y| xs.clone().map(move |x| (x, y)));
 
-        for (initial, control) in test_cases {
-            let view = gtk::Box::new(gtk::Orientation::Horizontal, 0);
-            let control_strs = control.iter().map(u8::to_string).collect::<Vec<_>>();
+            for (initial, control) in test_cases {
+                let view = gtk::Box::new(gtk::Orientation::Horizontal, 0);
+                let control_strs = control.iter().map(u8::to_string).collect::<Vec<_>>();
 
-            let mut vec = FactoryVec::from_vec(wrap(initial));
-            vec.generate(&view, sender());
-            vec.clear();
-            for data in control {
-                vec.push(TestData(*data));
+                let mut vec = FactoryVec::from_vec(wrap(initial));
+                vec.generate(&view, sender());
+                vec.clear();
+                for data in control {
+                    vec.push(TestData(*data));
+                }
+                vec.generate(&view, sender());
+                assert_eq!(child_texts(&view), control_strs);
             }
-            vec.generate(&view, sender());
-            assert_eq!(child_texts(&view), control_strs);
-        }
+        });
     }
 
     #[test]
     fn all_state_transitions() {
-        gtk::init().unwrap();
-        let view = gtk::Box::new(gtk::Orientation::Horizontal, 0);
+        test_synced(move || {
+            let view = gtk::Box::new(gtk::Orientation::Horizontal, 0);
 
-        let mut vec = FactoryVec::new();
-        // NoneO → Add
-        vec.push(TestData(13));
-        // Add → NoneO
-        vec.pop();
-        vec.push(TestData(2));
-        vec.push(TestData(23));
-        vec.generate(&view, sender());
-        // NoneX → Update
-        vec.get_mut(0).unwrap();
-        // NoneX → Remove
-        vec.pop().unwrap();
-        // Update → Remove
-        vec.pop().unwrap();
-        // Remove → Recreate
-        vec.push(TestData(7));
-        // Recreate → Remove
-        vec.pop().unwrap();
-        vec.generate(&view, sender());
+            let mut vec = FactoryVec::new();
+            // NoneO → Add
+            vec.push(TestData(13));
+            // Add → NoneO
+            vec.pop();
+            vec.push(TestData(2));
+            vec.push(TestData(23));
+            vec.generate(&view, sender());
+            // NoneX → Update
+            vec.get_mut(0).unwrap();
+            // NoneX → Remove
+            vec.pop().unwrap();
+            // Update → Remove
+            vec.pop().unwrap();
+            // Remove → Recreate
+            vec.push(TestData(7));
+            // Recreate → Remove
+            vec.pop().unwrap();
+            vec.generate(&view, sender());
+        });
     }
 
     #[test]
     fn all_states_generated() {
-        gtk::init().unwrap();
-        let view = gtk::Box::new(gtk::Orientation::Horizontal, 0);
+        test_synced(move || {
+            let view = gtk::Box::new(gtk::Orientation::Horizontal, 0);
 
-        let mut vec = FactoryVec::from_vec(wrap(&[0, 1, 2, 3])); // Add, None0
-        vec.generate(&view, sender());
-        // 0: NoneX
-        vec.get_mut(1).unwrap().0 = 33; // 1: Update
-        vec.pop(); // 3: Remove
-        vec.pop();
-        vec.push(TestData(66)); // 2. Recreate
-        vec.generate(&view, sender());
-        assert_eq!(child_texts(&view), ["0", "33", "66"]);
+            let mut vec = FactoryVec::from_vec(wrap(&[0, 1, 2, 3])); // Add, None0
+            vec.generate(&view, sender());
+            // 0: NoneX
+            vec.get_mut(1).unwrap().0 = 33; // 1: Update
+            vec.pop(); // 3: Remove
+            vec.pop();
+            vec.push(TestData(66)); // 2. Recreate
+            vec.generate(&view, sender());
+            assert_eq!(child_texts(&view), ["0", "33", "66"]);
+        });
     }
 }

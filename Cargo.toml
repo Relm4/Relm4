@@ -42,5 +42,7 @@ macros = ["relm4-macros"]
 all = ["tokio-rt", "libadwaita", "macros"]
 
 [dev-dependencies]
+futures-channel = "0.3"
+futures-executor = "0.3"
 # Macros required to run tests.
 relm4-macros = { path = "relm4-macros" }
