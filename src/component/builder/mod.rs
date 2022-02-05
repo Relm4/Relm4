@@ -11,24 +11,24 @@ use tokio::sync::mpsc;
 
 /// A component that is ready for docking and launch.
 #[derive(Debug)]
-pub struct Bridge<Component, Root> {
+pub struct ComponentBuilder<Component, Root> {
     /// The root widget of the component.
     pub root: Root,
 
     pub(super) component: PhantomData<Component>,
 }
 
-impl<Component, Root> Bridge<Component, Root> {
+impl<Component, Root> ComponentBuilder<Component, Root> {
     /// Configure the root widget before launching.
-    pub fn preflight<F: FnOnce(&mut Root) + 'static>(mut self, func: F) -> Self {
+    pub fn update_root<F: FnOnce(&mut Root) + 'static>(mut self, func: F) -> Self {
         func(&mut self.root);
         self
     }
 }
 
-impl<Component, Root: AsRef<gtk::Widget>> Bridge<Component, Root> {
+impl<Component, Root: AsRef<gtk::Widget>> ComponentBuilder<Component, Root> {
     /// Attach the component's root widget to a given container.
-    pub fn attach_to(self, container: &impl RelmContainerExt) -> Self {
+    pub fn attach_root(self, container: &impl RelmContainerExt) -> Self {
         container.container_add(self.root.as_ref());
 
         self

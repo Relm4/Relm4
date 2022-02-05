@@ -22,7 +22,7 @@ fn main() {
             // Intiialize a component's root widget
             let component = SettingsListModel::init()
                 // Attach the root widget to the given window.
-                .attach_to(&window)
+                .attach_root(&window)
                 // Start the component service with an initial parameter
                 .launch("Settings List Demo".into())
                 // Attach the returned receiver's messages to this closure.
@@ -118,12 +118,12 @@ impl Component for SettingsListModel {
             .build()
     }
 
-    fn dock(
+    fn init_parts(
         title: Self::Payload,
         root: &Self::Root,
         _input: &mut Sender<Self::Input>,
         output: &mut Sender<Self::Output>,
-    ) -> Fuselage<Self, Self::Widgets> {
+    ) -> ComponentParts<Self, Self::Widgets> {
         // Request the caller to reload its options.
         let _ = output.send(SettingsListOutput::Reload);
 
@@ -142,7 +142,7 @@ impl Component for SettingsListModel {
         root.append(&label);
         root.append(&list);
 
-        Fuselage {
+        ComponentParts {
             model: SettingsListModel::default(),
             widgets: SettingsListWidgets {
                 list,

@@ -1,5 +1,5 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt};
-use relm4::{gtk, send, Fuselage, RelmApp, Sender, SimpleComponent, WidgetPlus};
+use relm4::{gtk, send, ComponentParts, RelmApp, Sender, SimpleComponent, WidgetPlus};
 
 struct AppModel {
     counter: u8,
@@ -37,12 +37,12 @@ impl SimpleComponent for AppModel {
     }
 
     /// Initialize the UI.
-    fn dock(
+    fn init_parts(
         counter: Self::Payload,
         window: &Self::Root,
         input: &mut Sender<Self::Input>,
         _output: &mut Sender<Self::Output>,
-    ) -> Fuselage<Self, Self::Widgets> {
+    ) -> ComponentParts<Self, Self::Widgets> {
         let model = AppModel { counter };
 
         let vbox = gtk::Box::builder()
@@ -74,7 +74,7 @@ impl SimpleComponent for AppModel {
 
         let widgets = AppWidgets { label };
 
-        Fuselage { model, widgets }
+        ComponentParts { model, widgets }
     }
 
     fn update(

@@ -2,12 +2,12 @@ use gtk::prelude::{ApplicationExt, ApplicationExtManual, GtkApplicationExt, IsA,
 
 use crate::component::Component;
 use crate::component::ComponentController;
-use crate::Bridge;
+use crate::ComponentBuilder;
 
 /// An app that runs the main application.
 #[derive(Debug)]
 pub struct RelmApp<C: Component> {
-    bridge: Bridge<C, C::Root>,
+    bridge: ComponentBuilder<C, C::Root>,
 
     /// The [`gtk::Application`] that's used internally to setup
     /// and run the application.

@@ -33,20 +33,20 @@ pub trait Component: Sized + 'static {
     fn init_root() -> Self::Root;
 
     /// Initializes the root widget and prepares a `Bridge` for docking.
-    fn init() -> Bridge<Self, Self::Root> {
-        Bridge {
+    fn init() -> ComponentBuilder<Self, Self::Root> {
+        ComponentBuilder {
             root: Self::init_root(),
             component: PhantomData,
         }
     }
 
     /// Creates the initial model and view, docking it into the component.
-    fn dock(
+    fn init_parts(
         params: Self::Payload,
         root: &Self::Root,
         input: &mut Sender<Self::Input>,
         output: &mut Sender<Self::Output>,
-    ) -> Fuselage<Self, Self::Widgets>;
+    ) -> ComponentParts<Self, Self::Widgets>;
 
     /// Processes inputs received by the component.
     #[allow(unused)]
@@ -107,20 +107,20 @@ pub trait SimpleComponent: Sized + 'static {
     fn init_root() -> Self::Root;
 
     /// Initializes the root widget and prepares a `Bridge` for docking.
-    fn init() -> Bridge<Self, Self::Root> {
-        Bridge {
+    fn init() -> ComponentBuilder<Self, Self::Root> {
+        ComponentBuilder {
             root: Self::init_root(),
             component: PhantomData,
         }
     }
 
     /// Creates the initial model and view, docking it into the component.
-    fn dock(
+    fn init_parts(
         params: Self::Payload,
         root: &Self::Root,
         input: &mut Sender<Self::Input>,
         output: &mut Sender<Self::Output>,
-    ) -> Fuselage<Self, Self::Widgets>;
+    ) -> ComponentParts<Self, Self::Widgets>;
 
     /// Processes inputs received by the component.
     #[allow(unused)]
@@ -164,13 +164,13 @@ where
         C::init_root()
     }
 
-    fn dock(
+    fn init_parts(
         params: Self::Payload,
         root: &Self::Root,
         input: &mut Sender<Self::Input>,
         output: &mut Sender<Self::Output>,
-    ) -> Fuselage<Self, Self::Widgets> {
-        C::dock(params, root, input, output)
+    ) -> ComponentParts<Self, Self::Widgets> {
+        C::init_parts(params, root, input, output)
     }
 
     fn update(
