@@ -1,7 +1,13 @@
 mod container;
+mod removable;
+mod set_child;
 
 #[allow(unreachable_pub)]
 pub use self::container::RelmContainerExt;
+#[allow(unreachable_pub)]
+pub use self::removable::RelmRemovableExt;
+#[allow(unreachable_pub)]
+pub use self::set_child::RelmSetChildExt;
 
 use gtk::prelude::*;
 
