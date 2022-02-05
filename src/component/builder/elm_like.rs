@@ -37,7 +37,7 @@ impl<C: Component> ComponentBuilder<C, C::Root> {
         // The main service receives `Self::Input` and `Self::CommandOutput` messages and applies
         // them to the model and view.
         let mut input_tx_ = input_tx.clone();
-        let fuselage_ = watcher.clone();
+        let watcher_ = watcher.clone();
         let id = crate::spawn_local(async move {
             loop {
                 let notifier = notifier.notified().fuse();
@@ -56,7 +56,7 @@ impl<C: Component> ComponentBuilder<C, C::Root> {
                             let &mut ComponentParts {
                                 ref mut model,
                                 ref mut widgets,
-                            } = &mut *fuselage_.state.borrow_mut();
+                            } = &mut *watcher_.state.borrow_mut();
 
                             if let Some(command) = model.update(message, &mut input_tx_, &mut output_tx)
                             {
@@ -78,7 +78,7 @@ impl<C: Component> ComponentBuilder<C, C::Root> {
                             let &mut ComponentParts {
                                 ref mut model,
                                 ref mut widgets,
-                            } = &mut *fuselage_.state.borrow_mut();
+                            } = &mut *watcher_.state.borrow_mut();
 
                             model.update_cmd(message, &mut input_tx_, &mut output_tx);
                             model.update_view(widgets, &mut input_tx_, &mut output_tx);
@@ -90,7 +90,7 @@ impl<C: Component> ComponentBuilder<C, C::Root> {
                         let &mut ComponentParts {
                             ref mut model,
                             ref mut widgets,
-                        } = &mut *fuselage_.state.borrow_mut();
+                        } = &mut *watcher_.state.borrow_mut();
 
                         model.update_view(widgets, &mut input_tx_, &mut output_tx);
                     }
