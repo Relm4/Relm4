@@ -21,7 +21,7 @@ pub trait Component: Sized + 'static {
     type Output: 'static;
 
     /// The initial parameter(s) for launch.
-    type Payload;
+    type InitParams;
 
     /// The widget that was constructed by the component.
     type Root: OnDestroy;
@@ -42,7 +42,7 @@ pub trait Component: Sized + 'static {
 
     /// Creates the initial model and view, docking it into the component.
     fn init_parts(
-        params: Self::Payload,
+        params: Self::InitParams,
         root: &Self::Root,
         input: &mut Sender<Self::Input>,
         output: &mut Sender<Self::Output>,
@@ -95,7 +95,7 @@ pub trait SimpleComponent: Sized + 'static {
     type Output: 'static;
 
     /// The initial parameter(s) for launch.
-    type Payload;
+    type InitParams;
 
     /// The widget that was constructed by the component.
     type Root: OnDestroy;
@@ -116,7 +116,7 @@ pub trait SimpleComponent: Sized + 'static {
 
     /// Creates the initial model and view, docking it into the component.
     fn init_parts(
-        params: Self::Payload,
+        params: Self::InitParams,
         root: &Self::Root,
         input: &mut Sender<Self::Input>,
         output: &mut Sender<Self::Output>,
@@ -151,7 +151,7 @@ impl<C> Component for C
 where
     C: SimpleComponent,
 {
-    type Payload = C::Payload;
+    type InitParams = C::InitParams;
     type Input = C::Input;
     type Output = C::Output;
     type Root = C::Root;
@@ -165,7 +165,7 @@ where
     }
 
     fn init_parts(
-        params: Self::Payload,
+        params: Self::InitParams,
         root: &Self::Root,
         input: &mut Sender<Self::Input>,
         output: &mut Sender<Self::Output>,

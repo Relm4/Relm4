@@ -21,7 +21,7 @@ pub trait StatefulComponent: Sized + 'static {
     type Output: 'static;
 
     /// The initial parameter(s) for launch.
-    type Payload;
+    type InitParams;
 
     /// The widget that was constructed by the component.
     type Root: OnDestroy;
@@ -42,7 +42,7 @@ pub trait StatefulComponent: Sized + 'static {
 
     /// Creates the initial model and view, docking it into the component.
     fn init_parts(
-        params: Self::Payload,
+        params: Self::InitParams,
         root: &Self::Root,
         input: &mut Sender<Self::Input>,
         output: &mut Sender<Self::Output>,

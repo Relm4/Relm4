@@ -23,7 +23,7 @@ impl SimpleComponent for AppModel {
     type Widgets = AppWidgets;
     type Root = gtk::Window;
 
-    type Payload = u8;
+    type InitParams = u8;
 
     type Input = AppMsg;
     type Output = ();
@@ -38,7 +38,7 @@ impl SimpleComponent for AppModel {
 
     /// Initialize the UI.
     fn init_parts(
-        counter: Self::Payload,
+        counter: Self::InitParams,
         window: &Self::Root,
         input: &mut Sender<Self::Input>,
         _output: &mut Sender<Self::Output>,

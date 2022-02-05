@@ -106,7 +106,7 @@ impl Component for SettingsListModel {
     type CommandOutput = SettingsListCmdOutput;
     type Input = SettingsListInput;
     type Output = SettingsListOutput;
-    type Payload = String;
+    type InitParams = String;
     type Root = gtk::Box;
     type Widgets = SettingsListWidgets;
 
@@ -119,7 +119,7 @@ impl Component for SettingsListModel {
     }
 
     fn init_parts(
-        title: Self::Payload,
+        title: Self::InitParams,
         root: &Self::Root,
         _input: &mut Sender<Self::Input>,
         output: &mut Sender<Self::Output>,

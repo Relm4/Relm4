@@ -12,7 +12,7 @@ impl<C: StatefulComponent> ComponentBuilder<C, C::Root> {
     /// Starts the component, passing ownership to a future attached to a GLib context.
     pub fn launch_stateful(
         self,
-        payload: C::Payload,
+        payload: C::InitParams,
     ) -> Connector<C, C::Root, C::Widgets, C::Input, C::Output> {
         let ComponentBuilder { root, .. } = self;
 
