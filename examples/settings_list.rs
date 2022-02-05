@@ -22,7 +22,7 @@ fn main() {
             // Intiialize a component's root widget
             let component = SettingsListModel::init()
                 // Attach the root widget to the given window.
-                .attach_root(&window)
+                .attach_to(&window)
                 // Start the component service with an initial parameter
                 .launch("Settings List Demo".into())
                 // Attach the returned receiver's messages to this closure.

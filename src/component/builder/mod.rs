@@ -28,7 +28,7 @@ impl<Component, Root> ComponentBuilder<Component, Root> {
 
 impl<Component, Root: AsRef<gtk::Widget>> ComponentBuilder<Component, Root> {
     /// Attach the component's root widget to a given container.
-    pub fn attach_root(self, container: &impl RelmContainerExt) -> Self {
+    pub fn attach_to(self, container: &impl RelmContainerExt) -> Self {
         container.container_add(self.root.as_ref());
 
         self
