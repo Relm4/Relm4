@@ -26,8 +26,8 @@ pub trait WidgetPlus {
 
     /// Try to remove a widget from a widget.
     ///
-    /// Returns [`true`] if the removal was successful and
-    /// [`false`] if nothing was done.
+    /// Returns [`true`] if the removal is supported on the type of widget.
+    /// **This doesn't mean that the widget was actually removed.**
     fn try_remove(&self, widget: &impl IsA<Widget>) -> bool;
 }
 

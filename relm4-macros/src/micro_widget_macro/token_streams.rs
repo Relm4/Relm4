@@ -9,10 +9,10 @@ pub(super) struct TokenStreams {
     pub struct_fields: TokenStream2,
     /// The tokens initializing the widgets.
     pub init_widgets: TokenStream2,
+    /// The tokens initializing the properties.
+    pub assign_properties: TokenStream2,
     /// The tokens connecting widgets.
     pub connect_widgets: TokenStream2,
-    /// The tokens initializing the properties.
-    pub init_properties: TokenStream2,
     /// The tokens for the returned struct fields -> name,
     pub return_fields: TokenStream2,
     /// The view tokens (watch! macro)
@@ -49,7 +49,7 @@ impl Widget {
                     );
                 }
             } else {
-                prop.property_init_stream(&mut streams.init_properties, &self.name, relm4_path);
+                prop.property_init_stream(&mut streams.assign_properties, &self.name, relm4_path);
 
                 prop.view_stream(&mut streams.view, &self.name, relm4_path, false);
                 prop.track_stream(&mut streams.track, &self.name, model_type, false);
@@ -81,7 +81,7 @@ impl ReturnedWidget {
                 widget
                     .generate_micro_widget_tokens_recursively(streams, vis, model_type, relm4_path);
             } else {
-                prop.property_init_stream(&mut streams.init_properties, &self.name, relm4_path);
+                prop.property_init_stream(&mut streams.assign_properties, &self.name, relm4_path);
                 prop.connect_stream(&mut streams.connect, &self.name);
 
                 prop.view_stream(&mut streams.view, &self.name, relm4_path, false);

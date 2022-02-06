@@ -67,6 +67,9 @@ where
 {
     /// Creates new [`MicroComponent`]
     pub fn new(model: Model, data: Model::Data) -> Self {
+        // Make sure GTK is initialized in case this was added to the model.
+        gtk::init().unwrap();
+
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
         let widgets = Model::Widgets::init_view(&model, sender.clone());
         let root_widget = widgets.root_widget();
@@ -171,7 +174,7 @@ where
         self.root_widget.parent().is_some()
     }
 
-    /// Tries to diconnect the root widget from its parent widget.
+    /// Tries to disconnect the root widget from its parent widget.
     ///
     /// Returns [`true`] of the root widget was disconnected from the parent widget
     /// and [`false`] if nothing was done.

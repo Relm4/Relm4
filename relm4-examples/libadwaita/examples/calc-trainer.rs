@@ -357,7 +357,8 @@ impl Widgets<AppModel, ()> for AppWidgets {
                     }
                 },
                 append = &gtk::Label {
-                    set_text: "Calculation Type:"
+                    set_text: "Calculation Type:",
+                    set_margin_top: 10,
                 },
                 append = &gtk::Box {
                     set_orientation: gtk::Orientation::Horizontal,

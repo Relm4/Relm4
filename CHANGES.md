@@ -1,6 +1,12 @@
 # Changelog
 
-## Unreleased 
+## Unreleased
+
+### Fixed
+
++ relm4-macros: Parse whole expressions instead of just literals
+
+## 0.4.2 - 2022-2-4 
 
 ### Added
 
@@ -11,6 +17,7 @@
 + relm4: Fixed clear method of FactoryVec
 + relm4-macros: The micro_component macro now parses post_view correctly
 + relm4-macros: Fix the ordering of properties in the view macro
++ relm4-macros: Fix the ordering of widget assignments in the view macro
 
 ## 0.4.1 - 2022-1-17
 

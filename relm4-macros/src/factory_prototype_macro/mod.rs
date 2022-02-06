@@ -80,7 +80,7 @@ pub(crate) fn generate_tokens(
         struct_fields,
         init_widgets,
         connect_widgets,
-        init_properties,
+        assign_properties,
         connect,
         return_fields,
         connect_components,
@@ -125,7 +125,7 @@ pub(crate) fn generate_tokens(
                 #init_widgets
                 #connect_widgets
                 #menus_stream
-                #init_properties
+                #assign_properties
                 #connect
                 #connect_components
                 #post_init
