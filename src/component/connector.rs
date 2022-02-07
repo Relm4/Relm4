@@ -10,7 +10,7 @@ use std::rc::Rc;
 /// Contains the post-launch input sender and output receivers with the root widget.
 ///
 /// The receiver can be separated from the `Fairing` by choosing a method for handling it.
-pub struct Fairing<Component, Root, Widgets, Input, Output> {
+pub struct Connector<Component, Root, Widgets, Input, Output> {
     /// The models and widgets maintained by the component.
     pub(super) state: Rc<StateWatcher<Component, Widgets>>,
 
@@ -25,7 +25,7 @@ pub struct Fairing<Component, Root, Widgets, Input, Output> {
 }
 
 impl<Component, Root, Widgets, Input: 'static, Output: 'static>
-    Fairing<Component, Root, Widgets, Input, Output>
+    Connector<Component, Root, Widgets, Input, Output>
 {
     /// Forwards output events to the designated sender.
     pub fn forward<X: 'static, F: (Fn(Output) -> X) + 'static>(
@@ -33,7 +33,7 @@ impl<Component, Root, Widgets, Input: 'static, Output: 'static>
         sender_: Sender<X>,
         transform: F,
     ) -> Controller<Component, Root, Widgets, Input> {
-        let Fairing {
+        let Connector {
             state,
             widget,
             sender,
@@ -54,7 +54,7 @@ impl<Component, Root, Widgets, Input: 'static, Output: 'static>
         self,
         mut func: F,
     ) -> Controller<Component, Root, Widgets, Input> {
-        let Fairing {
+        let Connector {
             state,
             widget,
             sender,
@@ -92,7 +92,9 @@ impl<Component, Root, Widgets, Input: 'static, Output: 'static>
     }
 }
 
-impl<C: Component> ComponentController<C> for Fairing<C, C::Root, C::Widgets, C::Input, C::Output> {
+impl<C: Component> ComponentController<C>
+    for Connector<C, C::Root, C::Widgets, C::Input, C::Output>
+{
     fn sender(&self) -> &Sender<C::Input> {
         &self.sender
     }

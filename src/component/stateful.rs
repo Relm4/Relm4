@@ -21,7 +21,7 @@ pub trait StatefulComponent: Sized + 'static {
     type Output: 'static;
 
     /// The initial parameter(s) for launch.
-    type Payload;
+    type InitParams;
 
     /// The widget that was constructed by the component.
     type Root: OnDestroy;
@@ -33,20 +33,20 @@ pub trait StatefulComponent: Sized + 'static {
     fn init_root() -> Self::Root;
 
     /// Initializes the root widget and prepares a `Bridge` for docking.
-    fn init() -> Bridge<Self, Self::Root> {
-        Bridge {
+    fn init() -> ComponentBuilder<Self, Self::Root> {
+        ComponentBuilder {
             root: Self::init_root(),
             component: PhantomData,
         }
     }
 
     /// Creates the initial model and view, docking it into the component.
-    fn dock(
-        params: Self::Payload,
+    fn init_parts(
+        params: Self::InitParams,
         root: &Self::Root,
         input: &mut Sender<Self::Input>,
         output: &mut Sender<Self::Output>,
-    ) -> Fuselage<Self, Self::Widgets>;
+    ) -> ComponentParts<Self, Self::Widgets>;
 
     /// Processes inputs received by the component.
     #[allow(unused)]

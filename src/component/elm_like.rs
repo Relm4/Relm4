@@ -21,7 +21,7 @@ pub trait Component: Sized + 'static {
     type Output: 'static;
 
     /// The initial parameter(s) for launch.
-    type Payload;
+    type InitParams;
 
     /// The widget that was constructed by the component.
     type Root: OnDestroy;
@@ -33,20 +33,20 @@ pub trait Component: Sized + 'static {
     fn init_root() -> Self::Root;
 
     /// Initializes the root widget and prepares a `Bridge` for docking.
-    fn init() -> Bridge<Self, Self::Root> {
-        Bridge {
+    fn init() -> ComponentBuilder<Self, Self::Root> {
+        ComponentBuilder {
             root: Self::init_root(),
             component: PhantomData,
         }
     }
 
     /// Creates the initial model and view, docking it into the component.
-    fn dock(
-        params: Self::Payload,
+    fn init_parts(
+        params: Self::InitParams,
         root: &Self::Root,
         input: &mut Sender<Self::Input>,
         output: &mut Sender<Self::Output>,
-    ) -> Fuselage<Self, Self::Widgets>;
+    ) -> ComponentParts<Self, Self::Widgets>;
 
     /// Processes inputs received by the component.
     #[allow(unused)]
@@ -95,7 +95,7 @@ pub trait SimpleComponent: Sized + 'static {
     type Output: 'static;
 
     /// The initial parameter(s) for launch.
-    type Payload;
+    type InitParams;
 
     /// The widget that was constructed by the component.
     type Root: OnDestroy;
@@ -107,20 +107,20 @@ pub trait SimpleComponent: Sized + 'static {
     fn init_root() -> Self::Root;
 
     /// Initializes the root widget and prepares a `Bridge` for docking.
-    fn init() -> Bridge<Self, Self::Root> {
-        Bridge {
+    fn init() -> ComponentBuilder<Self, Self::Root> {
+        ComponentBuilder {
             root: Self::init_root(),
             component: PhantomData,
         }
     }
 
     /// Creates the initial model and view, docking it into the component.
-    fn dock(
-        params: Self::Payload,
+    fn init_parts(
+        params: Self::InitParams,
         root: &Self::Root,
         input: &mut Sender<Self::Input>,
         output: &mut Sender<Self::Output>,
-    ) -> Fuselage<Self, Self::Widgets>;
+    ) -> ComponentParts<Self, Self::Widgets>;
 
     /// Processes inputs received by the component.
     #[allow(unused)]
@@ -151,7 +151,7 @@ impl<C> Component for C
 where
     C: SimpleComponent,
 {
-    type Payload = C::Payload;
+    type InitParams = C::InitParams;
     type Input = C::Input;
     type Output = C::Output;
     type Root = C::Root;
@@ -164,13 +164,13 @@ where
         C::init_root()
     }
 
-    fn dock(
-        params: Self::Payload,
+    fn init_parts(
+        params: Self::InitParams,
         root: &Self::Root,
         input: &mut Sender<Self::Input>,
         output: &mut Sender<Self::Output>,
-    ) -> Fuselage<Self, Self::Widgets> {
-        C::dock(params, root, input, output)
+    ) -> ComponentParts<Self, Self::Widgets> {
+        C::init_parts(params, root, input, output)
     }
 
     fn update(

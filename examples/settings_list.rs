@@ -106,7 +106,7 @@ impl Component for SettingsListModel {
     type CommandOutput = SettingsListCmdOutput;
     type Input = SettingsListInput;
     type Output = SettingsListOutput;
-    type Payload = String;
+    type InitParams = String;
     type Root = gtk::Box;
     type Widgets = SettingsListWidgets;
 
@@ -118,12 +118,12 @@ impl Component for SettingsListModel {
             .build()
     }
 
-    fn dock(
-        title: Self::Payload,
+    fn init_parts(
+        title: Self::InitParams,
         root: &Self::Root,
         _input: &mut Sender<Self::Input>,
         output: &mut Sender<Self::Output>,
-    ) -> Fuselage<Self, Self::Widgets> {
+    ) -> ComponentParts<Self, Self::Widgets> {
         // Request the caller to reload its options.
         let _ = output.send(SettingsListOutput::Reload);
 
@@ -142,7 +142,7 @@ impl Component for SettingsListModel {
         root.append(&label);
         root.append(&list);
 
-        Fuselage {
+        ComponentParts {
             model: SettingsListModel::default(),
             widgets: SettingsListWidgets {
                 list,

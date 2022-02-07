@@ -2,12 +2,12 @@ use gtk::prelude::{ApplicationExt, ApplicationExtManual, GtkApplicationExt, IsA,
 
 use crate::component::Component;
 use crate::component::ComponentController;
-use crate::Bridge;
+use crate::ComponentBuilder;
 
 /// An app that runs the main application.
 #[derive(Debug)]
 pub struct RelmApp<C: Component> {
-    bridge: Bridge<C, C::Root>,
+    bridge: ComponentBuilder<C, C::Root>,
 
     /// The [`gtk::Application`] that's used internally to setup
     /// and run the application.
@@ -34,7 +34,7 @@ where
     /// Unlike [`gtk::Application::run`], this function
     /// does not handle command-line arguments. To pass arguments to GTK, use
     /// [`RelmApp::run_with_args`].
-    pub fn run(self, payload: C::Payload) {
+    pub fn run(self, payload: C::InitParams) {
         let RelmApp { bridge, app } = self;
         let controller = bridge.launch(payload).detach();
         let window = controller.widget().clone();
@@ -49,7 +49,7 @@ where
 
     /// Runs the application with the provided command-line arguments, returns once the application
     /// is closed.
-    pub fn run_with_args<S>(self, payload: C::Payload, args: &[S])
+    pub fn run_with_args<S>(self, payload: C::InitParams, args: &[S])
     where
         S: AsRef<str>,
     {
