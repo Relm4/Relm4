@@ -1,5 +1,8 @@
 use proc_macro2::Span as Span2;
-use syn::{punctuated::Punctuated, token::Colon2, Ident, Path, PathArguments, PathSegment, Token};
+use syn::{
+    punctuated::Punctuated, token::Colon2, Ident, Path, PathArguments, PathSegment, Token, Type,
+    TypePath,
+};
 
 macro_rules! parse_func {
     ($name:ident, $func:ident, $tokens:ident) => {
@@ -50,4 +53,19 @@ pub(crate) fn default_relm4_path() -> Path {
         leading_colon: Some(Token![::](Span2::call_site())),
         segments: relm4_segments,
     }
+}
+
+pub(crate) fn self_type() -> Type {
+    // Create a `Self` type for the model
+    let path_segment = PathSegment {
+        ident: Ident::new("Self", Span2::call_site()),
+        arguments: PathArguments::default(),
+    };
+    let mut segments = Punctuated::new();
+    segments.push(path_segment);
+    let path = Path {
+        segments,
+        leading_colon: None,
+    };
+    TypePath { path, qself: None }.into()
 }

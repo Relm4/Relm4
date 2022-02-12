@@ -13,6 +13,7 @@ use syn::parse_macro_input;
 mod additional_fields;
 mod args;
 mod attrs;
+mod component;
 mod derive_components;
 mod factory_prototype_macro;
 mod item_impl;
@@ -33,6 +34,17 @@ use attrs::Attrs;
 use item_impl::ItemImpl;
 use menu::Menus;
 use widgets::Widget;
+
+#[proc_macro_attribute]
+pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
+    let Attrs {
+        visibility,
+        relm4_path,
+    } = parse_macro_input!(attributes as Attrs);
+    let data = parse_macro_input!(input as ItemImpl);
+
+    component::generate_tokens(visibility, relm4_path, data).into()
+}
 
 /// Macro that implements [`relm4::Widgets`](https://aaronerhardt.github.io/docs/relm4/relm4/trait.Widgets.html) and generates the corresponding struct.
 ///
