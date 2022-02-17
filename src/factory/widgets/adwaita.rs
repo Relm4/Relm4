@@ -1,4 +1,7 @@
-use crate::factory::{positions::StackPageInfo, FactoryListView, FactoryView};
+use crate::factory::{
+    positions::{StackPageInfo, TabPageInfo},
+    FactoryListView, FactoryView,
+};
 use gtk::glib;
 
 impl<Widget> FactoryView<Widget> for adw::Carousel
@@ -22,11 +25,21 @@ impl<Widget> FactoryView<Widget> for adw::TabView
 where
     Widget: glib::IsA<gtk::Widget>,
 {
-    type Position = ();
+    type Position = TabPageInfo;
     type Root = adw::TabPage;
 
-    fn add(&self, widget: &Widget, _position: &()) -> adw::TabPage {
-        self.append(widget)
+    fn add(&self, widget: &Widget, position: &TabPageInfo) -> adw::TabPage {
+        let page = self.append(widget);
+
+        if let Some(title) = &position.title {
+            page.set_title(title);
+        }
+
+        if let Some(tooltip) = &position.tooltip {
+            page.set_tooltip(tooltip);
+        }
+
+        page
     }
 
     fn remove(&self, widget: &adw::TabPage) {
