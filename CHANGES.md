@@ -4,6 +4,8 @@
 
 ### Fixed
 
++ relm4: Fixed the positon type for TabView
++ relm4: Fixed state changes in FactoryVec (by [V02460](https://github.com/V02460))
 + relm4-macros: Parse whole expressions instead of just literals
 
 ## 0.4.2 - 2022-2-4 
