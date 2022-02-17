@@ -131,6 +131,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
                     },
                     attach(1, 2, 1, 1) = &gtk::Label {
                         set_label: "grid test 2",
+                        set_visible: counter == 0,
                     },
                     attach(2, 1, 1, 1) = &gtk::Label {
                         set_label: "grid test 3",
@@ -184,6 +185,8 @@ impl Widgets<AppModel, ()> for AppWidgets {
         let start_label = gtk::Label::builder()
             .label("This should appear at the top")
             .build();
+
+        let counter = model.counter;
     }
 
     fn post_init() {
