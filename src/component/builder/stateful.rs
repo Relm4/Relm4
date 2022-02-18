@@ -7,7 +7,7 @@ use super::*;
 use futures::FutureExt;
 use std::cell::RefCell;
 use std::rc::Rc;
-use tokio::sync::oneshot;
+use tokio::sync::{broadcast, oneshot};
 
 impl<C: StatefulComponent> ComponentBuilder<C, C::Root> {
     /// Starts the component, passing ownership to a future attached to a GLib context.
@@ -38,6 +38,9 @@ impl<C: StatefulComponent> ComponentBuilder<C, C::Root> {
         // The source ID of the component's service will be sent through this once the root
         // widget has been iced, which will give the component one last chance to say goodbye.
         let (burn_notifier, burn_recipient) = oneshot::channel::<gtk::glib::SourceId>();
+
+        // Notifies the component's child commands that it is now deceased.
+        let (death_notifier, _) = broadcast::channel::<()>(1);
 
         let mut input_tx_ = input_tx.clone();
         let watcher_ = watcher.clone();
@@ -70,8 +73,9 @@ impl<C: StatefulComponent> ComponentBuilder<C, C::Root> {
                                 model.update(widgets, message, &mut input_tx_, &mut output_tx)
                             {
                                 let cmd_tx = cmd_tx.clone();
+                                let recipient = death_notifier.subscribe();
                                 crate::spawn(async move {
-                                    if let Some(output) = C::command(command).await {
+                                    if let Some(output) = C::command(command, recipient).await {
                                         let _ = cmd_tx.send(output);
                                     }
                                 });
@@ -109,6 +113,8 @@ impl<C: StatefulComponent> ComponentBuilder<C, C::Root> {
                         } = &mut *watcher_.state.borrow_mut();
 
                         model.shutdown(widgets, output_tx);
+
+                        let _ = death_notifier.send(());
 
                         if let Ok(id) = id {
                             id.remove();

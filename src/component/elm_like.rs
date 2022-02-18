@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT or Apache-2.0
 
 use super::*;
-use crate::Sender;
+use crate::{Sender, ShutdownReceiver};
 use std::marker::PhantomData;
 
 /// Elm-style variant of a Component with view updates separated from input updates
@@ -81,7 +81,10 @@ pub trait Component: Sized + 'static {
 
     /// A command to perform in a background thread.
     #[allow(unused)]
-    fn command(message: Self::Command) -> CommandFuture<Self::CommandOutput> {
+    fn command(
+        message: Self::Command,
+        shutdown: ShutdownReceiver,
+    ) -> CommandFuture<Self::CommandOutput> {
         Box::pin(async move { None })
     }
 
