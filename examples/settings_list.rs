@@ -12,11 +12,12 @@
 //! component, which forwards the reload command back to the caller of the
 //! component, which then issues to reload the widgets again.
 
+use futures::FutureExt;
 use gtk::prelude::*;
 use relm4::*;
 
 fn main() {
-    gtk::builders::ApplicationBuilder::new()
+    gtk::Application::builder()
         .application_id("org.relm4.SettingsListExample")
         .launch(|_app, window| {
             // Intiialize a component's root widget
@@ -111,7 +112,7 @@ impl Component for SettingsListModel {
     type Widgets = SettingsListWidgets;
 
     fn init_root() -> Self::Root {
-        gtk::builders::BoxBuilder::new()
+        gtk::Box::builder()
             .halign(gtk::Align::Center)
             .hexpand(true)
             .orientation(gtk::Orientation::Vertical)
@@ -238,13 +239,20 @@ impl Component for SettingsListModel {
         }
     }
 
-    fn command(message: Self::Command) -> CommandFuture<Self::CommandOutput> {
+    fn command(message: Self::Command, mut shutdown: ShutdownReceiver) -> CommandFuture<Self::CommandOutput> {
         Box::pin(async move {
-            match message {
-                SettingsListCommand::Reload => {
-                    tokio::time::sleep(std::time::Duration::from_secs(2)).await;
-                    Some(SettingsListCmdOutput::Reload)
+            let task = async move {
+                match message {
+                    SettingsListCommand::Reload => {
+                        tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+                        Some(SettingsListCmdOutput::Reload)
+                    }
                 }
+            };
+
+            futures::select! {
+                _ = shutdown.recv().fuse() => None,
+                response = task.fuse() => response,
             }
         })
     }
