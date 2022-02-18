@@ -84,6 +84,10 @@ pub trait Component: Sized + 'static {
     fn command(message: Self::Command) -> CommandFuture<Self::CommandOutput> {
         Box::pin(async move { None })
     }
+
+    /// Last method called before a component is shut down.
+    #[allow(unused)]
+    fn shutdown(&mut self, widgets: &mut Self::Widgets, output: Sender<Self::Output>) {}
 }
 
 /// Elm-style variant of a Component with view updates separated from input updates
@@ -145,6 +149,10 @@ pub trait SimpleComponent: Sized + 'static {
         output: &mut Sender<Self::Output>,
     ) {
     }
+
+    /// Last method called before a component is shut down.
+    #[allow(unused)]
+    fn shutdown(&mut self, widgets: &mut Self::Widgets, output: Sender<Self::Output>) {}
 }
 
 impl<C> Component for C
@@ -190,5 +198,9 @@ where
         output: &mut Sender<Self::Output>,
     ) {
         C::update_view(self, widgets, input, output)
+    }
+
+    fn shutdown(&mut self, widgets: &mut Self::Widgets, output: Sender<Self::Output>) {
+        self.shutdown(widgets, output);
     }
 }

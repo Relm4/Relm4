@@ -7,6 +7,7 @@ use super::*;
 use futures::FutureExt;
 use std::cell::RefCell;
 use std::rc::Rc;
+use tokio::sync::oneshot;
 
 impl<C: Component> ComponentBuilder<C, C::Root> {
     /// Starts the component, passing ownership to a future attached to a GLib context.
@@ -34,11 +35,18 @@ impl<C: Component> ComponentBuilder<C, C::Root> {
             notifier: notifier.clone(),
         });
 
-        // The main service receives `Self::Input` and `Self::CommandOutput` messages and applies
-        // them to the model and view.
+        // The source ID of the component's service will be sent through this once the root
+        // widget has been iced, which will give the component one last chance to say goodbye.
+        let (burn_notifier, burn_recipient) = oneshot::channel::<gtk::glib::SourceId>();
+
         let mut input_tx_ = input_tx.clone();
         let watcher_ = watcher.clone();
+
+        // Spawns the component's service. It will receive both `Self::Input` and
+        // `Self::CommandOutput` messages. It will spawn commands as requested by
+        // updates, and send `Self::Output` messages externally.
         let id = crate::spawn_local(async move {
+            let mut burn_notice = burn_recipient.fuse();
             loop {
                 let notifier = notifier.notified().fuse();
                 let cmd = cmd_rx.recv().fuse();
@@ -94,12 +102,30 @@ impl<C: Component> ComponentBuilder<C, C::Root> {
 
                         model.update_view(widgets, &mut input_tx_, &mut output_tx);
                     }
+
+                    // Triggered when the component is destroyed
+                    id = burn_notice => {
+                        let ComponentParts {
+                            ref mut model,
+                            ref mut widgets,
+                        } = &mut *watcher_.state.borrow_mut();
+
+                        model.shutdown(widgets, output_tx);
+
+                        if let Ok(id) = id {
+                            id.remove();
+                        }
+
+                        return
+                    }
                 );
             }
         });
 
         // When the root widget is destroyed, the spawned service will be removed.
-        root.on_destroy(move || id.remove());
+        root.on_destroy(move || {
+            let _ = burn_notifier.send(id);
+        });
 
         // Give back a type for controlling the component service.
         Connector {

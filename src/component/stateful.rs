@@ -86,4 +86,8 @@ pub trait StatefulComponent: Sized + 'static {
     fn command(message: Self::Command) -> CommandFuture<Self::CommandOutput> {
         Box::pin(async move { None })
     }
+
+    /// Last method called before a component is shut down.
+    #[allow(unused)]
+    fn shutdown(&mut self, widgets: &mut Self::Widgets, output: Sender<Self::Output>) {}
 }
