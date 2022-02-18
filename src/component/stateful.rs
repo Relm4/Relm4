@@ -86,8 +86,9 @@ pub trait StatefulComponent: Sized + 'static {
     fn command(
         message: Self::Command,
         shutdown: ShutdownReceiver,
-    ) -> CommandFuture<Self::CommandOutput> {
-        Box::pin(async move { None })
+        out: Sender<Self::CommandOutput>,
+    ) -> CommandFuture {
+        Box::pin(async {})
     }
 
     /// Last method called before a component is shut down.

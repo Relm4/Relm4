@@ -72,13 +72,8 @@ impl<C: Component> ComponentBuilder<C, C::Root> {
 
                             if let Some(command) = model.update(message, &mut input_tx_, &mut output_tx)
                             {
-                                let input = cmd_tx.clone();
                                 let recipient = death_recipient.clone();
-                                crate::spawn(async move {
-                                    if let Some(message) = C::command(command, recipient).await {
-                                        let _ = input.send(message);
-                                    }
-                                });
+                                crate::spawn(C::command(command, recipient, cmd_tx.clone()));
                             }
 
                             model.update_view(widgets, &mut input_tx_, &mut output_tx);

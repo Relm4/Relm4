@@ -28,6 +28,7 @@ mod worker;
 
 pub use self::component::*;
 pub use self::extensions::*;
+pub use self::shutdown::ShutdownReceiver;
 pub use self::worker::*;
 pub use app::RelmApp;
 pub use tokio::task::JoinHandle;

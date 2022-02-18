@@ -75,11 +75,7 @@ impl<C: StatefulComponent> ComponentBuilder<C, C::Root> {
                             {
                                 let cmd_tx = cmd_tx.clone();
                                 let recipient = death_recipient.clone();
-                                crate::spawn(async move {
-                                    if let Some(output) = C::command(command, recipient).await {
-                                        let _ = cmd_tx.send(output);
-                                    }
-                                });
+                                crate::spawn(C::command(command, recipient, cmd_tx));
                             }
                         }
                     }

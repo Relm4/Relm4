@@ -21,14 +21,14 @@ fn main() {
         .application_id("org.relm4.SettingsListExample")
         .launch(|_app, window| {
             // Intiialize a component's root widget
-            let component = SettingsListModel::init()
+            let component = App::init()
                 // Attach the root widget to the given window.
                 .attach_to(&window)
                 // Start the component service with an initial parameter
                 .launch("Settings List Demo".into())
                 // Attach the returned receiver's messages to this closure.
                 .connect_receiver(move |sender, message| match message {
-                    SettingsListOutput::Clicked(id) => {
+                    Output::Clicked(id) => {
                         eprintln!("ID {id} Clicked");
 
                         match id {
@@ -37,26 +37,26 @@ fn main() {
                                 xdg_open("https://aaronerhardt.github.io/docs/relm4/relm4/".into())
                             }
                             2 => {
-                                let _ = sender.send(SettingsListInput::Clear);
+                                let _ = sender.send(Input::Clear);
                             }
                             _ => (),
                         }
                     }
 
-                    SettingsListOutput::Reload => {
-                        let _ = sender.send(SettingsListInput::AddSetting {
+                    Output::Reload => {
+                        let _ = sender.send(Input::AddSetting {
                             description: "Browse GitHub Repository".into(),
                             button: "GitHub".into(),
                             id: 0,
                         });
 
-                        let _ = sender.send(SettingsListInput::AddSetting {
+                        let _ = sender.send(Input::AddSetting {
                             description: "Browse Documentation".into(),
                             button: "Docs".into(),
                             id: 1,
                         });
 
-                        let _ = sender.send(SettingsListInput::AddSetting {
+                        let _ = sender.send(Input::AddSetting {
                             description: "Clear List".into(),
                             button: "Clear".into(),
                             id: 2,
@@ -69,17 +69,17 @@ fn main() {
 }
 
 #[derive(Default)]
-pub struct SettingsListModel {
+pub struct App {
     pub options: Vec<(String, String, u32)>,
 }
 
-pub struct SettingsListWidgets {
+pub struct Widgets {
     pub list: gtk::ListBox,
     pub options: Vec<gtk::Box>,
     pub button_sg: gtk::SizeGroup,
 }
 
-pub enum SettingsListInput {
+pub enum Input {
     AddSetting {
         description: String,
         button: String,
@@ -89,27 +89,27 @@ pub enum SettingsListInput {
     Reload,
 }
 
-pub enum SettingsListOutput {
+pub enum Output {
     Clicked(u32),
     Reload,
 }
 
-pub enum SettingsListCommand {
+pub enum Command {
     Reload,
 }
 
-pub enum SettingsListCmdOutput {
+pub enum CmdOut {
     Reload,
 }
 
-impl Component for SettingsListModel {
-    type Command = SettingsListCommand;
-    type CommandOutput = SettingsListCmdOutput;
-    type Input = SettingsListInput;
-    type Output = SettingsListOutput;
+impl Component for App {
+    type Command = Command;
+    type CommandOutput = CmdOut;
+    type Input = Input;
+    type Output = Output;
     type InitParams = String;
     type Root = gtk::Box;
-    type Widgets = SettingsListWidgets;
+    type Widgets = Widgets;
 
     fn init_root() -> Self::Root {
         gtk::Box::builder()
@@ -126,7 +126,7 @@ impl Component for SettingsListModel {
         output: &mut Sender<Self::Output>,
     ) -> ComponentParts<Self, Self::Widgets> {
         // Request the caller to reload its options.
-        let _ = output.send(SettingsListOutput::Reload);
+        let _ = output.send(Output::Reload);
 
         let label = gtk::builders::LabelBuilder::new()
             .label(&title)
@@ -144,8 +144,8 @@ impl Component for SettingsListModel {
         root.append(&list);
 
         ComponentParts {
-            model: SettingsListModel::default(),
-            widgets: SettingsListWidgets {
+            model: App::default(),
+            widgets: Widgets {
                 list,
                 button_sg: gtk::SizeGroup::new(gtk::SizeGroupMode::Both),
                 options: Default::default(),
@@ -160,7 +160,7 @@ impl Component for SettingsListModel {
         output: &mut Sender<Self::Output>,
     ) -> Option<Self::Command> {
         match message {
-            SettingsListInput::AddSetting {
+            Input::AddSetting {
                 description,
                 button,
                 id,
@@ -168,13 +168,13 @@ impl Component for SettingsListModel {
                 self.options.push((description, button, id));
             }
 
-            SettingsListInput::Clear => {
+            Input::Clear => {
                 self.options.clear();
-                return Some(SettingsListCommand::Reload);
+                return Some(Command::Reload);
             }
 
-            SettingsListInput::Reload => {
-                let _ = output.send(SettingsListOutput::Reload);
+            Input::Reload => {
+                let _ = output.send(Output::Reload);
             }
         }
 
@@ -188,8 +188,8 @@ impl Component for SettingsListModel {
         output: &mut Sender<Self::Output>,
     ) {
         match message {
-            SettingsListCmdOutput::Reload => {
-                let _ = output.send(SettingsListOutput::Reload);
+            CmdOut::Reload => {
+                let _ = output.send(Output::Reload);
             }
         }
     }
@@ -227,7 +227,7 @@ impl Component for SettingsListModel {
                             set_size_group: &widgets.button_sg,
 
                             connect_clicked(output) => move |_| {
-                                let _ = output.send(SettingsListOutput::Clicked(id));
+                                let _ = output.send(Output::Clicked(id));
                             }
                         }
                     }
@@ -239,22 +239,21 @@ impl Component for SettingsListModel {
         }
     }
 
-    fn command(
-        message: Self::Command,
-        shutdown: ShutdownReceiver,
-    ) -> CommandFuture<Self::CommandOutput> {
+    fn command(message: Self::Command, shutdown: ShutdownReceiver, out: Sender<CmdOut>) -> CommandFuture {
         shutdown
             // Performs this operation until a shutdown is triggered
             .register(async move {
                 match message {
-                    SettingsListCommand::Reload => {
+                    Command::Reload => {
                         tokio::time::sleep(std::time::Duration::from_secs(2)).await;
-                        Some(SettingsListCmdOutput::Reload)
+                        let _ = out.send(CmdOut::Reload);
                     }
                 }
             })
-            // Returns this value if a shutdown was triggered.
-            .on_shutdown(async { None })
+            // Perform task until a shutdown interrupts it
+            .wait()
+            // Drop output
+            .map(|_| ())
             // Wrap into a `Pin<Box<Future>>` for return
             .boxed()
     }
