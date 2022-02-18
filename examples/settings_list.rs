@@ -239,7 +239,11 @@ impl Component for App {
         }
     }
 
-    fn command(message: Self::Command, shutdown: ShutdownReceiver, out: Sender<CmdOut>) -> CommandFuture {
+    fn command(
+        message: Self::Command,
+        shutdown: ShutdownReceiver,
+        out: Sender<CmdOut>,
+    ) -> CommandFuture {
         shutdown
             // Performs this operation until a shutdown is triggered
             .register(async move {
@@ -251,9 +255,7 @@ impl Component for App {
                 }
             })
             // Perform task until a shutdown interrupts it
-            .wait()
-            // Drop output
-            .map(|_| ())
+            .wait_then_drop()
             // Wrap into a `Pin<Box<Future>>` for return
             .boxed()
     }

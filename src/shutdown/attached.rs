@@ -43,4 +43,11 @@ where
             Either::Right((out, _)) => Either::Right(out),
         }
     }
+
+    /// Waits until a shutdown signal is received.
+    ///
+    /// Ignores any output when we don't care about it.
+    pub async fn wait_then_drop(self) {
+        let _ = self.wait().await;
+    }
 }
