@@ -112,7 +112,7 @@ impl<Input: 'static, Output: 'static> WorkerHandle<Input, Output> {
             worker,
         } = self;
 
-        crate::spawn_local(crate::forward(receiver, sender_, transform));
+        crate::spawn_local(receiver.forward(sender_, transform));
         WorkerController { sender, worker }
     }
 }

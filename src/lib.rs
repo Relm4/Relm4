@@ -61,23 +61,6 @@ pub use relm4_macros::*;
 /// Re-export of libadwaita
 pub use adw;
 
-/// Forwards an event from one channel to another.
-pub async fn forward<Transformer, Input, Output>(
-    mut receiver: Receiver<Input>,
-    sender: Sender<Output>,
-    transformer: Transformer,
-) where
-    Transformer: (Fn(Input) -> Output) + 'static,
-    Input: 'static,
-    Output: 'static,
-{
-    while let Some(event) = receiver.recv().await {
-        if sender.0.send(transformer(event)).is_err() {
-            break;
-        }
-    }
-}
-
 /// Sets a custom global stylesheet.
 ///
 /// # Panics
