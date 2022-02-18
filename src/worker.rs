@@ -5,7 +5,6 @@
 use crate::{Receiver, Sender};
 use std::future::Future;
 use std::pin::Pin;
-use tokio::sync::mpsc;
 
 /// A future returned by a component's command method.
 pub type WorkerFuture = Pin<Box<dyn Future<Output = ()> + Send>>;
@@ -28,8 +27,8 @@ pub trait Worker: Sized + Send {
 
     /// Spawns the worker task in the background.
     fn init(params: Self::InputParams) -> WorkerHandle<Self::Input, Self::Output> {
-        let (input_tx, mut input_rx) = mpsc::unbounded_channel::<Self::Input>();
-        let (mut output_tx, output_rx) = mpsc::unbounded_channel::<Self::Output>();
+        let (input_tx, mut input_rx) = crate::channel::<Self::Input>();
+        let (mut output_tx, output_rx) = crate::channel::<Self::Output>();
 
         let worker = {
             let mut input_tx = input_tx.clone();

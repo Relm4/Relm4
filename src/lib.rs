@@ -15,6 +15,7 @@
 
 pub mod actions;
 mod app;
+mod channel;
 mod component;
 pub mod drawing;
 mod extensions;
@@ -26,6 +27,7 @@ pub mod shutdown;
 pub mod util;
 mod worker;
 
+pub use self::channel::*;
 pub use self::component::*;
 pub use self::extensions::*;
 pub use self::shutdown::ShutdownReceiver;
@@ -37,13 +39,6 @@ pub use util::widget_plus::WidgetPlus;
 use once_cell::sync::OnceCell;
 use std::future::Future;
 use tokio::runtime::Runtime;
-use tokio::sync::mpsc;
-
-/// Re-export of `tokio::sync::mpsc::UnboundedSender`.
-pub type Sender<T> = mpsc::UnboundedSender<T>;
-
-/// Re-export of `tokio::sync::mpsc::UnboundedReceiver`.
-pub type Receiver<T> = mpsc::UnboundedReceiver<T>;
 
 /// Defines how many threads that Relm should use for background tasks.
 ///
@@ -77,7 +72,7 @@ pub async fn forward<Transformer, Input, Output>(
     Output: 'static,
 {
     while let Some(event) = receiver.recv().await {
-        if sender.send(transformer(event)).is_err() {
+        if sender.0.send(transformer(event)).is_err() {
             break;
         }
     }
@@ -161,6 +156,6 @@ where
 #[macro_export]
 macro_rules! send {
     ($sender:expr, $msg:expr) => {
-        $sender.send($msg).expect("Receiver was dropped!")
+        $sender.send($msg)
     };
 }

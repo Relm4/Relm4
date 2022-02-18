@@ -19,13 +19,13 @@ impl<C: StatefulComponent> ComponentBuilder<C, C::Root> {
         let ComponentBuilder { root, .. } = self;
 
         // Used for all events to be processed by this component's internal service.
-        let (mut input_tx, mut input_rx) = mpsc::unbounded_channel::<C::Input>();
+        let (mut input_tx, mut input_rx) = crate::channel::<C::Input>();
 
         // Used by this component to send events to be handled externally by the caller.
-        let (mut output_tx, output_rx) = mpsc::unbounded_channel::<C::Output>();
+        let (mut output_tx, output_rx) = crate::channel::<C::Output>();
 
         // Sends messages from commands executed from the background.
-        let (cmd_tx, mut cmd_rx) = mpsc::unbounded_channel::<C::CommandOutput>();
+        let (cmd_tx, mut cmd_rx) = crate::channel::<C::CommandOutput>();
 
         // Gets notifications when a component's model and view is updated externally.
         let notifier = Rc::new(tokio::sync::Notify::new());

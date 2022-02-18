@@ -105,7 +105,7 @@ impl Component for App {
                 append: button = &gtk::Button {
                     set_label: "Compute",
                     connect_clicked(input) => move |_| {
-                        let _ = input.send(Input::Compute);
+                        input.send(Input::Compute);
                     }
                 }
             }
@@ -186,12 +186,12 @@ impl Component for App {
                 let mut progress = 0.0;
 
                 while progress < 1.0 {
-                    let _ = out.send(CmdOut::Progress(progress));
+                    out.send(CmdOut::Progress(progress));
                     progress += 0.1;
                     tokio::time::sleep(std::time::Duration::from_millis(333)).await;
                 }
 
-                let _ = out.send(CmdOut::Finished(Ok("42".into())));
+                out.send(CmdOut::Finished(Ok("42".into())));
             })
             // Perform task until a shutdown interrupts it
             .drop_on_shutdown()

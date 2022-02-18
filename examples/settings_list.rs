@@ -37,26 +37,26 @@ fn main() {
                                 xdg_open("https://aaronerhardt.github.io/docs/relm4/relm4/".into())
                             }
                             2 => {
-                                let _ = sender.send(Input::Clear);
+                                sender.send(Input::Clear);
                             }
                             _ => (),
                         }
                     }
 
                     Output::Reload => {
-                        let _ = sender.send(Input::AddSetting {
+                        sender.send(Input::AddSetting {
                             description: "Browse GitHub Repository".into(),
                             button: "GitHub".into(),
                             id: 0,
                         });
 
-                        let _ = sender.send(Input::AddSetting {
+                        sender.send(Input::AddSetting {
                             description: "Browse Documentation".into(),
                             button: "Docs".into(),
                             id: 1,
                         });
 
-                        let _ = sender.send(Input::AddSetting {
+                        sender.send(Input::AddSetting {
                             description: "Clear List".into(),
                             button: "Clear".into(),
                             id: 2,
@@ -126,7 +126,7 @@ impl Component for App {
         output: &Sender<Self::Output>,
     ) -> ComponentParts<Self, Self::Widgets> {
         // Request the caller to reload its options.
-        let _ = output.send(Output::Reload);
+        output.send(Output::Reload);
 
         let label = gtk::builders::LabelBuilder::new()
             .label(&title)
@@ -174,7 +174,7 @@ impl Component for App {
             }
 
             Input::Reload => {
-                let _ = output.send(Output::Reload);
+                output.send(Output::Reload);
             }
         }
 
@@ -189,7 +189,7 @@ impl Component for App {
     ) {
         match message {
             CmdOut::Reload => {
-                let _ = output.send(Output::Reload);
+                output.send(Output::Reload);
             }
         }
     }
@@ -227,7 +227,7 @@ impl Component for App {
                             set_size_group: &widgets.button_sg,
 
                             connect_clicked(output) => move |_| {
-                                let _ = output.send(Output::Clicked(id));
+                                output.send(Output::Clicked(id));
                             }
                         }
                     }
@@ -250,7 +250,7 @@ impl Component for App {
                 match message {
                     Command::Reload => {
                         tokio::time::sleep(std::time::Duration::from_secs(2)).await;
-                        let _ = out.send(CmdOut::Reload);
+                        out.send(CmdOut::Reload);
                     }
                 }
             })
