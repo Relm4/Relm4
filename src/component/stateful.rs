@@ -44,8 +44,8 @@ pub trait StatefulComponent: Sized + 'static {
     fn init_parts(
         params: Self::InitParams,
         root: &Self::Root,
-        input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) -> ComponentParts<Self, Self::Widgets>;
 
     /// Processes inputs received by the component.
@@ -54,8 +54,8 @@ pub trait StatefulComponent: Sized + 'static {
         &mut self,
         widgets: &mut Self::Widgets,
         message: Self::Input,
-        input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) -> Option<Self::Command> {
         None
     }
@@ -66,8 +66,8 @@ pub trait StatefulComponent: Sized + 'static {
         &mut self,
         widgets: &mut Self::Widgets,
         message: Self::CommandOutput,
-        input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) {
     }
 
@@ -76,8 +76,8 @@ pub trait StatefulComponent: Sized + 'static {
     fn update_notify(
         &mut self,
         widgets: &mut Self::Widgets,
-        input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) {
     }
 

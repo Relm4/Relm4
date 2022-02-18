@@ -122,8 +122,8 @@ impl Component for App {
     fn init_parts(
         title: Self::InitParams,
         root: &Self::Root,
-        _input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        _input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) -> ComponentParts<Self, Self::Widgets> {
         // Request the caller to reload its options.
         let _ = output.send(Output::Reload);
@@ -156,8 +156,8 @@ impl Component for App {
     fn update(
         &mut self,
         message: Self::Input,
-        _input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        _input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) -> Option<Self::Command> {
         match message {
             Input::AddSetting {
@@ -184,8 +184,8 @@ impl Component for App {
     fn update_cmd(
         &mut self,
         message: Self::CommandOutput,
-        _input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        _input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) {
         match message {
             CmdOut::Reload => {
@@ -197,8 +197,8 @@ impl Component for App {
     fn update_view(
         &self,
         widgets: &mut Self::Widgets,
-        _input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        _input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) {
         if self.options.is_empty() && !widgets.options.is_empty() {
             widgets.list.remove_all();

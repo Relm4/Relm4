@@ -44,8 +44,8 @@ pub trait Component: Sized + 'static {
     fn init_parts(
         params: Self::InitParams,
         root: &Self::Root,
-        input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) -> ComponentParts<Self, Self::Widgets>;
 
     /// Processes inputs received by the component.
@@ -53,8 +53,8 @@ pub trait Component: Sized + 'static {
     fn update(
         &mut self,
         message: Self::Input,
-        input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) -> Option<Self::Command> {
         None
     }
@@ -64,8 +64,8 @@ pub trait Component: Sized + 'static {
     fn update_cmd(
         &mut self,
         message: Self::CommandOutput,
-        input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) {
     }
 
@@ -74,8 +74,8 @@ pub trait Component: Sized + 'static {
     fn update_view(
         &self,
         widgets: &mut Self::Widgets,
-        input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) {
     }
 
@@ -126,8 +126,8 @@ pub trait SimpleComponent: Sized + 'static {
     fn init_parts(
         params: Self::InitParams,
         root: &Self::Root,
-        input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) -> ComponentParts<Self, Self::Widgets>;
 
     /// Processes inputs received by the component.
@@ -135,22 +135,22 @@ pub trait SimpleComponent: Sized + 'static {
     fn update(
         &mut self,
         message: Self::Input,
-        input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) {
     }
 
     /// Defines how the component should respond to command updates.
     #[allow(unused)]
-    fn update_cmd(&mut self, input: &mut Sender<Self::Input>, output: &mut Sender<Self::Output>) {}
+    fn update_cmd(&mut self, input: &Sender<Self::Input>, output: &Sender<Self::Output>) {}
 
     /// Updates the view after the model has been updated.
     #[allow(unused)]
     fn update_view(
         &self,
         widgets: &mut Self::Widgets,
-        input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) {
     }
 
@@ -179,8 +179,8 @@ where
     fn init_parts(
         params: Self::InitParams,
         root: &Self::Root,
-        input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) -> ComponentParts<Self, Self::Widgets> {
         C::init_parts(params, root, input, output)
     }
@@ -188,8 +188,8 @@ where
     fn update(
         &mut self,
         message: Self::Input,
-        input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) -> Option<Self::Command> {
         C::update(self, message, input, output);
         None
@@ -198,8 +198,8 @@ where
     fn update_view(
         &self,
         widgets: &mut Self::Widgets,
-        input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) {
         C::update_view(self, widgets, input, output)
     }

@@ -71,8 +71,8 @@ impl Component for App {
     fn init_parts(
         _args: Self::InitParams,
         root: &Self::Root,
-        input: &mut Sender<Self::Input>,
-        _output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        _output: &Sender<Self::Output>,
     ) -> ComponentParts<Self, Self::Widgets> {
         relm4_macros::view! {
             container = gtk::Box {
@@ -126,8 +126,8 @@ impl Component for App {
     fn update(
         &mut self,
         message: Self::Input,
-        _input: &mut Sender<Self::Input>,
-        _output: &mut Sender<Self::Output>,
+        _input: &Sender<Self::Input>,
+        _output: &Sender<Self::Output>,
     ) -> Option<Self::Command> {
         match message {
             Input::Compute => {
@@ -140,8 +140,8 @@ impl Component for App {
     fn update_cmd(
         &mut self,
         message: Self::CommandOutput,
-        _input: &mut Sender<Self::Input>,
-        _output: &mut Sender<Self::Output>,
+        _input: &Sender<Self::Input>,
+        _output: &Sender<Self::Output>,
     ) {
         if let CmdOut::Finished(_) = message {
             self.computing = false;
@@ -153,8 +153,8 @@ impl Component for App {
     fn update_view(
         &self,
         widgets: &mut Self::Widgets,
-        _input: &mut Sender<Self::Input>,
-        _output: &mut Sender<Self::Output>,
+        _input: &Sender<Self::Input>,
+        _output: &Sender<Self::Output>,
     ) {
         widgets.button.set_sensitive(!self.computing);
 
