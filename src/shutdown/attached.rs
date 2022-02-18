@@ -47,7 +47,7 @@ where
     /// Waits until a shutdown signal is received.
     ///
     /// Ignores any output when we don't care about it.
-    pub async fn wait_then_drop(self) {
+    pub async fn drop_on_shutdown(self) {
         let _ = self.wait().await;
     }
 }

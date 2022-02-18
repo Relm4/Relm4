@@ -194,7 +194,7 @@ impl Component for App {
                 let _ = out.send(CmdOut::Finished(Ok("42".into())));
             })
             // Perform task until a shutdown interrupts it
-            .wait_then_drop()
+            .drop_on_shutdown()
             // Wrap into a `Pin<Box<Future>>` for return
             .boxed()
     }

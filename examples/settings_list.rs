@@ -255,7 +255,7 @@ impl Component for App {
                 }
             })
             // Perform task until a shutdown interrupts it
-            .wait_then_drop()
+            .drop_on_shutdown()
             // Wrap into a `Pin<Box<Future>>` for return
             .boxed()
     }
