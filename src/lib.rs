@@ -19,6 +19,10 @@ mod component;
 pub mod drawing;
 mod extensions;
 pub mod factory;
+
+/// Cancellation mechanism used by Relm
+pub mod shutdown;
+
 pub mod util;
 mod worker;
 
@@ -32,16 +36,13 @@ pub use util::widget_plus::WidgetPlus;
 use once_cell::sync::OnceCell;
 use std::future::Future;
 use tokio::runtime::Runtime;
-use tokio::sync::{broadcast, mpsc};
+use tokio::sync::mpsc;
 
 /// Re-export of `tokio::sync::mpsc::UnboundedSender`.
 pub type Sender<T> = mpsc::UnboundedSender<T>;
 
 /// Re-export of `tokio::sync::mpsc::UnboundedReceiver`.
 pub type Receiver<T> = mpsc::UnboundedReceiver<T>;
-
-/// A broadcast receiver which receives a message when a component is deceased.
-pub type ShutdownReceiver = broadcast::Receiver<()>;
 
 /// Defines how many threads that Relm should use for background tasks.
 ///

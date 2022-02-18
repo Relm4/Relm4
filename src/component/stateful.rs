@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT or Apache-2.0
 
 use super::*;
-use crate::{Sender, ShutdownReceiver};
+use crate::{shutdown::ShutdownReceiver, Sender};
 use std::marker::PhantomData;
 
 /// Component with view updates happening at the same time as model updates.

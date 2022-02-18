@@ -239,22 +239,24 @@ impl Component for SettingsListModel {
         }
     }
 
-    fn command(message: Self::Command, mut shutdown: ShutdownReceiver) -> CommandFuture<Self::CommandOutput> {
-        Box::pin(async move {
-            let task = async move {
+    fn command(
+        message: Self::Command,
+        shutdown: ShutdownReceiver,
+    ) -> CommandFuture<Self::CommandOutput> {
+        shutdown
+            // Performs this operation until a shutdown is triggered
+            .register(async move {
                 match message {
                     SettingsListCommand::Reload => {
                         tokio::time::sleep(std::time::Duration::from_secs(2)).await;
                         Some(SettingsListCmdOutput::Reload)
                     }
                 }
-            };
-
-            futures::select! {
-                _ = shutdown.recv().fuse() => None,
-                response = task.fuse() => response,
-            }
-        })
+            })
+            // Returns this value if a shutdown was triggered.
+            .on_shutdown(async { None })
+            // Wrap into a `Pin<Box<Future>>` for return
+            .boxed()
     }
 }
 

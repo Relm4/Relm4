@@ -4,10 +4,11 @@
 
 use super::super::*;
 use super::*;
+use crate::shutdown;
 use futures::FutureExt;
 use std::cell::RefCell;
 use std::rc::Rc;
-use tokio::sync::{broadcast, oneshot};
+use tokio::sync::oneshot;
 
 impl<C: StatefulComponent> ComponentBuilder<C, C::Root> {
     /// Starts the component, passing ownership to a future attached to a GLib context.
@@ -40,7 +41,7 @@ impl<C: StatefulComponent> ComponentBuilder<C, C::Root> {
         let (burn_notifier, burn_recipient) = oneshot::channel::<gtk::glib::SourceId>();
 
         // Notifies the component's child commands that it is now deceased.
-        let (death_notifier, _) = broadcast::channel::<()>(1);
+        let (death_notifier, death_recipient) = shutdown::channel();
 
         let mut input_tx_ = input_tx.clone();
         let watcher_ = watcher.clone();
@@ -73,7 +74,7 @@ impl<C: StatefulComponent> ComponentBuilder<C, C::Root> {
                                 model.update(widgets, message, &mut input_tx_, &mut output_tx)
                             {
                                 let cmd_tx = cmd_tx.clone();
-                                let recipient = death_notifier.subscribe();
+                                let recipient = death_recipient.clone();
                                 crate::spawn(async move {
                                     if let Some(output) = C::command(command, recipient).await {
                                         let _ = cmd_tx.send(output);
@@ -114,7 +115,7 @@ impl<C: StatefulComponent> ComponentBuilder<C, C::Root> {
 
                         model.shutdown(widgets, output_tx);
 
-                        let _ = death_notifier.send(());
+                        let _ = death_notifier.shutdown();
 
                         if let Ok(id) = id {
                             id.remove();
