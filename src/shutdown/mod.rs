@@ -1,3 +1,6 @@
+// Copyright 2022 System76 <info@system76.com>
+// SPDX-License-Identifier: MIT or Apache-2.0
+
 mod attached;
 mod receiver;
 mod sender;
