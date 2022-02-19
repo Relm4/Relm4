@@ -1,16 +1,48 @@
 use syn::{
     bracketed, parenthesized,
+    parse::discouraged::Speculative,
     parse::{Parse, ParseStream},
     parse_macro_input,
     spanned::Spanned,
     token, Error, Expr, ExprMacro, Ident, Macro, Result, Token,
 };
 
-use crate::widgets::{Property, PropertyName, PropertyType};
+use crate::widgets::{Property, PropertyName, PropertyType, Widget};
+
+fn parse_for_container_ext(input: ParseStream) -> Option<Property> {
+    // Try parsing a widget as only the widget type.
+    // The widget is then added using RelmContainerExt.
+    if input.peek(Ident)
+        || (input.peek(Token![&]) || input.peek(Token![*])) && input.peek2(Ident)
+        || input.peek(Token![&]) && input.peek2(Token![*]) && input.peek3(Ident)
+    {
+        if let Ok(widget) = Widget::parse_for_container_ext(input) {
+            return Some(Property {
+                name: PropertyName::RelmContainerExtAssign,
+                ty: PropertyType::Widget(widget),
+                generics: None,
+                args: None,
+                optional_assign: false,
+                iterative: false,
+            });
+        }
+    }
+    None
+}
 
 impl Parse for Property {
     fn parse(input: ParseStream) -> Result<Self> {
-        let name = input.parse()?;
+        // For container ext parsing
+        let forked_input = input.fork();
+
+        let name = match input.parse() {
+            Ok(name) => name,
+            Err(err) => {
+                // As a last chance, try parsing a widget definition for RelmContainerExt
+                return parse_for_container_ext(input).ok_or(err);
+            }
+        };
+
         let mut optional_assign = false;
         let mut iterative = false;
         let mut braced_args = false;
@@ -135,7 +167,13 @@ impl Parse for Property {
                 }
             }
         } else {
-            return Err(input.error("Unexpected token. Expected =>, =, : or ?:"));
+            // As a last chance, try parsing a widget definition for RelmContainerExt
+            return if let Some(prop) = parse_for_container_ext(&forked_input) {
+                input.advance_to(&forked_input);
+                Ok(prop)
+            } else {
+                Err(input.error("Unexpected token. Expected =>, =, : or ?:"))
+            };
         };
 
         if !input.is_empty() && !input.peek(Token![,]) {

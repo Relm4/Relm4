@@ -1,6 +1,6 @@
 use proc_macro2::{Span as Span2, TokenStream as TokenStream2};
 use quote::{quote, quote_spanned, ToTokens};
-use syn::{spanned::Spanned, Error, Expr, ExprCall, ExprField, Ident, Member, Type};
+use syn::{spanned::Spanned, Error, Expr, ExprCall, ExprField, Ident, Member, Path, Type};
 
 use super::{Property, PropertyType, Tracker};
 
@@ -57,14 +57,18 @@ impl Property {
         w_name: &Ident,
         model_type: &Type,
         self_as_widgets: bool,
+        relm4_path: &Path,
     ) {
         if let Some((bool_stream, update_stream)) = self.ty.track_tokens(model_type) {
             let p_name = &self.name;
             let p_span = p_name.span().unwrap().into();
 
-            let assign_fn =
-                self.name
-                    .self_assign_fn_stream(&self.generics, w_name, self_as_widgets);
+            let assign_fn = self.name.self_assign_fn_stream(
+                &self.generics,
+                w_name,
+                self_as_widgets,
+                relm4_path,
+            );
             let self_assign_args = self.name.self_assign_args_stream(w_name, self_as_widgets);
             let args_stream = self.args_stream();
 

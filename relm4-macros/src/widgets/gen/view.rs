@@ -22,9 +22,12 @@ impl Property {
         widgets_as_self: bool,
     ) {
         if let Some(p_assign) = self.ty.view_assign_tokens() {
-            let assign_fn =
-                self.name
-                    .self_assign_fn_stream(&self.generics, w_name, widgets_as_self);
+            let assign_fn = self.name.self_assign_fn_stream(
+                &self.generics,
+                w_name,
+                widgets_as_self,
+                relm4_path,
+            );
             let self_assign_args = self.name.self_assign_args_stream(w_name, widgets_as_self);
 
             util::property_assign_tokens(

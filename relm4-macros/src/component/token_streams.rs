@@ -45,7 +45,7 @@ impl Widget {
 
         // Rename the `root` to the actual widget name
         streams.rename_root.extend(quote_spanned! {
-            name_span => let #name = root;
+            name_span => let #name = root.clone();
         });
 
         // The root isn't part of the widgets struct
@@ -55,7 +55,7 @@ impl Widget {
         for prop in &self.properties.properties {
             if let PropertyType::Widget(widget) = &prop.ty {
                 widget.generate_component_tokens_recursively(streams, vis, model_type, relm4_path);
-                prop.connect_widgets_stream(&mut streams.assign_properties, &self.name);
+                prop.connect_widgets_stream(&mut streams.assign_properties, &self.name, relm4_path);
 
                 if let Some(returned_widget) = &widget.returned_widget {
                     returned_widget.generate_component_tokens_recursively(
@@ -64,13 +64,17 @@ impl Widget {
                 }
             } else {
                 prop.property_init_stream(&mut streams.assign_properties, &self.name, relm4_path);
-                prop.connect_widgets_stream(&mut streams.assign_properties, &self.name);
+                prop.connect_widgets_stream(&mut streams.assign_properties, &self.name, relm4_path);
 
                 prop.view_stream(&mut streams.view, &self.name, relm4_path, true);
-                prop.track_stream(&mut streams.track, &self.name, model_type, true);
+                prop.track_stream(&mut streams.track, &self.name, model_type, true, relm4_path);
 
-                prop.connect_stream(&mut streams.connect, &self.name);
-                prop.connect_component_stream(&mut streams.connect_components, &self.name);
+                prop.connect_stream(&mut streams.connect, &self.name, relm4_path);
+                prop.connect_component_stream(
+                    &mut streams.connect_components,
+                    &self.name,
+                    relm4_path,
+                );
 
                 //prop.connect_parent_stream(&mut streams.parent, &self.name);
             }
@@ -91,7 +95,7 @@ impl Widget {
         for prop in &self.properties.properties {
             if let PropertyType::Widget(widget) = &prop.ty {
                 widget.generate_component_tokens_recursively(streams, vis, model_type, relm4_path);
-                prop.connect_widgets_stream(&mut streams.assign_properties, &self.name);
+                prop.connect_widgets_stream(&mut streams.assign_properties, &self.name, relm4_path);
 
                 if let Some(returned_widget) = &widget.returned_widget {
                     returned_widget.generate_component_tokens_recursively(
@@ -100,13 +104,17 @@ impl Widget {
                 }
             } else {
                 prop.property_init_stream(&mut streams.assign_properties, &self.name, relm4_path);
-                prop.connect_widgets_stream(&mut streams.assign_properties, &self.name);
+                prop.connect_widgets_stream(&mut streams.assign_properties, &self.name, relm4_path);
 
                 prop.view_stream(&mut streams.view, &self.name, relm4_path, true);
-                prop.track_stream(&mut streams.track, &self.name, model_type, true);
+                prop.track_stream(&mut streams.track, &self.name, model_type, true, relm4_path);
 
-                prop.connect_stream(&mut streams.connect, &self.name);
-                prop.connect_component_stream(&mut streams.connect_components, &self.name);
+                prop.connect_stream(&mut streams.connect, &self.name, relm4_path);
+                prop.connect_component_stream(
+                    &mut streams.connect_components,
+                    &self.name,
+                    relm4_path,
+                );
 
                 //prop.connect_parent_stream(&mut streams.parent, &self.name);
             }
@@ -128,17 +136,27 @@ impl ReturnedWidget {
         for prop in &self.properties.properties {
             if let PropertyType::Widget(widget) = &prop.ty {
                 widget.generate_component_tokens_recursively(streams, vis, model_type, relm4_path);
-                prop.connect_widgets_stream(&mut streams.assign_properties, &self.name);
+                prop.connect_widgets_stream(&mut streams.assign_properties, &self.name, relm4_path);
             } else {
                 prop.property_init_stream(&mut streams.assign_properties, &self.name, relm4_path);
-                prop.connect_widgets_stream(&mut streams.assign_properties, &self.name);
+                prop.connect_widgets_stream(&mut streams.assign_properties, &self.name, relm4_path);
 
-                prop.connect_stream(&mut streams.connect, &self.name);
+                prop.connect_stream(&mut streams.connect, &self.name, relm4_path);
 
                 prop.view_stream(&mut streams.view, &self.name, relm4_path, false);
-                prop.track_stream(&mut streams.track, &self.name, model_type, false);
+                prop.track_stream(
+                    &mut streams.track,
+                    &self.name,
+                    model_type,
+                    false,
+                    relm4_path,
+                );
 
-                prop.connect_component_stream(&mut streams.connect_components, &self.name);
+                prop.connect_component_stream(
+                    &mut streams.connect_components,
+                    &self.name,
+                    relm4_path,
+                );
             }
         }
     }

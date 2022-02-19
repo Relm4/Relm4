@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote_spanned, ToTokens};
-use syn::{spanned::Spanned, Ident};
+use syn::{spanned::Spanned, Ident, Path};
 
 use super::{Property, PropertyType};
 
@@ -16,12 +16,19 @@ impl PropertyType {
 
 impl Property {
     /// Connect components and widgets.
-    pub fn connect_component_stream(&self, stream: &mut TokenStream2, w_name: &Ident) {
+    pub fn connect_component_stream(
+        &self,
+        stream: &mut TokenStream2,
+        w_name: &Ident,
+        relm4_path: &Path,
+    ) {
         if let Some(p_assign) = self.ty.connect_component_tokens() {
             let p_name = &self.name;
             let p_span = p_name.span().unwrap().into();
 
-            let assign_fn = self.name.assign_fn_stream(&self.generics, w_name);
+            let assign_fn = self
+                .name
+                .assign_fn_stream(&self.generics, w_name, relm4_path);
             let self_assign_args = self.name.assign_args_stream(w_name);
 
             let mut arg_stream = TokenStream2::new();

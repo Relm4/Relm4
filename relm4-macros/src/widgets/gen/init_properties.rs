@@ -33,7 +33,9 @@ impl Property {
         if let Some(p_assign) = self.ty.init_assign_tokens() {
             let args_stream = self.args_stream();
 
-            let assign_fn = self.name.assign_fn_stream(&self.generics, parent_name);
+            let assign_fn = self
+                .name
+                .assign_fn_stream(&self.generics, parent_name, relm4_path);
             let self_assign_args = self.name.assign_args_stream(parent_name);
 
             util::property_assign_tokens(
