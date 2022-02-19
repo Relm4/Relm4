@@ -66,9 +66,11 @@ impl Parse for Property {
             }
         }
         // look for widgets
-        else if input.peek(Token![=])
+        else if (input.peek(Token![=])
             || input.peek3(Token![=])
-            || (input.peek(Token![:]) && input.peek2(Token![mut]) && input.peek3(Ident))
+            || (input.peek(Token![:]) && input.peek2(Token![mut]) && input.peek3(Ident)))
+            // Don't interpret `property: value == other,` as a widget
+            && !input.peek3(Token![==])
         {
             if input.peek(Token![=]) {
                 let _token: Token![=] = input.parse()?;
