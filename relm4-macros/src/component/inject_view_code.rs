@@ -1,13 +1,18 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
-use syn::{Expr, ImplItemMethod, Pat, Stmt};
+use syn::{spanned::Spanned, Error, Expr, ImplItemMethod, Pat, Result, Stmt};
 
 pub(super) fn inject_view_code(
     mut func: ImplItemMethod,
     view_code: TokenStream2,
     widgets_return_code: TokenStream2,
-) -> ImplItemMethod {
+) -> Result<ImplItemMethod> {
+    let func_span = func.span();
     let mut stmts = func.block.stmts;
+
+    if stmts.is_empty() {
+        return Err(Error::new(func_span, "The function must not be empty"));
+    }
 
     let mut new_stmts = Vec::new();
     let mut iter = stmts.drain(..);
@@ -24,7 +29,7 @@ pub(super) fn inject_view_code(
                                 if let Pat::Ident(ident) = &pat {
                                     widget_ident = Some(ident.clone());
                                 } else {
-                                    todo!();
+                                    return Err(Error::new(pat.span(), "Expected an identifier"));
                                 }
                             }
                         }
@@ -41,7 +46,7 @@ pub(super) fn inject_view_code(
                 new_stmts.push(stmt);
             }
         } else {
-            todo!()
+            return Err(Error::new(func_span, "Expected an injection point for the view macro. Try using `let widgets = view_output!();`"));
         }
     };
     new_stmts.push(view_code_stmt);
@@ -52,5 +57,5 @@ pub(super) fn inject_view_code(
     }
 
     func.block.stmts = new_stmts;
-    func
+    Ok(func)
 }

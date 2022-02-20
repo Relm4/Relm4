@@ -115,7 +115,10 @@ pub(crate) fn generate_tokens(
         }
     };
 
-    let init_parts_injected = inject_view_code(init_parts, view_code, widgets_return_code);
+    let init_parts_injected = match inject_view_code(init_parts, view_code, widgets_return_code) {
+        Ok(method) => method,
+        Err(err) => return err.to_compile_error(),
+    };
 
     quote! {
         #[allow(dead_code)]
