@@ -1,7 +1,5 @@
 use proc_macro2::{Span as Span2, TokenStream as TokenStream2};
-use syn::{
-    punctuated::Punctuated, token, token::Mut, Expr, ExprClosure, Generics, Ident, Path,
-};
+use syn::{punctuated::Punctuated, token, token::Mut, Expr, ExprClosure, Generics, Ident, Path};
 
 use crate::args::Args;
 
@@ -31,6 +29,7 @@ pub(super) enum PropertyType {
 pub enum PropertyName {
     Ident(Ident),
     Path(Path),
+    RelmContainerExtAssign,
 }
 
 #[derive(Debug)]
@@ -52,6 +51,9 @@ pub(super) struct Properties {
     pub properties: Vec<Property>,
 }
 
+/// The function that intitalizes the widget.
+///
+/// This might be a real function or just something like `gtk::Label`.
 #[derive(Debug)]
 pub(super) struct WidgetFunc {
     pub path_segments: Vec<Ident>,

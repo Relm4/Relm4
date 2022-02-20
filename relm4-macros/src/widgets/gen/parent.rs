@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::ToTokens;
-use syn::Ident;
+use syn::{Ident, Path};
 
 use super::{util, Property, PropertyType};
 
@@ -16,14 +16,19 @@ impl PropertyType {
 }
 
 impl Property {
-    pub fn connect_parent_stream(&self, stream: &mut TokenStream2, parent_name: &Ident) {
+    pub fn connect_parent_stream(
+        &self,
+        stream: &mut TokenStream2,
+        parent_name: &Ident,
+        relm4_path: &Path,
+    ) {
         if let Some(p_assign) = self.ty.connect_parent_tokens() {
             let args_stream = self.args_stream();
 
             // Parents are only for the widget macro, therefore self is never the widgets
-            let assign_fn = self
-                .name
-                .self_assign_fn_stream(&self.generics, parent_name, false);
+            let assign_fn =
+                self.name
+                    .self_assign_fn_stream(&self.generics, parent_name, false, relm4_path);
             let self_assign_args = self.name.assign_args_stream(parent_name);
 
             util::property_assign_tokens(
