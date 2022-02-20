@@ -46,7 +46,7 @@ impl SimpleComponent for AppModel {
                     }
                 },
 
-                append = &gtk::Label {
+                &gtk::Label {
                     set_label: watch!(&format!("Counter: {}", model.counter)),
                     set_margin_all: 5,
                 }
