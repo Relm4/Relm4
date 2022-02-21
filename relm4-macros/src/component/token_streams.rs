@@ -48,9 +48,8 @@ impl Widget {
             name_span => let #name = root.clone();
         });
 
-        // The root isn't part of the widgets struct
-        // self.struct_fields_stream(&mut streams.struct_fields, vis);
-        // self.return_stream(&mut streams.return_fields);
+        self.struct_fields_stream(&mut streams.struct_fields, vis);
+        self.return_stream(&mut streams.return_fields);
 
         for prop in &self.properties.properties {
             if let PropertyType::Widget(widget) = &prop.ty {
