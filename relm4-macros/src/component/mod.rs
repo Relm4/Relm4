@@ -146,8 +146,8 @@ pub(crate) fn generate_tokens(
             fn update_view(
                 &self,
                 widgets: &mut Self::Widgets,
-                input: &mut Sender<Self::Input>,
-                output: &mut Sender<Self::Output>,
+                input: &Sender<Self::Input>,
+                output: &Sender<Self::Output>,
             ) {
                 let model = self;
                 // Wrap pre_view and post_view code to prevent early returns from skipping other view code.

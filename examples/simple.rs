@@ -58,8 +58,8 @@ impl SimpleComponent for AppModel {
     fn init_parts(
         counter: Self::InitParams,
         root: &Self::Root,
-        input: &mut Sender<Self::Input>,
-        _output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        _output: &Sender<Self::Output>,
     ) -> ComponentParts<Self, Self::Widgets> {
         let model = AppModel { counter };
 
@@ -72,8 +72,8 @@ impl SimpleComponent for AppModel {
     fn update(
         &mut self,
         msg: Self::Input,
-        _input: &mut Sender<Self::Input>,
-        _ouput: &mut Sender<Self::Output>,
+        _input: &Sender<Self::Input>,
+        _ouput: &Sender<Self::Output>,
     ) {
         match msg {
             AppMsg::Increment => {
