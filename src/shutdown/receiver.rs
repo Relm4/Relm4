@@ -1,12 +1,18 @@
 // Copyright 2022 System76 <info@system76.com>
 // SPDX-License-Identifier: MIT or Apache-2.0
 
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+};
+
 use super::AttachedShutdown;
 use tokio::sync::broadcast::{Receiver, Sender};
 
 /// Listens to shutdown signals and constructs shutdown futures.
 #[derive(Debug)]
 pub struct ShutdownReceiver {
+    pub(super) alive: Arc<AtomicBool>,
     pub(super) sender: Sender<()>,
     pub(super) receiver: Receiver<()>,
 }
@@ -22,13 +28,16 @@ impl ShutdownReceiver {
 
     /// Waits until a shutdown signal is received.
     pub async fn wait(mut self) {
-        let _ = self.receiver.recv().await;
+        if self.alive.load(Ordering::SeqCst) {
+            let _ = self.receiver.recv().await;
+        }
     }
 }
 
 impl Clone for ShutdownReceiver {
     fn clone(&self) -> Self {
         Self {
+            alive: self.alive.clone(),
             sender: self.sender.clone(),
             receiver: self.sender.subscribe(),
         }
