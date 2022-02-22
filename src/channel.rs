@@ -11,8 +11,8 @@ pub(crate) fn channel<T>() -> (Sender<T>, Receiver<T>) {
 pub struct Sender<T>(pub(crate) flume::Sender<T>);
 
 impl<T> From<flume::Sender<T>> for Sender<T> {
-    fn from(tokio: flume::Sender<T>) -> Self {
-        Self(tokio)
+    fn from(sender: flume::Sender<T>) -> Self {
+        Self(sender)
     }
 }
 

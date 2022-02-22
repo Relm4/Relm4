@@ -1,7 +1,5 @@
 use super::ComponentParts;
 use std::cell::{Ref, RefCell, RefMut};
-use std::rc::Rc;
-use tokio::sync::Notify;
 
 /// Keeps track of a components model and view.
 ///
@@ -10,7 +8,7 @@ use tokio::sync::Notify;
 pub struct StateWatcher<Component, Widgets> {
     /// The models and widgets maintained by the component.
     pub(super) state: RefCell<ComponentParts<Component, Widgets>>,
-    pub(super) notifier: Rc<Notify>,
+    pub(super) notifier: flume::Sender<()>,
 }
 
 impl<Component, Widgets> StateWatcher<Component, Widgets> {
@@ -21,7 +19,7 @@ impl<Component, Widgets> StateWatcher<Component, Widgets> {
 
     /// Borrows the model and view of a component, and notifies the component to check for updates.
     pub fn get_mut(&self) -> RefMut<'_, ComponentParts<Component, Widgets>> {
-        self.notifier.notify_one();
+        let _ = self.notifier.send(());
         self.state.borrow_mut()
     }
 }

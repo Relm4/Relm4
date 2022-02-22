@@ -30,12 +30,12 @@ impl<C: Component> ComponentBuilder<C, C::Root> {
         let (cmd_tx, mut cmd_rx) = crate::channel::<C::CommandOutput>();
 
         // Gets notifications when a component's model and view is updated externally.
-        let notifier = Rc::new(tokio::sync::Notify::new());
+        let (notifier, notifier_rx) = flume::bounded(0);
 
         // Constructs the initial model and view with the initial payload.
         let watcher = Rc::new(StateWatcher {
             state: RefCell::new(C::init_parts(payload, &root, &mut input_tx, &mut output_tx)),
-            notifier: notifier.clone(),
+            notifier,
         });
 
         // The source ID of the component's service will be sent through this once the root
@@ -54,7 +54,7 @@ impl<C: Component> ComponentBuilder<C, C::Root> {
         let id = crate::spawn_local(async move {
             let mut burn_notice = burn_recipient.fuse();
             loop {
-                let notifier = notifier.notified().fuse();
+                let notifier = notifier_rx.recv_async().fuse();
                 let cmd = cmd_rx.recv().fuse();
                 let input = input_rx.recv().fuse();
 
