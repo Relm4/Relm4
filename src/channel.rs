@@ -1,19 +1,17 @@
 // Copyright 2022 System76 <info@system76.com>
 // SPDX-License-Identifier: MIT or Apache-2.0
 
-use tokio::sync::mpsc;
-
 pub(crate) fn channel<T>() -> (Sender<T>, Receiver<T>) {
-    let (tx, rx) = mpsc::unbounded_channel();
+    let (tx, rx) = flume::unbounded();
     (Sender(tx), Receiver(rx))
 }
 
 /// A Relm4 sender sends messages to a component or worker.
 #[derive(Debug)]
-pub struct Sender<T>(pub(crate) mpsc::UnboundedSender<T>);
+pub struct Sender<T>(pub(crate) flume::Sender<T>);
 
-impl<T> From<mpsc::UnboundedSender<T>> for Sender<T> {
-    fn from(tokio: mpsc::UnboundedSender<T>) -> Self {
+impl<T> From<flume::Sender<T>> for Sender<T> {
+    fn from(tokio: flume::Sender<T>) -> Self {
         Self(tokio)
     }
 }
@@ -35,12 +33,12 @@ impl<T> Clone for Sender<T> {
 
 /// A Relm4 receiver receives messages from a component or worker.
 #[derive(Debug)]
-pub struct Receiver<T>(pub(crate) mpsc::UnboundedReceiver<T>);
+pub struct Receiver<T>(pub(crate) flume::Receiver<T>);
 
 impl<T> Receiver<T> {
     /// Receives a message from a component or worker.
     pub async fn recv(&mut self) -> Option<T> {
-        self.0.recv().await
+        self.0.recv_async().await.ok()
     }
 
     /// Forwards an event from one channel to another.
