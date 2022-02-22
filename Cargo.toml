@@ -21,6 +21,7 @@ members = [
 [dependencies]
 adw = { version = "0.1", optional = true, package = "libadwaita" }
 async-broadcast = "0.3.4"
+async-oneshot = "0.5.0"
 flume = "0.10.11"
 fragile = "1.1.0"
 futures = "0.3.19"

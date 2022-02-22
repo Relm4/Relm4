@@ -4,11 +4,13 @@
 
 use super::super::*;
 use super::*;
+
 use crate::shutdown;
+
+use async_oneshot::oneshot;
 use futures::FutureExt;
 use std::cell::RefCell;
 use std::rc::Rc;
-use tokio::sync::oneshot;
 
 impl<C: Component> ComponentBuilder<C, C::Root> {
     /// Starts the component, passing ownership to a future attached to a GLib context.
@@ -38,7 +40,7 @@ impl<C: Component> ComponentBuilder<C, C::Root> {
 
         // The source ID of the component's service will be sent through this once the root
         // widget has been iced, which will give the component one last chance to say goodbye.
-        let (burn_notifier, burn_recipient) = oneshot::channel::<gtk::glib::SourceId>();
+        let (mut burn_notifier, burn_recipient) = oneshot::<gtk::glib::SourceId>();
 
         // Notifies the component's child commands that it is now deceased.
         let (death_notifier, death_recipient) = shutdown::channel();
