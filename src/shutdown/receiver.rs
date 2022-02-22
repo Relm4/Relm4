@@ -7,13 +7,12 @@ use std::sync::{
 };
 
 use super::AttachedShutdown;
-use tokio::sync::broadcast::{Receiver, Sender};
+use async_broadcast::Receiver;
 
 /// Listens to shutdown signals and constructs shutdown futures.
 #[derive(Debug)]
 pub struct ShutdownReceiver {
     pub(super) alive: Arc<AtomicBool>,
-    pub(super) sender: Sender<()>,
     pub(super) receiver: Receiver<()>,
 }
 
@@ -38,8 +37,7 @@ impl Clone for ShutdownReceiver {
     fn clone(&self) -> Self {
         Self {
             alive: self.alive.clone(),
-            sender: self.sender.clone(),
-            receiver: self.sender.subscribe(),
+            receiver: self.receiver.clone(),
         }
     }
 }

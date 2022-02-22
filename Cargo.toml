@@ -20,7 +20,7 @@ members = [
 
 [dependencies]
 adw = { version = "0.1", optional = true, package = "libadwaita" }
-blocking = "1.1.0"
+async-broadcast = "0.3.4"
 fragile = "1.1.0"
 futures = "0.3.19"
 gtk = { version = "0.4.1", package = "gtk4" }
