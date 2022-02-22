@@ -128,7 +128,7 @@ pub(super) fn generate_stream(input: &DeriveInput) -> Result<TokenStream2> {
                 }
             }
 
-            fn connect_parent(&mut self, parent_widgets: &AppWidgets) {
+            fn connect_parent(&mut self, parent_widgets: & <#model as #relm4_path::Model>::Widgets) {
                 #connect_parent_stream
             }
         }

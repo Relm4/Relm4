@@ -4,6 +4,7 @@
 
 ### Fixed
 
++ relm4-macros: Use correct widget type in derive macro for components
 + relm4-macros: Fix parsing of `property: value == other,` expressions
 + relm4: Fixed the positon type for TabView
 + relm4: Fixed state changes in FactoryVec (by [V02460](https://github.com/V02460))
