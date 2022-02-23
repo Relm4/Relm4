@@ -8,7 +8,7 @@ use std::rc::Rc;
 /// Shared behavior of component controller types.
 pub trait ComponentController<C: Component> {
     /// Emits an input to the component.
-    fn emit(&mut self, event: C::Input) {
+    fn emit(&self, event: C::Input) {
         let _ = self.sender().send(event);
     }
 

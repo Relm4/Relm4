@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT or Apache-2.0
 
 use super::*;
-use crate::Sender;
+use crate::{shutdown::ShutdownReceiver, Sender};
 use std::marker::PhantomData;
 
 /// Component with view updates happening at the same time as model updates.
@@ -44,8 +44,8 @@ pub trait StatefulComponent: Sized + 'static {
     fn init_parts(
         params: Self::InitParams,
         root: &Self::Root,
-        input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) -> ComponentParts<Self, Self::Widgets>;
 
     /// Processes inputs received by the component.
@@ -54,8 +54,8 @@ pub trait StatefulComponent: Sized + 'static {
         &mut self,
         widgets: &mut Self::Widgets,
         message: Self::Input,
-        input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) -> Option<Self::Command> {
         None
     }
@@ -66,8 +66,8 @@ pub trait StatefulComponent: Sized + 'static {
         &mut self,
         widgets: &mut Self::Widgets,
         message: Self::CommandOutput,
-        input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) {
     }
 
@@ -76,14 +76,22 @@ pub trait StatefulComponent: Sized + 'static {
     fn update_notify(
         &mut self,
         widgets: &mut Self::Widgets,
-        input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) {
     }
 
     /// A command to perform in a background thread.
     #[allow(unused)]
-    fn command(message: Self::Command) -> CommandFuture<Self::CommandOutput> {
-        Box::pin(async move { None })
+    fn command(
+        message: Self::Command,
+        shutdown: ShutdownReceiver,
+        out: Sender<Self::CommandOutput>,
+    ) -> CommandFuture {
+        Box::pin(async {})
     }
+
+    /// Last method called before a component is shut down.
+    #[allow(unused)]
+    fn shutdown(&mut self, widgets: &mut Self::Widgets, output: Sender<Self::Output>) {}
 }

@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT or Apache-2.0
 
 use super::*;
-use crate::Sender;
+use crate::{shutdown::ShutdownReceiver, Sender};
 use std::marker::PhantomData;
 
 /// Elm-style variant of a Component with view updates separated from input updates
@@ -44,8 +44,8 @@ pub trait Component: Sized + 'static {
     fn init_parts(
         params: Self::InitParams,
         root: &Self::Root,
-        input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) -> ComponentParts<Self, Self::Widgets>;
 
     /// Processes inputs received by the component.
@@ -53,8 +53,8 @@ pub trait Component: Sized + 'static {
     fn update(
         &mut self,
         message: Self::Input,
-        input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) -> Option<Self::Command> {
         None
     }
@@ -64,8 +64,8 @@ pub trait Component: Sized + 'static {
     fn update_cmd(
         &mut self,
         message: Self::CommandOutput,
-        input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) {
     }
 
@@ -74,16 +74,24 @@ pub trait Component: Sized + 'static {
     fn update_view(
         &self,
         widgets: &mut Self::Widgets,
-        input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) {
     }
 
     /// A command to perform in a background thread.
     #[allow(unused)]
-    fn command(message: Self::Command) -> CommandFuture<Self::CommandOutput> {
-        Box::pin(async move { None })
+    fn command(
+        message: Self::Command,
+        shutdown: ShutdownReceiver,
+        output: Sender<Self::CommandOutput>,
+    ) -> CommandFuture {
+        Box::pin(async {})
     }
+
+    /// Last method called before a component is shut down.
+    #[allow(unused)]
+    fn shutdown(&mut self, widgets: &mut Self::Widgets, output: Sender<Self::Output>) {}
 }
 
 /// Elm-style variant of a Component with view updates separated from input updates
@@ -118,8 +126,8 @@ pub trait SimpleComponent: Sized + 'static {
     fn init_parts(
         params: Self::InitParams,
         root: &Self::Root,
-        input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) -> ComponentParts<Self, Self::Widgets>;
 
     /// Processes inputs received by the component.
@@ -127,24 +135,28 @@ pub trait SimpleComponent: Sized + 'static {
     fn update(
         &mut self,
         message: Self::Input,
-        input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) {
     }
 
     /// Defines how the component should respond to command updates.
     #[allow(unused)]
-    fn update_cmd(&mut self, input: &mut Sender<Self::Input>, output: &mut Sender<Self::Output>) {}
+    fn update_cmd(&mut self, input: &Sender<Self::Input>, output: &Sender<Self::Output>) {}
 
     /// Updates the view after the model has been updated.
     #[allow(unused)]
     fn update_view(
         &self,
         widgets: &mut Self::Widgets,
-        input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) {
     }
+
+    /// Last method called before a component is shut down.
+    #[allow(unused)]
+    fn shutdown(&mut self, widgets: &mut Self::Widgets, output: Sender<Self::Output>) {}
 }
 
 impl<C> Component for C
@@ -167,8 +179,8 @@ where
     fn init_parts(
         params: Self::InitParams,
         root: &Self::Root,
-        input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) -> ComponentParts<Self, Self::Widgets> {
         C::init_parts(params, root, input, output)
     }
@@ -176,8 +188,8 @@ where
     fn update(
         &mut self,
         message: Self::Input,
-        input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) -> Option<Self::Command> {
         C::update(self, message, input, output);
         None
@@ -186,9 +198,13 @@ where
     fn update_view(
         &self,
         widgets: &mut Self::Widgets,
-        input: &mut Sender<Self::Input>,
-        output: &mut Sender<Self::Output>,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
     ) {
         C::update_view(self, widgets, input, output)
+    }
+
+    fn shutdown(&mut self, widgets: &mut Self::Widgets, output: Sender<Self::Output>) {
+        self.shutdown(widgets, output);
     }
 }

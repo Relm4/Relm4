@@ -4,6 +4,8 @@
 
 use super::super::*;
 use super::*;
+use crate::shutdown;
+use async_oneshot::oneshot;
 use futures::FutureExt;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -17,30 +19,40 @@ impl<C: StatefulComponent> ComponentBuilder<C, C::Root> {
         let ComponentBuilder { root, .. } = self;
 
         // Used for all events to be processed by this component's internal service.
-        let (mut input_tx, mut input_rx) = mpsc::unbounded_channel::<C::Input>();
+        let (mut input_tx, mut input_rx) = crate::channel::<C::Input>();
 
         // Used by this component to send events to be handled externally by the caller.
-        let (mut output_tx, output_rx) = mpsc::unbounded_channel::<C::Output>();
+        let (mut output_tx, output_rx) = crate::channel::<C::Output>();
 
         // Sends messages from commands executed from the background.
-        let (cmd_tx, mut cmd_rx) = mpsc::unbounded_channel::<C::CommandOutput>();
+        let (cmd_tx, mut cmd_rx) = crate::channel::<C::CommandOutput>();
 
         // Gets notifications when a component's model and view is updated externally.
-        let notifier = Rc::new(tokio::sync::Notify::new());
+        let (notifier, notifier_rx) = flume::bounded(0);
 
         // Constructs the initial model and view with the initial payload.
         let watcher = Rc::new(StateWatcher {
             state: RefCell::new(C::init_parts(payload, &root, &mut input_tx, &mut output_tx)),
-            notifier: notifier.clone(),
+            notifier,
         });
 
-        // The main service receives `Self::Input` and `Self::CommandOutput` messages and applies
-        // them to the model and view.
+        // The source ID of the component's service will be sent through this once the root
+        // widget has been iced, which will give the component one last chance to say goodbye.
+        let (mut burn_notifier, burn_recipient) = oneshot::<gtk::glib::SourceId>();
+
+        // Notifies the component's child commands that it is now deceased.
+        let (death_notifier, death_recipient) = shutdown::channel();
+
         let mut input_tx_ = input_tx.clone();
         let watcher_ = watcher.clone();
+
+        // Spawns the component's service. It will receive both `Self::Input` and
+        // `Self::CommandOutput` messages. It will spawn commands as requested by
+        // updates, and send `Self::Output` messages externally.
         let id = crate::spawn_local(async move {
+            let mut burn_notice = burn_recipient.fuse();
             loop {
-                let notifier = notifier.notified().fuse();
+                let notifier = notifier_rx.recv_async().fuse();
                 let cmd = cmd_rx.recv().fuse();
                 let input = input_rx.recv().fuse();
 
@@ -62,11 +74,8 @@ impl<C: StatefulComponent> ComponentBuilder<C, C::Root> {
                                 model.update(widgets, message, &mut input_tx_, &mut output_tx)
                             {
                                 let cmd_tx = cmd_tx.clone();
-                                crate::spawn(async move {
-                                    if let Some(output) = C::command(command).await {
-                                        let _ = cmd_tx.send(output);
-                                    }
-                                });
+                                let recipient = death_recipient.clone();
+                                crate::spawn(C::command(command, recipient, cmd_tx));
                             }
                         }
                     }
@@ -92,12 +101,33 @@ impl<C: StatefulComponent> ComponentBuilder<C, C::Root> {
 
                         model.update_notify(widgets, &mut input_tx_, &mut output_tx);
                     }
+
+                    // Triggered when the component is destroyed
+                    id = burn_notice => {
+                        let ComponentParts {
+                            ref mut model,
+                            ref mut widgets,
+                        } = &mut *watcher_.state.borrow_mut();
+
+                        model.shutdown(widgets, output_tx);
+
+                        let _ = death_notifier.shutdown();
+
+                        if let Ok(id) = id {
+                            id.remove();
+                        }
+
+                        return
+                    }
                 );
             }
         });
 
         // When the root widget is destroyed, the spawned service will be removed.
-        root.on_destroy(move || id.remove());
+        // Passes the `glib::SourceId` through the shutdown channel.
+        root.on_destroy(move || {
+            let _ = burn_notifier.send(id);
+        });
 
         // Give back a type for controlling the component service.
         Connector {

@@ -7,7 +7,6 @@ mod stateful;
 
 use crate::RelmContainerExt;
 use std::marker::PhantomData;
-use tokio::sync::mpsc;
 
 /// A component that is ready for docking and launch.
 #[derive(Debug)]
