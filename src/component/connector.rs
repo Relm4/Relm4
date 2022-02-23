@@ -30,7 +30,7 @@ impl<Component, Root, Widgets, Input: 'static, Output: 'static>
     /// Forwards output events to the designated sender.
     pub fn forward<X: 'static, F: (Fn(Output) -> X) + 'static>(
         self,
-        sender_: Sender<X>,
+        sender_: &Sender<X>,
         transform: F,
     ) -> Controller<Component, Root, Widgets, Input> {
         let Connector {
@@ -40,7 +40,7 @@ impl<Component, Root, Widgets, Input: 'static, Output: 'static>
             receiver,
         } = self;
 
-        crate::spawn_local(receiver.forward(sender_, transform));
+        crate::spawn_local(receiver.forward(sender_.clone(), transform));
 
         Controller {
             state,

@@ -103,7 +103,7 @@ impl<Input: 'static, Output: 'static> WorkerHandle<Input, Output> {
     /// Forwards output events to the designated sender.
     pub fn forward<X: 'static, F: (Fn(Output) -> X) + 'static>(
         self,
-        sender_: Sender<X>,
+        sender_: &Sender<X>,
         transform: F,
     ) -> WorkerController<Input> {
         let WorkerHandle {
@@ -112,7 +112,7 @@ impl<Input: 'static, Output: 'static> WorkerHandle<Input, Output> {
             worker,
         } = self;
 
-        crate::spawn_local(receiver.forward(sender_, transform));
+        crate::spawn_local(receiver.forward(sender_.clone(), transform));
         WorkerController { sender, worker }
     }
 }
