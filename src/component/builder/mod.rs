@@ -6,6 +6,7 @@ mod elm_like;
 mod stateful;
 
 use crate::RelmContainerExt;
+use gtk::prelude::GtkWindowExt;
 use std::marker::PhantomData;
 
 /// A component that is ready for docking and launch.
@@ -29,6 +30,15 @@ impl<Component, Root: AsRef<gtk::Widget>> ComponentBuilder<Component, Root> {
     /// Attach the component's root widget to a given container.
     pub fn attach_to(self, container: &impl RelmContainerExt) -> Self {
         container.container_add(self.root.as_ref());
+
+        self
+    }
+}
+
+impl<Component, Root: AsRef<gtk::Window>> ComponentBuilder<Component, Root> {
+    /// Set the component's root widget transient for a given window.
+    pub fn transient_to(self, window: impl AsRef<gtk::Window>) -> Self {
+        self.root.as_ref().set_transient_for(Some(window.as_ref()));
 
         self
     }
