@@ -84,9 +84,6 @@ pub trait RelmListBoxExt {
     /// Get the index of a widget attached to a listbox.
     fn index_of_child(&self, widget: &impl AsRef<gtk::Widget>) -> Option<i32>;
 
-    /// Remove all children from listbox.
-    fn remove_all(&self);
-
     /// Remove the row of a child attached a listbox.
     fn remove_row_of_child(&self, widget: &impl AsRef<gtk::Widget>);
 
@@ -101,12 +98,6 @@ impl RelmListBoxExt for gtk::ListBox {
         }
 
         None
-    }
-
-    fn remove_all(&self) {
-        while let Some(child) = self.last_child() {
-            self.remove(&child);
-        }
     }
 
     fn remove_row_of_child(&self, widget: &impl AsRef<gtk::Widget>) {
