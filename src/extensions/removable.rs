@@ -2,30 +2,50 @@ use crate::RelmSetChildExt;
 use gtk::prelude::*;
 
 /// Widget types which can have widgets removed from them.
-pub trait RelmRemovableExt<W> {
+pub trait RelmRemovableExt<'a> {
+    /// Type of children of the container.
+    type Child: 'a;
     /// Removes the widget from the container
     /// if it is a child of the container.
-    fn container_remove(&self, widget: &W);
+    fn container_remove(&self, widget: Self::Child);
+    /// Remove all children from the container.
+    fn remove_all(&self);
 }
 
-impl<T: RelmSetChildExt, W: AsRef<gtk::Widget>> RelmRemovableExt<W> for T {
-    fn container_remove(&self, _widget: &W) {
+impl<'a, T: RelmSetChildExt> RelmRemovableExt<'a> for T {
+    type Child = &'a dyn AsRef<gtk::Widget>;
+    fn container_remove(&self, _widget: Self::Child) {
+        self.container_set_child(None::<&gtk::Widget>);
+    }
+    fn remove_all(&self) {
         self.container_set_child(None::<&gtk::Widget>);
     }
 }
 
-impl<W: AsRef<gtk::ListBoxRow>> RelmRemovableExt<W> for gtk::ListBox {
-    fn container_remove(&self, widget: &W) {
-        self.remove(widget.as_ref());
+impl<'a> RelmRemovableExt<'a> for gtk::ListBox {
+    type Child = &'a gtk::ListBoxRow;
+    fn container_remove(&self, widget: Self::Child) {
+        self.remove(widget);
+    }
+    fn remove_all(&self) {
+        while let Some(child) = self.last_child() {
+            self.remove(&child);
+        }
     }
 }
 
 macro_rules! remove_impl {
     ($($type:ty),+) => {
         $(
-            impl<W: AsRef<gtk::Widget>> RelmRemovableExt<W> for $type {
-                fn container_remove(&self, widget: &W) {
+            impl<'a> RelmRemovableExt<'a> for $type {
+                type Child = &'a dyn AsRef<gtk::Widget>;
+                fn container_remove(&self, widget: Self::Child) {
                     self.remove(widget.as_ref());
+                }
+                fn remove_all(&self) {
+                    while let Some(child) = self.last_child() {
+                        self.remove(&child);
+                    }
                 }
             }
         )+
@@ -35,9 +55,15 @@ macro_rules! remove_impl {
 macro_rules! remove_child_impl {
     ($($type:ty),+) => {
         $(
-            impl<W: AsRef<gtk::Widget>> RelmRemovableExt<W> for $type {
-                fn container_remove(&self, widget: &W) {
+            impl<'a> RelmRemovableExt<'a> for $type {
+                type Child = &'a dyn AsRef<gtk::Widget>;
+                fn container_remove(&self, widget: Self::Child) {
                     self.remove_child(widget.as_ref());
+                }
+                fn remove_all(&self) {
+                    while let Some(child) = self.last_child() {
+                        self.remove_child(&child);
+                    }
                 }
             }
         )+
