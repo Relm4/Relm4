@@ -23,7 +23,7 @@ pub struct ComponentBuilder<C: Component> {
 
 impl<C: Component> ComponentBuilder<C> {
     /// Configure the root widget before launching.
-    pub fn update_root<F: FnOnce(&mut C::Root) + 'static>(mut self, func: F) -> Self {
+    pub fn update_root<F: FnOnce(&mut C::Root)>(mut self, func: F) -> Self {
         func(&mut self.root);
         self
     }
