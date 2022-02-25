@@ -60,7 +60,7 @@ impl SimpleComponent for AppModel {
         root: &Self::Root,
         input: &Sender<Self::Input>,
         _output: &Sender<Self::Output>,
-    ) -> ComponentParts<Self, Self::Widgets> {
+    ) -> ComponentParts<Self> {
         let model = AppModel { counter };
 
         // Insert the macro codegen here
