@@ -55,6 +55,10 @@ pub use relm4_macros::*;
 /// Re-export of libadwaita
 pub use adw;
 
+#[cfg(feature = "libpanel")]
+/// Re-export of libpanel
+pub use panel;
+
 #[cfg(feature = "tokio-rt")]
 #[cfg_attr(doc, doc(cfg(feature = "tokio-rt")))]
 /// Re-export of [`async_trait::async_trait`]
