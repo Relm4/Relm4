@@ -27,6 +27,11 @@ impl<C: Component> ComponentBuilder<C> {
         func(&mut self.root);
         self
     }
+
+    /// Access the root widget before the component is initialized.
+    pub fn widget(&self) -> &C::Root {
+        &self.root
+    }
 }
 
 impl<C: Component> ComponentBuilder<C>
