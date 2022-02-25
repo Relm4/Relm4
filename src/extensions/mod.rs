@@ -40,8 +40,11 @@ impl ApplicationBuilderExt for gtk::builders::ApplicationBuilder {
 
 /// Additional methods for `gtk::Widget`
 pub trait RelmWidgetExt {
-    /// Iterates across the child widgets of a widget
+    /// Iterates across the child widgets of a widget.
     fn iter_children(&self) -> Box<dyn Iterator<Item = gtk::Widget>>;
+
+    /// Iterates across the child widgets of a widget, in reverse order.
+    fn iter_children_reverse(&self) -> Box<dyn Iterator<Item = gtk::Widget>>;
 
     /// Iterates children of a widget with a closure.
     fn for_each_child<F: FnMut(gtk::Widget) + 'static>(&self, func: F);
@@ -67,6 +70,10 @@ impl<T: gtk::glib::IsA<gtk::Widget>> RelmWidgetExt for T {
 
     fn iter_children(&self) -> Box<dyn Iterator<Item = gtk::Widget>> {
         Box::new(iter_children(self.as_ref()))
+    }
+
+    fn iter_children_reverse(&self) -> Box<dyn Iterator<Item = gtk::Widget>> {
+        Box::new(iter_children_reverse(self.as_ref()))
     }
 
     fn set_size_group(&self, size_group: &gtk::SizeGroup) {
@@ -129,6 +136,19 @@ fn iter_children(widget: &gtk::Widget) -> impl Iterator<Item = gtk::Widget> {
     std::iter::from_fn(move || {
         if let Some(child) = widget.take() {
             widget = child.next_sibling();
+            return Some(child);
+        }
+
+        None
+    })
+}
+
+fn iter_children_reverse(widget: &gtk::Widget) -> impl Iterator<Item = gtk::Widget> {
+    let mut widget = widget.last_child();
+
+    std::iter::from_fn(move || {
+        if let Some(child) = widget.take() {
+            widget = child.prev_sibling();
             return Some(child);
         }
 
