@@ -7,7 +7,7 @@ use crate::ComponentBuilder;
 /// An app that runs the main application.
 #[derive(Debug)]
 pub struct RelmApp<C: Component> {
-    bridge: ComponentBuilder<C, C::Root>,
+    bridge: ComponentBuilder<C>,
 
     /// The [`gtk::Application`] that's used internally to setup
     /// and run the application.

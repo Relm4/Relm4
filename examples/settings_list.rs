@@ -124,7 +124,7 @@ impl Component for App {
         root: &Self::Root,
         _input: &Sender<Self::Input>,
         output: &Sender<Self::Output>,
-    ) -> ComponentParts<Self, Self::Widgets> {
+    ) -> ComponentParts<Self> {
         // Request the caller to reload its options.
         output.send(Output::Reload);
 

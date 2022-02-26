@@ -42,7 +42,7 @@ impl SimpleComponent for AppModel {
         window: &Self::Root,
         input: &Sender<Self::Input>,
         _output: &Sender<Self::Output>,
-    ) -> ComponentParts<Self, Self::Widgets> {
+    ) -> ComponentParts<Self> {
         let model = AppModel { counter };
 
         let vbox = gtk::Box::builder()
