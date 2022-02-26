@@ -145,6 +145,60 @@ where
         Some(data)
     }
 
+    /// Remove an element at position `index` within the [`FactoryVec`],
+    /// shifting all elements after it to the left.
+    ///
+    /// Note: Because this shifts over the remaining elements, it has a
+    /// worst-case performance of *O*(*n*). If you don't need the order of elements
+    /// to be preserved, use [`swap_remove`] instead.
+    ///
+    /// [`swap_remove`]: Vec::swap_remove
+    ///
+    /// # Panics
+    ///
+    /// Panics if `index` is out of bounds.
+    ///
+    pub fn remove(&mut self, index: usize) -> Data {
+        let data = self.data.remove(index);
+
+        let change = match self.changes.borrow().get(&index) {
+            None | Some(ChangeType::Update) => Some(ChangeType::Remove),
+            Some(ChangeType::Add) => None,
+            Some(ChangeType::Recreate) => Some(ChangeType::Remove),
+            Some(ChangeType::Remove) => unreachable!(),
+        };
+        self.set_change(index, change);
+
+        data
+    }
+
+    /// Removes an element from the vector and returns it.
+    ///
+    /// The removed element is replaced by the last element of the vector.
+    ///
+    /// This does not preserve ordering, but is *O*(1).
+    /// If you need to preserve the element order, use [`remove`] instead.
+    ///
+    /// [`remove`]: Vec::remove
+    ///
+    /// # Panics
+    ///
+    /// Panics if `index` is out of bounds.
+    ///
+    pub fn swap_remove(&mut self, index: usize) -> Data {
+        let data = self.data.swap_remove(index);
+
+        let change = match self.changes.borrow().get(&index) {
+            None | Some(ChangeType::Update) => Some(ChangeType::Remove),
+            Some(ChangeType::Add) => None,
+            Some(ChangeType::Recreate) => Some(ChangeType::Remove),
+            Some(ChangeType::Remove) => unreachable!(),
+        };
+        self.set_change(index, change);
+
+        data
+    }
+
     /// Get a reference to data stored at `index`.
     #[must_use]
     pub fn get(&self, index: usize) -> Option<&Data> {
