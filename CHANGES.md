@@ -4,6 +4,7 @@
 
 ### Added 
 
++ relm4: Add WidgetRef trait to make AsRef easier accessible for widgets
 + relm4-macros: Destructure widgets in Widgets::view
 
 ### Fixed

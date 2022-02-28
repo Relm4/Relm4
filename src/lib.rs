@@ -30,6 +30,7 @@ pub use micro_component::{MicroComponent, MicroComponentError, MicroModel, Micro
 pub use msg_handler::RelmMsgHandler;
 pub use traits::*;
 pub use util::widget_plus::WidgetPlus;
+pub use util::WidgetRef;
 pub use worker::*;
 
 use fragile::Fragile;

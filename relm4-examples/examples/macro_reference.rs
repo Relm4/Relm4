@@ -1,7 +1,7 @@
 use gtk::prelude::{BoxExt, ButtonExt, GridExt, GtkWindowExt, OrientableExt, WidgetExt};
 use relm4::{
     gtk, send, AppUpdate, ComponentUpdate, Model, RelmApp, RelmComponent, Sender, WidgetPlus,
-    Widgets,
+    Widgets, WidgetRef
 };
 
 #[tracker::track]
@@ -158,6 +158,13 @@ impl Widgets<AppModel, ()> for AppWidgets {
                     connect_clicked[sender1 = components.button1.sender()] => move |_| {
                         send!(sender1, ButtonMsg);
                     }
+                },
+                append = &gtk::CenterBox {
+                    set_center_widget: watch!(Some(if model.counter % 2 == 0 {
+                        test_label_1.widget_ref()
+                    } else {
+                        test_label_2.widget_ref()
+                    })),
                 }
             },
         }
@@ -165,6 +172,8 @@ impl Widgets<AppModel, ()> for AppWidgets {
 
     additional_fields! {
         test_field: u8,
+        test_label_1: gtk::Label,
+        test_label_2: gtk::Label,
     }
 
     fn pre_init() {
@@ -187,6 +196,9 @@ impl Widgets<AppModel, ()> for AppWidgets {
             .build();
 
         let counter = model.counter;
+
+        let test_label_1 = gtk::Label::new(Some("test 1"));
+        let test_label_2 = gtk::Label::new(Some("test 2"));
     }
 
     fn post_init() {
