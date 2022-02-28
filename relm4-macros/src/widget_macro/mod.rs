@@ -168,10 +168,18 @@ pub(crate) fn generate_tokens(
 
             /// Update the view to represent the updated model.
             fn view(&mut self, model: &#model, sender: #relm4_path::Sender<<#model as #relm4_path::Model>::Msg>) {
+                #[allow(unused_variables)]
+                let Self {
+                    #return_fields
+                    #additional_fields_return_stream
+                } = self;
+
                 // Wrap pre_view and post_view code to prevent early returns from skipping other view code.
                 (|| { #pre_view })();
+
                 #view
                 #track
+
                 (|| { #post_view })();
             }
         }

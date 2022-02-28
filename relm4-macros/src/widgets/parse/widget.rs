@@ -45,7 +45,7 @@ impl Parse for Widget {
 
         // get the inner input as func_input
         let func_input = if let Some(paren_input) = &inner_input {
-            &paren_input
+            paren_input
         } else {
             input
         };
