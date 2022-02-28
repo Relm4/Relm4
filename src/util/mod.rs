@@ -14,4 +14,4 @@ impl<T: AsRef<Widget>> WidgetRef for T {
     fn widget_ref(&self) -> &Widget {
         self.as_ref()
     }
-}    
+}

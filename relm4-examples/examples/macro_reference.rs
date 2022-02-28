@@ -1,7 +1,7 @@
 use gtk::prelude::{BoxExt, ButtonExt, GridExt, GtkWindowExt, OrientableExt, WidgetExt};
 use relm4::{
     gtk, send, AppUpdate, ComponentUpdate, Model, RelmApp, RelmComponent, Sender, WidgetPlus,
-    Widgets, WidgetRef
+    WidgetRef, Widgets,
 };
 
 #[tracker::track]
