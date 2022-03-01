@@ -19,13 +19,16 @@ members = [
 ]
 
 [dependencies]
-adw = { version = "0.1", optional = true, package = "libadwaita" }
+#adw = { version = "0.2", optional = true, package = "libadwaita" }
+adw = { git = "https://gitlab.gnome.org/World/Rust/libadwaita-rs", optional = true, package = "libadwaita" }
+
 async-broadcast = "0.3.4"
 async-oneshot = "0.5.0"
 flume = "0.10.11"
 fragile = "1.1.0"
 futures = "0.3.19"
-gtk = { version = "0.4.1", package = "gtk4" }
+gtk = { git = "https://github.com/gtk-rs/gtk4-rs", package = "gtk4" }
+#gtk = { version = "0.5", package = "gtk4" }
 log = "0.4.14"
 once_cell = "1.8"
 tokio = { version = "1.15", features = ["rt", "rt-multi-thread"] }
