@@ -1,3 +1,7 @@
 //! Utility traits for working with GTK widgets.
 
-pub mod widget_plus;
+mod widget_plus;
+mod widget_ref;
+
+pub use widget_plus::WidgetPlus;
+pub use widget_ref::WidgetRef;

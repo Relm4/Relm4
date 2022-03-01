@@ -34,7 +34,7 @@ pub use self::shutdown::ShutdownReceiver;
 pub use self::worker::*;
 pub use app::RelmApp;
 pub use tokio::task::JoinHandle;
-pub use util::widget_plus::WidgetPlus;
+pub use util::{WidgetPlus, WidgetRef};
 
 use once_cell::sync::OnceCell;
 use std::future::Future;

@@ -1,5 +1,3 @@
-//! Trait that extends [`gtk::prelude::WidgetExt`].
-
 use gtk::prelude::{BoxExt, Cast, FixedExt, GridExt, IsA, StyleContextExt, TextViewExt, WidgetExt};
 use gtk::Widget;
 
