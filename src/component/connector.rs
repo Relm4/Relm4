@@ -6,33 +6,31 @@ use super::{Component, ComponentController, Controller, StateWatcher};
 use crate::{Receiver, Sender};
 use std::rc::Rc;
 
-#[derive(Debug)]
 /// Contains the post-launch input sender and output receivers with the root widget.
 ///
 /// The receiver can be separated from the `Fairing` by choosing a method for handling it.
-pub struct Connector<Component, Root, Widgets, Input, Output> {
+#[allow(missing_debug_implementations)]
+pub struct Connector<C: Component> {
     /// The models and widgets maintained by the component.
-    pub(super) state: Rc<StateWatcher<Component, Widgets>>,
+    pub(super) state: Rc<StateWatcher<C>>,
 
     /// The widget that this component manages.
-    pub(super) widget: Root,
+    pub(super) widget: C::Root,
 
     /// Used for emitting events to the component.
-    pub(super) sender: Sender<Input>,
+    pub(super) sender: Sender<C::Input>,
 
     /// The outputs being received by the component.
-    pub(super) receiver: Receiver<Output>,
+    pub(super) receiver: Receiver<C::Output>,
 }
 
-impl<Component, Root, Widgets, Input: 'static, Output: 'static>
-    Connector<Component, Root, Widgets, Input, Output>
-{
+impl<C: Component> Connector<C> {
     /// Forwards output events to the designated sender.
-    pub fn forward<X: 'static, F: (Fn(Output) -> X) + 'static>(
+    pub fn forward<X: 'static, F: (Fn(C::Output) -> X) + 'static>(
         self,
         sender_: &Sender<X>,
         transform: F,
-    ) -> Controller<Component, Root, Widgets, Input> {
+    ) -> Controller<C> {
         let Connector {
             state,
             widget,
@@ -50,10 +48,10 @@ impl<Component, Root, Widgets, Input: 'static, Output: 'static>
     }
 
     /// Given a mutable closure, captures the receiver for handling.
-    pub fn connect_receiver<F: FnMut(&mut Sender<Input>, Output) + 'static>(
+    pub fn connect_receiver<F: FnMut(&mut Sender<C::Input>, C::Output) + 'static>(
         self,
         mut func: F,
-    ) -> Controller<Component, Root, Widgets, Input> {
+    ) -> Controller<C> {
         let Connector {
             state,
             widget,
@@ -76,7 +74,7 @@ impl<Component, Root, Widgets, Input: 'static, Output: 'static>
     }
 
     /// Ignore outputs from the component and take the handle.
-    pub fn detach(self) -> Controller<Component, Root, Widgets, Input> {
+    pub fn detach(self) -> Controller<C> {
         let Self {
             state,
             widget,
@@ -92,14 +90,12 @@ impl<Component, Root, Widgets, Input: 'static, Output: 'static>
     }
 }
 
-impl<C: Component> ComponentController<C>
-    for Connector<C, C::Root, C::Widgets, C::Input, C::Output>
-{
+impl<C: Component> ComponentController<C> for Connector<C> {
     fn sender(&self) -> &Sender<C::Input> {
         &self.sender
     }
 
-    fn state(&self) -> &Rc<StateWatcher<C, C::Widgets>> {
+    fn state(&self) -> &Rc<StateWatcher<C>> {
         &self.state
     }
 

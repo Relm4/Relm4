@@ -40,8 +40,11 @@ impl ApplicationBuilderExt for gtk::builders::ApplicationBuilder {
 
 /// Additional methods for `gtk::Widget`
 pub trait RelmWidgetExt {
-    /// Iterates across the child widgets of a widget
+    /// Iterates across the child widgets of a widget.
     fn iter_children(&self) -> Box<dyn Iterator<Item = gtk::Widget>>;
+
+    /// Iterates across the child widgets of a widget, in reverse order.
+    fn iter_children_reverse(&self) -> Box<dyn Iterator<Item = gtk::Widget>>;
 
     /// Iterates children of a widget with a closure.
     fn for_each_child<F: FnMut(gtk::Widget) + 'static>(&self, func: F);
@@ -69,6 +72,10 @@ impl<T: gtk::glib::IsA<gtk::Widget>> RelmWidgetExt for T {
         Box::new(iter_children(self.as_ref()))
     }
 
+    fn iter_children_reverse(&self) -> Box<dyn Iterator<Item = gtk::Widget>> {
+        Box::new(iter_children_reverse(self.as_ref()))
+    }
+
     fn set_size_group(&self, size_group: &gtk::SizeGroup) {
         size_group.add_widget(self);
     }
@@ -84,9 +91,6 @@ pub trait RelmListBoxExt {
     /// Get the index of a widget attached to a listbox.
     fn index_of_child(&self, widget: &impl AsRef<gtk::Widget>) -> Option<i32>;
 
-    /// Remove all children from listbox.
-    fn remove_all(&self);
-
     /// Remove the row of a child attached a listbox.
     fn remove_row_of_child(&self, widget: &impl AsRef<gtk::Widget>);
 
@@ -101,12 +105,6 @@ impl RelmListBoxExt for gtk::ListBox {
         }
 
         None
-    }
-
-    fn remove_all(&self) {
-        while let Some(child) = self.last_child() {
-            self.remove(&child);
-        }
     }
 
     fn remove_row_of_child(&self, widget: &impl AsRef<gtk::Widget>) {
@@ -138,6 +136,19 @@ fn iter_children(widget: &gtk::Widget) -> impl Iterator<Item = gtk::Widget> {
     std::iter::from_fn(move || {
         if let Some(child) = widget.take() {
             widget = child.next_sibling();
+            return Some(child);
+        }
+
+        None
+    })
+}
+
+fn iter_children_reverse(widget: &gtk::Widget) -> impl Iterator<Item = gtk::Widget> {
+    let mut widget = widget.last_child();
+
+    std::iter::from_fn(move || {
+        if let Some(child) = widget.take() {
+            widget = child.prev_sibling();
             return Some(child);
         }
 

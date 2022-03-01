@@ -16,31 +16,31 @@ pub trait ComponentController<C: Component> {
     fn sender(&self) -> &Sender<C::Input>;
 
     /// Provides access to the state of a component.
-    fn state(&self) -> &Rc<StateWatcher<C, C::Widgets>>;
+    fn state(&self) -> &Rc<StateWatcher<C>>;
 
     /// The root widget of the component.
     fn widget(&self) -> &C::Root;
 }
 
-#[derive(Debug)]
 /// Controls the component from afar.
-pub struct Controller<Component, Root, Widgets, Input> {
+#[allow(missing_debug_implementations)]
+pub struct Controller<C: Component> {
     /// The models and widgets maintained by the component.
-    pub(super) state: Rc<StateWatcher<Component, Widgets>>,
+    pub(super) state: Rc<StateWatcher<C>>,
 
     /// The widget that this component manages.
-    pub(super) widget: Root,
+    pub(super) widget: C::Root,
 
     /// Used for emitting events to the component.
-    pub(super) sender: Sender<Input>,
+    pub(super) sender: Sender<C::Input>,
 }
 
-impl<C: Component> ComponentController<C> for Controller<C, C::Root, C::Widgets, C::Input> {
+impl<C: Component> ComponentController<C> for Controller<C> {
     fn sender(&self) -> &Sender<C::Input> {
         &self.sender
     }
 
-    fn state(&self) -> &Rc<StateWatcher<C, C::Widgets>> {
+    fn state(&self) -> &Rc<StateWatcher<C>> {
         &self.state
     }
 

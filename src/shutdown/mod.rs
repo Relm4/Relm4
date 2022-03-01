@@ -22,7 +22,7 @@ pub fn channel() -> (ShutdownSender, ShutdownReceiver) {
     (
         ShutdownSender {
             alive: alive.clone(),
-            sender: sender,
+            sender,
         },
         ShutdownReceiver { alive, receiver },
     )

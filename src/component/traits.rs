@@ -24,7 +24,7 @@ pub trait Component: Sized + 'static {
     type InitParams;
 
     /// The widget that was constructed by the component.
-    type Root: OnDestroy;
+    type Root: std::fmt::Debug + OnDestroy;
 
     /// The type that's used for storing widgets created for this component.
     type Widgets: 'static;
@@ -33,7 +33,7 @@ pub trait Component: Sized + 'static {
     fn init_root() -> Self::Root;
 
     /// Initializes the root widget and prepares a `Bridge` for docking.
-    fn init() -> ComponentBuilder<Self, Self::Root> {
+    fn init() -> ComponentBuilder<Self> {
         ComponentBuilder {
             root: Self::init_root(),
             component: PhantomData,
@@ -46,7 +46,7 @@ pub trait Component: Sized + 'static {
         root: &Self::Root,
         input: &Sender<Self::Input>,
         output: &Sender<Self::Output>,
-    ) -> ComponentParts<Self, Self::Widgets>;
+    ) -> ComponentParts<Self>;
 
     /// Processes inputs received by the component.
     #[allow(unused)]
@@ -69,6 +69,18 @@ pub trait Component: Sized + 'static {
     ) {
     }
 
+    /// Handles updates from a command.
+    fn update_cmd_with_view(
+        &mut self,
+        widgets: &mut Self::Widgets,
+        message: Self::CommandOutput,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
+    ) {
+        self.update_cmd(message, input, output);
+        self.update_view(widgets, input, output)
+    }
+
     /// Updates the view after the model has been updated.
     #[allow(unused)]
     fn update_view(
@@ -77,6 +89,19 @@ pub trait Component: Sized + 'static {
         input: &Sender<Self::Input>,
         output: &Sender<Self::Output>,
     ) {
+    }
+
+    /// Updates the model and view. Optionally returns a command to run.
+    fn update_with_view(
+        &mut self,
+        widgets: &mut Self::Widgets,
+        message: Self::Input,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
+    ) -> Option<Self::Command> {
+        let cmd = self.update(message, input, output);
+        self.update_view(widgets, input, output);
+        cmd
     }
 
     /// A command to perform in a background thread.
@@ -106,7 +131,7 @@ pub trait SimpleComponent: Sized + 'static {
     type InitParams;
 
     /// The widget that was constructed by the component.
-    type Root: OnDestroy;
+    type Root: std::fmt::Debug + OnDestroy;
 
     /// The type that's used for storing widgets created for this component.
     type Widgets: 'static;
@@ -115,7 +140,7 @@ pub trait SimpleComponent: Sized + 'static {
     fn init_root() -> Self::Root;
 
     /// Initializes the root widget and prepares a `Bridge` for docking.
-    fn init() -> ComponentBuilder<Self, Self::Root> {
+    fn init() -> ComponentBuilder<Self> {
         ComponentBuilder {
             root: Self::init_root(),
             component: PhantomData,
@@ -128,7 +153,7 @@ pub trait SimpleComponent: Sized + 'static {
         root: &Self::Root,
         input: &Sender<Self::Input>,
         output: &Sender<Self::Output>,
-    ) -> ComponentParts<Self, Self::Widgets>;
+    ) -> ComponentParts<Self>;
 
     /// Processes inputs received by the component.
     #[allow(unused)]
@@ -181,7 +206,7 @@ where
         root: &Self::Root,
         input: &Sender<Self::Input>,
         output: &Sender<Self::Output>,
-    ) -> ComponentParts<Self, Self::Widgets> {
+    ) -> ComponentParts<Self> {
         C::init_parts(params, root, input, output)
     }
 
