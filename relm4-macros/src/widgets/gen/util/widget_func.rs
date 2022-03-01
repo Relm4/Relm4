@@ -67,8 +67,7 @@ impl WidgetFunc {
         }
 
         if let Some(args) = &self.args {
-            tokens.extend(quote! {(#args)});
-            tokens
+            quote! { #tokens(#args) }
         } else {
             quote! {
                 #tokens::default()

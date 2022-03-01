@@ -44,7 +44,7 @@ fn parse_widget_func(input: ParseStream) -> Result<WidgetFuncInfo> {
 
     // get the inner input as func_input
     let func_input = if let Some(paren_input) = &inner_input {
-        &paren_input
+        paren_input
     } else {
         input
     };
@@ -122,6 +122,19 @@ impl Widget {
 
         // Generat a name
         let name = util::idents_to_snake_case(&func.path_segments, func.span);
+
+        let ref_token = match ref_token {
+            Some(ref_token) => Some(ref_token),
+            None => {
+                // A `Default` implementation will be generated
+                // so we know we get `T` but need `&T`
+                if func.args.is_none() {
+                    Some(And::default())
+                } else {
+                    None
+                }
+            }
+        };
 
         Ok(Widget {
             mutable: None,
