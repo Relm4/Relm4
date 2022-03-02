@@ -2,8 +2,8 @@ use gtk::prelude::ToVariant;
 
 /// Trait used to specify the group name in [`ActionName`].
 pub trait ActionGroupName {
-    /// Returns the group name.
-    fn group_name() -> &'static str;
+    /// The name of the group.
+    const NAME: &'static str;
 }
 
 /// Trait for marking stateless actions.
@@ -26,12 +26,12 @@ pub trait ActionName {
     /// Use [`()`] for stateless actions.
     type State;
 
-    /// Returns the actions name.
-    fn name() -> &'static str;
+    /// The name of the action.
+    const NAME: &'static str;
 
     /// The full action name (group.action).
     fn action_name() -> String {
-        format!("{}.{}", Self::Group::group_name(), Self::name())
+        format!("{}.{}", Self::Group::NAME, Self::NAME)
     }
 }
 
