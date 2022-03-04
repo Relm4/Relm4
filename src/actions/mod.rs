@@ -17,9 +17,7 @@ macro_rules! new_action_group {
         $vis struct $ty;
 
         impl relm4::actions::ActionGroupName for $ty {
-            fn group_name() -> &'static str {
-                $name
-            }
+            const NAME: &'static str = $name;
         }
     };
 }
@@ -35,9 +33,7 @@ macro_rules! new_stateless_action {
             type Target = ();
             type State = ();
 
-            fn name() -> &'static str {
-                $name
-            }
+            const NAME: &'static str = $name;
         }
     };
 }
@@ -55,9 +51,7 @@ macro_rules! new_stateful_action {
             type Target = $value;
             type State = $state;
 
-            fn name() -> &'static str {
-                $name
-            }
+            const NAME: &'static str = $name;
         }
     };
 }
@@ -84,7 +78,7 @@ where
         let ty = Name::Target::static_variant_type();
 
         let action =
-            gio::SimpleAction::new_stateful(Name::name(), Some(&ty), &start_value.to_variant());
+            gio::SimpleAction::new_stateful(Name::NAME, Some(&ty), &start_value.to_variant());
 
         action.connect_activate(move |action, variant| {
             let value = variant.unwrap().get().unwrap();
@@ -111,7 +105,7 @@ where
         start_value: &Name::State,
         callback: Callback,
     ) -> Self {
-        let action = gio::SimpleAction::new_stateful(Name::name(), None, &start_value.to_variant());
+        let action = gio::SimpleAction::new_stateful(Name::NAME, None, &start_value.to_variant());
 
         action.connect_activate(move |action, _variant| {
             let mut state = action.state().unwrap().get().unwrap();
@@ -137,7 +131,7 @@ where
     ) -> Self {
         let ty = Name::Target::static_variant_type();
 
-        let action = gio::SimpleAction::new(Name::name(), Some(&ty));
+        let action = gio::SimpleAction::new(Name::NAME, Some(&ty));
 
         action.connect_activate(move |action, variant| {
             let value = variant.unwrap().get().unwrap();
@@ -158,7 +152,7 @@ where
 {
     /// Create a new stateless action.
     pub fn new_stateless<Callback: Fn(&gio::SimpleAction) + 'static>(callback: Callback) -> Self {
-        let action = gio::SimpleAction::new(Name::name(), None);
+        let action = gio::SimpleAction::new(Name::NAME, None);
 
         action.connect_activate(move |action, _variant| {
             callback(action);
