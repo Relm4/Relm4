@@ -109,13 +109,13 @@ impl RelmListBoxExt for gtk::ListBox {
 pub struct ChildrenIterator<T: RelmIterChildrenExt> {
     start: Option<T::Child>,
     end: Option<T::Child>,
-    done: bool,
+    init_start: bool,
+    init_end: bool,
 }
 
 impl<T: RelmIterChildrenExt> ChildrenIterator<T> {
     /// Create a new iterator over children of `widget`.
     pub fn new(widget: &T) -> Self {
-        let widget = widget.as_ref();
         let start = widget.first_child().map(|child| {
             child
                 .downcast::<T::Child>()
@@ -126,26 +126,47 @@ impl<T: RelmIterChildrenExt> ChildrenIterator<T> {
                 .downcast::<T::Child>()
                 .expect("The type of children does not match.")
         });
-        let done = start.is_none();
-        ChildrenIterator { start, end, done }
+        ChildrenIterator {
+            start,
+            end,
+            init_start: false,
+            init_end: false,
+        }
     }
 }
 
 impl<T: RelmIterChildrenExt> Iterator for ChildrenIterator<T> {
     type Item = T::Child;
     fn next(&mut self) -> Option<Self::Item> {
-        if !self.done {
-            if let Some(start) = self.start.take() {
-                if self.start == self.end {
-                    self.done = true;
-                }
-                self.start = start.next_sibling().map(|child| {
-                    child
-                        .downcast::<T::Child>()
-                        .expect("The type of children does not match.")
-                });
-                return Some(start);
+        if !self.init_start {
+            self.init_start = true;
+            return self.start.clone();
+        }
+
+        if self.start == self.end {
+            if self.init_end {
+                return None;
+            } else {
+                self.init_end = true;
+                return self.start.clone();
             }
+        }
+
+        if let Some(start) = self.start.take() {
+            self.start = start.next_sibling().map(|child| {
+                child
+                    .downcast::<T::Child>()
+                    .expect("The type of children does not match.")
+            });
+            if self.start == self.end {
+                if self.init_end {
+                    return None;
+                } else {
+                    self.init_end = true;
+                    return self.start.clone();
+                }
+            }
+            return self.start.clone();
         }
 
         None
@@ -154,18 +175,35 @@ impl<T: RelmIterChildrenExt> Iterator for ChildrenIterator<T> {
 
 impl<T: RelmIterChildrenExt> DoubleEndedIterator for ChildrenIterator<T> {
     fn next_back(&mut self) -> Option<Self::Item> {
-        if !self.done {
-            if let Some(end) = self.end.take() {
-                if self.start == self.end {
-                    self.done = true;
-                }
-                self.end = end.prev_sibling().map(|child| {
-                    child
-                        .downcast::<T::Child>()
-                        .expect("The type of children does not match.")
-                });
-                return Some(end);
+        if !self.init_end {
+            self.init_end = true;
+            return self.end.clone();
+        }
+
+        if self.start == self.end {
+            if self.init_start {
+                return None;
+            } else {
+                self.init_start = true;
+                return self.end.clone();
             }
+        }
+
+        if let Some(end) = self.end.take() {
+            self.end = end.prev_sibling().map(|child| {
+                child
+                    .downcast::<T::Child>()
+                    .expect("The type of children does not match.")
+            });
+            if self.start == self.end {
+                if self.init_start {
+                    return None;
+                } else {
+                    self.init_start = true;
+                    return self.end.clone();
+                }
+            }
+            return self.end.clone();
         }
 
         None
@@ -173,27 +211,14 @@ impl<T: RelmIterChildrenExt> DoubleEndedIterator for ChildrenIterator<T> {
 }
 
 /// Widget types which allow iteration over their children.
-pub trait RelmIterChildrenExt: IsA<gtk::Widget> {
-    /// Type of container children.
-    type Child: IsA<gtk::Widget>;
+pub trait RelmIterChildrenExt: RelmRemovableExt + IsA<gtk::Widget> {
     /// Returns an iterator over container children.
     fn iter_children(&self) -> ChildrenIterator<Self> {
         ChildrenIterator::new(self)
     }
 }
 
-impl RelmIterChildrenExt for gtk::Box {
-    type Child = gtk::Widget;
-}
-
-impl RelmIterChildrenExt for gtk::ListBox {
-    type Child = gtk::ListBoxRow;
-}
-
-impl RelmIterChildrenExt for gtk::FlowBox {
-    type Child = gtk::FlowBoxChild;
-}
-
-impl RelmIterChildrenExt for gtk::Grid {
-    type Child = gtk::Widget;
-}
+impl RelmIterChildrenExt for gtk::Box {}
+impl RelmIterChildrenExt for gtk::ListBox {}
+impl RelmIterChildrenExt for gtk::FlowBox {}
+impl RelmIterChildrenExt for gtk::Grid {}

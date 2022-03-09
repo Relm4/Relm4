@@ -26,7 +26,7 @@ fn same_widgets(
 }
 
 #[gtk::test]
-fn box_ext() {
+fn box_extension_traits() {
     let gtk_box = gtk::Box::default();
     let widgets = TestWidgets::default();
 
@@ -38,9 +38,10 @@ fn box_ext() {
 
     let mut children = gtk_box.iter_children();
     assert!(same_widgets(children.next(), Some(&widgets.0)));
+    assert!(same_widgets(children.next_back(), Some(&widgets.2)));
     assert!(same_widgets(children.next(), Some(&widgets.1)));
-    assert!(same_widgets(children.next(), Some(&widgets.2)));
     assert_eq!(children.next(), None);
+    assert_eq!(children.next_back(), None);
 
     gtk_box.remove_all();
 
@@ -48,7 +49,7 @@ fn box_ext() {
 }
 
 #[gtk::test]
-fn list_box_ext() {
+fn list_box_extension_traits() {
     let list_box = gtk::ListBox::default();
     let widgets = TestWidgets::default();
 
@@ -63,10 +64,11 @@ fn list_box_ext() {
     assert_eq!(list_box.index_of_child(&widgets.2), Some(2));
 
     let mut rows = list_box.iter_children();
+    assert!(same_widgets(rows.next_back(), widgets.2.parent()));
     assert!(same_widgets(rows.next(), widgets.0.parent()));
     assert!(same_widgets(rows.next(), widgets.1.parent()));
-    assert!(same_widgets(rows.next(), widgets.2.parent()));
     assert_eq!(rows.next(), None);
+    assert_eq!(rows.next_back(), None);
 
     list_box.remove_all();
 
@@ -90,7 +92,7 @@ fn list_box_ext() {
 }
 
 #[gtk::test]
-fn flow_box_ext() {
+fn flow_box_extension_traits() {
     let flow_box = gtk::FlowBox::default();
     let widgets = TestWidgets::default();
 
@@ -105,6 +107,7 @@ fn flow_box_ext() {
     assert!(same_widgets(flow_children.next(), widgets.1.parent()));
     assert!(same_widgets(flow_children.next(), widgets.2.parent()));
     assert_eq!(flow_children.next(), None);
+    assert_eq!(flow_children.next_back(), None);
 
     flow_box.remove_all();
 
@@ -112,7 +115,7 @@ fn flow_box_ext() {
 }
 
 #[gtk::test]
-fn grid_ext() {
+fn grid_extension_traits() {
     let grid = gtk::Grid::default();
     let widgets = TestWidgets::default();
 
@@ -127,6 +130,7 @@ fn grid_ext() {
     assert!(same_widgets(children.next(), Some(&widgets.1)));
     assert!(same_widgets(children.next(), Some(&widgets.2)));
     assert_eq!(children.next(), None);
+    assert_eq!(children.next_back(), None);
 
     grid.remove_all();
 
