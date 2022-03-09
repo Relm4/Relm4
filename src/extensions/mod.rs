@@ -109,8 +109,7 @@ impl RelmListBoxExt for gtk::ListBox {
 pub struct ChildrenIterator<T: RelmIterChildrenExt> {
     start: Option<T::Child>,
     end: Option<T::Child>,
-    init_start: bool,
-    init_end: bool,
+    done: bool,
 }
 
 impl<T: RelmIterChildrenExt> ChildrenIterator<T> {
@@ -126,87 +125,65 @@ impl<T: RelmIterChildrenExt> ChildrenIterator<T> {
                 .downcast::<T::Child>()
                 .expect("The type of children does not match.")
         });
-        ChildrenIterator {
-            start,
-            end,
-            init_start: false,
-            init_end: false,
-        }
+        let done = start.is_none();
+        ChildrenIterator { start, end, done }
     }
 }
 
 impl<T: RelmIterChildrenExt> Iterator for ChildrenIterator<T> {
     type Item = T::Child;
     fn next(&mut self) -> Option<Self::Item> {
-        if !self.init_start {
-            self.init_start = true;
-            return self.start.clone();
-        }
-
-        if self.start == self.end {
-            if self.init_end {
-                return None;
-            } else {
-                self.init_end = true;
-                return self.start.clone();
-            }
-        }
-
-        if let Some(start) = self.start.take() {
-            self.start = start.next_sibling().map(|child| {
-                child
-                    .downcast::<T::Child>()
-                    .expect("The type of children does not match.")
-            });
+        if self.done {
+            None
+        } else {
+            // Handle cases where only one child exists and
+            // when all but one widget were consumed
             if self.start == self.end {
-                if self.init_end {
-                    return None;
-                } else {
-                    self.init_end = true;
-                    return self.start.clone();
-                }
+                self.done = true;
+                self.start.clone()
+            } else if let Some(start) = self.start.take() {
+                // "Increment" the start child
+                self.start = start.next_sibling().map(|child| {
+                    child
+                        .downcast::<T::Child>()
+                        .expect("The type of children does not match.")
+                });
+                // Just to make sure the iterator ends next time
+                // because all widgets were consumed
+                self.done = self.start.is_none();
+                Some(start)
+            } else {
+                None
             }
-            return self.start.clone();
         }
-
-        None
     }
 }
 
 impl<T: RelmIterChildrenExt> DoubleEndedIterator for ChildrenIterator<T> {
     fn next_back(&mut self) -> Option<Self::Item> {
-        if !self.init_end {
-            self.init_end = true;
-            return self.end.clone();
-        }
-
-        if self.start == self.end {
-            if self.init_start {
-                return None;
-            } else {
-                self.init_start = true;
-                return self.end.clone();
-            }
-        }
-
-        if let Some(end) = self.end.take() {
-            self.end = end.prev_sibling().map(|child| {
-                child
-                    .downcast::<T::Child>()
-                    .expect("The type of children does not match.")
-            });
+        if self.done {
+            None
+        } else {
+            // Handle cases where only one child exists and
+            // when all but one widget were consumed
             if self.start == self.end {
-                if self.init_start {
-                    return None;
-                } else {
-                    self.init_start = true;
-                    return self.end.clone();
-                }
+                self.done = true;
+                self.end.clone()
+            } else if let Some(end) = self.end.take() {
+                // "Decrement" the end child
+                self.end = end.prev_sibling().map(|child| {
+                    child
+                        .downcast::<T::Child>()
+                        .expect("The type of children does not match.")
+                });
+                // Just to make sure the iterator ends next time
+                // because all widgets were consumed
+                self.done = self.end.is_none();
+                Some(end)
+            } else {
+                None
             }
-            return self.end.clone();
         }
-
-        None
     }
 }
 

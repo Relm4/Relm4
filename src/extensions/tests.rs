@@ -106,8 +106,8 @@ fn flow_box_extension_traits() {
     assert!(same_widgets(flow_children.next(), widgets.0.parent()));
     assert!(same_widgets(flow_children.next(), widgets.1.parent()));
     assert!(same_widgets(flow_children.next(), widgets.2.parent()));
-    assert_eq!(flow_children.next(), None);
     assert_eq!(flow_children.next_back(), None);
+    assert_eq!(flow_children.next(), None);
 
     flow_box.remove_all();
 
