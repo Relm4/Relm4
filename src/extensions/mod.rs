@@ -2,10 +2,13 @@ mod container;
 mod removable;
 mod set_child;
 
+#[cfg(test)]
+mod tests;
+
 #[allow(unreachable_pub)]
 pub use self::container::RelmContainerExt;
 #[allow(unreachable_pub)]
-pub use self::removable::RelmRemovableExt;
+pub use self::removable::{RelmRemovableExt, RelmRemoveAllExt};
 #[allow(unreachable_pub)]
 pub use self::set_child::RelmSetChildExt;
 
@@ -40,15 +43,6 @@ impl ApplicationBuilderExt for gtk::builders::ApplicationBuilder {
 
 /// Additional methods for `gtk::Widget`
 pub trait RelmWidgetExt {
-    /// Iterates across the child widgets of a widget.
-    fn iter_children(&self) -> Box<dyn Iterator<Item = gtk::Widget>>;
-
-    /// Iterates across the child widgets of a widget, in reverse order.
-    fn iter_children_reverse(&self) -> Box<dyn Iterator<Item = gtk::Widget>>;
-
-    /// Iterates children of a widget with a closure.
-    fn for_each_child<F: FnMut(gtk::Widget) + 'static>(&self, func: F);
-
     /// Attach widget to a `gtk::SizeGroup`.
     fn set_size_group(&self, size_group: &gtk::SizeGroup);
 
@@ -59,23 +53,6 @@ pub trait RelmWidgetExt {
 }
 
 impl<T: gtk::glib::IsA<gtk::Widget>> RelmWidgetExt for T {
-    fn for_each_child<F: FnMut(gtk::Widget) + 'static>(&self, mut func: F) {
-        let mut widget = self.first_child();
-
-        while let Some(child) = widget.take() {
-            widget = child.next_sibling();
-            func(child);
-        }
-    }
-
-    fn iter_children(&self) -> Box<dyn Iterator<Item = gtk::Widget>> {
-        Box::new(iter_children(self.as_ref()))
-    }
-
-    fn iter_children_reverse(&self) -> Box<dyn Iterator<Item = gtk::Widget>> {
-        Box::new(iter_children_reverse(self.as_ref()))
-    }
-
     fn set_size_group(&self, size_group: &gtk::SizeGroup) {
         size_group.add_widget(self);
     }
@@ -100,24 +77,21 @@ pub trait RelmListBoxExt {
 
 impl RelmListBoxExt for gtk::ListBox {
     fn index_of_child(&self, widget: &impl AsRef<gtk::Widget>) -> Option<i32> {
-        if let Some(row) = self.row_of_child(widget) {
-            return Some(row.index());
-        }
-
-        None
+        self.row_of_child(widget).map(|row| row.index())
     }
 
     fn remove_row_of_child(&self, widget: &impl AsRef<gtk::Widget>) {
         if let Some(row) = self.row_of_child(widget) {
+            row.set_child(None::<&gtk::Widget>);
             self.remove(&row);
         }
     }
 
     fn row_of_child(&self, widget: &impl AsRef<gtk::Widget>) -> Option<gtk::ListBoxRow> {
         if let Some(row) = widget.as_ref().ancestor(gtk::ListBoxRow::static_type()) {
-            if let Some(row) = row.dynamic_cast_ref::<gtk::ListBoxRow>() {
+            if let Some(row) = row.downcast_ref::<gtk::ListBoxRow>() {
                 if let Some(parent_widget) = row.parent() {
-                    if let Some(parent_box) = parent_widget.dynamic_cast_ref::<gtk::ListBox>() {
+                    if let Some(parent_box) = parent_widget.downcast_ref::<gtk::ListBox>() {
                         if parent_box == self {
                             return Some(row.clone());
                         }
@@ -130,28 +104,98 @@ impl RelmListBoxExt for gtk::ListBox {
     }
 }
 
-fn iter_children(widget: &gtk::Widget) -> impl Iterator<Item = gtk::Widget> {
-    let mut widget = widget.first_child();
-
-    std::iter::from_fn(move || {
-        if let Some(child) = widget.take() {
-            widget = child.next_sibling();
-            return Some(child);
-        }
-
-        None
-    })
+/// An iterator over container children.
+#[derive(Debug)]
+pub struct ChildrenIterator<T: RelmIterChildrenExt> {
+    start: Option<T::Child>,
+    end: Option<T::Child>,
+    done: bool,
 }
 
-fn iter_children_reverse(widget: &gtk::Widget) -> impl Iterator<Item = gtk::Widget> {
-    let mut widget = widget.last_child();
-
-    std::iter::from_fn(move || {
-        if let Some(child) = widget.take() {
-            widget = child.prev_sibling();
-            return Some(child);
-        }
-
-        None
-    })
+impl<T: RelmIterChildrenExt> ChildrenIterator<T> {
+    /// Create a new iterator over children of `widget`.
+    pub fn new(widget: &T) -> Self {
+        let start = widget.first_child().map(|child| {
+            child
+                .downcast::<T::Child>()
+                .expect("The type of children does not match.")
+        });
+        let end = widget.last_child().map(|child| {
+            child
+                .downcast::<T::Child>()
+                .expect("The type of children does not match.")
+        });
+        let done = start.is_none();
+        ChildrenIterator { start, end, done }
+    }
 }
+
+impl<T: RelmIterChildrenExt> Iterator for ChildrenIterator<T> {
+    type Item = T::Child;
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.done {
+            None
+        } else {
+            // Handle cases where only one child exists and
+            // when all but one widget were consumed
+            if self.start == self.end {
+                self.done = true;
+                self.start.clone()
+            } else if let Some(start) = self.start.take() {
+                // "Increment" the start child
+                self.start = start.next_sibling().map(|child| {
+                    child
+                        .downcast::<T::Child>()
+                        .expect("The type of children does not match.")
+                });
+                // Just to make sure the iterator ends next time
+                // because all widgets were consumed
+                self.done = self.start.is_none();
+                Some(start)
+            } else {
+                None
+            }
+        }
+    }
+}
+
+impl<T: RelmIterChildrenExt> DoubleEndedIterator for ChildrenIterator<T> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        if self.done {
+            None
+        } else {
+            // Handle cases where only one child exists and
+            // when all but one widget were consumed
+            if self.start == self.end {
+                self.done = true;
+                self.end.clone()
+            } else if let Some(end) = self.end.take() {
+                // "Decrement" the end child
+                self.end = end.prev_sibling().map(|child| {
+                    child
+                        .downcast::<T::Child>()
+                        .expect("The type of children does not match.")
+                });
+                // Just to make sure the iterator ends next time
+                // because all widgets were consumed
+                self.done = self.end.is_none();
+                Some(end)
+            } else {
+                None
+            }
+        }
+    }
+}
+
+/// Widget types which allow iteration over their children.
+pub trait RelmIterChildrenExt: RelmRemovableExt + IsA<gtk::Widget> {
+    /// Returns an iterator over container children.
+    fn iter_children(&self) -> ChildrenIterator<Self> {
+        ChildrenIterator::new(self)
+    }
+}
+
+impl RelmIterChildrenExt for gtk::Box {}
+impl RelmIterChildrenExt for gtk::ListBox {}
+impl RelmIterChildrenExt for gtk::FlowBox {}
+impl RelmIterChildrenExt for gtk::Grid {}
