@@ -8,7 +8,7 @@ mod tests;
 #[allow(unreachable_pub)]
 pub use self::container::RelmContainerExt;
 #[allow(unreachable_pub)]
-pub use self::removable::RelmRemovableExt;
+pub use self::removable::{RelmRemovableExt, RelmRemoveAllExt};
 #[allow(unreachable_pub)]
 pub use self::set_child::RelmSetChildExt;
 
@@ -63,49 +63,10 @@ impl<T: gtk::glib::IsA<gtk::Widget>> RelmWidgetExt for T {
     }
 }
 
-fn iter_children(widget: &gtk::Widget) -> impl Iterator<Item = gtk::Widget> {
-    let mut widget = widget.first_child();
-
-    std::iter::from_fn(move || {
-        if let Some(child) = widget.take() {
-            widget = child.next_sibling();
-            return Some(child);
-        }
-
-        None
-    })
-}
-
-/// Additional methods for `gtk::Box`.
-pub trait RelmBoxExt {
-    /// Returns all children of the box.
-    fn children(&self) -> Vec<gtk::Widget>;
-
-    /// Remove all children from the box.
-    fn remove_all(&self);
-}
-
-impl RelmBoxExt for gtk::Box {
-    fn children(&self) -> Vec<gtk::Widget> {
-        iter_children(self.as_ref()).collect()
-    }
-    fn remove_all(&self) {
-        while let Some(child) = self.last_child() {
-            self.remove(&child);
-        }
-    }
-}
-
 /// Additional methods for `gtk::ListBox`.
 pub trait RelmListBoxExt {
-    /// Returns all rows of the listbox.
-    fn rows(&self) -> Vec<gtk::ListBoxRow>;
-
     /// Get the index of a widget attached to a listbox.
     fn index_of_child(&self, widget: &impl AsRef<gtk::Widget>) -> Option<i32>;
-
-    /// Remove all children from listbox.
-    fn remove_all(&self);
 
     /// Remove the row of a child attached a listbox.
     fn remove_row_of_child(&self, widget: &impl AsRef<gtk::Widget>);
@@ -115,31 +76,8 @@ pub trait RelmListBoxExt {
 }
 
 impl RelmListBoxExt for gtk::ListBox {
-    fn rows(&self) -> Vec<gtk::ListBoxRow> {
-        iter_children(self.as_ref())
-            .map(|widget| {
-                widget
-                    .downcast::<gtk::ListBoxRow>()
-                    .expect("The child of `ListBox` is not a `ListBoxRow`.")
-            })
-            .collect()
-    }
     fn index_of_child(&self, widget: &impl AsRef<gtk::Widget>) -> Option<i32> {
-        if let Some(row) = self.row_of_child(widget) {
-            return Some(row.index());
-        }
-
-        None
-    }
-
-    fn remove_all(&self) {
-        while let Some(child) = self.last_child() {
-            let row = child
-                .downcast::<gtk::ListBoxRow>()
-                .expect("The child of `ListBox` is not a `ListBoxRow`.");
-            row.set_child(None::<&gtk::Widget>);
-            self.remove(&row);
-        }
+        self.row_of_child(widget).map(|row| row.index())
     }
 
     fn remove_row_of_child(&self, widget: &impl AsRef<gtk::Widget>) {
@@ -166,48 +104,96 @@ impl RelmListBoxExt for gtk::ListBox {
     }
 }
 
-/// Additional methods for `gtk::FlowBox`.
-pub trait RelmFlowBoxExt {
-    /// Returns all children of the flowbox.
-    fn flow_children(&self) -> Vec<gtk::FlowBoxChild>;
-
-    /// Remove all children from the flowbox.
-    fn remove_all(&self);
+/// An iterator over container children.
+#[derive(Debug)]
+pub struct ChildrenIterator<T: RelmIterChildrenExt> {
+    start: Option<T::Child>,
+    end: Option<T::Child>,
+    done: bool,
 }
 
-impl RelmFlowBoxExt for gtk::FlowBox {
-    fn flow_children(&self) -> Vec<gtk::FlowBoxChild> {
-        iter_children(self.as_ref())
-            .map(|widget| {
-                widget
-                    .downcast::<gtk::FlowBoxChild>()
-                    .expect("The child of `FlowBox` is not a `FlowBoxChild`.")
-            })
-            .collect()
+impl<T: RelmIterChildrenExt> ChildrenIterator<T> {
+    /// Create a new iterator over children of `widget`.
+    pub fn new(widget: &T) -> Self {
+        let widget = widget.as_ref();
+        let start = widget.first_child().map(|child| {
+            child
+                .downcast::<T::Child>()
+                .expect("The type of children does not match.")
+        });
+        let end = widget.last_child().map(|child| {
+            child
+                .downcast::<T::Child>()
+                .expect("The type of children does not match.")
+        });
+        let done = start.is_none();
+        ChildrenIterator { start, end, done }
     }
-    fn remove_all(&self) {
-        while let Some(child) = self.last_child() {
-            self.remove(&child);
+}
+
+impl<T: RelmIterChildrenExt> Iterator for ChildrenIterator<T> {
+    type Item = T::Child;
+    fn next(&mut self) -> Option<Self::Item> {
+        if !self.done {
+            if let Some(start) = self.start.take() {
+                if self.start == self.end {
+                    self.done = true;
+                }
+                self.start = start.next_sibling().map(|child| {
+                    child
+                        .downcast::<T::Child>()
+                        .expect("The type of children does not match.")
+                });
+                return Some(start);
+            }
         }
+
+        None
     }
 }
 
-/// Additional methods for `gtk::Grid`.
-pub trait RelmGridExt {
-    /// Returns all children of the grid.
-    fn children(&self) -> Vec<gtk::Widget>;
-
-    /// Remove all children from the grid.
-    fn remove_all(&self);
-}
-
-impl RelmGridExt for gtk::Grid {
-    fn children(&self) -> Vec<gtk::Widget> {
-        iter_children(self.as_ref()).collect()
-    }
-    fn remove_all(&self) {
-        while let Some(child) = self.last_child() {
-            self.remove(&child);
+impl<T: RelmIterChildrenExt> DoubleEndedIterator for ChildrenIterator<T> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        if !self.done {
+            if let Some(end) = self.end.take() {
+                if self.start == self.end {
+                    self.done = true;
+                }
+                self.end = end.prev_sibling().map(|child| {
+                    child
+                        .downcast::<T::Child>()
+                        .expect("The type of children does not match.")
+                });
+                return Some(end);
+            }
         }
+
+        None
     }
+}
+
+/// Widget types which allow iteration over their children.
+pub trait RelmIterChildrenExt: IsA<gtk::Widget> {
+    /// Type of container children.
+    type Child: IsA<gtk::Widget>;
+    /// Returns an iterator over container children.
+    fn iter_children(&self) -> ChildrenIterator<Self> {
+        ChildrenIterator::new(self)
+    }
+}
+
+impl RelmIterChildrenExt for gtk::Box {
+    type Child = gtk::Widget;
+}
+
+impl RelmIterChildrenExt for gtk::ListBox {
+    type Child = gtk::ListBoxRow;
+}
+
+impl RelmIterChildrenExt for gtk::FlowBox {
+    type Child = gtk::FlowBoxChild;
+}
+
+impl RelmIterChildrenExt for gtk::Grid {
+    type Child = gtk::Widget;
 }

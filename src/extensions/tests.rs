@@ -1,7 +1,7 @@
-use crate::{gtk, RelmBoxExt, RelmFlowBoxExt, RelmGridExt, RelmListBoxExt};
+use crate::{gtk, RelmIterChildrenExt, RelmListBoxExt, RelmRemoveAllExt};
 use gtk::prelude::{BoxExt, GridExt, WidgetExt};
 
-// A set of widgets for testing
+// A set of widgets for tests
 #[derive(Default)]
 struct TestWidgets(gtk::Label, gtk::Switch, gtk::Box);
 
@@ -10,6 +10,18 @@ impl TestWidgets {
         assert!(self.0.parent().is_some());
         assert!(self.1.parent().is_some());
         assert!(self.2.parent().is_some());
+    }
+}
+
+// Returns whether two optional widgets are the same.
+fn same_widgets(
+    first: Option<impl AsRef<gtk::Widget>>,
+    second: Option<impl AsRef<gtk::Widget>>,
+) -> bool {
+    match (first, second) {
+        (Some(first), Some(second)) => first.as_ref() == second.as_ref(),
+        (None, None) => true,
+        _ => false,
     }
 }
 
@@ -24,14 +36,15 @@ fn box_ext() {
 
     widgets.assert_parent();
 
-    let children = gtk_box.children();
-    assert_eq!(children.get(0), Some(widgets.0.as_ref()));
-    assert_eq!(children.get(1), Some(widgets.1.as_ref()));
-    assert_eq!(children.get(2), Some(widgets.2.as_ref()));
+    let mut children = gtk_box.iter_children();
+    assert!(same_widgets(children.next(), Some(&widgets.0)));
+    assert!(same_widgets(children.next(), Some(&widgets.1)));
+    assert!(same_widgets(children.next(), Some(&widgets.2)));
+    assert_eq!(children.next(), None);
 
     gtk_box.remove_all();
 
-    assert_eq!(gtk_box.children().len(), 0);
+    assert_eq!(gtk_box.iter_children().next(), None);
 }
 
 #[gtk::test]
@@ -49,23 +62,15 @@ fn list_box_ext() {
     assert_eq!(list_box.index_of_child(&widgets.1), Some(1));
     assert_eq!(list_box.index_of_child(&widgets.2), Some(2));
 
-    let rows = list_box.rows();
-    assert_eq!(
-        rows.get(0).map(|row| row.as_ref()),
-        widgets.0.parent().as_ref()
-    );
-    assert_eq!(
-        rows.get(1).map(|row| row.as_ref()),
-        widgets.1.parent().as_ref()
-    );
-    assert_eq!(
-        rows.get(2).map(|row| row.as_ref()),
-        widgets.2.parent().as_ref()
-    );
+    let mut rows = list_box.iter_children();
+    assert!(same_widgets(rows.next(), widgets.0.parent()));
+    assert!(same_widgets(rows.next(), widgets.1.parent()));
+    assert!(same_widgets(rows.next(), widgets.2.parent()));
+    assert_eq!(rows.next(), None);
 
     list_box.remove_all();
 
-    assert_eq!(list_box.rows().len(), 0);
+    assert_eq!(list_box.iter_children().next(), None);
 
     list_box.append(&widgets.0);
     list_box.append(&widgets.1);
@@ -77,7 +82,7 @@ fn list_box_ext() {
     list_box.remove_row_of_child(&widgets.1);
     list_box.remove_row_of_child(&widgets.2);
 
-    assert_eq!(list_box.rows().len(), 0);
+    assert_eq!(list_box.iter_children().next(), None);
 
     assert_eq!(list_box.index_of_child(&widgets.0), None);
     assert_eq!(list_box.index_of_child(&widgets.1), None);
@@ -95,23 +100,15 @@ fn flow_box_ext() {
 
     widgets.assert_parent();
 
-    let flow_children = flow_box.flow_children();
-    assert_eq!(
-        flow_children.get(0).map(|child| child.as_ref()),
-        widgets.0.parent().as_ref()
-    );
-    assert_eq!(
-        flow_children.get(1).map(|child| child.as_ref()),
-        widgets.1.parent().as_ref()
-    );
-    assert_eq!(
-        flow_children.get(2).map(|child| child.as_ref()),
-        widgets.2.parent().as_ref()
-    );
+    let mut flow_children = flow_box.iter_children();
+    assert!(same_widgets(flow_children.next(), widgets.0.parent()));
+    assert!(same_widgets(flow_children.next(), widgets.1.parent()));
+    assert!(same_widgets(flow_children.next(), widgets.2.parent()));
+    assert_eq!(flow_children.next(), None);
 
     flow_box.remove_all();
 
-    assert_eq!(flow_box.flow_children().len(), 0);
+    assert_eq!(flow_box.iter_children().next(), None);
 }
 
 #[gtk::test]
@@ -125,10 +122,11 @@ fn grid_ext() {
 
     widgets.assert_parent();
 
-    let children = grid.children();
-    assert_eq!(children.get(0), Some(widgets.0.as_ref()));
-    assert_eq!(children.get(1), Some(widgets.1.as_ref()));
-    assert_eq!(children.get(2), Some(widgets.2.as_ref()));
+    let mut children = grid.iter_children();
+    assert!(same_widgets(children.next(), Some(&widgets.0)));
+    assert!(same_widgets(children.next(), Some(&widgets.1)));
+    assert!(same_widgets(children.next(), Some(&widgets.2)));
+    assert_eq!(children.next(), None);
 
     grid.remove_all();
 

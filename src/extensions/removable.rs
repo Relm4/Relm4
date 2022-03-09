@@ -61,3 +61,37 @@ remove_impl!(
     gtk::HeaderBar
 );
 remove_child_impl!(gtk::InfoBar);
+
+/// Widget types that allow removal of all their children.
+pub trait RelmRemoveAllExt {
+    /// Remove all children from the container.
+    fn remove_all(&self);
+}
+
+macro_rules! remove_all_impl {
+    ($($type:ty),+) => {
+        $(
+            impl RelmRemoveAllExt for $type {
+                fn remove_all(&self) {
+                    while let Some(child) = self.last_child() {
+                        self.remove(&child);
+                    }
+                }
+            }
+        )+
+    }
+}
+
+remove_all_impl!(gtk::Box, gtk::FlowBox, gtk::Grid);
+
+impl RelmRemoveAllExt for gtk::ListBox {
+    fn remove_all(&self) {
+        while let Some(child) = self.last_child() {
+            let row = child
+                .downcast::<gtk::ListBoxRow>()
+                .expect("The child of `ListBox` is not a `ListBoxRow`.");
+            row.set_child(None::<&gtk::Widget>);
+            self.remove(&row);
+        }
+    }
+}
