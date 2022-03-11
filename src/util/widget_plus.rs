@@ -18,9 +18,9 @@ pub trait WidgetPlus {
     /// # use relm4::WidgetPlus;
     /// # gtk::init().unwrap();
     /// # let widget = gtk::Button::new();
-    /// widget.inline_css(b"border: 1px solid red");
+    /// widget.inline_css("border: 1px solid red");
     /// ```
-    fn inline_css(&self, style_data: &[u8]);
+    fn inline_css(&self, style: &str);
 
     /// Try to remove a widget from a widget.
     ///
@@ -45,10 +45,17 @@ impl<W: IsA<Widget> + WidgetExt> WidgetPlus for W {
         }
     }
 
-    fn inline_css(&self, style_data: &[u8]) {
+    fn inline_css(&self, style: &str) {
         let context = self.style_context();
         let provider = gtk::CssProvider::new();
-        provider.load_from_data(&[b"*{", style_data, b"}"].concat());
+
+        let data = if style.ends_with(';') {
+            [b"*{", style.as_bytes(), b"}"].concat()
+        } else {
+            [b"*{", style.as_bytes(), b";}"].concat()
+        };
+
+        provider.load_from_data(&data);
         context.add_provider(&provider, gtk::STYLE_PROVIDER_PRIORITY_APPLICATION + 1);
     }
 
