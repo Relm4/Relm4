@@ -35,7 +35,7 @@ impl FactoryPrototype for FileListItem {
         );
         let row = gtk::ListBoxRow::builder().child(&label).build();
 
-        label.inline_css(b"margin: 0;");
+        label.inline_css(b"margin: 0");
 
         let key = key.clone();
         label.connect_clicked(move |_| {
