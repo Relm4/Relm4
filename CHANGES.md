@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.4.3 - 2022-3-13 
+
 ### Added 
 
 + relm4: Add WidgetRef trait to make AsRef easier accessible for widgets
