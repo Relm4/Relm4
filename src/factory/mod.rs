@@ -40,6 +40,21 @@ where
     uid_counter: u16,
 }
 
+impl<Widget, C, ParentMsg> Drop for FactoryVecDeque<Widget, C, ParentMsg>
+where
+    Widget: FactoryView + FactoryViewPlus,
+    C: FactoryComponent<Widget, ParentMsg>,
+    C::Root: AsRef<Widget::Children>,
+{
+    fn drop(&mut self) {
+        for component in &self.components {
+            if let Some(widget) = component.returned_widget() {
+                self.widget.factory_remove(widget);
+            }
+        }
+    }
+}
+
 struct ModelStateValue {
     index: DynamicIndex,
     uid: u16,
