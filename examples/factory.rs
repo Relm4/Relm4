@@ -7,7 +7,6 @@ use relm4::{
 #[derive(Debug)]
 struct Counter {
     value: u8,
-    index: DynamicIndex,
 }
 
 #[derive(Debug)]
@@ -58,14 +57,11 @@ impl FactoryComponent<gtk::Box, AppMsg> for Counter {
 
     fn init_model(
         value: Self::InitParams,
-        index: &DynamicIndex,
+        _index: &DynamicIndex,
         _input: &Sender<Self::Input>,
         _output: &Sender<Self::Output>,
     ) -> Self {
-        Self {
-            value,
-            index: index.clone(),
-        }
+        Self { value }
     }
 
     fn init_widgets(
@@ -254,28 +250,27 @@ impl SimpleComponent for AppModel {
                 self.counters.pop_back();
             }
             AppMsg::SendFront(index) => {
-                if let Some(counter) = self.counters.remove(index.current_index()) {
-                    self.counters.push_front(counter.value);
-                }
+                self.counters.move_front(index.current_index());
             }
             AppMsg::MoveDown(index) => {
                 let index = index.current_index();
-                if let Some(counter) = self.counters.remove(index) {
-                    self.counters.insert(index + 1, counter.value);
+                let new_index = index + 1;
+                // Already at the end?
+                if new_index < self.counters.len() {
+                    self.counters.move_to(index, new_index);
                 }
             }
             AppMsg::MoveUp(index) => {
                 let index = index.current_index();
+                // Already at the start?
                 if index != 0 {
-                    if let Some(counter) = self.counters.remove(index) {
-                        self.counters.insert(index - 1, counter.value);
-                    }
+                    self.counters.move_to(index, index - 1);
                 }
             }
         }
         if self.counters.len() > 2 {
             // Testing different stuff...
-            self.counters.swap(0, 2);
+            //self.counters.swap(0, 2);
             let mut counter = self.counters.get_mut(1);
             counter.value = counter.value.wrapping_add(10);
         }

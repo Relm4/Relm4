@@ -210,15 +210,80 @@ where
     ///
     /// Panics if either index is out of bounds.
     pub fn swap(&mut self, first: usize, second: usize) {
+        // Don't update anything if both are equal
         if first != second {
             self.model_state.swap(first, second);
+            self.components.swap(first, second);
 
             // Update indexes.
             self.model_state[first].index.set_value(first);
             self.model_state[second].index.set_value(second);
         }
+    }
 
-        self.components.swap(first, second);
+    /// Moves an element at index `current_position` to `target`,
+    /// shifting all elements between these positions.
+    ///
+    /// `current_position` and `target` may be equal.
+    ///
+    /// Element at index 0 is the front of the queue.
+    ///
+    /// # Panics
+    ///
+    /// Panics if either index is out of bounds.
+    pub fn move_to(&mut self, current_position: usize, target: usize) {
+        // Don't update anything if both are equal
+        if current_position != target {
+            let elem = self.model_state.remove(current_position).unwrap();
+            self.model_state.insert(target, elem);
+            let comp = self.components.remove(current_position).unwrap();
+            self.components.insert(target, comp);
+
+            // Update indexes.
+            if current_position > target {
+                // Move down -> shift elements in between up.
+                for state in self
+                    .model_state
+                    .iter_mut()
+                    .skip(target + 1)
+                    .take(current_position - target)
+                {
+                    state.index.increment();
+                }
+            } else {
+                // Move up -> shift elements in between down.
+                for state in self
+                    .model_state
+                    .iter_mut()
+                    .skip(current_position + 1)
+                    .take(target - current_position)
+                {
+                    state.index.decrement();
+                }
+            }
+
+            self.model_state[target].index.set_value(target);
+        }
+    }
+
+    /// Moves an element at index `current_position` to the front,
+    /// shifting all elements between these positions.
+    ///
+    /// # Panics
+    ///
+    /// Panics if either index is out of bounds.
+    pub fn move_front(&mut self, current_position: usize) {
+        self.move_to(current_position, 0)
+    }
+
+    /// Moves an element at index `current_position` to the back,
+    /// shifting all elements between these positions.
+    ///
+    /// # Panics
+    ///
+    /// Panics if either index is out of bounds.
+    pub fn move_back(&mut self, current_position: usize) {
+        self.move_to(current_position, self.components.len())
     }
 
     /// Send a message to one of the elements.
