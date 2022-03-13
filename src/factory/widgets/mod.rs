@@ -1,5 +1,5 @@
-mod gtk4;
+mod gtk;
 
 #[cfg(feature = "libadwaita")]
 #[cfg_attr(doc, doc(cfg(feature = "libadwaita")))]
-mod adwaita;
+mod libadwaita;
