@@ -136,7 +136,7 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
 
 /// Macro that implements [`relm4::MicrosWidgets`](https://aaronerhardt.github.io/docs/relm4/relm4/trait.MicroWidgets.html) and generates the corresponding struct.
 ///
-/// It works very similar to [`widget`].
+/// It works very similar to [`macro@widget`].
 #[proc_macro_attribute]
 pub fn micro_widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let Attrs {
@@ -151,7 +151,7 @@ pub fn micro_widget(attributes: TokenStream, input: TokenStream) -> TokenStream 
 /// Macro that implements [`relm4::factory::FactoryPrototype`](https://aaronerhardt.github.io/docs/relm4/relm4/factory/trait.FactoryPrototype.html)
 /// and generates the corresponding widget struct.
 ///
-/// It works very similar to [`widget`].
+/// It works very similar to [`macro@widget`].
 #[proc_macro_attribute]
 pub fn factory_prototype(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let Attrs {
@@ -210,9 +210,9 @@ pub fn menu(input: TokenStream) -> TokenStream {
     menus.menus_stream(&default_relm4_path).into()
 }
 
-/// The [`view`] macro allows you to construct your UI easily and cleanly.
+/// The [`view!`] macro allows you to construct your UI easily and cleanly.
 ///
-/// It does the same as inside the [`widget`] attribute macro,
+/// It does the same as inside the [`macro@widget`] attribute macro,
 /// but with less features (no factories, components, etc).
 ///
 /// You can even use the `relm4-macros` crate independently from Relm4 to build your GTK4 UI.
