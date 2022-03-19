@@ -15,16 +15,6 @@ pub struct GridPosition {
 }
 
 #[derive(Debug)]
-/// Position or rather information for a stack page
-/// inside a factory.
-pub struct StackPageInfo {
-    /// The name of the [`gtk::StackPage`].
-    pub name: Option<String>,
-    /// The title of the [`gtk::StackPage`].
-    pub title: Option<String>,
-}
-
-#[derive(Debug)]
 /// Position used for [`gtk::Fixed`].
 pub struct FixedPosition {
     /// Position on the x-axis.
