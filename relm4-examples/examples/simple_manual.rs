@@ -1,53 +1,50 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt};
-use relm4::{gtk, send, AppUpdate, Model, RelmApp, Sender, WidgetPlus, Widgets};
+use relm4::{gtk, send, ComponentParts, RelmApp, Sender, SimpleComponent, WidgetPlus};
 
 struct AppModel {
     counter: u8,
 }
 
+#[derive(Debug)]
 enum AppMsg {
     Increment,
     Decrement,
 }
 
-impl Model for AppModel {
-    type Msg = AppMsg;
-    type Widgets = AppWidgets;
-    type Components = ();
-}
-
-impl AppUpdate for AppModel {
-    fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) -> bool {
-        match msg {
-            AppMsg::Increment => {
-                self.counter = self.counter.wrapping_add(1);
-            }
-            AppMsg::Decrement => {
-                self.counter = self.counter.wrapping_sub(1);
-            }
-        }
-        true
-    }
-}
-
 struct AppWidgets {
-    window: gtk::ApplicationWindow,
+    //window: gtk::Window,
     //vbox: gtk::Box,
     //inc_button: gtk::Button,
     //dec_button: gtk::Button,
     label: gtk::Label,
 }
 
-impl Widgets<AppModel, ()> for AppWidgets {
-    type Root = gtk::ApplicationWindow;
+impl SimpleComponent for AppModel {
+    type Widgets = AppWidgets;
+    type Root = gtk::Window;
 
-    /// Initialize the UI.
-    fn init_view(model: &AppModel, _parent_widgets: &(), sender: Sender<AppMsg>) -> Self {
-        let window = gtk::ApplicationWindow::builder()
+    type InitParams = u8;
+
+    type Input = AppMsg;
+    type Output = ();
+
+    fn init_root() -> Self::Root {
+        gtk::Window::builder()
             .title("Simple app")
             .default_width(300)
             .default_height(100)
-            .build();
+            .build()
+    }
+
+    /// Initialize the UI.
+    fn init_parts(
+        counter: Self::InitParams,
+        window: &Self::Root,
+        input: &Sender<Self::Input>,
+        _output: &Sender<Self::Output>,
+    ) -> ComponentParts<Self> {
+        let model = AppModel { counter };
+
         let vbox = gtk::Box::builder()
             .orientation(gtk::Orientation::Vertical)
             .spacing(5)
@@ -65,36 +62,51 @@ impl Widgets<AppModel, ()> for AppWidgets {
         vbox.append(&dec_button);
         vbox.append(&label);
 
-        let btn_sender = sender.clone();
+        let btn_sender = input.clone();
         inc_button.connect_clicked(move |_| {
             send!(btn_sender, AppMsg::Increment);
         });
 
-        let btn_sender = sender;
+        let btn_sender = input.clone();
         dec_button.connect_clicked(move |_| {
             send!(btn_sender, AppMsg::Decrement);
         });
 
-        Self {
-            window,
-            //vbox,
-            //inc_button,
-            //dec_button,
-            label,
+        let widgets = AppWidgets { label };
+
+        ComponentParts { model, widgets }
+    }
+
+    fn update(
+        &mut self,
+        msg: Self::Input,
+        _input: &Sender<Self::Input>,
+        _ouput: &Sender<Self::Output>,
+    ) {
+        match msg {
+            AppMsg::Increment => {
+                self.counter = self.counter.wrapping_add(1);
+            }
+            AppMsg::Decrement => {
+                self.counter = self.counter.wrapping_sub(1);
+            }
         }
     }
-    /// Return the root widget.
-    fn root_widget(&self) -> Self::Root {
-        self.window.clone()
-    }
+
     /// Update the view to represent the updated model.
-    fn view(&mut self, model: &AppModel, _sender: Sender<AppMsg>) {
-        self.label.set_label(&format!("Counter: {}", model.counter));
+    fn update_view(
+        &self,
+        widgets: &mut Self::Widgets,
+        _input: &Sender<Self::Input>,
+        _output: &Sender<Self::Output>,
+    ) {
+        widgets
+            .label
+            .set_label(&format!("Counter: {}", self.counter));
     }
 }
 
 fn main() {
-    let model = AppModel { counter: 0 };
-    let app = RelmApp::new(model);
-    app.run();
+    let app: RelmApp<AppModel> = RelmApp::new("relm4.test.simple_manual");
+    app.run(0);
 }

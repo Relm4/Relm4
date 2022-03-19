@@ -1,166 +1,298 @@
-use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt};
-use relm4::factory::{positions::GridPosition, Factory, FactoryPrototype, FactoryVec};
-use relm4::{gtk, AppUpdate, Model, RelmApp, Sender, Widgets};
+use gtk::prelude::{BoxExt, ButtonExt, GridExt, GtkWindowExt, OrientableExt};
+use relm4::{
+    factory::{positions::GridPosition, DynamicIndex, FactoryComponent, FactoryVecDeque, Position},
+    gtk, send, ComponentParts, RelmApp, Sender, SimpleComponent, WidgetPlus,
+};
 
-struct AppWidgets {
-    main: gtk::ApplicationWindow,
-    gen_grid: gtk::Grid,
+#[derive(Debug)]
+struct Counter {
+    value: u8,
 }
 
 #[derive(Debug)]
-enum AppMsg {
-    Add,
-    Remove,
-    Clicked(usize),
+enum CounterMsg {
+    Increment,
+    Decrement,
 }
 
-struct Data {
-    counter: u8,
+enum CounterOutput {
+    SendFront(DynamicIndex),
+    MoveUp(DynamicIndex),
+    MoveDown(DynamicIndex),
 }
 
-struct AppModel {
-    data: FactoryVec<Data>,
-    counter: u8,
+struct CounterWidgets {
+    label: gtk::Label,
 }
 
-impl Model for AppModel {
-    type Msg = AppMsg;
-    type Widgets = AppWidgets;
-    type Components = ();
-}
-
-impl Widgets<AppModel, ()> for AppWidgets {
-    type Root = gtk::ApplicationWindow;
-
-    fn init_view(_model: &AppModel, _components: &(), sender: Sender<AppMsg>) -> Self {
-        let main = gtk::ApplicationWindow::builder()
-            .default_width(300)
-            .default_height(200)
-            .build();
-        let main_box = gtk::Box::builder()
-            .orientation(gtk::Orientation::Vertical)
-            .margin_end(5)
-            .margin_top(5)
-            .margin_start(5)
-            .margin_bottom(5)
-            .spacing(5)
-            .build();
-
-        let gen_grid = gtk::Grid::builder()
-            .orientation(gtk::Orientation::Vertical)
-            .margin_end(5)
-            .margin_top(5)
-            .margin_start(5)
-            .margin_bottom(5)
-            .row_spacing(5)
-            .column_spacing(5)
-            .column_homogeneous(true)
-            .build();
-
-        let add = gtk::Button::with_label("Add");
-        let remove = gtk::Button::with_label("Remove");
-
-        main_box.append(&add);
-        main_box.append(&remove);
-        main_box.append(&gen_grid);
-
-        main.set_child(Some(&main_box));
-
-        let cloned_sender = sender.clone();
-        add.connect_clicked(move |_| {
-            cloned_sender.send(AppMsg::Add).unwrap();
-        });
-
-        remove.connect_clicked(move |_| {
-            sender.send(AppMsg::Remove).unwrap();
-        });
-
-        AppWidgets { main, gen_grid }
-    }
-
-    fn view(&mut self, model: &AppModel, sender: Sender<AppMsg>) {
-        model.data.generate(&self.gen_grid, sender);
-    }
-
-    fn root_widget(&self) -> gtk::ApplicationWindow {
-        self.main.clone()
-    }
-}
-
-impl AppUpdate for AppModel {
-    fn update(&mut self, msg: AppMsg, _components: &(), _sender: Sender<AppMsg>) -> bool {
-        match msg {
-            AppMsg::Add => {
-                self.data.push(Data {
-                    counter: self.counter,
-                });
-                self.counter += 1;
-            }
-            AppMsg::Remove => {
-                self.data.pop();
-            }
-            AppMsg::Clicked(index) => {
-                if let Some(data) = self.data.get_mut(index) {
-                    data.counter = data.counter.wrapping_sub(1);
-                }
-            }
-        }
-        true
-    }
-}
-
-#[derive(Debug)]
-struct FactoryWidgets {
-    button: gtk::Button,
-}
-
-impl FactoryPrototype for Data {
-    type Factory = FactoryVec<Self>;
-    type Widgets = FactoryWidgets;
-    type Root = gtk::Button;
-    type View = gtk::Grid;
-    type Msg = AppMsg;
-
-    fn init_view(&self, index: &usize, sender: Sender<AppMsg>) -> FactoryWidgets {
-        let button = gtk::Button::with_label(&self.counter.to_string());
-        let index = *index;
-        button.connect_clicked(move |_| {
-            sender.send(AppMsg::Clicked(index)).unwrap();
-        });
-        FactoryWidgets { button }
-    }
-
-    // create a chess grid pattern
-    fn position(&self, index: &usize) -> GridPosition {
-        let index = *index as i32;
-
-        // add a new row for every 5th element
-        let row = index / 5;
-        // use every second column and move columns in uneven rows by 1
-        let column = (index % 5) * 2 + row % 2;
-
+impl Position<GridPosition> for Counter {
+    fn position(index: usize) -> GridPosition {
+        let x = index % 5;
+        let y = index / 5;
         GridPosition {
-            column,
-            row,
+            column: y as i32,
+            row: x as i32,
             width: 1,
             height: 1,
         }
     }
+}
 
-    fn view(&self, _index: &usize, widgets: &FactoryWidgets) {
-        widgets.button.set_label(&self.counter.to_string());
+impl FactoryComponent<gtk::Grid, AppMsg> for Counter {
+    type Widgets = CounterWidgets;
+
+    type InitParams = u8;
+
+    type Input = CounterMsg;
+    type Output = CounterOutput;
+
+    type Root = gtk::Box;
+    type Command = ();
+    type CommandOutput = ();
+
+    fn output_to_parent_msg(output: Self::Output) -> Option<AppMsg> {
+        Some(match output {
+            CounterOutput::SendFront(index) => AppMsg::SendFront(index),
+            CounterOutput::MoveUp(index) => AppMsg::MoveUp(index),
+            CounterOutput::MoveDown(index) => AppMsg::MoveDown(index),
+        })
     }
 
-    fn root_widget(widgets: &FactoryWidgets) -> &gtk::Button {
-        &widgets.button
+    fn init_root() -> Self::Root {
+        relm4_macros::view! {
+            root = gtk::Box {
+                set_orientation: gtk::Orientation::Horizontal,
+                set_spacing: 10,
+            }
+        }
+        root
+    }
+
+    fn init_model(
+        value: Self::InitParams,
+        _index: &DynamicIndex,
+        _input: &Sender<Self::Input>,
+        _output: &Sender<Self::Output>,
+    ) -> Self {
+        Self { value }
+    }
+
+    fn init_widgets(
+        &mut self,
+        index: &DynamicIndex,
+        root: &Self::Root,
+        _returned_widget: &gtk::Widget,
+        input: &Sender<Self::Input>,
+        output: &Sender<Self::Output>,
+    ) -> Self::Widgets {
+        relm4_macros::view! {
+            label = gtk::Label {
+                set_label: &self.value.to_string(),
+            }
+        }
+
+        relm4_macros::view! {
+            add_button = gtk::Button {
+                set_label: "+",
+                connect_clicked(input) => move |_| {
+                    input.send(CounterMsg::Increment)
+                }
+            }
+        }
+
+        relm4_macros::view! {
+            remove_button = gtk::Button {
+                set_label: "-",
+                connect_clicked(input) => move |_| {
+                    input.send(CounterMsg::Decrement)
+                }
+            }
+        }
+
+        relm4_macros::view! {
+            move_up_button = gtk::Button {
+                set_label: "UP",
+                connect_clicked(output, index) => move |_| {
+                    output.send(CounterOutput::MoveUp(index.clone()))
+                }
+            }
+        }
+
+        relm4_macros::view! {
+            move_down_button = gtk::Button {
+                set_label: "DOWN",
+                connect_clicked(output, index) => move |_| {
+                    output.send(CounterOutput::MoveDown(index.clone()))
+                }
+            }
+        }
+
+        relm4_macros::view! {
+            to_front_button = gtk::Button {
+                set_label: "To start",
+                connect_clicked(output, index) => move |_| {
+                    output.send(CounterOutput::SendFront(index.clone()))
+                }
+            }
+        }
+
+        root.append(&label);
+        root.append(&add_button);
+        root.append(&remove_button);
+        root.append(&move_up_button);
+        root.append(&move_down_button);
+        root.append(&to_front_button);
+
+        CounterWidgets { label }
+    }
+
+    fn update(
+        &mut self,
+        msg: Self::Input,
+        _input: &Sender<Self::Input>,
+        _ouput: &Sender<Self::Output>,
+    ) -> Option<Self::Command> {
+        match msg {
+            CounterMsg::Increment => {
+                self.value = self.value.wrapping_add(1);
+            }
+            CounterMsg::Decrement => {
+                self.value = self.value.wrapping_sub(1);
+            }
+        }
+        None
+    }
+
+    fn update_view(
+        &self,
+        widgets: &mut Self::Widgets,
+        _input: &Sender<Self::Input>,
+        _output: &Sender<Self::Output>,
+    ) {
+        widgets.label.set_label(&self.value.to_string());
+    }
+}
+
+struct AppModel {
+    created_widgets: u8,
+    counters: FactoryVecDeque<gtk::Grid, Counter, AppMsg>,
+}
+
+#[derive(Debug)]
+enum AppMsg {
+    AddCounter,
+    RemoveCounter,
+    SendFront(DynamicIndex),
+    MoveUp(DynamicIndex),
+    MoveDown(DynamicIndex),
+}
+
+#[relm4_macros::component]
+impl SimpleComponent for AppModel {
+    // AppWidgets is generated by the macro
+    type Widgets = AppWidgets;
+
+    type InitParams = u8;
+
+    type Input = AppMsg;
+    type Output = ();
+
+    view! {
+        gtk::Window {
+            set_title: Some("Grid factory example"),
+            set_default_width: 300,
+            set_default_height: 100,
+
+            gtk::Box {
+                set_orientation: gtk::Orientation::Vertical,
+                set_spacing: 5,
+                set_margin_all: 5,
+
+                gtk::Button {
+                    set_label: "Add counter",
+                    connect_clicked(input) => move |_| {
+                        send!(input, AppMsg::AddCounter);
+                    }
+                },
+
+                gtk::Button {
+                    set_label: "Remove counter",
+                    connect_clicked(input) => move |_| {
+                        send!(input, AppMsg::RemoveCounter);
+                    }
+                },
+
+                append: counter_box = &gtk::Grid {
+                    set_orientation: gtk::Orientation::Vertical,
+                    set_column_spacing: 15,
+                    set_row_spacing: 5,
+                }
+            }
+        }
+    }
+
+    // Initialize the UI.
+    fn init_parts(
+        counter: Self::InitParams,
+        root: &Self::Root,
+        input: &Sender<Self::Input>,
+        _output: &Sender<Self::Output>,
+    ) -> ComponentParts<Self> {
+        // Insert the macro codegen here
+        let widgets = view_output!();
+
+        let model = AppModel {
+            created_widgets: counter,
+            counters: FactoryVecDeque::new(widgets.counter_box.clone(), input),
+        };
+
+        ComponentParts { model, widgets }
+    }
+
+    fn update(
+        &mut self,
+        msg: Self::Input,
+        _input: &Sender<Self::Input>,
+        _ouput: &Sender<Self::Output>,
+    ) {
+        match msg {
+            AppMsg::AddCounter => {
+                self.counters.push_back(self.created_widgets);
+                self.created_widgets = self.created_widgets.wrapping_add(1);
+            }
+            AppMsg::RemoveCounter => {
+                self.counters.pop_back();
+            }
+            AppMsg::SendFront(index) => {
+                self.counters.move_front(index.current_index());
+            }
+            AppMsg::MoveDown(index) => {
+                let index = index.current_index();
+                let new_index = index + 1;
+                // Already at the end?
+                if new_index < self.counters.len() {
+                    self.counters.move_to(index, new_index);
+                }
+            }
+            AppMsg::MoveUp(index) => {
+                let index = index.current_index();
+                // Already at the start?
+                if index != 0 {
+                    self.counters.move_to(index, index - 1);
+                }
+            }
+        }
+        if self.counters.len() > 2 {
+            // Testing different stuff...
+            //self.counters.swap(0, 2);
+            //let mut counter = self.counters.get_mut(1);
+            //counter.value = counter.value.wrapping_add(10);
+        }
+        self.counters.render_changes();
     }
 }
 
 fn main() {
-    let model = AppModel {
-        data: FactoryVec::new(),
-        counter: 0,
-    };
-    let relm = RelmApp::new(model);
-    relm.run();
+    let app: RelmApp<AppModel> = RelmApp::new("relm4.test.gridFactory");
+    app.run(0);
 }
