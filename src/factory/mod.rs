@@ -18,7 +18,6 @@ use component_storage::ComponentStorage;
 use handle::FactoryHandle;
 
 use std::cell::{Ref, RefMut};
-
 use std::collections::VecDeque;
 
 #[allow(missing_debug_implementations)]
@@ -26,8 +25,8 @@ use std::collections::VecDeque;
 /// data associated with components that implement [`FactoryComponent`].
 pub struct FactoryVecDeque<Widget, C, ParentMsg>
 where
-    Widget: FactoryView + FactoryViewPlus,
-    C: FactoryComponent<Widget, ParentMsg>,
+    Widget: FactoryView,
+    C: FactoryComponent<Widget, ParentMsg> + Position<Widget::Position>,
     C::Root: AsRef<Widget::Children>,
     ParentMsg: 'static,
     Widget: 'static,
@@ -42,8 +41,8 @@ where
 
 impl<Widget, C, ParentMsg> Drop for FactoryVecDeque<Widget, C, ParentMsg>
 where
-    Widget: FactoryView + FactoryViewPlus,
-    C: FactoryComponent<Widget, ParentMsg>,
+    Widget: FactoryView,
+    C: FactoryComponent<Widget, ParentMsg> + Position<Widget::Position>,
     C::Root: AsRef<Widget::Children>,
 {
     fn drop(&mut self) {
@@ -63,8 +62,8 @@ struct ModelStateValue {
 
 impl<Widget, C, ParentMsg> FactoryVecDeque<Widget, C, ParentMsg>
 where
-    Widget: FactoryView + FactoryViewPlus,
-    C: FactoryComponent<Widget, ParentMsg>,
+    Widget: FactoryView,
+    C: FactoryComponent<Widget, ParentMsg> + Position<Widget::Position>,
     C::Root: AsRef<Widget::Children>,
 {
     /// Creates a new [`FactoryVecDeque`].
@@ -89,6 +88,8 @@ where
     ///
     /// Also, only modified elements will be updated.
     pub fn render_changes(&mut self) {
+        let mut first_position_change_idx = None;
+
         for (index, state) in self.model_state.iter().enumerate() {
             if state.uid == self.rendered_state.front().copied().unwrap_or_default() {
                 // Remove item from previously rendered list
@@ -98,10 +99,13 @@ where
                     // Update component
                     self.components[index].state_change_notify();
                 }
-                // else: nothing changed
             } else if let Some(rendered_index) =
                 self.rendered_state.iter().position(|idx| *idx == state.uid)
             {
+                if first_position_change_idx.is_none() {
+                    first_position_change_idx = Some(index);
+                }
+
                 // Remove item from previously rendered list
                 self.rendered_state.remove(rendered_index);
 
@@ -119,15 +123,19 @@ where
                     self.components[index].state_change_notify();
                 }
             } else {
+                if first_position_change_idx.is_none() {
+                    first_position_change_idx = Some(index);
+                }
+
                 // The element doesn't exist yet
                 let insert_widget = self.components[index].widget();
-                //let insert_widget = Widget::returned_widget_to_child(widget.as_ref());
+                let position = C::position(index);
                 let returned_widget = if index == 0 {
-                    self.widget.factory_prepend(insert_widget)
+                    self.widget.factory_prepend(insert_widget, &position)
                 } else {
                     let previous_widget = self.components[index - 1].returned_widget().unwrap();
                     self.widget
-                        .factory_insert_after(insert_widget, previous_widget)
+                        .factory_insert_after(insert_widget, &position, previous_widget)
                 };
                 let component = self.components.remove(index).unwrap();
                 let dyn_index = &self.model_state[index].index;
@@ -137,9 +145,124 @@ where
                 self.components.insert(index, component);
             }
         }
+
+        // Reset change tracker
+        self.model_state.iter_mut().for_each(|s| s.changed = false);
+
         // Set rendered state to the state of the model
         // because everything should be up-to-date now.
         self.rendered_state = self.model_state.iter().map(|s| s.uid).collect();
+
+        if let Some(change_index) = first_position_change_idx {
+            for (index, comp) in self.components.iter().enumerate().skip(change_index) {
+                let position = C::position(index);
+                self.widget
+                    .factory_update_position(comp.returned_widget().unwrap(), &position);
+            }
+        }
+    }
+
+    /// Returns the number of elements in the [`FactoryVecDeque`].
+    pub fn len(&self) -> usize {
+        self.components.len()
+    }
+
+    /// Returns true if the [`FactoryVecDeque`] is empty.
+    pub fn is_empty(&self) -> bool {
+        self.components.is_empty()
+    }
+
+    /// Send a message to one of the elements.
+    pub fn send(&self, index: usize, msg: C::Input) {
+        self.components[index].send(msg)
+    }
+
+    /// Tries to get an immutable reference to
+    /// the model of one element.
+    ///
+    /// Returns `None` is `index` is invalid.
+    ///
+    /// # Panics
+    ///
+    /// Panics when the same element was borrowed mutably
+    /// somewhere else.
+    pub fn try_get(&self, index: usize) -> Option<Ref<'_, C>> {
+        self.components.get(index).map(ComponentStorage::get)
+    }
+
+    /// Tries to get a mutable reference to
+    /// the model of one element.
+    ///
+    /// Returns `None` is `index` is invalid.
+    ///
+    /// # Panics
+    ///
+    /// Panics when the same element was borrowed
+    /// somewhere else.
+    pub fn try_get_mut(&mut self, index: usize) -> Option<RefMut<'_, C>> {
+        // Mark as modified
+        if let Some(state) = self.model_state.get_mut(index) {
+            state.changed = true;
+        }
+        self.components.get(index).map(ComponentStorage::get_mut)
+    }
+
+    /// Provides a reference to the element at the given index.
+    ///
+    /// Element at index 0 is the front of the queue.
+    ///
+    /// # Panics
+    ///
+    /// Panics when the index is invalid or
+    /// the same element was borrowed mutably somewhere else.
+    pub fn get(&self, index: usize) -> Ref<'_, C> {
+        self.try_get(index)
+            .expect("Called `get` on an invalid index")
+    }
+
+    /// Provides a mutable reference to the element at the given index.
+    ///
+    /// Element at index 0 is the front of the queue.
+    ///
+    /// # Panics
+    ///
+    /// Panics when the index is invalid or
+    /// the same element was borrowed somewhere else.
+    pub fn get_mut(&mut self, index: usize) -> RefMut<'_, C> {
+        self.try_get_mut(index)
+            .expect("Called `get_mut` on an invalid index")
+    }
+
+    /// Removes the last element from the [`FactoryVecDeque`] and returns it,
+    /// or [`None`] if it is empty.
+    pub fn pop_back(&mut self) -> Option<C> {
+        if self.components.is_empty() {
+            None
+        } else {
+            self.remove(self.components.len() - 1)
+        }
+    }
+
+    /// Removes and returns the element at index from the [`FactoryVecDeque`].
+    /// Returns [`None`] if index is out of bounds.
+    ///
+    /// Element at index 0 is the front of the queue.
+    pub fn remove(&mut self, index: usize) -> Option<C> {
+        self.model_state.remove(index);
+        let component = self.components.remove(index);
+
+        // Decrement the indexes of the following elements.
+        for states in self.model_state.iter_mut().skip(index) {
+            states.index.decrement();
+        }
+
+        if let Some(comp) = &component {
+            if let Some(widget) = &comp.returned_widget() {
+                self.widget.factory_remove(widget);
+            }
+        }
+
+        component.map(ComponentStorage::extract)
     }
 
     /// Returns the widget all components are attached to.
@@ -188,16 +311,6 @@ where
             },
         );
         self.uid_counter += 1;
-    }
-
-    /// Returns the number of elements in the [`FactoryVecDeque`].
-    pub fn len(&self) -> usize {
-        self.components.len()
-    }
-
-    /// Returns true if the [`FactoryVecDeque`] is empty.
-    pub fn is_empty(&self) -> bool {
-        self.components.is_empty()
     }
 
     /// Swaps elements at indices `first` and `second`.
@@ -286,102 +399,9 @@ where
         self.move_to(current_position, self.components.len())
     }
 
-    /// Send a message to one of the elements.
-    pub fn send(&self, index: usize, msg: C::Input) {
-        self.components[index].send(msg)
-    }
-
-    /// Tries to get an immutable reference to
-    /// the model of one element.
-    ///
-    /// Returns `None` is `index` is invalid.
-    ///
-    /// # Panics
-    ///
-    /// Panics when the same element was borrowed mutably
-    /// somewhere else.
-    pub fn try_get(&self, index: usize) -> Option<Ref<'_, C>> {
-        self.components.get(index).map(ComponentStorage::get)
-    }
-
-    /// Tries to get a mutable reference to
-    /// the model of one element.
-    ///
-    /// Returns `None` is `index` is invalid.
-    ///
-    /// # Panics
-    ///
-    /// Panics when the same element was borrowed
-    /// somewhere else.
-    pub fn try_get_mut(&mut self, index: usize) -> Option<RefMut<'_, C>> {
-        // Mark as modified
-        if let Some(state) = self.model_state.get_mut(index) {
-            state.changed = true;
-        }
-        self.components.get(index).map(ComponentStorage::get_mut)
-    }
-
-    /// Provides a reference to the element at the given index.
-    ///
-    /// Element at index 0 is the front of the queue.
-    ///
-    /// # Panics
-    ///
-    /// Panics when the index is invalid or
-    /// the same element was borrowed mutably somewhere else.
-    pub fn get(&self, index: usize) -> Ref<'_, C> {
-        self.try_get(index)
-            .expect("Called `get` on an invalid index")
-    }
-
-    /// Provides a mutable reference to the element at the given index.
-    ///
-    /// Element at index 0 is the front of the queue.
-    ///
-    /// # Panics
-    ///
-    /// Panics when the index is invalid or
-    /// the same element was borrowed somewhere else.
-    pub fn get_mut(&mut self, index: usize) -> RefMut<'_, C> {
-        self.try_get_mut(index)
-            .expect("Called `get_mut` on an invalid index")
-    }
-
-    /// Removes the last element from the [`FactoryVecDeque`] and returns it,
-    /// or [`None`] if it is empty.
-    pub fn pop_back(&mut self) -> Option<C> {
-        if self.components.is_empty() {
-            None
-        } else {
-            self.remove(self.components.len() - 1)
-        }
-    }
-
     /// Removes the first element from the [`FactoryVecDeque`] and returns it,
     /// or [`None`] if it is empty.
     pub fn pop_front(&mut self) -> Option<C> {
         self.remove(0)
-    }
-
-    /// Removes and returns the element at index from the [`FactoryVecDeque`].
-    /// Returns [`None`] if index is out of bounds.
-    ///
-    /// Element at index 0 is the front of the queue.
-    pub fn remove(&mut self, index: usize) -> Option<C> {
-        self.model_state.remove(index);
-        let component = self.components.remove(index);
-
-        // Decrement the indexes of the following elements.
-        for states in self.model_state.iter_mut().skip(index) {
-            states.index.decrement();
-        }
-
-        if let Some(comp) = &component {
-            if let Some(widget) = &comp.returned_widget() {
-                self.widget.factory_remove(widget);
-            }
-        }
-
-        component.map(ComponentStorage::extract)
     }
 }

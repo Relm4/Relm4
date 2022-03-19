@@ -25,40 +25,61 @@ pub trait FactoryView {
     /// For example [`GridPosition`](positions::GridPosition) for [`gtk::Grid`] or `()` for [`gtk::Box`]
     type Position;
 
+    /// Removes a widget.
+    fn factory_remove(&self, widget: &Self::ReturnedWidget);
     /// Adds a new widget to self at the end.
     fn factory_append(
         &self,
         widget: impl AsRef<Self::Children>,
-        _position: &Self::Position,
+        position: &Self::Position,
     ) -> Self::ReturnedWidget;
 
-    /// Removes a widget.
-    fn factory_remove(&self, widget: &Self::ReturnedWidget);
-}
-
-/// Extends [`FactoryView`] for containers that work similar to lists.
-/// This means that the container can insert widgets before and after other
-/// widgets.
-pub trait FactoryViewPlus: FactoryView {
     /// Add an widget to the front.
-    fn factory_prepend(&self, widget: impl AsRef<Self::Children>) -> Self::ReturnedWidget;
+    fn factory_prepend(
+        &self,
+        widget: impl AsRef<Self::Children>,
+        position: &Self::Position,
+    ) -> Self::ReturnedWidget;
 
     /// Insert a widget after another widget.
     fn factory_insert_after(
         &self,
         widget: impl AsRef<Self::Children>,
+        position: &Self::Position,
         other: &Self::ReturnedWidget,
     ) -> Self::ReturnedWidget;
 
-    /// Converts a retuned widget to the children type.
+    /// Converts a returned widget to the children type.
     ///
     fn returned_widget_to_child(root_child: &Self::ReturnedWidget) -> Self::Children;
 
-    /// Move an item ather another item.
+    /// Move an item after another item.
     fn factory_move_after(&self, widget: &Self::ReturnedWidget, other: &Self::ReturnedWidget);
 
     /// Move an item to the start.
     fn factory_move_start(&self, widget: &Self::ReturnedWidget);
+
+    /// Update the position inside positioned containers like [`gtk::Grid`].
+    fn factory_update_position(&self, _widget: &Self::ReturnedWidget, _position: &Self::Position) {}
+}
+
+/// Returns the position of an element inside a
+/// container like [`gtk::Grid`] where the position isn't
+/// clearly defined by the index.
+pub trait Position<Pos> {
+    /// Returns the position.
+    ///
+    /// This function can be called very often
+    /// if widgets are moved a lot, so it should
+    /// be cheap to call.
+    fn position(index: usize) -> Pos;
+}
+
+impl<T> Position<()> for T
+where
+    T: FactoryView<Position = ()>,
+{
+    fn position(_index: usize) {}
 }
 
 /// A component that's stored inside a factory.
