@@ -1,6 +1,6 @@
-use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
+use gtk::prelude::{BoxExt, ButtonExt, GridExt, GtkWindowExt, OrientableExt};
 use relm4::{
-    factory::{DynamicIndex, FactoryComponent, FactoryVecDeque},
+    factory::{positions::GridPosition, DynamicIndex, FactoryComponent, FactoryVecDeque, Position},
     gtk, send, ComponentParts, RelmApp, Sender, SimpleComponent, WidgetPlus,
 };
 
@@ -25,7 +25,20 @@ struct CounterWidgets {
     label: gtk::Label,
 }
 
-impl FactoryComponent<gtk::Box, AppMsg> for Counter {
+impl Position<GridPosition> for Counter {
+    fn position(index: usize) -> GridPosition {
+        let x = index % 5;
+        let y = index / 5;
+        GridPosition {
+            column: y as i32,
+            row: x as i32,
+            width: 1,
+            height: 1,
+        }
+    }
+}
+
+impl FactoryComponent<gtk::Grid, AppMsg> for Counter {
     type Widgets = CounterWidgets;
 
     type InitParams = u8;
@@ -162,7 +175,7 @@ impl FactoryComponent<gtk::Box, AppMsg> for Counter {
 
 struct AppModel {
     created_widgets: u8,
-    counters: FactoryVecDeque<gtk::Box, Counter, AppMsg>,
+    counters: FactoryVecDeque<gtk::Grid, Counter, AppMsg>,
 }
 
 #[derive(Debug)]
@@ -186,7 +199,7 @@ impl SimpleComponent for AppModel {
 
     view! {
         gtk::Window {
-            set_title: Some("Factory example"),
+            set_title: Some("Grid factory example"),
             set_default_width: 300,
             set_default_height: 100,
 
@@ -209,9 +222,10 @@ impl SimpleComponent for AppModel {
                     }
                 },
 
-                append: counter_box = &gtk::Box {
+                append: counter_box = &gtk::Grid {
                     set_orientation: gtk::Orientation::Vertical,
-                    set_spacing: 5,
+                    set_column_spacing: 15,
+                    set_row_spacing: 5,
                 }
             }
         }
@@ -271,14 +285,14 @@ impl SimpleComponent for AppModel {
         if self.counters.len() > 2 {
             // Testing different stuff...
             //self.counters.swap(0, 2);
-            let mut counter = self.counters.get_mut(1);
-            counter.value = counter.value.wrapping_add(10);
+            //let mut counter = self.counters.get_mut(1);
+            //counter.value = counter.value.wrapping_add(10);
         }
         self.counters.render_changes();
     }
 }
 
 fn main() {
-    let app: RelmApp<AppModel> = RelmApp::new("relm4.test.factory");
+    let app: RelmApp<AppModel> = RelmApp::new("relm4.test.gridFactory");
     app.run(0);
 }
