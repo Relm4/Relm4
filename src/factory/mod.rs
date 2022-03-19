@@ -348,7 +348,10 @@ where
         // Don't update anything if both are equal
         if current_position != target {
             let elem = self.model_state.remove(current_position).unwrap();
+            // Set new index
+            elem.index.set_value(target);
             self.model_state.insert(target, elem);
+
             let comp = self.components.remove(current_position).unwrap();
             self.components.insert(target, comp);
 
@@ -368,14 +371,12 @@ where
                 for state in self
                     .model_state
                     .iter_mut()
-                    .skip(current_position + 1)
+                    .skip(current_position)
                     .take(target - current_position)
                 {
                     state.index.decrement();
                 }
             }
-
-            self.model_state[target].index.set_value(target);
         }
     }
 

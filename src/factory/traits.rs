@@ -75,10 +75,7 @@ pub trait Position<Pos> {
     fn position(index: usize) -> Pos;
 }
 
-impl<T> Position<()> for T
-where
-    T: FactoryView<Position = ()>,
-{
+impl<C> Position<()> for C {
     fn position(_index: usize) {}
 }
 
