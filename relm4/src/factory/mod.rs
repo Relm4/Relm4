@@ -17,8 +17,10 @@ use builder::FactoryBuilder;
 use component_storage::ComponentStorage;
 use handle::FactoryHandle;
 
-use std::cell::{Ref, RefMut};
+use std::cell::{Ref, RefCell, RefMut};
+use std::collections::hash_map::DefaultHasher;
 use std::collections::VecDeque;
+use std::hash::{Hash, Hasher};
 
 #[allow(missing_debug_implementations)]
 /// A container similar to [`VecDeque`] that can be used to store
@@ -33,10 +35,21 @@ where
 {
     widget: Widget,
     parent_sender: Sender<ParentMsg>,
-    components: VecDeque<ComponentStorage<Widget, C, ParentMsg>>,
-    model_state: VecDeque<ModelStateValue>,
-    rendered_state: VecDeque<u16>,
+    components: RefCell<VecDeque<ComponentStorage<Widget, C, ParentMsg>>>,
+    model_state: RefCell<VecDeque<ModelStateValue>>,
+    rendered_state: RefCell<VecDeque<RenderedState>>,
     uid_counter: u16,
+}
+
+struct RenderedState {
+    uid: u16,
+    widget_hash: u64,
+}
+
+struct ModelStateValue {
+    index: DynamicIndex,
+    uid: u16,
+    changed: bool,
 }
 
 impl<Widget, C, ParentMsg> Drop for FactoryVecDeque<Widget, C, ParentMsg>
@@ -46,18 +59,12 @@ where
     C::Root: AsRef<Widget::Children>,
 {
     fn drop(&mut self) {
-        for component in &self.components {
+        for component in self.components.get_mut() {
             if let Some(widget) = component.returned_widget() {
                 self.widget.factory_remove(widget);
             }
         }
     }
-}
-
-struct ModelStateValue {
-    index: DynamicIndex,
-    uid: u16,
-    changed: bool,
 }
 
 impl<Widget, C, ParentMsg> FactoryVecDeque<Widget, C, ParentMsg>
@@ -71,9 +78,9 @@ where
         Self {
             widget,
             parent_sender: parent_sender.clone(),
-            components: VecDeque::new(),
-            model_state: VecDeque::new(),
-            rendered_state: VecDeque::new(),
+            components: RefCell::new(VecDeque::new()),
+            model_state: RefCell::new(VecDeque::new()),
+            rendered_state: RefCell::new(VecDeque::new()),
             // 0 is always an invalid uid
             uid_counter: 1,
         }
@@ -87,40 +94,42 @@ where
     /// but won't cause any UI updates.
     ///
     /// Also, only modified elements will be updated.
-    pub fn render_changes(&mut self) {
+    pub fn render_changes(&self) {
         let mut first_position_change_idx = None;
 
-        for (index, state) in self.model_state.iter().enumerate() {
-            if state.uid == self.rendered_state.front().copied().unwrap_or_default() {
+        let mut components = self.components.borrow_mut();
+        let mut rendered_state = self.rendered_state.borrow_mut();
+        for (index, state) in self.model_state.borrow().iter().enumerate() {
+            if state.uid == rendered_state.front().map(|r| r.uid).unwrap_or_default() {
                 // Remove item from previously rendered list
-                self.rendered_state.pop_front();
+                rendered_state.pop_front();
 
                 if state.changed {
                     // Update component
-                    self.components[index].state_change_notify();
+                    components[index].state_change_notify();
                 }
             } else if let Some(rendered_index) =
-                self.rendered_state.iter().position(|idx| *idx == state.uid)
+                rendered_state.iter().position(|r| r.uid == state.uid)
             {
                 if first_position_change_idx.is_none() {
                     first_position_change_idx = Some(index);
                 }
 
                 // Remove item from previously rendered list
-                self.rendered_state.remove(rendered_index);
+                rendered_state.remove(rendered_index);
 
                 // Detach and re-attach item
-                let widget = self.components[index].returned_widget().unwrap();
+                let widget = components[index].returned_widget().unwrap();
                 if index == 0 {
                     self.widget.factory_move_start(widget);
                 } else {
-                    let previous_widget = self.components[index - 1].returned_widget().unwrap();
+                    let previous_widget = components[index - 1].returned_widget().unwrap();
                     self.widget.factory_move_after(widget, previous_widget);
                 }
 
                 if state.changed {
                     // Update component
-                    self.components[index].state_change_notify();
+                    components[index].state_change_notify();
                 }
             } else {
                 if first_position_change_idx.is_none() {
@@ -128,33 +137,53 @@ where
                 }
 
                 // The element doesn't exist yet
-                let insert_widget = self.components[index].widget();
+                let insert_widget = components[index].widget();
                 let position = C::position(index);
                 let returned_widget = if index == 0 {
                     self.widget.factory_prepend(insert_widget, &position)
                 } else {
-                    let previous_widget = self.components[index - 1].returned_widget().unwrap();
+                    let previous_widget = components[index - 1].returned_widget().unwrap();
                     self.widget
                         .factory_insert_after(insert_widget, &position, previous_widget)
                 };
-                let component = self.components.remove(index).unwrap();
-                let dyn_index = &self.model_state[index].index;
+                let component = components.remove(index).unwrap();
+                let dyn_index = &self.model_state.borrow()[index].index;
                 let component = component
                     .launch(dyn_index, returned_widget, &self.parent_sender)
                     .unwrap();
-                self.components.insert(index, component);
+                components.insert(index, component);
             }
         }
 
         // Reset change tracker
-        self.model_state.iter_mut().for_each(|s| s.changed = false);
+        self.model_state
+            .borrow_mut()
+            .iter_mut()
+            .for_each(|s| s.changed = false);
+
 
         // Set rendered state to the state of the model
         // because everything should be up-to-date now.
-        self.rendered_state = self.model_state.iter().map(|s| s.uid).collect();
+        drop(rendered_state);
+        self.rendered_state.replace(
+            self.model_state
+                .borrow()
+                .iter()
+                .zip(components.iter())
+                .map(|(s, c)| {
+                    let mut hasher = DefaultHasher::default();
+                    c.returned_widget().unwrap().hash(&mut hasher);
+
+                    RenderedState {
+                        uid: s.uid,
+                        widget_hash: hasher.finish(),
+                    }
+                })
+                .collect(),
+        );
 
         if let Some(change_index) = first_position_change_idx {
-            for (index, comp) in self.components.iter().enumerate().skip(change_index) {
+            for (index, comp) in components.iter().enumerate().skip(change_index) {
                 let position = C::position(index);
                 self.widget
                     .factory_update_position(comp.returned_widget().unwrap(), &position);
@@ -164,17 +193,17 @@ where
 
     /// Returns the number of elements in the [`FactoryVecDeque`].
     pub fn len(&self) -> usize {
-        self.components.len()
+        self.components.borrow().len()
     }
 
     /// Returns true if the [`FactoryVecDeque`] is empty.
     pub fn is_empty(&self) -> bool {
-        self.components.is_empty()
+        self.components.borrow().is_empty()
     }
 
     /// Send a message to one of the elements.
     pub fn send(&self, index: usize, msg: C::Input) {
-        self.components[index].send(msg)
+        self.components.borrow()[index].send(msg)
     }
 
     /// Tries to get an immutable reference to
@@ -187,7 +216,13 @@ where
     /// Panics when the same element was borrowed mutably
     /// somewhere else.
     pub fn try_get(&self, index: usize) -> Option<Ref<'_, C>> {
-        self.components.get(index).map(ComponentStorage::get)
+        // Safety: This is safe because ownership is tracked by each
+        // component individually, an therefore violating ownership
+        // rules is impossible.
+        // The safe version struggles with lifetime, maybe this can
+        // be fixed soon.
+        let components = unsafe { self.components.try_borrow_unguarded().unwrap() };
+        components.get(index).map(ComponentStorage::get)
     }
 
     /// Tries to get a mutable reference to
@@ -201,10 +236,13 @@ where
     /// somewhere else.
     pub fn try_get_mut(&mut self, index: usize) -> Option<RefMut<'_, C>> {
         // Mark as modified
-        if let Some(state) = self.model_state.get_mut(index) {
+        if let Some(state) = self.model_state.get_mut().get_mut(index) {
             state.changed = true;
         }
-        self.components.get(index).map(ComponentStorage::get_mut)
+        self.components
+            .get_mut()
+            .get_mut(index)
+            .map(ComponentStorage::get_mut)
     }
 
     /// Provides a reference to the element at the given index.
@@ -236,10 +274,10 @@ where
     /// Removes the last element from the [`FactoryVecDeque`] and returns it,
     /// or [`None`] if it is empty.
     pub fn pop_back(&mut self) -> Option<C> {
-        if self.components.is_empty() {
+        if self.is_empty() {
             None
         } else {
-            self.remove(self.components.len() - 1)
+            self.remove(self.len() - 1)
         }
     }
 
@@ -248,11 +286,14 @@ where
     ///
     /// Element at index 0 is the front of the queue.
     pub fn remove(&mut self, index: usize) -> Option<C> {
-        self.model_state.remove(index);
-        let component = self.components.remove(index);
+        let model_state = self.model_state.get_mut();
+        let components = self.components.get_mut();
+
+        model_state.remove(index);
+        let component = components.remove(index);
 
         // Decrement the indexes of the following elements.
-        for states in self.model_state.iter_mut().skip(index) {
+        for states in model_state.iter_mut().skip(index) {
             states.index.decrement();
         }
 
@@ -272,7 +313,7 @@ where
 
     /// Appends an element at the end of the [`FactoryVecDeque`].
     pub fn push_back(&mut self, init_params: C::InitParams) {
-        let index = self.model_state.len();
+        let index = self.len();
         self.insert(index, init_params);
     }
 
@@ -291,18 +332,20 @@ where
     ///
     /// Panics if index is greater than [`FactoryVecDeque`]’s length.
     pub fn insert(&mut self, index: usize, init_params: C::InitParams) {
+        let model_state = self.model_state.get_mut();
+        let components = self.components.get_mut();
+
         let dyn_index = DynamicIndex::new(index);
 
         // Increment the indexes of the following elements.
-        for states in self.model_state.iter_mut().skip(index) {
+        for states in model_state.iter_mut().skip(index) {
             states.index.increment();
         }
 
         let builder = FactoryBuilder::new(&dyn_index, init_params);
 
-        self.components
-            .insert(index, ComponentStorage::Builder(builder));
-        self.model_state.insert(
+        components.insert(index, ComponentStorage::Builder(builder));
+        model_state.insert(
             index,
             ModelStateValue {
                 index: dyn_index,
@@ -325,12 +368,15 @@ where
     pub fn swap(&mut self, first: usize, second: usize) {
         // Don't update anything if both are equal
         if first != second {
-            self.model_state.swap(first, second);
-            self.components.swap(first, second);
+            let model_state = self.model_state.get_mut();
+            let components = self.components.get_mut();
+
+            model_state.swap(first, second);
+            components.swap(first, second);
 
             // Update indexes.
-            self.model_state[first].index.set_value(first);
-            self.model_state[second].index.set_value(second);
+            model_state[first].index.set_value(first);
+            model_state[second].index.set_value(second);
         }
     }
 
@@ -347,19 +393,21 @@ where
     pub fn move_to(&mut self, current_position: usize, target: usize) {
         // Don't update anything if both are equal
         if current_position != target {
-            let elem = self.model_state.remove(current_position).unwrap();
+            let model_state = self.model_state.get_mut();
+            let components = self.components.get_mut();
+
+            let elem = model_state.remove(current_position).unwrap();
             // Set new index
             elem.index.set_value(target);
-            self.model_state.insert(target, elem);
+            model_state.insert(target, elem);
 
-            let comp = self.components.remove(current_position).unwrap();
-            self.components.insert(target, comp);
+            let comp = components.remove(current_position).unwrap();
+            components.insert(target, comp);
 
             // Update indexes.
             if current_position > target {
                 // Move down -> shift elements in between up.
-                for state in self
-                    .model_state
+                for state in model_state
                     .iter_mut()
                     .skip(target + 1)
                     .take(current_position - target)
@@ -368,8 +416,7 @@ where
                 }
             } else {
                 // Move up -> shift elements in between down.
-                for state in self
-                    .model_state
+                for state in model_state
                     .iter_mut()
                     .skip(current_position)
                     .take(target - current_position)
@@ -397,12 +444,49 @@ where
     ///
     /// Panics if either index is out of bounds.
     pub fn move_back(&mut self, current_position: usize) {
-        self.move_to(current_position, self.components.len())
+        self.move_to(current_position, self.len())
     }
 
     /// Removes the first element from the [`FactoryVecDeque`] and returns it,
     /// or [`None`] if it is empty.
     pub fn pop_front(&mut self) -> Option<C> {
         self.remove(0)
+    }
+}
+
+#[cfg(feature = "libadwaita")]
+impl<C, ParentMsg> FactoryVecDeque<adw::TabView, C, ParentMsg>
+where
+    C: FactoryComponent<adw::TabView, ParentMsg> + Position<()>,
+    C::Root: AsRef<gtk::Widget>,
+{
+    /// Apply external updates that happened between the last render.
+    ///
+    /// **YOU MUST NOT EDIT THE [`FactoryVecDeque`] BETWEEN CALLING
+    /// THIS [`render_change`] AND THIS METHOD. THIS MIGHT CAUSE
+    /// UNDEFINED BEHAVIOR.
+    pub fn apply_external_updates(&mut self) {
+        let length = self.widget().n_pages();
+        let mut hashes: Vec<u64> = Vec::with_capacity(length as usize);
+
+        for i in 0..length {
+            let page = self.widget.nth_page(i);
+            let mut hasher = DefaultHasher::default();
+            page.hash(&mut hasher);
+            hashes.push(hasher.finish());
+        }
+
+        for (index, hash) in hashes.iter().enumerate() {
+            let rendered_state = self.rendered_state.get_mut();
+
+            if *hash != rendered_state.get(index).map(|state| state.widget_hash).unwrap_or_default() {
+                let old_position = rendered_state.iter().position(|state| state.widget_hash == *hash).expect("A new widget was added");
+
+                let elem = rendered_state.remove(old_position).unwrap();
+                rendered_state.insert(index, elem);
+
+                self.move_to(old_position, index);
+            }
+        }
     }
 }

@@ -28,7 +28,7 @@ where
         }
     }
 
-    pub(super) fn get_mut(&self) -> RefMut<'_, C> {
+    pub(super) fn get_mut(&mut self) -> RefMut<'_, C> {
         match self {
             Self::Builder(builder) => builder.data.borrow_mut(),
             Self::Final(handle) => handle.data.borrow_mut(),

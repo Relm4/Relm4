@@ -28,3 +28,15 @@ set_child_impl!(
     gtk::ApplicationWindow,
     gtk::Dialog
 );
+
+#[cfg(feature = "libadwaita")]
+mod libadwaita {
+    use super::RelmSetChildExt;
+    use adw::prelude::AdwWindowExt;
+
+    impl RelmSetChildExt for adw::Window {
+        fn container_set_child(&self, widget: Option<&impl AsRef<gtk::Widget>>) {
+            self.set_content(widget.map(|w| w.as_ref()));
+        }
+    }
+}

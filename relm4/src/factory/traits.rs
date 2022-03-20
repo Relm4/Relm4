@@ -14,7 +14,7 @@ pub trait FactoryView {
     /// which might be used to set additional parameters.
     ///
     /// Therefore, this "returned widget" is explicitly handled here.
-    type ReturnedWidget: std::fmt::Debug;
+    type ReturnedWidget: std::fmt::Debug + std::hash::Hash;
 
     /// Widget type that is attached to the container
     /// and also the root of the components.

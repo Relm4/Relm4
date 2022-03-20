@@ -7,6 +7,7 @@ impl FactoryView for adw::TabView {
     type Position = ();
 
     fn factory_remove(&self, widget: &Self::ReturnedWidget) {
+        self.close_page(widget);
         self.close_page_finish(widget, true);
     }
 
