@@ -1,0 +1,36 @@
+[package]
+name = "examples"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[dev-dependencies]
+relm4 = { path = "../relm4", features = ["macros"] }
+#relm4-components = { path = "../relm4-components" }
+tokio = { version = "1.15", features = ["rt", "macros", "time", "rt-multi-thread"] }
+futures = "0.3.19"
+tracker = "0.1"
+
+[[example]]
+name = "simple"
+path = "simple.rs"
+
+[[example]]
+name = "simple_manual"
+path = "simple_manual.rs"
+
+[[example]]
+name = "factory"
+path = "factory.rs"
+
+[[example]]
+name = "grid_factory"
+path = "grid_factory.rs"
+
+[[example]]
+name = "settings_list"
+path = "settings_list.rs"
+
+[[example]]
+name = "progress"
+path = "progress.rs"

@@ -74,7 +74,7 @@ impl Component for App {
         input: &Sender<Self::Input>,
         _output: &Sender<Self::Output>,
     ) -> ComponentParts<Self> {
-        relm4_macros::view! {
+        relm4::view! {
             container = gtk::Box {
                 set_halign: gtk::Align::Center,
                 set_valign: gtk::Align::Center,

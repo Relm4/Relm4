@@ -205,7 +205,7 @@ impl Component for App {
         } else if self.options.len() != widgets.options.len() {
             if let Some((description, button_label, id)) = self.options.last() {
                 let id = *id;
-                relm4_macros::view! {
+                relm4::view! {
                     widget = gtk::Box {
                         set_orientation: gtk::Orientation::Horizontal,
                         set_margin_start: 20,

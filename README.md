@@ -1,11 +1,13 @@
 <h1>
-  <img src="assets/Relm_logo_with_text.png" width="190" alt="Relm4">
+  <a href="https://relm4.org">
+    <img src="assets/Relm_logo_with_text.png" width="190" alt="Relm4">
+  </a>
 </h1>
 
 [![CI](https://github.com/AaronErhardt/relm4/actions/workflows/rust.yml/badge.svg)](https://github.com/AaronErhardt/relm4/actions/workflows/rust.yml)
 [![Matrix](https://img.shields.io/matrix/relm4:matrix.org?label=matrix%20chat)](https://matrix.to/#/#relm4:matrix.org)
 [![Relm4 on crates.io](https://img.shields.io/crates/v/relm4.svg)](https://crates.io/crates/relm4)
-[![Relm4 docs](https://img.shields.io/badge/rust-documentation-blue)](https://aaronerhardt.github.io/docs/relm4/relm4/)
+[![Relm4 docs](https://img.shields.io/badge/rust-documentation-blue)](https://relm4.org/docs/stable/relm4/)
 [![Relm4 book](https://img.shields.io/badge/rust-book-fc0060)](https://aaronerhardt.github.io/relm4-book/book/)
 ![Minimum Rust version 1.56](https://img.shields.io/badge/rustc-1.56+-06a096.svg)
 [![dependency status](https://deps.rs/repo/github/aaronerhardt/relm4/status.svg)](https://deps.rs/repo/github/aaronerhardt/relm4)
@@ -29,7 +31,7 @@ Built on top of this foundation, Relm4 makes developing more idiomatic, simpler 
 ## Documentation
 
 + 📖 **[The Relm4 book](https://aaronerhardt.github.io/relm4-book/book/)**
-+ 📜 **[Rust documentation](https://aaronerhardt.github.io/docs/relm4/relm4/)**
++ 📜 **[Rust documentation](https://relm4.org/docs/stable/relm4/)**
 
 ## Dependencies
 
