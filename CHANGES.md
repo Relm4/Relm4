@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+### Fixed
+
++ relm4: Always initialize GTK/Libadwaita before running apps
 + relm4-macros: Some doc link fixes
 
 ## 0.4.3 - 2022-3-13 

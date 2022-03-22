@@ -5,6 +5,14 @@ use std::marker::PhantomData;
 
 use crate::{AppUpdate, Application, Components, Model as ModelTrait, Widgets as WidgetsTrait};
 
+#[cfg(feature = "libadwaita")]
+use adw::init;
+
+#[cfg(not(feature = "libadwaita"))]
+fn init() {
+    gtk::init().expect("Couldn't initialize GTK");
+}
+
 /// The app that runs the main application.
 /// A [`RelmApp`] consists of a model that stores the application state
 /// and widgets that represent the UI.
@@ -52,7 +60,6 @@ where
 
     /// Create a Relm4 application.
     pub fn new(model: Model) -> Self {
-        gtk::init().expect("Couldn't initialize GTK");
         let app = Application::default();
 
         Self::with_app(model, app)
@@ -60,6 +67,9 @@ where
 
     /// Create a new Relm4 application with an existing [`gtk::Application`].
     pub fn with_app(mut model: Model, app: Application) -> Self {
+        // Initialize GTK/Libadwaita
+        init();
+
         crate::APP
             .set(fragile::Fragile::new(app.clone()))
             .expect("APP was alredy set");
