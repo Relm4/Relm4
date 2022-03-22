@@ -231,10 +231,12 @@ where
 
     /// Initialize a new [`FactoryVecDeque`] with a normal [`VecDeque`].
     #[must_use]
-    pub fn from_vec_deque(mut data: VecDeque<Data>) -> Self {
-        let mut indexed_data = VecDeque::with_capacity(data.len());
-        let mut changes = Vec::with_capacity(data.len());
-        for (num, item) in data.drain(..).enumerate() {
+    pub fn from_vec_deque(data: VecDeque<Data>) -> Self {
+        let length = data.len();
+        let mut indexed_data = VecDeque::with_capacity(length);
+        let mut changes = Vec::with_capacity(length);
+
+        for (num, item) in data.into_iter().enumerate() {
             indexed_data.push_back(IndexedData::new(item, num));
             changes.push(Change {
                 ty: ChangeType::Add,
@@ -243,7 +245,7 @@ where
         }
         FactoryVecDeque {
             data: indexed_data,
-            widgets: RefCell::new(VecDeque::with_capacity(data.len())),
+            widgets: RefCell::new(VecDeque::with_capacity(length)),
             changes: RefCell::new(changes),
         }
     }
