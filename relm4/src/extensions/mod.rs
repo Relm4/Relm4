@@ -1,5 +1,5 @@
 mod container;
-mod removable;
+mod remove;
 mod set_child;
 
 #[cfg(test)]
@@ -8,7 +8,7 @@ mod tests;
 #[allow(unreachable_pub)]
 pub use self::container::RelmContainerExt;
 #[allow(unreachable_pub)]
-pub use self::removable::{RelmRemovableExt, RelmRemoveAllExt};
+pub use self::remove::{RelmRemoveAllExt, RelmRemoveExt};
 #[allow(unreachable_pub)]
 pub use self::set_child::RelmSetChildExt;
 
@@ -188,7 +188,7 @@ impl<T: RelmIterChildrenExt> DoubleEndedIterator for ChildrenIterator<T> {
 }
 
 /// Widget types which allow iteration over their children.
-pub trait RelmIterChildrenExt: RelmRemovableExt + IsA<gtk::Widget> {
+pub trait RelmIterChildrenExt: RelmRemoveExt + IsA<gtk::Widget> {
     /// Returns an iterator over container children.
     fn iter_children(&self) -> ChildrenIterator<Self> {
         ChildrenIterator::new(self)
