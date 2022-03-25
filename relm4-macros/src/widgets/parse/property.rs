@@ -121,7 +121,7 @@ impl Parse for Property {
             let colon: Token! [:] = input.parse()?;
             let colon_span = colon.span();
 
-            if input.peek2(Token![!]) {
+            if input.peek2(Token![!]) && !input.peek3(Token![=]) {
                 let mac: Macro = input.parse()?;
                 let segs = &mac.path.segments;
 
