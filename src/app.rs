@@ -5,12 +5,11 @@ use std::marker::PhantomData;
 
 use crate::{AppUpdate, Application, Components, Model as ModelTrait, Widgets as WidgetsTrait};
 
-#[cfg(feature = "libadwaita")]
-use adw::init;
-
-#[cfg(not(feature = "libadwaita"))]
 fn init() {
     gtk::init().expect("Couldn't initialize GTK");
+
+    #[cfg(feature = "libadwaita")]
+    adw::init();
 }
 
 /// The app that runs the main application.
