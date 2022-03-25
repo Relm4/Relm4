@@ -132,6 +132,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
                     attach(1, 2, 1, 1): label2 = &gtk::Label {
                         set_label: "grid test 2",
                         set_visible: counter == 0,
+                        set_visible: counter != 0,
                     },
                     attach(2, 1, 1, 1) = &gtk::Label {
                         set_label: watch!(&format!("dbg: {:?}", label2)),

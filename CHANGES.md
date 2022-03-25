@@ -4,6 +4,7 @@
 
 ### Fixed
 
++ relm4-macros: Don't interpret expr != expr as macro
 + relm4: Always initialize GTK/Libadwaita before running apps
 + relm4-macros: Some doc link fixes
 
