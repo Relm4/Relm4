@@ -89,7 +89,7 @@ macro_rules! remove_all_impl {
     }
 }
 
-remove_all_impl!(gtk::Box, gtk::FlowBox, gtk::Grid);
+remove_all_impl!(gtk::Box, gtk::FlowBox, gtk::Stack, gtk::Grid);
 
 impl RelmRemoveAllExt for gtk::ListBox {
     fn remove_all(&self) {

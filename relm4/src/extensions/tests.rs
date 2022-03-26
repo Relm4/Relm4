@@ -138,3 +138,26 @@ fn grid_extension_traits() {
     assert!(widgets.1.parent().is_none());
     assert!(widgets.2.parent().is_none());
 }
+
+#[gtk::test]
+fn stack_extension_traits() {
+    let stack = gtk::Stack::default();
+    let widgets = TestWidgets::default();
+
+    stack.add_child(&widgets.0);
+    stack.add_child(&widgets.1);
+    stack.add_child(&widgets.2);
+
+    widgets.assert_parent();
+
+    let mut children = stack.iter_children();
+    assert!(same_widgets(children.next(), Some(&widgets.0)));
+    assert!(same_widgets(children.next(), Some(&widgets.1)));
+    assert!(same_widgets(children.next(), Some(&widgets.2)));
+    assert_eq!(children.next_back(), None);
+    assert_eq!(children.next(), None);
+
+    stack.remove_all();
+
+    assert_eq!(stack.iter_children().next(), None);
+}
