@@ -55,7 +55,7 @@ pub(crate) fn generate_tokens(
     let menus_stream = menus.map(|m| m.menus_stream(&relm4_path));
 
     let funcs::Funcs {
-        init_parts,
+        init,
         pre_view,
         post_view,
         unhandled_fns,
@@ -115,7 +115,7 @@ pub(crate) fn generate_tokens(
         }
     };
 
-    let init_parts_injected = match inject_view_code(init_parts, view_code, widgets_return_code) {
+    let init_injected = match inject_view_code(init, view_code, widgets_return_code) {
         Ok(method) => method,
         Err(err) => return err.to_compile_error(),
     };
@@ -140,7 +140,7 @@ pub(crate) fn generate_tokens(
                 #init_root
             }
 
-            #init_parts_injected
+            #init_injected
 
             /// Update the view to represent the updated model.
             fn update_view(

@@ -119,7 +119,7 @@ impl Component for App {
             .build()
     }
 
-    fn init_parts(
+    fn init(
         title: Self::InitParams,
         root: &Self::Root,
         _input: &Sender<Self::Input>,

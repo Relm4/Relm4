@@ -4,7 +4,6 @@
 
 use super::*;
 use crate::{shutdown::ShutdownReceiver, Sender};
-use std::marker::PhantomData;
 
 /// Elm-style variant of a Component with view updates separated from input updates
 pub trait Component: Sized + 'static {
@@ -38,7 +37,7 @@ pub trait Component: Sized + 'static {
     fn init_root() -> Self::Root;
 
     /// Creates the initial model and view, docking it into the component.
-    fn init_parts(
+    fn init(
         params: Self::InitParams,
         root: &Self::Root,
         input: &Sender<Self::Input>,
@@ -137,7 +136,7 @@ pub trait SimpleComponent: Sized + 'static {
     fn init_root() -> Self::Root;
 
     /// Creates the initial model and view, docking it into the component.
-    fn init_parts(
+    fn init(
         params: Self::InitParams,
         root: &Self::Root,
         input: &Sender<Self::Input>,
@@ -190,13 +189,13 @@ where
         C::init_root()
     }
 
-    fn init_parts(
+    fn init(
         params: Self::InitParams,
         root: &Self::Root,
         input: &Sender<Self::Input>,
         output: &Sender<Self::Output>,
     ) -> ComponentParts<Self> {
-        C::init_parts(params, root, input, output)
+        C::init(params, root, input, output)
     }
 
     fn update(

@@ -218,7 +218,7 @@ impl SimpleComponent for AppModel {
     }
 
     // Initialize the UI.
-    fn init_parts(
+    fn init(
         counter: Self::InitParams,
         root: &Self::Root,
         input: &Sender<Self::Input>,

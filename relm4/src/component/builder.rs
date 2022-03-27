@@ -86,7 +86,7 @@ impl<C: Component> ComponentBuilder<C> {
 
         // Constructs the initial model and view with the initial payload.
         let watcher = Rc::new(StateWatcher {
-            state: RefCell::new(C::init_parts(payload, &root, &input_tx, &output_tx)),
+            state: RefCell::new(C::init(payload, &root, &input_tx, &output_tx)),
             notifier,
         });
 
