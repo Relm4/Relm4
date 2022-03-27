@@ -199,3 +199,4 @@ impl RelmIterChildrenExt for gtk::Box {}
 impl RelmIterChildrenExt for gtk::ListBox {}
 impl RelmIterChildrenExt for gtk::FlowBox {}
 impl RelmIterChildrenExt for gtk::Grid {}
+impl RelmIterChildrenExt for gtk::Stack {}
