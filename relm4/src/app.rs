@@ -24,7 +24,7 @@ where
 
         let app = gtk::Application::builder().application_id(app_id).build();
 
-        let bridge = C::init();
+        let bridge = ComponentBuilder::<C>::new();
 
         Self { bridge, app }
     }

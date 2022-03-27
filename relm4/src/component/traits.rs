@@ -4,7 +4,6 @@
 
 use super::*;
 use crate::{shutdown::ShutdownReceiver, Sender};
-use std::marker::PhantomData;
 
 /// Elm-style variant of a Component with view updates separated from input updates
 pub trait Component: Sized + 'static {
@@ -29,19 +28,16 @@ pub trait Component: Sized + 'static {
     /// The type that's used for storing widgets created for this component.
     type Widgets: 'static;
 
+    /// Create a builder for this component.
+    fn builder() -> ComponentBuilder<Self> {
+        ComponentBuilder::<Self>::new()
+    }
+
     /// Initializes the root widget
     fn init_root() -> Self::Root;
 
-    /// Initializes the root widget and prepares a `Bridge` for docking.
-    fn init() -> ComponentBuilder<Self> {
-        ComponentBuilder {
-            root: Self::init_root(),
-            component: PhantomData,
-        }
-    }
-
     /// Creates the initial model and view, docking it into the component.
-    fn init_parts(
+    fn init(
         params: Self::InitParams,
         root: &Self::Root,
         input: &Sender<Self::Input>,
@@ -139,16 +135,8 @@ pub trait SimpleComponent: Sized + 'static {
     /// Initializes the root widget
     fn init_root() -> Self::Root;
 
-    /// Initializes the root widget and prepares a `Bridge` for docking.
-    fn init() -> ComponentBuilder<Self> {
-        ComponentBuilder {
-            root: Self::init_root(),
-            component: PhantomData,
-        }
-    }
-
     /// Creates the initial model and view, docking it into the component.
-    fn init_parts(
+    fn init(
         params: Self::InitParams,
         root: &Self::Root,
         input: &Sender<Self::Input>,
@@ -201,13 +189,13 @@ where
         C::init_root()
     }
 
-    fn init_parts(
+    fn init(
         params: Self::InitParams,
         root: &Self::Root,
         input: &Sender<Self::Input>,
         output: &Sender<Self::Output>,
     ) -> ComponentParts<Self> {
-        C::init_parts(params, root, input, output)
+        C::init(params, root, input, output)
     }
 
     fn update(

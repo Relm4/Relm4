@@ -161,7 +161,6 @@ where
             .iter_mut()
             .for_each(|s| s.changed = false);
 
-
         // Set rendered state to the state of the model
         // because everything should be up-to-date now.
         drop(rendered_state);
@@ -479,8 +478,16 @@ where
         for (index, hash) in hashes.iter().enumerate() {
             let rendered_state = self.rendered_state.get_mut();
 
-            if *hash != rendered_state.get(index).map(|state| state.widget_hash).unwrap_or_default() {
-                let old_position = rendered_state.iter().position(|state| state.widget_hash == *hash).expect("A new widget was added");
+            if *hash
+                != rendered_state
+                    .get(index)
+                    .map(|state| state.widget_hash)
+                    .unwrap_or_default()
+            {
+                let old_position = rendered_state
+                    .iter()
+                    .position(|state| state.widget_hash == *hash)
+                    .expect("A new widget was added");
 
                 let elem = rendered_state.remove(old_position).unwrap();
                 rendered_state.insert(index, elem);

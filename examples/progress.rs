@@ -68,7 +68,7 @@ impl Component for App {
         gtk::Window::default()
     }
 
-    fn init_parts(
+    fn init(
         _args: Self::InitParams,
         root: &Self::Root,
         input: &Sender<Self::Input>,

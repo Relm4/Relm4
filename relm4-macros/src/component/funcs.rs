@@ -4,7 +4,7 @@ use syn::{spanned::Spanned, Error, ImplItemMethod, Result};
 
 pub(super) struct Funcs {
     pub unhandled_fns: Vec<ImplItemMethod>,
-    pub init_parts: ImplItemMethod,
+    pub init: ImplItemMethod,
     pub pre_view: Option<TokenStream2>,
     pub post_view: Option<TokenStream2>,
 }
@@ -23,7 +23,7 @@ macro_rules! parse_func {
 
 impl Funcs {
     pub fn new(mut funcs: Vec<ImplItemMethod>) -> Result<Self> {
-        let mut init_parts = None;
+        let mut init = None;
         let mut unhandled_fns = Vec::new();
         let mut pre_view = None;
         let mut post_view = None;
@@ -31,14 +31,14 @@ impl Funcs {
         for func in funcs.drain(..) {
             let ident = &func.sig.ident;
 
-            if ident == "init_parts" {
-                if init_parts.is_some() {
+            if ident == "init" {
+                if init.is_some() {
                     return Err(Error::new(
                         func.span().unwrap().into(),
-                        "`init_parts` method defined multiple times",
+                        "`init` method defined multiple times",
                     ));
                 } else {
-                    init_parts = Some(func);
+                    init = Some(func);
                 }
             } else if ident == "pre_view" {
                 let stmts = &func.block.stmts;
@@ -53,11 +53,11 @@ impl Funcs {
             }
         }
 
-        let init_parts = init_parts
-            .ok_or_else(|| Error::new(Span2::call_site(), "`init_parts` method isn't defined"))?;
+        let init =
+            init.ok_or_else(|| Error::new(Span2::call_site(), "`init` method isn't defined"))?;
 
         Ok(Funcs {
-            init_parts,
+            init,
             pre_view,
             post_view,
             unhandled_fns,

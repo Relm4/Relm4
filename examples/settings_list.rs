@@ -21,7 +21,7 @@ fn main() {
         .application_id("org.relm4.SettingsListExample")
         .launch(|_app, window| {
             // Intiialize a component's root widget
-            let component = App::init()
+            let component = App::builder()
                 // Attach the root widget to the given window.
                 .attach_to(&window)
                 // Start the component service with an initial parameter
@@ -119,7 +119,7 @@ impl Component for App {
             .build()
     }
 
-    fn init_parts(
+    fn init(
         title: Self::InitParams,
         root: &Self::Root,
         _input: &Sender<Self::Input>,
