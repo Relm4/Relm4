@@ -29,16 +29,13 @@ pub trait Component: Sized + 'static {
     /// The type that's used for storing widgets created for this component.
     type Widgets: 'static;
 
+    /// Create a builder for this component.
+    fn builder() -> ComponentBuilder<Self> {
+        ComponentBuilder::<Self>::new()
+    }
+
     /// Initializes the root widget
     fn init_root() -> Self::Root;
-
-    /// Initializes the root widget and prepares a `Bridge` for docking.
-    fn init() -> ComponentBuilder<Self> {
-        ComponentBuilder {
-            root: Self::init_root(),
-            component: PhantomData,
-        }
-    }
 
     /// Creates the initial model and view, docking it into the component.
     fn init_parts(
@@ -138,14 +135,6 @@ pub trait SimpleComponent: Sized + 'static {
 
     /// Initializes the root widget
     fn init_root() -> Self::Root;
-
-    /// Initializes the root widget and prepares a `Bridge` for docking.
-    fn init() -> ComponentBuilder<Self> {
-        ComponentBuilder {
-            root: Self::init_root(),
-            component: PhantomData,
-        }
-    }
 
     /// Creates the initial model and view, docking it into the component.
     fn init_parts(

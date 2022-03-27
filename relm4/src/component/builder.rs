@@ -22,6 +22,15 @@ pub struct ComponentBuilder<C: Component> {
 }
 
 impl<C: Component> ComponentBuilder<C> {
+    #[allow(clippy::new_without_default)]
+    /// Prepares a component for initialization.
+    pub fn new() -> Self {
+        ComponentBuilder {
+            root: C::init_root(),
+            component: PhantomData,
+        }
+    }
+
     /// Configure the root widget before launching.
     pub fn update_root<F: FnOnce(&mut C::Root)>(mut self, func: F) -> Self {
         func(&mut self.root);
