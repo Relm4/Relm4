@@ -43,11 +43,6 @@ pub enum Output {
     Clicked(u32),
 }
 
-pub enum Command {
-    /// Initiate a background job which pushes the progress bar.
-    Compute,
-}
-
 pub enum CmdOut {
     /// Progress update from a command.
     Progress(f32),
@@ -56,7 +51,6 @@ pub enum CmdOut {
 }
 
 impl Component for App {
-    type Command = Command;
     type CommandOutput = CmdOut;
     type Input = Input;
     type Output = Output;
@@ -122,15 +116,29 @@ impl Component for App {
         }
     }
 
-    fn update(
-        &mut self,
-        message: Self::Input,
-        _sender: &ComponentSender<Self>,
-    ) -> Option<Self::Command> {
+    fn update(&mut self, message: Self::Input, sender: &ComponentSender<Self>) {
         match message {
             Input::Compute => {
                 self.computing = true;
-                Some(Command::Compute)
+                sender.command(|out, shutdown| {
+                    shutdown
+                        // Performs this operation until a shutdown is triggered
+                        .register(async move {
+                            let mut progress = 0.0;
+
+                            while progress < 1.0 {
+                                out.send(CmdOut::Progress(progress));
+                                progress += 0.1;
+                                tokio::time::sleep(std::time::Duration::from_millis(333)).await;
+                            }
+
+                            out.send(CmdOut::Finished(Ok("42".into())));
+                        })
+                        // Perform task until a shutdown interrupts it
+                        .drop_on_shutdown()
+                        // Wrap into a `Pin<Box<Future>>` for return
+                        .boxed()
+                });
             }
         }
     }
@@ -161,29 +169,5 @@ impl Component for App {
                 }
             }
         }
-    }
-
-    fn command(
-        _message: Self::Command,
-        shutdown: ShutdownReceiver,
-        out: Sender<CmdOut>,
-    ) -> CommandFuture {
-        shutdown
-            // Performs this operation until a shutdown is triggered
-            .register(async move {
-                let mut progress = 0.0;
-
-                while progress < 1.0 {
-                    out.send(CmdOut::Progress(progress));
-                    progress += 0.1;
-                    tokio::time::sleep(std::time::Duration::from_millis(333)).await;
-                }
-
-                out.send(CmdOut::Finished(Ok("42".into())));
-            })
-            // Perform task until a shutdown interrupts it
-            .drop_on_shutdown()
-            // Wrap into a `Pin<Box<Future>>` for return
-            .boxed()
     }
 }

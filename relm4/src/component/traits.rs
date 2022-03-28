@@ -3,13 +3,10 @@
 // SPDX-License-Identifier: MIT or Apache-2.0
 
 use super::*;
-use crate::{shutdown::ShutdownReceiver, ComponentSender, Sender};
+use crate::{ComponentSender, Sender};
 
 /// Elm-style variant of a Component with view updates separated from input updates
 pub trait Component: Sized + 'static {
-    /// Internal commands to perform
-    type Command: 'static + Send;
-
     /// Messages which are received from commands executing in the background.
     type CommandOutput: 'static + Send;
 
@@ -45,13 +42,7 @@ pub trait Component: Sized + 'static {
 
     /// Processes inputs received by the component.
     #[allow(unused)]
-    fn update(
-        &mut self,
-        message: Self::Input,
-        sender: &ComponentSender<Self>,
-    ) -> Option<Self::Command> {
-        None
-    }
+    fn update(&mut self, message: Self::Input, sender: &ComponentSender<Self>) {}
 
     /// Defines how the component should respond to command updates.
     #[allow(unused)]
@@ -78,20 +69,9 @@ pub trait Component: Sized + 'static {
         widgets: &mut Self::Widgets,
         message: Self::Input,
         sender: &ComponentSender<Self>,
-    ) -> Option<Self::Command> {
-        let cmd = self.update(message, sender);
+    ) {
+        self.update(message, sender);
         self.update_view(widgets, sender);
-        cmd
-    }
-
-    /// A command to perform in a background thread.
-    #[allow(unused)]
-    fn command(
-        message: Self::Command,
-        shutdown: ShutdownReceiver,
-        output: Sender<Self::CommandOutput>,
-    ) -> CommandFuture {
-        Box::pin(async {})
     }
 
     /// Last method called before a component is shut down.
@@ -153,7 +133,6 @@ where
     type Root = C::Root;
     type Widgets = C::Widgets;
 
-    type Command = ();
     type CommandOutput = ();
 
     fn init_root() -> Self::Root {
@@ -168,13 +147,8 @@ where
         C::init(params, root, sender)
     }
 
-    fn update(
-        &mut self,
-        message: Self::Input,
-        sender: &ComponentSender<Self>,
-    ) -> Option<Self::Command> {
+    fn update(&mut self, message: Self::Input, sender: &ComponentSender<Self>) {
         C::update(self, message, sender);
-        None
     }
 
     fn update_view(&self, widgets: &mut Self::Widgets, sender: &ComponentSender<Self>) {

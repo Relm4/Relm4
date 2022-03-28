@@ -94,16 +94,11 @@ pub enum Output {
     Reload,
 }
 
-pub enum Command {
-    Reload,
-}
-
 pub enum CmdOut {
     Reload,
 }
 
 impl Component for App {
-    type Command = Command;
     type CommandOutput = CmdOut;
     type Input = Input;
     type Output = Output;
@@ -152,11 +147,7 @@ impl Component for App {
         }
     }
 
-    fn update(
-        &mut self,
-        message: Self::Input,
-        sender: &ComponentSender<Self>,
-    ) -> Option<Self::Command> {
+    fn update(&mut self, message: Self::Input, sender: &ComponentSender<Self>) {
         match message {
             Input::AddSetting {
                 description,
@@ -168,15 +159,23 @@ impl Component for App {
 
             Input::Clear => {
                 self.options.clear();
-                return Some(Command::Reload);
+
+                sender.command(|out, shutdown| {
+                    // Perform this async operation.
+                    let task = async move {
+                        tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+                        out.send(CmdOut::Reload);
+                    };
+
+                    // Designate for it to drop on component death.
+                    shutdown.register(task).drop_on_shutdown().boxed()
+                });
             }
 
             Input::Reload => {
                 sender.output(Output::Reload);
             }
         }
-
-        None
     }
 
     fn update_cmd(&mut self, message: Self::CommandOutput, sender: &ComponentSender<Self>) {
@@ -225,27 +224,6 @@ impl Component for App {
                 widgets.options.push(widget);
             }
         }
-    }
-
-    fn command(
-        message: Self::Command,
-        shutdown: ShutdownReceiver,
-        out: Sender<CmdOut>,
-    ) -> CommandFuture {
-        shutdown
-            // Performs this operation until a shutdown is triggered
-            .register(async move {
-                match message {
-                    Command::Reload => {
-                        tokio::time::sleep(std::time::Duration::from_secs(2)).await;
-                        out.send(CmdOut::Reload);
-                    }
-                }
-            })
-            // Perform task until a shutdown interrupts it
-            .drop_on_shutdown()
-            // Wrap into a `Pin<Box<Future>>` for return
-            .boxed()
     }
 }
 

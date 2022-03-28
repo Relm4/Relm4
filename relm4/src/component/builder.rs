@@ -85,10 +85,15 @@ impl<C: Component> ComponentBuilder<C> {
         // Gets notifications when a component's model and view is updated externally.
         let (notifier, notifier_rx) = flume::bounded(0);
 
+        // Notifies the component's child commands that it is now deceased.
+        let (death_notifier, death_recipient) = shutdown::channel();
+
         // Encapsulates the senders used by component methods.
         let component_sender = Arc::new(ComponentSenderInner {
+            command: cmd_tx,
             input: input_tx.clone(),
             output: output_tx.clone(),
+            shutdown: death_recipient,
         });
 
         // Constructs the initial model and view with the initial payload.
@@ -100,9 +105,6 @@ impl<C: Component> ComponentBuilder<C> {
         // The source ID of the component's service will be sent through this once the root
         // widget has been iced, which will give the component one last chance to say goodbye.
         let (mut burn_notifier, burn_recipient) = oneshot::<gtk::glib::SourceId>();
-
-        // Notifies the component's child commands that it is now deceased.
-        let (death_notifier, death_recipient) = shutdown::channel();
 
         let watcher_ = watcher.clone();
 
@@ -130,11 +132,7 @@ impl<C: Component> ComponentBuilder<C> {
                                 ref mut widgets,
                             } = &mut *watcher_.state.borrow_mut();
 
-                            if let Some(command) = model.update_with_view(widgets, message, &component_sender)
-                            {
-                                let recipient = death_recipient.clone();
-                                crate::spawn(C::command(command, recipient, cmd_tx.clone()));
-                            }
+                            model.update_with_view(widgets, message, &component_sender);
                         }
                     }
 
