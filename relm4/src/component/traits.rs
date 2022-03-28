@@ -132,6 +132,11 @@ pub trait SimpleComponent: Sized + 'static {
     /// The type that's used for storing widgets created for this component.
     type Widgets: 'static;
 
+    /// Create a builder for this component.
+    fn builder() -> ComponentBuilder<Self> {
+        ComponentBuilder::<Self>::new()
+    }
+
     /// Initializes the root widget
     fn init_root() -> Self::Root;
 
