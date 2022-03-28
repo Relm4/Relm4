@@ -2,7 +2,7 @@
 // Copyright 2022 System76 <info@system76.com>
 // SPDX-License-Identifier: MIT or Apache-2.0
 
-use super::{Component, ComponentParts, Connector, OnDestroy, StateWatcher};
+use super::{Component, ComponentParts, ComponentSenderInner, Connector, OnDestroy, StateWatcher};
 use crate::shutdown;
 use crate::RelmContainerExt;
 use async_oneshot::oneshot;
@@ -11,6 +11,7 @@ use gtk::prelude::GtkWindowExt;
 use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::rc::Rc;
+use std::sync::Arc;
 
 /// A component that is ready for docking and launch.
 #[derive(Debug)]
@@ -84,9 +85,15 @@ impl<C: Component> ComponentBuilder<C> {
         // Gets notifications when a component's model and view is updated externally.
         let (notifier, notifier_rx) = flume::bounded(0);
 
+        // Encapsulates the senders used by component methods.
+        let component_sender = Arc::new(ComponentSenderInner {
+            input: input_tx.clone(),
+            output: output_tx.clone(),
+        });
+
         // Constructs the initial model and view with the initial payload.
         let watcher = Rc::new(StateWatcher {
-            state: RefCell::new(C::init(payload, &root, &input_tx, &output_tx)),
+            state: RefCell::new(C::init(payload, &root, &component_sender)),
             notifier,
         });
 
@@ -97,7 +104,6 @@ impl<C: Component> ComponentBuilder<C> {
         // Notifies the component's child commands that it is now deceased.
         let (death_notifier, death_recipient) = shutdown::channel();
 
-        let input_tx_ = input_tx.clone();
         let watcher_ = watcher.clone();
 
         // Spawns the component's service. It will receive both `Self::Input` and
@@ -124,7 +130,7 @@ impl<C: Component> ComponentBuilder<C> {
                                 ref mut widgets,
                             } = &mut *watcher_.state.borrow_mut();
 
-                            if let Some(command) = model.update_with_view(widgets, message, &input_tx_, &output_tx)
+                            if let Some(command) = model.update_with_view(widgets, message, &component_sender)
                             {
                                 let recipient = death_recipient.clone();
                                 crate::spawn(C::command(command, recipient, cmd_tx.clone()));
@@ -140,7 +146,7 @@ impl<C: Component> ComponentBuilder<C> {
                                 ref mut widgets,
                             } = &mut *watcher_.state.borrow_mut();
 
-                            model.update_cmd_with_view(widgets, message, &input_tx_, &output_tx);
+                            model.update_cmd_with_view(widgets, message, &component_sender);
                         }
                     }
 
@@ -151,7 +157,7 @@ impl<C: Component> ComponentBuilder<C> {
                             ref mut widgets,
                         } = &mut *watcher_.state.borrow_mut();
 
-                        model.update_view(widgets, &input_tx_, &output_tx);
+                        model.update_view(widgets, &component_sender);
                     }
 
                     // Triggered when the component is destroyed

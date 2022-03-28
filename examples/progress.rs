@@ -71,8 +71,7 @@ impl Component for App {
     fn init(
         _args: Self::InitParams,
         root: &Self::Root,
-        input: &Sender<Self::Input>,
-        _output: &Sender<Self::Output>,
+        sender: &ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         relm4::view! {
             container = gtk::Box {
@@ -104,8 +103,8 @@ impl Component for App {
 
                 append: button = &gtk::Button {
                     set_label: "Compute",
-                    connect_clicked(input) => move |_| {
-                        input.send(Input::Compute);
+                    connect_clicked(sender) => move |_| {
+                        sender.input(Input::Compute);
                     }
                 }
             }
@@ -126,23 +125,17 @@ impl Component for App {
     fn update(
         &mut self,
         message: Self::Input,
-        _input: &Sender<Self::Input>,
-        _output: &Sender<Self::Output>,
+        _sender: &ComponentSender<Self>,
     ) -> Option<Self::Command> {
         match message {
             Input::Compute => {
                 self.computing = true;
-                return Some(Command::Compute);
+                Some(Command::Compute)
             }
         }
     }
 
-    fn update_cmd(
-        &mut self,
-        message: Self::CommandOutput,
-        _input: &Sender<Self::Input>,
-        _output: &Sender<Self::Output>,
-    ) {
+    fn update_cmd(&mut self, message: Self::CommandOutput, _sender: &ComponentSender<Self>) {
         if let CmdOut::Finished(_) = message {
             self.computing = false;
         }
@@ -150,12 +143,7 @@ impl Component for App {
         self.task = Some(message);
     }
 
-    fn update_view(
-        &self,
-        widgets: &mut Self::Widgets,
-        _input: &Sender<Self::Input>,
-        _output: &Sender<Self::Output>,
-    ) {
+    fn update_view(&self, widgets: &mut Self::Widgets, _sender: &ComponentSender<Self>) {
         widgets.button.set_sensitive(!self.computing);
 
         if let Some(ref progress) = self.task {
