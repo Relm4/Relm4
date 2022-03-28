@@ -2,7 +2,7 @@ use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
 use relm4::{
     adw,
     factory::{DynamicIndex, FactoryComponent, FactoryVecDeque},
-    gtk, send, ComponentParts, RelmApp, Sender, SimpleComponent,
+    gtk, ComponentParts, ComponentSender, RelmApp, Sender, SimpleComponent,
 };
 
 #[derive(Debug)]
@@ -206,15 +206,15 @@ impl SimpleComponent for AppModel {
 
                 gtk::Button {
                     set_label: "Add counter",
-                    connect_clicked(input) => move |_| {
-                        send!(input, AppMsg::AddCounter);
+                    connect_clicked(sender) => move |_| {
+                        sender.input(AppMsg::AddCounter);
                     }
                 },
 
                 gtk::Button {
                     set_label: "Remove counter",
-                    connect_clicked(input) => move |_| {
-                        send!(input, AppMsg::RemoveCounter);
+                    connect_clicked(sender) => move |_| {
+                        sender.input(AppMsg::RemoveCounter);
                     }
                 },
 
@@ -227,26 +227,20 @@ impl SimpleComponent for AppModel {
     fn init(
         counter: Self::InitParams,
         root: &Self::Root,
-        input: &Sender<Self::Input>,
-        _output: &Sender<Self::Output>,
+        sender: &ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         // Insert the macro codegen here
         let widgets = view_output!();
 
         let model = AppModel {
             created_widgets: counter,
-            counters: FactoryVecDeque::new(widgets.tabs.clone(), input),
+            counters: FactoryVecDeque::new(widgets.tabs.clone(), &sender.input),
         };
 
         ComponentParts { model, widgets }
     }
 
-    fn update(
-        &mut self,
-        msg: Self::Input,
-        _input: &Sender<Self::Input>,
-        _ouput: &Sender<Self::Output>,
-    ) {
+    fn update(&mut self, msg: Self::Input, _sender: &ComponentSender<Self>) {
         self.counters.apply_external_updates();
         match msg {
             AppMsg::AddCounter => {

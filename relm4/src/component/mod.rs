@@ -5,6 +5,7 @@
 mod builder;
 mod connector;
 mod controller;
+mod sender;
 mod state_watcher;
 mod traits;
 
@@ -14,6 +15,8 @@ pub use self::builder::ComponentBuilder;
 pub use self::connector::Connector;
 #[allow(unreachable_pub)]
 pub use self::controller::{ComponentController, Controller};
+#[allow(unreachable_pub)]
+pub use self::sender::{ComponentSender, ComponentSenderInner};
 #[allow(unreachable_pub)]
 pub use self::state_watcher::StateWatcher;
 #[allow(unreachable_pub)]

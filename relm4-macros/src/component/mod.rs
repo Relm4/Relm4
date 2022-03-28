@@ -146,8 +146,7 @@ pub(crate) fn generate_tokens(
             fn update_view(
                 &self,
                 widgets: &mut Self::Widgets,
-                input: &Sender<Self::Input>,
-                output: &Sender<Self::Output>,
+                sender: &ComponentSender<Self>,
             ) {
                 let Self::Widgets {
                     #return_fields

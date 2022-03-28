@@ -122,11 +122,10 @@ impl Component for App {
     fn init(
         title: Self::InitParams,
         root: &Self::Root,
-        _input: &Sender<Self::Input>,
-        output: &Sender<Self::Output>,
+        sender: &ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         // Request the caller to reload its options.
-        output.send(Output::Reload);
+        sender.output(Output::Reload);
 
         let label = gtk::builders::LabelBuilder::new()
             .label(&title)
@@ -156,8 +155,7 @@ impl Component for App {
     fn update(
         &mut self,
         message: Self::Input,
-        _input: &Sender<Self::Input>,
-        output: &Sender<Self::Output>,
+        sender: &ComponentSender<Self>,
     ) -> Option<Self::Command> {
         match message {
             Input::AddSetting {
@@ -174,32 +172,22 @@ impl Component for App {
             }
 
             Input::Reload => {
-                output.send(Output::Reload);
+                sender.output(Output::Reload);
             }
         }
 
         None
     }
 
-    fn update_cmd(
-        &mut self,
-        message: Self::CommandOutput,
-        _input: &Sender<Self::Input>,
-        output: &Sender<Self::Output>,
-    ) {
+    fn update_cmd(&mut self, message: Self::CommandOutput, sender: &ComponentSender<Self>) {
         match message {
             CmdOut::Reload => {
-                output.send(Output::Reload);
+                sender.output(Output::Reload);
             }
         }
     }
 
-    fn update_view(
-        &self,
-        widgets: &mut Self::Widgets,
-        _input: &Sender<Self::Input>,
-        output: &Sender<Self::Output>,
-    ) {
+    fn update_view(&self, widgets: &mut Self::Widgets, sender: &ComponentSender<Self>) {
         if self.options.is_empty() && !widgets.options.is_empty() {
             widgets.list.remove_all();
         } else if self.options.len() != widgets.options.len() {
@@ -226,8 +214,8 @@ impl Component for App {
                             set_label: button_label,
                             set_size_group: &widgets.button_sg,
 
-                            connect_clicked(output) => move |_| {
-                                output.send(Output::Clicked(id));
+                            connect_clicked(sender) => move |_| {
+                                sender.output(Output::Clicked(id));
                             }
                         }
                     }
