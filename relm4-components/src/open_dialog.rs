@@ -1,149 +1,123 @@
 //! Reusable and easily configurable open dialog component.
-use gtk::prelude::{FileChooserExt, FileExt, NativeDialogExt};
-use relm4::{gtk, send, ComponentUpdate, Model, Sender};
+//!
+//! **[Example implementation](https://github.com/AaronErhardt/relm4/blob/next/examples/file_dialogs.rs)**
+use gtk::prelude::{DialogExt, FileChooserExt, FileExt, GtkWindowExt, WidgetExt};
+use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent};
 
-use std::marker::PhantomData;
 use std::path::PathBuf;
-
-use crate::ParentWindow;
 
 #[derive(Clone, Debug)]
 /// Configuration for the open dialog component
 pub struct OpenDialogSettings {
     /// Label for cancel button
-    pub cancel_label: &'static str,
+    pub cancel_label: String,
     /// Label for accept button
-    pub accept_label: &'static str,
+    pub accept_label: String,
     /// Allow or disallow creating folders
     pub create_folders: bool,
-    /// Modal dialogs freeze other windows as long they are visible
+    /// Freeze other windows while the dialog is open
     pub is_modal: bool,
-    /// Filter for MINE types or other patterns
+    /// Filter for MIME types or other patterns
     pub filters: Vec<gtk::FileFilter>,
 }
 
-/// Interface for creating OpenDialogSettings
-pub trait OpenDialogConfig {
-    /// Model from which OpenDialogSettings will be built
-    type Model: Model;
-    /// Builds configuration for OpenDialog
-    fn open_dialog_config(model: &Self::Model) -> OpenDialogSettings;
-}
-
-#[tracker::track]
-#[derive(Debug)]
-/// Model of the open dialog component
-pub struct OpenDialogModel<Conf> {
-    #[do_not_track]
-    settings: OpenDialogSettings,
-    is_active: bool,
-    #[do_not_track]
-    _conf_provider: PhantomData<*const Conf>, //we don't own Conf, there is no instance of Conf
+impl Default for OpenDialogSettings {
+    fn default() -> Self {
+        OpenDialogSettings {
+            accept_label: String::from("Open"),
+            cancel_label: String::from("Cancel"),
+            create_folders: true,
+            is_modal: true,
+            filters: Vec::new(),
+        }
+    }
 }
 
 #[derive(Debug)]
+/// A model for the open dialog component
+pub struct OpenDialog {
+    visible: bool,
+}
+
 /// Messages that can be sent to the open dialog component
+#[derive(Debug, Clone)]
 pub enum OpenDialogMsg {
-    /// Opens the dialog
+    /// Show the dialog
     Open,
     #[doc(hidden)]
+    Hide,
+}
+
+/// Messages that can be sent to the open dialog component
+#[derive(Debug, Clone)]
+pub enum OpenDialogResponse {
+    /// User clicked accept button.
     Accept(PathBuf),
-    #[doc(hidden)]
-    InvalidInput,
-    #[doc(hidden)]
+    /// User clicked cancel button.
     Cancel,
 }
 
-impl<Conf: OpenDialogConfig> Model for OpenDialogModel<Conf> {
-    type Msg = OpenDialogMsg;
+/// Widgets of the open dialog component.
+#[relm4::component(pub)]
+impl SimpleComponent for OpenDialog {
     type Widgets = OpenDialogWidgets;
-    type Components = ();
-}
 
-/// Interface for the parent model
-pub trait OpenDialogParent: Model
-where
-    Self::Widgets: ParentWindow,
-{
-    /// Tell the open dialog how to response if the user wants to open a file
-    fn open_msg(path: PathBuf) -> Self::Msg;
-}
+    type InitParams = OpenDialogSettings;
 
-impl<ParentModel, Conf> ComponentUpdate<ParentModel> for OpenDialogModel<Conf>
-where
-    ParentModel: OpenDialogParent,
-    <ParentModel as relm4::Model>::Widgets: ParentWindow,
-    Conf: OpenDialogConfig<Model = ParentModel>,
-{
-    fn init_model(parent_model: &ParentModel) -> Self {
-        Self {
-            settings: Conf::open_dialog_config(parent_model),
-            is_active: false,
-            tracker: 0,
-            _conf_provider: PhantomData,
-        }
-    }
+    type Input = OpenDialogMsg;
+    type Output = OpenDialogResponse;
 
-    fn update(
-        &mut self,
-        msg: OpenDialogMsg,
-        _components: &(),
-        _sender: Sender<OpenDialogMsg>,
-        parent_sender: Sender<ParentModel::Msg>,
-    ) {
-        self.reset();
-
-        match msg {
-            OpenDialogMsg::Open => {
-                self.is_active = true;
-            }
-            OpenDialogMsg::Cancel => {
-                self.is_active = false;
-            }
-            OpenDialogMsg::Accept(path) => {
-                self.is_active = false;
-                parent_sender.send(ParentModel::open_msg(path)).unwrap();
-            }
-            _ => (),
-        }
-    }
-}
-
-#[relm4::widget(visibility = pub)]
-/// Widgets of the open dialog component
-impl<ParentModel, Conf> relm4::Widgets<OpenDialogModel<Conf>, ParentModel> for OpenDialogWidgets
-where
-    ParentModel: Model,
-    ParentModel::Widgets: ParentWindow,
-    Conf: OpenDialogConfig,
-{
     view! {
-        gtk::FileChooserNative {
+        gtk::FileChooserDialog {
             set_action: gtk::FileChooserAction::Open,
-            set_visible: watch!(model.is_active),
-            add_filter: iterate!(&model.settings.filters),
-            set_create_folders: model.settings.create_folders,
-            set_cancel_label: Some(model.settings.cancel_label),
-            set_accept_label: Some(model.settings.accept_label),
-            set_modal: model.settings.is_modal,
-            set_transient_for: parent!(parent_widgets.parent_window().as_ref()),
-            connect_response => move |dialog, res_ty| {
+
+            set_create_folders: settings.create_folders,
+            set_modal: settings.is_modal,
+            add_button(gtk::ResponseType::Accept): &settings.accept_label,
+            add_button(gtk::ResponseType::Cancel): &settings.cancel_label,
+            add_filter: iterate!(&settings.filters),
+
+            set_visible: watch!(model.visible),
+
+            connect_response(sender) => move |dialog, res_ty| {
                 match res_ty {
                     gtk::ResponseType::Accept => {
                         if let Some(file) = dialog.file() {
                             if let Some(path) = file.path() {
-                                send!(sender, OpenDialogMsg::Accept(path));
+                                sender.output(OpenDialogResponse::Accept(path));
+                                sender.input(OpenDialogMsg::Hide);
                                 return;
                             }
                         }
-                        send!(sender, OpenDialogMsg::InvalidInput);
-                    },
-                    gtk::ResponseType::Cancel => {
-                        send!(sender, OpenDialogMsg::Cancel)
-                    },
-                    _ => (),
+                        sender.output(OpenDialogResponse::Cancel);
+                    }
+                    _ => sender.output(OpenDialogResponse::Cancel),
                 }
-            },
+                sender.input(OpenDialogMsg::Hide);
+            }
+        }
+    }
+
+    fn init(
+        settings: Self::InitParams,
+        root: &Self::Root,
+        sender: &ComponentSender<Self>,
+    ) -> ComponentParts<Self> {
+        let model = OpenDialog { visible: false };
+
+        let widgets = view_output!();
+
+        ComponentParts { model, widgets }
+    }
+
+    fn update(&mut self, message: Self::Input, _sender: &ComponentSender<Self>) {
+        match message {
+            OpenDialogMsg::Open => {
+                self.visible = true;
+            }
+            OpenDialogMsg::Hide => {
+                self.visible = false;
+            }
         }
     }
 }

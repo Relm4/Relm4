@@ -1,163 +1,135 @@
 //! Reusable and easily configurable save dialog component.
 //!
-//! **[Example implementation](https://github.com/AaronErhardt/relm4/blob/main/relm4-examples/examples/save_dialog.rs)**
+//! **[Example implementation](https://github.com/AaronErhardt/relm4/blob/next/examples/file_dialogs.rs)**
+use gtk::prelude::{DialogExt, FileChooserExt, FileExt, GtkWindowExt, WidgetExt};
+use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent};
 
-use gtk::prelude::{FileChooserExt, FileExt, NativeDialogExt};
-use relm4::{gtk, send, ComponentUpdate, Model, Sender};
-
-use std::marker::PhantomData;
 use std::path::PathBuf;
-
-use crate::ParentWindow;
 
 #[derive(Clone, Debug)]
 /// Configuration for the save dialog component
 pub struct SaveDialogSettings {
     /// Label for cancel button
-    pub cancel_label: &'static str,
+    pub cancel_label: String,
     /// Label for accept button
-    pub accept_label: &'static str,
+    pub accept_label: String,
     /// Allow or disallow creating folders
     pub create_folders: bool,
-    /// Modal dialogs freeze other windows as long they are visible
+    /// Freeze other windows while the dialog is open
     pub is_modal: bool,
-    /// Filter for MINE types or other patterns
+    /// Filter for MIME types or other patterns
     pub filters: Vec<gtk::FileFilter>,
 }
 
-///Interface for building the configuration for SaveDialog
-pub trait SaveDialogConfig {
-    /// Model from which configuration should be built
-    type Model: Model;
-    /// Configure the save dialog
-    fn dialog_config(model: &Self::Model) -> SaveDialogSettings;
-}
-
-#[tracker::track]
-#[derive(Debug)]
-/// Model of the save dialog component
-pub struct SaveDialogModel<Conf: SaveDialogConfig> {
-    #[do_not_track]
-    settings: SaveDialogSettings,
-    suggestion: Option<String>,
-    is_active: bool,
-    name: String,
-    #[do_not_track]
-    _config_provider: PhantomData<*const Conf>, //we don't own Conf, there is no instance of Conf
+impl Default for SaveDialogSettings {
+    fn default() -> Self {
+        SaveDialogSettings {
+            accept_label: String::from("Save"),
+            cancel_label: String::from("Cancel"),
+            create_folders: true,
+            is_modal: true,
+            filters: Vec::new(),
+        }
+    }
 }
 
 #[derive(Debug)]
+/// A model for the save dialog component
+pub struct SaveDialog {
+    current_name: String,
+    visible: bool,
+}
+
 /// Messages that can be sent to the save dialog component
+#[derive(Debug, Clone)]
 pub enum SaveDialogMsg {
-    /// Opens the dialog
+    /// Show the dialog
     Save,
-    /// Opens the dialog with a suggested file name
+    /// Show the dialog, with a suggested file name
     SaveAs(String),
     #[doc(hidden)]
+    Hide,
+}
+
+/// Messages that can be sent from the save dialog component
+#[derive(Debug, Clone)]
+pub enum SaveDialogResponse {
+    /// User clicked accept button.
     Accept(PathBuf),
-    #[doc(hidden)]
-    InvalidInput,
-    #[doc(hidden)]
+    /// User clicked cancel button.
     Cancel,
 }
 
-impl<Conf: SaveDialogConfig> Model for SaveDialogModel<Conf> {
-    type Msg = SaveDialogMsg;
+/// Widgets of the save dialog component.
+#[relm4::component(pub)]
+impl SimpleComponent for SaveDialog {
     type Widgets = SaveDialogWidgets;
-    type Components = ();
-}
 
-/// Interface for the parent model of the save dialog
-pub trait SaveDialogParent: Model
-where
-    Self::Widgets: ParentWindow,
-{
-    /// Tell the save dialog how to response if the user wants to save
-    fn save_msg(path: PathBuf) -> Self::Msg;
-}
+    type InitParams = SaveDialogSettings;
 
-impl<ParentModel, Conf> ComponentUpdate<ParentModel> for SaveDialogModel<Conf>
-where
-    ParentModel: SaveDialogParent,
-    <ParentModel as relm4::Model>::Widgets: ParentWindow,
-    Conf: SaveDialogConfig<Model = ParentModel>,
-{
-    fn init_model(parent_model: &ParentModel) -> Self {
-        Self {
-            settings: Conf::dialog_config(parent_model),
-            is_active: false,
-            suggestion: None,
-            name: String::new(),
-            tracker: 0,
-            _config_provider: PhantomData,
-        }
-    }
+    type Input = SaveDialogMsg;
+    type Output = SaveDialogResponse;
 
-    fn update(
-        &mut self,
-        msg: SaveDialogMsg,
-        _components: &(),
-        _sender: Sender<SaveDialogMsg>,
-        parent_sender: Sender<ParentModel::Msg>,
-    ) {
-        self.reset();
-
-        match msg {
-            SaveDialogMsg::Save => {
-                self.is_active = true;
-            }
-            SaveDialogMsg::SaveAs(name) => {
-                self.is_active = true;
-                self.set_name(name);
-            }
-            SaveDialogMsg::Cancel => {
-                self.is_active = false;
-            }
-            SaveDialogMsg::Accept(path) => {
-                self.is_active = false;
-                parent_sender.send(ParentModel::save_msg(path)).unwrap();
-            }
-            _ => (),
-        }
-    }
-}
-
-#[relm4::widget(pub)]
-/// Widgets for the save dialog
-impl<ParentModel, Conf> relm4::Widgets<SaveDialogModel<Conf>, ParentModel> for SaveDialogWidgets
-where
-    ParentModel: Model,
-    ParentModel::Widgets: ParentWindow,
-    Conf: SaveDialogConfig<Model = ParentModel>,
-{
     view! {
-        gtk::FileChooserNative {
+        gtk::FileChooserDialog {
             set_action: gtk::FileChooserAction::Save,
-            set_visible: watch!(model.is_active),
-            set_current_name: track!(model.changed(SaveDialogModel::<Conf>::name()), &model.name),
-            add_filter: iterate!(&model.settings.filters),
-            set_create_folders: model.settings.create_folders,
-            set_cancel_label: Some(model.settings.cancel_label),
-            set_accept_label: Some(model.settings.accept_label),
-            set_modal: model.settings.is_modal,
-            set_transient_for: parent!(parent_widgets.parent_window().as_ref()),
-            connect_response => move |dialog, res_ty| {
+
+            set_create_folders: settings.create_folders,
+            set_modal: settings.is_modal,
+            add_button(gtk::ResponseType::Accept): &settings.accept_label,
+            add_button(gtk::ResponseType::Cancel): &settings.cancel_label,
+            add_filter: iterate!(&settings.filters),
+
+            set_current_name: watch!(&model.current_name),
+            set_visible: watch!(model.visible),
+
+            connect_response(sender) => move |dialog, res_ty| {
                 match res_ty {
                     gtk::ResponseType::Accept => {
                         if let Some(file) = dialog.file() {
                             if let Some(path) = file.path() {
-                                send!(sender, SaveDialogMsg::Accept(path));
+                                sender.output(SaveDialogResponse::Accept(path));
+                                sender.input(SaveDialogMsg::Hide);
                                 return;
                             }
                         }
-                        send!(sender, SaveDialogMsg::InvalidInput);
-                    },
-                    gtk::ResponseType::Cancel => {
-                        send!(sender, SaveDialogMsg::Cancel)
-                    },
-                    _ => (),
+                        sender.output(SaveDialogResponse::Cancel);
+                    }
+                    _ => sender.output(SaveDialogResponse::Cancel),
                 }
-            },
+                sender.input(SaveDialogMsg::Hide);
+            }
+        }
+    }
+
+    fn init(
+        settings: Self::InitParams,
+        root: &Self::Root,
+        sender: &ComponentSender<Self>,
+    ) -> ComponentParts<Self> {
+        let model = SaveDialog {
+            current_name: String::new(),
+            visible: false,
+        };
+
+        let widgets = view_output!();
+
+        ComponentParts { model, widgets }
+    }
+
+    fn update(&mut self, message: Self::Input, _sender: &ComponentSender<Self>) {
+        match message {
+            SaveDialogMsg::Save => {
+                self.current_name = String::new();
+                self.visible = true;
+            }
+            SaveDialogMsg::SaveAs(file_name) => {
+                self.current_name = file_name;
+                self.visible = true;
+            }
+            SaveDialogMsg::Hide => {
+                self.visible = false;
+            }
         }
     }
 }
