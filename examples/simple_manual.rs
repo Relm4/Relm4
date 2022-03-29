@@ -43,6 +43,9 @@ impl SimpleComponent for AppModel {
         window: &Self::Root,
         sender: &ComponentSender<Self>,
     ) -> ComponentParts<Self> {
+        // Stop the event loop when the root widget is destroyed.
+        sender.stop_with_widget(window);
+
         let model = AppModel { counter };
 
         let vbox = gtk::Box::builder()

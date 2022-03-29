@@ -1,6 +1,6 @@
 use super::{handle::FactoryHandle, DynamicIndex, FactoryComponent, FactoryView};
 
-use crate::{shutdown, OnDestroy, Receiver, Sender};
+use crate::{shutdown, Receiver, Sender};
 
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -99,7 +99,7 @@ where
 
         // The source ID of the component's service will be sent through this once the root
         // widget has been iced, which will give the component one last chance to say goodbye.
-        let (mut burn_notifier, burn_recipient) = oneshot::<gtk::glib::SourceId>();
+        let (burn_notifier, burn_recipient) = oneshot::<gtk::glib::SourceId>();
 
         // Notifies the component's child commands that it is now deceased.
         let (death_notifier, death_recipient) = shutdown::channel();
@@ -168,19 +168,6 @@ where
             }
         });
 
-        // Clone runtime id to be able to drop the runtime manually
-        // when the data is removed from the factory.
-        let runtime_id = Rc::new(RefCell::new(Some(id)));
-        let on_destroy_id = runtime_id.clone();
-
-        // When the root widget is destroyed, the spawned service will be removed.
-        let root_widget_ = root_widget.clone();
-        root_widget_.on_destroy(move || {
-            if let Some(id) = on_destroy_id.borrow_mut().take() {
-                let _ = burn_notifier.send(id);
-            }
-        });
-
         // Give back a type for controlling the component service.
         FactoryHandle {
             data,
@@ -188,7 +175,10 @@ where
             returned_widget,
             input: input_tx,
             notifier: Sender(notifier),
-            runtime_id,
+            burner: crate::component::CompBurner {
+                runtime_id: RefCell::new(Some(id)),
+                burn_notifier,
+            },
         }
     }
 }

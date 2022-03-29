@@ -59,7 +59,7 @@ where
         match self {
             Self::Builder(builder) => Rc::try_unwrap(builder.data).unwrap().into_inner(),
             Self::Final(handle) => {
-                if let Some(id) = handle.runtime_id.borrow_mut().take() {
+                if let Some(id) = handle.burner.runtime_id.borrow_mut().take() {
                     id.remove();
                 }
                 Rc::try_unwrap(handle.data).unwrap().into_inner()

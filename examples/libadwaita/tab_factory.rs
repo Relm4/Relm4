@@ -229,6 +229,9 @@ impl SimpleComponent for AppModel {
         root: &Self::Root,
         sender: &ComponentSender<Self>,
     ) -> ComponentParts<Self> {
+        // Stop the event loop when the root widget is destroyed.
+        sender.stop_with_widget(root);
+
         // Insert the macro codegen here
         let widgets = view_output!();
 

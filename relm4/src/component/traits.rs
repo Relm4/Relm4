@@ -20,7 +20,7 @@ pub trait Component: Sized + 'static {
     type InitParams;
 
     /// The widget that was constructed by the component.
-    type Root: std::fmt::Debug + OnDestroy;
+    type Root: std::fmt::Debug;
 
     /// The type that's used for storing widgets created for this component.
     type Widgets: 'static;
@@ -91,7 +91,7 @@ pub trait SimpleComponent: Sized + 'static {
     type InitParams;
 
     /// The widget that was constructed by the component.
-    type Root: std::fmt::Debug + OnDestroy;
+    type Root: std::fmt::Debug;
 
     /// The type that's used for storing widgets created for this component.
     type Widgets: 'static;

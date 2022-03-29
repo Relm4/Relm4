@@ -67,6 +67,9 @@ impl Component for App {
         root: &Self::Root,
         sender: &ComponentSender<Self>,
     ) -> ComponentParts<Self> {
+        // Stop the event loop when the root widget is destroyed.
+        sender.stop_with_widget(root);
+
         relm4::view! {
             container = gtk::Box {
                 set_halign: gtk::Align::Center,

@@ -1,7 +1,7 @@
 //! Traits for for managing and updating factories.
 
 use super::DynamicIndex;
-use crate::{CommandFuture, OnDestroy, Sender, ShutdownReceiver};
+use crate::{CommandFuture, Sender, ShutdownReceiver};
 
 use std::fmt::Debug;
 
@@ -99,7 +99,7 @@ pub trait FactoryComponent<ParentWidget: FactoryView, ParentMsg>: Sized + Debug 
     type InitParams;
 
     /// The widget that was constructed by the component.
-    type Root: std::fmt::Debug + OnDestroy + Clone;
+    type Root: std::fmt::Debug + Clone;
 
     /// The type that's used for storing widgets created for this component.
     type Widgets: 'static;

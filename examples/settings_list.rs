@@ -21,7 +21,7 @@ fn main() {
         .application_id("org.relm4.SettingsListExample")
         .launch(|_app, window| {
             // Intiialize a component's root widget
-            let component = App::builder()
+            App::builder()
                 // Attach the root widget to the given window.
                 .attach_to(&window)
                 // Start the component service with an initial parameter
@@ -63,8 +63,6 @@ fn main() {
                         });
                     }
                 });
-
-            println!("parent is {:?}", component.widget().toplevel_window());
         });
 }
 
@@ -119,6 +117,9 @@ impl Component for App {
         root: &Self::Root,
         sender: &ComponentSender<Self>,
     ) -> ComponentParts<Self> {
+        // Stop the event loop when the root widget is destroyed.
+        sender.stop_with_widget(root);
+
         // Request the caller to reload its options.
         sender.output(Output::Reload);
 

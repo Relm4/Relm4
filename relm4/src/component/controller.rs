@@ -12,6 +12,14 @@ pub trait ComponentController<C: Component> {
         let _ = self.sender().send(event);
     }
 
+    /// Provides access to the component's killswitch.
+    fn killswitch(&self) -> &flume::Sender<()>;
+
+    /// Remotely stops the component.
+    fn stop(&self) {
+        let _ = self.killswitch().send(());
+    }
+
     /// Provides access to the component's sender.
     fn sender(&self) -> &Sender<C::Input>;
 
@@ -33,9 +41,16 @@ pub struct Controller<C: Component> {
 
     /// Used for emitting events to the component.
     pub(super) sender: Sender<C::Input>,
+
+    /// Allows the caller to stop the event loop remotely.
+    pub(super) killswitch: flume::Sender<()>,
 }
 
 impl<C: Component> ComponentController<C> for Controller<C> {
+    fn killswitch(&self) -> &flume::Sender<()> {
+        &self.killswitch
+    }
+
     fn sender(&self) -> &Sender<C::Input> {
         &self.sender
     }
