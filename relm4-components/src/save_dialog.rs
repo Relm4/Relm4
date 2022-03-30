@@ -1,6 +1,6 @@
 //! Reusable and easily configurable save dialog component.
 //!
-//! **[Example implementation](https://github.com/Relm4/relm4/relm4/blob/main/relm4-examples/examples/save_dialog.rs)**
+//! **[Example implementation](https://github.com/Relm4/relm4/blob/main/relm4-examples/examples/save_dialog.rs)**
 
 use gtk::prelude::{FileChooserExt, FileExt, NativeDialogExt};
 use relm4::{gtk, send, ComponentUpdate, Model, Sender};

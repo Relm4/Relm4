@@ -2,7 +2,7 @@
   <img src="assets/Relm_logo_with_text.png" width="190" alt="Relm4">
 </h1>
 
-[![CI](https://github.com/Relm4/relm4/relm4/actions/workflows/rust.yml/badge.svg)](https://github.com/Relm4/relm4/relm4/actions/workflows/rust.yml)
+[![CI](https://github.com/Relm4/relm4/actions/workflows/rust.yml/badge.svg)](https://github.com/Relm4/relm4/actions/workflows/rust.yml)
 [![Matrix](https://img.shields.io/matrix/relm4:matrix.org?label=matrix%20chat)](https://matrix.to/#/#relm4:matrix.org)
 [![Relm4 on crates.io](https://img.shields.io/crates/v/relm4.svg)](https://crates.io/crates/relm4)
 [![Relm4 docs](https://img.shields.io/badge/rust-documentation-blue)](https://relm4.org/docs/stable/relm4/)

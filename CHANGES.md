@@ -145,7 +145,7 @@
 ### Fixed
 
 + relm4-macros: Parsing the first widget should now always work as expected
-+ relm4-macros: [#20](https://github.com/Relm4/relm4/relm4/issues/20) Fix wrong order when using components in the widget macro
++ relm4-macros: [#20](https://github.com/Relm4/relm4/issues/20) Fix wrong order when using components in the widget macro
 
 ## 0.1.0 - 2021-09-06
 
@@ -183,7 +183,7 @@
 ### Changed
 
 + book: Many book improvements by [tronta](https://github.com/tronta)
-+ relm4: Removed class name methods from WidgetPlus [#14](https://github.com/Relm4/relm4/relm4/pull/14)
++ relm4: Removed class name methods from WidgetPlus [#14](https://github.com/Relm4/relm4/pull/14)
 
 ### Fixed
 
