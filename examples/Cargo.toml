@@ -6,7 +6,6 @@ edition = "2021"
 
 [dev-dependencies]
 relm4 = { path = "../relm4", features = ["macros"] }
-#relm4-components = { path = "../relm4-components" }
 tokio = { version = "1.15", features = ["rt", "macros", "time", "rt-multi-thread"] }
 futures = "0.3.19"
 tracker = "0.1"

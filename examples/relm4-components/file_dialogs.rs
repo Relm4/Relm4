@@ -1,14 +1,10 @@
-use gtk::prelude::{
-    ButtonExt, DialogExt, GtkWindowExt, OrientableExt, TextBufferExt, TextViewExt, WidgetExt,
-};
+use gtk::prelude::*;
 use relm4::{
     gtk, Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,
     SimpleComponent, WidgetPlus,
 };
-use relm4_components::{
-    open_dialog::{OpenDialog, OpenDialogMsg, OpenDialogResponse, OpenDialogSettings},
-    save_dialog::{SaveDialog, SaveDialogMsg, SaveDialogResponse, SaveDialogSettings},
-};
+use relm4_components::{open_dialog::*, save_dialog::*};
+
 use std::path::PathBuf;
 
 struct App {
@@ -99,9 +95,7 @@ impl SimpleComponent for App {
             .launch(OpenDialogSettings::default())
             .forward(sender.input_sender(), |response| match response {
                 OpenDialogResponse::Accept(path) => Input::OpenResponse(path),
-                OpenDialogResponse::Cancel => {
-                    Input::ShowMessage(String::from("File opening was cancelled"))
-                }
+                _ => Input::ShowMessage(String::from("File opening was cancelled")),
             });
 
         let save_dialog = SaveDialog::builder()

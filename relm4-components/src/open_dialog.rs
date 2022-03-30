@@ -1,7 +1,9 @@
 //! Reusable and easily configurable open dialog component.
 //!
 //! **[Example implementation](https://github.com/AaronErhardt/relm4/blob/next/examples/file_dialogs.rs)**
-use gtk::prelude::{DialogExt, FileChooserExt, FileExt, GtkWindowExt, WidgetExt};
+use gtk::prelude::{
+    Cast, DialogExt, FileChooserExt, FileExt, GtkWindowExt, ListModelExt, WidgetExt,
+};
 use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent};
 
 use std::path::PathBuf;
@@ -9,6 +11,13 @@ use std::path::PathBuf;
 #[derive(Clone, Debug)]
 /// Configuration for the open dialog component
 pub struct OpenDialogSettings {
+    /// Select folders instead of files.
+    ///
+    /// You should be aware the user might be able to select folders
+    /// even if this setting is set to `false`. This is a technical limitation of gtk.
+    pub folder_mode: bool,
+    /// Allow selection of multiple items.
+    pub select_multiple: bool,
     /// Label for cancel button
     pub cancel_label: String,
     /// Label for accept button
@@ -24,6 +33,8 @@ pub struct OpenDialogSettings {
 impl Default for OpenDialogSettings {
     fn default() -> Self {
         OpenDialogSettings {
+            folder_mode: false,
+            select_multiple: false,
             accept_label: String::from("Open"),
             cancel_label: String::from("Cancel"),
             create_folders: true,
@@ -51,7 +62,9 @@ pub enum OpenDialogMsg {
 /// Messages that can be sent to the open dialog component
 #[derive(Debug, Clone)]
 pub enum OpenDialogResponse {
-    /// User clicked accept button.
+    /// User clicked accept button. Requires `select_multiple` to be `true`.
+    AcceptMultiple(Vec<PathBuf>),
+    /// User clicked accept button. Requires `select_multiple` to be `false` (default behavior).
     Accept(PathBuf),
     /// User clicked cancel button.
     Cancel,
@@ -69,8 +82,13 @@ impl SimpleComponent for OpenDialog {
 
     view! {
         gtk::FileChooserDialog {
-            set_action: gtk::FileChooserAction::Open,
+            set_action: if settings.folder_mode {
+                gtk::FileChooserAction::SelectFolder
+            } else {
+                gtk::FileChooserAction::Open
+            },
 
+            set_select_multiple: settings.select_multiple,
             set_create_folders: settings.create_folders,
             set_modal: settings.is_modal,
             add_button(gtk::ResponseType::Accept): &settings.accept_label,
@@ -82,17 +100,32 @@ impl SimpleComponent for OpenDialog {
             connect_response(sender) => move |dialog, res_ty| {
                 match res_ty {
                     gtk::ResponseType::Accept => {
-                        if let Some(file) = dialog.file() {
-                            if let Some(path) = file.path() {
-                                sender.output(OpenDialogResponse::Accept(path));
+                        match settings.select_multiple {
+                            true => {
+                                let list_model = dialog.files();
+                                let paths = (0..list_model.n_items())
+                                    .filter_map(|index| list_model.item(index))
+                                    .filter_map(|obj| obj.downcast::<gtk::gio::File>().ok())
+                                    .filter_map(|file| file.path()).collect();
+                                sender.output(OpenDialogResponse::AcceptMultiple(paths));
                                 sender.input(OpenDialogMsg::Hide);
                                 return;
+                            },
+                            false => {
+                                if let Some(file) = dialog.file() {
+                                    if let Some(path) = file.path() {
+                                        sender.output(OpenDialogResponse::Accept(path));
+                                        sender.input(OpenDialogMsg::Hide);
+                                        return;
+                                    }
+                                }
+                               sender.output(OpenDialogResponse::Cancel);
                             }
                         }
-                        sender.output(OpenDialogResponse::Cancel);
                     }
                     _ => sender.output(OpenDialogResponse::Cancel),
                 }
+
                 sender.input(OpenDialogMsg::Hide);
             }
         }
