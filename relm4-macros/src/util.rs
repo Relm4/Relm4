@@ -4,6 +4,8 @@ use syn::{
     TypePath,
 };
 
+use std::sync::atomic::{AtomicU16, Ordering};
+
 macro_rules! parse_func {
     ($name:ident, $func:ident, $tokens:ident) => {
         if $name.is_some() {
@@ -16,14 +18,15 @@ macro_rules! parse_func {
     };
 }
 
-pub(crate) fn idents_to_snake_case(idents: &[Ident], span: Span2) -> Ident {
-    use std::sync::atomic::{AtomicU16, Ordering};
+pub(crate) fn idents_to_snake_case<'a, I: Iterator<Item = &'a Ident>>(
+    idents: I,
+    span: Span2,
+) -> Ident {
     static COUNTER: AtomicU16 = AtomicU16::new(0);
     let val = COUNTER.fetch_add(1, Ordering::Relaxed);
     let index_str = val.to_string();
 
     let segements: Vec<String> = idents
-        .iter()
         .map(|ident| ident.to_string().to_lowercase())
         .collect();
     let length: usize =

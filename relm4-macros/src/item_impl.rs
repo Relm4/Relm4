@@ -7,7 +7,6 @@ use syn::{
     WhereClause,
 };
 
-#[derive(Debug)]
 pub(super) struct ItemImpl {
     pub outer_attrs: Option<TokenStream2>,
     pub impl_generics: Generics,

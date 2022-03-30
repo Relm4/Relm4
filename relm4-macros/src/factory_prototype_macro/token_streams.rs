@@ -3,7 +3,7 @@ use syn::{Path, Type, Visibility};
 
 use crate::widgets::{PropertyType, ReturnedWidget, Widget};
 
-#[derive(Debug, Default)]
+#[derive(Default)]
 pub(super) struct TokenStreams {
     /// The tokens for the struct fields -> name: Type,
     pub struct_fields: TokenStream2,

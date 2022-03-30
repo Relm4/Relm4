@@ -151,6 +151,7 @@ where
 ///
 /// The message is sent using the sender and the [`Result`] is unwrapped automatically.
 #[macro_export]
+#[deprecated(since = "0.5.0", note = "Use `sender.send(msg)` instead.")]
 macro_rules! send {
     ($sender:expr, $msg:expr) => {
         $sender.send($msg)

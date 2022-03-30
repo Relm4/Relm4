@@ -1,15 +1,17 @@
 use syn::{
     braced, parenthesized,
-    parse::{Parse, ParseBuffer, ParseStream},
+    parse::{ParseBuffer, ParseStream},
+    spanned::Spanned,
     token,
     token::{And, Star},
-    Ident, Result, Token,
+    Error, Expr, Ident, Result, Token,
 };
 
-use crate::util;
-use crate::widgets::{Properties, Widget, WidgetFunc};
+use crate::widgets::{util::attr_twice_error, Attr, Attrs, Properties, Widget, WidgetFunc};
+use crate::{args::Args, widgets::WidgetAttr};
 
 type WidgetFuncInfo = (
+    // For `Some(widget)`
     Option<Ident>,
     Option<And>,
     Option<Star>,
@@ -17,73 +19,32 @@ type WidgetFuncInfo = (
     Properties,
 );
 
-/// Parse information related to the widget function.
-fn parse_widget_func(input: ParseStream) -> Result<WidgetFuncInfo> {
-    let inner_input: Option<ParseBuffer>;
-
-    let upcomming_some = {
-        let forked_input = input.fork();
-        if forked_input.peek(Ident) {
-            let ident: Ident = forked_input.parse()?;
-            ident == "Some"
-        } else {
-            false
-        }
-    };
-
-    let wrapper = if upcomming_some && input.peek2(token::Paren) {
-        let ident = input.parse()?;
-        let paren_input;
-        parenthesized!(paren_input in input);
-        inner_input = Some(paren_input);
-        Some(ident)
-    } else {
-        inner_input = None;
-        None
-    };
-
-    // get the inner input as func_input
-    let func_input = if let Some(paren_input) = &inner_input {
-        paren_input
-    } else {
-        input
-    };
-
-    // Look for &
-    let ref_token = func_input.parse().ok();
-
-    // Look for *
-    let deref_token = func_input.parse().ok();
-
-    let func: WidgetFunc = func_input.parse()?;
-
-    let inner;
-    let _token = braced!(inner in input);
-    let properties = inner.parse()?;
-
-    Ok((wrapper, ref_token, deref_token, func, properties))
-}
-
-impl Parse for Widget {
-    fn parse(input: ParseStream) -> Result<Self> {
-        let mut name_opt: Option<Ident> = None;
-
+impl Widget {
+    pub(super) fn parse(
+        input: ParseStream,
+        attributes: Option<Attrs>,
+        args: Option<Args<Expr>>,
+    ) -> Result<Self> {
+        let attr = Self::process_attributes(attributes)?;
         // Check if first token is `mut`
         let mutable = input.parse().ok();
 
         // Look for name = Widget syntax
-        if input.peek2(Token![=]) {
-            name_opt = Some(input.parse()?);
+        let name_opt: Option<Ident> = if input.peek2(Token![=]) {
+            let name_opt = Some(input.parse()?);
             let _token: Token![=] = input.parse()?;
+            name_opt
+        } else {
+            None
         };
 
-        let (wrapper, ref_token, deref_token, func, properties) = parse_widget_func(input)?;
+        let (wrapper, ref_token, deref_token, func, properties) = Self::parse_widget_func(input)?;
 
-        // Generat a name if no name was given.
+        // Generate a name if no name was given.
         let name = if let Some(name) = name_opt {
             name
         } else {
-            util::idents_to_snake_case(&func.path_segments, func.span)
+            func.snake_case_name()
         };
 
         let returned_widget = if input.peek(Token![->]) {
@@ -94,9 +55,11 @@ impl Parse for Widget {
         };
 
         Ok(Widget {
+            attr,
             mutable,
             name,
             func,
+            args,
             properties,
             wrapper,
             ref_token,
@@ -104,47 +67,110 @@ impl Parse for Widget {
             returned_widget,
         })
     }
-}
 
-impl Widget {
-    pub fn parse_for_container_ext(input: ParseStream) -> Result<Self> {
-        // Look for &
-        let ref_token = input.parse().ok();
-
-        // Look for *
-        let deref_token = input.parse().ok();
-
-        let func: WidgetFunc = input.parse()?;
+    pub(super) fn parse_for_container_ext(
+        input: ParseStream,
+        func: WidgetFunc,
+        attributes: Option<Attrs>,
+    ) -> Result<Self> {
+        let attr = Self::process_attributes(attributes)?;
 
         let inner;
         let _token = braced!(inner in input);
         let properties = inner.parse()?;
 
-        // Generat a name
-        let name = util::idents_to_snake_case(&func.path_segments, func.span);
+        // Generate a name
+        let name = func.snake_case_name();
 
-        let ref_token = match ref_token {
-            Some(ref_token) => Some(ref_token),
-            None => {
-                // A `Default` implementation will be generated
-                // so we know we get `T` but need `&T`
-                if func.args.is_none() {
-                    Some(And::default())
-                } else {
-                    None
-                }
-            }
-        };
+        let ref_token = Some(And::default());
 
         Ok(Widget {
+            attr,
             mutable: None,
             name,
             func,
+            args: None,
             properties,
             wrapper: None,
             ref_token,
-            deref_token,
+            deref_token: None,
             returned_widget: None,
         })
+    }
+
+    fn process_attributes(attrs: Option<Attrs>) -> Result<WidgetAttr> {
+        if let Some(attrs) = attrs {
+            let mut local = false;
+
+            for attr in attrs.inner {
+                if let Attr::Local(_) = attr {
+                    if local {
+                        return Err(attr_twice_error(&attr));
+                    } else {
+                        local = true;
+                    }
+                } else {
+                    return Err(Error::new(
+                        attr.span(),
+                        "Widgets can only have `local` or `local_ref` as attribute.",
+                    ));
+                }
+            }
+
+            Ok(if local {
+                WidgetAttr::Local
+            } else {
+                WidgetAttr::None
+            })
+        } else {
+            Ok(WidgetAttr::None)
+        }
+    }
+
+    /// Parse information related to the widget function.
+    fn parse_widget_func(input: ParseStream) -> Result<WidgetFuncInfo> {
+        let inner_input: Option<ParseBuffer>;
+
+        let upcoming_some = {
+            let forked_input = input.fork();
+            if forked_input.peek(Ident) {
+                let ident: Ident = forked_input.parse()?;
+                ident == "Some"
+            } else {
+                false
+            }
+        };
+
+        let wrapper = if upcoming_some && input.peek2(token::Paren) {
+            let ident = input.parse()?;
+            let paren_input;
+            parenthesized!(paren_input in input);
+            inner_input = Some(paren_input);
+            Some(ident)
+        } else {
+            inner_input = None;
+            None
+        };
+
+        // get the inner input as func_input
+        let func_input = if let Some(paren_input) = &inner_input {
+            paren_input
+        } else {
+            input
+        };
+
+        // Look for &
+        let ref_token = func_input.parse().ok();
+
+        // Look for *
+        let deref_token = func_input.parse().ok();
+
+        let func: WidgetFunc = func_input.parse()?;
+
+        let inner;
+        let _token = braced!(inner in input);
+        let properties = inner.parse()?;
+
+        Ok((wrapper, ref_token, deref_token, func, properties))
     }
 }

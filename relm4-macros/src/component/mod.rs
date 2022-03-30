@@ -13,7 +13,7 @@ mod types;
 use inject_view_code::inject_view_code;
 
 pub(crate) fn generate_tokens(
-    visibility: Option<Visibility>,
+    vis: Option<Visibility>,
     relm4_path: Path,
     data: ItemImpl,
 ) -> TokenStream2 {
@@ -43,7 +43,7 @@ pub(crate) fn generate_tokens(
     let outer_attrs = &data.outer_attrs;
 
     let Macros {
-        widgets,
+        top_level_widget,
         additional_fields,
         menus,
     } = match Macros::new(&data.macros, data.brace_span.unwrap()) {
@@ -64,11 +64,9 @@ pub(crate) fn generate_tokens(
         Err(err) => return err.to_compile_error(),
     };
 
+    let widgets = &top_level_widget.inner;
     let _root_widget_name = &widgets.name;
     let root_widget_type = widgets.func.type_token_stream();
-
-    let mut streams = token_streams::TokenStreams::default();
-    widgets.init_token_generation(&mut streams, &visibility, &model_type, &relm4_path);
 
     let token_streams::TokenStreams {
         init_root,
@@ -78,11 +76,8 @@ pub(crate) fn generate_tokens(
         assign_properties,
         connect,
         return_fields,
-        //parent,
-        connect_components,
-        view,
-        track,
-    } = streams;
+        update_view: view,
+    } = top_level_widget.generate_streams(&vis, &model_type, &relm4_path);
 
     let impl_generics = data.impl_generics;
     let where_clause = data.where_clause;
@@ -105,7 +100,6 @@ pub(crate) fn generate_tokens(
         #init_widgets
         #assign_properties
         #connect
-        #connect_components
     };
 
     let widgets_return_code = quote! {
@@ -123,7 +117,7 @@ pub(crate) fn generate_tokens(
     quote! {
         #[allow(dead_code)]
         #outer_attrs
-        #visibility struct #widgets_type {
+        #vis struct #widgets_type {
             #struct_fields
             #additional_fields
         }
@@ -157,7 +151,6 @@ pub(crate) fn generate_tokens(
                 // Wrap pre_view and post_view code to prevent early returns from skipping other view code.
                 (|| { #pre_view })();
                 #view
-                #track
                 (|| { #post_view })();
             }
 

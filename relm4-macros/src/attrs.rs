@@ -7,14 +7,12 @@ use syn::{
 
 use crate::util::default_relm4_path;
 
-#[derive(Debug)]
 enum AttributeType {
     None,
     Named,
     Unnamed { span: Span },
 }
 
-#[derive(Debug)]
 pub struct Attrs {
     /// Keeps information about visibility of the widget
     pub visibility: Option<Visibility>,

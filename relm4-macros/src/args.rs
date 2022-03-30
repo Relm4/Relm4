@@ -7,7 +7,6 @@ use syn::{
     Error, Result, Token,
 };
 
-#[derive(Debug)]
 pub struct Args<T>
 where
     T: Parse + ToTokens,

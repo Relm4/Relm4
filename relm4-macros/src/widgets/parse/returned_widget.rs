@@ -35,7 +35,7 @@ impl Parse for ReturnedWidget {
 
         let name = name.unwrap_or_else(|| {
             crate::util::idents_to_snake_case(
-                &[Ident::new("_returned_widget", Span2::call_site())],
+                [Ident::new("_returned_widget", Span2::call_site())].iter(),
                 ty.span(),
             )
         });

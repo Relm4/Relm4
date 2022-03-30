@@ -1,7 +1,7 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
 use relm4::{
     factory::{DynamicIndex, FactoryComponent, FactoryVecDeque},
-    gtk, ComponentParts, ComponentSender, RelmApp, Sender, SimpleComponent, WidgetPlus,
+    gtk, ComponentParts, RelmApp, Sender, SimpleComponent, WidgetPlus,
 };
 
 #[derive(Debug)]
@@ -72,6 +72,13 @@ impl FactoryComponent<gtk::Box, AppMsg> for Counter {
         input: &Sender<Self::Input>,
         output: &Sender<Self::Output>,
     ) -> Self::Widgets {
+        relm4::view! {
+            #[local]
+            root -> gtk::Label {
+
+            }
+        }
+
         relm4::view! {
             label = gtk::Label {
                 set_label: &self.value.to_string(),

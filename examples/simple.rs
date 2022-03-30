@@ -34,20 +34,21 @@ impl SimpleComponent for AppModel {
 
                 gtk::Button {
                     set_label: "Increment",
-                    connect_clicked(sender) => move |_| {
+                    connect_clicked[sender] => move |_| {
                         sender.input(AppMsg::Increment);
                     }
                 },
 
                 gtk::Button {
                     set_label: "Decrement",
-                    connect_clicked(sender) => move |_| {
+                    connect_clicked[sender] => move |_| {
                         sender.input(AppMsg::Decrement);
                     }
                 },
 
                 gtk::Label {
-                    set_label: watch!(&format!("Counter: {}", model.counter)),
+                    #[watch]
+                    set_label: &format!("Counter: {}", model.counter),
                     set_margin_all: 5,
                 }
             }
@@ -62,7 +63,7 @@ impl SimpleComponent for AppModel {
     ) -> ComponentParts<Self> {
         let model = AppModel { counter };
 
-        // Insert the macro codegen here
+        // Insert the macro code generation here
         let widgets = view_output!();
 
         ComponentParts { model, widgets }
