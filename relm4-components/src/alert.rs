@@ -1,6 +1,6 @@
 //! Reusable and easily configurable alert component.
 //!
-//! **[Example implementation](https://github.com/AaronErhardt/relm4/blob/main/relm4-examples/examples/alert.rs)**
+//! **[Example implementation](https://github.com/Relm4/relm4/relm4/blob/main/relm4-examples/examples/alert.rs)**
 
 use gtk::prelude::{DialogExt, GtkWindowExt, WidgetExt};
 use relm4::{gtk, send, ComponentUpdate, Model, Sender};

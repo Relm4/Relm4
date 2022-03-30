@@ -4,10 +4,10 @@ authors = ["Aaron Erhardt <aaron.erhardt@t-online.de>"]
 edition = "2021"
 version = "0.4.0"
 description = "An idiomatic GUI library inspired by Elm and based on gtk4-rs"
-repository = "https://github.com/AaronErhardt/relm4"
+repository = "https://github.com/Relm4/relm4/relm4"
 readme = "README.md"
 license = "Apache-2.0 OR MIT"
-documentation = "https://aaronerhardt.github.io/docs/relm4/relm4_components/"
+documentation = "https://relm4.org/docs/stable/relm4_components/"
 
 keywords = ["gui", "gtk", "gtk4"]
 categories = ["gui"]

@@ -1,8 +1,8 @@
 #![doc(
-    html_logo_url = "https://raw.githubusercontent.com/AaronErhardt/relm4/main/assets/Relm_logo.svg"
+    html_logo_url = "https://raw.githubusercontent.com/https://raw.githubusercontent.com/Relm4/relm4//relm4/main/assets/Relm_logo.svg"
 )]
 #![doc(
-    html_favicon_url = "https://raw.githubusercontent.com/AaronErhardt/relm4/main/assets/Relm_logo.svg"
+    html_favicon_url = "https://raw.githubusercontent.com/https://raw.githubusercontent.com/Relm4/relm4//relm4/main/assets/Relm_logo.svg"
 )]
 #![allow(clippy::single_component_path_imports)]
 
@@ -34,7 +34,7 @@ use item_impl::ItemImpl;
 use menu::Menus;
 use widgets::Widget;
 
-/// Macro that implements [`relm4::Widgets`](https://aaronerhardt.github.io/docs/relm4/relm4/trait.Widgets.html) and generates the corresponding struct.
+/// Macro that implements [`relm4::Widgets`](https://relm4.org/docs/stable/relm4/trait.Widgets.html) and generates the corresponding struct.
 ///
 /// # Attributes
 ///
@@ -122,7 +122,7 @@ pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
     widget_macro::generate_tokens(visibility, relm4_path, data).into()
 }
 
-/// Macro that implements [`relm4::MicrosWidgets`](https://aaronerhardt.github.io/docs/relm4/relm4/trait.MicroWidgets.html) and generates the corresponding struct.
+/// Macro that implements [`relm4::MicrosWidgets`](https://relm4.org/docs/stable/relm4/trait.MicroWidgets.html) and generates the corresponding struct.
 ///
 /// It works very similar to [`macro@widget`].
 #[proc_macro_attribute]
@@ -136,7 +136,7 @@ pub fn micro_widget(attributes: TokenStream, input: TokenStream) -> TokenStream 
     micro_widget_macro::generate_tokens(visibility, relm4_path, data).into()
 }
 
-/// Macro that implements [`relm4::factory::FactoryPrototype`](https://aaronerhardt.github.io/docs/relm4/relm4/factory/trait.FactoryPrototype.html)
+/// Macro that implements [`relm4::factory::FactoryPrototype`](https://relm4.org/docs/stable/relm4/factory/trait.FactoryPrototype.html)
 /// and generates the corresponding widget struct.
 ///
 /// It works very similar to [`macro@widget`].

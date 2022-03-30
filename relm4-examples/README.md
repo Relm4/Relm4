@@ -5,7 +5,7 @@ A collection of small example apps using relm4.
 ## Setup
 
 ```bash
-git clone https://github.com/AaronErhardt/relm4.git
+git clone https://github.com/Relm4/relm4/relm4.git
 cd relm4
 cd relm4-examples
 ```
