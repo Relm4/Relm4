@@ -2,7 +2,7 @@
 name = "relm4"
 authors = ["Aaron Erhardt <aaron.erhardt@t-online.de>"]
 edition = "2021"
-version = "0.4.3"
+version = "0.4.4"
 description = "An idiomatic GUI library inspired by Elm and based on gtk4-rs"
 repository = "https://github.com/Relm4/relm4/relm4"
 readme = "README.md"
