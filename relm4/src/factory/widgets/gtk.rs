@@ -165,8 +165,14 @@ impl FactoryView for gtk::ListBox {
         widget: impl AsRef<Self::Children>,
         _position: &(),
     ) -> Self::ReturnedWidget {
-        self.append(widget.as_ref());
-        widget.as_ref().parent().unwrap().downcast().unwrap()
+        let widget = widget.as_ref();
+
+        self.append(widget);
+
+        match widget.downcast_ref::<gtk::ListBoxRow>() {
+            Some(row) => row.clone(),
+            None => widget.parent().unwrap().downcast().unwrap(),
+        }
     }
 
     fn factory_prepend(
@@ -174,8 +180,14 @@ impl FactoryView for gtk::ListBox {
         widget: impl AsRef<Self::Children>,
         _position: &(),
     ) -> Self::ReturnedWidget {
-        self.prepend(widget.as_ref());
-        widget.as_ref().parent().unwrap().downcast().unwrap()
+        let widget = widget.as_ref();
+
+        self.prepend(widget);
+
+        match widget.downcast_ref::<gtk::ListBoxRow>() {
+            Some(row) => row.clone(),
+            None => widget.parent().unwrap().downcast().unwrap(),
+        }
     }
 
     fn factory_insert_after(
