@@ -88,6 +88,7 @@ impl FactoryComponent<gtk::Grid, AppMsg> for Counter {
         relm4::view! {
             label = gtk::Label {
                 set_label: &self.value.to_string(),
+                set_width_chars: 3,
             }
         }
 
@@ -111,7 +112,7 @@ impl FactoryComponent<gtk::Grid, AppMsg> for Counter {
 
         relm4::view! {
             move_up_button = gtk::Button {
-                set_label: "UP",
+                set_label: "Up",
                 connect_clicked(output, index) => move |_| {
                     output.send(CounterOutput::MoveUp(index.clone()))
                 }
@@ -120,7 +121,7 @@ impl FactoryComponent<gtk::Grid, AppMsg> for Counter {
 
         relm4::view! {
             move_down_button = gtk::Button {
-                set_label: "DOWN",
+                set_label: "Down",
                 connect_clicked(output, index) => move |_| {
                     output.send(CounterOutput::MoveDown(index.clone()))
                 }
@@ -275,12 +276,6 @@ impl SimpleComponent for AppModel {
                     self.counters.move_to(index, index - 1);
                 }
             }
-        }
-        if self.counters.len() > 2 {
-            // Testing different stuff...
-            //self.counters.swap(0, 2);
-            //let mut counter = self.counters.get_mut(1);
-            //counter.value = counter.value.wrapping_add(10);
         }
         self.counters.render_changes();
     }
