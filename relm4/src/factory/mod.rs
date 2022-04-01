@@ -443,7 +443,7 @@ where
     ///
     /// Panics if index is out of bounds.
     pub fn move_back(&mut self, current_position: usize) {
-        self.move_to(current_position, self.len())
+        self.move_to(current_position, self.len() - 1)
     }
 
     /// Removes the first element from the [`FactoryVecDeque`] and returns it,
