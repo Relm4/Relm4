@@ -20,11 +20,14 @@ macro_rules! set_child_impl {
 
 set_child_impl!(
     gtk::Button,
-    gtk::ComboBox,
+    gtk::LinkButton,
+    gtk::ToggleButton,
     gtk::FlowBoxChild,
     gtk::Frame,
+    gtk::ListBoxRow,
     gtk::Popover,
     gtk::Window,
+    gtk::ScrolledWindow,
     gtk::ApplicationWindow,
     gtk::Dialog
 );
@@ -32,11 +35,26 @@ set_child_impl!(
 #[cfg(feature = "libadwaita")]
 mod libadwaita {
     use super::RelmSetChildExt;
-    use adw::prelude::AdwWindowExt;
+    use adw::prelude::{AdwApplicationWindowExt, AdwWindowExt, BinExt};
 
-    impl RelmSetChildExt for adw::Window {
-        fn container_set_child(&self, widget: Option<&impl AsRef<gtk::Widget>>) {
-            self.set_content(widget.map(|w| w.as_ref()));
+    macro_rules! set_child_content_impl {
+        ($($type:ty),+) => {
+            $(
+                impl RelmSetChildExt for $type {
+                    fn container_set_child(&self, widget: Option<&impl AsRef<gtk::Widget>>) {
+                        self.set_content(widget.map(|w| w.as_ref()));
+                    }
+                }
+            )+
         }
     }
+
+    set_child_content_impl!(adw::Window, adw::ApplicationWindow);
+    set_child_impl!(
+        adw::Bin,
+        adw::Clamp,
+        adw::ClampScrollable,
+        adw::SplitButton,
+        adw::StatusPage
+    );
 }
