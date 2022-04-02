@@ -76,6 +76,7 @@ impl FactoryComponent<adw::TabView, AppMsg> for Counter {
         relm4::view! {
             label = gtk::Label {
                 set_label: &self.value.to_string(),
+                set_width_chars: 3,
             }
         }
 
@@ -99,7 +100,7 @@ impl FactoryComponent<adw::TabView, AppMsg> for Counter {
 
         relm4::view! {
             move_up_button = gtk::Button {
-                set_label: "UP",
+                set_label: "Up",
                 connect_clicked(output, index) => move |_| {
                     output.send(CounterOutput::MoveUp(index.clone()))
                 }
@@ -108,7 +109,7 @@ impl FactoryComponent<adw::TabView, AppMsg> for Counter {
 
         relm4::view! {
             move_down_button = gtk::Button {
-                set_label: "DOWN",
+                set_label: "Down",
                 connect_clicked(output, index) => move |_| {
                     output.send(CounterOutput::MoveDown(index.clone()))
                 }
