@@ -217,7 +217,9 @@ impl FactoryView for gtk::ListBox {
     }
 
     fn returned_widget_to_child(returned_widget: &Self::ReturnedWidget) -> Self::Children {
-        returned_widget.child().unwrap()
+        returned_widget
+            .child()
+            .unwrap_or_else(|| returned_widget.upcast_ref::<gtk::Widget>().clone())
     }
 }
 
@@ -288,7 +290,9 @@ impl FactoryView for gtk::FlowBox {
     }
 
     fn returned_widget_to_child(returned_widget: &Self::ReturnedWidget) -> Self::Children {
-        returned_widget.child().unwrap()
+        returned_widget
+            .child()
+            .unwrap_or_else(|| returned_widget.upcast_ref::<gtk::Widget>().clone())
     }
 }
 
