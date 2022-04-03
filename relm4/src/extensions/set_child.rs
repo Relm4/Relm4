@@ -1,7 +1,8 @@
+use super::ContainerChild;
 use gtk::prelude::*;
 
 /// Widget types which allow to set or unset their child.
-pub trait RelmSetChildExt {
+pub trait RelmSetChildExt: ContainerChild {
     /// Set a child for the container or remove it using [`None`].
     fn container_set_child(&self, widget: Option<&impl AsRef<gtk::Widget>>);
 }

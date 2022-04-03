@@ -30,8 +30,8 @@ fn box_extension_traits() {
     let gtk_box = gtk::Box::default();
     let widgets = TestWidgets::default();
 
-    gtk_box.append(&widgets.0);
     gtk_box.append(&widgets.1);
+    gtk_box.prepend(&widgets.0);
     gtk_box.append(&widgets.2);
 
     widgets.assert_parent();
@@ -53,8 +53,8 @@ fn list_box_extension_traits() {
     let list_box = gtk::ListBox::default();
     let widgets = TestWidgets::default();
 
-    list_box.append(&widgets.0);
     list_box.append(&widgets.1);
+    list_box.prepend(&widgets.0);
     list_box.append(&widgets.2);
 
     widgets.assert_parent();
@@ -96,8 +96,8 @@ fn flow_box_extension_traits() {
     let flow_box = gtk::FlowBox::default();
     let widgets = TestWidgets::default();
 
-    flow_box.insert(&widgets.0, -1);
     flow_box.insert(&widgets.1, -1);
+    flow_box.insert(&widgets.0, 0);
     flow_box.insert(&widgets.2, -1);
 
     widgets.assert_parent();
@@ -120,8 +120,8 @@ fn grid_extension_traits() {
     let widgets = TestWidgets::default();
 
     grid.attach(&widgets.0, 0, 0, 1, 1);
-    grid.attach(&widgets.1, 1, 0, 1, 1);
     grid.attach(&widgets.2, 2, 2, 2, 2);
+    grid.attach(&widgets.1, 1, 0, 1, 1);
 
     widgets.assert_parent();
 
