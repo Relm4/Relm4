@@ -1,4 +1,5 @@
 mod container;
+mod iter_children;
 mod remove;
 mod set_child;
 
@@ -7,6 +8,8 @@ mod tests;
 
 #[allow(unreachable_pub)]
 pub use self::container::RelmContainerExt;
+#[allow(unreachable_pub)]
+pub use self::iter_children::RelmIterChildrenExt;
 #[allow(unreachable_pub)]
 pub use self::remove::{RelmRemoveAllExt, RelmRemoveExt};
 #[allow(unreachable_pub)]
@@ -104,99 +107,75 @@ impl RelmListBoxExt for gtk::ListBox {
     }
 }
 
-/// An iterator over container children.
-#[derive(Debug)]
-pub struct ChildrenIterator<T: RelmIterChildrenExt> {
-    start: Option<T::Child>,
-    end: Option<T::Child>,
-    done: bool,
+/// Type of children inside a container.
+///
+/// For example, `gtk::ListBox` only contains `gtk::ListBoxRow` widgets
+/// as children. If you add any other kind of widget, a row is automatically
+/// inserted between the list box and the widget.
+///
+/// For simple widgets like `gtk::Box`, the children type will be `gtk::Widget`,
+/// meaning that it can be any widget type.
+pub trait ContainerChild {
+    /// Type of container children.
+    type Child: IsA<gtk::Widget>;
 }
 
-impl<T: RelmIterChildrenExt> ChildrenIterator<T> {
-    /// Create a new iterator over children of `widget`.
-    pub fn new(widget: &T) -> Self {
-        let start = widget.first_child().map(|child| {
-            child
-                .downcast::<T::Child>()
-                .expect("The type of children does not match.")
-        });
-        let end = widget.last_child().map(|child| {
-            child
-                .downcast::<T::Child>()
-                .expect("The type of children does not match.")
-        });
-        let done = start.is_none();
-        ChildrenIterator { start, end, done }
-    }
-}
-
-impl<T: RelmIterChildrenExt> Iterator for ChildrenIterator<T> {
-    type Item = T::Child;
-    fn next(&mut self) -> Option<Self::Item> {
-        if self.done {
-            None
-        } else {
-            // Handle cases where only one child exists and
-            // when all but one widget were consumed
-            if self.start == self.end {
-                self.done = true;
-                self.start.clone()
-            } else if let Some(start) = self.start.take() {
-                // "Increment" the start child
-                self.start = start.next_sibling().map(|child| {
-                    child
-                        .downcast::<T::Child>()
-                        .expect("The type of children does not match.")
-                });
-                // Just to make sure the iterator ends next time
-                // because all widgets were consumed
-                self.done = self.start.is_none();
-                Some(start)
-            } else {
-                None
+macro_rules! container_child_impl {
+    ($($type:ty: $child:ty)+) => {
+        $(
+            impl ContainerChild for $type {
+                type Child = $child;
             }
-        }
-    }
-}
-
-impl<T: RelmIterChildrenExt> DoubleEndedIterator for ChildrenIterator<T> {
-    fn next_back(&mut self) -> Option<Self::Item> {
-        if self.done {
-            None
-        } else {
-            // Handle cases where only one child exists and
-            // when all but one widget were consumed
-            if self.start == self.end {
-                self.done = true;
-                self.end.clone()
-            } else if let Some(end) = self.end.take() {
-                // "Decrement" the end child
-                self.end = end.prev_sibling().map(|child| {
-                    child
-                        .downcast::<T::Child>()
-                        .expect("The type of children does not match.")
-                });
-                // Just to make sure the iterator ends next time
-                // because all widgets were consumed
-                self.done = self.end.is_none();
-                Some(end)
-            } else {
-                None
+        )+
+    };
+    ($($type:ty)+) => {
+        $(
+            impl ContainerChild for $type {
+                type Child = gtk::Widget;
             }
-        }
-    }
+        )+
+    };
 }
 
-/// Widget types which allow iteration over their children.
-pub trait RelmIterChildrenExt: RelmRemoveExt + IsA<gtk::Widget> {
-    /// Returns an iterator over container children.
-    fn iter_children(&self) -> ChildrenIterator<Self> {
-        ChildrenIterator::new(self)
-    }
+container_child_impl! {
+    gtk::Box
+    gtk::Fixed
+    gtk::Grid
+    gtk::ActionBar
+    gtk::Stack
+    gtk::HeaderBar
+    gtk::InfoBar
+    gtk::Button
+    gtk::ComboBox
+    gtk::FlowBoxChild
+    gtk::Frame
+    gtk::Popover
+    gtk::Window
+    gtk::ApplicationWindow
+    gtk::ListBoxRow
+    gtk::ScrolledWindow
+    gtk::Dialog
+    gtk::LinkButton
+    gtk::ToggleButton
 }
 
-impl RelmIterChildrenExt for gtk::Box {}
-impl RelmIterChildrenExt for gtk::ListBox {}
-impl RelmIterChildrenExt for gtk::FlowBox {}
-impl RelmIterChildrenExt for gtk::Grid {}
-impl RelmIterChildrenExt for gtk::Stack {}
+container_child_impl! {
+    gtk::ListBox: gtk::ListBoxRow
+    gtk::FlowBox: gtk::FlowBoxChild
+}
+
+#[cfg(feature = "libadwaita")]
+mod libadwaita {
+    use super::ContainerChild;
+
+    container_child_impl! {
+        adw::TabView
+        adw::Window
+        adw::Bin
+        adw::ApplicationWindow
+        adw::Clamp
+        adw::ClampScrollable
+        adw::SplitButton
+        adw::StatusPage
+    }
+}
