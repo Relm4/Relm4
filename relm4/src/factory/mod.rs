@@ -431,7 +431,7 @@ where
     ///
     /// # Panics
     ///
-    /// Panics if either index is out of bounds.
+    /// Panics if index is out of bounds.
     pub fn move_front(&mut self, current_position: usize) {
         self.move_to(current_position, 0)
     }
@@ -441,9 +441,9 @@ where
     ///
     /// # Panics
     ///
-    /// Panics if either index is out of bounds.
+    /// Panics if index is out of bounds.
     pub fn move_back(&mut self, current_position: usize) {
-        self.move_to(current_position, self.len())
+        self.move_to(current_position, self.len() - 1)
     }
 
     /// Removes the first element from the [`FactoryVecDeque`] and returns it,
@@ -462,8 +462,7 @@ where
     /// Apply external updates that happened between the last render.
     ///
     /// **YOU MUST NOT EDIT THE [`FactoryVecDeque`] BETWEEN CALLING
-    /// THIS [`render_change`] AND THIS METHOD. THIS MIGHT CAUSE
-    /// UNDEFINED BEHAVIOR.
+    /// [`render_change`] AND THIS METHOD. THIS MIGHT CAUSE UNDEFINED BEHAVIOR.
     pub fn apply_external_updates(&mut self) {
         let length = self.widget().n_pages();
         let mut hashes: Vec<u64> = Vec::with_capacity(length as usize);

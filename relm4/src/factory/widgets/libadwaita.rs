@@ -43,7 +43,11 @@ impl FactoryView for adw::TabView {
 
     fn factory_move_after(&self, widget: &Self::ReturnedWidget, other: &Self::ReturnedWidget) {
         let new_position = self.page_position(other) + 1;
-        self.reorder_page(widget, new_position);
+        if new_position == self.n_pages() {
+            self.reorder_last(widget);
+        } else {
+            self.reorder_page(widget, new_position);
+        }
     }
 
     fn factory_move_start(&self, widget: &Self::ReturnedWidget) {

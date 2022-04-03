@@ -1,4 +1,4 @@
-use gtk::prelude::{BoxExt, Cast, GridExt, ListBoxRowExt, WidgetExt};
+use gtk::prelude::{BoxExt, Cast, FlowBoxChildExt, GridExt, ListBoxRowExt, WidgetExt};
 
 use crate::factory::{positions, FactoryView};
 
@@ -156,7 +156,8 @@ impl FactoryView for gtk::ListBox {
     type Position = ();
 
     fn factory_remove(&self, widget: &Self::ReturnedWidget) {
-        self.remove(&widget.child().unwrap());
+        widget.set_child(None::<&gtk::Widget>);
+        self.remove(widget);
     }
 
     fn factory_append(
@@ -164,8 +165,14 @@ impl FactoryView for gtk::ListBox {
         widget: impl AsRef<Self::Children>,
         _position: &(),
     ) -> Self::ReturnedWidget {
-        self.append(widget.as_ref());
-        widget.as_ref().parent().unwrap().downcast().unwrap()
+        let widget = widget.as_ref();
+
+        self.append(widget);
+
+        match widget.downcast_ref::<gtk::ListBoxRow>() {
+            Some(row) => row.clone(),
+            None => widget.parent().unwrap().downcast().unwrap(),
+        }
     }
 
     fn factory_prepend(
@@ -173,8 +180,14 @@ impl FactoryView for gtk::ListBox {
         widget: impl AsRef<Self::Children>,
         _position: &(),
     ) -> Self::ReturnedWidget {
-        self.prepend(widget.as_ref());
-        widget.as_ref().parent().unwrap().downcast().unwrap()
+        let widget = widget.as_ref();
+
+        self.prepend(widget);
+
+        match widget.downcast_ref::<gtk::ListBoxRow>() {
+            Some(row) => row.clone(),
+            None => widget.parent().unwrap().downcast().unwrap(),
+        }
     }
 
     fn factory_insert_after(
@@ -183,13 +196,19 @@ impl FactoryView for gtk::ListBox {
         _position: &(),
         other: &Self::ReturnedWidget,
     ) -> Self::ReturnedWidget {
-        self.insert(widget.as_ref(), other.index());
-        widget.as_ref().parent().unwrap().downcast().unwrap()
+        let widget = widget.as_ref();
+
+        self.insert(widget, other.index() + 1);
+
+        match widget.downcast_ref::<gtk::ListBoxRow>() {
+            Some(row) => row.clone(),
+            None => widget.parent().unwrap().downcast().unwrap(),
+        }
     }
 
     fn factory_move_after(&self, widget: &Self::ReturnedWidget, other: &Self::ReturnedWidget) {
         self.remove(widget);
-        self.insert(widget, other.index());
+        self.insert(widget, other.index() + 1);
     }
 
     fn factory_move_start(&self, widget: &Self::ReturnedWidget) {
@@ -198,7 +217,82 @@ impl FactoryView for gtk::ListBox {
     }
 
     fn returned_widget_to_child(returned_widget: &Self::ReturnedWidget) -> Self::Children {
-        returned_widget.child().unwrap()
+        returned_widget
+            .child()
+            .unwrap_or_else(|| returned_widget.upcast_ref::<gtk::Widget>().clone())
+    }
+}
+
+impl FactoryView for gtk::FlowBox {
+    type Children = gtk::Widget;
+    type ReturnedWidget = gtk::FlowBoxChild;
+    type Position = ();
+
+    fn factory_remove(&self, widget: &Self::ReturnedWidget) {
+        widget.set_child(None::<&gtk::Widget>);
+        self.remove(widget);
+    }
+
+    fn factory_append(
+        &self,
+        widget: impl AsRef<Self::Children>,
+        _position: &(),
+    ) -> Self::ReturnedWidget {
+        let widget = widget.as_ref();
+
+        self.insert(widget, -1);
+
+        match widget.downcast_ref::<gtk::FlowBoxChild>() {
+            Some(child) => child.clone(),
+            None => widget.parent().unwrap().downcast().unwrap(),
+        }
+    }
+
+    fn factory_prepend(
+        &self,
+        widget: impl AsRef<Self::Children>,
+        _position: &(),
+    ) -> Self::ReturnedWidget {
+        let widget = widget.as_ref();
+
+        self.insert(widget, 0);
+
+        match widget.downcast_ref::<gtk::FlowBoxChild>() {
+            Some(child) => child.clone(),
+            None => widget.parent().unwrap().downcast().unwrap(),
+        }
+    }
+
+    fn factory_insert_after(
+        &self,
+        widget: impl AsRef<Self::Children>,
+        _position: &(),
+        other: &Self::ReturnedWidget,
+    ) -> Self::ReturnedWidget {
+        let widget = widget.as_ref();
+
+        self.insert(widget, other.index() + 1);
+
+        match widget.downcast_ref::<gtk::FlowBoxChild>() {
+            Some(child) => child.clone(),
+            None => widget.parent().unwrap().downcast().unwrap(),
+        }
+    }
+
+    fn factory_move_after(&self, widget: &Self::ReturnedWidget, other: &Self::ReturnedWidget) {
+        self.remove(widget);
+        self.insert(widget, other.index() + 1);
+    }
+
+    fn factory_move_start(&self, widget: &Self::ReturnedWidget) {
+        self.remove(widget);
+        self.insert(widget, 0);
+    }
+
+    fn returned_widget_to_child(returned_widget: &Self::ReturnedWidget) -> Self::Children {
+        returned_widget
+            .child()
+            .unwrap_or_else(|| returned_widget.upcast_ref::<gtk::Widget>().clone())
     }
 }
 
@@ -213,39 +307,6 @@ impl FactoryView for gtk::ListBox {
 
 //     fn remove(&self, widget: &gtk::TreeViewColumn) {
 //         self.remove_column(widget);
-//     }
-// }
-
-// impl<Widget> FactoryView<Widget> for gtk::FlowBox
-// where
-//     Widget: glib::IsA<gtk::Widget>,
-// {
-//     type Position = ();
-//     type Root = Widget;
-
-//     fn add(&self, widget: &Widget, _position: &()) -> Widget {
-//         self.insert(widget, -1);
-//         widget.clone()
-//     }
-
-//     fn remove(&self, widget: &Widget) {
-//         self.remove(widget);
-//     }
-// }
-
-// impl<Widget> FactoryListView<Widget> for gtk::FlowBox
-// where
-//     Self: FactoryView<Widget, Root = Widget>,
-//     Widget: gtk::prelude::FlowBoxChildExt + glib::IsA<gtk::Widget> + Clone,
-// {
-//     fn insert_after(&self, widget: &Widget, other: &Widget) -> Widget {
-//         self.insert(widget, other.index());
-//         widget.clone()
-//     }
-
-//     fn push_front(&self, widget: &Widget) -> Widget {
-//         self.insert(widget, 0);
-//         widget.clone()
 //     }
 // }
 
