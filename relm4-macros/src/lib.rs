@@ -1,9 +1,5 @@
-#![doc(
-    html_logo_url = "https://raw.githubusercontent.com/https://raw.githubusercontent.com/Relm4/relm4//relm4/main/assets/Relm_logo.svg"
-)]
-#![doc(
-    html_favicon_url = "https://raw.githubusercontent.com/https://raw.githubusercontent.com/Relm4/relm4//relm4/main/assets/Relm_logo.svg"
-)]
+#![doc(html_logo_url = "https://relm4.org/icons/relm4_logo.svg")]
+#![doc(html_favicon_url = "https://relm4.org/icons/relm4_org.svg")]
 #![allow(clippy::single_component_path_imports)]
 
 use proc_macro::{self, TokenStream};
