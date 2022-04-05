@@ -105,10 +105,10 @@ impl FactoryPrototype for Number {
         let dropdown =
             gtk::DropDown::from_strings(&[" ", "1", "2", "3", "4", "5", "6", "7", "8", "9"]);
 
-        if index % 3 == 0 {
+        if index % 3 == 0 && index % 9 != 0 {
             dropdown.set_margin_start(5);
         }
-        if (index / 9) % 3 == 0 {
+        if (index / 9) % 3 == 0 && *index > 9 {
             dropdown.set_margin_top(5);
         }
 
@@ -156,13 +156,11 @@ impl Widgets<AppModel, ()> for AppWidgets {
             set_resizable: false,
             set_content = Some(&gtk::Box) {
                 set_orientation: gtk::Orientation::Vertical,
-                set_margin_all: 5,
-                set_spacing: 5,
                 append = &adw::HeaderBar {
                     set_title_widget = Some(&adw::WindowTitle::new("Sudoku Solver",
                         "Beat your neighbor in solving Sudoku puzzles")) {
                     },
-                    pack_start =&gtk::Button {
+                    pack_start = &gtk::Button {
                         set_label: "Clear",
                         connect_clicked(sender) => move |_| {
                             send!(sender, AppMsg::Clear);
@@ -176,7 +174,7 @@ impl Widgets<AppModel, ()> for AppWidgets {
                     },
                 },
                 append = &gtk::Grid {
-                    set_margin_all: 5,
+                    set_margin_all: 10,
                     factory!(model.values),
                 }
             }
