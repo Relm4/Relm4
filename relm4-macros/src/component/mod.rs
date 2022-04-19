@@ -72,12 +72,12 @@ pub(crate) fn generate_tokens(
         init_root,
         rename_root,
         struct_fields,
-        init_widgets,
-        assign_properties,
+        init: init_widgets,
+        assign,
         connect,
         return_fields,
-        update_view: view,
-    } = top_level_widget.generate_streams(&vis, &model_type, &relm4_path);
+        update_view,
+    } = top_level_widget.generate_streams(&vis, &model_type, &relm4_path, true);
 
     let impl_generics = data.impl_generics;
     let where_clause = data.where_clause;
@@ -98,7 +98,7 @@ pub(crate) fn generate_tokens(
         #rename_root
         #menus_stream
         #init_widgets
-        #assign_properties
+        #assign
         #connect
     };
 
@@ -150,7 +150,7 @@ pub(crate) fn generate_tokens(
                 let model = self;
                 // Wrap pre_view and post_view code to prevent early returns from skipping other view code.
                 (|| { #pre_view })();
-                #view
+                #update_view
                 (|| { #post_view })();
             }
 

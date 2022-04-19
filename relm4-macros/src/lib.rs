@@ -6,7 +6,7 @@
 )]
 #![allow(clippy::single_component_path_imports)]
 
-use proc_macro::{self, TokenStream};
+use proc_macro::TokenStream;
 use quote::quote;
 use syn::parse_macro_input;
 
@@ -14,18 +14,15 @@ mod additional_fields;
 mod args;
 mod attrs;
 mod component;
-//mod derive_components;
-//mod factory_prototype_macro;
+//mod factory_prototype;
 mod item_impl;
 mod macros;
 mod menu;
-//mod micro_widget_macro;
+mod widgets;
+mod view;
 
 #[macro_use]
 mod util;
-
-//mod widget_macro;
-mod widgets;
 
 // Hack to make the macro visible for other parts of this crate.
 pub(crate) use parse_func;
@@ -138,17 +135,6 @@ pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
 //    quote! {}.into()
 // }
 
-// #[proc_macro_derive(Components, attributes(components))]
-// pub fn derive(input: TokenStream) -> TokenStream {
-//     let derive_input = parse_macro_input!(input);
-//     let output = derive_components::generate_stream(&derive_input);
-
-//     match output {
-//         Ok(output) => output.into(),
-//         Err(error) => error.into_compile_error().into(),
-//     }
-// }
-
 /// A macro to create menus.
 ///
 /// # Example
@@ -237,33 +223,5 @@ pub fn menu(input: TokenStream) -> TokenStream {
 /// ```
 #[proc_macro]
 pub fn view(input: TokenStream) -> TokenStream {
-    quote! {}.into()
-    // let widgets = parse_macro_input!(input as TopLevelWidget);
-    // let default_relm4_path = util::default_relm4_path();
-
-    // let model_type = syn::Type::Tuple(syn::TypeTuple {
-    //     paren_token: syn::token::Paren::default(),
-    //     elems: syn::punctuated::Punctuated::new(),
-    // });
-
-    // let mut streams = widget_macro::token_streams::TokenStreams::default();
-    // widgets.generate_widget_tokens_recursively(
-    //     &mut streams,
-    //     &None,
-    //     &model_type,
-    //     &default_relm4_path,
-    // );
-    // let widget_macro::token_streams::TokenStreams {
-    //     init_widgets,
-    //     assign_properties,
-    //     connect,
-    //     ..
-    // } = streams;
-
-    // let output = quote! {
-    //     #init_widgets
-    //     #assign_properties
-    //     #connect
-    // };
-    // output.into()
+    view::generate_tokens(input)
 }

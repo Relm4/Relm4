@@ -13,27 +13,28 @@ pub(crate) struct TokenStreams {
     /// The tokens for the struct fields -> name: Type,
     pub struct_fields: TokenStream2,
     /// The tokens initializing the widgets.
-    pub init_widgets: TokenStream2,
+    pub init: TokenStream2,
     /// The tokens initializing the properties.
-    pub assign_properties: TokenStream2,
+    pub assign: TokenStream2,
+    /// The tokens for connecting events.
+    pub connect: TokenStream2,
     /// The tokens for the returned struct fields -> name,
     pub return_fields: TokenStream2,
     /// The view tokens (watch! macro)
     pub update_view: TokenStream2,
-    /// The tokens for connecting events.
-    pub connect: TokenStream2,
 }
 
 impl TopLevelWidget {
-    pub(super) fn generate_streams(
+    pub fn generate_streams(
         &self,
         vis: &Option<Visibility>,
         model_type: &Type,
         relm4_path: &Path,
+        generate_init_root_stream: bool,
     ) -> TokenStreams {
         let mut streams = TokenStreams::default();
         self.inner
-            .init_token_generation(&mut streams, vis, model_type, relm4_path);
+            .init_token_generation(&mut streams, vis, model_type, relm4_path, generate_init_root_stream);
 
         streams
     }
@@ -46,13 +47,20 @@ impl Widget {
         vis: &Option<Visibility>,
         model_type: &Type,
         relm4_path: &Path,
+        generate_init_root_stream: bool,
     ) {
         let name = &self.name;
         let name_span = name.span();
 
         // Initialize the root
-        self.init_stream(&mut streams.init_root);
-        name.to_tokens(&mut streams.init_root);
+        if generate_init_root_stream {
+            // For the `component` macro
+            self.init_stream(&mut streams.init_root);
+            name.to_tokens(&mut streams.init_root);
+        } else {
+            // For the `view!` macro
+            self.init_stream(&mut streams.init);
+        }
 
         self.struct_fields_stream(&mut streams.struct_fields, vis);
         self.return_stream(&mut streams.return_fields);
@@ -63,8 +71,8 @@ impl Widget {
         });
 
         for prop in &self.properties.properties {
-            prop.init_stream(&mut streams.init_widgets);
-            prop.assign_stream(&mut streams.assign_properties, &self.name, relm4_path);
+            prop.init_stream(&mut streams.init);
+            prop.assign_stream(&mut streams.assign, &self.name, relm4_path);
             prop.connect_signals_stream(&mut streams.connect, &self.name, relm4_path);
             prop.update_view_stream(&mut streams.update_view, &self.name, relm4_path);
 
@@ -91,8 +99,8 @@ impl Widget {
         relm4_path: &Path,
     ) {
         for prop in &self.properties.properties {
-            prop.init_stream(&mut streams.init_widgets);
-            prop.assign_stream(&mut streams.assign_properties, &self.name, relm4_path);
+            prop.init_stream(&mut streams.init);
+            prop.assign_stream(&mut streams.assign, &self.name, relm4_path);
             prop.connect_signals_stream(&mut streams.connect, &self.name, relm4_path);
             prop.update_view_stream(&mut streams.update_view, &self.name, relm4_path);
 
@@ -124,8 +132,8 @@ impl ReturnedWidget {
         self.return_stream(&mut streams.return_fields);
 
         for prop in &self.properties.properties {
-            prop.init_stream(&mut streams.init_widgets);
-            prop.assign_stream(&mut streams.assign_properties, &self.name, relm4_path);
+            prop.init_stream(&mut streams.init);
+            prop.assign_stream(&mut streams.assign, &self.name, relm4_path);
             prop.connect_signals_stream(&mut streams.connect, &self.name, relm4_path);
             prop.update_view_stream(&mut streams.update_view, &self.name, relm4_path);
 
