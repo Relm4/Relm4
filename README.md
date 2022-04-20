@@ -146,6 +146,10 @@ fn main() {
 
 ```
 
+## Projects using Relm4
+
+- [fm](https://github.com/euclio/fm) — A small, general-purpose file manager.
+
 ## License
 
 Licensed under either of
