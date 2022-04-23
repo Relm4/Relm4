@@ -1,7 +1,7 @@
 use syn::{
     parse::{Parse, ParseStream},
     spanned::Spanned,
-    token, Error, Result,
+    token, Error, Result, Token,
 };
 
 use crate::widgets::{PropertyFunc, WidgetFunc, WidgetFuncPath};
@@ -10,7 +10,7 @@ impl Parse for PropertyFunc {
     fn parse(input: ParseStream) -> Result<Self> {
         let path: WidgetFuncPath = input.parse()?;
 
-        if input.peek(token::Paren) {
+        if input.peek(token::Paren) || input.peek(Token![->]) {
             Ok(Self::Func(WidgetFunc::parse_with_path(input, path)?))
         } else {
             match path {

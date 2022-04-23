@@ -2,7 +2,9 @@ use syn::{spanned::Spanned, Error, Ident, Result};
 
 use crate::util;
 
-use super::{AssignPropertyAttr, PropertyFunc, PropertyName, WidgetFunc, WidgetFuncPath};
+use super::{
+    AssignPropertyAttr, PropertyFunc, PropertyName, WidgetAttr, WidgetFunc, WidgetFuncPath,
+};
 
 pub(super) fn attr_twice_error<T: Spanned>(attr: &T) -> Error {
     Error::new(attr.span(), "Cannot use the same attribute twice.")
@@ -45,6 +47,12 @@ impl WidgetFunc {
                 util::idents_to_snake_case(method.path.iter(), self.path.span())
             }
         }
+    }
+}
+
+impl WidgetAttr {
+    pub(super) fn is_local_attr(&self) -> bool {
+        matches!(self, Self::Local | Self::LocalRef)
     }
 }
 

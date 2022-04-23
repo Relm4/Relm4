@@ -1,3 +1,4 @@
+use proc_macro2::TokenStream as TokenStream2;
 use syn::{
     braced, parenthesized,
     parse::{ParseBuffer, ParseStream},
@@ -7,7 +8,9 @@ use syn::{
     Error, Expr, Ident, Result, Token,
 };
 
-use crate::widgets::{util::attr_twice_error, Attr, Attrs, Properties, Widget, WidgetFunc};
+use crate::widgets::{
+    util::attr_twice_error, Attr, Attrs, Properties, Widget, WidgetFunc, WidgetFuncPath,
+};
 use crate::{args::Args, widgets::WidgetAttr};
 
 type WidgetFuncInfo = (
@@ -25,15 +28,19 @@ impl Widget {
         attributes: Option<Attrs>,
         args: Option<Args<Expr>>,
     ) -> Result<Self> {
-        let attr = Self::process_attributes(attributes)?;
+        let (attr, doc_attr) = Self::process_attributes(attributes)?;
         // Check if first token is `mut`
         let mutable = input.parse().ok();
 
         // Look for name = Widget syntax
         let name_opt: Option<Ident> = if input.peek2(Token![=]) {
-            let name_opt = Some(input.parse()?);
-            let _token: Token![=] = input.parse()?;
-            name_opt
+            if attr.is_local_attr() {
+                return Err(input.error("When using the `local` or `local_ref` attributes you cannot rename the existing local variable."));
+            } else {
+                let name = input.parse()?;
+                let _token: Token![=] = input.parse()?;
+                Some(name)
+            }
         } else {
             None
         };
@@ -43,6 +50,8 @@ impl Widget {
         // Generate a name if no name was given.
         let name = if let Some(name) = name_opt {
             name
+        } else if attr.is_local_attr() {
+            Self::local_attr_name(&func)?
         } else {
             func.snake_case_name()
         };
@@ -55,6 +64,7 @@ impl Widget {
         };
 
         Ok(Widget {
+            doc_attr,
             attr,
             mutable,
             name,
@@ -73,18 +83,23 @@ impl Widget {
         func: WidgetFunc,
         attributes: Option<Attrs>,
     ) -> Result<Self> {
-        let attr = Self::process_attributes(attributes)?;
+        let (attr, doc_attr) = Self::process_attributes(attributes)?;
 
         let inner;
         let _token = braced!(inner in input);
         let properties = inner.parse()?;
 
         // Generate a name
-        let name = func.snake_case_name();
+        let name = if attr.is_local_attr() {
+            Self::local_attr_name(&func)?
+        } else {
+            func.snake_case_name()
+        };
 
         let ref_token = Some(And::default());
 
         Ok(Widget {
+            doc_attr,
             attr,
             mutable: None,
             name,
@@ -98,32 +113,68 @@ impl Widget {
         })
     }
 
-    fn process_attributes(attrs: Option<Attrs>) -> Result<WidgetAttr> {
+    fn process_attributes(attrs: Option<Attrs>) -> Result<(WidgetAttr, Option<TokenStream2>)> {
         if let Some(attrs) = attrs {
-            let mut local = false;
+            let mut widget_attr = WidgetAttr::None;
+            let mut doc_attr: Option<TokenStream2> = None;
 
             for attr in attrs.inner {
-                if let Attr::Local(_) = attr {
-                    if local {
-                        return Err(attr_twice_error(&attr));
-                    } else {
-                        local = true;
+                match attr {
+                    Attr::Local(_) => {
+                        if widget_attr == WidgetAttr::None {
+                            widget_attr = WidgetAttr::Local;
+                        } else {
+                            return Err(attr_twice_error(&attr));
+                        }
                     }
-                } else {
-                    return Err(Error::new(
-                        attr.span(),
-                        "Widgets can only have `local` or `local_ref` as attribute.",
-                    ));
+                    Attr::LocalRef(_) => {
+                        if widget_attr == WidgetAttr::None {
+                            widget_attr = WidgetAttr::LocalRef;
+                        } else {
+                            return Err(attr_twice_error(&attr));
+                        }
+                    }
+                    Attr::Doc(tokens) => {
+                        if let Some(doc_tokens) = &mut doc_attr {
+                            doc_tokens.extend(tokens);
+                        } else {
+                            doc_attr = Some(tokens);
+                        }
+                    }
+                    _ => {
+                        return Err(Error::new(
+                            attr.span(),
+                            "Widgets can only have docs and `local` or `local_ref` as attribute.",
+                        ));
+                    }
                 }
             }
 
-            Ok(if local {
-                WidgetAttr::Local
-            } else {
-                WidgetAttr::None
-            })
+            Ok((widget_attr, doc_attr))
         } else {
-            Ok(WidgetAttr::None)
+            Ok((WidgetAttr::None, None))
+        }
+    }
+
+    // Make sure that the widget function is just a single identifier of the
+    // local variable if a local attribute was set.
+    fn local_attr_name(func: &WidgetFunc) -> Result<Ident> {
+        let error_fn = |span| {
+            Error::new(
+                span,
+                "Expected identifier due to the `local` or `local_ref` attribute.",
+            )
+        };
+
+        match &func.path {
+            WidgetFuncPath::Path(path) => {
+                if let Some(name) = path.get_ident() {
+                    Ok(name.clone())
+                } else {
+                    Err(error_fn(path.span()))
+                }
+            }
+            WidgetFuncPath::Method(method) => Err(error_fn(method.span())),
         }
     }
 

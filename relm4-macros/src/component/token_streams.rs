@@ -20,6 +20,8 @@ pub(crate) struct TokenStreams {
     pub connect: TokenStream2,
     /// The tokens for the returned struct fields -> name,
     pub return_fields: TokenStream2,
+    /// For destructuring the widget struct field
+    pub destructure_fields: TokenStream2,
     /// The view tokens (watch! macro)
     pub update_view: TokenStream2,
 }
@@ -33,8 +35,13 @@ impl TopLevelWidget {
         generate_init_root_stream: bool,
     ) -> TokenStreams {
         let mut streams = TokenStreams::default();
-        self.inner
-            .init_token_generation(&mut streams, vis, model_type, relm4_path, generate_init_root_stream);
+        self.inner.init_token_generation(
+            &mut streams,
+            vis,
+            model_type,
+            relm4_path,
+            generate_init_root_stream,
+        );
 
         streams
     }
@@ -64,6 +71,7 @@ impl Widget {
 
         self.struct_fields_stream(&mut streams.struct_fields, vis);
         self.return_stream(&mut streams.return_fields);
+        self.destructure_stream(&mut streams.destructure_fields);
 
         // Rename the `root` to the actual widget name
         streams.rename_root.extend(quote_spanned! {
@@ -76,8 +84,9 @@ impl Widget {
             prop.connect_signals_stream(&mut streams.connect, &self.name, relm4_path);
             prop.update_view_stream(&mut streams.update_view, &self.name, relm4_path);
 
-            prop.return_stream(&mut streams.return_fields);
             prop.struct_fields_stream(&mut streams.struct_fields, vis, relm4_path);
+            prop.return_stream(&mut streams.return_fields);
+            prop.destructure_stream(&mut streams.destructure_fields);
 
             if let PropertyType::Widget(widget) = &prop.ty {
                 widget.generate_component_tokens_recursively(streams, vis, model_type, relm4_path);
@@ -104,8 +113,9 @@ impl Widget {
             prop.connect_signals_stream(&mut streams.connect, &self.name, relm4_path);
             prop.update_view_stream(&mut streams.update_view, &self.name, relm4_path);
 
-            prop.return_stream(&mut streams.return_fields);
             prop.struct_fields_stream(&mut streams.struct_fields, vis, relm4_path);
+            prop.return_stream(&mut streams.return_fields);
+            prop.destructure_stream(&mut streams.destructure_fields);
 
             if let PropertyType::Widget(widget) = &prop.ty {
                 widget.generate_component_tokens_recursively(streams, vis, model_type, relm4_path);
@@ -130,6 +140,7 @@ impl ReturnedWidget {
     ) {
         self.struct_fields_stream(&mut streams.struct_fields, vis);
         self.return_stream(&mut streams.return_fields);
+        self.destructure_stream(&mut streams.destructure_fields);
 
         for prop in &self.properties.properties {
             prop.init_stream(&mut streams.init);
@@ -137,8 +148,9 @@ impl ReturnedWidget {
             prop.connect_signals_stream(&mut streams.connect, &self.name, relm4_path);
             prop.update_view_stream(&mut streams.update_view, &self.name, relm4_path);
 
-            prop.return_stream(&mut streams.return_fields);
             prop.struct_fields_stream(&mut streams.struct_fields, vis, relm4_path);
+            prop.return_stream(&mut streams.return_fields);
+            prop.destructure_stream(&mut streams.destructure_fields);
 
             if let PropertyType::Widget(widget) = &prop.ty {
                 widget.generate_component_tokens_recursively(streams, vis, model_type, relm4_path);

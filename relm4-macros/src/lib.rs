@@ -7,7 +7,6 @@
 #![allow(clippy::single_component_path_imports)]
 
 use proc_macro::TokenStream;
-use quote::quote;
 use syn::parse_macro_input;
 
 mod additional_fields;
@@ -18,8 +17,8 @@ mod component;
 mod item_impl;
 mod macros;
 mod menu;
-mod widgets;
 mod view;
+mod widgets;
 
 #[macro_use]
 mod util;

@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned};
 
-use super::{PropertyName, ReturnedWidget, Widget, WidgetFunc};
+use super::{PropertyName, ReturnedWidget, Widget};
 
 /// Utility methods and functions.
 mod util;
@@ -9,12 +9,12 @@ mod util;
 /// Generate struct fields.
 mod struct_fields;
 
-/// Fields of the returned widget sturct.
+/// Fields of the returned widget struct.
 mod return_fields;
 
 mod assign;
 mod connect_signals;
-/// Connect to parent properties.
+mod destructure_fields;
 mod init;
 mod update_view;
 

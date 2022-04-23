@@ -21,6 +21,10 @@ impl WidgetFunc {
                 let ty_path = input.parse()?;
                 ty = Some(ty_path);
             }
+        } else if input.peek(Token! [->]) {
+            let _token: Token! [->] = input.parse()?;
+            let ty_path = input.parse()?;
+            ty = Some(ty_path);
         }
 
         Ok(WidgetFunc { path, args, ty })

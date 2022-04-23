@@ -26,11 +26,18 @@ impl Property {
 impl Widget {
     pub fn struct_fields_stream(&self, stream: &mut TokenStream2, vis: &Option<Visibility>) {
         let name = &self.name;
-        let ty = self.func.type_token_stream();
+        let ty = self.func_type_token_stream();
 
-        stream.extend(quote! {
-            #[allow(missing_docs)]
-            #vis #name: #ty,
+        stream.extend(if let Some(docs) = &self.doc_attr {
+            quote! {
+                #[doc = #docs]
+                #vis #name: #ty,
+            }
+        } else {
+            quote! {
+                #[allow(missing_docs)]
+                #vis #name: #ty,
+            }
         });
     }
 }

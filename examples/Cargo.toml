@@ -34,3 +34,7 @@ path = "settings_list.rs"
 [[example]]
 name = "progress"
 path = "progress.rs"
+
+[[example]]
+name = "macro_reference"
+path = "macro_reference.rs"

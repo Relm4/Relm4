@@ -66,7 +66,7 @@ pub(crate) fn generate_tokens(
 
     let widgets = &top_level_widget.inner;
     let _root_widget_name = &widgets.name;
-    let root_widget_type = widgets.func.type_token_stream();
+    let root_widget_type = widgets.func_type_token_stream();
 
     let token_streams::TokenStreams {
         init_root,
@@ -76,6 +76,7 @@ pub(crate) fn generate_tokens(
         assign,
         connect,
         return_fields,
+        destructure_fields,
         update_view,
     } = top_level_widget.generate_streams(&vis, &model_type, &relm4_path, true);
 
@@ -142,8 +143,9 @@ pub(crate) fn generate_tokens(
                 widgets: &mut Self::Widgets,
                 sender: &ComponentSender<Self>,
             ) {
+                #[allow(unused_variables)]
                 let Self::Widgets {
-                    #return_fields
+                    #destructure_fields
                     #additional_fields_return_stream
                 } = widgets;
 

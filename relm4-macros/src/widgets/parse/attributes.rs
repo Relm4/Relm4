@@ -1,3 +1,4 @@
+use quote::ToTokens;
 use syn::{
     parse::{Parse, ParseStream},
     spanned::Spanned,
@@ -18,6 +19,10 @@ impl Parse for Attrs {
                     if let Some(ident) = path.get_ident() {
                         if ident == "local" {
                             Attr::Local(ident.clone())
+                        } else if ident == "local_ref" {
+                            Attr::LocalRef(ident.clone())
+                        } else if ident == "root" {
+                            Attr::Root(ident.clone())
                         } else if ident == "watch" {
                             Attr::Watch(ident.clone())
                         } else if ident == "track" {
@@ -25,7 +30,10 @@ impl Parse for Attrs {
                         } else if ident == "iterate" {
                             Attr::Iterate(ident.clone())
                         } else {
-                            return Err(Error::new(ident.span(), "Unexpected attribute name."));
+                            return Err(Error::new(
+                                ident.span(),
+                                &format!("Unexpected attribute name `{}`.", path.to_token_stream()),
+                            ));
                         }
                     } else {
                         return Err(Error::new(path.span(), "Expected identifier."));
@@ -47,8 +55,13 @@ impl Parse for Attrs {
                                     "Expected string attribute value.",
                                 ));
                             }
+                        } else if ident == "doc" {
+                            Attr::Doc(lit.into_token_stream())
                         } else {
-                            return Err(Error::new(ident.span(), "Unexpected attribute name."));
+                            return Err(Error::new(
+                                ident.span(),
+                                &format!("Unexpected attribute name `{}`.", ident),
+                            ));
                         }
                     } else {
                         return Err(Error::new(path.span(), "Expected identifier."));

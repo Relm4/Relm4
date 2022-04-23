@@ -81,6 +81,7 @@ pub(super) enum WidgetFuncPath {
 }
 
 pub(super) struct Widget {
+    doc_attr: Option<TokenStream2>,
     attr: WidgetAttr,
     mutable: Option<Mut>,
     pub(super) name: Ident,
@@ -97,7 +98,7 @@ pub(super) struct Widget {
 pub(super) enum WidgetAttr {
     None,
     Local,
-    //LocalRef,
+    LocalRef,
 }
 
 pub(super) struct TopLevelWidget {
@@ -112,7 +113,10 @@ pub(super) struct ReturnedWidget {
 }
 
 pub(super) enum Attr {
+    Doc(TokenStream2),
     Local(Ident),
+    LocalRef(Ident),
+    Root(Ident),
     Iterate(Ident),
     Watch(Ident),
     Track(Ident, Option<Box<Expr>>),

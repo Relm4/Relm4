@@ -74,15 +74,11 @@ impl FactoryComponent<gtk::Box, AppMsg> for Counter {
     ) -> Self::Widgets {
         relm4::view! {
             #[local]
-            root -> gtk::Label {
-
-            }
-        }
-
-        relm4::view! {
-            label = gtk::Label {
-                set_label: &self.value.to_string(),
-                set_width_chars: 3,
+            root {
+                append: label = &gtk::Label {
+                    set_label: &self.value.to_string(),
+                    set_width_chars: 3,
+                }
             }
         }
 
@@ -131,7 +127,6 @@ impl FactoryComponent<gtk::Box, AppMsg> for Counter {
             }
         }
 
-        root.append(&label);
         root.append(&add_button);
         root.append(&remove_button);
         root.append(&move_up_button);

@@ -4,9 +4,7 @@ use syn::parse_macro_input;
 
 use crate::{component, util, widgets::TopLevelWidget};
 
-pub(super) fn generate_tokens(
-    input: TokenStream,
-) -> TokenStream {
+pub(super) fn generate_tokens(input: TokenStream) -> TokenStream {
     let top_level_widget = parse_macro_input!(input as TopLevelWidget);
     let relm4_path = util::default_relm4_path();
 
