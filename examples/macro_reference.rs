@@ -1,4 +1,4 @@
-use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
+use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, ToggleButtonExt, WidgetExt};
 use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, SimpleComponent, WidgetPlus};
 
 struct AppModel {
@@ -56,6 +56,17 @@ impl SimpleComponent for AppModel {
                     #[watch]
                     set_label: &format!("Counter: {}", model.counter),
                     set_margin_all: 5,
+                },
+
+                gtk::ToggleButton {
+                    set_label: "Counter is even",
+                    #[watch]
+                    #[block_signal(toggle_handler)]
+                    set_active: model.counter % 2 == 0,
+
+                    connect_toggled[sender] => move |_| {
+                        sender.input(AppMsg::Increment);
+                    } @toggle_handler,
                 },
 
                 #[local]

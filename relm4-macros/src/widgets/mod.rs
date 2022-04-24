@@ -41,6 +41,7 @@ pub(super) struct AssignProperty {
     optional_assign: bool,
     /// Iterate through elements to generate tokens
     iterative: bool,
+    block_signals: Vec<Ident>,
 }
 
 pub(super) struct SignalHandler {
@@ -126,6 +127,7 @@ pub(super) enum Attr {
     Iterate(Ident),
     Watch(Ident),
     Track(Ident, Option<Box<Expr>>),
+    BlockSignal(Ident, Vec<Ident>),
 }
 
 pub(super) struct Attrs {

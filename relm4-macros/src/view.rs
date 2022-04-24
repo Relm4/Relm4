@@ -23,8 +23,8 @@ pub(super) fn generate_tokens(input: TokenStream) -> TokenStream {
 
     let output = quote! {
         #init
-        #assign
         #connect
+        #assign
     };
     output.into()
 }

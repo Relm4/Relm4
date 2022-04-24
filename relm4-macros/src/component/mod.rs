@@ -97,8 +97,8 @@ pub(crate) fn generate_tokens(
         #rename_root
         #menus_stream
         #init_widgets
-        #assign
         #connect
+        #assign
     };
 
     let widgets_return_code = quote! {

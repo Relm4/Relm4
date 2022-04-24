@@ -1,13 +1,20 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote_spanned, ToTokens};
 use syn::{
-    parse::ParseStream, spanned::Spanned, Error, Expr, ExprCall, ExprField, Member, Result, Token,
+    parse::ParseStream, spanned::Spanned, Error, Expr, ExprCall, ExprField, Ident, Member, Result,
+    Token,
 };
 
 use crate::{
     args::Args,
     widgets::{util::attr_twice_error, AssignProperty, AssignPropertyAttr, Attr, Attrs},
 };
+
+struct ProcessedAttrs {
+    watch: AssignPropertyAttr,
+    iterative: bool,
+    block_signals: Vec<Ident>,
+}
 
 impl AssignProperty {
     pub(super) fn parse(
@@ -28,24 +35,27 @@ impl AssignProperty {
             }
         };
 
-        let (attr, iterative) = Self::process_attributes(&expr, attributes)?;
+        let ProcessedAttrs {
+            watch,
+            iterative,
+            block_signals,
+        } = Self::process_attributes(&expr, attributes)?;
 
         Ok(Self {
-            attr,
+            attr: watch,
             expr,
             args,
             optional_assign,
             iterative,
+            block_signals,
         })
     }
 
-    fn process_attributes(
-        assign_expr: &Expr,
-        attrs: Option<Attrs>,
-    ) -> Result<(AssignPropertyAttr, bool)> {
+    fn process_attributes(assign_expr: &Expr, attrs: Option<Attrs>) -> Result<ProcessedAttrs> {
         if let Some(attrs) = attrs {
             let mut iterative = false;
-            let mut watch_attr = AssignPropertyAttr::None;
+            let mut watch = AssignPropertyAttr::None;
+            let mut block_signals = Vec::with_capacity(0);
 
             for attr in attrs.inner {
                 match attr {
@@ -57,15 +67,15 @@ impl AssignProperty {
                         }
                     }
                     Attr::Watch(_) => {
-                        if watch_attr == AssignPropertyAttr::None {
-                            watch_attr = AssignPropertyAttr::Watch;
+                        if watch == AssignPropertyAttr::None {
+                            watch = AssignPropertyAttr::Watch;
                         } else {
                             return Err(attr_twice_error(&attr));
                         }
                     }
                     Attr::Track(_, ref expr) => {
-                        if watch_attr == AssignPropertyAttr::None {
-                            watch_attr = if let Some(expr) = expr {
+                        if watch == AssignPropertyAttr::None {
+                            watch = if let Some(expr) = expr {
                                 AssignPropertyAttr::Track(expr.to_token_stream())
                             } else {
                                 AssignPropertyAttr::Track(generate_tracker_from_expression(
@@ -76,6 +86,13 @@ impl AssignProperty {
                             return Err(attr_twice_error(&attr));
                         }
                     }
+                    Attr::BlockSignal(name, idents) => {
+                        if block_signals.is_empty() {
+                            block_signals = idents; 
+                        } else {
+                            return Err(attr_twice_error(&name));
+                        }
+                    }
                     _ => {
                         return Err(Error::new(
                             attr.span(),
@@ -84,9 +101,17 @@ impl AssignProperty {
                     }
                 }
             }
-            Ok((watch_attr, iterative))
+            Ok(ProcessedAttrs {
+                watch,
+                iterative,
+                block_signals,
+            })
         } else {
-            Ok((AssignPropertyAttr::None, false))
+            Ok(ProcessedAttrs {
+                watch: AssignPropertyAttr::None,
+                iterative: false,
+                block_signals: Vec::with_capacity(0),
+            })
         }
     }
 }

@@ -6,8 +6,8 @@ impl SignalHandler {
     pub(super) fn parse_with_args(input: ParseStream, args: Option<Args<Expr>>) -> Result<Self> {
         let closure = input.parse()?;
 
-        let handler_id = if input.peek(Token![->]) {
-            let _arrow: Token![->] = input.parse()?;
+        let handler_id = if input.peek(Token![@]) {
+            let _arrow: Token![@] = input.parse()?;
             input.parse()?
         } else {
             None

@@ -13,6 +13,7 @@ impl Spanned for Attr {
             Self::Iterate(ident) => ident.span(),
             Self::Watch(ident) => ident.span(),
             Self::Track(ident, _) => ident.span(),
+            Self::BlockSignal(ident, _) => ident.span(),
         }
     }
 }
