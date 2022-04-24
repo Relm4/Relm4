@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::quote_spanned;
-use syn::{spanned::Spanned, Ident, Path};
+use quote::{quote_spanned, ToTokens};
+use syn::{spanned::Spanned, Ident, Path, Expr};
 
 use crate::widgets::{AssignProperty, PropertyName};
 
@@ -14,9 +14,15 @@ impl AssignProperty {
     ) {
         let assign_fn = p_name.assign_fn_stream(w_name, relm4_path);
         let self_assign_args = p_name.assign_args_stream(w_name);
-        let assign = &self.expr;
         let args = self.args.as_ref();
         let span = p_name.span();
+
+        // Destructure tuples
+        let assign = if let Expr::Tuple(tuple) = &self.expr {
+            tuple.elems.to_token_stream()
+        } else {
+            self.expr.to_token_stream()
+        };
 
         stream.extend(match (self.optional_assign, self.iterative) {
             (false, false) => {

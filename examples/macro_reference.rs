@@ -65,6 +65,7 @@ impl SimpleComponent for AppModel {
                 #[local_ref]
                 local_ref_label -> gtk::Label {
                     set_opacity: 0.7,
+                    set_size_request: (40, 40),
                 },
             }
         }
