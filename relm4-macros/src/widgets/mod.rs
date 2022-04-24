@@ -102,6 +102,7 @@ pub(super) enum WidgetAttr {
 }
 
 pub(super) struct TopLevelWidget {
+    pub(super) is_root: bool,
     pub(super) inner: Widget,
 }
 

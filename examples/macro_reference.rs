@@ -77,7 +77,9 @@ impl SimpleComponent for AppModel {
         root: &Self::Root,
         sender: &ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let model = AppModel { counter: params.counter };
+        let model = AppModel {
+            counter: params.counter,
+        };
 
         let local_label = gtk::Label::new(Some("local_label"));
         let local_ref_label_value = gtk::Label::new(Some("local_ref_label"));
@@ -102,7 +104,5 @@ impl SimpleComponent for AppModel {
 
 fn main() {
     let app: RelmApp<AppModel> = RelmApp::new("relm4.test.simple");
-    app.run(AppInit {
-        counter: 0,
-    });
+    app.run(AppInit { counter: 0 });
 }

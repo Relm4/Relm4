@@ -2,7 +2,7 @@ use syn::{spanned::Spanned, Error, Ident, Result};
 
 use crate::util;
 
-use super::{
+use crate::widgets::{
     AssignPropertyAttr, PropertyFunc, PropertyName, WidgetAttr, WidgetFunc, WidgetFuncPath,
 };
 
