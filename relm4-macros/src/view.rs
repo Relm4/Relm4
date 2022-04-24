@@ -2,10 +2,10 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::parse_macro_input;
 
-use crate::{component, util, widgets::TopLevelWidget};
+use crate::{component, util, widgets::ViewWidgets};
 
 pub(super) fn generate_tokens(input: TokenStream) -> TokenStream {
-    let top_level_widget = parse_macro_input!(input as TopLevelWidget);
+    let view_widgets: ViewWidgets = parse_macro_input!(input);
     let relm4_path = util::default_relm4_path();
 
     // Use unit type
@@ -19,7 +19,7 @@ pub(super) fn generate_tokens(input: TokenStream) -> TokenStream {
         assign,
         connect,
         ..
-    } = top_level_widget.generate_streams(&None, &model_type, &relm4_path, false);
+    } = view_widgets.generate_streams(&None, &model_type, &relm4_path, true);
 
     let output = quote! {
         #init

@@ -6,26 +6,30 @@ use syn::{
 
 impl Parse for TopLevelWidget {
     fn parse(input: ParseStream) -> Result<Self> {
-        let mut attributes: Option<Attrs> = input.parse().ok();
+        let attributes: Option<Attrs> = input.parse().ok();
 
         // Look for #[root] attribute and remove it from the list if it exists
-        let is_root = if let Some(attributes) = &mut attributes {
-            let root_pos = attributes
-                .inner
-                .iter()
-                .position(|attr| matches!(attr, Attr::Root(_)));
-            if let Some(root_pos) = root_pos {
-                attributes.inner.swap_remove(root_pos);
-                true
-            } else {
-                false
+        let (attributes, root_attr) = if let Some(prev_attributes) = attributes {
+            let mut attributes = Attrs {
+                inner: Vec::with_capacity(prev_attributes.inner.len()),
+            };
+            let mut root_attr = None;
+            for attr in prev_attributes.inner.into_iter() {
+                match attr {
+                    Attr::Root(ident) => {
+                        // Save root attribute and don't push it to the new list
+                        root_attr = Some(ident);
+                    }
+                    _ => attributes.inner.push(attr),
+                }
             }
+            (Some(attributes), root_attr)
         } else {
-            false
+            (None, None)
         };
 
         Ok(Self {
-            is_root,
+            root_attr,
             inner: Widget::parse(input, attributes, None)?,
         })
     }

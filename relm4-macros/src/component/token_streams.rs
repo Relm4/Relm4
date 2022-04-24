@@ -1,8 +1,8 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote_spanned, ToTokens};
-use syn::{Path, Type, Visibility};
+use syn::{Error, Path, Type, Visibility};
 
-use crate::widgets::{PropertyType, ReturnedWidget, TopLevelWidget, Widget};
+use crate::widgets::{PropertyType, ReturnedWidget, TopLevelWidget, ViewWidgets, Widget};
 
 #[derive(Default)]
 pub(crate) struct TokenStreams {
@@ -26,24 +26,60 @@ pub(crate) struct TokenStreams {
     pub update_view: TokenStream2,
 }
 
-impl TopLevelWidget {
+impl ViewWidgets {
     pub fn generate_streams(
         &self,
         vis: &Option<Visibility>,
         model_type: &Type,
         relm4_path: &Path,
-        generate_init_root_stream: bool,
+        standalone_view: bool,
     ) -> TokenStreams {
         let mut streams = TokenStreams::default();
+
+        for top_level_widget in &self.top_level_widgets {
+            top_level_widget.generate_streams(
+                &mut streams,
+                vis,
+                model_type,
+                relm4_path,
+                standalone_view,
+            );
+        }
+
+        streams
+    }
+
+    /// Generate root type for `Root` parameter in `Component` impl
+    pub fn root_type(&self) -> TokenStream2 {
+        for top_level_widget in &self.top_level_widgets {
+            if top_level_widget.root_attr.is_some() {
+                return top_level_widget.inner.func_type_token_stream();
+            }
+        }
+        Error::new(
+            self.span,
+            "You need to specify the root widget using the `#[root]` attribute.",
+        )
+        .to_compile_error()
+    }
+}
+
+impl TopLevelWidget {
+    fn generate_streams(
+        &self,
+        streams: &mut TokenStreams,
+        vis: &Option<Visibility>,
+        model_type: &Type,
+        relm4_path: &Path,
+        standalone_view: bool,
+    ) {
         self.inner.init_token_generation(
-            &mut streams,
+            streams,
             vis,
             model_type,
             relm4_path,
-            generate_init_root_stream,
+            !standalone_view && self.root_attr.is_some(),
         );
-
-        streams
     }
 }
 

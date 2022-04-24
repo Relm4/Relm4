@@ -7,6 +7,7 @@ mod property_name;
 mod returned_widget;
 mod signal_handler;
 mod top_level_widget;
+mod view_widgets;
 mod widget;
 mod widget_func;
 mod widget_func_path;

@@ -43,7 +43,7 @@ pub(crate) fn generate_tokens(
     let outer_attrs = &data.outer_attrs;
 
     let Macros {
-        top_level_widget,
+        view_widgets,
         additional_fields,
         menus,
     } = match Macros::new(&data.macros, data.brace_span.unwrap()) {
@@ -64,10 +64,6 @@ pub(crate) fn generate_tokens(
         Err(err) => return err.to_compile_error(),
     };
 
-    let widgets = &top_level_widget.inner;
-    let _root_widget_name = &widgets.name;
-    let root_widget_type = widgets.func_type_token_stream();
-
     let token_streams::TokenStreams {
         init_root,
         rename_root,
@@ -78,7 +74,9 @@ pub(crate) fn generate_tokens(
         return_fields,
         destructure_fields,
         update_view,
-    } = top_level_widget.generate_streams(&vis, &model_type, &relm4_path, true);
+    } = view_widgets.generate_streams(&vis, &model_type, &relm4_path, false);
+
+    let root_widget_type = view_widgets.root_type();
 
     let impl_generics = data.impl_generics;
     let where_clause = data.where_clause;

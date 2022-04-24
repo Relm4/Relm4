@@ -1,4 +1,4 @@
-use proc_macro2::TokenStream as TokenStream2;
+use proc_macro2::{Span as Span2, TokenStream as TokenStream2};
 use syn::{
     punctuated::Punctuated, token, token::Mut, Expr, ExprClosure, Ident, MethodTurbofish, Path,
 };
@@ -9,6 +9,16 @@ mod gen;
 mod parse;
 mod span;
 mod util;
+
+pub(super) struct ViewWidgets {
+    pub(super) span: Span2,
+    pub(super) top_level_widgets: Vec<TopLevelWidget>,
+}
+
+pub(super) struct TopLevelWidget {
+    pub(super) root_attr: Option<Ident>,
+    pub(super) inner: Widget,
+}
 
 pub(super) enum PropertyType {
     Assign(AssignProperty),
@@ -99,11 +109,6 @@ pub(super) enum WidgetAttr {
     None,
     Local,
     LocalRef,
-}
-
-pub(super) struct TopLevelWidget {
-    pub(super) is_root: bool,
-    pub(super) inner: Widget,
 }
 
 pub(super) struct ReturnedWidget {

@@ -26,8 +26,9 @@ impl SimpleComponent for AppModel {
     type Output = ();
 
     view! {
-        gtk::Window {
-            set_title: Some("Simple app"),
+        #[root]
+        main_window = gtk::Window {
+            set_title: Some("Macro reference example"),
             set_default_width: 300,
             set_default_height: 100,
 
@@ -36,7 +37,7 @@ impl SimpleComponent for AppModel {
                 set_spacing: 5,
                 set_margin_all: 5,
 
-                gtk::Button {
+                append: inc_button = &gtk::Button {
                     set_label: "Increment",
                     connect_clicked[sender] => move |_| {
                         sender.input(AppMsg::Increment);
@@ -67,6 +68,20 @@ impl SimpleComponent for AppModel {
                     set_opacity: 0.7,
                     set_size_request: (40, 40),
                 },
+            }
+        },
+        gtk::Window {
+            set_title: Some("Another window"),
+            set_default_width: 300,
+            set_default_height: 100,
+            set_transient_for: Some(&main_window),
+            // Empty args
+            hide: (),
+            #[watch]
+            set_visible: model.counter == 42,
+
+            gtk::Label {
+                set_label: "You made it to 42!",
             }
         }
     }
@@ -103,6 +118,6 @@ impl SimpleComponent for AppModel {
 }
 
 fn main() {
-    let app: RelmApp<AppModel> = RelmApp::new("relm4.test.simple");
+    let app: RelmApp<AppModel> = RelmApp::new("relm4.test.macro_reference");
     app.run(AppInit { counter: 0 });
 }

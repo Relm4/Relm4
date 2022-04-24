@@ -3,10 +3,10 @@ use syn::{spanned::Spanned, Error, Macro, Result};
 
 use crate::additional_fields::AdditionalFields;
 use crate::menu::Menus;
-use crate::widgets::TopLevelWidget;
+use crate::widgets::ViewWidgets;
 
 pub(super) struct Macros {
-    pub top_level_widget: TopLevelWidget,
+    pub view_widgets: ViewWidgets,
     pub additional_fields: Option<AdditionalFields>,
     pub menus: Option<Menus>,
 }
@@ -14,7 +14,7 @@ pub(super) struct Macros {
 impl Macros {
     pub fn new(macros: &[Macro], span: Span) -> Result<Self> {
         let mut additional_fields = None;
-        let mut top_level_widget = None;
+        let mut view_widgets = None;
         let mut menus = None;
 
         for mac in macros {
@@ -32,13 +32,13 @@ impl Macros {
                         mac.span().unwrap().into(),
                         "widget macro is empty",
                     ));
-                } else if top_level_widget.is_some() {
+                } else if view_widgets.is_some() {
                     return Err(Error::new(
                         mac.span().unwrap().into(),
                         "widget macro defined multiple times",
                     ));
                 }
-                top_level_widget = Some(syn::parse_macro_input::parse(tokens.into())?);
+                view_widgets = Some(syn::parse_macro_input::parse(tokens.into())?);
             } else if ident == "additional_fields" {
                 if additional_fields.is_some() {
                     return Err(Error::new(
@@ -71,7 +71,7 @@ impl Macros {
         }
 
         Ok(Macros {
-            top_level_widget: top_level_widget
+            view_widgets: view_widgets
                 .ok_or_else(|| Error::new(span.into(), "No view macro in impl block"))?,
             additional_fields,
             menus,

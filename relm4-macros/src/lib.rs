@@ -1,9 +1,5 @@
-#![doc(
-    html_logo_url = "https://raw.githubusercontent.com/AaronErhardt/relm4/main/assets/Relm_logo.svg"
-)]
-#![doc(
-    html_favicon_url = "https://raw.githubusercontent.com/AaronErhardt/relm4/main/assets/Relm_logo.svg"
-)]
+#![doc(html_logo_url = "https://relm4.org/icons/relm4_logo.svg")]
+#![doc(html_favicon_url = "https://relm4.org/icons/relm4_org.svg")]
 #![allow(clippy::single_component_path_imports)]
 
 use proc_macro::TokenStream;
@@ -213,7 +209,7 @@ pub fn menu(input: TokenStream) -> TokenStream {
 ///         current_dir = mut &String {
 ///             push_str: path,
 ///         },
-///         env: args!("HOME", "/home/relm4"),
+///         env: ("HOME", "/home/relm4"),
 ///     }
 /// }
 ///

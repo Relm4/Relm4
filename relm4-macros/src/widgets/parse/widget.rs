@@ -144,7 +144,7 @@ impl Widget {
                     _ => {
                         return Err(Error::new(
                             attr.span(),
-                            "Widgets can only have docs and `local` or `local_ref` as attribute.",
+                            "Widgets can only have docs and `local`, `local_ref` or `root` as attribute.",
                         ));
                     }
                 }
