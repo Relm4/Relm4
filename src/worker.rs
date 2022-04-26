@@ -66,6 +66,11 @@ where
     pub fn send(&self, msg: Model::Msg) -> Result<(), std::sync::mpsc::SendError<Model::Msg>> {
         self.sender.send(msg)
     }
+
+    /// Get a sender to send messages to this component.
+    pub fn sender(&self) -> Sender<Model::Msg> {
+        self.sender.clone()
+    }
 }
 
 impl<Model, ParentModel> RelmWorker<Model, ParentModel>
@@ -206,5 +211,10 @@ where
     /// This can be used by the parent to send messages to this worker.
     pub fn send(&self, msg: Model::Msg) -> Result<(), std::sync::mpsc::SendError<Model::Msg>> {
         self.sender.send(msg)
+    }
+
+    /// Get a sender to send messages to this component.
+    pub fn sender(&self) -> Sender<Model::Msg> {
+        self.sender.clone()
     }
 }
