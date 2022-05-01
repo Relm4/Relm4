@@ -61,6 +61,10 @@ pub use relm4_macros::*;
 /// Re-export of libadwaita
 pub use adw;
 
+#[cfg(feature = "libpanel")]
+/// Re-export of libpanel
+pub use panel;
+
 /// Sets a custom global stylesheet.
 ///
 /// # Panics
