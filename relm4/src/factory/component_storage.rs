@@ -2,9 +2,10 @@ use crate::factory::{DynamicIndex, FactoryBuilder, FactoryComponent, FactoryHand
 use crate::Sender;
 
 use std::cell::{Ref, RefMut};
+use std::fmt::Debug;
 use std::rc::Rc;
 
-#[allow(missing_debug_implementations)]
+#[derive(Debug)]
 pub(super) enum ComponentStorage<Widget, C, ParentMsg>
 where
     Widget: FactoryView,

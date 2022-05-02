@@ -22,9 +22,9 @@ use std::collections::hash_map::DefaultHasher;
 use std::collections::VecDeque;
 use std::hash::{Hash, Hasher};
 
-#[allow(missing_debug_implementations)]
 /// A container similar to [`VecDeque`] that can be used to store
 /// data associated with components that implement [`FactoryComponent`].
+#[derive(Debug)]
 pub struct FactoryVecDeque<Widget, C, ParentMsg>
 where
     Widget: FactoryView,
@@ -41,11 +41,14 @@ where
     uid_counter: u16,
 }
 
+#[allow(dead_code)] // As of 1.60 dead code analysis erroneously reports the Debug impl as dead
+#[derive(Debug)]
 struct RenderedState {
     uid: u16,
     widget_hash: u64,
 }
 
+#[derive(Debug)]
 struct ModelStateValue {
     index: DynamicIndex,
     uid: u16,

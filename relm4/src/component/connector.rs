@@ -4,12 +4,12 @@
 
 use super::{Component, ComponentController, Controller, StateWatcher};
 use crate::{Receiver, Sender};
+use std::fmt::{self, Debug};
 use std::rc::Rc;
 
 /// Contains the post-launch input sender and output receivers with the root widget.
 ///
 /// The receiver can be separated from the `Fairing` by choosing a method for handling it.
-#[allow(missing_debug_implementations)]
 pub struct Connector<C: Component> {
     /// The models and widgets maintained by the component.
     pub(super) state: Rc<StateWatcher<C>>,
@@ -101,5 +101,20 @@ impl<C: Component> ComponentController<C> for Connector<C> {
 
     fn widget(&self) -> &C::Root {
         &self.widget
+    }
+}
+
+impl<C: Component> Debug for Connector<C>
+where
+    C: Debug,
+    C::Widgets: Debug,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Connector")
+            .field("state", &self.state)
+            .field("widget", &self.widget)
+            .field("sender", &self.sender)
+            .field("receiver", &self.receiver)
+            .finish()
     }
 }

@@ -3,12 +3,12 @@ use super::{handle::FactoryHandle, DynamicIndex, FactoryComponent, FactoryView};
 use crate::{shutdown, OnDestroy, Receiver, Sender};
 
 use std::cell::RefCell;
+use std::fmt;
 use std::rc::Rc;
 
 use async_oneshot::oneshot;
 use futures::FutureExt;
 
-#[allow(missing_debug_implementations)]
 pub(super) struct FactoryBuilder<Widget, C, ParentMsg>
 where
     Widget: FactoryView,
@@ -190,5 +190,23 @@ where
             notifier: Sender(notifier),
             runtime_id,
         }
+    }
+}
+
+impl<Widget, C, ParentMsg> fmt::Debug for FactoryBuilder<Widget, C, ParentMsg>
+where
+    Widget: FactoryView,
+    C: FactoryComponent<Widget, ParentMsg>,
+    ParentMsg: 'static,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("FactoryBuilder")
+            .field("data", &self.data)
+            .field("root_widget", &self.root_widget)
+            .field("input_tx", &self.input_tx)
+            .field("input_rx", &self.input_rx)
+            .field("output_tx", &self.output_tx)
+            .field("output_rx", &self.output_rx)
+            .finish()
     }
 }
