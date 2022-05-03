@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: MIT or Apache-2.0
 
 use crate::*;
+use std::fmt::{self, Debug};
 use std::rc::Rc;
 
 /// Shared behavior of component controller types.
@@ -23,7 +24,6 @@ pub trait ComponentController<C: Component> {
 }
 
 /// Controls the component from afar.
-#[allow(missing_debug_implementations)]
 pub struct Controller<C: Component> {
     /// The models and widgets maintained by the component.
     pub(super) state: Rc<StateWatcher<C>>,
@@ -46,5 +46,19 @@ impl<C: Component> ComponentController<C> for Controller<C> {
 
     fn widget(&self) -> &C::Root {
         &self.widget
+    }
+}
+
+impl<C: Component> Debug for Controller<C>
+where
+    C: Debug,
+    C::Widgets: Debug,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("Controller")
+            .field("state", &self.state)
+            .field("widget", &self.widget)
+            .field("sender", &self.sender)
+            .finish()
     }
 }

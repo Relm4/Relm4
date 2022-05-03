@@ -1,10 +1,11 @@
 use super::{Component, ComponentParts};
+
 use std::cell::{Ref, RefCell, RefMut};
+use std::fmt::{self, Debug};
 
 /// Keeps track of a components model and view.
 ///
 /// Borrowing the model and view will notify the component to check for updates.
-#[allow(missing_debug_implementations)]
 pub struct StateWatcher<C: Component> {
     /// The models and widgets maintained by the component.
     pub(super) state: RefCell<ComponentParts<C>>,
@@ -21,5 +22,18 @@ impl<C: Component> StateWatcher<C> {
     pub fn get_mut(&self) -> RefMut<'_, ComponentParts<C>> {
         let _ = self.notifier.send(());
         self.state.borrow_mut()
+    }
+}
+
+impl<C: Component> Debug for StateWatcher<C>
+where
+    C: Debug,
+    C::Widgets: Debug,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("StateWatcher")
+            .field("state", &self.state)
+            .field("notifier", &self.notifier)
+            .finish()
     }
 }

@@ -131,6 +131,7 @@ pub(crate) fn generate_tokens(
 
     quote! {
         #[allow(dead_code)]
+        #[derive(Debug)]
         #outer_attrs
         #visibility struct #ty {
             #struct_fields
