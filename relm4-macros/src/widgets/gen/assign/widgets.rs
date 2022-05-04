@@ -31,8 +31,15 @@ impl Widget {
         let assign_fn = p_name.assign_fn_stream(w_name, relm4_path);
         let self_assign_args = p_name.assign_args_stream(w_name);
         let assign = self.widget_assignment();
-        let args = self.args.as_ref();
         let span = p_name.span();
+
+        let args = if let Some(args) = self.args.as_ref() {
+            Some(quote! {
+                , #args
+            })
+        } else {
+            None
+        };
 
         stream.extend(if let Some(ret_widget) = &self.returned_widget {
             let return_assign_stream = ret_widget.return_assign_tokens();

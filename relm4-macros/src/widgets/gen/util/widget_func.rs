@@ -22,22 +22,25 @@ impl Widget {
             }
             match &func.path {
                 WidgetFuncPath::Path(path) => {
-                    if self.args.is_some() {
+                    // ARGS ARE HANDLED INCORRECTLY
+                    // if self.args.is_some() {
+                    //     dbg!(&self.args.as_ref().unwrap().inner);
                         // If for example gtk::Box::new() was used, ignore ::new()
                         // and use gtk::Box as type.
-                        let len = path.segments.len();
-                        if len == 0 {
-                            unreachable!()
-                        } else if len == 1 {
-                            return Error::new(func.span().unwrap().into(),
-                                &format!("You need to specify a type of your function. Use this instead: {}() -> Type {{ ...", 
-                                path.to_token_stream())).into_compile_error();
-                        } else {
-                            (&path.segments, len - 1)
-                        }
-                    } else {
+                    //     let len = path.segments.len();
+                    //     dbg!(len);
+                    //     if len == 0 {
+                    //         unreachable!()
+                    //     } else if len == 1 {
+                    //         return Error::new(func.span().unwrap().into(),
+                    //             &format!("You need to specify a type of your function. Use this instead: {}() -> Type {{ ...",
+                    //             path.to_token_stream())).into_compile_error();
+                    //     } else {
+                    //         (&path.segments, len - 1)
+                    //     }
+                    // } else {
                         (&path.segments, path.segments.len())
-                    }
+                    // }
                 }
                 WidgetFuncPath::Method(method) => {
                     // Method calls need an explicit type

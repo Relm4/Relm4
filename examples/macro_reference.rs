@@ -1,4 +1,6 @@
-use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, ToggleButtonExt, WidgetExt};
+use gtk::prelude::{
+    BoxExt, ButtonExt, GridExt, GtkWindowExt, OrientableExt, ToggleButtonExt, WidgetExt,
+};
 use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, SimpleComponent, WidgetPlus};
 
 struct AppModel {
@@ -50,6 +52,14 @@ impl SimpleComponent for AppModel {
                         sender.input(AppMsg::Decrement);
                     }
                 },
+
+                //gtk::Dialog::builder().header_bar(true).build() {
+                gtk::Grid {
+                    attach[1, 1, 1, 1] = &gtk::Label {
+                        set_label: "Grid works!",
+                    }
+                },
+
 
                 /// Counter label
                 gtk::Label {
