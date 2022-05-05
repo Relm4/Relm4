@@ -20,6 +20,9 @@ pub struct ComponentSenderInner<C: Component> {
     /// Emits component outputs
     pub output: Sender<C::Output>,
 
+    /// Stops the event loop when triggered.
+    pub(crate) killswitch: flume::Sender<()>,
+
     pub(crate) shutdown: ShutdownReceiver,
 }
 
@@ -35,6 +38,16 @@ impl<C: Component> ComponentSenderInner<C> {
         crate::spawn(async move {
             cmd(sender, recipient).await;
         });
+    }
+
+    /// Requests to stop this component's event loop.
+    pub fn stop(&self) {
+        let _ = self.killswitch.send(());
+    }
+
+    /// Provides access to the killswitch sender.
+    pub fn stop_sender(&self) -> &flume::Sender<()> {
+        &self.killswitch
     }
 
     /// Emit an input to the component.
@@ -55,5 +68,28 @@ impl<C: Component> ComponentSenderInner<C> {
     /// Equivalent to `&self.output`.
     pub fn output_sender(&self) -> &Sender<C::Output> {
         &self.output
+    }
+}
+
+// GTK integration
+impl<C: Component> ComponentSenderInner<C> {
+    /// Attaches the stop signal to a widget.
+    pub fn stop_with_widget(self: &Arc<Self>, widget: &dyn AsRef<gtk::Widget>) {
+        use gtk::prelude::WidgetExt;
+        let this = self.clone();
+        widget
+            .as_ref()
+            .connect_destroy(move |_| this.stop());
+    }
+
+    /// Attaches the stop signal to a native dialog
+    pub fn stop_with_native_dialog(self: &Arc<Self>, dialog: &dyn AsRef<gtk::NativeDialog>) {
+        use gtk::prelude::NativeDialogExt;
+        let this = self.clone();
+        dialog.as_ref().connect_response(move |_, response| {
+            if let gtk::ResponseType::DeleteEvent = response {
+                this.stop();
+            }
+        });
     }
 }

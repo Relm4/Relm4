@@ -6,7 +6,6 @@ use std::rc::Rc;
 
 use super::FactoryView;
 use crate::Sender;
-use gtk::glib;
 
 pub(super) struct FactoryHandle<Widget, C: FactoryComponent<Widget, ParentMsg>, ParentMsg>
 where
@@ -18,7 +17,9 @@ where
     pub(super) returned_widget: Widget::ReturnedWidget,
     pub(super) input: Sender<C::Input>,
     pub(super) notifier: Sender<()>,
-    pub(super) runtime_id: Rc<RefCell<Option<glib::SourceId>>>,
+
+    /// Kills the event loop of this component on drop.
+    pub(super) burner: crate::component::CompBurner,
 }
 
 impl<Widget, C, ParentMsg> fmt::Debug for FactoryHandle<Widget, C, ParentMsg>

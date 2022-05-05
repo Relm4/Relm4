@@ -2,7 +2,7 @@
 // Copyright 2022 System76 <info@system76.com>
 // SPDX-License-Identifier: MIT or Apache-2.0
 
-use super::{Component, ComponentParts, ComponentSenderInner, Connector, OnDestroy, StateWatcher};
+use super::{Component, ComponentParts, ComponentSenderInner, Connector, StateWatcher};
 use crate::shutdown;
 use crate::RelmContainerExt;
 use async_oneshot::oneshot;
@@ -88,12 +88,20 @@ impl<C: Component> ComponentBuilder<C> {
         // Notifies the component's child commands that it is now deceased.
         let (death_notifier, death_recipient) = shutdown::channel();
 
+        // The source ID of the component's service will be sent through this once the root
+        // widget has been iced, which will give the component one last chance to say goodbye.
+        let (mut burn_notifier, burn_recipient) = oneshot::<gtk::glib::SourceId>();
+
+        // Receives the kill event from the component sender.
+        let (killswitch_tx, killswitch_rx) = flume::bounded(1);
+
         // Encapsulates the senders used by component methods.
         let component_sender = Arc::new(ComponentSenderInner {
             command: cmd_tx,
             input: input_tx.clone(),
             output: output_tx.clone(),
             shutdown: death_recipient,
+            killswitch: killswitch_tx.clone(),
         });
 
         // Constructs the initial model and view with the initial payload.
@@ -101,10 +109,6 @@ impl<C: Component> ComponentBuilder<C> {
             state: RefCell::new(C::init(payload, &root, &component_sender)),
             notifier,
         });
-
-        // The source ID of the component's service will be sent through this once the root
-        // widget has been iced, which will give the component one last chance to say goodbye.
-        let (mut burn_notifier, burn_recipient) = oneshot::<gtk::glib::SourceId>();
 
         let watcher_ = watcher.clone();
 
@@ -179,13 +183,15 @@ impl<C: Component> ComponentBuilder<C> {
             }
         });
 
-        // When the root widget is destroyed, the spawned service will be removed.
-        root.on_destroy(move || {
-            let _ = burn_notifier.send(id);
+        crate::spawn_local(async move {
+            if let Ok(()) = killswitch_rx.recv_async().await {
+                let _ = burn_notifier.send(id);
+            }
         });
 
         // Give back a type for controlling the component service.
         Connector {
+            killswitch: killswitch_tx,
             state: watcher,
             widget: root,
             sender: input_tx,

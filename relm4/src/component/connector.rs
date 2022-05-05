@@ -22,6 +22,9 @@ pub struct Connector<C: Component> {
 
     /// The outputs being received by the component.
     pub(super) receiver: Receiver<C::Output>,
+
+    /// Allows the caller to stop the event loop remotely.
+    pub(super) killswitch: flume::Sender<()>,
 }
 
 impl<C: Component> Connector<C> {
@@ -32,18 +35,20 @@ impl<C: Component> Connector<C> {
         transform: F,
     ) -> Controller<C> {
         let Connector {
+            killswitch,
+            receiver,
+            sender,
             state,
             widget,
-            sender,
-            receiver,
         } = self;
 
         crate::spawn_local(receiver.forward(sender_.clone(), transform));
 
         Controller {
+            killswitch,
+            sender,
             state,
             widget,
-            sender,
         }
     }
 
@@ -53,9 +58,10 @@ impl<C: Component> Connector<C> {
         mut func: F,
     ) -> Controller<C> {
         let Connector {
+            killswitch,
+            sender,
             state,
             widget,
-            sender,
             mut receiver,
         } = self;
 
@@ -67,30 +73,37 @@ impl<C: Component> Connector<C> {
         });
 
         Controller {
+            killswitch,
+            sender,
             state,
             widget,
-            sender,
         }
     }
 
     /// Ignore outputs from the component and take the handle.
     pub fn detach(self) -> Controller<C> {
         let Self {
+            killswitch,
+            sender,
             state,
             widget,
-            sender,
             ..
         } = self;
 
         Controller {
+            killswitch,
+            sender,
             state,
             widget,
-            sender,
         }
     }
 }
 
 impl<C: Component> ComponentController<C> for Connector<C> {
+    fn killswitch(&self) -> &flume::Sender<()> {
+        &self.killswitch
+    }
+
     fn sender(&self) -> &Sender<C::Input> {
         &self.sender
     }
