@@ -150,6 +150,7 @@ fn main() {
 
 - [fm](https://github.com/euclio/fm) — A small, general-purpose file manager.
 - [Done](https://github.com/edfloreshz/done) - A simple and versatile to do app.
+- [Reovim](https://github.com/songww/reovim) - GUI frontend for neovim.
 
 ## License
 
