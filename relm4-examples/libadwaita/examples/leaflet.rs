@@ -12,7 +12,7 @@ pub enum AppMsg {
     UnFolded,
     Folded,
     GoNext,
-    GoBack
+    GoBack,
 }
 
 impl Model for AppModel {
@@ -118,9 +118,9 @@ impl Widgets<AppModel, ()> for AppWidgets {
                     self.go_next_button.set_visible(false);
                     sidebar_header.set_show_start_title_buttons(false);
                     sidebar_header.set_show_end_title_buttons(false);
-                },
+                }
                 AppMsg::GoNext => self.leaflet.set_visible_child(&self.content),
-                AppMsg::GoBack => self.leaflet.set_visible_child(&self.sidebar)
+                AppMsg::GoBack => self.leaflet.set_visible_child(&self.sidebar),
             }
         }
     }
