@@ -1,9 +1,7 @@
 //! Reusable and easily configurable open dialog component.
 //!
 //! **[Example implementation](https://github.com/AaronErhardt/relm4/blob/next/examples/file_dialogs.rs)**
-use gtk::prelude::{
-    Cast, DialogExt, FileChooserExt, FileExt, GtkWindowExt, ListModelExt, WidgetExt,
-};
+use gtk::prelude::{Cast, FileChooserExt, FileExt, ListModelExt, NativeDialogExt};
 use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent};
 
 use std::path::PathBuf;
@@ -81,7 +79,7 @@ impl SimpleComponent for OpenDialog {
     type Output = OpenDialogResponse;
 
     view! {
-        gtk::FileChooserDialog {
+        gtk::FileChooserNative {
             set_action: if settings.folder_mode {
                 gtk::FileChooserAction::SelectFolder
             } else {
@@ -91,8 +89,8 @@ impl SimpleComponent for OpenDialog {
             set_select_multiple: settings.select_multiple,
             set_create_folders: settings.create_folders,
             set_modal: settings.is_modal,
-            add_button(gtk::ResponseType::Accept): &settings.accept_label,
-            add_button(gtk::ResponseType::Cancel): &settings.cancel_label,
+            set_accept_label: Some(&settings.accept_label),
+            set_cancel_label: Some(&settings.cancel_label),
             add_filter: iterate!(&settings.filters),
 
             set_visible: watch!(model.visible),

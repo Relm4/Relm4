@@ -91,7 +91,7 @@ impl SimpleComponent for App {
         sender: &ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let open_dialog = OpenDialog::builder()
-            .transient_for(root)
+            .update_root(|dialog| dialog.set_transient_for(Some(root)))
             .launch(OpenDialogSettings::default())
             .forward(sender.input_sender(), |response| match response {
                 OpenDialogResponse::Accept(path) => Input::OpenResponse(path),
@@ -99,7 +99,7 @@ impl SimpleComponent for App {
             });
 
         let save_dialog = SaveDialog::builder()
-            .transient_for(root)
+            .update_root(|dialog| dialog.set_transient_for(Some(root)))
             .launch(SaveDialogSettings::default())
             .forward(sender.input_sender(), |response| match response {
                 SaveDialogResponse::Accept(path) => Input::SaveResponse(path),

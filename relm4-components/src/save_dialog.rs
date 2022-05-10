@@ -1,7 +1,7 @@
 //! Reusable and easily configurable save dialog component.
 //!
 //! **[Example implementation](https://github.com/AaronErhardt/relm4/blob/next/examples/file_dialogs.rs)**
-use gtk::prelude::{DialogExt, FileChooserExt, FileExt, GtkWindowExt, WidgetExt};
+use gtk::prelude::{FileChooserExt, FileExt, NativeDialogExt};
 use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent};
 
 use std::path::PathBuf;
@@ -71,13 +71,13 @@ impl SimpleComponent for SaveDialog {
     type Output = SaveDialogResponse;
 
     view! {
-        gtk::FileChooserDialog {
+        gtk::FileChooserNative {
             set_action: gtk::FileChooserAction::Save,
 
             set_create_folders: settings.create_folders,
             set_modal: settings.is_modal,
-            add_button(gtk::ResponseType::Accept): &settings.accept_label,
-            add_button(gtk::ResponseType::Cancel): &settings.cancel_label,
+            set_accept_label: Some(&settings.accept_label),
+            set_cancel_label: Some(&settings.cancel_label),
             add_filter: iterate!(&settings.filters),
 
             set_current_name: watch!(&model.current_name),
