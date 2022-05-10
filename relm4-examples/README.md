@@ -36,7 +36,7 @@ To know how to update the widgets the `FactoryPrototype` trait is used to define
 + future: A small app that demonstrates how futures can be executed in relm4 by using the surf crate to download HTML from websites.
 Sadly this doesn't work for tokio (async-std and similar are fine though) but you can still spawn a thread that runs your asynchronous code inside a tokio runtime.
 
-+ list: A simple app using `gtk::ListView` to efficiently render large list. It's very close to the example in the [gtk4-rs book](https://gtk-rs.org/gtk4-rs/git/book/lists.html).
++ list: A simple app using `gtk::ListView` to efficiently render large list. It's very close to the example in the [gtk4-rs book](https://gtk-rs.org/gtk4-rs/git/book/list_widgets.html).
 
 + tokio: An app using the tokio-rt feature and an `AsyncRelmWorker` to efficiently fetch favicons and HTML text from websites.
 Note that by default delays for the HTTP-requests are enabled that makes UI updates better visible.
