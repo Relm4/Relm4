@@ -45,11 +45,11 @@ pub trait OnDestroy {
     fn on_destroy<F: FnOnce() + 'static>(&self, func: F);
 }
 
-impl<T: AsRef<gtk::Widget>> OnDestroy for T {
+impl<T: AsRef<gtk::glib::Object>> OnDestroy for T {
     fn on_destroy<F: FnOnce() + 'static>(&self, func: F) {
-        use gtk::prelude::WidgetExt;
+        use gtk::prelude::ObjectExt;
         let func = std::cell::RefCell::new(Some(func));
-        self.as_ref().connect_destroy(move |_| {
+        self.as_ref().add_weak_ref_notify_local(move || {
             if let Some(func) = func.take() {
                 func();
             }
