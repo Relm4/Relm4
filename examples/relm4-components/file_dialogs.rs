@@ -95,7 +95,9 @@ impl SimpleComponent for App {
             .launch(OpenDialogSettings::default())
             .forward(sender.input_sender(), |response| match response {
                 OpenDialogResponse::Accept(path) => Input::OpenResponse(path),
-                _ => Input::ShowMessage(String::from("File opening was cancelled")),
+                OpenDialogResponse::Cancel => {
+                    Input::ShowMessage(String::from("File opening was cancelled"))
+                }
             });
 
         let save_dialog = SaveDialog::builder()

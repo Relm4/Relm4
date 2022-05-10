@@ -4,7 +4,57 @@
 use gtk::prelude::{Cast, FileChooserExt, FileExt, ListModelExt, NativeDialogExt};
 use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent};
 
-use std::path::PathBuf;
+use std::{marker::PhantomData, path::PathBuf};
+
+/// A component that prompts the user to choose a file.
+///
+/// The user would be able to select a single file. If you'd like to select multiple, use [`OpenDialogMulti`].
+pub type OpenDialog = OpenDialogInner<SingleSelection>;
+
+/// A component that prompts the user to choose a file.
+///
+/// The user would be able to select multiple files. If you'd like to select just one, use [`OpenDialog`].
+pub type OpenDialogMulti = OpenDialogInner<MultiSelection>;
+
+/// Type of selection used for the open dialog.
+pub trait Select {
+    /// Output of the selection.
+    type Selection;
+    /// Whether to select multiple files inside the dialog.
+    const SELECT_MULTIPLE: bool;
+    /// Construct selection from the file chooser.
+    fn select(dialog: &gtk::FileChooserNative) -> Self::Selection;
+}
+
+/// A type of selection where only one file can be chosen at a time.
+pub struct SingleSelection;
+
+impl Select for SingleSelection {
+    type Selection = PathBuf;
+    const SELECT_MULTIPLE: bool = false;
+    fn select(dialog: &gtk::FileChooserNative) -> Self::Selection {
+        dialog
+            .file()
+            .expect("No file selected")
+            .path()
+            .expect("No path")
+    }
+}
+
+/// A type of selection where multiple types can be chosen at a time.
+pub struct MultiSelection;
+impl Select for MultiSelection {
+    type Selection = Vec<PathBuf>;
+    const SELECT_MULTIPLE: bool = true;
+    fn select(dialog: &gtk::FileChooserNative) -> Self::Selection {
+        let list_model = dialog.files();
+        (0..list_model.n_items())
+            .filter_map(|index| list_model.item(index))
+            .filter_map(|obj| obj.downcast::<gtk::gio::File>().ok())
+            .filter_map(|file| file.path())
+            .collect()
+    }
+}
 
 #[derive(Clone, Debug)]
 /// Configuration for the open dialog component
@@ -14,8 +64,6 @@ pub struct OpenDialogSettings {
     /// You should be aware the user might be able to select folders
     /// even if this setting is set to `false`. This is a technical limitation of gtk.
     pub folder_mode: bool,
-    /// Allow selection of multiple items.
-    pub select_multiple: bool,
     /// Label for cancel button
     pub cancel_label: String,
     /// Label for accept button
@@ -32,7 +80,6 @@ impl Default for OpenDialogSettings {
     fn default() -> Self {
         OpenDialogSettings {
             folder_mode: false,
-            select_multiple: false,
             accept_label: String::from("Open"),
             cancel_label: String::from("Cancel"),
             create_folders: true,
@@ -43,9 +90,10 @@ impl Default for OpenDialogSettings {
 }
 
 #[derive(Debug)]
-/// A model for the open dialog component
-pub struct OpenDialog {
+/// Model for the open dialog component
+pub struct OpenDialogInner<S: Select> {
     visible: bool,
+    _phantom: PhantomData<S>,
 }
 
 /// Messages that can be sent to the open dialog component
@@ -57,26 +105,24 @@ pub enum OpenDialogMsg {
     Hide,
 }
 
-/// Messages that can be sent to the open dialog component
+/// Messages that can be sent from the open dialog component
 #[derive(Debug, Clone)]
-pub enum OpenDialogResponse {
-    /// User clicked accept button. Requires `select_multiple` to be `true`.
-    AcceptMultiple(Vec<PathBuf>),
-    /// User clicked accept button. Requires `select_multiple` to be `false` (default behavior).
-    Accept(PathBuf),
+pub enum OpenDialogResponse<S: Select> {
+    /// User clicked accept button.
+    Accept(S::Selection),
     /// User clicked cancel button.
     Cancel,
 }
 
 /// Widgets of the open dialog component.
 #[relm4::component(pub)]
-impl SimpleComponent for OpenDialog {
+impl<S: Select + 'static> SimpleComponent for OpenDialogInner<S> {
     type Widgets = OpenDialogWidgets;
 
     type InitParams = OpenDialogSettings;
 
     type Input = OpenDialogMsg;
-    type Output = OpenDialogResponse;
+    type Output = OpenDialogResponse<S>;
 
     view! {
         gtk::FileChooserNative {
@@ -86,7 +132,7 @@ impl SimpleComponent for OpenDialog {
                 gtk::FileChooserAction::Open
             },
 
-            set_select_multiple: settings.select_multiple,
+            set_select_multiple: S::SELECT_MULTIPLE,
             set_create_folders: settings.create_folders,
             set_modal: settings.is_modal,
             set_accept_label: Some(&settings.accept_label),
@@ -98,28 +144,8 @@ impl SimpleComponent for OpenDialog {
             connect_response(sender) => move |dialog, res_ty| {
                 match res_ty {
                     gtk::ResponseType::Accept => {
-                        match settings.select_multiple {
-                            true => {
-                                let list_model = dialog.files();
-                                let paths = (0..list_model.n_items())
-                                    .filter_map(|index| list_model.item(index))
-                                    .filter_map(|obj| obj.downcast::<gtk::gio::File>().ok())
-                                    .filter_map(|file| file.path()).collect();
-                                sender.output(OpenDialogResponse::AcceptMultiple(paths));
-                                sender.input(OpenDialogMsg::Hide);
-                                return;
-                            },
-                            false => {
-                                if let Some(file) = dialog.file() {
-                                    if let Some(path) = file.path() {
-                                        sender.output(OpenDialogResponse::Accept(path));
-                                        sender.input(OpenDialogMsg::Hide);
-                                        return;
-                                    }
-                                }
-                               sender.output(OpenDialogResponse::Cancel);
-                            }
-                        }
+                        let selection = S::select(dialog);
+                        sender.output(OpenDialogResponse::Accept(selection));
                     }
                     _ => sender.output(OpenDialogResponse::Cancel),
                 }
@@ -134,7 +160,10 @@ impl SimpleComponent for OpenDialog {
         root: &Self::Root,
         sender: &ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let model = OpenDialog { visible: false };
+        let model = OpenDialogInner {
+            visible: false,
+            _phantom: PhantomData::default(),
+        };
 
         let widgets = view_output!();
 
