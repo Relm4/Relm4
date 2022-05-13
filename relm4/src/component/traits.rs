@@ -99,12 +99,11 @@ pub trait SimpleComponent: Sized + 'static {
     /// Initializes the root widget
     fn init_root() -> Self::Root;
 
-    /// Creates the initial model and view, docking it into the component.
-    fn init(
-        params: Self::InitParams,
-        root: &Self::Root,
-        sender: &ComponentSender<Self>,
-    ) -> ComponentParts<Self>;
+    /// Creates the initial model.
+    fn init(params: Self::InitParams, sender: &ComponentSender<Self>) -> Self;
+
+    /// Initialized the widgets.
+    fn init_view(root: &Self::Root, sender: &ComponentSender<Self>) -> Self::Widgets;
 
     /// Processes inputs received by the component.
     #[allow(unused)]
@@ -144,7 +143,10 @@ where
         root: &Self::Root,
         sender: &ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        C::init(params, root, sender)
+        let model = C::init(params, sender);
+        let widgets = C::init_view(root, sender);
+
+        ComponentParts { model, widgets }
     }
 
     fn update(&mut self, message: Self::Input, sender: &ComponentSender<Self>) {
