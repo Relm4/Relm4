@@ -31,6 +31,11 @@ Built on top of this foundation, Relm4 makes developing more idiomatic, simpler 
 + 📖 **[The Relm4 book](https://relm4.org/book/)**
 + 📜 **[Rust documentation](https://relm4.org/docs/stable/relm4/)**
 
+## Need help?
+If you find yourself having trouble with anything, feel free to ask questions at:
+- [GitHub Discussions](https://github.com/Relm4/Relm4/discussions)
+- [Matrix](https://matrix.to/#/#relm4:matrix.org)
+
 ## Dependencies
 
 Relm4 depends on GTK4: [How to install GTK4](https://www.gtk.org/docs/installations/).
