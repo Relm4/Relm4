@@ -12,6 +12,7 @@
 #![doc(
     html_favicon_url = "https://raw.githubusercontent.com/AaronErhardt/relm4/main/assets/Relm_logo.svg"
 )]
+#![cfg_attr(dox, feature(doc_cfg))]
 
 pub mod actions;
 mod app;
