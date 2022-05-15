@@ -28,6 +28,11 @@ where
 
     /// Create a Relm4 application.
     pub fn with_app(app: Application) -> Self {
+        gtk::init().unwrap();
+
+        #[cfg(feature = "libadwaita")]
+        adw::init();
+
         let bridge = ComponentBuilder::<C>::new();
 
         Self { bridge, app }
