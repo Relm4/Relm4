@@ -79,7 +79,7 @@ impl Component for App {
                 set_margin_end: 12,
                 set_orientation: gtk::Orientation::Horizontal,
 
-                &gtk::Box {
+                gtk::Box {
                     set_spacing: 4,
                     set_hexpand: true,
                     set_valign: gtk::Align::Center,
@@ -97,7 +97,7 @@ impl Component for App {
 
                 append: button = &gtk::Button {
                     set_label: "Compute",
-                    connect_clicked(sender) => move |_| {
+                    connect_clicked[sender] => move |_| {
                         sender.input(Input::Compute);
                     }
                 }
