@@ -65,6 +65,8 @@ impl SimpleComponent for AppModel {
                     .selectable(true)
                     .build(),
 
+                gtk::Label::new(Some("Constructors work!")),
+
                 /// Counter label
                 gtk::Label {
                     #[watch]
