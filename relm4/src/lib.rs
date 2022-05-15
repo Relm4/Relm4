@@ -65,6 +65,12 @@ pub use adw;
 /// Re-export of libpanel
 pub use panel;
 
+#[cfg(feature = "libadwaita")]
+type Application = adw::Application;
+
+#[cfg(not(feature = "libadwaita"))]
+type Application = gtk::Application;
+
 /// Sets a custom global stylesheet.
 ///
 /// # Panics
