@@ -60,7 +60,12 @@ impl Widget {
 impl WidgetFunc {
     /// Get the tokens of the widget's function.
     pub fn func_token_stream(&self) -> TokenStream2 {
-        let WidgetFunc { path, args, method_chain, .. } = &self;
+        let WidgetFunc {
+            path,
+            args,
+            method_chain,
+            ..
+        } = &self;
 
         let mut stream = if let Some(args) = args {
             quote! { #path(#args) }
@@ -71,7 +76,7 @@ impl WidgetFunc {
         };
 
         if let Some(method_chain) = method_chain {
-            stream.extend(quote!{
+            stream.extend(quote! {
                 .#method_chain
             })
         }

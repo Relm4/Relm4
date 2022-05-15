@@ -6,18 +6,6 @@ use syn::{
 
 use std::sync::atomic::{AtomicU16, Ordering};
 
-macro_rules! parse_func {
-    ($name:ident, $func:ident, $tokens:ident) => {
-        if $name.is_some() {
-            return Err(::syn::Error::new(
-                $func.span().unwrap().into(),
-                &format!("Method `{}` defined multiple times", stringify!($name)),
-            ));
-        }
-        $name = Some($tokens);
-    };
-}
-
 pub(crate) fn idents_to_snake_case<'a, I: Iterator<Item = &'a Ident>>(
     idents: I,
     span: Span2,

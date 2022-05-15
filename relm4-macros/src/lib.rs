@@ -19,9 +19,6 @@ mod widgets;
 #[macro_use]
 mod util;
 
-// Hack to make the macro visible for other parts of this crate.
-pub(crate) use parse_func;
-
 use attrs::Attrs;
 use item_impl::ItemImpl;
 use menu::Menus;

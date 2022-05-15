@@ -20,7 +20,7 @@ impl WidgetFunc {
         } else if let Some(args) = &self.args {
             Err(Error::new(
                 args.span(),
-                "Can't use arguments in property assignments",
+                "Can't use function arguments in property assignments",
             ))
         } else {
             Ok(if let Some(ident) = self.path.get_ident() {
