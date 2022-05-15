@@ -21,10 +21,7 @@ enum CounterOutput {
     MoveDown(DynamicIndex),
 }
 
-struct CounterWidgets {
-    label: gtk::Label,
-}
-
+#[relm4::factory]
 impl FactoryComponent<gtk::Box, AppMsg> for Counter {
     type Widgets = CounterWidgets;
 
@@ -33,7 +30,6 @@ impl FactoryComponent<gtk::Box, AppMsg> for Counter {
     type Input = CounterMsg;
     type Output = CounterOutput;
 
-    type Root = gtk::Box;
     type Command = ();
     type CommandOutput = ();
 
@@ -45,14 +41,57 @@ impl FactoryComponent<gtk::Box, AppMsg> for Counter {
         })
     }
 
-    fn init_root(&self) -> Self::Root {
-        relm4::view! {
-            root = gtk::Box {
-                set_orientation: gtk::Orientation::Horizontal,
-                set_spacing: 10,
+    view! {
+        root = gtk::Box {
+            set_orientation: gtk::Orientation::Horizontal,
+            set_spacing: 10,
+
+            #[name = "label"]
+            gtk::Label {
+                set_label: &self.value.to_string(),
+                set_width_chars: 3,
+            },
+
+            #[name = "add_button"]
+            gtk::Button {
+                set_label: "+",
+                connect_clicked[input] => move |_| {
+                    input.send(CounterMsg::Increment)
+                }
+            },
+
+            #[name = "remove_button"]
+            gtk::Button {
+                set_label: "-",
+                connect_clicked[input] => move |_| {
+                    input.send(CounterMsg::Decrement)
+                }
+            },
+
+            #[name = "move_up_button"]
+            gtk::Button {
+                set_label: "Up",
+                connect_clicked[output, index] => move |_| {
+                    output.send(CounterOutput::MoveUp(index.clone()))
+                }
+            },
+
+            #[name = "move_down_button"]
+            gtk::Button {
+                set_label: "Down",
+                connect_clicked[output, index] => move |_| {
+                    output.send(CounterOutput::MoveDown(index.clone()))
+                }
+            },
+
+            #[name = "to_front_button"]
+            gtk::Button {
+                set_label: "To start",
+                connect_clicked[output, index] => move |_| {
+                    output.send(CounterOutput::SendFront(index.clone()))
+                }
             }
         }
-        root
     }
 
     fn init_model(
@@ -72,68 +111,9 @@ impl FactoryComponent<gtk::Box, AppMsg> for Counter {
         input: &Sender<Self::Input>,
         output: &Sender<Self::Output>,
     ) -> Self::Widgets {
-        relm4::view! {
-            #[local]
-            root {
-                append: label = &gtk::Label {
-                    set_label: &self.value.to_string(),
-                    set_width_chars: 3,
-                }
-            }
-        }
+        let widgets = view_output!();
 
-        relm4::view! {
-            add_button = gtk::Button {
-                set_label: "+",
-                connect_clicked[input] => move |_| {
-                    input.send(CounterMsg::Increment)
-                }
-            }
-        }
-
-        relm4::view! {
-            remove_button = gtk::Button {
-                set_label: "-",
-                connect_clicked[input] => move |_| {
-                    input.send(CounterMsg::Decrement)
-                }
-            }
-        }
-
-        relm4::view! {
-            move_up_button = gtk::Button {
-                set_label: "Up",
-                connect_clicked[output, index] => move |_| {
-                    output.send(CounterOutput::MoveUp(index.clone()))
-                }
-            }
-        }
-
-        relm4::view! {
-            move_down_button = gtk::Button {
-                set_label: "Down",
-                connect_clicked[output, index] => move |_| {
-                    output.send(CounterOutput::MoveDown(index.clone()))
-                }
-            }
-        }
-
-        relm4::view! {
-            to_front_button = gtk::Button {
-                set_label: "To start",
-                connect_clicked[output, index] => move |_| {
-                    output.send(CounterOutput::SendFront(index.clone()))
-                }
-            }
-        }
-
-        root.append(&add_button);
-        root.append(&remove_button);
-        root.append(&move_up_button);
-        root.append(&move_down_button);
-        root.append(&to_front_button);
-
-        CounterWidgets { label }
+        widgets
     }
 
     fn update(
@@ -153,12 +133,7 @@ impl FactoryComponent<gtk::Box, AppMsg> for Counter {
         None
     }
 
-    fn update_view(
-        &self,
-        widgets: &mut Self::Widgets,
-        _input: &Sender<Self::Input>,
-        _output: &Sender<Self::Output>,
-    ) {
+    fn pre_view() {
         widgets.label.set_label(&self.value.to_string());
     }
 }

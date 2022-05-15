@@ -17,10 +17,11 @@ pub(crate) fn generate_tokens(
     relm4_path: Path,
     data: ItemImpl,
 ) -> TokenStream2 {
-    if PathArguments::None != data.trait_.segments.last().unwrap().arguments {
+    let last_segment = data.trait_.segments.last().unwrap();
+    if PathArguments::None != last_segment.arguments {
         return Error::new(
-            data.trait_.segments.span(),
-            "Expected no generic parameters for model and parent model",
+            last_segment.arguments.span(),
+            "Expected no generic parameters",
         )
         .to_compile_error();
     };
@@ -33,6 +34,7 @@ pub(crate) fn generate_tokens(
         init_params,
         input,
         output,
+        other_types,
     } = match types::Types::new(data.types) {
         Ok(types) => types,
         Err(err) => return err.to_compile_error(),
@@ -124,6 +126,8 @@ pub(crate) fn generate_tokens(
         impl #impl_generics #trait_ for #ty #where_clause {
             type Root = #root_widget_type;
             type Widgets = #widgets_type;
+
+            #(#other_types)*
 
             #init_params
             #input

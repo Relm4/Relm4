@@ -87,6 +87,15 @@ impl Parse for Attrs {
                             }
                         } else if ident == "doc" {
                             Attr::Doc(lit.into_token_stream())
+                        } else if ident == "name" {
+                            if let Lit::Str(string) = lit {
+                                Attr::Name(ident.clone(), string.parse()?)
+                            } else {
+                                return Err(Error::new(
+                                    lit.span(),
+                                    "Expected string attribute value.",
+                                ));
+                            }
                         } else {
                             return Err(Error::new(
                                 ident.span(),

@@ -26,7 +26,7 @@ impl Widget {
         attributes: Option<Attrs>,
         args: Option<Args<Expr>>,
     ) -> Result<Self> {
-        let (attr, doc_attr) = Self::process_attributes(attributes)?;
+        let (attr, doc_attr, new_name) = Self::process_attributes(attributes)?;
         // Check if first token is `mut`
         let mutable = input.parse().ok();
 
@@ -45,8 +45,24 @@ impl Widget {
 
         let (wrapper, ref_token, deref_token, func, properties) = Self::parse_widget_func(input)?;
 
+        // Make sure that the name is only defined one.
+        let mut name_set = name_opt.is_some();
+        if new_name.is_some() {
+            if name_set {
+                return Err(Error::new(name_opt.unwrap().span(), "Widget name is specified more than once (attribute, assignment or local attribute)."));
+            } else {
+                name_set = true;
+            }
+        } 
+
+        if attr.is_local_attr() && name_set {
+            return Err(Error::new(input.span(), "Widget name is specified more than once (attribute, assignment or local attribute)."));
+        }
+
         // Generate a name if no name was given.
         let name = if let Some(name) = name_opt {
+            name
+        } else if let Some(name) = new_name {
             name
         } else if attr.is_local_attr() {
             Self::local_attr_name(&func)?
@@ -81,7 +97,7 @@ impl Widget {
         func: WidgetFunc,
         attributes: Option<Attrs>,
     ) -> Result<Self> {
-        let (attr, doc_attr) = Self::process_attributes(attributes)?;
+        let (attr, doc_attr, new_name) = Self::process_attributes(attributes)?;
 
         let properties = if input.peek(Token![,]) {
             Properties::default()
@@ -90,9 +106,18 @@ impl Widget {
             let _token = braced!(inner in input);
             inner.parse()?
         };
-
+        
+        // Make sure that the name is only defined one.
+        if attr.is_local_attr() {
+            if let Some(name) = &new_name {
+                return Err(Error::new(name.span(), "Widget name is specified more than once (attribute, assignment or local attribute)."));
+            }
+        } 
+        //
         // Generate a name
-        let name = if attr.is_local_attr() {
+        let name = if let Some(name) = new_name {
+            name
+        } else if attr.is_local_attr() {
             Self::local_attr_name(&func)?
         } else {
             func.snake_case_name()
@@ -115,10 +140,11 @@ impl Widget {
         })
     }
 
-    fn process_attributes(attrs: Option<Attrs>) -> Result<(WidgetAttr, Option<TokenStream2>)> {
+    fn process_attributes(attrs: Option<Attrs>) -> Result<(WidgetAttr, Option<TokenStream2>, Option<Ident>)> {
         if let Some(attrs) = attrs {
             let mut widget_attr = WidgetAttr::None;
             let mut doc_attr: Option<TokenStream2> = None;
+            let mut name = None;
 
             for attr in attrs.inner {
                 match attr {
@@ -143,6 +169,13 @@ impl Widget {
                             doc_attr = Some(tokens);
                         }
                     }
+                    Attr::Name(_, ref name_value) => {
+                        if name.is_some() {
+                            return Err(attr_twice_error(&attr));
+                        } else {
+                            name = Some(name_value.clone());
+                        }
+                    }
                     _ => {
                         return Err(Error::new(
                             attr.span(),
@@ -152,9 +185,9 @@ impl Widget {
                 }
             }
 
-            Ok((widget_attr, doc_attr))
+            Ok((widget_attr, doc_attr, name))
         } else {
-            Ok((WidgetAttr::None, None))
+            Ok((WidgetAttr::None, None, None))
         }
     }
 

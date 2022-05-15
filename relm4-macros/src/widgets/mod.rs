@@ -120,6 +120,7 @@ pub(super) enum Attr {
     Watch(Ident),
     Track(Ident, Option<Box<Expr>>),
     BlockSignal(Ident, Vec<Ident>),
+    Name(Ident, Ident),
 }
 
 pub(super) struct Attrs {

@@ -18,6 +18,7 @@ mod widgets;
 
 #[macro_use]
 mod util;
+mod factory;
 
 use attrs::Attrs;
 use item_impl::ItemImpl;
@@ -109,6 +110,17 @@ pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let data = parse_macro_input!(input as ItemImpl);
 
     component::generate_tokens(visibility, relm4_path, data).into()
+}
+
+#[proc_macro_attribute]
+pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
+    let Attrs {
+        visibility,
+        relm4_path,
+    } = parse_macro_input!(attributes as Attrs);
+    let data = parse_macro_input!(input as ItemImpl);
+
+    factory::generate_tokens(visibility, relm4_path, data).into()
 }
 
 // Macro that implements [`relm4::factory::FactoryPrototype`](https://aaronerhardt.github.io/docs/relm4/relm4/factory/trait.FactoryPrototype.html)
