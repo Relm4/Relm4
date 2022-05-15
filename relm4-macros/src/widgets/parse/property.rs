@@ -6,8 +6,7 @@ use syn::{
 };
 
 use crate::widgets::{
-    AssignProperty, Attrs, Property, PropertyFunc, PropertyName, PropertyType, SignalHandler,
-    Widget,
+    AssignProperty, Attrs, Property, PropertyName, PropertyType, SignalHandler, Widget, WidgetFunc,
 };
 
 impl Parse for Property {
@@ -20,11 +19,10 @@ impl Parse for Property {
         };
 
         // Parse path, ident or function
-        let func: PropertyFunc = input.parse()?;
+        let func: WidgetFunc = input.parse()?;
 
-        // `gtk::Box { ... }` or `data.init_widget() -> gtk::Button { ... }`
-        if input.peek(token::Brace) || input.peek(Token![->]) {
-            let func = func.into_widget_func();
+        // `gtk::Box { ... }`, `data.init_widget() -> gtk::Button { ... }` or `gtk::Box,`
+        if input.peek(token::Brace) || input.peek(Token![->]) || input.peek(Token![,]) {
             let ty =
                 PropertyType::Widget(Widget::parse_for_container_ext(input, func, attributes)?);
 

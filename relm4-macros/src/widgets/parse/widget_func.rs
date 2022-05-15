@@ -2,13 +2,13 @@ use syn::{
     parenthesized,
     parse::{Parse, ParseStream},
     punctuated::Punctuated,
-    token, Result, Token,
+    token, Path, Result, Token,
 };
 
-use crate::widgets::{WidgetFunc, WidgetFuncPath};
+use crate::widgets::WidgetFunc;
 
 impl WidgetFunc {
-    pub(super) fn parse_with_path(input: ParseStream, path: WidgetFuncPath) -> Result<Self> {
+    pub(super) fn parse_with_path(input: ParseStream, path: Path) -> Result<Self> {
         let mut args = None;
         let mut ty = None;
 
@@ -27,7 +27,19 @@ impl WidgetFunc {
             ty = Some(ty_path);
         }
 
-        Ok(WidgetFunc { path, args, ty })
+        let method_chain = if input.peek(token::Dot) {
+            let _dot: token::Dot = input.parse()?;
+            Some(Punctuated::parse_separated_nonempty(input)?)
+        } else {
+            None
+        };
+
+        Ok(WidgetFunc {
+            path,
+            args,
+            method_chain,
+            ty,
+        })
     }
 }
 

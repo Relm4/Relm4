@@ -27,7 +27,7 @@ impl AssignProperty {
             }
             AssignPropertyAttr::Track(track_stream) => {
                 let mut assign_stream = TokenStream2::new();
-                self.assign_stream(&mut &mut assign_stream, p_name, w_name, relm4_path);
+                self.assign_stream(&mut assign_stream, p_name, w_name, relm4_path);
 
                 stream.extend(quote_spanned! {
                     track_stream.span() => if #track_stream {

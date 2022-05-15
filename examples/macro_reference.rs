@@ -60,6 +60,10 @@ impl SimpleComponent for AppModel {
                     }
                 },
 
+                gtk::Label::builder()
+                    .label("Builder pattern works!")
+                    .selectable(true)
+                    .build(),
 
                 /// Counter label
                 gtk::Label {

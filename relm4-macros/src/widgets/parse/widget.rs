@@ -8,9 +8,7 @@ use syn::{
     Error, Expr, Ident, Result, Token,
 };
 
-use crate::widgets::{
-    util::attr_twice_error, Attr, Attrs, Properties, Widget, WidgetFunc, WidgetFuncPath,
-};
+use crate::widgets::{util::attr_twice_error, Attr, Attrs, Properties, Widget, WidgetFunc};
 use crate::{args::Args, widgets::WidgetAttr};
 
 type WidgetFuncInfo = (
@@ -85,9 +83,13 @@ impl Widget {
     ) -> Result<Self> {
         let (attr, doc_attr) = Self::process_attributes(attributes)?;
 
-        let inner;
-        let _token = braced!(inner in input);
-        let properties = inner.parse()?;
+        let properties = if input.peek(Token![,]) {
+            Properties::default()
+        } else {
+            let inner;
+            let _token = braced!(inner in input);
+            inner.parse()?
+        };
 
         // Generate a name
         let name = if attr.is_local_attr() {
@@ -159,22 +161,13 @@ impl Widget {
     // Make sure that the widget function is just a single identifier of the
     // local variable if a local attribute was set.
     fn local_attr_name(func: &WidgetFunc) -> Result<Ident> {
-        let error_fn = |span| {
-            Error::new(
-                span,
+        if let Some(name) = func.path.get_ident() {
+            Ok(name.clone())
+        } else {
+            Err(Error::new(
+                func.path.span(),
                 "Expected identifier due to the `local` or `local_ref` attribute.",
-            )
-        };
-
-        match &func.path {
-            WidgetFuncPath::Path(path) => {
-                if let Some(name) = path.get_ident() {
-                    Ok(name.clone())
-                } else {
-                    Err(error_fn(path.span()))
-                }
-            }
-            WidgetFuncPath::Method(method) => Err(error_fn(method.span())),
+            ))
         }
     }
 

@@ -50,12 +50,6 @@ pub(super) struct SignalHandler {
     args: Option<Args<Expr>>,
 }
 
-pub(super) enum PropertyFunc {
-    Ident(Ident),
-    Path(Path),
-    Func(WidgetFunc),
-}
-
 pub enum PropertyName {
     Ident(Ident),
     Path(Path),
@@ -68,6 +62,7 @@ pub(super) struct Property {
     pub(super) ty: PropertyType,
 }
 
+#[derive(Default)]
 pub(super) struct Properties {
     pub(super) properties: Vec<Property>,
 }
@@ -76,19 +71,16 @@ pub(super) struct Properties {
 ///
 /// This might be a real function or just something like `gtk::Label`.
 pub(super) struct WidgetFunc {
-    path: WidgetFuncPath,
+    path: Path,
     args: Option<Punctuated<Expr, token::Comma>>,
+    method_chain: Option<Punctuated<WidgetFuncMethod, token::Dot>>,
     ty: Option<Path>,
 }
 
-pub(super) struct WidgetMethodCall {
-    path: Punctuated<Ident, token::Dot>,
+pub(super) struct WidgetFuncMethod {
+    ident: Ident,
     turbofish: Option<MethodTurbofish>,
-}
-
-pub(super) enum WidgetFuncPath {
-    Path(Path),
-    Method(WidgetMethodCall),
+    args: Option<Punctuated<Expr, token::Comma>>,
 }
 
 pub(super) struct Widget {

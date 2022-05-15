@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote_spanned, ToTokens, quote};
+use quote::{quote, quote_spanned, ToTokens};
 use syn::{spanned::Spanned, Expr, Ident, Path};
 
 use crate::widgets::{AssignProperty, PropertyName};
@@ -16,13 +16,11 @@ impl AssignProperty {
         let self_assign_args = p_name.assign_args_stream(w_name);
         let span = p_name.span();
 
-        let args = if let Some(args) = self.args.as_ref() {
-            Some(quote! {
+        let args = self.args.as_ref().map(|args| {
+            quote! {
                 , #args
-            })
-        } else {
-            None
-        };
+            }
+        });
 
         // Destructure tuples
         let assign = if let Expr::Tuple(tuple) = &self.expr {
@@ -34,8 +32,8 @@ impl AssignProperty {
         let (block_stream, unblock_stream) = if self.block_signals.is_empty() {
             (None, None)
         } else {
-            let mut block_stream= TokenStream2::default();
-            let mut unblock_stream= TokenStream2::default();
+            let mut block_stream = TokenStream2::default();
+            let mut unblock_stream = TokenStream2::default();
             for signal_handler in &self.block_signals {
                 block_stream.extend(quote! {
                     {
@@ -72,7 +70,7 @@ impl AssignProperty {
             }
             (false, true) => {
                 quote_spanned! {
-                    span => 
+                    span =>
                         #block_stream
                         for __elem in #assign {
                             #assign_fn(#self_assign_args __elem #args);
@@ -82,7 +80,7 @@ impl AssignProperty {
             }
             (true, true) => {
                 quote_spanned! {
-                    span => 
+                    span =>
                         #block_stream
                         for __elem in #assign {
                             if let Some(__p_assign) = __elem {

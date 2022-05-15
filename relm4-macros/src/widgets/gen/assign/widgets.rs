@@ -33,13 +33,11 @@ impl Widget {
         let assign = self.widget_assignment();
         let span = p_name.span();
 
-        let args = if let Some(args) = self.args.as_ref() {
-            Some(quote! {
-                , #args
-            })
-        } else {
-            None
-        };
+        let args = self.args.as_ref().map(|args| {
+            quote! {
+               , #args
+            }
+        });
 
         stream.extend(if let Some(ret_widget) = &self.returned_widget {
             let return_assign_stream = ret_widget.return_assign_tokens();

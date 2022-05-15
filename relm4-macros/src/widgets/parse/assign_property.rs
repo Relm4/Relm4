@@ -88,7 +88,7 @@ impl AssignProperty {
                     }
                     Attr::BlockSignal(name, idents) => {
                         if block_signals.is_empty() {
-                            block_signals = idents; 
+                            block_signals = idents;
                         } else {
                             return Err(attr_twice_error(&name));
                         }
