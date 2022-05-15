@@ -1,9 +1,7 @@
 use quote::ToTokens;
-use syn::{
-    parse::{Parse, ParseStream},
-    spanned::Spanned,
-    Attribute, Error, Lit, Meta, MetaList, MetaNameValue, NestedMeta, Result,
-};
+use syn::parse::{Parse, ParseStream};
+use syn::spanned::Spanned;
+use syn::{Attribute, Error, Lit, Meta, MetaList, MetaNameValue, NestedMeta, Result};
 
 use crate::widgets::{Attr, Attrs};
 

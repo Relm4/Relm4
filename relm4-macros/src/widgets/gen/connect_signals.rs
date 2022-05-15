@@ -1,7 +1,9 @@
-use crate::widgets::{Property, PropertyName, PropertyType, SignalHandler};
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote_spanned;
-use syn::{spanned::Spanned, Expr, Ident, Path};
+use syn::spanned::Spanned;
+use syn::{Expr, Ident, Path};
+
+use crate::widgets::{Property, PropertyName, PropertyType, SignalHandler};
 
 impl Property {
     pub fn connect_signals_stream(

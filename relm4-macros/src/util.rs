@@ -1,10 +1,9 @@
-use proc_macro2::Span as Span2;
-use syn::{
-    punctuated::Punctuated, token::Colon2, Ident, Path, PathArguments, PathSegment, Token, Type,
-    TypePath,
-};
-
 use std::sync::atomic::{AtomicU16, Ordering};
+
+use proc_macro2::Span as Span2;
+use syn::punctuated::Punctuated;
+use syn::token::Colon2;
+use syn::{Ident, Path, PathArguments, PathSegment, Token, Type, TypePath};
 
 pub(crate) fn idents_to_snake_case<'a, I: Iterator<Item = &'a Ident>>(
     idents: I,

@@ -1,10 +1,7 @@
 use proc_macro2::Span as Span2;
-use syn::{
-    braced, parenthesized,
-    parse::{Parse, ParseStream},
-    punctuated::Punctuated,
-    token, Ident, Path, Result, Token,
-};
+use syn::parse::{Parse, ParseStream};
+use syn::punctuated::Punctuated;
+use syn::{braced, parenthesized, token, Ident, Path, Result, Token};
 
 use super::{Menu, MenuEntry, MenuItem, MenuSection, Menus};
 

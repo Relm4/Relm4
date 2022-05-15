@@ -1,4 +1,6 @@
-use syn::{punctuated::Punctuated, token::Comma, Expr, Ident, LitStr, Path};
+use syn::punctuated::Punctuated;
+use syn::token::Comma;
+use syn::{Expr, Ident, LitStr, Path};
 
 mod gen;
 mod parse;

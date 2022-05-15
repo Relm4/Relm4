@@ -1,6 +1,7 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
-use syn::{spanned::Spanned, Error, Expr, ImplItemMethod, Pat, Result, Stmt};
+use syn::spanned::Spanned;
+use syn::{Error, Expr, ImplItemMethod, Pat, Result, Stmt};
 
 pub(super) fn inject_view_code(
     mut func: ImplItemMethod,

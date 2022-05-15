@@ -1,6 +1,7 @@
 use proc_macro2::{Span as Span2, TokenStream as TokenStream2};
 use quote::quote;
-use syn::{spanned::Spanned, Error, ImplItemMethod, Result};
+use syn::spanned::Spanned;
+use syn::{Error, ImplItemMethod, Result};
 
 pub(super) struct Funcs {
     pub unhandled_fns: Vec<ImplItemMethod>,

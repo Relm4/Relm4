@@ -9,7 +9,7 @@ mod additional_fields;
 mod args;
 mod attrs;
 mod component;
-//mod factory_prototype;
+// mod factory_prototype;
 mod item_impl;
 mod macros;
 mod menu;
@@ -49,9 +49,9 @@ use menu::Menus;
 /// }
 ///
 /// impl Model for AppModel {
+///     type Components = ();
 ///     type Msg = AppMsg;
 ///     type Widgets = AppWidgets;
-///     type Components = ();
 /// }
 ///
 /// impl AppUpdate for AppModel {
@@ -128,7 +128,7 @@ pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
 //
 // It works very similar to [`macro@widget`].
 // #[proc_macro_attribute]
-//pub fn factory_prototype(attributes: TokenStream, input: TokenStream) -> TokenStream {
+// pub fn factory_prototype(attributes: TokenStream, input: TokenStream) -> TokenStream {
 // let Attrs {
 //     visibility,
 //     relm4_path,
@@ -183,8 +183,8 @@ pub fn menu(input: TokenStream) -> TokenStream {
 /// You can even use the `relm4-macros` crate independently from Relm4 to build your GTK4 UI.
 ///
 /// ```no_run
-/// use relm4::gtk;
 /// use gtk::prelude::{BoxExt, ButtonExt};
+/// use relm4::gtk;
 ///
 /// // Creating a box with a button inside.
 /// relm4_macros::view! {

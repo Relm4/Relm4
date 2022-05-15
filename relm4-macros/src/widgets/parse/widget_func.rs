@@ -1,9 +1,6 @@
-use syn::{
-    parenthesized,
-    parse::{Parse, ParseStream},
-    punctuated::Punctuated,
-    token, Path, Result, Token,
-};
+use syn::parse::{Parse, ParseStream};
+use syn::punctuated::Punctuated;
+use syn::{parenthesized, token, Path, Result, Token};
 
 use crate::widgets::WidgetFunc;
 

@@ -1,5 +1,6 @@
 use proc_macro::Span;
-use syn::{spanned::Spanned, Error, Macro, Result};
+use syn::spanned::Spanned;
+use syn::{Error, Macro, Result};
 
 use crate::additional_fields::AdditionalFields;
 use crate::menu::Menus;

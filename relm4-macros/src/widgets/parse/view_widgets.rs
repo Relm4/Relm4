@@ -1,9 +1,6 @@
-use syn::{
-    parse::{Parse, ParseStream, Result},
-    Error, Ident, Token,
-};
-
 use proc_macro2::Span as Span2;
+use syn::parse::{Parse, ParseStream, Result};
+use syn::{Error, Ident, Token};
 
 use crate::widgets::{TopLevelWidget, ViewWidgets};
 

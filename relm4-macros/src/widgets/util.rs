@@ -1,10 +1,9 @@
-use syn::{spanned::Spanned, Error, Ident, Result};
-
-use crate::util;
-
-use crate::widgets::{AssignPropertyAttr, WidgetAttr, WidgetFunc};
+use syn::spanned::Spanned;
+use syn::{Error, Ident, Result};
 
 use super::PropertyName;
+use crate::util;
+use crate::widgets::{AssignPropertyAttr, WidgetAttr, WidgetFunc};
 
 pub(super) fn attr_twice_error<T: Spanned>(attr: &T) -> Error {
     Error::new(attr.span(), "Cannot use the same attribute twice.")

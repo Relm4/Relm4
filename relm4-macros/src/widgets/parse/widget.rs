@@ -1,15 +1,12 @@
 use proc_macro2::TokenStream as TokenStream2;
-use syn::{
-    braced, parenthesized,
-    parse::{ParseBuffer, ParseStream},
-    spanned::Spanned,
-    token,
-    token::{And, Star},
-    Error, Expr, Ident, Result, Token,
-};
+use syn::parse::{ParseBuffer, ParseStream};
+use syn::spanned::Spanned;
+use syn::token::{And, Star};
+use syn::{braced, parenthesized, token, Error, Expr, Ident, Result, Token};
 
-use crate::widgets::{util::attr_twice_error, Attr, Attrs, Properties, Widget, WidgetFunc};
-use crate::{args::Args, widgets::WidgetAttr};
+use crate::args::Args;
+use crate::widgets::util::attr_twice_error;
+use crate::widgets::{Attr, Attrs, Properties, Widget, WidgetAttr, WidgetFunc};
 
 type WidgetFuncInfo = (
     // For `Some(widget)`
@@ -53,7 +50,7 @@ impl Widget {
             } else {
                 name_set = true;
             }
-        } 
+        }
 
         if attr.is_local_attr() && name_set {
             return Err(Error::new(input.span(), "Widget name is specified more than once (attribute, assignment or local attribute)."));
@@ -106,14 +103,13 @@ impl Widget {
             let _token = braced!(inner in input);
             inner.parse()?
         };
-        
+
         // Make sure that the name is only defined one.
         if attr.is_local_attr() {
             if let Some(name) = &new_name {
                 return Err(Error::new(name.span(), "Widget name is specified more than once (attribute, assignment or local attribute)."));
             }
-        } 
-        //
+        }
         // Generate a name
         let name = if let Some(name) = new_name {
             name
@@ -140,7 +136,9 @@ impl Widget {
         })
     }
 
-    fn process_attributes(attrs: Option<Attrs>) -> Result<(WidgetAttr, Option<TokenStream2>, Option<Ident>)> {
+    fn process_attributes(
+        attrs: Option<Attrs>,
+    ) -> Result<(WidgetAttr, Option<TokenStream2>, Option<Ident>)> {
         if let Some(attrs) = attrs {
             let mut widget_attr = WidgetAttr::None;
             let mut doc_attr: Option<TokenStream2> = None;

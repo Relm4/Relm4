@@ -2,9 +2,8 @@ use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
 use syn::{Path, Visibility};
 
-use crate::widgets::{Property, PropertyType, SignalHandler};
-
 use super::{ReturnedWidget, Widget};
+use crate::widgets::{Property, PropertyType, SignalHandler};
 
 impl Property {
     pub fn struct_fields_stream(

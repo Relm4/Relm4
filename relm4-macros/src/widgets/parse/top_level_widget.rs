@@ -1,8 +1,7 @@
+use syn::parse::{Parse, ParseStream};
+use syn::Result;
+
 use crate::widgets::{Attr, Attrs, TopLevelWidget, Widget};
-use syn::{
-    parse::{Parse, ParseStream},
-    Result,
-};
 
 impl Parse for TopLevelWidget {
     fn parse(input: ParseStream) -> Result<Self> {

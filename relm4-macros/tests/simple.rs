@@ -12,9 +12,9 @@ enum AppMsg {
 }
 
 impl Model for AppModel {
+    type Components = ();
     type Msg = AppMsg;
     type Widgets = AppWidgets;
-    type Components = ();
 }
 
 impl AppUpdate for AppModel {

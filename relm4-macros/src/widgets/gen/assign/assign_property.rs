@@ -1,6 +1,7 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned, ToTokens};
-use syn::{spanned::Spanned, Expr, Ident, Path};
+use syn::spanned::Spanned;
+use syn::{Expr, Ident, Path};
 
 use crate::widgets::{AssignProperty, PropertyName};
 

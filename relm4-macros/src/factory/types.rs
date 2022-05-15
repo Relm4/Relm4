@@ -1,5 +1,6 @@
 use proc_macro2::Span as Span2;
-use syn::{spanned::Spanned, Error, Ident, ImplItemType, Result, Type};
+use syn::spanned::Spanned;
+use syn::{Error, Ident, ImplItemType, Result, Type};
 
 pub(super) struct Types {
     pub widgets: Ident,

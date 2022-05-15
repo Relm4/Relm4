@@ -1,6 +1,7 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens};
-use syn::{spanned::Spanned, Error};
+use syn::spanned::Spanned;
+use syn::Error;
 
 use crate::widgets::{Widget, WidgetFunc};
 

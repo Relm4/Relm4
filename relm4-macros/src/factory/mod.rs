@@ -1,10 +1,11 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens};
-use syn::Type;
-use syn::{Path, Visibility};
+use syn::{Path, Type, Visibility};
 
 use crate::component::token_streams;
-use crate::{macros::Macros, util::self_type, ItemImpl};
+use crate::macros::Macros;
+use crate::util::self_type;
+use crate::ItemImpl;
 
 mod funcs;
 mod inject_view_code;

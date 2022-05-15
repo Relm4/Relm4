@@ -2,7 +2,8 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::parse_macro_input;
 
-use crate::{component, util, widgets::ViewWidgets};
+use crate::widgets::ViewWidgets;
+use crate::{component, util};
 
 pub(super) fn generate_tokens(input: TokenStream) -> TokenStream {
     let view_widgets: ViewWidgets = parse_macro_input!(input);

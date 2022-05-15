@@ -1,9 +1,6 @@
-use syn::{
-    bracketed,
-    parse::{Parse, ParseStream},
-    spanned::Spanned,
-    token, Error, Ident, Result, Token,
-};
+use syn::parse::{Parse, ParseStream};
+use syn::spanned::Spanned;
+use syn::{bracketed, token, Error, Ident, Result, Token};
 
 use crate::widgets::{
     AssignProperty, Attrs, Property, PropertyName, PropertyType, SignalHandler, Widget, WidgetFunc,

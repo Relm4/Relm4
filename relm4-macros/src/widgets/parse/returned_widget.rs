@@ -1,10 +1,7 @@
 use proc_macro2::Span as Span2;
-use syn::{
-    braced,
-    parse::{Parse, ParseStream},
-    spanned::Spanned,
-    Ident, Result, Token,
-};
+use syn::parse::{Parse, ParseStream};
+use syn::spanned::Spanned;
+use syn::{braced, Ident, Result, Token};
 
 use crate::widgets::ReturnedWidget;
 

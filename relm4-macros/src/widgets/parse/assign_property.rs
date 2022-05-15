@@ -1,14 +1,12 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote_spanned, ToTokens};
-use syn::{
-    parse::ParseStream, spanned::Spanned, Error, Expr, ExprCall, ExprField, Ident, Member, Result,
-    Token,
-};
+use syn::parse::ParseStream;
+use syn::spanned::Spanned;
+use syn::{Error, Expr, ExprCall, ExprField, Ident, Member, Result, Token};
 
-use crate::{
-    args::Args,
-    widgets::{util::attr_twice_error, AssignProperty, AssignPropertyAttr, Attr, Attrs},
-};
+use crate::args::Args;
+use crate::widgets::util::attr_twice_error;
+use crate::widgets::{AssignProperty, AssignPropertyAttr, Attr, Attrs};
 
 struct ProcessedAttrs {
     watch: AssignPropertyAttr,

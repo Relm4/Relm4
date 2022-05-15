@@ -1,4 +1,5 @@
-use syn::{parse::ParseStream, Expr, Result, Token};
+use syn::parse::ParseStream;
+use syn::{Expr, Result, Token};
 
 use crate::widgets::{Args, SignalHandler};
 

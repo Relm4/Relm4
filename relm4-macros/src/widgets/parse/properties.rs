@@ -1,8 +1,6 @@
-use syn::{
-    parse::{Parse, ParseStream},
-    punctuated::Punctuated,
-    Result, Token,
-};
+use syn::parse::{Parse, ParseStream};
+use syn::punctuated::Punctuated;
+use syn::{Result, Token};
 
 use crate::widgets::{Properties, Property};
 
