@@ -454,6 +454,20 @@ where
     pub fn pop_front(&mut self) -> Option<C> {
         self.remove(0)
     }
+
+    /// Remove all components from the [`FactoryVecDeque`].
+    pub fn clear(&mut self) {
+        let model_state = self.model_state.get_mut();
+        let components = self.components.get_mut();
+
+        model_state.clear();
+
+        for component in components.drain(..) {
+            if let Some(widget) = component.returned_widget() {
+                self.widget.factory_remove(widget);
+            }
+        }
+    }
 }
 
 #[cfg(feature = "libadwaita")]
