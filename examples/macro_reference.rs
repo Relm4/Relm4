@@ -56,7 +56,8 @@ impl SimpleComponent for AppModel {
                 //gtk::Dialog::builder().header_bar(true).build() {
                 gtk::Grid {
                     attach[1, 1, 1, 1] = &gtk::Label {
-                        set_label: "Grid works!",
+                        #[track = "model.counter % 10 == 0"]
+                        set_label: &format!("Grid works! ({})", model.counter),
                     }
                 },
 
