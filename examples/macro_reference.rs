@@ -3,6 +3,7 @@ use gtk::prelude::{
 };
 use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, SimpleComponent, WidgetPlus};
 
+#[tracker::track]
 struct AppModel {
     counter: u8,
 }
@@ -72,7 +73,8 @@ impl SimpleComponent for AppModel {
                 gtk::Label {
                     #[watch]
                     set_label: &format!("Counter: {}", model.counter),
-                    set_margin_all: 5,
+                    #[track]
+                    set_margin_all: model.counter.into(),
                 },
 
                 gtk::ToggleButton {
@@ -122,6 +124,7 @@ impl SimpleComponent for AppModel {
     ) -> ComponentParts<Self> {
         let model = AppModel {
             counter: params.counter,
+            tracker: 0,
         };
 
         let local_label = gtk::Label::new(Some("local_label"));
@@ -134,12 +137,13 @@ impl SimpleComponent for AppModel {
     }
 
     fn update(&mut self, msg: Self::Input, _sender: &ComponentSender<Self>) {
+        self.reset();
         match msg {
             AppMsg::Increment => {
-                self.counter = self.counter.wrapping_add(1);
+                self.set_counter(self.counter.wrapping_add(1));
             }
             AppMsg::Decrement => {
-                self.counter = self.counter.wrapping_sub(1);
+                self.set_counter(self.counter.wrapping_sub(1));
             }
         }
     }
