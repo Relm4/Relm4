@@ -125,7 +125,7 @@ pub(crate) fn generate_tokens(
             #input
             #output
 
-            fn init_root() -> Self::Root {
+            fn init_root(&self) -> Self::Root {
                 #init_root
             }
 
