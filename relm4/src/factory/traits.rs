@@ -113,7 +113,7 @@ pub trait FactoryComponent<ParentWidget: FactoryView, ParentMsg>: Sized + Debug 
     ) -> Self;
 
     /// Initializes the root widget
-    fn init_root() -> Self::Root;
+    fn init_root(&self) -> Self::Root;
 
     /// Initializes the widgets.
     fn init_widgets(

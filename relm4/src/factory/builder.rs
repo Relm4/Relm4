@@ -36,11 +36,10 @@ where
         // Used by this component to send events to be handled externally by the caller.
         let (output_tx, output_rx) = crate::channel::<C::Output>();
 
-        let data = Rc::new(RefCell::new(C::init_model(
-            params, index, &input_tx, &output_tx,
-        )));
+        let component = C::init_model(params, index, &input_tx, &output_tx);
+        let root_widget = component.init_root();
 
-        let root_widget = C::init_root();
+        let data = Rc::new(RefCell::new(component));
 
         Self {
             data,
