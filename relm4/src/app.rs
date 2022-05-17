@@ -1,9 +1,9 @@
-use gtk::prelude::{ApplicationExt, ApplicationExtManual, GtkApplicationExt, IsA, WidgetExt};
+use gtk::prelude::{ApplicationExt, ApplicationExtManual, Cast, GtkApplicationExt, IsA, WidgetExt};
 
 use crate::component::Component;
 use crate::component::ComponentController;
-use crate::ComponentBuilder;
 use crate::Application;
+use crate::ComponentBuilder;
 
 /// An app that runs the main application.
 #[derive(Debug)]
@@ -27,7 +27,7 @@ where
     }
 
     /// Create a Relm4 application.
-    pub fn with_app(app: Application) -> Self {
+    pub fn with_app(app: impl IsA<Application> + Cast) -> Self {
         gtk::init().unwrap();
 
         #[cfg(feature = "libadwaita")]
@@ -35,7 +35,10 @@ where
 
         let bridge = ComponentBuilder::<C>::new();
 
-        Self { bridge, app }
+        Self {
+            bridge,
+            app: app.upcast(),
+        }
     }
 
     /// Runs the application, returns once the application is closed.
