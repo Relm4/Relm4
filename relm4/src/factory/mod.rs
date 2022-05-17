@@ -273,6 +273,26 @@ where
             .expect("Called `get_mut` on an invalid index")
     }
 
+    /// Provides a reference to the back element, or None if the deque is empty.
+    pub fn back(&self) -> Option<Ref<'_, C>> {
+        self.try_get(self.len().wrapping_sub(1))
+    }
+
+    /// Provides a reference to the front element, or None if the deque is empty.
+    pub fn front(&self) -> Option<Ref<'_, C>> {
+        self.try_get(0)
+    }
+
+    /// Provides a mutable reference to the back element, or None if the deque is empty.
+    pub fn back_mut(&mut self) -> Option<RefMut<'_, C>> {
+        self.try_get_mut(self.len().wrapping_sub(1))
+    }
+
+    /// Provides a mutable reference to the front element, or None if the deque is empty.
+    pub fn front_mut(&mut self) -> Option<RefMut<'_, C>> {
+        self.try_get_mut(0)
+    }
+
     /// Removes the last element from the [`FactoryVecDeque`] and returns it,
     /// or [`None`] if it is empty.
     pub fn pop_back(&mut self) -> Option<C> {
@@ -281,6 +301,12 @@ where
         } else {
             self.remove(self.len() - 1)
         }
+    }
+
+    /// Removes the first element from the [`FactoryVecDeque`] and returns it,
+    /// or [`None`] if it is empty.
+    pub fn pop_front(&mut self) -> Option<C> {
+        self.remove(0)
     }
 
     /// Removes and returns the element at index from the [`FactoryVecDeque`].
@@ -447,12 +473,6 @@ where
     /// Panics if index is out of bounds.
     pub fn move_back(&mut self, current_position: usize) {
         self.move_to(current_position, self.len() - 1)
-    }
-
-    /// Removes the first element from the [`FactoryVecDeque`] and returns it,
-    /// or [`None`] if it is empty.
-    pub fn pop_front(&mut self) -> Option<C> {
-        self.remove(0)
     }
 
     /// Remove all components from the [`FactoryVecDeque`].
