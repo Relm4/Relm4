@@ -247,7 +247,7 @@ where
             .map(ComponentStorage::get_mut)
     }
 
-    /// Provides a reference to the element at the given index.
+    /// Provides a reference to the model of one element.
     ///
     /// Element at index 0 is the front of the queue.
     ///
@@ -260,7 +260,7 @@ where
             .expect("Called `get` on an invalid index")
     }
 
-    /// Provides a mutable reference to the element at the given index.
+    /// Provides a mutable reference to the model of one element.
     ///
     /// Element at index 0 is the front of the queue.
     ///
@@ -273,22 +273,30 @@ where
             .expect("Called `get_mut` on an invalid index")
     }
 
-    /// Provides a reference to the back element, or None if the deque is empty.
+    /// Provides a reference to the model of the back element.
+    ///
+    /// Returns None if the deque is empty.
     pub fn back(&self) -> Option<Ref<'_, C>> {
         self.try_get(self.len().wrapping_sub(1))
     }
 
-    /// Provides a reference to the front element, or None if the deque is empty.
+    /// Provides a reference to the model of the front element.
+    ///
+    /// Returns None if the deque is empty.
     pub fn front(&self) -> Option<Ref<'_, C>> {
         self.try_get(0)
     }
 
-    /// Provides a mutable reference to the back element, or None if the deque is empty.
+    /// Provides a mutable reference to the model of the back element.
+    ///
+    /// Returns None if the deque is empty.
     pub fn back_mut(&mut self) -> Option<RefMut<'_, C>> {
         self.try_get_mut(self.len().wrapping_sub(1))
     }
 
-    /// Provides a mutable reference to the front element, or None if the deque is empty.
+    /// Provides a mutable reference to the model of the front element.
+    ///
+    /// Returns None if the deque is empty.
     pub fn front_mut(&mut self) -> Option<RefMut<'_, C>> {
         self.try_get_mut(0)
     }
