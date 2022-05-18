@@ -263,7 +263,7 @@ impl SimpleComponent for AppModel {
                 }
             }
         }
-        let counter = self.counters.back().unwrap().value;
+
         self.counters.render_changes();
     }
 }

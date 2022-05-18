@@ -1,4 +1,6 @@
-use crate::factory::{DynamicIndex, FactoryBuilder, FactoryComponent, FactoryHandle, FactoryView};
+use crate::factory::{
+    builder::FactoryBuilder, handle::FactoryHandle, DynamicIndex, FactoryComponent, FactoryView,
+};
 use crate::Sender;
 
 use std::cell::{Ref, RefMut};
