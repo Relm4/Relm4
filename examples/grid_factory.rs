@@ -58,7 +58,7 @@ impl FactoryComponent<gtk::Grid, AppMsg> for Counter {
         })
     }
 
-    fn init_root() -> Self::Root {
+    fn init_root(&self) -> Self::Root {
         relm4::view! {
             root = gtk::Box {
                 set_orientation: gtk::Orientation::Horizontal,
