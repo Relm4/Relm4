@@ -483,7 +483,7 @@ where
     /// Apply external updates that happened between the last render.
     ///
     /// **YOU MUST NOT EDIT THE [`FactoryVecDeque`] BETWEEN CALLING
-    /// [`render_change`] AND THIS METHOD. THIS MIGHT CAUSE UNDEFINED BEHAVIOR.
+    /// [`Self::render_changes`] AND THIS METHOD. THIS MIGHT CAUSE UNDEFINED BEHAVIOR.
     pub fn apply_external_updates(&mut self) {
         let length = self.widget().n_pages();
         let mut hashes: Vec<u64> = Vec::with_capacity(length as usize);
