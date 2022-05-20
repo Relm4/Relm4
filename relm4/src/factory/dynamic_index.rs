@@ -1,19 +1,19 @@
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 
-/// A dynamic index that updates automatically when items are shifted inside a [`Factory`].
+/// A dynamic index that updates automatically when items are shifted inside a factory container.
 ///
 /// For example a [`FactoryVecDeque`](super::FactoryVecDeque) has an [`insert`](super::FactoryVecDeque::insert)
 /// method that allows users to insert data at arbitrary positions.
 /// If we insert at the front all following widgets will be moved by one which would
 /// invalidate their indices.
-/// To allow widgets in a [`Factory`] to still send messages with valid indices
+/// To allow widgets in a factory container to send messages with valid indices
 /// this type ensures that the indices is always up to date.
 ///
 /// Never send an index as [`usize`] but always as [`DynamicIndex`]
 /// to the update function because messages can be queued up and stale by the time they are handled.
 ///
-/// [`DynamicIndex`] is a smart pointer so cloning will work similar to [`Rc`] and will create
+/// [`DynamicIndex`] is a smart pointer so cloning will work similar to [`std::rc::Rc`] and will create
 /// a pointer to the same data.
 ///
 /// In short: only call [`current_index`](DynamicIndex::current_index) from the update function
@@ -42,7 +42,7 @@ impl Clone for DynamicIndex {
 impl DynamicIndex {
     /// Get the current index number.
     ///
-    /// This value is updated by the [`Factory`] and might change after each update function.
+    /// This value is updated by the factory container and might change after each update function.
     pub fn current_index(&self) -> usize {
         self.inner.load(Ordering::Relaxed)
     }

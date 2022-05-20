@@ -1,17 +1,20 @@
 //! An idiomatic GUI library inspired by Elm and based on gtk4-rs
 
-#![warn(
-    missing_debug_implementations,
-    missing_docs,
-    rust_2018_idioms,
-    unreachable_pub
-)]
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/AaronErhardt/relm4/main/assets/Relm_logo.svg"
 )]
 #![doc(
     html_favicon_url = "https://raw.githubusercontent.com/AaronErhardt/relm4/main/assets/Relm_logo.svg"
 )]
+
+#![warn(
+    missing_debug_implementations,
+    missing_docs,
+    rust_2018_idioms,
+    unreachable_pub
+)]
+
+// Configuration for doc builds on the nightly toolchain.
 #![cfg_attr(dox, feature(doc_cfg))]
 
 pub mod actions;
@@ -108,7 +111,7 @@ pub fn set_global_css_from_file<P: AsRef<std::path::Path>>(path: P) {
     }
 }
 
-/// Spawns a thread-local future on GLib's executor, for non-Send futures.
+/// Spawns a thread-local future on GLib's executor, for non-[`Send`] futures.
 pub fn spawn_local<F: Future<Output = ()> + 'static>(func: F) -> gtk::glib::SourceId {
     gtk::glib::MainContext::ref_thread_default().spawn_local(func)
 }
@@ -126,7 +129,7 @@ fn runtime() -> &'static Runtime {
     })
 }
 
-/// Spawns a `Send`-able future to the shared component runtime.
+/// Spawns a [`Send`]-able future to the shared component runtime.
 pub fn spawn<F>(future: F) -> JoinHandle<F::Output>
 where
     F: Future + Send + 'static,

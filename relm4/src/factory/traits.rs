@@ -22,7 +22,7 @@ pub trait FactoryView {
 
     /// Position type used by this widget.
     ///
-    /// For example [`GridPosition`](positions::GridPosition) for [`gtk::Grid`] or `()` for [`gtk::Box`]
+    /// For example [`GridPosition`](super::positions::GridPosition) for [`gtk::Grid`] or `()` for [`gtk::Box`]
     type Position;
 
     /// Removes a widget.
@@ -125,7 +125,7 @@ pub trait FactoryComponent<ParentWidget: FactoryView, ParentMsg>: Sized + Debug 
         output: &Sender<Self::Output>,
     ) -> Self::Widgets;
 
-    /// Convert [`Self::Output`] into [`ParentMsg`] in order to
+    /// Convert [`Self::Output`] into `ParentMsg` in order to
     /// send message to the parent.
     ///
     /// If [`None`] is returned, nothing is forwarded.

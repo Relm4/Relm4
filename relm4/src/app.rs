@@ -10,8 +10,11 @@ use crate::ComponentBuilder;
 pub struct RelmApp<C: Component> {
     bridge: ComponentBuilder<C>,
 
-    /// The [`Application`] that's used internally to setup
+    /// The application that's used internally to setup
     /// and run the application.
+    ///
+    /// Depending on your feature flag this is either
+    /// [`gtk::Application`] or [`adw::Application`].
     pub app: Application,
 }
 
@@ -43,7 +46,7 @@ where
 
     /// Runs the application, returns once the application is closed.
     ///
-    /// Unlike [`gtk::Application::run`], this function
+    /// Unlike [`gtk::prelude::ApplicationExtManual::run`], this function
     /// does not handle command-line arguments. To pass arguments to GTK, use
     /// [`RelmApp::run_with_args`].
     pub fn run(self, payload: C::InitParams) {
