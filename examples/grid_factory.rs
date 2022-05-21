@@ -95,7 +95,7 @@ impl FactoryComponent<gtk::Grid, AppMsg> for Counter {
         relm4::view! {
             add_button = gtk::Button {
                 set_label: "+",
-                connect_clicked(input) => move |_| {
+                connect_clicked[input] => move |_| {
                     input.send(CounterMsg::Increment)
                 }
             }
@@ -104,7 +104,7 @@ impl FactoryComponent<gtk::Grid, AppMsg> for Counter {
         relm4::view! {
             remove_button = gtk::Button {
                 set_label: "-",
-                connect_clicked(input) => move |_| {
+                connect_clicked[input] => move |_| {
                     input.send(CounterMsg::Decrement)
                 }
             }
@@ -113,7 +113,7 @@ impl FactoryComponent<gtk::Grid, AppMsg> for Counter {
         relm4::view! {
             move_up_button = gtk::Button {
                 set_label: "Up",
-                connect_clicked(output, index) => move |_| {
+                connect_clicked[output, index] => move |_| {
                     output.send(CounterOutput::MoveUp(index.clone()))
                 }
             }
@@ -122,7 +122,7 @@ impl FactoryComponent<gtk::Grid, AppMsg> for Counter {
         relm4::view! {
             move_down_button = gtk::Button {
                 set_label: "Down",
-                connect_clicked(output, index) => move |_| {
+                connect_clicked[output, index] => move |_| {
                     output.send(CounterOutput::MoveDown(index.clone()))
                 }
             }
@@ -131,7 +131,7 @@ impl FactoryComponent<gtk::Grid, AppMsg> for Counter {
         relm4::view! {
             to_front_button = gtk::Button {
                 set_label: "To start",
-                connect_clicked(output, index) => move |_| {
+                connect_clicked[output, index] => move |_| {
                     output.send(CounterOutput::SendFront(index.clone()))
                 }
             }
@@ -211,14 +211,14 @@ impl SimpleComponent for AppModel {
 
                 gtk::Button {
                     set_label: "Add counter",
-                    connect_clicked(sender) => move |_| {
+                    connect_clicked[sender] => move |_| {
                         sender.input(AppMsg::AddCounter);
                     }
                 },
 
                 gtk::Button {
                     set_label: "Remove counter",
-                    connect_clicked(sender) => move |_| {
+                    connect_clicked[sender] => move |_| {
                         sender.input(AppMsg::RemoveCounter);
                     }
                 },

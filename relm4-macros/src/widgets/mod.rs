@@ -1,83 +1,168 @@
 use proc_macro2::{Span as Span2, TokenStream as TokenStream2};
-use syn::{punctuated::Punctuated, token, token::Mut, Expr, ExprClosure, Generics, Ident, Path};
+use syn::punctuated::Punctuated;
+use syn::token::{Else, FatArrow, If, Match, Mut};
+use syn::{token, Expr, ExprClosure, Ident, MethodTurbofish, Pat, Path};
 
 use crate::args::Args;
 
 mod gen;
 mod parse;
+mod parse_util;
+mod span;
 
-#[derive(Debug)]
-pub(super) struct Tracker {
-    bool_fn: Expr,
-    update_fns: Vec<Expr>,
+pub(super) struct ViewWidgets {
+    pub(super) span: Span2,
+    pub(super) top_level_widgets: Vec<TopLevelWidget>,
 }
 
-#[derive(Debug)]
-pub(super) enum PropertyType {
-    Expr(Expr),
-    Track(Tracker),
-    Parent(Expr),
-    Args(Args<Expr>),
-    Connect(ExprClosure),
-    ConnectComponent(ExprClosure),
-    Watch(TokenStream2),
-    Factory(Expr),
+pub(super) struct TopLevelWidget {
+    pub(super) root_attr: Option<Ident>,
+    pub(super) inner: Widget,
+}
+
+enum PropertyType {
+    Assign(AssignProperty),
+    SignalHandler(SignalHandler),
     Widget(Widget),
+    ConditionalWidget(ConditionalWidget),
+    ParseError(ParseError),
 }
 
-#[derive(Debug)]
-pub enum PropertyName {
+enum ParseError {
+    Ident((Ident, TokenStream2)),
+    Path((Path, TokenStream2)),
+    Generic(TokenStream2),
+}
+
+enum AssignPropertyAttr {
+    None,
+    Watch,
+    Track(TokenStream2),
+}
+
+struct AssignProperty {
+    attr: AssignPropertyAttr,
+    /// Optional arguments like param_name[arg1, arg2, ...]
+    args: Option<Args<Expr>>,
+    expr: Expr,
+    /// Assign with an ?
+    optional_assign: bool,
+    /// Iterate through elements to generate tokens
+    iterative: bool,
+    block_signals: Vec<Ident>,
+}
+
+struct SignalHandler {
+    closure: ExprClosure,
+    handler_id: Option<Ident>,
+    args: Option<Args<Expr>>,
+}
+
+enum PropertyName {
     Ident(Ident),
     Path(Path),
     RelmContainerExtAssign,
 }
 
-#[derive(Debug)]
-pub(super) struct Property {
+struct Property {
     /// Either a path or just an ident
-    pub name: PropertyName,
-    pub ty: PropertyType,
-    pub generics: Option<Generics>,
-    /// Optional arguments like param_name(arg1, arg2, ...)
-    pub args: Option<Args<Expr>>,
-    /// Assign with an ?
-    pub optional_assign: bool,
-    /// Iterate through elements to generate tokens
-    pub iterative: bool,
+    name: PropertyName,
+    ty: PropertyType,
 }
 
-#[derive(Debug)]
-pub(super) struct Properties {
-    pub properties: Vec<Property>,
+#[derive(Default)]
+struct Properties {
+    properties: Vec<Property>,
 }
 
-/// The function that intitalizes the widget.
+/// The function that initializes the widget.
 ///
 /// This might be a real function or just something like `gtk::Label`.
-#[derive(Debug)]
-pub(super) struct WidgetFunc {
-    pub path_segments: Vec<Ident>,
-    pub args: Option<Punctuated<Expr, token::Comma>>,
-    pub ty: Option<Vec<Ident>>,
-    pub span: Span2,
+struct WidgetFunc {
+    path: Path,
+    args: Option<Punctuated<Expr, token::Comma>>,
+    method_chain: Option<Punctuated<WidgetFuncMethod, token::Dot>>,
+    ty: Option<Path>,
 }
 
-#[derive(Debug)]
+struct WidgetFuncMethod {
+    ident: Ident,
+    turbofish: Option<MethodTurbofish>,
+    args: Option<Punctuated<Expr, token::Comma>>,
+}
+
 pub(super) struct Widget {
-    pub mutable: Option<Mut>,
-    pub name: Ident,
-    pub func: WidgetFunc,
-    pub properties: Properties,
-    pub wrapper: Option<Ident>,
-    pub ref_token: Option<token::And>,
-    pub deref_token: Option<token::Star>,
-    pub returned_widget: Option<ReturnedWidget>,
+    doc_attr: Option<TokenStream2>,
+    attr: WidgetAttr,
+    mutable: Option<Mut>,
+    pub(super) name: Ident,
+    func: WidgetFunc,
+    args: Option<Args<Expr>>,
+    properties: Properties,
+    wrapper: Option<Ident>,
+    ref_token: Option<token::And>,
+    deref_token: Option<token::Star>,
+    returned_widget: Option<ReturnedWidget>,
 }
 
-#[derive(Debug)]
-pub(super) struct ReturnedWidget {
-    pub name: Ident,
-    pub ty: Option<Path>,
-    pub properties: Properties,
-    pub is_optional: bool,
+#[derive(PartialEq)]
+enum WidgetAttr {
+    None,
+    Local,
+    LocalRef,
+}
+
+struct ReturnedWidget {
+    name: Ident,
+    ty: Option<Path>,
+    properties: Properties,
+    is_optional: bool,
+}
+
+struct ConditionalWidget {
+    doc_attr: Option<TokenStream2>,
+    transition: Option<Ident>,
+    name: Ident,
+    args: Option<Args<Expr>>,
+    branches: ConditionalBranches,
+}
+
+enum ConditionalBranches {
+    If(Vec<IfBranch>),
+    Match((Match, Box<Expr>, Vec<MatchArm>)),
+}
+
+enum IfCondition {
+    If(If, Expr),
+    ElseIf(Else, If, Expr),
+    Else(Else),
+}
+
+struct IfBranch {
+    cond: IfCondition,
+    widget: Widget,
+}
+
+struct MatchArm {
+    pattern: Pat,
+    guard: Option<(If, Box<Expr>)>,
+    arrow: FatArrow,
+    widget: Widget,
+}
+
+enum Attr {
+    Doc(TokenStream2),
+    Local(Ident),
+    LocalRef(Ident),
+    Root(Ident),
+    Iterate(Ident),
+    Watch(Ident),
+    Track(Ident, Option<Box<Expr>>),
+    BlockSignal(Ident, Vec<Ident>),
+    Name(Ident, Ident),
+    Transition(Ident, Ident),
+}
+
+struct Attrs {
+    inner: Vec<Attr>,
 }

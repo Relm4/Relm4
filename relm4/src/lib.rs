@@ -1,4 +1,4 @@
-//! An idiomatic GUI library inspired by Elm and based on gtk4-rs
+//! An idiomatic GUI library inspired by Elm and based on gtk4-rs.
 
 #![doc(
     html_logo_url = "https://raw.githubusercontent.com/AaronErhardt/relm4/main/assets/Relm_logo.svg"
@@ -6,14 +6,12 @@
 #![doc(
     html_favicon_url = "https://raw.githubusercontent.com/AaronErhardt/relm4/main/assets/Relm_logo.svg"
 )]
-
 #![warn(
     missing_debug_implementations,
     missing_docs,
     rust_2018_idioms,
     unreachable_pub
 )]
-
 // Configuration for doc builds on the nightly toolchain.
 #![cfg_attr(dox, feature(doc_cfg))]
 
@@ -151,8 +149,9 @@ where
 ///
 /// The message is sent using the sender and the [`Result`] is unwrapped automatically.
 #[macro_export]
+#[deprecated(since = "0.5.0", note = "Use `sender.input(msg)` instead.")]
 macro_rules! send {
     ($sender:expr, $msg:expr) => {
-        $sender.send($msg)
+        $sender.input($msg)
     };
 }

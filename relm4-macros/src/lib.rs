@@ -1,50 +1,28 @@
-#![doc(
-    html_logo_url = "https://raw.githubusercontent.com/AaronErhardt/relm4/main/assets/Relm_logo.svg"
-)]
-#![doc(
-    html_favicon_url = "https://raw.githubusercontent.com/AaronErhardt/relm4/main/assets/Relm_logo.svg"
-)]
+#![doc(html_logo_url = "https://relm4.org/icons/relm4_logo.svg")]
+#![doc(html_favicon_url = "https://relm4.org/icons/relm4_org.svg")]
 #![allow(clippy::single_component_path_imports)]
 
-use proc_macro::{self, TokenStream};
-use quote::quote;
+use proc_macro::TokenStream;
 use syn::parse_macro_input;
 
 mod additional_fields;
 mod args;
 mod attrs;
 mod component;
-mod derive_components;
-mod factory_prototype_macro;
+// mod factory_prototype;
 mod item_impl;
 mod macros;
 mod menu;
-mod micro_widget_macro;
+mod view;
+mod widgets;
 
 #[macro_use]
 mod util;
-
-mod widget_macro;
-mod widgets;
-
-// Hack to make the macro visibile for other parts of this crate.
-pub(crate) use parse_func;
+mod factory;
 
 use attrs::Attrs;
 use item_impl::ItemImpl;
 use menu::Menus;
-use widgets::Widget;
-
-#[proc_macro_attribute]
-pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
-    let Attrs {
-        visibility,
-        relm4_path,
-    } = parse_macro_input!(attributes as Attrs);
-    let data = parse_macro_input!(input as ItemImpl);
-
-    component::generate_tokens(visibility, relm4_path, data).into()
-}
 
 /// Macro that implements [`relm4::Widgets`](https://aaronerhardt.github.io/docs/relm4/relm4/trait.Widgets.html) and generates the corresponding struct.
 ///
@@ -71,9 +49,9 @@ pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
 /// }
 ///
 /// impl Model for AppModel {
+///     type Components = ();
 ///     type Msg = AppMsg;
 ///     type Widgets = AppWidgets;
-///     type Components = ();
 /// }
 ///
 /// impl AppUpdate for AppModel {
@@ -124,55 +102,42 @@ pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
 /// }
 /// ```
 #[proc_macro_attribute]
-pub fn widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
+pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let Attrs {
         visibility,
         relm4_path,
     } = parse_macro_input!(attributes as Attrs);
     let data = parse_macro_input!(input as ItemImpl);
 
-    widget_macro::generate_tokens(visibility, relm4_path, data).into()
+    component::generate_tokens(visibility, relm4_path, data).into()
 }
 
-/// Macro that implements [`relm4::MicrosWidgets`](https://aaronerhardt.github.io/docs/relm4/relm4/trait.MicroWidgets.html) and generates the corresponding struct.
-///
-/// It works very similar to [`macro@widget`].
 #[proc_macro_attribute]
-pub fn micro_widget(attributes: TokenStream, input: TokenStream) -> TokenStream {
+pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let Attrs {
         visibility,
         relm4_path,
     } = parse_macro_input!(attributes as Attrs);
     let data = parse_macro_input!(input as ItemImpl);
 
-    micro_widget_macro::generate_tokens(visibility, relm4_path, data).into()
+    factory::generate_tokens(visibility, relm4_path, data).into()
 }
 
-/// Macro that implements [`relm4::factory::FactoryPrototype`](https://aaronerhardt.github.io/docs/relm4/relm4/factory/trait.FactoryPrototype.html)
-/// and generates the corresponding widget struct.
-///
-/// It works very similar to [`macro@widget`].
-#[proc_macro_attribute]
-pub fn factory_prototype(attributes: TokenStream, input: TokenStream) -> TokenStream {
-    let Attrs {
-        visibility,
-        relm4_path,
-    } = parse_macro_input!(attributes as Attrs);
-    let data = parse_macro_input!(input as ItemImpl);
+// Macro that implements [`relm4::factory::FactoryPrototype`](https://aaronerhardt.github.io/docs/relm4/relm4/factory/trait.FactoryPrototype.html)
+// and generates the corresponding widget struct.
+//
+// It works very similar to [`macro@widget`].
+// #[proc_macro_attribute]
+// pub fn factory_prototype(attributes: TokenStream, input: TokenStream) -> TokenStream {
+// let Attrs {
+//     visibility,
+//     relm4_path,
+// } = parse_macro_input!(attributes as Attrs);
+// let data = parse_macro_input!(input as ItemImpl);
 
-    factory_prototype_macro::generate_tokens(visibility, relm4_path, data).into()
-}
-
-#[proc_macro_derive(Components, attributes(components))]
-pub fn derive(input: TokenStream) -> TokenStream {
-    let derive_input = parse_macro_input!(input);
-    let output = derive_components::generate_stream(&derive_input);
-
-    match output {
-        Ok(output) => output.into(),
-        Err(error) => error.into_compile_error().into(),
-    }
-}
+// factory_prototype_macro::generate_tokens(visibility, relm4_path, data).into()
+//    quote! {}.into()
+// }
 
 /// A macro to create menus.
 ///
@@ -218,8 +183,8 @@ pub fn menu(input: TokenStream) -> TokenStream {
 /// You can even use the `relm4-macros` crate independently from Relm4 to build your GTK4 UI.
 ///
 /// ```no_run
-/// use relm4::gtk;
 /// use gtk::prelude::{BoxExt, ButtonExt};
+/// use relm4::gtk;
 ///
 /// // Creating a box with a button inside.
 /// relm4_macros::view! {
@@ -253,7 +218,7 @@ pub fn menu(input: TokenStream) -> TokenStream {
 ///         current_dir = mut &String {
 ///             push_str: path,
 ///         },
-///         env: args!("HOME", "/home/relm4"),
+///         env: ("HOME", "/home/relm4"),
 ///     }
 /// }
 ///
@@ -262,32 +227,5 @@ pub fn menu(input: TokenStream) -> TokenStream {
 /// ```
 #[proc_macro]
 pub fn view(input: TokenStream) -> TokenStream {
-    let widgets = parse_macro_input!(input as Widget);
-    let default_relm4_path = util::default_relm4_path();
-
-    let model_type = syn::Type::Tuple(syn::TypeTuple {
-        paren_token: syn::token::Paren::default(),
-        elems: syn::punctuated::Punctuated::new(),
-    });
-
-    let mut streams = widget_macro::token_streams::TokenStreams::default();
-    widgets.generate_widget_tokens_recursively(
-        &mut streams,
-        &None,
-        &model_type,
-        &default_relm4_path,
-    );
-    let widget_macro::token_streams::TokenStreams {
-        init_widgets,
-        assign_properties,
-        connect,
-        ..
-    } = streams;
-
-    let output = quote! {
-        #init_widgets
-        #assign_properties
-        #connect
-    };
-    output.into()
+    view::generate_tokens(input)
 }

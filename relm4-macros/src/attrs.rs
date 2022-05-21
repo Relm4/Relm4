@@ -1,20 +1,16 @@
 use proc_macro2::Span;
-use syn::{
-    parse::{Parse, ParseStream},
-    spanned::Spanned,
-    Error, Ident, Path, Result, Token, Visibility,
-};
+use syn::parse::{Parse, ParseStream};
+use syn::spanned::Spanned;
+use syn::{Error, Ident, Path, Result, Token, Visibility};
 
 use crate::util::default_relm4_path;
 
-#[derive(Debug)]
 enum AttributeType {
     None,
     Named,
     Unnamed { span: Span },
 }
 
-#[derive(Debug)]
 pub struct Attrs {
     /// Keeps information about visibility of the widget
     pub visibility: Option<Visibility>,
@@ -40,7 +36,6 @@ impl Parse for Attrs {
     /// 1. It's fine if visibility is used unnamed so `#[widget(pub)]` must be valid but thats the only case.
     /// 2. Widget visibility might be named `#[widget(visibility = pub)]`.
     /// 3. `relm4` argument must be named. Always.
-    ///
     fn parse(input: ParseStream) -> Result<Self> {
         let mut attrs = Attrs::new();
         let mut attrs_type = AttributeType::None;

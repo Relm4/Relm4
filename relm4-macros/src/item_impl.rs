@@ -1,13 +1,11 @@
 use proc_macro2::{Span, TokenStream as TokenStream2};
 use quote::quote;
+use syn::parse::{Parse, ParseStream};
 use syn::{
-    braced,
-    parse::{Parse, ParseStream},
-    Attribute, Generics, ImplItemMethod, ImplItemType, Macro, Path, Result, Token, Type,
+    braced, Attribute, Generics, ImplItemMethod, ImplItemType, Macro, Path, Result, Token, Type,
     WhereClause,
 };
 
-#[derive(Debug)]
 pub(super) struct ItemImpl {
     pub outer_attrs: Option<TokenStream2>,
     pub impl_generics: Generics,

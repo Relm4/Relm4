@@ -1,11 +1,13 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote_spanned, ToTokens};
-use syn::{Path, Type, Visibility};
+use quote::quote_spanned;
+use syn::{Error, Path, Visibility};
 
-use crate::widgets::{PropertyType, ReturnedWidget, Widget};
+use crate::widgets::{TopLevelWidget, ViewWidgets, Widget};
 
-#[derive(Debug, Default)]
+#[derive(Default)]
 pub(crate) struct TokenStreams {
+    /// Parsing errors
+    pub error: TokenStream2,
     /// Initialize the root widget.
     pub init_root: TokenStream2,
     /// Rename root to the actual widget name.
@@ -13,19 +15,65 @@ pub(crate) struct TokenStreams {
     /// The tokens for the struct fields -> name: Type,
     pub struct_fields: TokenStream2,
     /// The tokens initializing the widgets.
-    pub init_widgets: TokenStream2,
+    pub init: TokenStream2,
     /// The tokens initializing the properties.
-    pub assign_properties: TokenStream2,
-    /// The tokens for the returned struct fields -> name,
-    pub return_fields: TokenStream2,
-    /// The view tokens (watch! macro)
-    pub view: TokenStream2,
-    /// The view tokens (track! macro)
-    pub track: TokenStream2,
+    pub assign: TokenStream2,
     /// The tokens for connecting events.
     pub connect: TokenStream2,
-    /// The tokens for connecting events to components.
-    pub connect_components: TokenStream2,
+    /// The tokens for the returned struct fields -> name,
+    pub return_fields: TokenStream2,
+    /// For destructuring the widget struct field
+    pub destructure_fields: TokenStream2,
+    /// The view tokens (watch! macro)
+    pub update_view: TokenStream2,
+}
+
+impl ViewWidgets {
+    pub fn generate_streams(
+        &self,
+        vis: &Option<Visibility>,
+        relm4_path: &Path,
+        standalone_view: bool,
+    ) -> TokenStreams {
+        let mut streams = TokenStreams::default();
+
+        for top_level_widget in &self.top_level_widgets {
+            top_level_widget.generate_streams(&mut streams, vis, relm4_path, standalone_view);
+        }
+
+        streams
+    }
+
+    /// Generate root type for `Root` parameter in `Component` impl
+    pub fn root_type(&self) -> TokenStream2 {
+        for top_level_widget in &self.top_level_widgets {
+            if top_level_widget.root_attr.is_some() {
+                return top_level_widget.inner.func_type_token_stream();
+            }
+        }
+        Error::new(
+            self.span,
+            "You need to specify the root widget using the `#[root]` attribute.",
+        )
+        .to_compile_error()
+    }
+}
+
+impl TopLevelWidget {
+    fn generate_streams(
+        &self,
+        streams: &mut TokenStreams,
+        vis: &Option<Visibility>,
+        relm4_path: &Path,
+        standalone_view: bool,
+    ) {
+        self.inner.init_token_generation(
+            streams,
+            vis,
+            relm4_path,
+            !standalone_view && self.root_attr.is_some(),
+        );
+    }
 }
 
 impl Widget {
@@ -33,130 +81,32 @@ impl Widget {
         &self,
         streams: &mut TokenStreams,
         vis: &Option<Visibility>,
-        model_type: &Type,
         relm4_path: &Path,
+        generate_init_root_stream: bool,
     ) {
         let name = &self.name;
         let name_span = name.span();
 
         // Initialize the root
-        self.init_widgets_stream(&mut streams.init_root);
-        name.to_tokens(&mut streams.init_root);
+        if generate_init_root_stream {
+            // For the `component` macro
+            self.init_root_init_streams(&mut streams.init_root, &mut streams.init, relm4_path);
+        } else {
+            // For the `view!` macro
+            self.init_stream(&mut streams.init, relm4_path);
+        }
+
+        self.error_stream(&mut streams.error);
+        self.start_assign_stream(&mut streams.assign, relm4_path);
+        self.struct_fields_stream(&mut streams.struct_fields, vis, relm4_path);
+        self.return_stream(&mut streams.return_fields);
+        self.destructure_stream(&mut streams.destructure_fields);
+        self.update_view_stream(&mut streams.update_view, relm4_path);
+        self.connect_signals_stream(&mut streams.connect, relm4_path);
 
         // Rename the `root` to the actual widget name
         streams.rename_root.extend(quote_spanned! {
             name_span => let #name = root.clone();
         });
-
-        self.struct_fields_stream(&mut streams.struct_fields, vis);
-        self.return_stream(&mut streams.return_fields);
-
-        for prop in &self.properties.properties {
-            if let PropertyType::Widget(widget) = &prop.ty {
-                widget.generate_component_tokens_recursively(streams, vis, model_type, relm4_path);
-                prop.connect_widgets_stream(&mut streams.assign_properties, &self.name, relm4_path);
-
-                if let Some(returned_widget) = &widget.returned_widget {
-                    returned_widget.generate_component_tokens_recursively(
-                        streams, vis, model_type, relm4_path,
-                    );
-                }
-            } else {
-                prop.property_init_stream(&mut streams.assign_properties, &self.name, relm4_path);
-                prop.connect_widgets_stream(&mut streams.assign_properties, &self.name, relm4_path);
-
-                prop.view_stream(&mut streams.view, &self.name, relm4_path, true);
-                prop.track_stream(&mut streams.track, &self.name, model_type, true, relm4_path);
-
-                prop.connect_stream(&mut streams.connect, &self.name, relm4_path);
-                prop.connect_component_stream(
-                    &mut streams.connect_components,
-                    &self.name,
-                    relm4_path,
-                );
-
-                //prop.connect_parent_stream(&mut streams.parent, &self.name);
-            }
-        }
-    }
-
-    fn generate_component_tokens_recursively(
-        &self,
-        streams: &mut TokenStreams,
-        vis: &Option<Visibility>,
-        model_type: &Type,
-        relm4_path: &Path,
-    ) {
-        self.struct_fields_stream(&mut streams.struct_fields, vis);
-        self.init_widgets_stream(&mut streams.init_widgets);
-        self.return_stream(&mut streams.return_fields);
-
-        for prop in &self.properties.properties {
-            if let PropertyType::Widget(widget) = &prop.ty {
-                widget.generate_component_tokens_recursively(streams, vis, model_type, relm4_path);
-                prop.connect_widgets_stream(&mut streams.assign_properties, &self.name, relm4_path);
-
-                if let Some(returned_widget) = &widget.returned_widget {
-                    returned_widget.generate_component_tokens_recursively(
-                        streams, vis, model_type, relm4_path,
-                    );
-                }
-            } else {
-                prop.property_init_stream(&mut streams.assign_properties, &self.name, relm4_path);
-                prop.connect_widgets_stream(&mut streams.assign_properties, &self.name, relm4_path);
-
-                prop.view_stream(&mut streams.view, &self.name, relm4_path, true);
-                prop.track_stream(&mut streams.track, &self.name, model_type, true, relm4_path);
-
-                prop.connect_stream(&mut streams.connect, &self.name, relm4_path);
-                prop.connect_component_stream(
-                    &mut streams.connect_components,
-                    &self.name,
-                    relm4_path,
-                );
-
-                //prop.connect_parent_stream(&mut streams.parent, &self.name);
-            }
-        }
-    }
-}
-
-impl ReturnedWidget {
-    fn generate_component_tokens_recursively(
-        &self,
-        streams: &mut TokenStreams,
-        vis: &Option<Visibility>,
-        model_type: &Type,
-        relm4_path: &Path,
-    ) {
-        self.struct_fields_stream(&mut streams.struct_fields, vis);
-        self.return_stream(&mut streams.return_fields);
-
-        for prop in &self.properties.properties {
-            if let PropertyType::Widget(widget) = &prop.ty {
-                widget.generate_component_tokens_recursively(streams, vis, model_type, relm4_path);
-                prop.connect_widgets_stream(&mut streams.assign_properties, &self.name, relm4_path);
-            } else {
-                prop.property_init_stream(&mut streams.assign_properties, &self.name, relm4_path);
-                prop.connect_widgets_stream(&mut streams.assign_properties, &self.name, relm4_path);
-
-                prop.connect_stream(&mut streams.connect, &self.name, relm4_path);
-
-                prop.view_stream(&mut streams.view, &self.name, relm4_path, false);
-                prop.track_stream(
-                    &mut streams.track,
-                    &self.name,
-                    model_type,
-                    false,
-                    relm4_path,
-                );
-
-                prop.connect_component_stream(
-                    &mut streams.connect_components,
-                    &self.name,
-                    relm4_path,
-                );
-            }
-        }
     }
 }

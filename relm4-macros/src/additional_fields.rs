@@ -1,10 +1,8 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::ToTokens;
-use syn::{
-    parse::{Parse, ParseStream},
-    punctuated::Punctuated,
-    Field, Result, Token,
-};
+use syn::parse::{Parse, ParseStream};
+use syn::punctuated::Punctuated;
+use syn::{Field, Result, Token};
 
 pub struct AdditionalFields {
     pub inner: Punctuated<Field, Token![,]>,

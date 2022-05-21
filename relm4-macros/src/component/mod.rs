@@ -1,9 +1,10 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens};
-use syn::{spanned::Spanned, Error, PathArguments, Type};
-use syn::{Path, Visibility};
+use syn::spanned::Spanned;
+use syn::{Error, Path, PathArguments, Visibility};
 
-use crate::{macros::Macros, util::self_type, ItemImpl};
+use crate::macros::Macros;
+use crate::ItemImpl;
 
 mod funcs;
 mod inject_view_code;
@@ -13,26 +14,25 @@ mod types;
 use inject_view_code::inject_view_code;
 
 pub(crate) fn generate_tokens(
-    visibility: Option<Visibility>,
+    vis: Option<Visibility>,
     relm4_path: Path,
     data: ItemImpl,
 ) -> TokenStream2 {
-    if PathArguments::None != data.trait_.segments.last().unwrap().arguments {
+    let last_segment = data.trait_.segments.last().unwrap();
+    if PathArguments::None != last_segment.arguments {
         return Error::new(
-            data.trait_.segments.span(),
-            "Expected no generic parameters for model and parent model",
+            last_segment.arguments.span(),
+            "Expected no generic parameters",
         )
         .to_compile_error();
     };
-
-    // Create a `Self` type for the model
-    let model_type: Type = self_type();
 
     let types::Types {
         widgets: widgets_type,
         init_params,
         input,
         output,
+        other_types,
     } = match types::Types::new(data.types) {
         Ok(types) => types,
         Err(err) => return err.to_compile_error(),
@@ -43,7 +43,7 @@ pub(crate) fn generate_tokens(
     let outer_attrs = &data.outer_attrs;
 
     let Macros {
-        widgets,
+        view_widgets,
         additional_fields,
         menus,
     } = match Macros::new(&data.macros, data.brace_span.unwrap()) {
@@ -64,25 +64,20 @@ pub(crate) fn generate_tokens(
         Err(err) => return err.to_compile_error(),
     };
 
-    let _root_widget_name = &widgets.name;
-    let root_widget_type = widgets.func.type_token_stream();
-
-    let mut streams = token_streams::TokenStreams::default();
-    widgets.init_token_generation(&mut streams, &visibility, &model_type, &relm4_path);
-
     let token_streams::TokenStreams {
+        error,
         init_root,
         rename_root,
         struct_fields,
-        init_widgets,
-        assign_properties,
+        init: init_widgets,
+        assign,
         connect,
         return_fields,
-        //parent,
-        connect_components,
-        view,
-        track,
-    } = streams;
+        destructure_fields,
+        update_view,
+    } = view_widgets.generate_streams(&vis, &relm4_path, false);
+
+    let root_widget_type = view_widgets.root_type();
 
     let impl_generics = data.impl_generics;
     let where_clause = data.where_clause;
@@ -103,9 +98,11 @@ pub(crate) fn generate_tokens(
         #rename_root
         #menus_stream
         #init_widgets
-        #assign_properties
         #connect
-        #connect_components
+        {
+            #error
+        }
+        #assign
     };
 
     let widgets_return_code = quote! {
@@ -123,7 +120,7 @@ pub(crate) fn generate_tokens(
     quote! {
         #[allow(dead_code)]
         #outer_attrs
-        #visibility struct #widgets_type {
+        #vis struct #widgets_type {
             #struct_fields
             #additional_fields
         }
@@ -131,6 +128,8 @@ pub(crate) fn generate_tokens(
         impl #impl_generics #trait_ for #ty #where_clause {
             type Root = #root_widget_type;
             type Widgets = #widgets_type;
+
+            #(#other_types)*
 
             #init_params
             #input
@@ -148,16 +147,16 @@ pub(crate) fn generate_tokens(
                 widgets: &mut Self::Widgets,
                 sender: &ComponentSender<Self>,
             ) {
+                #[allow(unused_variables)]
                 let Self::Widgets {
-                    #return_fields
+                    #destructure_fields
                     #additional_fields_return_stream
                 } = widgets;
 
                 let model = self;
                 // Wrap pre_view and post_view code to prevent early returns from skipping other view code.
                 (|| { #pre_view })();
-                #view
-                #track
+                #update_view
                 (|| { #post_view })();
             }
 

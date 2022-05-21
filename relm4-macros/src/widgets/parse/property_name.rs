@@ -1,7 +1,5 @@
-use syn::{
-    parse::{Parse, ParseStream},
-    Result, Token,
-};
+use syn::parse::{Parse, ParseStream};
+use syn::{Result, Token};
 
 use crate::widgets::PropertyName;
 

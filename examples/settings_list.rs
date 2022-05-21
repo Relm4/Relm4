@@ -213,7 +213,7 @@ impl Component for App {
                             set_label: button_label,
                             set_size_group: &widgets.button_sg,
 
-                            connect_clicked(sender) => move |_| {
+                            connect_clicked[sender] => move |_| {
                                 sender.output(Output::Clicked(id));
                             }
                         }
