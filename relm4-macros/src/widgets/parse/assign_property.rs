@@ -74,11 +74,12 @@ impl AssignProperty {
                     Attr::Track(_, ref expr) => {
                         if watch == AssignPropertyAttr::None {
                             watch = if let Some(expr) = expr {
-                                AssignPropertyAttr::Track(expr.to_token_stream())
+                                AssignPropertyAttr::Track((expr.to_token_stream(), false))
                             } else {
-                                AssignPropertyAttr::Track(generate_tracker_from_expression(
-                                    assign_expr,
-                                )?)
+                                AssignPropertyAttr::Track((
+                                    generate_tracker_from_expression(assign_expr)?,
+                                    true,
+                                ))
                             };
                         } else {
                             return Err(attr_twice_error(&attr));
@@ -166,6 +167,6 @@ fn generate_tracker_from_expression(expression: &Expr) -> Result<TokenStream2> {
         return error_fn(expr_field.member.span(), "Expected a named member");
     };
 
-    let bool_stream = quote_spanned! { expr_field.span() => model.changed(Self::#ident()) };
+    let bool_stream = quote_spanned! { expr_field.span() => .changed(Self::#ident()) };
     Ok(bool_stream)
 }

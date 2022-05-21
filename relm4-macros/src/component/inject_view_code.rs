@@ -12,7 +12,10 @@ pub(super) fn inject_view_code(
     let mut stmts = func.block.stmts;
 
     if stmts.is_empty() {
-        return Err(Error::new(func_span, "The function must not be empty"));
+        return Err(Error::new(
+            func_span,
+            "The `init` function must not be empty",
+        ));
     }
 
     let mut new_stmts = Vec::new();

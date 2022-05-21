@@ -1,13 +1,16 @@
 use proc_macro2::{Span as Span2, TokenStream as TokenStream2};
 use quote::quote;
 use syn::spanned::Spanned;
-use syn::{Error, ImplItemMethod, Result};
+use syn::{Error, Ident, ImplItemMethod, Result};
+
+use crate::util;
 
 pub(super) struct Funcs {
     pub unhandled_fns: Vec<ImplItemMethod>,
     pub init_widgets: ImplItemMethod,
     pub pre_view: Option<TokenStream2>,
     pub post_view: Option<TokenStream2>,
+    pub root_name: Ident,
 }
 
 macro_rules! parse_func {
@@ -28,6 +31,7 @@ impl Funcs {
         let mut unhandled_fns = Vec::new();
         let mut pre_view = None;
         let mut post_view = None;
+        let mut root_name = None;
 
         for func in funcs.drain(..) {
             let ident = &func.sig.ident;
@@ -39,6 +43,7 @@ impl Funcs {
                         "`init` method defined multiple times",
                     ));
                 } else {
+                    root_name = Some(util::get_ident_of_nth_func_input(&func, 2)?);
                     init_widgets = Some(func);
                 }
             } else if ident == "pre_view" {
@@ -56,12 +61,14 @@ impl Funcs {
 
         let init_widgets = init_widgets
             .ok_or_else(|| Error::new(Span2::call_site(), "`init` method isn't defined"))?;
+        let root_name = root_name.unwrap();
 
         Ok(Funcs {
             init_widgets,
             pre_view,
             post_view,
             unhandled_fns,
+            root_name,
         })
     }
 }

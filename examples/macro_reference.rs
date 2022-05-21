@@ -5,7 +5,7 @@ use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, SimpleComponent, Widg
 
 #[tracker::track]
 struct AppModel {
-    counter: u8,
+    value: u8,
 }
 
 #[derive(Debug)]
@@ -57,18 +57,18 @@ impl SimpleComponent for AppModel {
                 //gtk::Dialog::builder().header_bar(true).build() {
                 gtk::Grid {
                     attach[1, 1, 1, 1] = &gtk::Label {
-                        #[track = "model.counter % 10 == 0"]
-                        set_label: &format!("Grid works! ({})", model.counter),
+                        #[track = "counter.value % 10 == 0"]
+                        set_label: &format!("Grid works! ({})", counter.value),
                     }
                 },
 
                 /// A conditional widget, wow!
                 #[transition = "SlideLeft"]
-                append = if model.counter % 2 == 0 {
+                append = if counter.value % 2 == 0 {
                     gtk::Label {
                         set_label: "Value is even",
                     }
-                } else if model.counter % 3 == 0 {
+                } else if counter.value % 3 == 0 {
                     gtk::Label {
                         set_label: "Value is dividable by 3",
                     }
@@ -79,7 +79,7 @@ impl SimpleComponent for AppModel {
                 },
 
                 #[transition = "SlideRight"]
-                append: match_stack = match model.counter {
+                append: match_stack = match counter.value {
                     (0..=2) => {
                         gtk::Label {
                             set_label: "Value is smaller than 3",
@@ -104,16 +104,16 @@ impl SimpleComponent for AppModel {
                 /// Counter label
                 gtk::Label {
                     #[watch]
-                    set_label: &format!("Counter: {}", model.counter),
+                    set_label: &format!("Counter: {}", counter.value),
                     #[track]
-                    set_margin_all: model.counter.into(),
+                    set_margin_all: counter.value.into(),
                 },
 
                 gtk::ToggleButton {
                     set_label: "Counter is even",
                     #[watch]
                     #[block_signal(toggle_handler)]
-                    set_active: model.counter % 2 == 0,
+                    set_active: counter.value % 2 == 0,
 
                     connect_toggled[sender] => move |_| {
                         sender.input(AppMsg::Increment);
@@ -140,7 +140,7 @@ impl SimpleComponent for AppModel {
             // Empty args
             hide: (),
             #[watch]
-            set_visible: model.counter == 42,
+            set_visible: counter.value == 42,
 
             gtk::Label {
                 set_label: "You made it to 42!",
@@ -151,11 +151,11 @@ impl SimpleComponent for AppModel {
     // Initialize the UI.
     fn init(
         params: Self::InitParams,
-        root: &Self::Root,
+        renamed_root: &Self::Root,
         sender: &ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let model = AppModel {
-            counter: params.counter,
+        let counter = AppModel {
+            value: params.counter,
             tracker: 0,
         };
 
@@ -165,17 +165,17 @@ impl SimpleComponent for AppModel {
         // Insert the macro code generation here
         let widgets = view_output!();
 
-        ComponentParts { model, widgets }
+        ComponentParts { model: counter, widgets }
     }
 
     fn update(&mut self, msg: Self::Input, _sender: &ComponentSender<Self>) {
         self.reset();
         match msg {
             AppMsg::Increment => {
-                self.set_counter(self.counter.wrapping_add(1));
+                self.set_value(self.value.wrapping_add(1));
             }
             AppMsg::Decrement => {
-                self.set_counter(self.counter.wrapping_sub(1));
+                self.set_value(self.value.wrapping_sub(1));
             }
         }
     }

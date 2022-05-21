@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote_spanned;
-use syn::{Error, Path, Visibility};
+use syn::{Error, Ident, Path, Visibility};
 
 use crate::widgets::{TopLevelWidget, ViewWidgets, Widget};
 
@@ -33,12 +33,21 @@ impl ViewWidgets {
         &self,
         vis: &Option<Visibility>,
         relm4_path: &Path,
+        model_name: &Ident,
+        root_name: Option<&Ident>,
         standalone_view: bool,
     ) -> TokenStreams {
         let mut streams = TokenStreams::default();
 
         for top_level_widget in &self.top_level_widgets {
-            top_level_widget.generate_streams(&mut streams, vis, relm4_path, standalone_view);
+            top_level_widget.generate_streams(
+                &mut streams,
+                vis,
+                relm4_path,
+                model_name,
+                root_name,
+                standalone_view,
+            );
         }
 
         streams
@@ -65,12 +74,16 @@ impl TopLevelWidget {
         streams: &mut TokenStreams,
         vis: &Option<Visibility>,
         relm4_path: &Path,
+        model_name: &Ident,
+        root_name: Option<&Ident>,
         standalone_view: bool,
     ) {
         self.inner.init_token_generation(
             streams,
             vis,
             relm4_path,
+            model_name,
+            root_name,
             !standalone_view && self.root_attr.is_some(),
         );
     }
@@ -82,6 +95,8 @@ impl Widget {
         streams: &mut TokenStreams,
         vis: &Option<Visibility>,
         relm4_path: &Path,
+        model_name: &Ident,
+        root_name: Option<&Ident>,
         generate_init_root_stream: bool,
     ) {
         let name = &self.name;
@@ -101,12 +116,14 @@ impl Widget {
         self.struct_fields_stream(&mut streams.struct_fields, vis, relm4_path);
         self.return_stream(&mut streams.return_fields);
         self.destructure_stream(&mut streams.destructure_fields);
-        self.update_view_stream(&mut streams.update_view, relm4_path);
+        self.update_view_stream(&mut streams.update_view, model_name, relm4_path);
         self.connect_signals_stream(&mut streams.connect, relm4_path);
 
         // Rename the `root` to the actual widget name
-        streams.rename_root.extend(quote_spanned! {
-            name_span => let #name = root.clone();
-        });
+        if let Some(root_name) = root_name {
+            streams.rename_root.extend(quote_spanned! {
+                name_span => let #name = #root_name.clone();
+            });
+        }
     }
 }

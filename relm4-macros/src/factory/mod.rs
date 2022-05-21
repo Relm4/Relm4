@@ -1,6 +1,6 @@
-use proc_macro2::TokenStream as TokenStream2;
+use proc_macro2::{Span as Span2, TokenStream as TokenStream2};
 use quote::{quote, ToTokens};
-use syn::{Path, Visibility};
+use syn::{Ident, Path, Visibility};
 
 use crate::component::token_streams;
 use crate::macros::Macros;
@@ -49,6 +49,7 @@ pub(crate) fn generate_tokens(
         pre_view,
         post_view,
         unhandled_fns,
+        root_name,
     } = match funcs::Funcs::new(data.funcs) {
         Ok(macros) => macros,
         Err(err) => return err.to_compile_error(),
@@ -65,7 +66,13 @@ pub(crate) fn generate_tokens(
         return_fields,
         destructure_fields,
         update_view,
-    } = view_widgets.generate_streams(&vis, &relm4_path, false);
+    } = view_widgets.generate_streams(
+        &vis,
+        &relm4_path,
+        &Ident::new("self", Span2::call_site()),
+        Some(&root_name),
+        false,
+    );
 
     let root_widget_type = view_widgets.root_type();
 

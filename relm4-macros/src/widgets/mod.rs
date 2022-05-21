@@ -37,7 +37,9 @@ enum ParseError {
 enum AssignPropertyAttr {
     None,
     Watch,
-    Track(TokenStream2),
+    /// The bool indicated whether the model type needs to
+    /// be pasted in front of the track expression.
+    Track((TokenStream2, bool)),
 }
 
 struct AssignProperty {

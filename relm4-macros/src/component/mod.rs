@@ -59,6 +59,8 @@ pub(crate) fn generate_tokens(
         pre_view,
         post_view,
         unhandled_fns,
+        root_name,
+        model_name,
     } = match funcs::Funcs::new(data.funcs) {
         Ok(macros) => macros,
         Err(err) => return err.to_compile_error(),
@@ -75,7 +77,7 @@ pub(crate) fn generate_tokens(
         return_fields,
         destructure_fields,
         update_view,
-    } = view_widgets.generate_streams(&vis, &relm4_path, false);
+    } = view_widgets.generate_streams(&vis, &relm4_path, &model_name, Some(&root_name), false);
 
     let root_widget_type = view_widgets.root_type();
 
@@ -153,7 +155,7 @@ pub(crate) fn generate_tokens(
                     #additional_fields_return_stream
                 } = widgets;
 
-                let model = self;
+                let #model_name = self;
                 // Wrap pre_view and post_view code to prevent early returns from skipping other view code.
                 (|| { #pre_view })();
                 #update_view
