@@ -1,10 +1,9 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens};
 use syn::spanned::Spanned;
-use syn::{Error, Path, PathArguments, Type, Visibility};
+use syn::{Error, Path, PathArguments, Visibility};
 
 use crate::macros::Macros;
-use crate::util::self_type;
 use crate::ItemImpl;
 
 mod funcs;
@@ -27,9 +26,6 @@ pub(crate) fn generate_tokens(
         )
         .to_compile_error();
     };
-
-    // Create a `Self` type for the model
-    let model_type: Type = self_type();
 
     let types::Types {
         widgets: widgets_type,
@@ -69,6 +65,7 @@ pub(crate) fn generate_tokens(
     };
 
     let token_streams::TokenStreams {
+        error,
         init_root,
         rename_root,
         struct_fields,
@@ -78,7 +75,7 @@ pub(crate) fn generate_tokens(
         return_fields,
         destructure_fields,
         update_view,
-    } = view_widgets.generate_streams(&vis, &model_type, &relm4_path, false);
+    } = view_widgets.generate_streams(&vis, &relm4_path, false);
 
     let root_widget_type = view_widgets.root_type();
 
@@ -102,6 +99,9 @@ pub(crate) fn generate_tokens(
         #menus_stream
         #init_widgets
         #connect
+        {
+            #error
+        }
         #assign
     };
 

@@ -1,5 +1,10 @@
 mod assign_property;
 mod attributes;
+mod conditional_branches;
+mod conditional_widget;
+mod if_branch;
+mod if_condition;
+mod match_arm;
 mod properties;
 mod property;
 mod property_name;

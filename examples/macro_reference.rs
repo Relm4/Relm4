@@ -62,6 +62,38 @@ impl SimpleComponent for AppModel {
                     }
                 },
 
+                /// A conditional widget, wow!
+                #[transition = "SlideLeft"]
+                append = if model.counter % 2 == 0 {
+                    gtk::Label {
+                        set_label: "Value is even",
+                    }
+                } else if model.counter % 3 == 0 {
+                    gtk::Label {
+                        set_label: "Value is dividable by 3",
+                    }
+                } else {
+                    gtk::Label {
+                        set_label: "Value is odd",
+                    }
+                },
+
+                #[transition = "SlideRight"]
+                append: match_stack = match model.counter {
+                    (0..=2) => {
+                        gtk::Label {
+                            set_label: "Value is smaller than 3",
+                        }
+                    },
+                    _ => {
+                        gtk::Label {
+                            set_label: "Value is higher than 2",
+                        }
+                    }
+                },
+
+                append = &gtk::Label,
+
                 gtk::Label::builder()
                     .label("Builder pattern works!")
                     .selectable(true)

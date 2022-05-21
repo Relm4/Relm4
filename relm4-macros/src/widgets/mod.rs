@@ -1,14 +1,14 @@
 use proc_macro2::{Span as Span2, TokenStream as TokenStream2};
 use syn::punctuated::Punctuated;
-use syn::token::Mut;
-use syn::{token, Expr, ExprClosure, Ident, MethodTurbofish, Path};
+use syn::token::{Else, FatArrow, If, Match, Mut};
+use syn::{token, Expr, ExprClosure, Ident, MethodTurbofish, Pat, Path};
 
 use crate::args::Args;
 
 mod gen;
 mod parse;
+mod parse_util;
 mod span;
-mod util;
 
 pub(super) struct ViewWidgets {
     pub(super) span: Span2,
@@ -20,19 +20,27 @@ pub(super) struct TopLevelWidget {
     pub(super) inner: Widget,
 }
 
-pub(super) enum PropertyType {
+enum PropertyType {
     Assign(AssignProperty),
     SignalHandler(SignalHandler),
     Widget(Widget),
+    ConditionalWidget(ConditionalWidget),
+    ParseError(ParseError),
 }
 
-pub(super) enum AssignPropertyAttr {
+enum ParseError {
+    Ident((Ident, TokenStream2)),
+    Path((Path, TokenStream2)),
+    Generic(TokenStream2),
+}
+
+enum AssignPropertyAttr {
     None,
     Watch,
     Track(TokenStream2),
 }
 
-pub(super) struct AssignProperty {
+struct AssignProperty {
     attr: AssignPropertyAttr,
     /// Optional arguments like param_name[arg1, arg2, ...]
     args: Option<Args<Expr>>,
@@ -44,40 +52,40 @@ pub(super) struct AssignProperty {
     block_signals: Vec<Ident>,
 }
 
-pub(super) struct SignalHandler {
+struct SignalHandler {
     closure: ExprClosure,
     handler_id: Option<Ident>,
     args: Option<Args<Expr>>,
 }
 
-pub enum PropertyName {
+enum PropertyName {
     Ident(Ident),
     Path(Path),
     RelmContainerExtAssign,
 }
 
-pub(super) struct Property {
+struct Property {
     /// Either a path or just an ident
     name: PropertyName,
-    pub(super) ty: PropertyType,
+    ty: PropertyType,
 }
 
 #[derive(Default)]
-pub(super) struct Properties {
-    pub(super) properties: Vec<Property>,
+struct Properties {
+    properties: Vec<Property>,
 }
 
 /// The function that initializes the widget.
 ///
 /// This might be a real function or just something like `gtk::Label`.
-pub(super) struct WidgetFunc {
+struct WidgetFunc {
     path: Path,
     args: Option<Punctuated<Expr, token::Comma>>,
     method_chain: Option<Punctuated<WidgetFuncMethod, token::Dot>>,
     ty: Option<Path>,
 }
 
-pub(super) struct WidgetFuncMethod {
+struct WidgetFuncMethod {
     ident: Ident,
     turbofish: Option<MethodTurbofish>,
     args: Option<Punctuated<Expr, token::Comma>>,
@@ -88,30 +96,61 @@ pub(super) struct Widget {
     attr: WidgetAttr,
     mutable: Option<Mut>,
     pub(super) name: Ident,
-    pub(super) func: WidgetFunc,
+    func: WidgetFunc,
     args: Option<Args<Expr>>,
-    pub(super) properties: Properties,
+    properties: Properties,
     wrapper: Option<Ident>,
     ref_token: Option<token::And>,
     deref_token: Option<token::Star>,
-    pub(super) returned_widget: Option<ReturnedWidget>,
+    returned_widget: Option<ReturnedWidget>,
 }
 
 #[derive(PartialEq)]
-pub(super) enum WidgetAttr {
+enum WidgetAttr {
     None,
     Local,
     LocalRef,
 }
 
-pub(super) struct ReturnedWidget {
-    pub(super) name: Ident,
+struct ReturnedWidget {
+    name: Ident,
     ty: Option<Path>,
-    pub(super) properties: Properties,
+    properties: Properties,
     is_optional: bool,
 }
 
-pub(super) enum Attr {
+struct ConditionalWidget {
+    doc_attr: Option<TokenStream2>,
+    transition: Option<Ident>,
+    name: Ident,
+    args: Option<Args<Expr>>,
+    branches: ConditionalBranches,
+}
+
+enum ConditionalBranches {
+    If(Vec<IfBranch>),
+    Match((Match, Box<Expr>, Vec<MatchArm>)),
+}
+
+enum IfCondition {
+    If(If, Expr),
+    ElseIf(Else, If, Expr),
+    Else(Else),
+}
+
+struct IfBranch {
+    cond: IfCondition,
+    widget: Widget,
+}
+
+struct MatchArm {
+    pattern: Pat,
+    guard: Option<(If, Box<Expr>)>,
+    arrow: FatArrow,
+    widget: Widget,
+}
+
+enum Attr {
     Doc(TokenStream2),
     Local(Ident),
     LocalRef(Ident),
@@ -121,8 +160,9 @@ pub(super) enum Attr {
     Track(Ident, Option<Box<Expr>>),
     BlockSignal(Ident, Vec<Ident>),
     Name(Ident, Ident),
+    Transition(Ident, Ident),
 }
 
-pub(super) struct Attrs {
+struct Attrs {
     inner: Vec<Attr>,
 }

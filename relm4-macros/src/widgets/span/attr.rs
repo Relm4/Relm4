@@ -15,6 +15,7 @@ impl Spanned for Attr {
             Self::Track(ident, _) => ident.span(),
             Self::BlockSignal(ident, _) => ident.span(),
             Self::Name(ident, _) => ident.span(),
+            Self::Transition(ident, _) => ident.span(),
         }
     }
 }

@@ -1,17 +1,37 @@
-use syn::parse::{Parse, ParseStream};
+use syn::parse::ParseStream;
 use syn::punctuated::Punctuated;
-use syn::{parenthesized, token, Path, Result, Token};
+use syn::spanned::Spanned;
+use syn::{token, Ident, Path, Token};
 
-use crate::widgets::WidgetFunc;
+use crate::widgets::{parse_util, ParseError, WidgetFunc};
 
 impl WidgetFunc {
-    pub(super) fn parse_with_path(input: ParseStream, path: Path) -> Result<Self> {
+    pub(super) fn parse_with_path(input: ParseStream, path: Path) -> Result<Self, ParseError> {
+        match Self::parse_with_path_internal(input, &path) {
+            Ok(func) => Ok(func),
+            Err(err) => Err(err.add_path(&path)),
+        }
+    }
+
+    fn parse_with_path_internal(input: ParseStream, path: &Path) -> Result<Self, ParseError> {
+        if input.peek(Ident) {
+            return Err(ParseError::Generic(
+                syn::Error::new(
+                    path.span()
+                        .join(input.span())
+                        .unwrap_or_else(|| input.span()),
+                    "A path must not be followed by an identifier",
+                )
+                .into_compile_error(),
+            )
+            .add_path(path));
+        }
+
         let mut args = None;
         let mut ty = None;
 
         if input.peek(token::Paren) {
-            let paren_input;
-            parenthesized!(paren_input in input);
+            let paren_input = parse_util::parens(input)?;
             args = Some(paren_input.call(Punctuated::parse_terminated)?);
             if input.peek(Token! [->]) {
                 let _token: Token! [->] = input.parse()?;
@@ -32,7 +52,7 @@ impl WidgetFunc {
         };
 
         Ok(WidgetFunc {
-            path,
+            path: path.clone(),
             args,
             method_chain,
             ty,
@@ -40,8 +60,8 @@ impl WidgetFunc {
     }
 }
 
-impl Parse for WidgetFunc {
-    fn parse(input: ParseStream) -> Result<Self> {
+impl WidgetFunc {
+    pub(super) fn parse(input: ParseStream) -> Result<Self, ParseError> {
         let path = input.parse()?;
         Self::parse_with_path(input, path)
     }

@@ -3,7 +3,7 @@ use syn::parse::{Parse, ParseStream};
 use syn::spanned::Spanned;
 use syn::{braced, Ident, Result, Token};
 
-use crate::widgets::ReturnedWidget;
+use crate::widgets::{parse_util, Properties, ReturnedWidget};
 
 impl Parse for ReturnedWidget {
     fn parse(input: ParseStream) -> Result<Self> {
@@ -31,7 +31,7 @@ impl Parse for ReturnedWidget {
         };
 
         let name = name.unwrap_or_else(|| {
-            crate::util::idents_to_snake_case(
+            parse_util::idents_to_snake_case(
                 [Ident::new("_returned_widget", Span2::call_site())].iter(),
                 ty.span(),
             )
@@ -39,7 +39,7 @@ impl Parse for ReturnedWidget {
 
         let inner;
         let _token = braced!(inner in input);
-        let properties = inner.parse()?;
+        let properties = Properties::parse(&inner);
 
         Ok(ReturnedWidget {
             name,

@@ -3,18 +3,67 @@ use quote::quote_spanned;
 use syn::spanned::Spanned;
 use syn::{Expr, Ident, Path};
 
-use crate::widgets::{Property, PropertyName, PropertyType, SignalHandler};
+use crate::widgets::{
+    ConditionalBranches, ConditionalWidget, Properties, Property, PropertyName, PropertyType,
+    ReturnedWidget, SignalHandler, Widget,
+};
 
 impl Property {
-    pub fn connect_signals_stream(
-        &self,
-        stream: &mut TokenStream2,
-        w_name: &Ident,
-        relm4_path: &Path,
-    ) {
-        if let PropertyType::SignalHandler(signal_handler) = &self.ty {
-            signal_handler.connect_signals_stream(stream, &self.name, w_name, relm4_path);
+    fn connect_signals_stream(&self, stream: &mut TokenStream2, w_name: &Ident, relm4_path: &Path) {
+        match &self.ty {
+            PropertyType::SignalHandler(signal_handler) => {
+                signal_handler.connect_signals_stream(stream, &self.name, w_name, relm4_path);
+            }
+            PropertyType::Widget(widget) => widget.connect_signals_stream(stream, relm4_path),
+            PropertyType::ConditionalWidget(cond_widget) => {
+                cond_widget.connect_signals_stream(stream, relm4_path)
+            }
+            PropertyType::Assign(_) | PropertyType::ParseError(_) => (),
         }
+    }
+}
+
+impl Properties {
+    fn connect_signals_stream(&self, stream: &mut TokenStream2, w_name: &Ident, relm4_path: &Path) {
+        for prop in &self.properties {
+            prop.connect_signals_stream(stream, w_name, relm4_path);
+        }
+    }
+}
+
+impl Widget {
+    pub fn connect_signals_stream(&self, stream: &mut TokenStream2, relm4_path: &Path) {
+        let w_name = &self.name;
+        self.properties
+            .connect_signals_stream(stream, w_name, relm4_path);
+        if let Some(returned_widget) = &self.returned_widget {
+            returned_widget.connect_signals_stream(stream, relm4_path);
+        }
+    }
+}
+
+impl ConditionalWidget {
+    fn connect_signals_stream(&self, stream: &mut TokenStream2, relm4_path: &Path) {
+        match &self.branches {
+            ConditionalBranches::If(if_branches) => {
+                for branch in if_branches {
+                    branch.widget.connect_signals_stream(stream, relm4_path);
+                }
+            }
+            ConditionalBranches::Match((_, _, match_arms)) => {
+                for arm in match_arms {
+                    arm.widget.connect_signals_stream(stream, relm4_path);
+                }
+            }
+        }
+    }
+}
+
+impl ReturnedWidget {
+    fn connect_signals_stream(&self, stream: &mut TokenStream2, relm4_path: &Path) {
+        let w_name = &self.name;
+        self.properties
+            .connect_signals_stream(stream, w_name, relm4_path);
     }
 }
 

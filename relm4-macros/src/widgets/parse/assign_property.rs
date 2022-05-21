@@ -5,7 +5,7 @@ use syn::spanned::Spanned;
 use syn::{Error, Expr, ExprCall, ExprField, Ident, Member, Result, Token};
 
 use crate::args::Args;
-use crate::widgets::util::attr_twice_error;
+use crate::widgets::parse_util::attr_twice_error;
 use crate::widgets::{AssignProperty, AssignPropertyAttr, Attr, Attrs};
 
 struct ProcessedAttrs {

@@ -6,7 +6,7 @@ use syn::{Ident, Path};
 use crate::widgets::{PropertyName, ReturnedWidget, Widget};
 
 impl ReturnedWidget {
-    pub fn return_assign_tokens(&self) -> TokenStream2 {
+    fn return_assign_tokens(&self) -> TokenStream2 {
         let name = &self.name;
 
         if let Some(ty) = &self.ty {
@@ -22,6 +22,11 @@ impl ReturnedWidget {
 }
 
 impl Widget {
+    pub fn start_assign_stream(&self, stream: &mut TokenStream2, relm4_path: &Path) {
+        let w_name = &self.name;
+        self.properties.assign_stream(stream, w_name, relm4_path);
+    }
+
     pub(super) fn assign_stream(
         &self,
         stream: &mut TokenStream2,
@@ -51,5 +56,15 @@ impl Widget {
                 span => #assign_fn(#self_assign_args #assign #args);
             }
         });
+
+        // Recursively generate code for properties
+        let w_name = &self.name;
+        self.properties.assign_stream(stream, w_name, relm4_path);
+
+        if let Some(returned_widget) = &self.returned_widget {
+            returned_widget
+                .properties
+                .assign_stream(stream, w_name, relm4_path);
+        }
     }
 }

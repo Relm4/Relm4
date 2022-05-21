@@ -6,7 +6,7 @@ use syn::{Expr, Ident, Path};
 use crate::widgets::{AssignProperty, PropertyName};
 
 impl AssignProperty {
-    pub fn assign_stream(
+    pub(crate) fn assign_stream(
         &self,
         stream: &mut TokenStream2,
         p_name: &PropertyName,

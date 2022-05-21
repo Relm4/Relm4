@@ -8,13 +8,13 @@ impl Parse for ViewWidgets {
     fn parse(input: ParseStream) -> Result<Self> {
         let span = input.span();
 
-        let first_widget: TopLevelWidget = input.parse()?;
+        let first_widget = TopLevelWidget::parse(input);
         let mut root_exists = first_widget.root_attr.is_some();
         let mut top_level_widgets = vec![first_widget];
 
         while input.peek(Token![,]) {
             let _colon: Token![,] = input.parse()?;
-            let widget: TopLevelWidget = input.parse()?;
+            let widget = TopLevelWidget::parse(input);
             if let Some(root_attr) = &widget.root_attr {
                 if root_exists {
                     return Err(Error::new(root_attr.span(), "You cannot have two roots."));

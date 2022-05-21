@@ -1,14 +1,26 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
 
-use crate::widgets::{Property, PropertyType, ReturnedWidget, SignalHandler, Widget, WidgetAttr};
+use crate::widgets::{
+    ConditionalBranches, ConditionalWidget, Properties, Property, PropertyType, ReturnedWidget,
+    SignalHandler, Widget, WidgetAttr,
+};
 
 impl Property {
-    pub fn return_stream(&self, stream: &mut TokenStream2) {
+    fn return_stream(&self, stream: &mut TokenStream2) {
         match &self.ty {
-            PropertyType::Assign(_) => (),
             PropertyType::Widget(widget) => widget.return_stream(stream),
             PropertyType::SignalHandler(signal_handler) => signal_handler.return_stream(stream),
+            PropertyType::ConditionalWidget(cond_widget) => cond_widget.return_stream(stream),
+            PropertyType::Assign(_) | PropertyType::ParseError(_) => (),
+        }
+    }
+}
+
+impl Properties {
+    fn return_stream(&self, stream: &mut TokenStream2) {
+        for prop in &self.properties {
+            prop.return_stream(stream);
         }
     }
 }
@@ -23,12 +35,39 @@ impl Widget {
         } else {
             quote! { #name, }
         });
+
+        self.properties.return_stream(stream);
+        if let Some(returned_widget) = &self.returned_widget {
+            returned_widget.return_stream(stream);
+        }
+    }
+}
+
+impl ConditionalWidget {
+    fn return_stream(&self, stream: &mut TokenStream2) {
+        let name = &self.name;
+
+        stream.extend(quote! { #name, });
+
+        match &self.branches {
+            ConditionalBranches::If(if_branches) => {
+                for branch in if_branches {
+                    branch.widget.return_stream(stream);
+                }
+            }
+            ConditionalBranches::Match((_, _, match_arms)) => {
+                for arm in match_arms {
+                    arm.widget.return_stream(stream);
+                }
+            }
+        }
     }
 }
 
 impl ReturnedWidget {
-    pub fn return_stream(&self, stream: &mut TokenStream2) {
+    fn return_stream(&self, stream: &mut TokenStream2) {
         self.destructure_stream(stream);
+        self.properties.return_stream(stream);
     }
 }
 
