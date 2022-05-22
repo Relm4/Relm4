@@ -79,24 +79,33 @@ macro_rules! parse_type {
     };
 }
 
+fn skip_inner_tokens(input: ParseStream) -> Result<(), syn::Error> {
+    while !input.is_empty() {
+        parse_next_token(input)?;
+    }
+    Ok(())
+}
+
 fn parse_next_token(input: ParseStream) -> Result<bool, syn::Error> {
-    let _unused;
+    let inner_tokens;
     if input.is_empty() {
         Ok(true)
     } else if input.peek(Token![,]) {
         let _comma: Token![,] = input.parse()?;
         Ok(true)
     } else if input.peek(token::Paren) {
-        parenthesized!(_unused in input);
+        parenthesized!(inner_tokens in input);
+        skip_inner_tokens(&inner_tokens)?;
         Ok(false)
     } else if input.peek(token::Bracket) {
-        bracketed!(_unused in input);
+        bracketed!(inner_tokens in input);
+        skip_inner_tokens(&inner_tokens)?;
         Ok(false)
     } else if input.peek(token::Brace) {
-        braced!(_unused in input);
+        braced!(inner_tokens in input);
+        skip_inner_tokens(&inner_tokens)?;
         Ok(false)
-    } else if input.peek(Ident) {
-        let _ident = Ident::parse_any(input)?;
+    } else if Ident::parse_any(input).is_ok() {
         Ok(false)
     } else if input.peek(And) {
         parse_type!(input, And);
@@ -129,6 +138,6 @@ fn parse_next_token(input: ParseStream) -> Result<bool, syn::Error> {
     } else if input.parse::<Punct>().is_ok() || input.parse::<Literal>().is_ok() {
         Ok(false)
     } else {
-        unreachable!("Every possible token should be covered. Please report this error at Relm4!");
+        unreachable!("Every possible token should be covered. Please report this error at Relm4! \nContext: '''{input}''' \n");
     }
 }

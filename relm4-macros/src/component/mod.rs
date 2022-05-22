@@ -155,6 +155,7 @@ pub(crate) fn generate_tokens(
                     #additional_fields_return_stream
                 } = widgets;
 
+                #[allow(unused_variables)]
                 let #model_name = self;
                 // Wrap pre_view and post_view code to prevent early returns from skipping other view code.
                 (|| { #pre_view })();

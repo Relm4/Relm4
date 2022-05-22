@@ -12,6 +12,7 @@ pub(super) fn generate_tokens(input: TokenStream) -> TokenStream {
     let model_name = Ident::new("_", Span2::call_site());
 
     let component::token_streams::TokenStreams {
+        error,
         init,
         assign,
         connect,
@@ -22,6 +23,9 @@ pub(super) fn generate_tokens(input: TokenStream) -> TokenStream {
         #init
         #connect
         #assign
+        {
+            #error
+        }
     };
     output.into()
 }
