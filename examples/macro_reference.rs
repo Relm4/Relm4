@@ -30,7 +30,8 @@ impl SimpleComponent for AppModel {
 
     view! {
         #[root]
-        main_window = gtk::Window {
+        #[name(main_window)]
+        gtk::Window {
             set_title: Some("Macro reference example"),
             set_default_width: 300,
             set_default_height: 100,
@@ -57,13 +58,15 @@ impl SimpleComponent for AppModel {
                 //gtk::Dialog::builder().header_bar(true).build() {
                 gtk::Grid {
                     attach[1, 1, 1, 1] = &gtk::Label {
-                        #[track = "counter.value % 10 == 0"]
+                        // Alternative: #[track = "counter.value % 10 == 0"]
+                        #[track(counter.value % 10 == 0)]
                         set_label: &format!("Grid works! ({})", counter.value),
                     }
                 },
 
                 /// A conditional widget, wow!
-                #[transition = "SlideLeft"]
+                // Alternative: #[transition = "SlideLeft"]
+                #[transition(SlideLeft)]
                 append = if counter.value % 2 == 0 {
                     gtk::Label {
                         set_label: "Value is even",
@@ -142,6 +145,7 @@ impl SimpleComponent for AppModel {
             #[watch]
             set_visible: counter.value == 42,
 
+            #[name = "my_label_name"]
             gtk::Label {
                 set_label: "You made it to 42!",
             }
