@@ -174,6 +174,71 @@ pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
 ///     }
 /// };
 /// ```
+///
+/// # Macro expansion
+///
+/// The code generation for the example above looks like this (plus comments):
+///
+/// ```
+/// struct WindowActionGroup;
+/// impl relm4::actions::ActionGroupName for WindowActionGroup {
+///     const NAME: &'static str = "win";
+/// }
+///
+/// struct TestAction;
+/// impl relm4::actions::ActionName for TestAction {
+///     type Group = WindowActionGroup;
+///     type State = ();
+///     type Target = ();
+///
+///     const NAME: &'static str = "test";
+/// }
+///
+/// struct TestU8Action;
+/// impl relm4::actions::ActionName for TestU8Action {
+///     type Group = WindowActionGroup;
+///     type State = u8;
+///     type Target = u8;
+///
+///     const NAME: &'static str = "test2";
+/// }
+///
+/// // Main menu
+/// let main_menu = ::relm4::gtk::gio::Menu::new();
+/// let new_entry = ::relm4::actions::RelmAction::<TestAction>::to_menu_item("Test");
+/// main_menu.append_item(&new_entry);
+/// let new_entry = ::relm4::actions::RelmAction::<TestAction>::to_menu_item("Test2");
+/// main_menu.append_item(&new_entry);
+/// let new_entry = ::relm4::actions::RelmAction::<TestU8Action>::to_menu_item_with_target_value(
+///     "Test toggle",
+///     &1_u8,
+/// );
+/// main_menu.append_item(&new_entry);
+///
+/// // Section 0
+/// let _section_0 = ::relm4::gtk::gio::Menu::new();
+/// main_menu.append_section(None, &_section_0);
+/// let new_entry = ::relm4::actions::RelmAction::<TestAction>::to_menu_item("Section test");
+/// _section_0.append_item(&new_entry);
+/// let new_entry = ::relm4::actions::RelmAction::<TestU8Action>::to_menu_item_with_target_value(
+///     "Test toggle",
+///     &1_u8,
+/// );
+/// _section_0.append_item(&new_entry);
+///
+/// // Section 1
+/// let _section_1 = ::relm4::gtk::gio::Menu::new();
+/// main_menu.append_section(None, &_section_1);
+/// let new_entry = ::relm4::actions::RelmAction::<TestAction>::to_menu_item("Test");
+/// _section_1.append_item(&new_entry);
+/// let new_entry = ::relm4::actions::RelmAction::<TestAction>::to_menu_item("Test2");
+/// _section_1.append_item(&new_entry);
+/// let new_entry = ::relm4::actions::RelmAction::<TestU8Action>::to_menu_item_with_target_value(
+///     "Test Value",
+///     &1_u8,
+/// );
+/// _section_1.append_item(&new_entry);
+/// ```
 #[proc_macro]
 pub fn menu(input: TokenStream) -> TokenStream {
     let menus = parse_macro_input!(input as Menus);
