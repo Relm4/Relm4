@@ -184,8 +184,8 @@ pub fn menu(input: TokenStream) -> TokenStream {
 
 /// The [`view!`] macro allows you to construct your UI easily and cleanly.
 ///
-/// It does the same as inside the [`macro@widget`] attribute macro,
-/// but with less features (no factories, components, etc).
+/// It does the same as inside the [`component`] attribute macro,
+/// but with less features.
 ///
 /// You can even use the `relm4-macros` crate independently from Relm4 to build your GTK4 UI.
 ///
@@ -237,7 +237,28 @@ pub fn menu(input: TokenStream) -> TokenStream {
 /// ```
 /// # Macro expansion
 ///
-/// The code generation from the first example looks like this (plus comments):
+/// Let's have a look the this example:
+///
+/// ```no_run
+/// # use gtk::prelude::{BoxExt, ButtonExt};
+/// # use relm4::gtk;
+/// // Creating a box with a button inside.
+/// relm4_macros::view! {
+///     vbox = gtk::Box {
+///         gtk::Button {
+///             set_label: "Click me!",
+///             connect_clicked => |_| {
+///                 println!("Hello world!");
+///             }
+///         },
+///         prepend: my_label = &gtk::Label::builder()
+///             .label("The view macro works!")
+///             .build(),
+///     }
+/// }
+/// ```
+///
+/// The code generation for this example looks like this (plus comments):
 ///
 /// ```no_run
 /// # use gtk::prelude::{BoxExt, ButtonExt};
