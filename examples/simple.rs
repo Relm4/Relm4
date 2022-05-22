@@ -83,5 +83,21 @@ impl SimpleComponent for AppModel {
 
 fn main() {
     let app: RelmApp<AppModel> = RelmApp::new("relm4.test.simple");
+
+    let sender = ();
+
+relm4::view! {
+    vbox = gtk::Box {
+        gtk::Button {
+            set_label: "Click me!",
+            connect_clicked => |_| {
+                println!("Hello world!");
+            }
+        },
+        prepend: my_label = &gtk::Label::builder()
+            .label("The view macro works!")
+            .build(),
+    }
+}
     app.run(0);
 }

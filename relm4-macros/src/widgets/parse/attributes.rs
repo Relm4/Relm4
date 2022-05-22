@@ -58,11 +58,11 @@ impl Parse for Attrs {
                         Attr::Track(ident.clone(), Some(Box::new(expr.clone())))
                     } else if ident == "transition" {
                         let expr = expect_one_nested_expr(&nested)?;
-                        let ident = expect_ident_from_expr(&expr)?;
+                        let ident = expect_ident_from_expr(expr)?;
                         Attr::Transition(ident.clone(), ident)
                     } else if ident == "name" {
                         let expr = expect_one_nested_expr(&nested)?;
-                        let ident = expect_ident_from_expr(&expr)?;
+                        let ident = expect_ident_from_expr(expr)?;
                         Attr::Name(ident.clone(), ident)
                     } else {
                         return Err(unexpected_attr_name(ident));
@@ -142,7 +142,7 @@ fn expect_ident_from_path(path: &Path) -> Result<Ident> {
 
 fn expect_one_nested_expr(nested: &Punctuated<Expr, token::Comma>) -> Result<&Expr> {
     if nested.len() != 1 {
-        return Err(Error::new(nested.span(), "Expected only one expression."));
+        Err(Error::new(nested.span(), "Expected only one expression."))
     } else {
         Ok(nested.first().unwrap())
     }
