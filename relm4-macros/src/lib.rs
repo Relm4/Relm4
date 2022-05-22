@@ -184,7 +184,7 @@ pub fn menu(input: TokenStream) -> TokenStream {
 
 /// The [`view!`] macro allows you to construct your UI easily and cleanly.
 ///
-/// It does the same as inside the [`component`] attribute macro,
+/// It does the same as inside the [`macro@component`] attribute macro,
 /// but with less features.
 ///
 /// You can even use the `relm4-macros` crate independently from Relm4 to build your GTK4 UI.
