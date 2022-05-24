@@ -1,13 +1,9 @@
-use super::handle::FactoryHandleData;
-use super::runtime_dropper::RuntimeDropper;
+use super::data_guard::DataGuard;
 use super::{handle::FactoryHandle, DynamicIndex, FactoryComponent, FactoryView};
 
 use crate::{shutdown, OnDestroy, Receiver, Sender};
 
-use std::cell::Cell;
 use std::fmt;
-use std::mem::ManuallyDrop;
-use std::rc::Rc;
 
 use async_oneshot::oneshot;
 use futures::FutureExt;
@@ -101,82 +97,62 @@ where
 
         let input_tx_ = input_tx.clone();
 
-        // Duplicate the references to `data`
-        // # SAFETY
-        // This is safe because:
-        // 1. The first reference never calls the destructor (being wrapped in ManuallyDrop)
-        // 2. The first reference is always dropped first. This is guaranteed by types like 
-        //    `RuntimeDropper` and `FactoryHandle` that wrap the data and the runtime ID
-        //    in a safe API that makes sure the runtime (and with it the first reference) is
-        //    dropped before the second reference is dropped or extracted.
-        // 3. The second reference can only be extracted or dropped AFTER the first one 
-        //    was dropped. The second reference can then safely behave like a normal `Box<C>`.
-        let (data, mut model) = unsafe {
-            let raw = Box::into_raw(data);
-            let data = Box::from_raw(raw);
-            let runtime_data = ManuallyDrop::new(Box::from_raw(raw));
-            (data, runtime_data)
-        };
-
         // Spawns the component's service. It will receive both `Self::Input` and
         // `Self::CommandOutput` messages. It will spawn commands as requested by
         // updates, and send `Self::Output` messages externally.
-        let id = crate::spawn_local(async move {
-            let mut burn_notice = burn_recipient.fuse();
-            loop {
-                let notifier = notifier_rx.recv_async().fuse();
-                let cmd = cmd_rx.recv().fuse();
-                let input = input_rx.recv().fuse();
+        let (data, on_destroy_id) = DataGuard::new(data, |mut model| {
+            async move {
+                let mut burn_notice = burn_recipient.fuse();
+                loop {
+                    let notifier = notifier_rx.recv_async().fuse();
+                    let cmd = cmd_rx.recv().fuse();
+                    let input = input_rx.recv().fuse();
 
-                futures::pin_mut!(cmd);
-                futures::pin_mut!(input);
-                futures::pin_mut!(notifier);
+                    futures::pin_mut!(cmd);
+                    futures::pin_mut!(input);
+                    futures::pin_mut!(notifier);
 
-                let _ = futures::select!(
-                    // Performs the model update, checking if the update requested a command.
-                    // Runs that command asynchronously in the background using tokio.
-                    message = input => {
-                        if let Some(message) = message {
-                            if let Some(command) = model.update_with_view(&mut widgets, message, &input_tx_, &output_tx)
-                            {
-                                let recipient = death_recipient.clone();
-                                crate::spawn(C::command(command, recipient, cmd_tx.clone()));
+                    let _ = futures::select!(
+                        // Performs the model update, checking if the update requested a command.
+                        // Runs that command asynchronously in the background using tokio.
+                        message = input => {
+                            if let Some(message) = message {
+                                if let Some(command) = model.update_with_view(&mut widgets, message, &input_tx_, &output_tx)
+                                {
+                                    let recipient = death_recipient.clone();
+                                    crate::spawn(C::command(command, recipient, cmd_tx.clone()));
+                                }
                             }
                         }
-                    }
 
-                    // Handles responses from a command.
-                    message = cmd => {
-                        if let Some(message) = message {
-                            model.update_cmd_with_view(&mut widgets, message, &input_tx_, &output_tx);
-                        }
-                    }
-
-                    // Triggered when the model and view have been updated externally.
-                    _ = notifier => {
-                        model.update_view(&mut widgets, &input_tx_, &output_tx);
-                    }
-
-                    // Triggered when the component is destroyed
-                    id = burn_notice => {
-                        model.shutdown(&mut widgets, output_tx);
-
-                        death_notifier.shutdown();
-
-                        if let Ok(id) = id {
-                            id.remove();
+                        // Handles responses from a command.
+                        message = cmd => {
+                            if let Some(message) = message {
+                                model.update_cmd_with_view(&mut widgets, message, &input_tx_, &output_tx);
+                            }
                         }
 
-                        return
-                    }
-                );
+                        // Triggered when the model and view have been updated externally.
+                        _ = notifier => {
+                            model.update_view(&mut widgets, &input_tx_, &output_tx);
+                        }
+
+                        // Triggered when the component is destroyed
+                        id = burn_notice => {
+                            model.shutdown(&mut widgets, output_tx);
+
+                            death_notifier.shutdown();
+
+                            if let Ok(id) = id {
+                                id.remove();
+                            }
+
+                            return
+                        }
+                    );
+                }
             }
         });
-
-        // Clone runtime id to be able to drop the runtime manually
-        // when the data is removed from the factory.
-        let runtime_id = Rc::new(Cell::new(Some(id)));
-        let on_destroy_id = Rc::clone(&runtime_id);
 
         // When the root widget is destroyed, the spawned service will be removed.
         let root_widget_ = root_widget.clone();
@@ -187,14 +163,13 @@ where
         });
 
         // Give back a type for controlling the component service.
-        FactoryHandle::new(FactoryHandleData {
+        FactoryHandle {
             data,
             root_widget,
             returned_widget,
             input: input_tx,
             notifier: Sender(notifier),
-            runtime: RuntimeDropper::new(runtime_id),
-        })
+        }
     }
 }
 

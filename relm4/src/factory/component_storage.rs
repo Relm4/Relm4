@@ -25,14 +25,14 @@ where
     pub(super) fn get(&self) -> &C {
         match self {
             Self::Builder(builder) => &builder.data,
-            Self::Final(handle) => handle.get_data(),
+            Self::Final(handle) => handle.data.get(),
         }
     }
 
     pub(super) fn get_mut(&mut self) -> &mut C {
         match self {
             Self::Builder(builder) => &mut builder.data,
-            Self::Final(handle) => handle.get_mut_data(),
+            Self::Final(handle) => handle.data.get_mut(),
         }
     }
 
@@ -46,7 +46,7 @@ where
     pub(super) fn send(&self, msg: C::Input) {
         match self {
             Self::Builder(builder) => builder.input_tx.send(msg),
-            Self::Final(handle) => handle.send(msg),
+            Self::Final(handle) => handle.input.send(msg),
         }
     }
 
@@ -59,7 +59,7 @@ where
     pub(super) fn extract(self) -> C {
         match self {
             Self::Builder(builder) => *builder.data,
-            Self::Final(handle) => handle.into_data(),
+            Self::Final(handle) => handle.data.into_inner(),
         }
     }
 
