@@ -72,3 +72,10 @@ impl SimpleComponent for AppModel {
         }
     }
 }
+
+fn assert_impls_debug<T: std::fmt::Debug>() {}
+
+#[test]
+fn assert_widgets_impl_debug() {
+    assert_impls_debug::<AppWidgets>();
+}
