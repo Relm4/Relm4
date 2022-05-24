@@ -3,21 +3,28 @@ use std::{cell::Cell, mem::ManuallyDrop, rc::Rc};
 use futures::Future;
 use gtk::glib;
 
-/// A type that will drop a runtime behind a shared reference
-/// when it is dropped.
+/// # SAFETY
+///
+/// This type is a safe wrapper that prevent's misuse,
+/// except if you move the data passed to the runtime outside
+/// of the runtime (through senders for example).
 pub(super) struct DataGuard<Data: std::fmt::Debug> {
     data: Box<Data>,
     rt: RuntimeDropper,
 }
 
 impl<Data: std::fmt::Debug> DataGuard<Data> {
+    /// DO NOT MOVE THE DATA PASSED TO THE CLOSURE OUTSIDE OF THE RUNTIME!
+    /// SAFETY IS ONLY GUARANTEED BECAUSE THE DATA IS BOUND TO THE LIFETIME OF THE RUNTIME!
     pub(super) fn new<F, Fut>(data: Box<Data>, f: F) -> (Self, Rc<Cell<Option<glib::SourceId>>>)
     where
         Fut: Future<Output = ()> + 'static,
         F: FnOnce(ManuallyDrop<Box<Data>>) -> Fut,
     {
         // Duplicate the references to `data`
+        //
         // # SAFETY
+        //
         // This is safe because:
         // 1. The first reference never calls the destructor (being wrapped in ManuallyDrop)
         // 2. The first reference is always dropped first. This is guaranteed by types like
@@ -26,6 +33,10 @@ impl<Data: std::fmt::Debug> DataGuard<Data> {
         //    dropped before the second reference is dropped or extracted.
         // 3. The second reference can only be extracted or dropped AFTER the first one
         //    was dropped. The second reference can then safely behave like a normal `Box<C>`.
+        //
+        // Unsoundness only occurs when data that was moved into the runtime is moved out on
+        // purpose. This would allow the first reference to outlive the first one, becoming
+        // a dangling pointer.
         let (data, model_data) = unsafe {
             let raw = Box::into_raw(data);
             let data = Box::from_raw(raw);
@@ -61,6 +72,8 @@ impl<Data: std::fmt::Debug> DataGuard<Data> {
 
 struct RuntimeDropper(Rc<Cell<Option<glib::SourceId>>>);
 
+/// A type that will drop a runtime behind a shared reference
+/// when it is dropped.
 impl Drop for RuntimeDropper {
     fn drop(&mut self) {
         if let Some(id) = self.0.take() {
@@ -111,9 +124,9 @@ mod test {
     }
 
     #[test]
-    fn test_data_guard() {
+    fn test_data_guard_drop() {
         let data = Box::new(DontDropBelow4(0_u8));
-        let (tx, rx) = flume::bounded(3);
+        let (tx, rx) = flume::unbounded();
 
         let main_ctx = MainContext::default();
 
@@ -134,16 +147,62 @@ mod test {
         assert_eq!(data.get().value(), 3);
 
         let mut data = data.into_inner();
-        // If destructor was called, it should have paniced by now
+        // If destructor was called, it should have panicked by now
         assert_eq!(data.value(), 3);
         assert!(rt.take().is_none());
+
+        main_ctx.iteration(false);
 
         // Make sure the destructor doesn't panic
         data.add();
         assert_eq!(data.value(), 4);
 
         tx.send(()).unwrap_err();
+        main_ctx.iteration(false);
+    }
+
+    #[test]
+    fn test_data_guard_rt_kill() {
+        let data = Box::new(DontDropBelow4(0_u8));
+        let (tx, rx) = flume::unbounded();
+
+        let main_ctx = MainContext::default();
+
+        let (data, rt) = DataGuard::new(data, |mut rt_data| async move {
+            while let Ok(_) = rx.recv_async().await {
+                rt_data.add();
+            }
+        });
+
+        main_ctx.iteration(false);
+        assert_eq!(data.get().value(), 0);
+
+        tx.send(()).unwrap();
+        tx.send(()).unwrap();
+        tx.send(()).unwrap();
+        main_ctx.iteration(false);
+
+        assert_eq!(data.get().value(), 3);
+
+        // Manually drop the runtime from outside
+        rt.take().unwrap().remove();
+
+        // Value shouldn't change
         tx.send(()).unwrap_err();
+        main_ctx.iteration(false);
+        assert_eq!(data.get().value(), 3);
+
+        let mut data = data.into_inner();
+        // If destructor was called, it should have panicked by now
+        assert_eq!(data.value(), 3);
+        assert!(rt.take().is_none());
+
+        main_ctx.iteration(false);
+
+        // Make sure the destructor doesn't panic
+        data.add();
+        assert_eq!(data.value(), 4);
+
         tx.send(()).unwrap_err();
         main_ctx.iteration(false);
     }
