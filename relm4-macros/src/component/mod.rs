@@ -122,6 +122,7 @@ pub(crate) fn generate_tokens(
     quote! {
         #[allow(dead_code)]
         #outer_attrs
+        #[derive(Debug)]
         #vis struct #widgets_type {
             #struct_fields
             #additional_fields
