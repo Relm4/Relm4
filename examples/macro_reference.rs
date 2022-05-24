@@ -169,7 +169,10 @@ impl SimpleComponent for AppModel {
         // Insert the macro code generation here
         let widgets = view_output!();
 
-        ComponentParts { model: counter, widgets }
+        ComponentParts {
+            model: counter,
+            widgets,
+        }
     }
 
     fn update(&mut self, msg: Self::Input, _sender: &ComponentSender<Self>) {

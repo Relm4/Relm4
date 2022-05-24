@@ -6,6 +6,7 @@ mod handle;
 mod widgets;
 
 pub mod collections;
+mod runtime_dropper;
 pub use collections::*;
 
 mod dynamic_index;

@@ -1,9 +1,12 @@
+use super::handle::FactoryHandleData;
+use super::runtime_dropper::RuntimeDropper;
 use super::{handle::FactoryHandle, DynamicIndex, FactoryComponent, FactoryView};
 
 use crate::{shutdown, OnDestroy, Receiver, Sender};
 
-use std::cell::RefCell;
+use std::cell::Cell;
 use std::fmt;
+use std::mem::ManuallyDrop;
 use std::rc::Rc;
 
 use async_oneshot::oneshot;
@@ -15,7 +18,7 @@ where
     C: FactoryComponent<Widget, ParentMsg>,
     ParentMsg: 'static,
 {
-    pub(super) data: Rc<RefCell<C>>,
+    pub(super) data: Box<C>,
     pub(super) root_widget: C::Root,
     pub(super) input_tx: Sender<C::Input>,
     pub(super) input_rx: Receiver<C::Input>,
@@ -36,10 +39,8 @@ where
         // Used by this component to send events to be handled externally by the caller.
         let (output_tx, output_rx) = crate::channel::<C::Output>();
 
-        let component = C::init_model(params, index, &input_tx, &output_tx);
-        let root_widget = component.init_root();
-
-        let data = Rc::new(RefCell::new(component));
+        let data = Box::new(C::init_model(params, index, &input_tx, &output_tx));
+        let root_widget = data.init_root();
 
         Self {
             data,
@@ -63,7 +64,7 @@ where
         Transform: Fn(C::Output) -> Option<ParentMsg> + 'static,
     {
         let Self {
-            data,
+            mut data,
             root_widget,
             input_tx,
             mut input_rx,
@@ -88,13 +89,8 @@ where
         // Gets notifications when a component's model and view is updated externally.
         let (notifier, notifier_rx) = flume::bounded(0);
 
-        let mut widgets = data.borrow_mut().init_widgets(
-            index,
-            &root_widget,
-            &returned_widget,
-            &input_tx,
-            &output_tx,
-        );
+        let mut widgets =
+            data.init_widgets(index, &root_widget, &returned_widget, &input_tx, &output_tx);
 
         // The source ID of the component's service will be sent through this once the root
         // widget has been iced, which will give the component one last chance to say goodbye.
@@ -104,7 +100,16 @@ where
         let (death_notifier, death_recipient) = shutdown::channel();
 
         let input_tx_ = input_tx.clone();
-        let runtime_data = data.clone();
+
+        // Duplicate `data`
+        // # SAFETY
+        // This is only safe because TODO!
+        let (data, mut model) = unsafe {
+            let raw = Box::into_raw(data);
+            let data = Box::from_raw(raw);
+            let runtime_data = ManuallyDrop::new(Box::from_raw(raw));
+            (data, runtime_data)
+        };
 
         // Spawns the component's service. It will receive both `Self::Input` and
         // `Self::CommandOutput` messages. It will spawn commands as requested by
@@ -125,8 +130,6 @@ where
                     // Runs that command asynchronously in the background using tokio.
                     message = input => {
                         if let Some(message) = message {
-                            let mut model = runtime_data.borrow_mut();
-
                             if let Some(command) = model.update_with_view(&mut widgets, message, &input_tx_, &output_tx)
                             {
                                 let recipient = death_recipient.clone();
@@ -138,21 +141,17 @@ where
                     // Handles responses from a command.
                     message = cmd => {
                         if let Some(message) = message {
-                            let mut model = runtime_data.borrow_mut();
                             model.update_cmd_with_view(&mut widgets, message, &input_tx_, &output_tx);
                         }
                     }
 
                     // Triggered when the model and view have been updated externally.
                     _ = notifier => {
-                        let model = runtime_data.borrow_mut();
                         model.update_view(&mut widgets, &input_tx_, &output_tx);
                     }
 
                     // Triggered when the component is destroyed
                     id = burn_notice => {
-                        let mut model = runtime_data.borrow_mut();
-
                         model.shutdown(&mut widgets, output_tx);
 
                         death_notifier.shutdown();
@@ -169,26 +168,26 @@ where
 
         // Clone runtime id to be able to drop the runtime manually
         // when the data is removed from the factory.
-        let runtime_id = Rc::new(RefCell::new(Some(id)));
-        let on_destroy_id = runtime_id.clone();
+        let runtime_id = Rc::new(Cell::new(Some(id)));
+        let on_destroy_id = Rc::clone(&runtime_id);
 
         // When the root widget is destroyed, the spawned service will be removed.
         let root_widget_ = root_widget.clone();
         root_widget_.on_destroy(move || {
-            if let Some(id) = on_destroy_id.borrow_mut().take() {
+            if let Some(id) = on_destroy_id.take().take() {
                 let _ = burn_notifier.send(id);
             }
         });
 
         // Give back a type for controlling the component service.
-        FactoryHandle {
+        FactoryHandle::new(FactoryHandleData {
             data,
             root_widget,
             returned_widget,
             input: input_tx,
             notifier: Sender(notifier),
-            runtime_id,
-        }
+            runtime: RuntimeDropper::new(runtime_id),
+        })
     }
 }
 

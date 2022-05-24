@@ -7,10 +7,64 @@ use crate::factory::{
 
 use super::{ModelStateValue, RenderedState};
 
-use std::cell::{Ref, RefCell, RefMut};
 use std::collections::hash_map::DefaultHasher;
 use std::collections::VecDeque;
 use std::hash::{Hash, Hasher};
+use std::ops::{Deref, DerefMut, Index, IndexMut};
+
+#[derive(Debug)]
+pub struct FactoryVecDequeGuard<'a, Widget, C, ParentMsg>
+where
+    Widget: FactoryView,
+    C: FactoryComponent<Widget, ParentMsg> + Position<Widget::Position>,
+    C::Root: AsRef<Widget::Children>,
+    ParentMsg: 'static,
+    Widget: 'static,
+{
+    inner: &'a mut FactoryVecDeque<Widget, C, ParentMsg>,
+}
+
+impl<'a, Widget, C, ParentMsg> Deref for FactoryVecDequeGuard<'a, Widget, C, ParentMsg>
+where
+    Widget: FactoryView,
+    C: FactoryComponent<Widget, ParentMsg> + Position<Widget::Position>,
+    C::Root: AsRef<Widget::Children>,
+    ParentMsg: 'static,
+    Widget: 'static,
+{
+    type Target = FactoryVecDeque<Widget, C, ParentMsg>;
+
+    fn deref(&self) -> &Self::Target {
+        self.inner
+    }
+}
+
+impl<'a, Widget, C, ParentMsg> DerefMut for FactoryVecDequeGuard<'a, Widget, C, ParentMsg>
+where
+    Widget: FactoryView,
+    C: FactoryComponent<Widget, ParentMsg> + Position<Widget::Position>,
+    C::Root: AsRef<Widget::Children>,
+    ParentMsg: 'static,
+    Widget: 'static,
+{
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.inner
+    }
+}
+
+impl<'a, Widget, C, ParentMsg> Drop for FactoryVecDequeGuard<'a, Widget, C, ParentMsg>
+where
+    Widget: FactoryView,
+    C: FactoryComponent<Widget, ParentMsg> + Position<Widget::Position>,
+    C::Root: AsRef<Widget::Children>,
+    ParentMsg: 'static,
+    Widget: 'static,
+{
+    fn drop(&mut self) {
+        self.inner.guarded = false;
+        self.inner.render_changes();
+    }
+}
 
 /// A container similar to [`VecDeque`] that can be used to store
 /// data associated with components that implement [`FactoryComponent`].
@@ -25,10 +79,11 @@ where
 {
     widget: Widget,
     parent_sender: Sender<ParentMsg>,
-    components: RefCell<VecDeque<ComponentStorage<Widget, C, ParentMsg>>>,
-    model_state: RefCell<VecDeque<ModelStateValue>>,
-    rendered_state: RefCell<VecDeque<RenderedState>>,
+    components: VecDeque<ComponentStorage<Widget, C, ParentMsg>>,
+    model_state: VecDeque<ModelStateValue>,
+    rendered_state: VecDeque<RenderedState>,
     uid_counter: u16,
+    guarded: bool,
 }
 
 impl<Widget, C, ParentMsg> Drop for FactoryVecDeque<Widget, C, ParentMsg>
@@ -38,11 +93,36 @@ where
     C::Root: AsRef<Widget::Children>,
 {
     fn drop(&mut self) {
-        for component in self.components.get_mut() {
+        for component in &mut self.components {
             if let Some(widget) = component.returned_widget() {
                 self.widget.factory_remove(widget);
             }
         }
+    }
+}
+
+impl<Widget, C, ParentMsg> Index<usize> for FactoryVecDeque<Widget, C, ParentMsg>
+where
+    Widget: FactoryView,
+    C: FactoryComponent<Widget, ParentMsg> + Position<Widget::Position>,
+    C::Root: AsRef<Widget::Children>,
+{
+    type Output = C;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        self.get(index).expect("Called `get` on an invalid index")
+    }
+}
+
+impl<Widget, C, ParentMsg> IndexMut<usize> for FactoryVecDeque<Widget, C, ParentMsg>
+where
+    Widget: FactoryView,
+    C: FactoryComponent<Widget, ParentMsg> + Position<Widget::Position>,
+    C::Root: AsRef<Widget::Children>,
+{
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        self.get_mut(index)
+            .expect("Called `get_mut` on an invalid index")
     }
 }
 
@@ -57,11 +137,21 @@ where
         Self {
             widget,
             parent_sender: parent_sender.clone(),
-            components: RefCell::new(VecDeque::new()),
-            model_state: RefCell::new(VecDeque::new()),
-            rendered_state: RefCell::new(VecDeque::new()),
+            components: VecDeque::new(),
+            model_state: VecDeque::new(),
+            rendered_state: VecDeque::new(),
             // 0 is always an invalid uid
             uid_counter: 1,
+            guarded: false,
+        }
+    }
+
+    pub fn guard<'a>(&'a mut self) -> Option<FactoryVecDequeGuard<'a, Widget, C, ParentMsg>> {
+        if !self.guarded {
+            self.guarded = true;
+            Some(FactoryVecDequeGuard { inner: self })
+        } else {
+            None
         }
     }
 
@@ -73,12 +163,12 @@ where
     /// but won't cause any UI updates.
     ///
     /// Also, only modified elements will be updated.
-    pub fn render_changes(&self) {
+    pub fn render_changes(&mut self) {
         let mut first_position_change_idx = None;
 
-        let mut components = self.components.borrow_mut();
-        let mut rendered_state = self.rendered_state.borrow_mut();
-        for (index, state) in self.model_state.borrow().iter().enumerate() {
+        let components = &mut self.components;
+        let rendered_state = &mut self.rendered_state;
+        for (index, state) in self.model_state.iter().enumerate() {
             if state.uid == rendered_state.front().map(|r| r.uid).unwrap_or_default() {
                 // Remove item from previously rendered list
                 rendered_state.pop_front();
@@ -126,7 +216,7 @@ where
                         .factory_insert_after(insert_widget, &position, previous_widget)
                 };
                 let component = components.remove(index).unwrap();
-                let dyn_index = &self.model_state.borrow()[index].index;
+                let dyn_index = &self.model_state[index].index;
                 let component = component
                     .launch(dyn_index, returned_widget, &self.parent_sender)
                     .unwrap();
@@ -135,30 +225,24 @@ where
         }
 
         // Reset change tracker
-        self.model_state
-            .borrow_mut()
-            .iter_mut()
-            .for_each(|s| s.changed = false);
+        self.model_state.iter_mut().for_each(|s| s.changed = false);
 
         // Set rendered state to the state of the model
         // because everything should be up-to-date now.
-        drop(rendered_state);
-        self.rendered_state.replace(
-            self.model_state
-                .borrow()
-                .iter()
-                .zip(components.iter())
-                .map(|(s, c)| {
-                    let mut hasher = DefaultHasher::default();
-                    c.returned_widget().unwrap().hash(&mut hasher);
+        self.rendered_state = self
+            .model_state
+            .iter()
+            .zip(components.iter())
+            .map(|(s, c)| {
+                let mut hasher = DefaultHasher::default();
+                c.returned_widget().unwrap().hash(&mut hasher);
 
-                    RenderedState {
-                        uid: s.uid,
-                        widget_hash: hasher.finish(),
-                    }
-                })
-                .collect(),
-        );
+                RenderedState {
+                    uid: s.uid,
+                    widget_hash: hasher.finish(),
+                }
+            })
+            .collect();
 
         if let Some(change_index) = first_position_change_idx {
             for (index, comp) in components.iter().enumerate().skip(change_index) {
@@ -171,110 +255,72 @@ where
 
     /// Returns the number of elements in the [`FactoryVecDeque`].
     pub fn len(&self) -> usize {
-        self.components.borrow().len()
+        self.components.len()
     }
 
     /// Returns true if the [`FactoryVecDeque`] is empty.
     pub fn is_empty(&self) -> bool {
-        self.components.borrow().is_empty()
+        self.components.is_empty()
     }
 
     /// Send a message to one of the elements.
     pub fn send(&self, index: usize, msg: C::Input) {
-        self.components.borrow()[index].send(msg)
+        self.components[index].send(msg)
     }
 
     /// Tries to get an immutable reference to
     /// the model of one element.
     ///
     /// Returns `None` is `index` is invalid.
-    ///
-    /// # Panics
-    ///
-    /// Panics when the same element was borrowed mutably
-    /// somewhere else.
-    pub fn try_get(&self, index: usize) -> Option<Ref<'_, C>> {
+    pub fn get(&self, index: usize) -> Option<&C> {
         // Safety: This is safe because ownership is tracked by each
         // component individually, an therefore violating ownership
         // rules is impossible.
         // The safe version struggles with lifetime, maybe this can
         // be fixed soon.
-        let components = unsafe { self.components.try_borrow_unguarded().unwrap() };
-        components.get(index).map(ComponentStorage::get)
+        self.components.get(index).map(ComponentStorage::get)
     }
 
     /// Tries to get a mutable reference to
     /// the model of one element.
     ///
     /// Returns `None` is `index` is invalid.
-    ///
-    /// # Panics
-    ///
-    /// Panics when the same element was borrowed
-    /// somewhere else.
-    pub fn try_get_mut(&mut self, index: usize) -> Option<RefMut<'_, C>> {
+    pub fn get_mut(&mut self, index: usize) -> Option<&mut C> {
         // Mark as modified
-        if let Some(state) = self.model_state.get_mut().get_mut(index) {
+        if let Some(state) = self.model_state.get_mut(index) {
             state.changed = true;
         }
         self.components
-            .get_mut()
             .get_mut(index)
             .map(ComponentStorage::get_mut)
-    }
-
-    /// Provides a reference to the model of one element.
-    ///
-    /// Element at index 0 is the front of the queue.
-    ///
-    /// # Panics
-    ///
-    /// Panics when the index is invalid or
-    /// the same element was borrowed mutably somewhere else.
-    pub fn get(&self, index: usize) -> Ref<'_, C> {
-        self.try_get(index)
-            .expect("Called `get` on an invalid index")
-    }
-
-    /// Provides a mutable reference to the model of one element.
-    ///
-    /// Element at index 0 is the front of the queue.
-    ///
-    /// # Panics
-    ///
-    /// Panics when the index is invalid or
-    /// the same element was borrowed somewhere else.
-    pub fn get_mut(&mut self, index: usize) -> RefMut<'_, C> {
-        self.try_get_mut(index)
-            .expect("Called `get_mut` on an invalid index")
     }
 
     /// Provides a reference to the model of the back element.
     ///
     /// Returns None if the deque is empty.
-    pub fn back(&self) -> Option<Ref<'_, C>> {
-        self.try_get(self.len().wrapping_sub(1))
+    pub fn back(&self) -> Option<&C> {
+        self.get(self.len().wrapping_sub(1))
     }
 
     /// Provides a reference to the model of the front element.
     ///
     /// Returns None if the deque is empty.
-    pub fn front(&self) -> Option<Ref<'_, C>> {
-        self.try_get(0)
+    pub fn front(&self) -> Option<&C> {
+        self.get(0)
     }
 
     /// Provides a mutable reference to the model of the back element.
     ///
     /// Returns None if the deque is empty.
-    pub fn back_mut(&mut self) -> Option<RefMut<'_, C>> {
-        self.try_get_mut(self.len().wrapping_sub(1))
+    pub fn back_mut(&mut self) -> Option<&mut C> {
+        self.get_mut(self.len().wrapping_sub(1))
     }
 
     /// Provides a mutable reference to the model of the front element.
     ///
     /// Returns None if the deque is empty.
-    pub fn front_mut(&mut self) -> Option<RefMut<'_, C>> {
-        self.try_get_mut(0)
+    pub fn front_mut(&mut self) -> Option<&mut C> {
+        self.get_mut(0)
     }
 
     /// Removes the last element from the [`FactoryVecDeque`] and returns it,
@@ -298,14 +344,11 @@ where
     ///
     /// Element at index 0 is the front of the queue.
     pub fn remove(&mut self, index: usize) -> Option<C> {
-        let model_state = self.model_state.get_mut();
-        let components = self.components.get_mut();
-
-        model_state.remove(index);
-        let component = components.remove(index);
+        self.model_state.remove(index);
+        let component = self.components.remove(index);
 
         // Decrement the indexes of the following elements.
-        for states in model_state.iter_mut().skip(index) {
+        for states in self.model_state.iter_mut().skip(index) {
             states.index.decrement();
         }
 
@@ -344,20 +387,18 @@ where
     ///
     /// Panics if index is greater than [`FactoryVecDeque`]’s length.
     pub fn insert(&mut self, index: usize, init_params: C::InitParams) {
-        let model_state = self.model_state.get_mut();
-        let components = self.components.get_mut();
-
         let dyn_index = DynamicIndex::new(index);
 
         // Increment the indexes of the following elements.
-        for states in model_state.iter_mut().skip(index) {
+        for states in self.model_state.iter_mut().skip(index) {
             states.index.increment();
         }
 
         let builder = FactoryBuilder::new(&dyn_index, init_params);
 
-        components.insert(index, ComponentStorage::Builder(builder));
-        model_state.insert(
+        self.components
+            .insert(index, ComponentStorage::Builder(builder));
+        self.model_state.insert(
             index,
             ModelStateValue {
                 index: dyn_index,
@@ -380,15 +421,12 @@ where
     pub fn swap(&mut self, first: usize, second: usize) {
         // Don't update anything if both are equal
         if first != second {
-            let model_state = self.model_state.get_mut();
-            let components = self.components.get_mut();
-
-            model_state.swap(first, second);
-            components.swap(first, second);
+            self.model_state.swap(first, second);
+            self.components.swap(first, second);
 
             // Update indexes.
-            model_state[first].index.set_value(first);
-            model_state[second].index.set_value(second);
+            self.model_state[first].index.set_value(first);
+            self.model_state[second].index.set_value(second);
         }
     }
 
@@ -405,21 +443,19 @@ where
     pub fn move_to(&mut self, current_position: usize, target: usize) {
         // Don't update anything if both are equal
         if current_position != target {
-            let model_state = self.model_state.get_mut();
-            let components = self.components.get_mut();
-
-            let elem = model_state.remove(current_position).unwrap();
+            let elem = self.model_state.remove(current_position).unwrap();
             // Set new index
             elem.index.set_value(target);
-            model_state.insert(target, elem);
+            self.model_state.insert(target, elem);
 
-            let comp = components.remove(current_position).unwrap();
-            components.insert(target, comp);
+            let comp = self.components.remove(current_position).unwrap();
+            self.components.insert(target, comp);
 
             // Update indexes.
             if current_position > target {
                 // Move down -> shift elements in between up.
-                for state in model_state
+                for state in self
+                    .model_state
                     .iter_mut()
                     .skip(target + 1)
                     .take(current_position - target)
@@ -428,7 +464,8 @@ where
                 }
             } else {
                 // Move up -> shift elements in between down.
-                for state in model_state
+                for state in self
+                    .model_state
                     .iter_mut()
                     .skip(current_position)
                     .take(target - current_position)
@@ -461,12 +498,9 @@ where
 
     /// Remove all components from the [`FactoryVecDeque`].
     pub fn clear(&mut self) {
-        let model_state = self.model_state.get_mut();
-        let components = self.components.get_mut();
+        self.model_state.clear();
 
-        model_state.clear();
-
-        for component in components.drain(..) {
+        for component in self.components.drain(..) {
             if let Some(widget) = component.returned_widget() {
                 self.widget.factory_remove(widget);
             }
@@ -496,21 +530,21 @@ where
         }
 
         for (index, hash) in hashes.iter().enumerate() {
-            let rendered_state = self.rendered_state.get_mut();
-
             if *hash
-                != rendered_state
+                != self
+                    .rendered_state
                     .get(index)
                     .map(|state| state.widget_hash)
                     .unwrap_or_default()
             {
-                let old_position = rendered_state
+                let old_position = self
+                    .rendered_state
                     .iter()
                     .position(|state| state.widget_hash == *hash)
                     .expect("A new widget was added");
 
-                let elem = rendered_state.remove(old_position).unwrap();
-                rendered_state.insert(index, elem);
+                let elem = self.rendered_state.remove(old_position).unwrap();
+                self.rendered_state.insert(index, elem);
 
                 self.move_to(old_position, index);
             }

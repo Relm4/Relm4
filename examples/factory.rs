@@ -213,35 +213,34 @@ impl SimpleComponent for AppModel {
     }
 
     fn update(&mut self, msg: Self::Input, _sender: &ComponentSender<Self>) {
+        let mut counters_guard = self.counters.guard().unwrap();
         match msg {
             AppMsg::AddCounter => {
-                self.counters.push_back(self.created_widgets);
+                counters_guard.push_back(self.created_widgets);
                 self.created_widgets = self.created_widgets.wrapping_add(1);
             }
             AppMsg::RemoveCounter => {
-                self.counters.pop_back();
+                counters_guard.pop_back();
             }
             AppMsg::SendFront(index) => {
-                self.counters.move_front(index.current_index());
+                counters_guard.move_front(index.current_index());
             }
             AppMsg::MoveDown(index) => {
                 let index = index.current_index();
                 let new_index = index + 1;
                 // Already at the end?
-                if new_index < self.counters.len() {
-                    self.counters.move_to(index, new_index);
+                if new_index < counters_guard.len() {
+                    counters_guard.move_to(index, new_index);
                 }
             }
             AppMsg::MoveUp(index) => {
                 let index = index.current_index();
                 // Already at the start?
                 if index != 0 {
-                    self.counters.move_to(index, index - 1);
+                    counters_guard.move_to(index, index - 1);
                 }
             }
         }
-
-        self.counters.render_changes();
     }
 }
 

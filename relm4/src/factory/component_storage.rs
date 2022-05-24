@@ -3,9 +3,7 @@ use crate::factory::{
 };
 use crate::Sender;
 
-use std::cell::{Ref, RefMut};
 use std::fmt::Debug;
-use std::rc::Rc;
 
 #[derive(Debug)]
 pub(super) enum ComponentStorage<Widget, C, ParentMsg>
@@ -24,17 +22,17 @@ where
     Widget: FactoryView,
     C: FactoryComponent<Widget, ParentMsg>,
 {
-    pub(super) fn get(&self) -> Ref<'_, C> {
+    pub(super) fn get(&self) -> &C {
         match self {
-            Self::Builder(builder) => builder.data.borrow(),
-            Self::Final(handle) => handle.data.borrow(),
+            Self::Builder(builder) => &builder.data,
+            Self::Final(handle) => handle.get_data(),
         }
     }
 
-    pub(super) fn get_mut(&mut self) -> RefMut<'_, C> {
+    pub(super) fn get_mut(&mut self) -> &mut C {
         match self {
-            Self::Builder(builder) => builder.data.borrow_mut(),
-            Self::Final(handle) => handle.data.borrow_mut(),
+            Self::Builder(builder) => &mut builder.data,
+            Self::Final(handle) => handle.get_mut_data(),
         }
     }
 
@@ -48,7 +46,7 @@ where
     pub(super) fn send(&self, msg: C::Input) {
         match self {
             Self::Builder(builder) => builder.input_tx.send(msg),
-            Self::Final(handle) => handle.input.send(msg),
+            Self::Final(handle) => handle.send(msg),
         }
     }
 
@@ -60,13 +58,8 @@ where
 
     pub(super) fn extract(self) -> C {
         match self {
-            Self::Builder(builder) => Rc::try_unwrap(builder.data).unwrap().into_inner(),
-            Self::Final(handle) => {
-                if let Some(id) = handle.runtime_id.borrow_mut().take() {
-                    id.remove();
-                }
-                Rc::try_unwrap(handle.data).unwrap().into_inner()
-            }
+            Self::Builder(builder) => *builder.data,
+            Self::Final(handle) => handle.into_data(),
         }
     }
 
