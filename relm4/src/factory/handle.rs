@@ -6,6 +6,11 @@ use std::fmt;
 use super::FactoryView;
 use crate::Sender;
 
+/// Don't allow public access to a [`FactoryHandle`].
+///
+/// It might be unsafe to extract `data` or `runtime`.
+/// Inside this type, it is guaranteed that extracting `data` will drop `runtime` before to
+/// comply with all required safety guarantees.
 pub(super) struct FactoryHandleData<Widget, C: FactoryComponent<Widget, ParentMsg>, ParentMsg>
 where
     Widget: FactoryView,

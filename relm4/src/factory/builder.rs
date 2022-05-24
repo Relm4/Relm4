@@ -101,9 +101,16 @@ where
 
         let input_tx_ = input_tx.clone();
 
-        // Duplicate `data`
+        // Duplicate the references to `data`
         // # SAFETY
-        // This is only safe because TODO!
+        // This is safe because:
+        // 1. The first reference never calls the destructor (being wrapped in ManuallyDrop)
+        // 2. The first reference is always dropped first. This is guaranteed by types like 
+        //    `RuntimeDropper` and `FactoryHandle` that wrap the data and the runtime ID
+        //    in a safe API that makes sure the runtime (and with it the first reference) is
+        //    dropped before the second reference is dropped or extracted.
+        // 3. The second reference can only be extracted or dropped AFTER the first one 
+        //    was dropped. The second reference can then safely behave like a normal `Box<C>`.
         let (data, mut model) = unsafe {
             let raw = Box::into_raw(data);
             let data = Box::from_raw(raw);
@@ -174,7 +181,7 @@ where
         // When the root widget is destroyed, the spawned service will be removed.
         let root_widget_ = root_widget.clone();
         root_widget_.on_destroy(move || {
-            if let Some(id) = on_destroy_id.take().take() {
+            if let Some(id) = on_destroy_id.take() {
                 let _ = burn_notifier.send(id);
             }
         });
