@@ -62,6 +62,7 @@ impl Widget {
         self.properties.assign_stream(stream, w_name, relm4_path);
 
         if let Some(returned_widget) = &self.returned_widget {
+            let w_name = &returned_widget.name;
             returned_widget
                 .properties
                 .assign_stream(stream, w_name, relm4_path);

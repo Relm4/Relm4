@@ -12,7 +12,7 @@ impl PropertyName {
             }
             PropertyName::Path(path) => path.to_token_stream(),
             PropertyName::RelmContainerExtAssign => {
-                quote! { #relm4_path ::RelmContainerExt::container_add }
+                quote_spanned! { w_name.span() => #relm4_path ::RelmContainerExt::container_add }
             }
         }
     }

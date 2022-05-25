@@ -4,42 +4,18 @@ use syn::{Error, Ident, ImplItemType, Result, Type};
 
 pub(super) struct Types {
     pub widgets: Ident,
-    pub init_params: ImplItemType,
-    pub input: ImplItemType,
-    pub output: ImplItemType,
     pub other_types: Vec<ImplItemType>,
-}
-
-macro_rules! parse_type {
-    ($lit:literal, $name:ident, $ty_name:ident, $ty:ident) => {
-        if $name.is_some() {
-            return Err(Error::new(
-                $ty_name.span(),
-                &format!("Type `{}` defined multiple times", $lit),
-            ));
-        }
-        $name = Some($ty);
-    };
 }
 
 impl Types {
     pub(super) fn new(types: Vec<ImplItemType>) -> Result<Self> {
-        let mut init_params = None;
-        let mut input = None;
-        let mut output = None;
         let mut other_types = Vec::new();
 
         let mut widgets = None;
 
         for ty in types {
             let ident = &ty.ident;
-            if ident == "InitParams" {
-                parse_type!("InitParams", init_params, ident, ty);
-            } else if ident == "Input" {
-                parse_type!("Input", input, ident, ty);
-            } else if ident == "Output" {
-                parse_type!("Output", output, ident, ty);
-            } else if ident == "Widgets" {
+            if ident == "Widgets" {
                 if widgets.is_some() {
                     return Err(Error::new(
                         ident.span(),
@@ -67,18 +43,9 @@ impl Types {
 
         let widgets =
             widgets.ok_or_else(|| Error::new(Span2::call_site(), "Did not find type `Widgets`"))?;
-        let init_params = init_params
-            .ok_or_else(|| Error::new(Span2::call_site(), "Did not find type `InitParams"))?;
-        let output =
-            output.ok_or_else(|| Error::new(Span2::call_site(), "Did not find type `Output`"))?;
-        let input =
-            input.ok_or_else(|| Error::new(Span2::call_site(), "Did not find type `Input`"))?;
 
         Ok(Self {
             widgets,
-            init_params,
-            output,
-            input,
             other_types,
         })
     }
