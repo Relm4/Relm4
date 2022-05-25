@@ -120,10 +120,12 @@ impl Widget {
         self.connect_signals_stream(&mut streams.connect, relm4_path);
 
         // Rename the `root` to the actual widget name
-        if let Some(root_name) = root_name {
-            streams.rename_root.extend(quote_spanned! {
-                name_span => let #name = #root_name.clone();
-            });
+        if generate_init_root_stream {
+            if let Some(root_name) = root_name {
+                streams.rename_root.extend(quote_spanned! {
+                    name_span => let #name = #root_name.clone();
+                });
+            }
         }
     }
 }
