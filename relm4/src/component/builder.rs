@@ -74,13 +74,13 @@ impl<C: Component> ComponentBuilder<C> {
         let ComponentBuilder { root, .. } = self;
 
         // Used for all events to be processed by this component's internal service.
-        let (input_tx, mut input_rx) = crate::channel::<C::Input>();
+        let (input_tx, input_rx) = crate::channel::<C::Input>();
 
         // Used by this component to send events to be handled externally by the caller.
         let (output_tx, output_rx) = crate::channel::<C::Output>();
 
         // Sends messages from commands executed from the background.
-        let (cmd_tx, mut cmd_rx) = crate::channel::<C::CommandOutput>();
+        let (cmd_tx, cmd_rx) = crate::channel::<C::CommandOutput>();
 
         // Gets notifications when a component's model and view is updated externally.
         let (notifier, notifier_rx) = flume::bounded(0);

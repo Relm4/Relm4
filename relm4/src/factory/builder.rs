@@ -66,9 +66,9 @@ where
             data,
             root_widget,
             input_tx,
-            mut input_rx,
+            input_rx,
             output_tx,
-            mut output_rx,
+            output_rx,
         } = self;
 
         let forward_sender = parent_sender.0.clone();
@@ -83,7 +83,7 @@ where
         });
 
         // Sends messages from commands executed from the background.
-        let (cmd_tx, mut cmd_rx) = crate::channel::<C::CommandOutput>();
+        let (cmd_tx, cmd_rx) = crate::channel::<C::CommandOutput>();
 
         // Gets notifications when a component's model and view is updated externally.
         let (notifier, notifier_rx) = flume::bounded(0);

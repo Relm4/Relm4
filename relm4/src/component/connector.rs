@@ -56,7 +56,7 @@ impl<C: Component> Connector<C> {
             state,
             widget,
             sender,
-            mut receiver,
+            receiver,
         } = self;
 
         let mut sender_ = sender.clone();

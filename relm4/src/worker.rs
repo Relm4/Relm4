@@ -27,7 +27,7 @@ pub trait Worker: Sized + Send {
 
     /// Spawns the worker task in the background.
     fn init(params: Self::InputParams) -> WorkerHandle<Self::Input, Self::Output> {
-        let (input_tx, mut input_rx) = crate::channel::<Self::Input>();
+        let (input_tx, input_rx) = crate::channel::<Self::Input>();
         let (mut output_tx, output_rx) = crate::channel::<Self::Output>();
 
         let worker = {
@@ -87,7 +87,7 @@ impl<Input: 'static, Output: 'static> WorkerHandle<Input, Output> {
         let WorkerHandle {
             worker,
             sender,
-            mut receiver,
+            receiver,
         } = self;
 
         let mut sender_ = sender.clone();
