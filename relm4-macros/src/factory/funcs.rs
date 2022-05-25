@@ -7,7 +7,7 @@ use crate::util;
 
 pub(super) struct Funcs {
     pub unhandled_fns: Vec<ImplItemMethod>,
-    pub init_widgets: ImplItemMethod,
+    pub init_widgets: Option<ImplItemMethod>,
     pub pre_view: Option<TokenStream2>,
     pub post_view: Option<TokenStream2>,
     pub root_name: Ident,
@@ -40,7 +40,7 @@ impl Funcs {
                 if init_widgets.is_some() {
                     return Err(Error::new(
                         func.span().unwrap().into(),
-                        "`init` method defined multiple times",
+                        "`init_widgets` method defined multiple times",
                     ));
                 } else {
                     root_name = Some(util::get_ident_of_nth_func_input(&func, 2)?);
@@ -59,9 +59,7 @@ impl Funcs {
             }
         }
 
-        let init_widgets = init_widgets
-            .ok_or_else(|| Error::new(Span2::call_site(), "`init` method isn't defined"))?;
-        let root_name = root_name.unwrap();
+        let root_name = root_name.unwrap_or_else(|| Ident::new("root", Span2::call_site()));
 
         Ok(Funcs {
             init_widgets,

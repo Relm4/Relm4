@@ -7,7 +7,7 @@ use crate::macros::Macros;
 use crate::ItemImpl;
 
 mod funcs;
-mod inject_view_code;
+pub(super) mod inject_view_code;
 pub(crate) mod token_streams;
 mod types;
 
@@ -18,7 +18,11 @@ pub(crate) fn generate_tokens(
     relm4_path: Path,
     data: ItemImpl,
 ) -> TokenStream2 {
-    let last_segment = data.trait_.segments.last().unwrap();
+    let last_segment = data
+        .trait_
+        .segments
+        .last()
+        .expect("Expected at least one segment in the trait path");
     if PathArguments::None != last_segment.arguments {
         return Error::new(
             last_segment.arguments.span(),
@@ -29,9 +33,6 @@ pub(crate) fn generate_tokens(
 
     let types::Types {
         widgets: widgets_type,
-        init_params,
-        input,
-        output,
         other_types,
     } = match types::Types::new(data.types) {
         Ok(types) => types,
@@ -132,10 +133,6 @@ pub(crate) fn generate_tokens(
             type Widgets = #widgets_type;
 
             #(#other_types)*
-
-            #init_params
-            #input
-            #output
 
             fn init_root() -> Self::Root {
                 #init_root

@@ -1,6 +1,6 @@
 use proc_macro2::{Span as Span2, TokenStream as TokenStream2};
 use quote::{quote, ToTokens};
-use syn::{Ident, Path, Visibility};
+use syn::{Ident, Path, PathArguments, Visibility};
 
 use crate::component::token_streams;
 use crate::macros::Macros;
@@ -17,11 +17,23 @@ pub(crate) fn generate_tokens(
     relm4_path: Path,
     data: ItemImpl,
 ) -> TokenStream2 {
+    let last_segment = data
+        .trait_
+        .segments
+        .last()
+        .expect("Expected at least one segment in the trait path");
+    let container_widget = if let PathArguments::AngleBracketed(args) = &last_segment.arguments {
+        if let Some(arg) = args.args.first() {
+            arg.to_token_stream()
+        } else {
+            quote! { () }
+        }
+    } else {
+        quote! { () }
+    };
+
     let types::Types {
         widgets: widgets_type,
-        init_params,
-        input,
-        output,
         other_types,
     } = match types::Types::new(data.types) {
         Ok(types) => types,
@@ -109,10 +121,13 @@ pub(crate) fn generate_tokens(
         }
     };
 
-    let init_injected = match inject_view_code(init_widgets, view_code, widgets_return_code) {
-        Ok(method) => method,
-        Err(err) => return err.to_compile_error(),
-    };
+    let init_injected = inject_view_code(
+        init_widgets,
+        view_code,
+        widgets_return_code,
+        container_widget,
+        &relm4_path,
+    );
 
     quote! {
         #[allow(dead_code)]
@@ -127,10 +142,6 @@ pub(crate) fn generate_tokens(
             type Widgets = #widgets_type;
 
             #(#other_types)*
-
-            #init_params
-            #input
-            #output
 
             fn init_root(&self) -> Self::Root {
                 #init_root
