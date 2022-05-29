@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote, quote_spanned, ToTokens};
+use quote::{quote_spanned, ToTokens};
 use syn::Path;
 
 use crate::widgets::{
@@ -75,13 +75,15 @@ impl ConditionalWidget {
     fn init_stream(&self, stream: &mut TokenStream2, relm4_path: &Path) {
         let name = &self.name;
 
-        stream.extend(quote! {
-            let #name = #relm4_path::gtk::Stack::default();
+        stream.extend(quote_spanned! {
+            name.span() =>
+                let #name = #relm4_path::gtk::Stack::default();
         });
 
         if let Some(transition) = &self.transition {
-            stream.extend(quote! {
-                #name.set_transition_type(#relm4_path::gtk::StackTransitionType:: #transition);
+            stream.extend(quote_spanned! {
+                transition.span() =>
+                    #name.set_transition_type(#relm4_path::gtk::StackTransitionType:: #transition);
             });
         }
 

@@ -40,8 +40,8 @@ impl Widget {
         let span = p_name.span();
 
         let args = self.args.as_ref().map(|args| {
-            quote! {
-               , #args
+            quote_spanned! {
+               args.span() => ,#args
             }
         });
 

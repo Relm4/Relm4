@@ -49,8 +49,8 @@ impl ConditionalWidget {
             name
         } else {
             parse_util::idents_to_snake_case(
-                [Ident::new("conditional_widget", Span2::call_site())].iter(),
-                Span2::call_site(),
+                [Ident::new("conditional_widget", input.span())].iter(),
+                input.span(),
             )
         };
 

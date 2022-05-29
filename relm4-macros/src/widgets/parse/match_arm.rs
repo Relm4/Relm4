@@ -1,4 +1,3 @@
-use proc_macro2::Span as Span2;
 use syn::parse::ParseStream;
 use syn::token::And;
 use syn::{token, Token};
@@ -30,11 +29,11 @@ impl MatchArm {
         };
 
         let attributes = inner_tokens.parse().ok();
-        let args = args_from_index(index);
+        let args = args_from_index(index, input.span());
+
+        let ref_span = input.span();
         let mut widget = Widget::parse(inner_tokens, attributes, Some(args))?;
-        widget.ref_token = Some(And {
-            spans: [Span2::call_site()],
-        });
+        widget.ref_token = Some(And { spans: [ref_span] });
 
         Ok(Self {
             pattern,

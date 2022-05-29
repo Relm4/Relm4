@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::quote;
+use quote::{quote, quote_spanned};
 use syn::{Ident, Path};
 
 use super::{Menu, MenuEntry, MenuItem, MenuSection, Menus};
@@ -19,8 +19,9 @@ impl Menus {
 impl Menu {
     fn menu_stream(&self, relm4_path: &Path) -> TokenStream2 {
         let name = &self.name;
-        let mut menu_stream = quote! {
-            let #name = #relm4_path::gtk::gio::Menu::new();
+        let mut menu_stream = quote_spanned! {
+            name.span() =>
+                let #name = #relm4_path::gtk::gio::Menu::new();
         };
 
         for item in &self.items {
@@ -53,14 +54,16 @@ impl MenuEntry {
         let string = &self.string;
         let ty = &self.action_ty;
         if let Some(value) = &self.value {
-            quote! {
-                let new_entry = #relm4_path::actions::RelmAction::<#ty>::to_menu_item_with_target_value(#string, &#value);
-                #parent_ident.append_item(&new_entry);
+            quote_spanned! {
+                string.span() =>
+                    let new_entry = #relm4_path::actions::RelmAction::<#ty>::to_menu_item_with_target_value(#string, &#value);
+                    #parent_ident.append_item(&new_entry);
             }
         } else {
-            quote! {
-                let new_entry = #relm4_path::actions::RelmAction::<#ty>::to_menu_item(#string);
-                #parent_ident.append_item(&new_entry);
+            quote_spanned! {
+                string.span() =>
+                    let new_entry = #relm4_path::actions::RelmAction::<#ty>::to_menu_item(#string);
+                    #parent_ident.append_item(&new_entry);
             }
         }
     }

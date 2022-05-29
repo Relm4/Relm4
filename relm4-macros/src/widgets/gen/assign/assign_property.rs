@@ -36,17 +36,19 @@ impl AssignProperty {
             let mut block_stream = TokenStream2::default();
             let mut unblock_stream = TokenStream2::default();
             for signal_handler in &self.block_signals {
-                block_stream.extend(quote! {
-                    {
-                        use #relm4_path ::WidgetRef;
-                        #relm4_path ::gtk::prelude::ObjectExt::block_signal(#w_name.widget_ref(), &#signal_handler);
-                    }
+                block_stream.extend(quote_spanned! {
+                    signal_handler.span() =>
+                        {
+                            use #relm4_path ::WidgetRef;
+                            #relm4_path ::gtk::prelude::ObjectExt::block_signal(#w_name.widget_ref(), &#signal_handler);
+                        }
                 });
-                unblock_stream.extend(quote! {
-                    {
-                        use #relm4_path ::WidgetRef;
-                        #relm4_path ::gtk::prelude::ObjectExt::unblock_signal(#w_name.widget_ref(), &#signal_handler);
-                    }
+                unblock_stream.extend(quote_spanned! {
+                    signal_handler.span() =>
+                        {
+                            use #relm4_path ::WidgetRef;
+                            #relm4_path ::gtk::prelude::ObjectExt::unblock_signal(#w_name.widget_ref(), &#signal_handler);
+                        }
                 });
             }
             (Some(block_stream), Some(unblock_stream))
