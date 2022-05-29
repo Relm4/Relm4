@@ -26,6 +26,9 @@ pub mod factory;
 /// Cancellation mechanism used by Relm
 pub mod shutdown;
 
+/// Shared state that can be accessed by many components.
+pub mod shared_state;
+
 pub mod util;
 mod worker;
 
