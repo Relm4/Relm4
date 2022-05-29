@@ -14,3 +14,7 @@ relm4 = { path = "../../relm4", features = ["libadwaita", "macros"] }
 [[example]]
 name = "tab_factory"
 path = "tab_factory.rs"
+
+[[example]]
+name = "tab_game"
+path = "tab_game.rs"
