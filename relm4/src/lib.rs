@@ -18,22 +18,37 @@
 pub mod actions;
 mod app;
 mod channel;
-mod component;
+
+/// Components are smaller mostly independent parts of
+/// your application.
+pub mod component;
+
 pub mod drawing;
 mod extensions;
 pub mod factory;
 
-/// Cancellation mechanism used by Relm
+/// Cancellation mechanism used by Relm4.
 pub mod shutdown;
 
-pub mod util;
-mod worker;
+/// Shared state that can be accessed by many components.
+pub mod shared_state;
 
-pub use self::channel::*;
-pub use self::component::*;
+pub mod util;
+
+/// A simpler version of components that does work
+/// in the background.
+pub mod worker;
+
+pub use self::channel::{channel, Receiver, Sender};
+pub use self::component::{
+    Component, ComponentBuilder, ComponentController, ComponentParts, ComponentSender, OnDestroy,
+    SimpleComponent,
+};
 pub use self::extensions::*;
+pub use self::shared_state::SharedState;
 pub use self::shutdown::ShutdownReceiver;
-pub use self::worker::*;
+pub use self::worker::{Worker, WorkerController, WorkerHandle};
+
 pub use app::RelmApp;
 pub use tokio::task::JoinHandle;
 pub use util::{WidgetPlus, WidgetRef};
@@ -72,6 +87,8 @@ type Application = adw::Application;
 
 #[cfg(not(feature = "libadwaita"))]
 type Application = gtk::Application;
+
+pub use tokio;
 
 /// Sets a custom global stylesheet.
 ///

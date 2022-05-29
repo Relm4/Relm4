@@ -3,7 +3,9 @@
 
 use std::fmt;
 
-pub(crate) fn channel<T>() -> (Sender<T>, Receiver<T>) {
+/// Create an unbounded channel to send messages
+/// between different parts of you application.
+pub fn channel<T>() -> (Sender<T>, Receiver<T>) {
     let (tx, rx) = flume::unbounded();
     (Sender(tx), Receiver(rx))
 }

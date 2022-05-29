@@ -1,7 +1,7 @@
 //! Traits for for managing and updating factories.
 
 use super::DynamicIndex;
-use crate::{CommandFuture, OnDestroy, Sender, ShutdownReceiver};
+use crate::{component::CommandFuture, OnDestroy, Sender, ShutdownReceiver};
 
 use std::fmt::Debug;
 
