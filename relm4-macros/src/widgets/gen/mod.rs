@@ -13,6 +13,7 @@ mod struct_fields;
 mod return_fields;
 
 mod assign;
+mod conditional_init;
 mod connect_signals;
 mod destructure_fields;
 mod error;
@@ -28,7 +29,7 @@ impl Widget {
 
         let out_stream = quote! { #ref_token #deref_token #w_name };
 
-        if let Some(wrapper) = &self.wrapper {
+        if let Some(wrapper) = &self.assign_wrapper {
             quote_spanned! {
                 wrapper.span() => #wrapper(#out_stream)
             }

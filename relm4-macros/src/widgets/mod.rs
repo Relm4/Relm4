@@ -101,7 +101,7 @@ pub(super) struct Widget {
     func: WidgetFunc,
     args: Option<Args<Expr>>,
     properties: Properties,
-    wrapper: Option<Ident>,
+    assign_wrapper: Option<Ident>,
     ref_token: Option<token::And>,
     deref_token: Option<token::Star>,
     returned_widget: Option<ReturnedWidget>,
@@ -124,6 +124,7 @@ struct ReturnedWidget {
 struct ConditionalWidget {
     doc_attr: Option<TokenStream2>,
     transition: Option<Ident>,
+    assign_wrapper: Option<Ident>,
     name: Ident,
     args: Option<Args<Expr>>,
     branches: ConditionalBranches,
@@ -163,6 +164,7 @@ enum Attr {
     BlockSignal(Ident, Vec<Ident>),
     Name(Ident, Ident),
     Transition(Ident, Ident),
+    Optional(Ident),
 }
 
 struct Attrs {

@@ -24,7 +24,8 @@ impl ReturnedWidget {
 impl Widget {
     pub fn start_assign_stream(&self, stream: &mut TokenStream2, relm4_path: &Path) {
         let w_name = &self.name;
-        self.properties.assign_stream(stream, w_name, relm4_path);
+        self.properties
+            .assign_stream(stream, w_name, false, relm4_path);
     }
 
     pub(super) fn assign_stream(
@@ -32,6 +33,7 @@ impl Widget {
         stream: &mut TokenStream2,
         p_name: &PropertyName,
         w_name: &Ident,
+        is_conditional: bool,
         relm4_path: &Path,
     ) {
         let assign_fn = p_name.assign_fn_stream(w_name, relm4_path);
@@ -59,13 +61,14 @@ impl Widget {
 
         // Recursively generate code for properties
         let w_name = &self.name;
-        self.properties.assign_stream(stream, w_name, relm4_path);
+        self.properties
+            .assign_stream(stream, w_name, is_conditional, relm4_path);
 
         if let Some(returned_widget) = &self.returned_widget {
             let w_name = &returned_widget.name;
             returned_widget
                 .properties
-                .assign_stream(stream, w_name, relm4_path);
+                .assign_stream(stream, w_name, is_conditional, relm4_path);
         }
     }
 }

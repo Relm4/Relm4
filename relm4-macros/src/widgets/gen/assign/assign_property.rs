@@ -3,9 +3,31 @@ use quote::{quote, quote_spanned, ToTokens};
 use syn::spanned::Spanned;
 use syn::{Expr, Ident, Path};
 
-use crate::widgets::{AssignProperty, PropertyName};
+use crate::widgets::{AssignProperty, AssignPropertyAttr, PropertyName};
 
 impl AssignProperty {
+    pub(crate) fn conditional_assign_stream(
+        &self,
+        stream: &mut TokenStream2,
+        p_name: &PropertyName,
+        w_name: &Ident,
+        is_conditional: bool,
+        relm4_path: &Path,
+    ) {
+        // If the code gen path is behind a conditional widgets, handle `watch` and `track` later.
+        // Normally, those would be initialized right away, but they might need access to
+        // variables from a pattern, for example `Some(variable)` so they are moved inside the
+        // match arm or if expression.
+        if !is_conditional
+            || !matches!(
+                self.attr,
+                AssignPropertyAttr::Track(_) | AssignPropertyAttr::Watch
+            )
+        {
+            self.assign_stream(stream, p_name, w_name, relm4_path);
+        }
+    }
+
     pub(crate) fn assign_stream(
         &self,
         stream: &mut TokenStream2,
