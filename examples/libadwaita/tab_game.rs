@@ -67,7 +67,7 @@ impl FactoryComponent<adw::TabView, AppMsg> for GamePage {
                 set_hexpand: true,
                 set_vexpand: true,
 
-                #[optional]
+                #[wrap(Some)]
                 set_center_widget = match **state {
                     GameState::Countdown(value) => {
                         gtk::Label {

@@ -31,8 +31,6 @@ impl Parse for Attrs {
                         Attr::Track(ident.clone(), None)
                     } else if ident == "iterate" {
                         Attr::Iterate(ident.clone())
-                    } else if ident == "optional" {
-                        Attr::Optional(ident.clone())
                     } else {
                         return Err(unexpected_attr_name(ident));
                     }
@@ -66,6 +64,10 @@ impl Parse for Attrs {
                         let expr = expect_one_nested_expr(&nested)?;
                         let ident = expect_ident_from_expr(expr)?;
                         Attr::Name(ident.clone(), ident)
+                    } else if ident == "wrap" {
+                        let expr = expect_one_nested_expr(&nested)?;
+                        let path = expect_path_from_expr(expr)?;
+                        Attr::Wrap(ident.clone(), path)
                     } else {
                         return Err(unexpected_attr_name(ident));
                     }
@@ -119,6 +121,17 @@ fn expect_string_lit(lit: &Lit) -> Result<&LitStr> {
         Err(Error::new(
             lit.span(),
             "Expected string literal. Try this: `\"value\"`.",
+        ))
+    }
+}
+
+fn expect_path_from_expr(expr: &Expr) -> Result<Path> {
+    if let Expr::Path(path) = expr {
+        Ok(path.path.clone())
+    } else {
+        Err(Error::new(
+            expr.span(),
+            &format!("Expected path `{}`.", expr.to_token_stream()),
         ))
     }
 }

@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream as TokenStream2;
 use syn::parse::ParseStream;
 use syn::spanned::Spanned;
-use syn::{Error, Expr, Ident, Token};
+use syn::{Error, Expr, Ident, Path, Token};
 
 use crate::args::Args;
 use crate::widgets::parse_util::{self, attr_twice_error};
@@ -11,7 +11,7 @@ type ConditionalAttrs = (
     Option<Ident>,
     Option<Ident>,
     Option<TokenStream2>,
-    Option<Ident>,
+    Option<Path>,
 );
 
 impl ConditionalWidget {
@@ -89,28 +89,30 @@ impl ConditionalWidget {
         let mut name = None;
         let mut doc_attr: Option<TokenStream2> = None;
         let mut assign_wrapper = None;
+
         if let Some(attrs) = attrs {
             for attr in attrs.inner {
+                let span = attr.span();
                 match attr {
-                    Attr::Transition(_, ref transition_value) => {
+                    Attr::Transition(_, transition_value) => {
                         if transition.is_none() {
-                            transition = Some(transition_value.clone());
+                            transition = Some(transition_value);
                         } else {
-                            return Err(attr_twice_error(&attr).into());
+                            return Err(attr_twice_error(span).into());
                         }
                     }
-                    Attr::Name(_, ref name_value) => {
+                    Attr::Name(_, name_value) => {
                         if name.is_none() {
-                            name = Some(name_value.clone());
+                            name = Some(name_value);
                         } else {
-                            return Err(attr_twice_error(&attr).into());
+                            return Err(attr_twice_error(span).into());
                         }
                     }
-                    Attr::Optional(ref ident) => {
-                        if assign_wrapper.is_none() {
-                            assign_wrapper = Some(Ident::new("Some", ident.span()));
+                    Attr::Wrap(_, path) => {
+                        if assign_wrapper.is_some() {
+                            return Err(attr_twice_error(span).into());
                         } else {
-                            return Err(attr_twice_error(&attr).into());
+                            assign_wrapper = Some(path.clone());
                         }
                     }
                     Attr::Doc(tokens) => {

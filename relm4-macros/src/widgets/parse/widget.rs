@@ -1,20 +1,20 @@
 use proc_macro2::TokenStream as TokenStream2;
-use syn::parse::{ParseBuffer, ParseStream};
+use syn::parse::ParseStream;
 use syn::spanned::Spanned;
 use syn::token::{And, Star};
-use syn::{token, Error, Expr, Ident, Token};
+use syn::{Error, Expr, Ident, Path, Token};
 
 use crate::args::Args;
 use crate::widgets::parse_util::{self, attr_twice_error};
 use crate::widgets::{Attr, Attrs, ParseError, Properties, Widget, WidgetAttr, WidgetFunc};
 
-type WidgetFuncInfo = (
-    // For `Some(widget)`
+type WidgetFuncInfo = (Option<And>, Option<Star>, WidgetFunc, Properties);
+
+type AttributeInfo = (
+    WidgetAttr,
+    Option<TokenStream2>,
     Option<Ident>,
-    Option<And>,
-    Option<Star>,
-    WidgetFunc,
-    Properties,
+    Option<Path>,
 );
 
 impl Widget {
@@ -23,7 +23,7 @@ impl Widget {
         attributes: Option<Attrs>,
         args: Option<Args<Expr>>,
     ) -> Result<Self, ParseError> {
-        let (attr, doc_attr, new_name) = Self::process_attributes(attributes)?;
+        let (attr, doc_attr, new_name, assign_wrapper) = Self::process_attributes(attributes)?;
         // Check if first token is `mut`
         let mutable = input.parse().ok();
 
@@ -40,7 +40,7 @@ impl Widget {
             None
         };
 
-        let (wrapper, ref_token, deref_token, func, properties) = Self::parse_widget_func(input)?;
+        let (ref_token, deref_token, func, properties) = Self::parse_widget_func(input)?;
 
         // Make sure that the name is only defined one.
         let mut name_set = name_opt.is_some();
@@ -82,7 +82,7 @@ impl Widget {
             func,
             args,
             properties,
-            assign_wrapper: wrapper,
+            assign_wrapper,
             ref_token,
             deref_token,
             returned_widget,
@@ -94,7 +94,15 @@ impl Widget {
         func: WidgetFunc,
         attributes: Option<Attrs>,
     ) -> Result<Self, ParseError> {
-        let (attr, doc_attr, new_name) = Self::process_attributes(attributes)?;
+        let (attr, doc_attr, new_name, assign_wrapper) = Self::process_attributes(attributes)?;
+
+        if let Some(wrapper) = assign_wrapper {
+            return Err(Error::new(
+                wrapper.span(),
+                "Can't use wrapper types in container assignment.",
+            )
+            .into());
+        }
 
         let properties = if input.peek(Token![,]) {
             Properties::default()
@@ -128,35 +136,35 @@ impl Widget {
             func,
             args: None,
             properties,
-            assign_wrapper: None,
+            assign_wrapper,
             ref_token,
             deref_token: None,
             returned_widget: None,
         })
     }
 
-    fn process_attributes(
-        attrs: Option<Attrs>,
-    ) -> Result<(WidgetAttr, Option<TokenStream2>, Option<Ident>), ParseError> {
+    fn process_attributes(attrs: Option<Attrs>) -> Result<AttributeInfo, ParseError> {
         if let Some(attrs) = attrs {
             let mut widget_attr = WidgetAttr::None;
             let mut doc_attr: Option<TokenStream2> = None;
             let mut name = None;
+            let mut assign_wrapper = None;
 
             for attr in attrs.inner {
+                let span = attr.span();
                 match attr {
                     Attr::Local(_) => {
                         if widget_attr == WidgetAttr::None {
                             widget_attr = WidgetAttr::Local;
                         } else {
-                            return Err(attr_twice_error(&attr).into());
+                            return Err(attr_twice_error(span).into());
                         }
                     }
                     Attr::LocalRef(_) => {
                         if widget_attr == WidgetAttr::None {
                             widget_attr = WidgetAttr::LocalRef;
                         } else {
-                            return Err(attr_twice_error(&attr).into());
+                            return Err(attr_twice_error(span).into());
                         }
                     }
                     Attr::Doc(tokens) => {
@@ -166,11 +174,18 @@ impl Widget {
                             doc_attr = Some(tokens);
                         }
                     }
-                    Attr::Name(_, ref name_value) => {
+                    Attr::Name(_, name_value) => {
                         if name.is_some() {
-                            return Err(attr_twice_error(&attr).into());
+                            return Err(attr_twice_error(span).into());
                         } else {
-                            name = Some(name_value.clone());
+                            name = Some(name_value);
+                        }
+                    }
+                    Attr::Wrap(_, path) => {
+                        if assign_wrapper.is_some() {
+                            return Err(attr_twice_error(span).into());
+                        } else {
+                            assign_wrapper = Some(path.clone());
                         }
                     }
                     _ => {
@@ -182,9 +197,9 @@ impl Widget {
                 }
             }
 
-            Ok((widget_attr, doc_attr, name))
+            Ok((widget_attr, doc_attr, name, assign_wrapper))
         } else {
-            Ok((WidgetAttr::None, None, None))
+            Ok((WidgetAttr::None, None, None, None))
         }
     }
 
@@ -204,42 +219,13 @@ impl Widget {
 
     /// Parse information related to the widget function.
     fn parse_widget_func(input: ParseStream) -> Result<WidgetFuncInfo, ParseError> {
-        let inner_input: Option<ParseBuffer>;
-
-        let upcoming_some = {
-            let forked_input = input.fork();
-            if forked_input.peek(Ident) {
-                let ident: Ident = forked_input.parse()?;
-                ident == "Some"
-            } else {
-                false
-            }
-        };
-
-        let wrapper = if upcoming_some && input.peek2(token::Paren) {
-            let ident = input.parse()?;
-            let paren_input = parse_util::parens(input)?;
-            inner_input = Some(paren_input);
-            Some(ident)
-        } else {
-            inner_input = None;
-            None
-        };
-
-        // get the inner input as func_input
-        let func_input = if let Some(paren_input) = &inner_input {
-            paren_input
-        } else {
-            input
-        };
-
         // Look for &
-        let ref_token = func_input.parse().ok();
+        let ref_token = input.parse().ok();
 
         // Look for *
-        let deref_token = func_input.parse().ok();
+        let deref_token = input.parse().ok();
 
-        let func = WidgetFunc::parse(func_input)?;
+        let func = WidgetFunc::parse(input)?;
 
         let properties = if input.peek(Token![,]) {
             Properties::default()
@@ -248,6 +234,6 @@ impl Widget {
             Properties::parse(&inner)
         };
 
-        Ok((wrapper, ref_token, deref_token, func, properties))
+        Ok((ref_token, deref_token, func, properties))
     }
 }
