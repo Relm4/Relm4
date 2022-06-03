@@ -1,5 +1,6 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned};
+use syn::spanned::Spanned;
 
 use super::{PropertyName, ReturnedWidget, Widget};
 

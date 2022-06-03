@@ -62,6 +62,7 @@ impl AssignProperty {
                     signal_handler.span() =>
                         {
                             use #relm4_path ::WidgetRef;
+                            #[allow(clippy::needless_borrow)]
                             #relm4_path ::gtk::prelude::ObjectExt::block_signal(#w_name.widget_ref(), &#signal_handler);
                         }
                 });
@@ -69,6 +70,7 @@ impl AssignProperty {
                     signal_handler.span() =>
                         {
                             use #relm4_path ::WidgetRef;
+                            #[allow(clippy::needless_borrow)]
                             #relm4_path ::gtk::prelude::ObjectExt::unblock_signal(#w_name.widget_ref(), &#signal_handler);
                         }
                 });
