@@ -1,13 +1,18 @@
-use proc_macro2::{Span as Span2, TokenStream as TokenStream2};
+use proc_macro2::TokenStream as TokenStream2;
 use syn::parse::ParseStream;
 use syn::spanned::Spanned;
-use syn::{Error, Expr, Ident, Token};
+use syn::{Error, Expr, Ident, Path, Token};
 
 use crate::args::Args;
 use crate::widgets::parse_util::{self, attr_twice_error};
 use crate::widgets::{Attr, Attrs, ConditionalBranches, ConditionalWidget, ParseError};
 
-type ConditionalAttrs = (Option<Ident>, Option<Ident>, Option<TokenStream2>);
+type ConditionalAttrs = (
+    Option<Ident>,
+    Option<Ident>,
+    Option<TokenStream2>,
+    Option<Path>,
+);
 
 impl ConditionalWidget {
     pub(super) fn parse(
@@ -31,7 +36,7 @@ impl ConditionalWidget {
         attrs: Option<Attrs>,
         args: Option<Args<Expr>>,
     ) -> Result<Self, ParseError> {
-        let (transition, attr_name, doc_attr) = Self::process_attrs(attrs)?;
+        let (transition, attr_name, doc_attr, assign_wrapper) = Self::process_attrs(attrs)?;
 
         if attr_name.is_some() {
             if let Some(name) = &name {
@@ -49,8 +54,8 @@ impl ConditionalWidget {
             name
         } else {
             parse_util::idents_to_snake_case(
-                [Ident::new("conditional_widget", Span2::call_site())].iter(),
-                Span2::call_site(),
+                [Ident::new("conditional_widget", input.span())].iter(),
+                input.span(),
             )
         };
 
@@ -60,6 +65,7 @@ impl ConditionalWidget {
                 doc_attr,
                 name,
                 transition,
+                assign_wrapper,
                 branches,
                 args,
             })
@@ -69,6 +75,7 @@ impl ConditionalWidget {
                 name,
                 transition,
                 branches,
+                assign_wrapper,
                 args,
                 doc_attr,
             })
@@ -81,21 +88,31 @@ impl ConditionalWidget {
         let mut transition = None;
         let mut name = None;
         let mut doc_attr: Option<TokenStream2> = None;
+        let mut assign_wrapper = None;
+
         if let Some(attrs) = attrs {
             for attr in attrs.inner {
+                let span = attr.span();
                 match attr {
-                    Attr::Transition(_, ref transition_value) => {
+                    Attr::Transition(_, transition_value) => {
                         if transition.is_none() {
-                            transition = Some(transition_value.clone());
+                            transition = Some(transition_value);
                         } else {
-                            return Err(attr_twice_error(&attr).into());
+                            return Err(attr_twice_error(span).into());
                         }
                     }
-                    Attr::Name(_, ref name_value) => {
+                    Attr::Name(_, name_value) => {
                         if name.is_none() {
-                            name = Some(name_value.clone());
+                            name = Some(name_value);
                         } else {
-                            return Err(attr_twice_error(&attr).into());
+                            return Err(attr_twice_error(span).into());
+                        }
+                    }
+                    Attr::Wrap(_, path) => {
+                        if assign_wrapper.is_some() {
+                            return Err(attr_twice_error(span).into());
+                        } else {
+                            assign_wrapper = Some(path.clone());
                         }
                     }
                     Attr::Doc(tokens) => {
@@ -114,6 +131,6 @@ impl ConditionalWidget {
                 }
             }
         }
-        Ok((transition, name, doc_attr))
+        Ok((transition, name, doc_attr, assign_wrapper))
     }
 }

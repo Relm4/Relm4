@@ -9,8 +9,13 @@ edition = "2021"
 [dev-dependencies]
 rand = "0.8.4"
 relm4 = { path = "../../relm4", features = ["libadwaita", "macros"] }
+tokio = { version = "1", features = ["time"] }
 #relm4-components = { path = "../../relm4-components" }
 
 [[example]]
 name = "tab_factory"
 path = "tab_factory.rs"
+
+[[example]]
+name = "tab_game"
+path = "tab_game.rs"

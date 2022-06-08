@@ -14,7 +14,7 @@ impl IfBranch {
         let braced = parse_util::braces(input)?;
 
         let attributes = braced.parse().ok();
-        let args = args_from_index(index);
+        let args = args_from_index(index, input.span());
         let mut widget = Widget::parse(&braced, attributes, Some(args))?;
         widget.ref_token = Some(And {
             spans: [Span2::call_site()],
@@ -24,21 +24,19 @@ impl IfBranch {
     }
 }
 
-pub(super) fn args_from_index(index: usize) -> Args<Expr> {
+pub(super) fn args_from_index(index: usize, span: Span2) -> Args<Expr> {
     Args {
         inner: vec![Expr::Call(ExprCall {
             attrs: Vec::new(),
             func: Box::new(Expr::Path(ExprPath {
                 attrs: Vec::new(),
                 qself: None,
-                path: Ident::new("Some", Span2::call_site()).into(),
+                path: Ident::new("Some", span).into(),
             })),
-            paren_token: Paren {
-                span: Span2::call_site(),
-            },
+            paren_token: Paren { span },
             args: Punctuated::from_iter(vec![Expr::Lit(ExprLit {
                 attrs: Vec::new(),
-                lit: Lit::Str(LitStr::new(&format!("{index}"), Span2::call_site())),
+                lit: Lit::Str(LitStr::new(&format!("{index}"), span)),
             })]),
         })],
     }

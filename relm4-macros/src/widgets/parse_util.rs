@@ -10,8 +10,8 @@ use syn::{Error, Ident, Path, PathArguments, PathSegment};
 use super::{ParseError, PropertyName};
 use crate::widgets::{parse_util, AssignPropertyAttr, WidgetAttr, WidgetFunc};
 
-pub(super) fn attr_twice_error<T: Spanned>(attr: &T) -> Error {
-    Error::new(attr.span(), "Cannot use the same attribute twice.")
+pub(super) fn attr_twice_error(span: Span2) -> Error {
+    Error::new(span, "Cannot use the same attribute twice.")
 }
 
 impl From<Error> for ParseError {

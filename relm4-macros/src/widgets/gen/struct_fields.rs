@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::quote;
+use quote::{quote, quote_spanned};
 use syn::{Path, Visibility};
 
 use super::{ReturnedWidget, Widget};
@@ -80,14 +80,16 @@ impl ConditionalWidget {
         let name = &self.name;
 
         stream.extend(if let Some(docs) = &self.doc_attr {
-            quote! {
-               #[doc = #docs]
-               #vis #name: #relm4_path::gtk::Stack,
+            quote_spanned! {
+                name.span() =>
+                   #[doc = #docs]
+                   #vis #name: #relm4_path::gtk::Stack,
             }
         } else {
-            quote! {
-                #[allow(missing_docs)]
-                #vis #name: #relm4_path::gtk::Stack,
+            quote_spanned! {
+                name.span() =>
+                    #[allow(missing_docs)]
+                    #vis #name: #relm4_path::gtk::Stack,
             }
         });
 
@@ -133,9 +135,10 @@ impl SignalHandler {
         relm4_path: &Path,
     ) {
         if let Some(signal_handler_id) = &self.handler_id {
-            stream.extend(quote! {
-                #[allow(missing_docs)]
-                #vis #signal_handler_id: #relm4_path::gtk::glib::signal::SignalHandlerId,
+            stream.extend(quote_spanned! {
+                signal_handler_id.span() =>
+                    #[allow(missing_docs)]
+                    #vis #signal_handler_id: #relm4_path::gtk::glib::signal::SignalHandlerId,
             });
         }
     }

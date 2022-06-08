@@ -163,8 +163,8 @@ pub(crate) fn generate_tokens(
                     #additional_fields_return_stream
                 } = widgets;
 
-                // Wrap pre_view and post_view code to prevent early returns from skipping other view code.
-                (|| { #pre_view })();
+                // Wrap post_view code to prevent early returns from skipping other view code.
+                #pre_view
                 #update_view
                 (|| { #post_view })();
             }

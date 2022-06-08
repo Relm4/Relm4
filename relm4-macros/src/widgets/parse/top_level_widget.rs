@@ -51,7 +51,7 @@ impl TopLevelWidget {
                         ty: PropertyType::ParseError(err),
                     }],
                 },
-                wrapper: None,
+                assign_wrapper: None,
                 ref_token: None,
                 deref_token: None,
                 returned_widget: None,
