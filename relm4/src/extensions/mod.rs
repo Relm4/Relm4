@@ -157,6 +157,7 @@ container_child_impl! {
     gtk::Dialog
     gtk::LinkButton
     gtk::ToggleButton
+    gtk::Overlay
 }
 
 container_child_impl! {
