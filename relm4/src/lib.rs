@@ -41,8 +41,8 @@ pub mod worker;
 
 pub use self::channel::{channel, Receiver, Sender};
 pub use self::component::{
-    Component, ComponentBuilder, ComponentController, ComponentParts, ComponentSender, OnDestroy,
-    SimpleComponent,
+    Component, ComponentBuilder, ComponentController, ComponentParts, ComponentSender, Controller,
+    OnDestroy, SimpleComponent,
 };
 pub use self::extensions::*;
 pub use self::shared_state::SharedState;

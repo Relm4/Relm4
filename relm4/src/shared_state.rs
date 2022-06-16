@@ -68,7 +68,7 @@ where
     /// STATE.subscribe(&sender, |data| *data);
     ///
     /// {
-    /// let mut data = STATE.get_mut();
+    ///     let mut data = STATE.get_mut();
     ///     **data += 1;
     /// }
     ///
