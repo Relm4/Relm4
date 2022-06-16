@@ -23,7 +23,8 @@ impl SimpleComponent for AppModel {
             set_title: Some("Simple app"),
             set_default_width: 300,
             set_default_height: 100,
-            set_child = Some(&gtk::Box) {
+
+            gtk::Box {
                 set_orientation: gtk::Orientation::Vertical,
                 set_margin_all: 5,
                 set_spacing: 5,

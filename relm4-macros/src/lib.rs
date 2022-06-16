@@ -58,24 +58,24 @@ use menu::Menus;
 ///             set_title: Some("Simple app"),
 ///             set_default_width: 300,
 ///             set_default_height: 100,
-///             set_child = Some(&gtk::Box) {
+///             gtk::Box {
 ///                 set_orientation: gtk::Orientation::Vertical,
 ///                 set_margin_all: 5,
 ///                 set_spacing: 5,
 ///
-///                 append = &gtk::Button {
+///                 gtk::Button {
 ///                     set_label: "Increment",
 ///                     connect_clicked[sender] => move |_| {
 ///                         sender.input(AppMsg::Increment);
 ///                     },
 ///                 },
-///                 append = &gtk::Button {
+///                 gtk::Button {
 ///                     set_label: "Decrement",
 ///                     connect_clicked[sender] => move |_| {
 ///                         sender.input(AppMsg::Decrement);
 ///                     },
 ///                 },
-///                 append = &gtk::Label {
+///                 gtk::Label {
 ///                     set_margin_all: 5,
 ///                     #[watch]
 ///                     set_label: &format!("Counter: {}", model.counter),
@@ -106,6 +106,50 @@ use menu::Menus;
 ///             }
 ///         }
 ///     }
+/// }
+/// ```
+///
+/// # Notes on pre_view
+///
+/// Using `return` in `pre_view` will cause a compiler warning.
+/// In general, you don't want to use `return` in `pre_view` as it will
+/// cause all following update functionality to be skipped.
+///
+/// ```compile_fail
+/// #![deny(unreachable_code)]
+///
+/// # use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
+/// # use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent, WidgetPlus};
+/// #
+/// struct AppModel {}
+///
+/// #[relm4_macros::component]
+/// impl SimpleComponent for AppModel {
+///       /* Code omitted */
+/// #     type InitParams = ();
+/// #     type Input = ();
+/// #     type Output = ();
+/// #     type Widgets = AppWidgets;
+/// #
+/// #     view! {
+/// #         gtk::Window {}
+/// #     }
+///
+///       fn pre_view() {
+///           return;
+///       }
+/// #
+/// #     fn init(
+/// #         counter: Self::InitParams,
+/// #         root: &Self::Root,
+/// #         sender: &ComponentSender<Self>,
+/// #     ) -> ComponentParts<Self> {
+/// #         let model = Self {};
+/// #
+/// #         let widgets = view_output!();
+/// #
+/// #         ComponentParts { model, widgets }
+/// #     }
 /// }
 /// ```
 #[proc_macro_attribute]
