@@ -7,6 +7,8 @@ use once_cell::sync::Lazy;
 
 use crate::Sender;
 
+type SubscriberFn<Data> = Box<dyn Fn(&Data) + 'static + Send + Sync>;
+
 /// A type that allows you to share information across your
 /// application easily.
 /// Get immutable and mutable access to the data and subscribe to changes.
@@ -18,7 +20,7 @@ use crate::Sender;
 /// this might cause a panic or a deadlock.
 pub struct SharedState<Data> {
     data: Lazy<RwLock<Data>>,
-    subscribers: Lazy<RwLock<Vec<Box<dyn Fn(&Data) + 'static + Send + Sync>>>>,
+    subscribers: Lazy<RwLock<Vec<SubscriberFn<Data>>>>,
 }
 
 impl<Data: std::fmt::Debug> std::fmt::Debug for SharedState<Data> {
@@ -90,7 +92,7 @@ where
     }
 
     /// Get immutable access to the shared data.
-    pub fn get<'a>(&'a self) -> SharedStateReadGuard<'a, Data> {
+    pub fn get(&self) -> SharedStateReadGuard<'_, Data> {
         SharedStateReadGuard {
             inner: self.data.read().unwrap(),
         }
@@ -98,7 +100,7 @@ where
 
     /// Get mutable access to the shared data.
     /// Once the lock is dropped all subscribers will be notified.
-    pub fn get_mut<'a>(&'a self) -> SharedStateWriteGuard<'a, Data> {
+    pub fn get_mut(&self) -> SharedStateWriteGuard<'_, Data> {
         SharedStateWriteGuard {
             data: self.data.write().unwrap(),
             subscribers: self.subscribers.write().unwrap(),
@@ -130,7 +132,7 @@ impl<'a, Data> Deref for SharedStateReadGuard<'a, Data> {
 /// Once dropped all subscribers of the [`SharedData`] will be notified.
 pub struct SharedStateWriteGuard<'a, Data> {
     data: RwLockWriteGuard<'a, Data>,
-    subscribers: RwLockWriteGuard<'a, Vec<Box<dyn Fn(&Data) + 'static + Send + Sync>>>,
+    subscribers: RwLockWriteGuard<'a, Vec<SubscriberFn<Data>>>,
 }
 
 impl<'a, Data: std::fmt::Debug> std::fmt::Debug for SharedStateWriteGuard<'a, Data> {
