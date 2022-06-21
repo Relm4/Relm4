@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned};
 use syn::spanned::Spanned;
-use syn::{Ident, Path};
+use syn::Ident;
 
 use crate::widgets::{ConditionalBranches, ConditionalWidget, PropertyName};
 
@@ -11,9 +11,8 @@ impl ConditionalWidget {
         stream: &mut TokenStream2,
         p_name: &PropertyName,
         w_name: &Ident,
-        relm4_path: &Path,
     ) {
-        let assign_fn = p_name.assign_fn_stream(w_name, relm4_path);
+        let assign_fn = p_name.assign_fn_stream(w_name);
         let self_assign_args = p_name.assign_args_stream(w_name);
         let span = p_name.span();
 
@@ -38,16 +37,13 @@ impl ConditionalWidget {
             ConditionalBranches::If(if_branches) => {
                 for branch in if_branches {
                     let p_name = PropertyName::Ident(Ident::new("add_named", p_name.span()));
-                    branch
-                        .widget
-                        .assign_stream(stream, &p_name, w_name, true, relm4_path);
+                    branch.widget.assign_stream(stream, &p_name, w_name, true);
                 }
             }
             ConditionalBranches::Match((_, _, match_arms)) => {
                 for arm in match_arms {
                     let p_name = PropertyName::Ident(Ident::new("add_named", p_name.span()));
-                    arm.widget
-                        .assign_stream(stream, &p_name, w_name, true, relm4_path);
+                    arm.widget.assign_stream(stream, &p_name, w_name, true);
                 }
             }
         }

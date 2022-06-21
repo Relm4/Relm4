@@ -2,9 +2,8 @@ use std::sync::atomic::{AtomicU16, Ordering};
 
 use proc_macro2::Span as Span2;
 use syn::parse::ParseBuffer;
-use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
-use syn::{braced, bracketed, parenthesized, Error, Ident, Path, PathArguments, PathSegment};
+use syn::{braced, bracketed, parenthesized, Error, Ident, Path};
 
 use super::{ParseError, PropertyName};
 use crate::widgets::{parse_util, AssignPropertyAttr, WidgetAttr, WidgetFunc};
@@ -151,18 +150,4 @@ pub(super) fn brackets<'a>(input: &'a ParseBuffer) -> Result<ParseBuffer<'a>, Pa
         Ok(content)
     })();
     Ok(content?)
-}
-
-pub(super) fn strings_to_path(strings: &[&str]) -> Path {
-    let path_segments: Vec<PathSegment> = strings
-        .iter()
-        .map(|string| PathSegment {
-            ident: Ident::new(string, Span2::call_site()),
-            arguments: PathArguments::None,
-        })
-        .collect();
-    Path {
-        leading_colon: None,
-        segments: Punctuated::from_iter(path_segments),
-    }
 }

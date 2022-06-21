@@ -1,12 +1,32 @@
-use syn::spanned::Spanned;
-use syn::{Error, FnArg, Ident, ImplItemMethod, Pat, Path};
+use std::rc::Rc;
 
-pub mod kw {
-    syn::custom_keyword!(Some);
+use proc_macro2::Span as Span2;
+use syn::punctuated::Punctuated;
+use syn::spanned::Spanned;
+use syn::{Error, FnArg, Ident, ImplItemMethod, Pat, Path, PathArguments, PathSegment};
+
+thread_local! {
+    #[cfg(feature = "relm4")]
+    pub(super) static GTK_IMPORT: Rc<syn::Path> = Rc::new(strings_to_path(&["relm4", "gtk"]));
+
+    #[cfg(not(feature = "relm4"))]
+    pub(super) static GTK_IMPORT: Rc<syn::Path> = Rc::new(strings_to_path(&["gtk"]));
 }
 
-pub(crate) fn default_relm4_path() -> Path {
-    syn::parse_quote! { ::relm4 }
+pub(super) fn strings_to_path(strings: &[&str]) -> Path {
+    let path_segments: Vec<PathSegment> = strings
+        .iter()
+        .map(|string| -> PathSegment {
+            PathSegment {
+                ident: Ident::new(string, Span2::call_site()),
+                arguments: PathArguments::None,
+            }
+        })
+        .collect();
+    Path {
+        leading_colon: None,
+        segments: Punctuated::from_iter(path_segments),
+    }
 }
 
 pub(crate) fn get_ident_of_nth_func_input(

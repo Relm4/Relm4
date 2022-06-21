@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned};
 use syn::spanned::Spanned;
-use syn::{Ident, Path};
+use syn::Ident;
 
 use crate::widgets::{
     AssignProperty, AssignPropertyAttr, ConditionalBranches, ConditionalWidget, MatchArm,
@@ -15,7 +15,6 @@ impl Property {
         w_name: &Ident,
         model_name: &Ident,
         is_conditional: bool,
-        relm4_path: &Path,
     ) {
         match &self.ty {
             PropertyType::Assign(assign) => assign.conditional_init_stream(
@@ -24,13 +23,12 @@ impl Property {
                 w_name,
                 model_name,
                 is_conditional,
-                relm4_path,
             ),
             PropertyType::Widget(widget) => {
-                widget.conditional_init_stream(stream, model_name, is_conditional, relm4_path)
+                widget.conditional_init_stream(stream, model_name, is_conditional)
             }
             PropertyType::ConditionalWidget(cond_widget) => {
-                cond_widget.conditional_init_stream(stream, model_name, relm4_path)
+                cond_widget.conditional_init_stream(stream, model_name)
             }
             PropertyType::SignalHandler(_) | PropertyType::ParseError(_) => (),
         }
@@ -44,22 +42,16 @@ impl Properties {
         w_name: &Ident,
         model_name: &Ident,
         is_conditional: bool,
-        relm4_path: &Path,
     ) {
         for prop in &self.properties {
-            prop.conditional_init_stream(stream, w_name, model_name, is_conditional, relm4_path);
+            prop.conditional_init_stream(stream, w_name, model_name, is_conditional);
         }
     }
 }
 
 impl Widget {
-    pub fn init_conditional_init_stream(
-        &self,
-        stream: &mut TokenStream2,
-        model_name: &Ident,
-        relm4_path: &Path,
-    ) {
-        self.conditional_init_stream(stream, model_name, false, relm4_path);
+    pub fn init_conditional_init_stream(&self, stream: &mut TokenStream2, model_name: &Ident) {
+        self.conditional_init_stream(stream, model_name, false);
     }
 
     fn conditional_init_stream(
@@ -67,29 +59,18 @@ impl Widget {
         stream: &mut TokenStream2,
         model_name: &Ident,
         is_conditional: bool,
-        relm4_path: &Path,
     ) {
         let w_name = &self.name;
-        self.properties.conditional_init_stream(
-            stream,
-            w_name,
-            model_name,
-            is_conditional,
-            relm4_path,
-        );
+        self.properties
+            .conditional_init_stream(stream, w_name, model_name, is_conditional);
         if let Some(returned_widget) = &self.returned_widget {
-            returned_widget.conditional_init_stream(stream, model_name, is_conditional, relm4_path);
+            returned_widget.conditional_init_stream(stream, model_name, is_conditional);
         }
     }
 }
 
 impl ConditionalWidget {
-    fn conditional_init_stream(
-        &self,
-        stream: &mut TokenStream2,
-        model_name: &Ident,
-        relm4_path: &Path,
-    ) {
+    fn conditional_init_stream(&self, stream: &mut TokenStream2, model_name: &Ident) {
         let brach_stream = match &self.branches {
             ConditionalBranches::If(if_branches) => {
                 let mut stream = TokenStream2::new();
@@ -100,7 +81,6 @@ impl ConditionalWidget {
                         &mut inner_update_stream,
                         model_name,
                         true,
-                        relm4_path,
                     );
                     branch.update_stream(&mut stream, inner_update_stream, index);
                 }
@@ -115,7 +95,6 @@ impl ConditionalWidget {
                         &mut inner_update_stream,
                         model_name,
                         true,
-                        relm4_path,
                     );
 
                     let MatchArm {
@@ -161,16 +140,10 @@ impl ReturnedWidget {
         stream: &mut TokenStream2,
         model_name: &Ident,
         is_conditional: bool,
-        relm4_path: &Path,
     ) {
         let w_name = &self.name;
-        self.properties.conditional_init_stream(
-            stream,
-            w_name,
-            model_name,
-            is_conditional,
-            relm4_path,
-        );
+        self.properties
+            .conditional_init_stream(stream, w_name, model_name, is_conditional);
     }
 }
 
@@ -182,18 +155,17 @@ impl AssignProperty {
         w_name: &Ident,
         model_name: &Ident,
         is_conditional: bool,
-        relm4_path: &Path,
     ) {
         // Unconditional code is handled in the "normal" init stream
         if is_conditional {
             match &self.attr {
                 AssignPropertyAttr::None => (),
                 AssignPropertyAttr::Watch => {
-                    self.assign_stream(stream, p_name, w_name, relm4_path);
+                    self.assign_stream(stream, p_name, w_name);
                 }
                 AssignPropertyAttr::Track((track_stream, paste_model)) => {
                     let mut assign_stream = TokenStream2::new();
-                    self.assign_stream(&mut assign_stream, p_name, w_name, relm4_path);
+                    self.assign_stream(&mut assign_stream, p_name, w_name);
                     let model = paste_model.then(|| model_name);
 
                     stream.extend(quote_spanned! {

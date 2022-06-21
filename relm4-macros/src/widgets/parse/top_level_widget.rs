@@ -1,5 +1,6 @@
 use syn::parse::ParseStream;
 
+use crate::util;
 use crate::widgets::{
     parse_util, Attr, Attrs, Properties, Property, PropertyName, PropertyType, TopLevelWidget,
     Widget, WidgetAttr, WidgetFunc,
@@ -37,7 +38,7 @@ impl TopLevelWidget {
                 mutable: None,
                 name: parse_util::string_to_snake_case("incorrect_top_level_widget"),
                 func: WidgetFunc {
-                    path: parse_util::strings_to_path(&["gtk", "Box"]),
+                    path: util::strings_to_path(&["gtk", "Box"]),
                     args: None,
                     method_chain: None,
                     ty: None,

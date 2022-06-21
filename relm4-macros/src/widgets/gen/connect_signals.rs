@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote_spanned;
 use syn::spanned::Spanned;
-use syn::{Expr, Ident, Path};
+use syn::{Expr, Ident};
 
 use crate::widgets::{
     ConditionalBranches, ConditionalWidget, Properties, Property, PropertyName, PropertyType,
@@ -9,14 +9,14 @@ use crate::widgets::{
 };
 
 impl Property {
-    fn connect_signals_stream(&self, stream: &mut TokenStream2, w_name: &Ident, relm4_path: &Path) {
+    fn connect_signals_stream(&self, stream: &mut TokenStream2, w_name: &Ident) {
         match &self.ty {
             PropertyType::SignalHandler(signal_handler) => {
-                signal_handler.connect_signals_stream(stream, &self.name, w_name, relm4_path);
+                signal_handler.connect_signals_stream(stream, &self.name, w_name);
             }
-            PropertyType::Widget(widget) => widget.connect_signals_stream(stream, relm4_path),
+            PropertyType::Widget(widget) => widget.connect_signals_stream(stream),
             PropertyType::ConditionalWidget(cond_widget) => {
-                cond_widget.connect_signals_stream(stream, relm4_path)
+                cond_widget.connect_signals_stream(stream)
             }
             PropertyType::Assign(_) | PropertyType::ParseError(_) => (),
         }
@@ -24,35 +24,34 @@ impl Property {
 }
 
 impl Properties {
-    fn connect_signals_stream(&self, stream: &mut TokenStream2, w_name: &Ident, relm4_path: &Path) {
+    fn connect_signals_stream(&self, stream: &mut TokenStream2, w_name: &Ident) {
         for prop in &self.properties {
-            prop.connect_signals_stream(stream, w_name, relm4_path);
+            prop.connect_signals_stream(stream, w_name);
         }
     }
 }
 
 impl Widget {
-    pub fn connect_signals_stream(&self, stream: &mut TokenStream2, relm4_path: &Path) {
+    pub fn connect_signals_stream(&self, stream: &mut TokenStream2) {
         let w_name = &self.name;
-        self.properties
-            .connect_signals_stream(stream, w_name, relm4_path);
+        self.properties.connect_signals_stream(stream, w_name);
         if let Some(returned_widget) = &self.returned_widget {
-            returned_widget.connect_signals_stream(stream, relm4_path);
+            returned_widget.connect_signals_stream(stream);
         }
     }
 }
 
 impl ConditionalWidget {
-    fn connect_signals_stream(&self, stream: &mut TokenStream2, relm4_path: &Path) {
+    fn connect_signals_stream(&self, stream: &mut TokenStream2) {
         match &self.branches {
             ConditionalBranches::If(if_branches) => {
                 for branch in if_branches {
-                    branch.widget.connect_signals_stream(stream, relm4_path);
+                    branch.widget.connect_signals_stream(stream);
                 }
             }
             ConditionalBranches::Match((_, _, match_arms)) => {
                 for arm in match_arms {
-                    arm.widget.connect_signals_stream(stream, relm4_path);
+                    arm.widget.connect_signals_stream(stream);
                 }
             }
         }
@@ -60,10 +59,9 @@ impl ConditionalWidget {
 }
 
 impl ReturnedWidget {
-    fn connect_signals_stream(&self, stream: &mut TokenStream2, relm4_path: &Path) {
+    fn connect_signals_stream(&self, stream: &mut TokenStream2) {
         let w_name = &self.name;
-        self.properties
-            .connect_signals_stream(stream, w_name, relm4_path);
+        self.properties.connect_signals_stream(stream, w_name);
     }
 }
 
@@ -73,9 +71,8 @@ impl SignalHandler {
         stream: &mut TokenStream2,
         p_name: &PropertyName,
         w_name: &Ident,
-        relm4_path: &Path,
     ) {
-        let assign_fn = p_name.assign_fn_stream(w_name, relm4_path);
+        let assign_fn = p_name.assign_fn_stream(w_name);
         let self_assign_args = p_name.assign_args_stream(w_name);
         let assign = &self.closure;
         let span = p_name.span();
