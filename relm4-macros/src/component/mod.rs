@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens};
 use syn::spanned::Spanned;
-use syn::{Error, Path, PathArguments, Visibility};
+use syn::{Error, PathArguments, Visibility};
 
 use crate::macros::Macros;
 use crate::ItemImpl;
@@ -13,11 +13,7 @@ mod types;
 
 use inject_view_code::inject_view_code;
 
-pub(crate) fn generate_tokens(
-    vis: Option<Visibility>,
-    relm4_path: Path,
-    data: ItemImpl,
-) -> TokenStream2 {
+pub(crate) fn generate_tokens(vis: Option<Visibility>, data: ItemImpl) -> TokenStream2 {
     let last_segment = data
         .trait_
         .segments
@@ -53,7 +49,7 @@ pub(crate) fn generate_tokens(
     };
 
     // Generate menu tokens
-    let menus_stream = menus.map(|m| m.menus_stream(&relm4_path));
+    let menus_stream = menus.map(|m| m.menus_stream());
 
     let funcs::Funcs {
         init,
@@ -78,7 +74,7 @@ pub(crate) fn generate_tokens(
         return_fields,
         destructure_fields,
         update_view,
-    } = view_widgets.generate_streams(&vis, &relm4_path, &model_name, Some(&root_name), false);
+    } = view_widgets.generate_streams(&vis, &model_name, Some(&root_name), false);
 
     let root_widget_type = view_widgets.root_type();
 

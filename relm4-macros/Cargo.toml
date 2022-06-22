@@ -15,6 +15,14 @@ documentation = "https://relm4.org/docs/stable/relm4/"
 [lib]
 proc-macro = true
 
+[features]
+default = ["relm4"]
+
+# Without the default "relm4" feature, all imports of gtk will
+# be `use gtk;` instread of `use relm4::gtk;` thus making it 
+# easier to use this crate without Relm4.
+relm4 = []
+
 [dependencies]
 proc-macro2 = "1.0"
 quote = "1.0"

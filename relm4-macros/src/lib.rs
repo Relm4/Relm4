@@ -22,6 +22,10 @@ use attrs::Attrs;
 use item_impl::ItemImpl;
 use menu::Menus;
 
+fn gtk_import() -> std::rc::Rc<syn::Path> {
+    util::GTK_IMPORT.with(|p| p.clone())
+}
+
 /// Macro that implements [`relm4::Component`](https://relm4.org/docs/next/relm4/trait.Component.html) and generates the corresponding struct.
 ///
 /// # Attributes
@@ -154,24 +158,18 @@ use menu::Menus;
 /// ```
 #[proc_macro_attribute]
 pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
-    let Attrs {
-        visibility,
-        relm4_path,
-    } = parse_macro_input!(attributes as Attrs);
+    let Attrs { visibility } = parse_macro_input!(attributes as Attrs);
     let data = parse_macro_input!(input as ItemImpl);
 
-    component::generate_tokens(visibility, relm4_path, data).into()
+    component::generate_tokens(visibility, data).into()
 }
 
 #[proc_macro_attribute]
 pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
-    let Attrs {
-        visibility,
-        relm4_path,
-    } = parse_macro_input!(attributes as Attrs);
+    let Attrs { visibility } = parse_macro_input!(attributes as Attrs);
     let data = parse_macro_input!(input as ItemImpl);
 
-    factory::generate_tokens(visibility, relm4_path, data).into()
+    factory::generate_tokens(visibility, data).into()
 }
 
 // Macro that implements [`relm4::factory::FactoryPrototype`](https://aaronerhardt.github.io/docs/relm4/relm4/factory/trait.FactoryPrototype.html)
@@ -182,11 +180,10 @@ pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
 // pub fn factory_prototype(attributes: TokenStream, input: TokenStream) -> TokenStream {
 // let Attrs {
 //     visibility,
-//     relm4_path,
 // } = parse_macro_input!(attributes as Attrs);
 // let data = parse_macro_input!(input as ItemImpl);
 
-// factory_prototype_macro::generate_tokens(visibility, relm4_path, data).into()
+// factory::generate_tokens(visibility, data).into()
 //    quote! {}.into()
 // }
 
@@ -286,9 +283,7 @@ pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn menu(input: TokenStream) -> TokenStream {
     let menus = parse_macro_input!(input as Menus);
-    let default_relm4_path = util::default_relm4_path();
-
-    menus.menus_stream(&default_relm4_path).into()
+    menus.menus_stream().into()
 }
 
 /// The [`view!`] macro allows you to construct your UI easily and cleanly.

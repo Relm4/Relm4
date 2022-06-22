@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned};
 use syn::spanned::Spanned;
-use syn::{Ident, Path};
+use syn::Ident;
 
 use crate::widgets::{
     AssignProperty, AssignPropertyAttr, ConditionalBranches, ConditionalWidget, MatchArm,
@@ -15,7 +15,6 @@ impl Property {
         w_name: &Ident,
         model_name: &Ident,
         conditional_branch: bool,
-        relm4_path: &Path,
     ) {
         match &self.ty {
             PropertyType::Assign(assign) => assign.update_view_stream(
@@ -24,13 +23,12 @@ impl Property {
                 w_name,
                 model_name,
                 conditional_branch,
-                relm4_path,
             ),
             PropertyType::Widget(widget) => {
-                widget.update_view_stream(stream, model_name, conditional_branch, relm4_path)
+                widget.update_view_stream(stream, model_name, conditional_branch)
             }
             PropertyType::ConditionalWidget(cond_widget) => {
-                cond_widget.update_view_stream(stream, model_name, relm4_path)
+                cond_widget.update_view_stream(stream, model_name)
             }
             PropertyType::SignalHandler(_) | PropertyType::ParseError(_) => (),
         }
@@ -44,22 +42,16 @@ impl Properties {
         w_name: &Ident,
         model_name: &Ident,
         conditional_branch: bool,
-        relm4_path: &Path,
     ) {
         for prop in &self.properties {
-            prop.update_view_stream(stream, w_name, model_name, conditional_branch, relm4_path);
+            prop.update_view_stream(stream, w_name, model_name, conditional_branch);
         }
     }
 }
 
 impl Widget {
-    pub fn init_update_view_stream(
-        &self,
-        stream: &mut TokenStream2,
-        model_name: &Ident,
-        relm4_path: &Path,
-    ) {
-        self.update_view_stream(stream, model_name, false, relm4_path);
+    pub fn init_update_view_stream(&self, stream: &mut TokenStream2, model_name: &Ident) {
+        self.update_view_stream(stream, model_name, false);
     }
 
     fn update_view_stream(
@@ -67,36 +59,27 @@ impl Widget {
         stream: &mut TokenStream2,
         model_name: &Ident,
         conditional_branch: bool,
-        relm4_path: &Path,
     ) {
         let w_name = &self.name;
-        self.properties.update_view_stream(
-            stream,
-            w_name,
-            model_name,
-            conditional_branch,
-            relm4_path,
-        );
+        self.properties
+            .update_view_stream(stream, w_name, model_name, conditional_branch);
         if let Some(returned_widget) = &self.returned_widget {
-            returned_widget.update_view_stream(stream, model_name, conditional_branch, relm4_path);
+            returned_widget.update_view_stream(stream, model_name, conditional_branch);
         }
     }
 }
 
 impl ConditionalWidget {
-    fn update_view_stream(&self, stream: &mut TokenStream2, model_name: &Ident, relm4_path: &Path) {
+    fn update_view_stream(&self, stream: &mut TokenStream2, model_name: &Ident) {
         let brach_stream = match &self.branches {
             ConditionalBranches::If(if_branches) => {
                 let mut stream = TokenStream2::new();
 
                 for (index, branch) in if_branches.iter().enumerate() {
                     let mut inner_update_stream = TokenStream2::new();
-                    branch.widget.update_view_stream(
-                        &mut inner_update_stream,
-                        model_name,
-                        true,
-                        relm4_path,
-                    );
+                    branch
+                        .widget
+                        .update_view_stream(&mut inner_update_stream, model_name, true);
                     branch.update_stream(&mut stream, inner_update_stream, index);
                 }
                 stream
@@ -105,12 +88,9 @@ impl ConditionalWidget {
                 let mut inner_tokens = TokenStream2::new();
                 for (index, match_arm) in match_arms.iter().enumerate() {
                     let mut inner_update_stream = TokenStream2::new();
-                    match_arm.widget.update_view_stream(
-                        &mut inner_update_stream,
-                        model_name,
-                        true,
-                        relm4_path,
-                    );
+                    match_arm
+                        .widget
+                        .update_view_stream(&mut inner_update_stream, model_name, true);
                     let MatchArm {
                         pattern,
                         guard,
@@ -155,16 +135,10 @@ impl ReturnedWidget {
         stream: &mut TokenStream2,
         model_name: &Ident,
         conditional_branch: bool,
-        relm4_path: &Path,
     ) {
         let w_name = &self.name;
-        self.properties.update_view_stream(
-            stream,
-            w_name,
-            model_name,
-            conditional_branch,
-            relm4_path,
-        );
+        self.properties
+            .update_view_stream(stream, w_name, model_name, conditional_branch);
     }
 }
 
@@ -176,16 +150,15 @@ impl AssignProperty {
         w_name: &Ident,
         model_name: &Ident,
         conditional_branch: bool,
-        relm4_path: &Path,
     ) {
         match &self.attr {
             AssignPropertyAttr::None => (),
             AssignPropertyAttr::Watch => {
-                self.assign_stream(stream, p_name, w_name, relm4_path);
+                self.assign_stream(stream, p_name, w_name);
             }
             AssignPropertyAttr::Track((track_stream, paste_model)) => {
                 let mut assign_stream = TokenStream2::new();
-                self.assign_stream(&mut assign_stream, p_name, w_name, relm4_path);
+                self.assign_stream(&mut assign_stream, p_name, w_name);
                 let model = paste_model.then(|| model_name);
                 let page_switch = conditional_branch.then(|| {
                     quote_spanned! {
