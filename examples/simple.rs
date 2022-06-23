@@ -64,7 +64,7 @@ impl SimpleComponent for AppModel {
         let model = AppModel { counter };
 
         // Insert the macro code generation here
-        let widgets = view_output!();
+        let widgets = view_output();
 
         ComponentParts { model, widgets }
     }
