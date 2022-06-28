@@ -24,6 +24,7 @@ pub use self::traits::Component;
 #[allow(unreachable_pub)]
 pub use self::traits::SimpleComponent;
 
+use std::cell::RefCell;
 use std::future::Future;
 use std::pin::Pin;
 
@@ -58,12 +59,45 @@ impl<T: AsRef<gtk::glib::Object>> OnDestroy for T {
 }
 
 /// An empty root type.
+/// Construct it using [`Default`].
 ///
 /// Use this type if you have a component that does no
 /// root (e.g. a wrapper around dialogs).
-#[derive(Debug)]
-pub struct EmptyRoot;
+///
+/// Note: When this type is dropped, the component will
+/// be dropped as well. The root is usually stored in 
+/// a [`Controller`] so you don't have to keep it alive
+/// yourself.
+#[derive(Default)]
+pub struct EmptyRoot {
+    func: RefCell<Option<Box<dyn FnOnce()>>>,
+}
+
+impl std::fmt::Debug for EmptyRoot {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("EmptyRoot")
+            .field(
+                "func",
+                &self
+                    .func
+                    .try_borrow()
+                    .map(|opt| opt.as_ref().map(|_| "Destroy function")),
+            )
+            .finish()
+    }
+}
 
 impl OnDestroy for EmptyRoot {
-    fn on_destroy<F: FnOnce() + 'static>(&self, _func: F) {}
+    fn on_destroy<F: FnOnce() + 'static>(&self, func: F) {
+        *self.func.borrow_mut() = Some(Box::new(func));
+    }
+}
+
+impl Drop for EmptyRoot {
+    fn drop(&mut self) {
+        if let Some(func) = self.func.borrow_mut().take() {
+            // Call OnDestroy function
+            func();
+        }
+    }
 }
