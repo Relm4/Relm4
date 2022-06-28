@@ -26,7 +26,7 @@ pub trait Worker: Sized + Send {
     ) -> Self;
 
     /// Spawns the worker task in the background.
-    fn init(params: Self::InputParams) -> WorkerHandle<Self::Input, Self::Output> {
+    fn init(params: Self::InputParams) -> WorkerHandle<Self> {
         let (input_tx, input_rx) = crate::channel::<Self::Input>();
         let (mut output_tx, output_rx) = crate::channel::<Self::Output>();
 
@@ -63,27 +63,31 @@ pub trait Worker: Sized + Send {
 #[derive(Debug)]
 #[must_use = "Dropping without aborting or handling the receiver causes the worker to live forever."]
 /// Handle to a worker task in the background
-pub struct WorkerHandle<Input, Output> {
+pub struct WorkerHandle<W: Worker> {
     /// Sends inputs to the worker.
-    pub sender: Sender<Input>,
+    pub sender: Sender<W::Input>,
 
     /// Where the worker will send its outputs to.
-    pub receiver: Receiver<Output>,
+    pub receiver: Receiver<W::Output>,
 
     worker: crate::JoinHandle<()>,
 }
 
-impl<Input: 'static, Output: 'static> WorkerHandle<Input, Output> {
+impl<W: Worker> WorkerHandle<W>
+where
+    W::Input: 'static,
+    W::Output: 'static,
+{
     /// Drops the handle and shuts down the service.
     pub fn abort(self) {
         self.worker.abort();
     }
 
     /// Given a mutable closure, captures the receiver for handling.
-    pub fn connect_receiver<F: FnMut(&mut Sender<Input>, Output) + 'static>(
+    pub fn connect_receiver<F: FnMut(&mut Sender<W::Input>, W::Output) + 'static>(
         self,
         mut func: F,
-    ) -> WorkerController<Input> {
+    ) -> WorkerController<W> {
         let WorkerHandle {
             worker,
             sender,
@@ -101,11 +105,11 @@ impl<Input: 'static, Output: 'static> WorkerHandle<Input, Output> {
     }
 
     /// Forwards output events to the designated sender.
-    pub fn forward<X: 'static, F: (Fn(Output) -> X) + 'static>(
+    pub fn forward<X: 'static, F: (Fn(W::Output) -> X) + 'static>(
         self,
         sender_: &Sender<X>,
         transform: F,
-    ) -> WorkerController<Input> {
+    ) -> WorkerController<W> {
         let WorkerHandle {
             sender,
             receiver,
@@ -119,14 +123,14 @@ impl<Input: 'static, Output: 'static> WorkerHandle<Input, Output> {
 
 /// Sends inputs to a worker. On drop, shuts down the worker.
 #[derive(Debug)]
-pub struct WorkerController<Input> {
+pub struct WorkerController<W: Worker> {
     /// Sends inputs to the worker.
-    pub sender: Sender<Input>,
+    pub sender: Sender<W::Input>,
 
     worker: crate::JoinHandle<()>,
 }
 
-impl<Input> Drop for WorkerController<Input> {
+impl<W: Worker> Drop for WorkerController<W> {
     fn drop(&mut self) {
         self.worker.abort();
     }
