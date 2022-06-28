@@ -32,8 +32,6 @@ fn gtk_import() -> std::rc::Rc<syn::Path> {
 ///
 /// To create public struct use `#[component(pub)]` or `#[component(visibility = pub)]`.
 ///
-/// If you use reexports to provide relm4, then you can use `#[widget(relm4 = ::myreexports::my_relm)]` to override relm4 used during generating struct.
-///
 /// # Example
 ///
 /// ```

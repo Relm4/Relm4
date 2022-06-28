@@ -56,3 +56,14 @@ impl<T: AsRef<gtk::glib::Object>> OnDestroy for T {
         });
     }
 }
+
+/// An empty root type.
+///
+/// Use this type if you have a component that does no
+/// root (e.g. a wrapper around dialogs).
+#[derive(Debug)]
+pub struct EmptyRoot;
+
+impl OnDestroy for EmptyRoot {
+    fn on_destroy<F: FnOnce() + 'static>(&self, _func: F) {}
+}
