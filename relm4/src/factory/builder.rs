@@ -120,7 +120,7 @@ where
                 futures::pin_mut!(input);
                 futures::pin_mut!(notifier);
 
-                let _ = futures::select!(
+                futures::select!(
                     // Performs the model update, checking if the update requested a command.
                     // Runs that command asynchronously in the background using tokio.
                     message = input => {

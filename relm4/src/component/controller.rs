@@ -13,7 +13,7 @@ use super::{Component, StateWatcher};
 pub trait ComponentController<C: Component> {
     /// Emits an input to the component.
     fn emit(&self, event: C::Input) {
-        let _ = self.sender().send(event);
+        self.sender().send(event);
     }
 
     /// Provides access to the component's sender.

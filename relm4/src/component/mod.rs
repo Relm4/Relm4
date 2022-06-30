@@ -65,7 +65,7 @@ impl<T: AsRef<gtk::glib::Object>> OnDestroy for T {
 /// root (e.g. a wrapper around dialogs).
 ///
 /// Note: When this type is dropped, the component will
-/// be dropped as well. The root is usually stored in 
+/// be dropped as well. The root is usually stored in
 /// a [`Controller`] so you don't have to keep it alive
 /// yourself.
 #[derive(Default)]
