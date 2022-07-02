@@ -42,3 +42,7 @@ path = "macro_reference.rs"
 [[example]]
 name = "non_blocking_async"
 path = "non_blocking_async.rs"
+
+[[example]]
+name = "menu"
+path = "menu.rs"

@@ -27,13 +27,13 @@ pub(crate) fn generate_tokens(vis: Option<Visibility>, data: ItemImpl) -> TokenS
         .to_compile_error();
     };
 
-    let types::Types {
-        widgets: widgets_type,
-        other_types,
-    } = match types::Types::new(data.types) {
-        Ok(types) => types,
-        Err(err) => return err.to_compile_error(),
-    };
+    let (
+        types::Types {
+            widgets: widgets_type,
+            other_types,
+        },
+        type_errors,
+    ) = types::Types::new(data.types);
 
     let trait_ = data.trait_;
     let ty = data.self_ty;
@@ -99,6 +99,7 @@ pub(crate) fn generate_tokens(vis: Option<Visibility>, data: ItemImpl) -> TokenS
         #init_widgets
         #connect
         {
+            #type_errors
             #error
         }
         #assign

@@ -16,6 +16,7 @@ struct Menu {
 
 enum MenuItem {
     Entry(Box<MenuEntry>),
+    Custom(LitStr),
     Section(MenuSection),
 }
 
