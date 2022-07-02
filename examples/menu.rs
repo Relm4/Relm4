@@ -80,37 +80,36 @@ impl SimpleComponent for AppModel {
         }
     }
 
-    // ============================================================
-    //
-    // You can also use menu! outside of the widget macro.
-    // This is the manual equivalent to the the menu! macro above.
-    //
-    // ============================================================
-    //
-    // fn pre_init() {
-    //     relm4_macros::menu! {
-    //         main_menu: {
-    //             "Test" => TestAction,
-    //             "Test2" => TestAction,
-    //             "Test toggle" => TestU8Action(1_u8),
-    //             section! {
-    //                 "Section test" => TestAction,
-    //                 "Test toggle" => TestU8Action(1_u8),
-    //             },
-    //             section! {
-    //                 "Test" => TestAction,
-    //                 "Test2" => TestAction,
-    //                 "Test Value" => TestU8Action(1_u8),
-    //             }
-    //         }
-    //     };
-    // }
-
     fn init(
         counter: Self::InitParams,
         root: &Self::Root,
         sender: &ComponentSender<Self>,
     ) -> ComponentParts<Self> {
+        // ============================================================
+        //
+        // You can also use menu! outside of the widget macro.
+        // This is the manual equivalent to the the menu! macro above.
+        //
+        // ============================================================
+        //
+        // relm4::menu! {
+        //     main_menu: {
+        //         custom: "my_widget",
+        //         "Test" => TestAction,
+        //         "Test2" => TestAction,
+        //         "Test toggle" => TestU8Action(1_u8),
+        //         section! {
+        //             "Section test" => TestAction,
+        //             "Test toggle" => TestU8Action(1_u8),
+        //         },
+        //         section! {
+        //             "Test" => TestAction,
+        //             "Test2" => TestAction,
+        //             "Test Value" => TestU8Action(1_u8),
+        //         }
+        //     }
+        // };
+
         let model = Self { counter };
         let widgets = view_output!();
 

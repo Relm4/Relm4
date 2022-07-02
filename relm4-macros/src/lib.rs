@@ -187,6 +187,13 @@ pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
 
 /// A macro to create menus.
 ///
+/// Use
+///
+/// + `"Label text" => ActionType,` to create new entries.
+/// + `"Label text" => ActionType(value),` to create new entries with action value.
+/// + `custom => "widget_id",` add a placeholder for custom widgets you can add later with [set_attribute_name](https://gtk-rs.org/gtk-rs-core/stable/0.15/docs/gio/struct.MenuItem.html#method.set_attribute_value).
+/// + `section! { ... }` to create new sections.
+///
 /// # Example
 ///
 /// ```
@@ -198,6 +205,7 @@ pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
 /// // Create a `MenuModel` called `menu_model`
 /// relm4_macros::menu! {
 ///     main_menu: {
+///         custom: "my_widget",
 ///         "Test" => TestAction,
 ///         "Test2" => TestAction,
 ///         "Test toggle" => TestU8Action(1_u8),
@@ -243,36 +251,43 @@ pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
 /// }
 ///
 /// // Main menu
-/// let main_menu = ::relm4::gtk::gio::Menu::new();
-/// let new_entry = ::relm4::actions::RelmAction::<TestAction>::to_menu_item("Test");
+/// let main_menu = relm4::gtk::gio::Menu::new();
+///
+/// // Placeholder for custom widget
+/// let new_entry = relm4::gtk::gio::MenuItem::new(None, None);
+/// let variant = relm4::gtk::glib::variant::ToVariant::to_variant("my_widget");
+/// new_entry.set_attribute_value("custom", Some(&variant));
 /// main_menu.append_item(&new_entry);
-/// let new_entry = ::relm4::actions::RelmAction::<TestAction>::to_menu_item("Test2");
+///
+/// let new_entry = relm4::actions::RelmAction::<TestAction>::to_menu_item("Test");
 /// main_menu.append_item(&new_entry);
-/// let new_entry = ::relm4::actions::RelmAction::<TestU8Action>::to_menu_item_with_target_value(
+/// let new_entry = relm4::actions::RelmAction::<TestAction>::to_menu_item("Test2");
+/// main_menu.append_item(&new_entry);
+/// let new_entry = relm4::actions::RelmAction::<TestU8Action>::to_menu_item_with_target_value(
 ///     "Test toggle",
 ///     &1_u8,
 /// );
 /// main_menu.append_item(&new_entry);
 ///
 /// // Section 0
-/// let _section_0 = ::relm4::gtk::gio::Menu::new();
+/// let _section_0 = relm4::gtk::gio::Menu::new();
 /// main_menu.append_section(None, &_section_0);
-/// let new_entry = ::relm4::actions::RelmAction::<TestAction>::to_menu_item("Section test");
+/// let new_entry = relm4::actions::RelmAction::<TestAction>::to_menu_item("Section test");
 /// _section_0.append_item(&new_entry);
-/// let new_entry = ::relm4::actions::RelmAction::<TestU8Action>::to_menu_item_with_target_value(
+/// let new_entry = relm4::actions::RelmAction::<TestU8Action>::to_menu_item_with_target_value(
 ///     "Test toggle",
 ///     &1_u8,
 /// );
 /// _section_0.append_item(&new_entry);
 ///
 /// // Section 1
-/// let _section_1 = ::relm4::gtk::gio::Menu::new();
+/// let _section_1 = relm4::gtk::gio::Menu::new();
 /// main_menu.append_section(None, &_section_1);
-/// let new_entry = ::relm4::actions::RelmAction::<TestAction>::to_menu_item("Test");
+/// let new_entry = relm4::actions::RelmAction::<TestAction>::to_menu_item("Test");
 /// _section_1.append_item(&new_entry);
-/// let new_entry = ::relm4::actions::RelmAction::<TestAction>::to_menu_item("Test2");
+/// let new_entry = relm4::actions::RelmAction::<TestAction>::to_menu_item("Test2");
 /// _section_1.append_item(&new_entry);
-/// let new_entry = ::relm4::actions::RelmAction::<TestU8Action>::to_menu_item_with_target_value(
+/// let new_entry = relm4::actions::RelmAction::<TestU8Action>::to_menu_item_with_target_value(
 ///     "Test Value",
 ///     &1_u8,
 /// );
@@ -381,7 +396,7 @@ pub fn menu(input: TokenStream) -> TokenStream {
 /// }
 ///
 /// // The button was added without any further instructions, so we assume `container_add()` will work.
-/// ::relm4::RelmContainerExt::container_add(&vbox, &_gtk_button_5);
+/// relm4::RelmContainerExt::container_add(&vbox, &_gtk_button_5);
 /// _gtk_button_5.set_label("Click me!");
 /// // For the label, we used the `prepend` method, so we don't need `container_add()` here.
 /// vbox.prepend(&my_label);
