@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned};
-use syn::Ident;
+use syn::{Ident, LitStr};
 
 use super::{Menu, MenuEntry, MenuItem, MenuSection, Menus};
 
@@ -37,12 +37,24 @@ impl MenuItem {
     fn item_stream(&self, parent_ident: &Ident) -> TokenStream2 {
         let mut item_stream = TokenStream2::new();
 
-        match self {
-            MenuItem::Entry(entry) => item_stream.extend(entry.entry_stream(parent_ident)),
-            MenuItem::Section(section) => item_stream.extend(section.section_stream(parent_ident)),
-        }
+        item_stream.extend(match self {
+            MenuItem::Entry(entry) => entry.entry_stream(parent_ident),
+            MenuItem::Section(section) => section.section_stream(parent_ident),
+            MenuItem::Custom(id) => custom_stream(parent_ident, id),
+        });
 
         item_stream
+    }
+}
+
+fn custom_stream(parent_ident: &Ident, id: &LitStr) -> TokenStream2 {
+    let gtk_import = crate::gtk_import();
+    quote_spanned! {
+        id.span() =>
+            let new_entry = #gtk_import::gio::MenuItem::new(None, None);
+            let variant = #gtk_import::glib::variant::ToVariant::to_variant(#id);
+            new_entry.set_attribute_value("custom", Some(&variant));
+            #parent_ident.append_item(&new_entry);
     }
 }
 
