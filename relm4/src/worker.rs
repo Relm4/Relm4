@@ -36,7 +36,7 @@ pub trait Worker: Sized + Send {
                 let mut worker = Self::init_inner(params, &mut input_tx, &mut output_tx);
 
                 while let Some(input) = input_rx.recv().await {
-                    worker.update(input, &mut input_tx, &mut output_tx).await;
+                    crate::spawn(worker.update(input, &mut input_tx, &mut output_tx));
                 }
             })
         };
