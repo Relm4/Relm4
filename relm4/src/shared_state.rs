@@ -129,7 +129,7 @@ impl<'a, Data> Deref for SharedStateReadGuard<'a, Data> {
 }
 
 /// A guard that mutably dereferences `Data`.
-/// Once dropped all subscribers of the [`SharedData`] will be notified.
+/// Once dropped all subscribers of the [`SharedState`] will be notified.
 pub struct SharedStateWriteGuard<'a, Data> {
     data: RwLockWriteGuard<'a, Data>,
     subscribers: RwLockWriteGuard<'a, Vec<SubscriberFn<Data>>>,
