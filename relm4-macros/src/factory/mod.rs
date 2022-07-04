@@ -1,10 +1,10 @@
 use proc_macro2::{Span as Span2, TokenStream as TokenStream2};
 use quote::{quote, ToTokens};
-use syn::{Ident, PathArguments, Visibility};
+use syn::spanned::Spanned;
+use syn::{Ident, Visibility};
 
 use crate::component::token_streams;
 use crate::macros::Macros;
-use crate::ItemImpl;
 
 mod funcs;
 mod inject_view_code;
@@ -12,39 +12,49 @@ mod types;
 
 use inject_view_code::inject_view_code;
 
-pub(crate) fn generate_tokens(vis: Option<Visibility>, data: ItemImpl) -> TokenStream2 {
-    let last_segment = data
-        .trait_
-        .segments
-        .last()
-        .expect("Expected at least one segment in the trait path");
-    let container_widget = if let PathArguments::AngleBracketed(args) = &last_segment.arguments {
-        if let Some(arg) = args.args.first() {
-            arg.to_token_stream()
-        } else {
-            quote! { () }
-        }
-    } else {
-        quote! { () }
-    };
-
+pub(crate) fn generate_tokens(
+    vis: Option<Visibility>,
+    factory_impl: syn::ItemImpl,
+) -> TokenStream2 {
+    let types = factory_impl
+        .items
+        .iter()
+        .filter_map(|item| match item {
+            syn::ImplItem::Type(ty) => Some(ty.clone()),
+            _ => None,
+        })
+        .collect::<Vec<_>>();
     let types::Types {
         widgets: widgets_type,
         other_types,
-    } = match types::Types::new(data.types) {
+    } = match types::Types::new(types) {
         Ok(types) => types,
         Err(err) => return err.to_compile_error(),
     };
 
-    let trait_ = data.trait_;
-    let ty = data.self_ty;
-    let outer_attrs = &data.outer_attrs;
+    let trait_ = match &factory_impl.trait_ {
+        Some((None, path, _)) => path,
+        _ => {
+            return syn::Error::new_spanned(&factory_impl, "must be a positive trait impl")
+                .into_compile_error()
+        }
+    };
+    let ty = &factory_impl.self_ty;
+    let outer_attrs = &factory_impl.attrs;
 
+    let macros = factory_impl
+        .items
+        .iter()
+        .filter_map(|item| match item {
+            syn::ImplItem::Macro(mac) => Some(mac.mac.clone()),
+            _ => None,
+        })
+        .collect::<Vec<_>>();
     let Macros {
         view_widgets,
         additional_fields,
         menus,
-    } = match Macros::new(&data.macros, data.brace_span.unwrap()) {
+    } = match Macros::new(&macros, factory_impl.span().unwrap()) {
         Ok(macros) => macros,
         Err(err) => return err.to_compile_error(),
     };
@@ -52,13 +62,21 @@ pub(crate) fn generate_tokens(vis: Option<Visibility>, data: ItemImpl) -> TokenS
     // Generate menu tokens
     let menus_stream = menus.map(|m| m.menus_stream());
 
+    let funcs = factory_impl
+        .items
+        .iter()
+        .filter_map(|item| match item {
+            syn::ImplItem::Method(func) => Some(func.clone()),
+            _ => None,
+        })
+        .collect::<Vec<_>>();
     let funcs::Funcs {
         init_widgets,
         pre_view,
         post_view,
         unhandled_fns,
         root_name,
-    } = match funcs::Funcs::new(data.funcs) {
+    } = match funcs::Funcs::new(funcs) {
         Ok(macros) => macros,
         Err(err) => return err.to_compile_error(),
     };
@@ -83,8 +101,8 @@ pub(crate) fn generate_tokens(vis: Option<Visibility>, data: ItemImpl) -> TokenS
 
     let root_widget_type = view_widgets.root_type();
 
-    let impl_generics = data.impl_generics;
-    let where_clause = data.where_clause;
+    let impl_generics = &factory_impl.generics.params;
+    let where_clause = &factory_impl.generics.where_clause;
 
     // Extract identifiers from additional fields for struct initialization: "test: u8" => "test"
     let additional_fields_return_stream = if let Some(fields) = &additional_fields {
@@ -116,6 +134,15 @@ pub(crate) fn generate_tokens(vis: Option<Visibility>, data: ItemImpl) -> TokenS
         }
     };
 
+    let last_segment = trait_.segments.last().unwrap();
+    let container_widget = match &last_segment.arguments {
+        syn::PathArguments::AngleBracketed(args) => {
+            args.args.first().map(|arg| arg.to_token_stream())
+        }
+        _ => None,
+    }
+    .unwrap_or_default();
+
     let init_injected = inject_view_code(
         init_widgets,
         view_code,
@@ -125,7 +152,7 @@ pub(crate) fn generate_tokens(vis: Option<Visibility>, data: ItemImpl) -> TokenS
 
     quote! {
         #[allow(dead_code)]
-        #outer_attrs
+        #(#outer_attrs)*
         #[derive(Debug)]
         #vis struct #widgets_type {
             #struct_fields

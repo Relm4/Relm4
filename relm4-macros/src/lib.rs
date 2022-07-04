@@ -8,7 +8,6 @@ mod additional_fields;
 mod args;
 mod attrs;
 mod component;
-mod item_impl;
 mod macros;
 mod menu;
 mod view;
@@ -19,7 +18,6 @@ mod util;
 mod factory;
 
 use attrs::Attrs;
-use item_impl::ItemImpl;
 use menu::Menus;
 
 fn gtk_import() -> std::rc::Rc<syn::Path> {
@@ -157,17 +155,17 @@ fn gtk_import() -> std::rc::Rc<syn::Path> {
 #[proc_macro_attribute]
 pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let Attrs { visibility } = parse_macro_input!(attributes as Attrs);
-    let data = parse_macro_input!(input as ItemImpl);
+    let component_impl = parse_macro_input!(input as syn::ItemImpl);
 
-    component::generate_tokens(visibility, data).into()
+    component::generate_tokens(visibility, component_impl).into()
 }
 
 #[proc_macro_attribute]
 pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let Attrs { visibility } = parse_macro_input!(attributes as Attrs);
-    let data = parse_macro_input!(input as ItemImpl);
+    let factory_impl = parse_macro_input!(input as syn::ItemImpl);
 
-    factory::generate_tokens(visibility, data).into()
+    factory::generate_tokens(visibility, factory_impl).into()
 }
 
 // Macro that implements [`relm4::factory::FactoryPrototype`](https://aaronerhardt.github.io/docs/relm4/relm4/factory/trait.FactoryPrototype.html)

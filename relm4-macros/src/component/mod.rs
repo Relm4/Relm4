@@ -1,10 +1,9 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens};
 use syn::spanned::Spanned;
-use syn::{Error, PathArguments, Visibility};
+use syn::Visibility;
 
 use crate::macros::Macros;
-use crate::ItemImpl;
 
 mod funcs;
 pub(super) mod inject_view_code;
@@ -13,37 +12,49 @@ mod types;
 
 use inject_view_code::inject_view_code;
 
-pub(crate) fn generate_tokens(vis: Option<Visibility>, data: ItemImpl) -> TokenStream2 {
-    let last_segment = data
-        .trait_
-        .segments
-        .last()
-        .expect("Expected at least one segment in the trait path");
-    if PathArguments::None != last_segment.arguments {
-        return Error::new(
-            last_segment.arguments.span(),
-            "Expected no generic parameters",
-        )
-        .to_compile_error();
-    };
-
+pub(crate) fn generate_tokens(
+    vis: Option<Visibility>,
+    component_impl: syn::ItemImpl,
+) -> TokenStream2 {
+    let types = component_impl
+        .items
+        .iter()
+        .filter_map(|item| match item {
+            syn::ImplItem::Type(ty) => Some(ty.clone()),
+            _ => None,
+        })
+        .collect();
     let (
         types::Types {
             widgets: widgets_type,
             other_types,
         },
         type_errors,
-    ) = types::Types::new(data.types);
+    ) = types::Types::new(types);
 
-    let trait_ = data.trait_;
-    let ty = data.self_ty;
-    let outer_attrs = &data.outer_attrs;
+    let trait_ = match component_impl.trait_ {
+        Some((None, path, _)) => path,
+        _ => {
+            return syn::Error::new_spanned(&component_impl, "must be a positive trait impl")
+                .into_compile_error()
+        }
+    };
+    let ty = &component_impl.self_ty;
+    let outer_attrs = &component_impl.attrs;
 
+    let macros = component_impl
+        .items
+        .iter()
+        .filter_map(|item| match item {
+            syn::ImplItem::Macro(mac) => Some(mac.mac.clone()),
+            _ => None,
+        })
+        .collect::<Vec<_>>();
     let Macros {
         view_widgets,
         additional_fields,
         menus,
-    } = match Macros::new(&data.macros, data.brace_span.unwrap()) {
+    } = match Macros::new(&macros, component_impl.span().unwrap()) {
         Ok(macros) => macros,
         Err(err) => return err.to_compile_error(),
     };
@@ -51,6 +62,14 @@ pub(crate) fn generate_tokens(vis: Option<Visibility>, data: ItemImpl) -> TokenS
     // Generate menu tokens
     let menus_stream = menus.map(|m| m.menus_stream());
 
+    let funcs = component_impl
+        .items
+        .iter()
+        .filter_map(|item| match item {
+            syn::ImplItem::Method(func) => Some(func.clone()),
+            _ => None,
+        })
+        .collect::<Vec<_>>();
     let funcs::Funcs {
         init,
         pre_view,
@@ -58,7 +77,7 @@ pub(crate) fn generate_tokens(vis: Option<Visibility>, data: ItemImpl) -> TokenS
         unhandled_fns,
         root_name,
         model_name,
-    } = match funcs::Funcs::new(data.funcs) {
+    } = match funcs::Funcs::new(funcs) {
         Ok(macros) => macros,
         Err(err) => return err.to_compile_error(),
     };
@@ -78,8 +97,8 @@ pub(crate) fn generate_tokens(vis: Option<Visibility>, data: ItemImpl) -> TokenS
 
     let root_widget_type = view_widgets.root_type();
 
-    let impl_generics = data.impl_generics;
-    let where_clause = data.where_clause;
+    let impl_generics = &component_impl.generics.params;
+    let where_clause = &component_impl.generics.where_clause;
 
     // Extract identifiers from additional fields for struct initialization: "test: u8" => "test"
     let additional_fields_return_stream = if let Some(fields) = &additional_fields {
@@ -119,7 +138,7 @@ pub(crate) fn generate_tokens(vis: Option<Visibility>, data: ItemImpl) -> TokenS
 
     quote! {
         #[allow(dead_code)]
-        #outer_attrs
+        #(#outer_attrs)*
         #[derive(Debug)]
         #vis struct #widgets_type {
             #struct_fields
