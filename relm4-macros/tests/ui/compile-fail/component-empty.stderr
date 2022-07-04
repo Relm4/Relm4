@@ -1,0 +1,13 @@
+error: No view macro in impl block
+ --> tests/ui/compile-fail/component-empty.rs:6:40
+  |
+6 | impl SimpleComponent for TestComponent {
+  |                                        ^
+
+warning: unused import: `relm4::SimpleComponent`
+ --> tests/ui/compile-fail/component-empty.rs:1:5
+  |
+1 | use relm4::SimpleComponent;
+  |     ^^^^^^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default

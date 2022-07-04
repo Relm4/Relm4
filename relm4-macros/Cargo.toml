@@ -30,3 +30,4 @@ syn = { version = "1.0", features = ["full", "extra-traits"] }
 
 [dev-dependencies]
 relm4 = { path = "../relm4" }
+trybuild = "1.0.63"

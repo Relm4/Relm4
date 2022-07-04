@@ -410,3 +410,9 @@ pub fn menu(input: TokenStream) -> TokenStream {
 pub fn view(input: TokenStream) -> TokenStream {
     view::generate_tokens(input)
 }
+
+#[test]
+fn ui() {
+    let t = trybuild::TestCases::new();
+    t.compile_fail("tests/ui/compile-fail/**/*.rs");
+}
