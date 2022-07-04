@@ -11,6 +11,7 @@ mod component;
 mod macros;
 mod menu;
 mod view;
+mod visitors;
 mod widgets;
 
 #[macro_use]

@@ -1,7 +1,7 @@
-error: Did not find type `Widgets`
- --> tests/ui/compile-fail/component-missing-widgets.rs:5:1
+error[E0046]: not all trait items implemented, missing: `Widgets`
+ --> tests/ui/compile-fail/component-missing-widgets.rs:6:1
   |
-5 | #[relm4_macros::component]
-  | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+6 | impl SimpleComponent for TestComponent {
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ missing `Widgets` in implementation
   |
-  = note: this error originates in the attribute macro `relm4_macros::component` (in Nightly builds, run with -Z macro-backtrace for more info)
+  = help: implement the missing item: `type Widgets = Type;`
