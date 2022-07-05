@@ -2,25 +2,27 @@
 // Copyright 2022 System76 <info@system76.com>
 // SPDX-License-Identifier: MIT or Apache-2.0
 
+use std::fmt::Debug;
+
 use super::*;
 use crate::{ComponentSender, Sender};
 
 /// Elm-style variant of a Component with view updates separated from input updates
 pub trait Component: Sized + 'static {
     /// Messages which are received from commands executing in the background.
-    type CommandOutput: 'static + Send;
+    type CommandOutput: Debug + Send + 'static;
 
     /// The message type that the component accepts as inputs.
-    type Input: 'static;
+    type Input: Debug + 'static;
 
     /// The message type that the component provides as outputs.
-    type Output: 'static;
+    type Output: Debug + 'static;
 
     /// The initial parameter(s) for launch.
     type InitParams;
 
     /// The widget that was constructed by the component.
-    type Root: std::fmt::Debug + OnDestroy;
+    type Root: Debug + OnDestroy;
 
     /// The type that's used for storing widgets created for this component.
     type Widgets: 'static;
@@ -77,15 +79,23 @@ pub trait Component: Sized + 'static {
     /// Last method called before a component is shut down.
     #[allow(unused)]
     fn shutdown(&mut self, widgets: &mut Self::Widgets, output: Sender<Self::Output>) {}
+
+    /// An identifier for the component used for debug logging.
+    ///
+    /// The default implementation of this method uses the address of the component, but
+    /// implementations are free to provide more meaningful identifiers.
+    fn id(&self) -> String {
+        format!("{:p}", &self)
+    }
 }
 
 /// Elm-style variant of a Component with view updates separated from input updates
 pub trait SimpleComponent: Sized + 'static {
     /// The message type that the component accepts as inputs.
-    type Input: 'static;
+    type Input: Debug + 'static;
 
     /// The message type that the component provides as outputs.
-    type Output: 'static;
+    type Output: Debug + 'static;
 
     /// The initial parameter(s) for launch.
     type InitParams;
