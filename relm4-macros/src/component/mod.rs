@@ -1,143 +1,117 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens};
-use syn::spanned::Spanned;
-use syn::{Error, PathArguments, Visibility};
+use syn::visit_mut::VisitMut;
+use syn::{parse_quote, Visibility};
 
-use crate::macros::Macros;
-use crate::ItemImpl;
+use crate::visitors::ComponentVisitor;
 
-mod funcs;
 pub(super) mod inject_view_code;
 pub(crate) mod token_streams;
-mod types;
 
 use inject_view_code::inject_view_code;
 
-pub(crate) fn generate_tokens(vis: Option<Visibility>, data: ItemImpl) -> TokenStream2 {
-    let last_segment = data
-        .trait_
-        .segments
-        .last()
-        .expect("Expected at least one segment in the trait path");
-    if PathArguments::None != last_segment.arguments {
-        return Error::new(
-            last_segment.arguments.span(),
-            "Expected no generic parameters",
-        )
-        .to_compile_error();
-    };
+pub(crate) fn generate_tokens(
+    vis: Option<Visibility>,
+    mut component_impl: syn::ItemImpl,
+) -> TokenStream2 {
+    let outer_attrs = component_impl.attrs.clone();
 
-    let (
-        types::Types {
-            widgets: widgets_type,
-            other_types,
-        },
-        type_errors,
-    ) = types::Types::new(data.types);
+    let mut component_visitor = ComponentVisitor::default();
+    component_visitor.visit_item_impl_mut(&mut component_impl);
 
-    let trait_ = data.trait_;
-    let ty = data.self_ty;
-    let outer_attrs = &data.outer_attrs;
+    let errors = component_visitor
+        .errors
+        .iter()
+        .map(|err| err.to_compile_error());
 
-    let Macros {
-        view_widgets,
-        additional_fields,
-        menus,
-    } = match Macros::new(&data.macros, data.brace_span.unwrap()) {
-        Ok(macros) => macros,
-        Err(err) => return err.to_compile_error(),
-    };
+    let additional_fields = component_visitor.additional_fields.take();
 
-    // Generate menu tokens
-    let menus_stream = menus.map(|m| m.menus_stream());
+    let menus_stream = component_visitor
+        .menus
+        .take()
+        .map(|menus| menus.menus_stream());
 
-    let funcs::Funcs {
-        init,
-        pre_view,
-        post_view,
-        unhandled_fns,
-        root_name,
-        model_name,
-    } = match funcs::Funcs::new(data.funcs) {
-        Ok(macros) => macros,
-        Err(err) => return err.to_compile_error(),
-    };
+    let mut struct_fields = None;
 
-    let token_streams::TokenStreams {
-        error,
-        init_root,
-        rename_root,
-        struct_fields,
-        init: init_widgets,
-        assign,
-        connect,
-        return_fields,
-        destructure_fields,
-        update_view,
-    } = view_widgets.generate_streams(&vis, &model_name, Some(&root_name), false);
+    if let ComponentVisitor {
+        view_widgets: Some(view_widgets),
+        model_name: Some(model_name),
+        root_name: Some(root_name),
+        init: Some(init),
+        ..
+    } = component_visitor
+    {
+        let token_streams::TokenStreams {
+            error,
+            init_root,
+            rename_root,
+            struct_fields: struct_fields_stream,
+            init: init_widgets,
+            assign,
+            connect,
+            return_fields,
+            destructure_fields,
+            update_view,
+        } = view_widgets.generate_streams(&vis, &model_name, Some(&root_name), false);
 
-    let root_widget_type = view_widgets.root_type();
+        struct_fields = Some(struct_fields_stream);
+        let root_widget_type = view_widgets.root_type();
 
-    let impl_generics = data.impl_generics;
-    let where_clause = data.where_clause;
+        // Extract identifiers from additional fields for struct initialization: "test: u8" => "test"
+        let additional_fields_return_stream = if let Some(fields) = &additional_fields {
+            let mut tokens = TokenStream2::new();
+            for field in fields.inner.pairs() {
+                tokens.extend(field.value().ident.to_token_stream());
+                tokens.extend(quote! {,});
+            }
+            tokens
+        } else {
+            TokenStream2::new()
+        };
 
-    // Extract identifiers from additional fields for struct initialization: "test: u8" => "test"
-    let additional_fields_return_stream = if let Some(fields) = &additional_fields {
-        let mut tokens = TokenStream2::new();
-        for field in fields.inner.pairs() {
-            tokens.extend(field.value().ident.to_token_stream());
-            tokens.extend(quote! {,});
-        }
-        tokens
-    } else {
-        TokenStream2::new()
-    };
+        let view_code = quote! {
+            #rename_root
+            #menus_stream
+            #init_widgets
+            #connect
+            {
+                #error
+            }
+            #assign
+        };
 
-    let view_code = quote! {
-        #rename_root
-        #menus_stream
-        #init_widgets
-        #connect
-        {
-            #type_errors
-            #error
-        }
-        #assign
-    };
+        let widgets_return_code = quote! {
+            Self::Widgets {
+                #return_fields
+                #additional_fields_return_stream
+            }
+        };
 
-    let widgets_return_code = quote! {
-        Self::Widgets {
-            #return_fields
-            #additional_fields_return_stream
-        }
-    };
+        let init_injected = match inject_view_code(init, view_code, widgets_return_code) {
+            Ok(method) => method,
+            Err(err) => return err.to_compile_error(),
+        };
 
-    let init_injected = match inject_view_code(init, view_code, widgets_return_code) {
-        Ok(method) => method,
-        Err(err) => return err.to_compile_error(),
-    };
-
-    quote! {
-        #[allow(dead_code)]
-        #outer_attrs
-        #[derive(Debug)]
-        #vis struct #widgets_type {
-            #struct_fields
-            #additional_fields
-        }
-
-        impl #impl_generics #trait_ for #ty #where_clause {
+        component_impl.items.push(parse_quote! {
             type Root = #root_widget_type;
-            type Widgets = #widgets_type;
+        });
 
-            #(#other_types)*
-
+        component_impl.items.push(parse_quote! {
             fn init_root() -> Self::Root {
                 #init_root
             }
+        });
 
-            #init_injected
+        let pre_view_stmts = component_visitor
+            .pre_view
+            .map(|f| f.block.stmts)
+            .unwrap_or_default();
+        let post_view_stmts = component_visitor
+            .post_view
+            .map(|f| f.block.stmts)
+            .unwrap_or_default();
 
+        component_impl.items.push(parse_quote! {
             /// Update the view to represent the updated model.
             fn update_view(
                 &self,
@@ -153,12 +127,34 @@ pub(crate) fn generate_tokens(vis: Option<Visibility>, data: ItemImpl) -> TokenS
                 #[allow(unused_variables)]
                 let #model_name = self;
 
-                #pre_view
+                #(#pre_view_stmts)*
                 #update_view
-                (|| { #post_view })();
+                (|| { #(#post_view_stmts)* })();
             }
+        });
 
-            #(#unhandled_fns)*
+        component_impl
+            .items
+            .push(syn::ImplItem::Method(init_injected));
+    }
+
+    let widgets_struct = component_visitor.widgets_ty.map(|ty| {
+        quote! {
+            #[allow(dead_code)]
+            #(#outer_attrs)*
+            #[derive(Debug)]
+            #vis struct #ty {
+                #struct_fields
+                #additional_fields
+            }
         }
+    });
+
+    quote! {
+        #widgets_struct
+
+        #component_impl
+
+        #(#errors)*
     }
 }
