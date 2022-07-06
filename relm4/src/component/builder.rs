@@ -8,10 +8,12 @@ use crate::RelmContainerExt;
 use async_oneshot::oneshot;
 use futures::FutureExt;
 use gtk::prelude::GtkWindowExt;
+use std::any;
 use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::rc::Rc;
 use std::sync::Arc;
+use tracing::info_span;
 
 /// A component that is ready for docking and launch.
 #[derive(Debug)]
@@ -132,6 +134,13 @@ impl<C: Component> ComponentBuilder<C> {
                                 ref mut widgets,
                             } = &mut *watcher_.state.borrow_mut();
 
+                            info_span!(
+                                "update_with_view",
+                                input=?message,
+                                component=any::type_name::<C>(),
+                                id=model.id(),
+                            );
+
                             model.update_with_view(widgets, message, &component_sender);
                         }
                     }
@@ -143,6 +152,13 @@ impl<C: Component> ComponentBuilder<C> {
                                 ref mut model,
                                 ref mut widgets,
                             } = &mut *watcher_.state.borrow_mut();
+
+                            info_span!(
+                                "update_cmd_with_view",
+                                cmd_output=?message,
+                                component=any::type_name::<C>(),
+                                id=model.id(),
+                            );
 
                             model.update_cmd_with_view(widgets, message, &component_sender);
                         }

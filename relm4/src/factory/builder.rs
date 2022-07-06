@@ -2,12 +2,14 @@ use super::{handle::FactoryHandle, DynamicIndex, FactoryComponent, FactoryView};
 
 use crate::{shutdown, OnDestroy, Receiver, Sender};
 
+use std::any;
 use std::cell::RefCell;
 use std::fmt;
 use std::rc::Rc;
 
 use async_oneshot::oneshot;
 use futures::FutureExt;
+use tracing::info_span;
 
 pub(super) struct FactoryBuilder<Widget, C, ParentMsg>
 where
@@ -127,6 +129,13 @@ where
                         if let Some(message) = message {
                             let mut model = runtime_data.borrow_mut();
 
+                            info_span!(
+                                "update_with_view",
+                                input=?message,
+                                component=any::type_name::<C>(),
+                                id=model.id(),
+                            );
+
                             if let Some(command) = model.update_with_view(&mut widgets, message, &input_tx_, &output_tx)
                             {
                                 let recipient = death_recipient.clone();
@@ -139,6 +148,14 @@ where
                     message = cmd => {
                         if let Some(message) = message {
                             let mut model = runtime_data.borrow_mut();
+
+                            info_span!(
+                                "update_cmd_with_view",
+                                cmd_output=?message,
+                                component=any::type_name::<C>(),
+                                id=model.id(),
+                            );
+
                             model.update_cmd_with_view(&mut widgets, message, &input_tx_, &output_tx);
                         }
                     }
