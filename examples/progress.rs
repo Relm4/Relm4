@@ -35,14 +35,17 @@ pub struct Widgets {
     progress: gtk::ProgressBar,
 }
 
+#[derive(Debug)]
 pub enum Input {
     Compute,
 }
 
+#[derive(Debug)]
 pub enum Output {
     Clicked(u32),
 }
 
+#[derive(Debug)]
 pub enum CmdOut {
     /// Progress update from a command.
     Progress(f32),

@@ -15,6 +15,7 @@ enum CounterMsg {
     Decrement,
 }
 
+#[derive(Debug)]
 enum CounterOutput {
     SendFront(DynamicIndex),
     MoveUp(DynamicIndex),
