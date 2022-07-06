@@ -42,6 +42,7 @@ fn gtk_import() -> std::rc::Rc<syn::Path> {
 ///     counter: u8,
 /// }
 ///
+/// #[derive(Debug)]
 /// enum AppMsg {
 ///     Increment,
 ///     Decrement,
