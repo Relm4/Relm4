@@ -59,13 +59,22 @@ where
     where
         S: AsRef<str>,
     {
+        use std::cell::Cell;
+
         let RelmApp { bridge, app } = self;
-        let controller = bridge.launch(payload).detach();
-        let window = controller.widget().clone();
+        let payload = Cell::new(Some(payload));
+        let bridge = Cell::new(Some(bridge));
 
         app.connect_activate(move |app| {
-            app.add_window(window.as_ref());
-            window.show();
+            if let (Some(bridge), Some(payload)) = (bridge.take(), payload.take()) {
+                let controller = bridge.launch(payload).detach();
+                let window = controller.widget().clone();
+
+                app.add_window(window.as_ref());
+                window.show();
+            } else {
+                panic!("Can't start Relm4 applications twice");
+            }
         });
 
         app.run_with_args(args);
