@@ -36,12 +36,12 @@ where
         #[cfg(feature = "libadwaita")]
         adw::init();
 
+        let app = app.upcast();
+        app.register(gtk::gio::Cancellable::NONE).expect("");
+
         let bridge = ComponentBuilder::<C>::new();
 
-        Self {
-            bridge,
-            app: app.upcast(),
-        }
+        Self { bridge, app }
     }
 
     /// Runs the application, returns once the application is closed.
