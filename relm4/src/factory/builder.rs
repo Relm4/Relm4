@@ -4,7 +4,6 @@ use super::{handle::FactoryHandle, DynamicIndex, FactoryComponent, FactoryView};
 use crate::{shutdown, OnDestroy, Receiver, Sender};
 
 use std::any;
-use std::cell::RefCell;
 use std::fmt;
 
 use async_oneshot::oneshot;
@@ -138,8 +137,6 @@ where
                         // Handles responses from a command.
                         message = cmd => {
                             if let Some(message) = message {
-                                let mut model = runtime_data.borrow_mut();
-
                                 info_span!(
                                     "update_cmd_with_view",
                                     cmd_output=?message,
@@ -153,14 +150,11 @@ where
 
                         // Triggered when the model and view have been updated externally.
                         _ = notifier => {
-                            let model = runtime_data.borrow_mut();
                             model.update_view(&mut widgets, &input_tx_, &output_tx);
                         }
 
                         // Triggered when the component is destroyed
                         id = burn_notice => {
-                            let mut model = runtime_data.borrow_mut();
-
                             model.shutdown(&mut widgets, output_tx);
 
                             death_notifier.shutdown();
@@ -169,23 +163,7 @@ where
                                 id.remove();
                             }
 
-                            // Triggered when the model and view have been updated externally.
-                            _ = notifier => {
-                                model.update_view(&mut widgets, &input_tx_, &output_tx);
-                            }
-
-                            // Triggered when the component is destroyed
-                            id = burn_notice => {
-                                model.shutdown(&mut widgets, output_tx);
-
-                                death_notifier.shutdown();
-
-                                if let Ok(id) = id {
-                                    id.remove();
-                                }
-
-                                return
-                            }
+                            return
                         }
                     );
                 }
