@@ -1,9 +1,7 @@
 use proc_macro2::Span;
 use syn::parse::{Parse, ParseStream};
 use syn::spanned::Spanned;
-use syn::{Error, Ident, Path, Result, Token, Visibility};
-
-use crate::util::default_relm4_path;
+use syn::{Error, Ident, Result, Token, Visibility};
 
 enum AttributeType {
     None,
@@ -14,19 +12,11 @@ enum AttributeType {
 pub struct Attrs {
     /// Keeps information about visibility of the widget
     pub visibility: Option<Visibility>,
-
-    /// Path to relm4
-    ///
-    /// Defaults to `::relm4`
-    pub relm4_path: Path,
 }
 
 impl Attrs {
     fn new() -> Self {
-        Attrs {
-            visibility: None,
-            relm4_path: default_relm4_path(),
-        }
+        Attrs { visibility: None }
     }
 }
 
@@ -47,10 +37,8 @@ impl Parse for Attrs {
         // #[widget(relm4 = ::my::path, relm4 = ::my::other::path ) ]
         // ```
         // is illegal.
-        let mut relm4_path_set = false;
-
         let mixed_use_error_message =
-            "You can't mix named and unnamed arguments while using `relm4_macros::widget`. \n\
+            "You can't mix named and unnamed arguments. \n\
             \n\
             You can use one of\n\
             \n\
@@ -93,22 +81,8 @@ impl Parse for Attrs {
 
                     attrs.visibility = Some(pub_vis);
                     attrs_type = AttributeType::Named;
-                } else if ident == "relm4" {
-                    let path: Path = input.parse()?;
-
-                    if let AttributeType::Unnamed { span } = attrs_type {
-                        return Err(Error::new(span, mixed_use_error_message));
-                    }
-                    if relm4_path_set {
-                        return Err(Error::new(path.span(), "You can't assign relm4 path twice"));
-                    }
-
-                    attrs.relm4_path = path;
-                    relm4_path_set = true;
-                    attrs_type = AttributeType::Named;
                 } else {
-                    return Err(input
-                        .error("Unknown argument. Valid arguments are: `visibility` or `relm4`"));
+                    return Err(input.error("Unknown argument. Expected `visibility`"));
                 }
             }
 

@@ -103,19 +103,6 @@ impl FactoryComponent<gtk::Box, AppMsg> for Counter {
         Self { value }
     }
 
-    fn init_widgets(
-        &mut self,
-        index: &DynamicIndex,
-        root: &Self::Root,
-        _returned_widget: &gtk::Widget,
-        input: &Sender<Self::Input>,
-        output: &Sender<Self::Output>,
-    ) -> Self::Widgets {
-        let widgets = view_output!();
-
-        widgets
-    }
-
     fn update(
         &mut self,
         msg: Self::Input,

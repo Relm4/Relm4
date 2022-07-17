@@ -1,19 +1,18 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote, quote_spanned, ToTokens};
-use syn::Path;
+use quote::{quote_spanned, ToTokens};
 
 use crate::widgets::{
     ConditionalBranches, ConditionalWidget, Properties, Property, PropertyType, Widget, WidgetAttr,
 };
 
 impl Property {
-    fn init_stream(&self, stream: &mut TokenStream2, relm4_path: &Path) {
+    fn init_stream(&self, stream: &mut TokenStream2) {
         match &self.ty {
             PropertyType::Widget(widget) => {
-                widget.init_stream(stream, relm4_path);
+                widget.init_stream(stream);
             }
             PropertyType::ConditionalWidget(cond_widget) => {
-                cond_widget.init_stream(stream, relm4_path);
+                cond_widget.init_stream(stream);
             }
             _ => (),
         }
@@ -21,30 +20,29 @@ impl Property {
 }
 
 impl Properties {
-    fn init_stream(&self, stream: &mut TokenStream2, relm4_path: &Path) {
+    fn init_stream(&self, stream: &mut TokenStream2) {
         for prop in &self.properties {
-            prop.init_stream(stream, relm4_path);
+            prop.init_stream(stream);
         }
     }
 }
 
 impl Widget {
-    pub fn init_stream(&self, stream: &mut TokenStream2, relm4_path: &Path) {
+    pub fn init_stream(&self, stream: &mut TokenStream2) {
         self.self_init_stream(stream);
-        self.other_init_stream(stream, relm4_path);
+        self.other_init_stream(stream);
     }
 
     pub fn init_root_init_streams(
         &self,
         init_root_stream: &mut TokenStream2,
         init_stream: &mut TokenStream2,
-        relm4_path: &Path,
     ) {
         // Init and name as return value
         self.self_init_stream(init_root_stream);
         self.name.to_tokens(init_root_stream);
 
-        self.other_init_stream(init_stream, relm4_path);
+        self.other_init_stream(init_stream);
     }
 
     fn self_init_stream(&self, stream: &mut TokenStream2) {
@@ -66,34 +64,37 @@ impl Widget {
         }
     }
 
-    fn other_init_stream(&self, stream: &mut TokenStream2, relm4_path: &Path) {
-        self.properties.init_stream(stream, relm4_path);
+    fn other_init_stream(&self, stream: &mut TokenStream2) {
+        self.properties.init_stream(stream);
     }
 }
 
 impl ConditionalWidget {
-    fn init_stream(&self, stream: &mut TokenStream2, relm4_path: &Path) {
+    fn init_stream(&self, stream: &mut TokenStream2) {
         let name = &self.name;
+        let gtk_import = crate::gtk_import();
 
-        stream.extend(quote! {
-            let #name = #relm4_path::gtk::Stack::default();
+        stream.extend(quote_spanned! {
+            name.span() =>
+                let #name = #gtk_import::Stack::default();
         });
 
         if let Some(transition) = &self.transition {
-            stream.extend(quote! {
-                #name.set_transition_type(#relm4_path::gtk::StackTransitionType:: #transition);
+            stream.extend(quote_spanned! {
+                transition.span() =>
+                    #name.set_transition_type(#gtk_import::StackTransitionType:: #transition);
             });
         }
 
         match &self.branches {
             ConditionalBranches::If(if_branches) => {
                 for branch in if_branches {
-                    branch.widget.init_stream(stream, relm4_path);
+                    branch.widget.init_stream(stream);
                 }
             }
             ConditionalBranches::Match((_, _, match_arms)) => {
                 for arm in match_arms {
-                    arm.widget.init_stream(stream, relm4_path);
+                    arm.widget.init_stream(stream);
                 }
             }
         }

@@ -8,10 +8,10 @@ mod additional_fields;
 mod args;
 mod attrs;
 mod component;
-mod item_impl;
 mod macros;
 mod menu;
 mod view;
+mod visitors;
 mod widgets;
 
 #[macro_use]
@@ -19,16 +19,17 @@ mod util;
 mod factory;
 
 use attrs::Attrs;
-use item_impl::ItemImpl;
 use menu::Menus;
+
+fn gtk_import() -> std::rc::Rc<syn::Path> {
+    util::GTK_IMPORT.with(|p| p.clone())
+}
 
 /// Macro that implements [`relm4::Component`](https://relm4.org/docs/next/relm4/trait.Component.html) and generates the corresponding struct.
 ///
 /// # Attributes
 ///
 /// To create public struct use `#[component(pub)]` or `#[component(visibility = pub)]`.
-///
-/// If you use reexports to provide relm4, then you can use `#[widget(relm4 = ::myreexports::my_relm)]` to override relm4 used during generating struct.
 ///
 /// # Example
 ///
@@ -41,6 +42,7 @@ use menu::Menus;
 ///     counter: u8,
 /// }
 ///
+/// #[derive(Debug)]
 /// enum AppMsg {
 ///     Increment,
 ///     Decrement,
@@ -58,24 +60,24 @@ use menu::Menus;
 ///             set_title: Some("Simple app"),
 ///             set_default_width: 300,
 ///             set_default_height: 100,
-///             set_child = Some(&gtk::Box) {
+///             gtk::Box {
 ///                 set_orientation: gtk::Orientation::Vertical,
 ///                 set_margin_all: 5,
 ///                 set_spacing: 5,
 ///
-///                 append = &gtk::Button {
+///                 gtk::Button {
 ///                     set_label: "Increment",
 ///                     connect_clicked[sender] => move |_| {
 ///                         sender.input(AppMsg::Increment);
 ///                     },
 ///                 },
-///                 append = &gtk::Button {
+///                 gtk::Button {
 ///                     set_label: "Decrement",
 ///                     connect_clicked[sender] => move |_| {
 ///                         sender.input(AppMsg::Decrement);
 ///                     },
 ///                 },
-///                 append = &gtk::Label {
+///                 gtk::Label {
 ///                     set_margin_all: 5,
 ///                     #[watch]
 ///                     set_label: &format!("Counter: {}", model.counter),
@@ -108,26 +110,64 @@ use menu::Menus;
 ///     }
 /// }
 /// ```
+///
+/// # Notes on pre_view
+///
+/// Using `return` in `pre_view` will cause a compiler warning.
+/// In general, you don't want to use `return` in `pre_view` as it will
+/// cause all following update functionality to be skipped.
+///
+/// ```compile_fail
+/// #![deny(unreachable_code)]
+///
+/// # use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
+/// # use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent, WidgetPlus};
+/// #
+/// struct AppModel {}
+///
+/// #[relm4_macros::component]
+/// impl SimpleComponent for AppModel {
+///       /* Code omitted */
+/// #     type InitParams = ();
+/// #     type Input = ();
+/// #     type Output = ();
+/// #     type Widgets = AppWidgets;
+/// #
+/// #     view! {
+/// #         gtk::Window {}
+/// #     }
+///
+///       fn pre_view() {
+///           return;
+///       }
+/// #
+/// #     fn init(
+/// #         counter: Self::InitParams,
+/// #         root: &Self::Root,
+/// #         sender: &ComponentSender<Self>,
+/// #     ) -> ComponentParts<Self> {
+/// #         let model = Self {};
+/// #
+/// #         let widgets = view_output!();
+/// #
+/// #         ComponentParts { model, widgets }
+/// #     }
+/// }
+/// ```
 #[proc_macro_attribute]
 pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
-    let Attrs {
-        visibility,
-        relm4_path,
-    } = parse_macro_input!(attributes as Attrs);
-    let data = parse_macro_input!(input as ItemImpl);
+    let Attrs { visibility } = parse_macro_input!(attributes as Attrs);
+    let component_impl = parse_macro_input!(input as syn::ItemImpl);
 
-    component::generate_tokens(visibility, relm4_path, data).into()
+    component::generate_tokens(visibility, component_impl).into()
 }
 
 #[proc_macro_attribute]
 pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
-    let Attrs {
-        visibility,
-        relm4_path,
-    } = parse_macro_input!(attributes as Attrs);
-    let data = parse_macro_input!(input as ItemImpl);
+    let Attrs { visibility } = parse_macro_input!(attributes as Attrs);
+    let factory_impl = parse_macro_input!(input as syn::ItemImpl);
 
-    factory::generate_tokens(visibility, relm4_path, data).into()
+    factory::generate_tokens(visibility, factory_impl).into()
 }
 
 // Macro that implements [`relm4::factory::FactoryPrototype`](https://aaronerhardt.github.io/docs/relm4/relm4/factory/trait.FactoryPrototype.html)
@@ -138,15 +178,21 @@ pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
 // pub fn factory_prototype(attributes: TokenStream, input: TokenStream) -> TokenStream {
 // let Attrs {
 //     visibility,
-//     relm4_path,
 // } = parse_macro_input!(attributes as Attrs);
 // let data = parse_macro_input!(input as ItemImpl);
 
-// factory_prototype_macro::generate_tokens(visibility, relm4_path, data).into()
+// factory::generate_tokens(visibility, data).into()
 //    quote! {}.into()
 // }
 
 /// A macro to create menus.
+///
+/// Use
+///
+/// + `"Label text" => ActionType,` to create new entries.
+/// + `"Label text" => ActionType(value),` to create new entries with action value.
+/// + `custom => "widget_id",` add a placeholder for custom widgets you can add later with [set_attribute_name](https://gtk-rs.org/gtk-rs-core/stable/0.15/docs/gio/struct.MenuItem.html#method.set_attribute_value).
+/// + `section! { ... }` to create new sections.
 ///
 /// # Example
 ///
@@ -159,6 +205,7 @@ pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
 /// // Create a `MenuModel` called `menu_model`
 /// relm4_macros::menu! {
 ///     main_menu: {
+///         custom: "my_widget",
 ///         "Test" => TestAction,
 ///         "Test2" => TestAction,
 ///         "Test toggle" => TestU8Action(1_u8),
@@ -204,36 +251,43 @@ pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
 /// }
 ///
 /// // Main menu
-/// let main_menu = ::relm4::gtk::gio::Menu::new();
-/// let new_entry = ::relm4::actions::RelmAction::<TestAction>::to_menu_item("Test");
+/// let main_menu = relm4::gtk::gio::Menu::new();
+///
+/// // Placeholder for custom widget
+/// let new_entry = relm4::gtk::gio::MenuItem::new(None, None);
+/// let variant = relm4::gtk::glib::variant::ToVariant::to_variant("my_widget");
+/// new_entry.set_attribute_value("custom", Some(&variant));
 /// main_menu.append_item(&new_entry);
-/// let new_entry = ::relm4::actions::RelmAction::<TestAction>::to_menu_item("Test2");
+///
+/// let new_entry = relm4::actions::RelmAction::<TestAction>::to_menu_item("Test");
 /// main_menu.append_item(&new_entry);
-/// let new_entry = ::relm4::actions::RelmAction::<TestU8Action>::to_menu_item_with_target_value(
+/// let new_entry = relm4::actions::RelmAction::<TestAction>::to_menu_item("Test2");
+/// main_menu.append_item(&new_entry);
+/// let new_entry = relm4::actions::RelmAction::<TestU8Action>::to_menu_item_with_target_value(
 ///     "Test toggle",
 ///     &1_u8,
 /// );
 /// main_menu.append_item(&new_entry);
 ///
 /// // Section 0
-/// let _section_0 = ::relm4::gtk::gio::Menu::new();
+/// let _section_0 = relm4::gtk::gio::Menu::new();
 /// main_menu.append_section(None, &_section_0);
-/// let new_entry = ::relm4::actions::RelmAction::<TestAction>::to_menu_item("Section test");
+/// let new_entry = relm4::actions::RelmAction::<TestAction>::to_menu_item("Section test");
 /// _section_0.append_item(&new_entry);
-/// let new_entry = ::relm4::actions::RelmAction::<TestU8Action>::to_menu_item_with_target_value(
+/// let new_entry = relm4::actions::RelmAction::<TestU8Action>::to_menu_item_with_target_value(
 ///     "Test toggle",
 ///     &1_u8,
 /// );
 /// _section_0.append_item(&new_entry);
 ///
 /// // Section 1
-/// let _section_1 = ::relm4::gtk::gio::Menu::new();
+/// let _section_1 = relm4::gtk::gio::Menu::new();
 /// main_menu.append_section(None, &_section_1);
-/// let new_entry = ::relm4::actions::RelmAction::<TestAction>::to_menu_item("Test");
+/// let new_entry = relm4::actions::RelmAction::<TestAction>::to_menu_item("Test");
 /// _section_1.append_item(&new_entry);
-/// let new_entry = ::relm4::actions::RelmAction::<TestAction>::to_menu_item("Test2");
+/// let new_entry = relm4::actions::RelmAction::<TestAction>::to_menu_item("Test2");
 /// _section_1.append_item(&new_entry);
-/// let new_entry = ::relm4::actions::RelmAction::<TestU8Action>::to_menu_item_with_target_value(
+/// let new_entry = relm4::actions::RelmAction::<TestU8Action>::to_menu_item_with_target_value(
 ///     "Test Value",
 ///     &1_u8,
 /// );
@@ -242,9 +296,7 @@ pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn menu(input: TokenStream) -> TokenStream {
     let menus = parse_macro_input!(input as Menus);
-    let default_relm4_path = util::default_relm4_path();
-
-    menus.menus_stream(&default_relm4_path).into()
+    menus.menus_stream().into()
 }
 
 /// The [`view!`] macro allows you to construct your UI easily and cleanly.
@@ -344,7 +396,7 @@ pub fn menu(input: TokenStream) -> TokenStream {
 /// }
 ///
 /// // The button was added without any further instructions, so we assume `container_add()` will work.
-/// ::relm4::RelmContainerExt::container_add(&vbox, &_gtk_button_5);
+/// relm4::RelmContainerExt::container_add(&vbox, &_gtk_button_5);
 /// _gtk_button_5.set_label("Click me!");
 /// // For the label, we used the `prepend` method, so we don't need `container_add()` here.
 /// vbox.prepend(&my_label);
@@ -357,4 +409,10 @@ pub fn menu(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn view(input: TokenStream) -> TokenStream {
     view::generate_tokens(input)
+}
+
+#[test]
+fn ui() {
+    let t = trybuild::TestCases::new();
+    t.compile_fail("tests/ui/compile-fail/**/*.rs");
 }

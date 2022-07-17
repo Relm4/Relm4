@@ -3,7 +3,7 @@ use quote::quote;
 use syn::spanned::Spanned;
 use syn::{Error, Expr, ImplItemMethod, Pat, Result, Stmt};
 
-pub(super) fn inject_view_code(
+pub(crate) fn inject_view_code(
     mut func: ImplItemMethod,
     view_code: TokenStream2,
     widgets_return_code: TokenStream2,

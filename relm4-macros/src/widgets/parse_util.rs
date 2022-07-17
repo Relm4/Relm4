@@ -1,17 +1,15 @@
 use std::sync::atomic::{AtomicU16, Ordering};
 
 use proc_macro2::Span as Span2;
-use syn::group::{parse_braces, parse_brackets, parse_parens};
 use syn::parse::ParseBuffer;
-use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
-use syn::{Error, Ident, Path, PathArguments, PathSegment};
+use syn::{braced, bracketed, parenthesized, Error, Ident, Path};
 
 use super::{ParseError, PropertyName};
 use crate::widgets::{parse_util, AssignPropertyAttr, WidgetAttr, WidgetFunc};
 
-pub(super) fn attr_twice_error<T: Spanned>(attr: &T) -> Error {
-    Error::new(attr.span(), "Cannot use the same attribute twice.")
+pub(super) fn attr_twice_error(span: Span2) -> Error {
+    Error::new(span, "Cannot use the same attribute twice.")
 }
 
 impl From<Error> for ParseError {
@@ -109,37 +107,47 @@ pub(crate) fn idents_to_snake_case<'a, I: Iterator<Item = &'a Ident>>(
     Ident::new(&name, span)
 }
 
+/// Weird hack to work around syn's awkward macros
+/// that always return [`syn::Error`] and are worse
+/// in every aspect compared to regular Rust code.
+///
+/// Sadly, the regular Rust API won't be made public,
+/// see https://github.com/dtolnay/syn/issues/1190.
 pub(super) fn parens<'a>(input: &'a ParseBuffer) -> Result<ParseBuffer<'a>, ParseError> {
-    match parse_parens(input) {
-        Ok(parens) => Ok(parens.content),
-        Err(error) => Err(error.into()),
-    }
+    let content = (move || {
+        let content;
+        parenthesized!(content in input);
+        Ok(content)
+    })();
+    Ok(content?)
 }
 
+/// Weird hack to work around syn's awkward macros
+/// that always return [`syn::Error`] and are worse
+/// in every aspect compared to regular Rust code.
+///
+/// Sadly, the regular Rust API won't be made public,
+/// see https://github.com/dtolnay/syn/issues/1190.
 pub(super) fn braces<'a>(input: &'a ParseBuffer) -> Result<ParseBuffer<'a>, ParseError> {
-    match parse_braces(input) {
-        Ok(parens) => Ok(parens.content),
-        Err(error) => Err(error.into()),
-    }
+    let content = (move || {
+        let content;
+        braced!(content in input);
+        Ok(content)
+    })();
+    Ok(content?)
 }
 
+/// Weird hack to work around syn's awkward macros
+/// that always return [`syn::Error`] and are worse
+/// in every aspect compared to regular Rust code.
+///
+/// Sadly, the regular Rust API won't be made public,
+/// see https://github.com/dtolnay/syn/issues/1190.
 pub(super) fn brackets<'a>(input: &'a ParseBuffer) -> Result<ParseBuffer<'a>, ParseError> {
-    match parse_brackets(input) {
-        Ok(parens) => Ok(parens.content),
-        Err(error) => Err(error.into()),
-    }
-}
-
-pub(super) fn strings_to_path(strings: &[&str]) -> Path {
-    let path_segments: Vec<PathSegment> = strings
-        .iter()
-        .map(|string| PathSegment {
-            ident: Ident::new(string, Span2::call_site()),
-            arguments: PathArguments::None,
-        })
-        .collect();
-    Path {
-        leading_colon: None,
-        segments: Punctuated::from_iter(path_segments),
-    }
+    let content = (move || {
+        let content;
+        bracketed!(content in input);
+        Ok(content)
+    })();
+    Ok(content?)
 }

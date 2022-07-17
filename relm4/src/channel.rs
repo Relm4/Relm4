@@ -3,7 +3,9 @@
 
 use std::fmt;
 
-pub(crate) fn channel<T>() -> (Sender<T>, Receiver<T>) {
+/// Create an unbounded channel to send messages
+/// between different parts of you application.
+pub fn channel<T>() -> (Sender<T>, Receiver<T>) {
     let (tx, rx) = flume::unbounded();
     (Sender(tx), Receiver(rx))
 }
@@ -43,13 +45,18 @@ pub struct Receiver<T>(pub(crate) flume::Receiver<T>);
 
 impl<T> Receiver<T> {
     /// Receives a message from a component or worker.
-    pub async fn recv(&mut self) -> Option<T> {
+    pub async fn recv(&self) -> Option<T> {
         self.0.recv_async().await.ok()
+    }
+
+    /// Receives a message synchronously from a component or worker.
+    pub fn recv_sync(&self) -> Option<T> {
+        self.0.recv().ok()
     }
 
     /// Forwards an event from one channel to another.
     pub async fn forward<Transformer, Output>(
-        mut self,
+        self,
         sender: impl Into<Sender<Output>>,
         transformer: Transformer,
     ) where

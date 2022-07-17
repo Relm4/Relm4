@@ -1,21 +1,31 @@
+use std::rc::Rc;
+
 use proc_macro2::Span as Span2;
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
-use syn::token::Colon2;
-use syn::{Error, FnArg, Ident, ImplItemMethod, Pat, Path, PathArguments, PathSegment, Token};
+use syn::{Error, FnArg, Ident, ImplItemMethod, Pat, Path, PathArguments, PathSegment};
 
-pub(crate) fn default_relm4_path() -> Path {
-    let relm4_path_segment = PathSegment {
-        ident: Ident::new("relm4", Span2::call_site()),
-        arguments: PathArguments::None,
-    };
+thread_local! {
+    #[cfg(feature = "relm4")]
+    pub(super) static GTK_IMPORT: Rc<syn::Path> = Rc::new(strings_to_path(&["relm4", "gtk"]));
 
-    let mut relm4_segments: Punctuated<PathSegment, Colon2> = Punctuated::new();
-    relm4_segments.push(relm4_path_segment);
+    #[cfg(not(feature = "relm4"))]
+    pub(super) static GTK_IMPORT: Rc<syn::Path> = Rc::new(strings_to_path(&["gtk"]));
+}
 
+pub(super) fn strings_to_path(strings: &[&str]) -> Path {
+    let path_segments: Vec<PathSegment> = strings
+        .iter()
+        .map(|string| -> PathSegment {
+            PathSegment {
+                ident: Ident::new(string, Span2::call_site()),
+                arguments: PathArguments::None,
+            }
+        })
+        .collect();
     Path {
-        leading_colon: Some(Token![::](Span2::call_site())),
-        segments: relm4_segments,
+        leading_colon: None,
+        segments: Punctuated::from_iter(path_segments),
     }
 }
 

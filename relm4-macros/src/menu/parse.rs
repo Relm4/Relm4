@@ -5,6 +5,8 @@ use syn::{braced, parenthesized, token, Ident, Path, Result, Token};
 
 use super::{Menu, MenuEntry, MenuItem, MenuSection, Menus};
 
+syn::custom_keyword!(custom);
+
 impl Parse for Menus {
     fn parse(input: ParseStream) -> Result<Self> {
         let items = input.call(Punctuated::parse_separated_nonempty)?;
@@ -51,7 +53,11 @@ impl Parse for MenuEntry {
 
 impl Parse for MenuItem {
     fn parse(input: ParseStream) -> Result<Self> {
-        Ok(if input.peek2(Token![!]) {
+        Ok(if input.peek(custom) {
+            let _custom: custom = input.parse()?;
+            let _colon: Token![:] = input.parse()?;
+            input.parse().map(MenuItem::Custom)?
+        } else if input.peek2(Token![!]) {
             input.parse().map(MenuItem::Section)?
         } else {
             input.parse().map(MenuItem::Entry)?

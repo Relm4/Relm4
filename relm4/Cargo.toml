@@ -40,6 +40,7 @@ tokio = { version = "1.15", features = ["rt", "rt-multi-thread"] }
 
 #relm4-macros = { version = "0.4.1", optional = true }
 relm4-macros = { path = "../relm4-macros", optional = true }
+tracing = { version = "0.1.35", features = ["log"] }
 
 [dev-dependencies]
 relm4-macros = { path = "../relm4-macros" }

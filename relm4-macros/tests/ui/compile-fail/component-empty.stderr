@@ -1,0 +1,13 @@
+error[E0046]: not all trait items implemented, missing: `Input`, `Output`, `InitParams`, `Root`, `Widgets`, `init_root`, `init`
+ --> tests/ui/compile-fail/component-empty.rs:6:1
+  |
+6 | impl SimpleComponent for TestComponent {
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ missing `Input`, `Output`, `InitParams`, `Root`, `Widgets`, `init_root`, `init` in implementation
+  |
+  = help: implement the missing item: `type Input = Type;`
+  = help: implement the missing item: `type Output = Type;`
+  = help: implement the missing item: `type InitParams = Type;`
+  = help: implement the missing item: `type Root = Type;`
+  = help: implement the missing item: `type Widgets = Type;`
+  = help: implement the missing item: `fn init_root() -> <Self as SimpleComponent>::Root { todo!() }`
+  = help: implement the missing item: `fn init(_: <Self as SimpleComponent>::InitParams, _: &<Self as SimpleComponent>::Root, _: &Arc<ComponentSenderInner<Self>>) -> ComponentParts<Self> { todo!() }`

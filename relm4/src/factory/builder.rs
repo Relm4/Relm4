@@ -3,10 +3,13 @@ use super::{handle::FactoryHandle, DynamicIndex, FactoryComponent, FactoryView};
 
 use crate::{shutdown, OnDestroy, Receiver, Sender};
 
+use std::any;
+use std::cell::RefCell;
 use std::fmt;
 
 use async_oneshot::oneshot;
 use futures::FutureExt;
+use tracing::info_span;
 
 pub(super) struct FactoryBuilder<Widget, C, ParentMsg>
 where
@@ -63,9 +66,9 @@ where
             mut data,
             root_widget,
             input_tx,
-            mut input_rx,
+            input_rx,
             output_tx,
-            mut output_rx,
+            output_rx,
         } = self;
 
         let forward_sender = parent_sender.0.clone();
@@ -80,7 +83,7 @@ where
         });
 
         // Sends messages from commands executed from the background.
-        let (cmd_tx, mut cmd_rx) = crate::channel::<C::CommandOutput>();
+        let (cmd_tx, cmd_rx) = crate::channel::<C::CommandOutput>();
 
         // Gets notifications when a component's model and view is updated externally.
         let (notifier, notifier_rx) = flume::bounded(0);
@@ -112,11 +115,18 @@ where
                     futures::pin_mut!(input);
                     futures::pin_mut!(notifier);
 
-                    let _ = futures::select!(
+                    futures::select!(
                         // Performs the model update, checking if the update requested a command.
                         // Runs that command asynchronously in the background using tokio.
                         message = input => {
                             if let Some(message) = message {
+                                info_span!(
+                                    "update_with_view",
+                                    input=?message,
+                                    component=any::type_name::<C>(),
+                                    id=model.id(),
+                                );
+
                                 if let Some(command) = model.update_with_view(&mut widgets, message, &input_tx_, &output_tx)
                                 {
                                     let recipient = death_recipient.clone();
@@ -128,17 +138,29 @@ where
                         // Handles responses from a command.
                         message = cmd => {
                             if let Some(message) = message {
+                                let mut model = runtime_data.borrow_mut();
+
+                                info_span!(
+                                    "update_cmd_with_view",
+                                    cmd_output=?message,
+                                    component=any::type_name::<C>(),
+                                    id=model.id(),
+                                );
+
                                 model.update_cmd_with_view(&mut widgets, message, &input_tx_, &output_tx);
                             }
                         }
 
                         // Triggered when the model and view have been updated externally.
                         _ = notifier => {
+                            let model = runtime_data.borrow_mut();
                             model.update_view(&mut widgets, &input_tx_, &output_tx);
                         }
 
                         // Triggered when the component is destroyed
                         id = burn_notice => {
+                            let mut model = runtime_data.borrow_mut();
+
                             model.shutdown(&mut widgets, output_tx);
 
                             death_notifier.shutdown();
@@ -147,7 +169,23 @@ where
                                 id.remove();
                             }
 
-                            return
+                            // Triggered when the model and view have been updated externally.
+                            _ = notifier => {
+                                model.update_view(&mut widgets, &input_tx_, &output_tx);
+                            }
+
+                            // Triggered when the component is destroyed
+                            id = burn_notice => {
+                                model.shutdown(&mut widgets, output_tx);
+
+                                death_notifier.shutdown();
+
+                                if let Ok(id) = id {
+                                    id.remove();
+                                }
+
+                                return
+                            }
                         }
                     );
                 }

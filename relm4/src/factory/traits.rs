@@ -1,7 +1,7 @@
 //! Traits for for managing and updating factories.
 
 use super::DynamicIndex;
-use crate::{CommandFuture, OnDestroy, Sender, ShutdownReceiver};
+use crate::{component::CommandFuture, OnDestroy, Sender, ShutdownReceiver};
 
 use std::fmt::Debug;
 
@@ -84,22 +84,22 @@ impl<C> Position<()> for C {
 /// of factories.
 pub trait FactoryComponent<ParentWidget: FactoryView, ParentMsg>: Sized + Debug + 'static {
     /// Internal commands to perform
-    type Command: 'static + Send;
+    type Command: Debug + Send + 'static;
 
     /// Messages which are received from commands executing in the background.
-    type CommandOutput: 'static + Send;
+    type CommandOutput: Debug + Send + 'static;
 
     /// The message type that the component accepts as inputs.
-    type Input: 'static;
+    type Input: Debug + 'static;
 
     /// The message type that the component provides as outputs.
-    type Output: 'static;
+    type Output: Debug + 'static;
 
     /// The initial parameter(s) for launch.
     type InitParams;
 
     /// The widget that was constructed by the component.
-    type Root: std::fmt::Debug + OnDestroy + Clone;
+    type Root: Debug + OnDestroy + Clone;
 
     /// The type that's used for storing widgets created for this component.
     type Widgets: 'static;
@@ -202,4 +202,12 @@ pub trait FactoryComponent<ParentWidget: FactoryView, ParentMsg>: Sized + Debug 
     /// Last method called before a component is shut down.
     #[allow(unused)]
     fn shutdown(&mut self, widgets: &mut Self::Widgets, output: Sender<Self::Output>) {}
+
+    /// An identifier for the component used for debug logging.
+    ///
+    /// The default implementation of this method uses the address of the component, but
+    /// implementations are free to provide more meaningful identifiers.
+    fn id(&self) -> String {
+        format!("{:p}", &self)
+    }
 }

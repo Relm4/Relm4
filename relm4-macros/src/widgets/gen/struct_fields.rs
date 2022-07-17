@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::quote;
-use syn::{Path, Visibility};
+use quote::{quote, quote_spanned};
+use syn::Visibility;
 
 use super::{ReturnedWidget, Widget};
 use crate::widgets::{
@@ -8,19 +8,14 @@ use crate::widgets::{
 };
 
 impl Property {
-    fn struct_fields_stream(
-        &self,
-        stream: &mut TokenStream2,
-        vis: &Option<Visibility>,
-        relm4_path: &Path,
-    ) {
+    fn struct_fields_stream(&self, stream: &mut TokenStream2, vis: &Option<Visibility>) {
         match &self.ty {
-            PropertyType::Widget(widget) => widget.struct_fields_stream(stream, vis, relm4_path),
+            PropertyType::Widget(widget) => widget.struct_fields_stream(stream, vis),
             PropertyType::SignalHandler(signal_handler) => {
-                signal_handler.struct_fields_stream(stream, vis, relm4_path)
+                signal_handler.struct_fields_stream(stream, vis)
             }
             PropertyType::ConditionalWidget(cond_widget) => {
-                cond_widget.struct_fields_stream(stream, vis, relm4_path)
+                cond_widget.struct_fields_stream(stream, vis)
             }
             PropertyType::Assign(_) | PropertyType::ParseError(_) => (),
         }
@@ -28,25 +23,15 @@ impl Property {
 }
 
 impl Properties {
-    fn struct_fields_stream(
-        &self,
-        stream: &mut TokenStream2,
-        vis: &Option<Visibility>,
-        relm4_path: &Path,
-    ) {
+    fn struct_fields_stream(&self, stream: &mut TokenStream2, vis: &Option<Visibility>) {
         for prop in &self.properties {
-            prop.struct_fields_stream(stream, vis, relm4_path);
+            prop.struct_fields_stream(stream, vis);
         }
     }
 }
 
 impl Widget {
-    pub fn struct_fields_stream(
-        &self,
-        stream: &mut TokenStream2,
-        vis: &Option<Visibility>,
-        relm4_path: &Path,
-    ) {
+    pub fn struct_fields_stream(&self, stream: &mut TokenStream2, vis: &Option<Visibility>) {
         let name = &self.name;
         let ty = self.func_type_token_stream();
 
@@ -62,44 +47,41 @@ impl Widget {
             }
         });
 
-        self.properties
-            .struct_fields_stream(stream, vis, relm4_path);
+        self.properties.struct_fields_stream(stream, vis);
         if let Some(returned_widget) = &self.returned_widget {
-            returned_widget.struct_fields_stream(stream, vis, relm4_path);
+            returned_widget.struct_fields_stream(stream, vis);
         }
     }
 }
 
 impl ConditionalWidget {
-    fn struct_fields_stream(
-        &self,
-        stream: &mut TokenStream2,
-        vis: &Option<Visibility>,
-        relm4_path: &Path,
-    ) {
+    fn struct_fields_stream(&self, stream: &mut TokenStream2, vis: &Option<Visibility>) {
         let name = &self.name;
+        let gtk_import = crate::gtk_import();
 
         stream.extend(if let Some(docs) = &self.doc_attr {
-            quote! {
-               #[doc = #docs]
-               #vis #name: #relm4_path::gtk::Stack,
+            quote_spanned! {
+                name.span() =>
+                   #[doc = #docs]
+                   #vis #name: #gtk_import::Stack,
             }
         } else {
-            quote! {
-                #[allow(missing_docs)]
-                #vis #name: #relm4_path::gtk::Stack,
+            quote_spanned! {
+                name.span() =>
+                    #[allow(missing_docs)]
+                    #vis #name: #gtk_import::Stack,
             }
         });
 
         match &self.branches {
             ConditionalBranches::If(if_branches) => {
                 for branch in if_branches {
-                    branch.widget.struct_fields_stream(stream, vis, relm4_path);
+                    branch.widget.struct_fields_stream(stream, vis);
                 }
             }
             ConditionalBranches::Match((_, _, match_arms)) => {
                 for arm in match_arms {
-                    arm.widget.struct_fields_stream(stream, vis, relm4_path);
+                    arm.widget.struct_fields_stream(stream, vis);
                 }
             }
         }
@@ -107,12 +89,7 @@ impl ConditionalWidget {
 }
 
 impl ReturnedWidget {
-    fn struct_fields_stream(
-        &self,
-        stream: &mut TokenStream2,
-        vis: &Option<Visibility>,
-        relm4_path: &Path,
-    ) {
+    fn struct_fields_stream(&self, stream: &mut TokenStream2, vis: &Option<Visibility>) {
         if let Some(ty) = &self.ty {
             let name = &self.name;
             stream.extend(quote! {
@@ -120,22 +97,18 @@ impl ReturnedWidget {
                 #vis #name: #ty,
             });
         }
-        self.properties
-            .struct_fields_stream(stream, vis, relm4_path);
+        self.properties.struct_fields_stream(stream, vis);
     }
 }
 
 impl SignalHandler {
-    fn struct_fields_stream(
-        &self,
-        stream: &mut TokenStream2,
-        vis: &Option<Visibility>,
-        relm4_path: &Path,
-    ) {
+    fn struct_fields_stream(&self, stream: &mut TokenStream2, vis: &Option<Visibility>) {
         if let Some(signal_handler_id) = &self.handler_id {
-            stream.extend(quote! {
-                #[allow(missing_docs)]
-                #vis #signal_handler_id: #relm4_path::gtk::glib::signal::SignalHandlerId,
+            let gtk_import = crate::gtk_import();
+            stream.extend(quote_spanned! {
+                signal_handler_id.span() =>
+                    #[allow(missing_docs)]
+                    #vis #signal_handler_id: #gtk_import::glib::signal::SignalHandlerId,
             });
         }
     }

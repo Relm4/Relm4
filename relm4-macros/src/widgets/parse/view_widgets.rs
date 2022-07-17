@@ -1,4 +1,3 @@
-use proc_macro2::Span as Span2;
 use syn::parse::{Parse, ParseStream, Result};
 use syn::{Error, Ident, Token};
 
@@ -26,7 +25,7 @@ impl Parse for ViewWidgets {
         }
 
         if !root_exists && top_level_widgets.len() == 1 {
-            top_level_widgets[0].root_attr = Some(Ident::new("root", Span2::call_site()));
+            top_level_widgets[0].root_attr = Some(Ident::new("root", input.span()));
         }
 
         if !input.is_empty() {

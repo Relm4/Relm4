@@ -2,15 +2,18 @@
 // Copyright 2022 System76 <info@system76.com>
 // SPDX-License-Identifier: MIT or Apache-2.0
 
-use crate::*;
 use std::fmt::{self, Debug};
 use std::rc::Rc;
+
+use crate::Sender;
+
+use super::{Component, StateWatcher};
 
 /// Shared behavior of component controller types.
 pub trait ComponentController<C: Component> {
     /// Emits an input to the component.
     fn emit(&self, event: C::Input) {
-        let _ = self.sender().send(event);
+        self.sender().send(event);
     }
 
     /// Provides access to the component's sender.

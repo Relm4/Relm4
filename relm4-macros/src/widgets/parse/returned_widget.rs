@@ -1,4 +1,3 @@
-use proc_macro2::Span as Span2;
 use syn::parse::{Parse, ParseStream};
 use syn::spanned::Spanned;
 use syn::{braced, Ident, Result, Token};
@@ -32,7 +31,7 @@ impl Parse for ReturnedWidget {
 
         let name = name.unwrap_or_else(|| {
             parse_util::idents_to_snake_case(
-                [Ident::new("_returned_widget", Span2::call_site())].iter(),
+                [Ident::new("_returned_widget", input.span())].iter(),
                 ty.span(),
             )
         });

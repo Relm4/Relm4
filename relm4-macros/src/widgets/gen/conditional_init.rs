@@ -9,26 +9,26 @@ use crate::widgets::{
 };
 
 impl Property {
-    fn update_view_stream(
+    fn conditional_init_stream(
         &self,
         stream: &mut TokenStream2,
         w_name: &Ident,
         model_name: &Ident,
-        conditional_branch: bool,
+        is_conditional: bool,
     ) {
         match &self.ty {
-            PropertyType::Assign(assign) => assign.update_view_stream(
+            PropertyType::Assign(assign) => assign.conditional_init_stream(
                 stream,
                 &self.name,
                 w_name,
                 model_name,
-                conditional_branch,
+                is_conditional,
             ),
             PropertyType::Widget(widget) => {
-                widget.update_view_stream(stream, model_name, conditional_branch)
+                widget.conditional_init_stream(stream, model_name, is_conditional)
             }
             PropertyType::ConditionalWidget(cond_widget) => {
-                cond_widget.update_view_stream(stream, model_name)
+                cond_widget.conditional_init_stream(stream, model_name)
             }
             PropertyType::SignalHandler(_) | PropertyType::ParseError(_) => (),
         }
@@ -36,67 +36,74 @@ impl Property {
 }
 
 impl Properties {
-    fn update_view_stream(
+    fn conditional_init_stream(
         &self,
         stream: &mut TokenStream2,
         w_name: &Ident,
         model_name: &Ident,
-        conditional_branch: bool,
+        is_conditional: bool,
     ) {
         for prop in &self.properties {
-            prop.update_view_stream(stream, w_name, model_name, conditional_branch);
+            prop.conditional_init_stream(stream, w_name, model_name, is_conditional);
         }
     }
 }
 
 impl Widget {
-    pub fn init_update_view_stream(&self, stream: &mut TokenStream2, model_name: &Ident) {
-        self.update_view_stream(stream, model_name, false);
+    pub fn init_conditional_init_stream(&self, stream: &mut TokenStream2, model_name: &Ident) {
+        self.conditional_init_stream(stream, model_name, false);
     }
 
-    fn update_view_stream(
+    fn conditional_init_stream(
         &self,
         stream: &mut TokenStream2,
         model_name: &Ident,
-        conditional_branch: bool,
+        is_conditional: bool,
     ) {
         let w_name = &self.name;
         self.properties
-            .update_view_stream(stream, w_name, model_name, conditional_branch);
+            .conditional_init_stream(stream, w_name, model_name, is_conditional);
         if let Some(returned_widget) = &self.returned_widget {
-            returned_widget.update_view_stream(stream, model_name, conditional_branch);
+            returned_widget.conditional_init_stream(stream, model_name, is_conditional);
         }
     }
 }
 
 impl ConditionalWidget {
-    fn update_view_stream(&self, stream: &mut TokenStream2, model_name: &Ident) {
+    fn conditional_init_stream(&self, stream: &mut TokenStream2, model_name: &Ident) {
         let brach_stream = match &self.branches {
             ConditionalBranches::If(if_branches) => {
                 let mut stream = TokenStream2::new();
 
                 for (index, branch) in if_branches.iter().enumerate() {
                     let mut inner_update_stream = TokenStream2::new();
-                    branch
-                        .widget
-                        .update_view_stream(&mut inner_update_stream, model_name, true);
+                    branch.widget.conditional_init_stream(
+                        &mut inner_update_stream,
+                        model_name,
+                        true,
+                    );
                     branch.update_stream(&mut stream, inner_update_stream, index);
                 }
                 stream
             }
             ConditionalBranches::Match((match_token, expr, match_arms)) => {
                 let mut inner_tokens = TokenStream2::new();
+
                 for (index, match_arm) in match_arms.iter().enumerate() {
                     let mut inner_update_stream = TokenStream2::new();
-                    match_arm
-                        .widget
-                        .update_view_stream(&mut inner_update_stream, model_name, true);
+                    match_arm.widget.conditional_init_stream(
+                        &mut inner_update_stream,
+                        model_name,
+                        true,
+                    );
+
                     let MatchArm {
                         pattern,
                         guard,
                         arrow,
                         ..
                     } = match_arm;
+
                     let (guard_if, guard_expr) = if let Some((guard_if, guard_expr)) = guard {
                         (Some(guard_if), Some(guard_expr))
                     } else {
@@ -106,7 +113,6 @@ impl ConditionalWidget {
                     let index = index.to_string();
                     inner_tokens.extend(quote! {
                         #pattern #guard_if #guard_expr #arrow {
-                            let __page_active: bool = (__current_page == #index);
                             #inner_update_stream
                             #index
                         },
@@ -121,57 +127,53 @@ impl ConditionalWidget {
         };
 
         let w_name = &self.name;
-        stream.extend(quote_spanned! {
-            w_name.span() =>
-            let __current_page = #w_name.visible_child_name().map_or("".to_string(), |s| s.as_str().to_string());
+        stream.extend(quote! {
+            let __current_page = "";
             #w_name.set_visible_child_name(#brach_stream);
         });
     }
 }
 
 impl ReturnedWidget {
-    fn update_view_stream(
+    fn conditional_init_stream(
         &self,
         stream: &mut TokenStream2,
         model_name: &Ident,
-        conditional_branch: bool,
+        is_conditional: bool,
     ) {
         let w_name = &self.name;
         self.properties
-            .update_view_stream(stream, w_name, model_name, conditional_branch);
+            .conditional_init_stream(stream, w_name, model_name, is_conditional);
     }
 }
 
 impl AssignProperty {
-    fn update_view_stream(
+    fn conditional_init_stream(
         &self,
         stream: &mut TokenStream2,
         p_name: &PropertyName,
         w_name: &Ident,
         model_name: &Ident,
-        conditional_branch: bool,
+        is_conditional: bool,
     ) {
-        match &self.attr {
-            AssignPropertyAttr::None => (),
-            AssignPropertyAttr::Watch => {
-                self.assign_stream(stream, p_name, w_name);
-            }
-            AssignPropertyAttr::Track((track_stream, paste_model)) => {
-                let mut assign_stream = TokenStream2::new();
-                self.assign_stream(&mut assign_stream, p_name, w_name);
-                let model = paste_model.then(|| model_name);
-                let page_switch = conditional_branch.then(|| {
-                    quote_spanned! {
-                        p_name.span() =>
-                            !__page_active ||
-                    }
-                });
+        // Unconditional code is handled in the "normal" init stream
+        if is_conditional {
+            match &self.attr {
+                AssignPropertyAttr::None => (),
+                AssignPropertyAttr::Watch => {
+                    self.assign_stream(stream, p_name, w_name);
+                }
+                AssignPropertyAttr::Track((track_stream, paste_model)) => {
+                    let mut assign_stream = TokenStream2::new();
+                    self.assign_stream(&mut assign_stream, p_name, w_name);
+                    let model = paste_model.then(|| model_name);
 
-                stream.extend(quote! {
-                    if #page_switch (#model #track_stream) {
-                        #assign_stream
-                    }
-                });
+                    stream.extend(quote_spanned! {
+                        track_stream.span() => if #model #track_stream {
+                            #assign_stream
+                        }
+                    });
+                }
             }
         }
     }

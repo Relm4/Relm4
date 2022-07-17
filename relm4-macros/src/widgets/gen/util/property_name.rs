@@ -1,18 +1,18 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned, ToTokens};
-use syn::{Ident, Path};
+use syn::Ident;
 
 use crate::widgets::gen::PropertyName;
 
 impl PropertyName {
-    pub fn assign_fn_stream(&self, w_name: &Ident, relm4_path: &Path) -> TokenStream2 {
+    pub fn assign_fn_stream(&self, w_name: &Ident) -> TokenStream2 {
         match self {
             PropertyName::Ident(ident) => {
                 quote! { #w_name.#ident }
             }
             PropertyName::Path(path) => path.to_token_stream(),
             PropertyName::RelmContainerExtAssign => {
-                quote! { #relm4_path ::RelmContainerExt::container_add }
+                quote_spanned! { w_name.span() => relm4::RelmContainerExt::container_add }
             }
         }
     }

@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote_spanned;
-use syn::{Error, Ident, Path, Visibility};
+use syn::{Error, Ident, Visibility};
 
 use crate::widgets::{TopLevelWidget, ViewWidgets, Widget};
 
@@ -32,7 +32,6 @@ impl ViewWidgets {
     pub fn generate_streams(
         &self,
         vis: &Option<Visibility>,
-        relm4_path: &Path,
         model_name: &Ident,
         root_name: Option<&Ident>,
         standalone_view: bool,
@@ -43,7 +42,6 @@ impl ViewWidgets {
             top_level_widget.generate_streams(
                 &mut streams,
                 vis,
-                relm4_path,
                 model_name,
                 root_name,
                 standalone_view,
@@ -73,7 +71,6 @@ impl TopLevelWidget {
         &self,
         streams: &mut TokenStreams,
         vis: &Option<Visibility>,
-        relm4_path: &Path,
         model_name: &Ident,
         root_name: Option<&Ident>,
         standalone_view: bool,
@@ -81,7 +78,6 @@ impl TopLevelWidget {
         self.inner.init_token_generation(
             streams,
             vis,
-            relm4_path,
             model_name,
             root_name,
             !standalone_view && self.root_attr.is_some(),
@@ -94,7 +90,6 @@ impl Widget {
         &self,
         streams: &mut TokenStreams,
         vis: &Option<Visibility>,
-        relm4_path: &Path,
         model_name: &Ident,
         root_name: Option<&Ident>,
         generate_init_root_stream: bool,
@@ -105,25 +100,28 @@ impl Widget {
         // Initialize the root
         if generate_init_root_stream {
             // For the `component` macro
-            self.init_root_init_streams(&mut streams.init_root, &mut streams.init, relm4_path);
+            self.init_root_init_streams(&mut streams.init_root, &mut streams.init);
         } else {
             // For the `view!` macro
-            self.init_stream(&mut streams.init, relm4_path);
+            self.init_stream(&mut streams.init);
         }
 
         self.error_stream(&mut streams.error);
-        self.start_assign_stream(&mut streams.assign, relm4_path);
-        self.struct_fields_stream(&mut streams.struct_fields, vis, relm4_path);
+        self.start_assign_stream(&mut streams.assign);
+        self.init_conditional_init_stream(&mut streams.assign, model_name);
+        self.struct_fields_stream(&mut streams.struct_fields, vis);
         self.return_stream(&mut streams.return_fields);
         self.destructure_stream(&mut streams.destructure_fields);
-        self.update_view_stream(&mut streams.update_view, model_name, relm4_path);
-        self.connect_signals_stream(&mut streams.connect, relm4_path);
+        self.init_update_view_stream(&mut streams.update_view, model_name);
+        self.connect_signals_stream(&mut streams.connect);
 
         // Rename the `root` to the actual widget name
-        if let Some(root_name) = root_name {
-            streams.rename_root.extend(quote_spanned! {
-                name_span => let #name = #root_name.clone();
-            });
+        if generate_init_root_stream {
+            if let Some(root_name) = root_name {
+                streams.rename_root.extend(quote_spanned! {
+                    name_span => let #name = #root_name.clone();
+                });
+            }
         }
     }
 }

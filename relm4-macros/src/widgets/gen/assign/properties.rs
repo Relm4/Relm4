@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream as TokenStream2;
-use syn::{Ident, Path};
+use syn::Ident;
 
 use crate::widgets::Properties;
 
@@ -8,10 +8,10 @@ impl Properties {
         &self,
         stream: &mut TokenStream2,
         w_name: &Ident,
-        relm4_path: &Path,
+        is_conditional: bool,
     ) {
         for prop in &self.properties {
-            prop.assign_stream(stream, w_name, relm4_path);
+            prop.assign_stream(stream, w_name, is_conditional);
         }
     }
 }

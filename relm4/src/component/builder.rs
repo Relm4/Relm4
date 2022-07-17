@@ -8,10 +8,12 @@ use crate::RelmContainerExt;
 use async_oneshot::oneshot;
 use futures::FutureExt;
 use gtk::prelude::GtkWindowExt;
+use std::any;
 use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::rc::Rc;
 use std::sync::Arc;
+use tracing::info_span;
 
 /// A component that is ready for docking and launch.
 #[derive(Debug)]
@@ -74,13 +76,13 @@ impl<C: Component> ComponentBuilder<C> {
         let ComponentBuilder { root, .. } = self;
 
         // Used for all events to be processed by this component's internal service.
-        let (input_tx, mut input_rx) = crate::channel::<C::Input>();
+        let (input_tx, input_rx) = crate::channel::<C::Input>();
 
         // Used by this component to send events to be handled externally by the caller.
         let (output_tx, output_rx) = crate::channel::<C::Output>();
 
         // Sends messages from commands executed from the background.
-        let (cmd_tx, mut cmd_rx) = crate::channel::<C::CommandOutput>();
+        let (cmd_tx, cmd_rx) = crate::channel::<C::CommandOutput>();
 
         // Gets notifications when a component's model and view is updated externally.
         let (notifier, notifier_rx) = flume::bounded(0);
@@ -122,7 +124,7 @@ impl<C: Component> ComponentBuilder<C> {
                 futures::pin_mut!(input);
                 futures::pin_mut!(notifier);
 
-                let _ = futures::select!(
+                futures::select!(
                     // Performs the model update, checking if the update requested a command.
                     // Runs that command asynchronously in the background using tokio.
                     message = input => {
@@ -131,6 +133,13 @@ impl<C: Component> ComponentBuilder<C> {
                                 ref mut model,
                                 ref mut widgets,
                             } = &mut *watcher_.state.borrow_mut();
+
+                            info_span!(
+                                "update_with_view",
+                                input=?message,
+                                component=any::type_name::<C>(),
+                                id=model.id(),
+                            );
 
                             model.update_with_view(widgets, message, &component_sender);
                         }
@@ -143,6 +152,13 @@ impl<C: Component> ComponentBuilder<C> {
                                 ref mut model,
                                 ref mut widgets,
                             } = &mut *watcher_.state.borrow_mut();
+
+                            info_span!(
+                                "update_cmd_with_view",
+                                cmd_output=?message,
+                                component=any::type_name::<C>(),
+                                id=model.id(),
+                            );
 
                             model.update_cmd_with_view(widgets, message, &component_sender);
                         }

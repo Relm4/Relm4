@@ -56,10 +56,11 @@ impl AssignProperty {
             let mut block_signals = Vec::with_capacity(0);
 
             for attr in attrs.inner {
+                let span = attr.span();
                 match attr {
                     Attr::Iterate(_) => {
                         if iterative {
-                            return Err(attr_twice_error(&attr));
+                            return Err(attr_twice_error(span));
                         } else {
                             iterative = true;
                         }
@@ -68,10 +69,10 @@ impl AssignProperty {
                         if watch == AssignPropertyAttr::None {
                             watch = AssignPropertyAttr::Watch;
                         } else {
-                            return Err(attr_twice_error(&attr));
+                            return Err(attr_twice_error(span));
                         }
                     }
-                    Attr::Track(_, ref expr) => {
+                    Attr::Track(_, expr) => {
                         if watch == AssignPropertyAttr::None {
                             watch = if let Some(expr) = expr {
                                 AssignPropertyAttr::Track((expr.to_token_stream(), false))
@@ -82,14 +83,14 @@ impl AssignProperty {
                                 ))
                             };
                         } else {
-                            return Err(attr_twice_error(&attr));
+                            return Err(attr_twice_error(span));
                         }
                     }
-                    Attr::BlockSignal(name, idents) => {
+                    Attr::BlockSignal(_, idents) => {
                         if block_signals.is_empty() {
                             block_signals = idents;
                         } else {
-                            return Err(attr_twice_error(&name));
+                            return Err(attr_twice_error(span));
                         }
                     }
                     _ => {
