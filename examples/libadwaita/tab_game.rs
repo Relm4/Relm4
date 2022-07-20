@@ -33,6 +33,7 @@ enum CounterMsg {
     Update,
 }
 
+#[derive(Debug)]
 enum CounterOutput {
     StartGame(DynamicIndex),
     SelectedGuess(DynamicIndex),

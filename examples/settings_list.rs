@@ -79,6 +79,7 @@ pub struct Widgets {
     pub button_sg: gtk::SizeGroup,
 }
 
+#[derive(Debug)]
 pub enum Input {
     AddSetting {
         description: String,
@@ -89,11 +90,13 @@ pub enum Input {
     Reload,
 }
 
+#[derive(Debug)]
 pub enum Output {
     Clicked(u32),
     Reload,
 }
 
+#[derive(Debug)]
 pub enum CmdOut {
     Reload,
 }

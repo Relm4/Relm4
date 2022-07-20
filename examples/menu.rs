@@ -9,6 +9,7 @@ struct AppModel {
     counter: u8,
 }
 
+#[derive(Debug)]
 enum AppMsg {
     Increment,
     Decrement,
