@@ -17,7 +17,7 @@ use gtk::prelude::*;
 use relm4::*;
 
 fn main() {
-    RelmApp::<App>::new("org.relm4.ProgressExample").run("Settings List Demo".into());
+    RelmApp::new("org.relm4.ProgressExample").run::<App>("Settings List Demo".into());
 }
 
 #[derive(Default)]

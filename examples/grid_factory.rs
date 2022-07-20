@@ -283,6 +283,6 @@ impl SimpleComponent for AppModel {
 }
 
 fn main() {
-    let app: RelmApp<AppModel> = RelmApp::new("relm4.test.gridFactory");
-    app.run(0);
+    let app = RelmApp::new("relm4.test.gridFactory");
+    app.run::<AppModel>(0);
 }

@@ -117,6 +117,6 @@ impl SimpleComponent for AppModel {
 }
 
 fn main() {
-    let app: RelmApp<AppModel> = RelmApp::new("relm4.test.non_blocking_async");
-    app.run(());
+    let app = RelmApp::new("relm4.test.non_blocking_async");
+    app.run::<AppModel>(());
 }
