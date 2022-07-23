@@ -3,10 +3,9 @@ use std::time::Duration;
 
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
 use relm4::{
-    gtk, worker::WorkerFuture, ComponentParts, ComponentSender, RelmApp, Sender, SimpleComponent,
-    WidgetPlus, Worker, WorkerController,
+    gtk, Component, ComponentParts, ComponentSender, RelmApp, SimpleComponent, WidgetPlus, Worker,
+    WorkerController,
 };
-use tokio::time::sleep;
 
 struct AsyncHandler;
 
@@ -28,30 +27,23 @@ enum AppMsg {
 }
 
 impl Worker for AsyncHandler {
-    type InputParams = ();
+    type InitParams = ();
     type Input = AsyncHandlerMsg;
     type Output = AppMsg;
 
-    fn init_inner(_: (), _: &mut Sender<AsyncHandlerMsg>, _: &mut Sender<AppMsg>) -> Self {
-        AsyncHandler
+    fn init(_params: Self::InitParams, _sender: &relm4::ComponentSender<Self>) -> Self {
+        Self
     }
 
-    fn update(
-        &mut self,
-        msg: AsyncHandlerMsg,
-        _: &mut Sender<AsyncHandlerMsg>,
-        output: &mut Sender<AppMsg>,
-    ) -> WorkerFuture {
-        let output = output.clone();
+    fn update(&mut self, msg: AsyncHandlerMsg, sender: &ComponentSender<Self>) {
+        let output = sender.output.clone();
 
-        Box::pin(async move {
-            sleep(Duration::from_secs(1)).await;
+        std::thread::sleep(Duration::from_secs(1));
 
-            match msg {
-                AsyncHandlerMsg::DelayedIncrement => output.send(AppMsg::Increment),
-                AsyncHandlerMsg::DelayedDecrement => output.send(AppMsg::Decrement),
-            }
-        })
+        match msg {
+            AsyncHandlerMsg::DelayedIncrement => output.send(AppMsg::Increment),
+            AsyncHandlerMsg::DelayedDecrement => output.send(AppMsg::Decrement),
+        }
     }
 }
 
@@ -96,7 +88,9 @@ impl SimpleComponent for AppModel {
     fn init(_: (), root: &Self::Root, sender: &ComponentSender<Self>) -> ComponentParts<Self> {
         let model = AppModel {
             counter: 0,
-            worker: AsyncHandler::init(()).forward(&sender.input, identity),
+            worker: AsyncHandler::builder()
+                .detach_worker(())
+                .forward(&sender.input, identity),
         };
 
         let widgets = view_output!();

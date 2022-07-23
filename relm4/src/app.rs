@@ -16,8 +16,7 @@ pub struct RelmApp {
     pub app: Application,
 }
 
-impl RelmApp
-{
+impl RelmApp {
     /// Create a Relm4 application.
     pub fn new(app_id: &str) -> Self {
         let app = Application::builder().application_id(app_id).build();
@@ -43,10 +42,10 @@ impl RelmApp
     /// does not handle command-line arguments. To pass arguments to GTK, use
     /// [`RelmApp::run_with_args`].
     pub fn run<C>(self, payload: C::InitParams)
-        where
-            C: Component,
-            C::Root: IsA<gtk::Window> + WidgetExt,
-     {
+    where
+        C: Component,
+        C::Root: IsA<gtk::Window> + WidgetExt,
+    {
         self.run_with_args::<C, &str>(payload, &[]);
     }
 
