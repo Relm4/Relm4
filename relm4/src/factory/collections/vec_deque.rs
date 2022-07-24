@@ -61,7 +61,6 @@ where
     Widget: 'static,
 {
     fn drop(&mut self) {
-        self.inner.guarded = false;
         self.inner.render_changes();
     }
 }
@@ -83,7 +82,6 @@ where
     model_state: VecDeque<ModelStateValue>,
     rendered_state: VecDeque<RenderedState>,
     uid_counter: u16,
-    guarded: bool,
 }
 
 impl<Widget, C, ParentMsg> Drop for FactoryVecDeque<Widget, C, ParentMsg>
@@ -142,17 +140,11 @@ where
             rendered_state: VecDeque::new(),
             // 0 is always an invalid uid
             uid_counter: 1,
-            guarded: false,
         }
     }
 
-    pub fn guard<'a>(&'a mut self) -> Option<FactoryVecDequeGuard<'a, Widget, C, ParentMsg>> {
-        if !self.guarded {
-            self.guarded = true;
-            Some(FactoryVecDequeGuard { inner: self })
-        } else {
-            None
-        }
+    pub fn guard(&mut self) -> FactoryVecDequeGuard<'_, Widget, C, ParentMsg> {
+        FactoryVecDequeGuard { inner: self }
     }
 
     /// Updates the widgets according to the changes made to the factory.
