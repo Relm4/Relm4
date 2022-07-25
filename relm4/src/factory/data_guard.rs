@@ -131,7 +131,7 @@ mod test {
         let main_ctx = MainContext::default();
 
         let (data, rt) = DataGuard::new(data, |mut rt_data| async move {
-            while let Ok(_) = rx.recv_async().await {
+            while (rx.recv_async().await).is_ok() {
                 rt_data.add();
             }
         });
@@ -169,7 +169,7 @@ mod test {
         let main_ctx = MainContext::default();
 
         let (data, rt) = DataGuard::new(data, |mut rt_data| async move {
-            while let Ok(_) = rx.recv_async().await {
+            while (rx.recv_async().await).is_ok() {
                 rt_data.add();
             }
         });

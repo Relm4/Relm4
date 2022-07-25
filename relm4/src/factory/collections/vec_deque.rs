@@ -5,7 +5,7 @@ use crate::factory::{
     FactoryView, Position,
 };
 
-use gtk::prelude::{Cast, IsA};
+use gtk::prelude::Cast;
 
 use super::{ModelStateValue, RenderedState};
 
