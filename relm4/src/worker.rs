@@ -246,16 +246,9 @@ where
 
     /// Ignore outputs from the component and take the handle.
     pub fn detach(self) -> WorkerController<W> {
-        let Self {
-            sender,
-            _root,
-            ..
-        } = self;
+        let Self { sender, _root, .. } = self;
 
-        WorkerController {
-            sender,
-            _root,
-        }
+        WorkerController { sender, _root }
     }
 }
 
