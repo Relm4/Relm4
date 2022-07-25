@@ -123,7 +123,7 @@ mod test {
         let _data = Box::new(DontDropBelow4(0_u8));
     }
 
-    #[test]
+    #[gtk::test]
     fn test_data_guard_drop() {
         let data = Box::new(DontDropBelow4(0_u8));
         let (tx, rx) = flume::unbounded();
@@ -161,7 +161,7 @@ mod test {
         main_ctx.iteration(false);
     }
 
-    #[test]
+    #[gtk::test]
     fn test_data_guard_rt_kill() {
         let data = Box::new(DontDropBelow4(0_u8));
         let (tx, rx) = flume::unbounded();
