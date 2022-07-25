@@ -63,7 +63,7 @@ where
     ///
     /// [`FactoryVecDeque`] should not be edited between calling [`Self::render_changes`]
     /// and this method, as it might cause undefined behaviour. This shouldn't be possible
-    /// because [`FactoryVecDequeGuard`] calls this method on creation.
+    /// because the method is called in [`FactoryVecDequeGuard::new`].
     #[cfg(feature = "libadwaita")]
     fn apply_external_updates(&mut self) {
         if let Some(tab_view) = self.inner.widget().dynamic_cast_ref::<adw::TabView>() {
@@ -77,14 +77,14 @@ where
                 hashes.push(hasher.finish());
             }
 
+            // Tab rearrangment
             for (index, hash) in hashes.iter().enumerate() {
-                if *hash
-                    != self
-                        .inner
-                        .rendered_state
-                        .get(index)
-                        .map(|state| state.widget_hash)
-                        .unwrap_or_default()
+                if self
+                    .inner
+                    .rendered_state
+                    .get(index)
+                    .map(|state| state.widget_hash)
+                    == Some(*hash)
                 {
                     let old_position = self
                         .inner
@@ -97,6 +97,19 @@ where
                     self.inner.rendered_state.insert(index, elem);
 
                     self.move_to(old_position, index);
+                }
+            }
+
+            // Closed tabs
+            let mut index = 0;
+            while index < self.inner.rendered_state.len() {
+                let hash = self.inner.rendered_state[index].widget_hash;
+                if !hashes.contains(&hash) {
+                    self.inner.rendered_state.remove(index);
+
+                    self.remove(index);
+                } else {
+                    index += 1;
                 }
             }
         }
