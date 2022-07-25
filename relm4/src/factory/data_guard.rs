@@ -35,7 +35,7 @@ impl<Data: std::fmt::Debug> DataGuard<Data> {
         //    was dropped. The second reference can then safely behave like a normal `Box<C>`.
         //
         // Unsoundness only occurs when data that was moved into the runtime is moved out on
-        // purpose. This would allow the first reference to outlive the first one, becoming
+        // purpose. This would allow the first reference to outlive the second one, becoming
         // a dangling pointer.
         let (data, model_data) = unsafe {
             let raw = Box::into_raw(data);
@@ -123,7 +123,7 @@ mod test {
         let _data = Box::new(DontDropBelow4(0_u8));
     }
 
-    #[test]
+    #[gtk::test]
     fn test_data_guard_drop() {
         let data = Box::new(DontDropBelow4(0_u8));
         let (tx, rx) = flume::unbounded();
@@ -131,7 +131,7 @@ mod test {
         let main_ctx = MainContext::default();
 
         let (data, rt) = DataGuard::new(data, |mut rt_data| async move {
-            while let Ok(_) = rx.recv_async().await {
+            while (rx.recv_async().await).is_ok() {
                 rt_data.add();
             }
         });
@@ -161,7 +161,7 @@ mod test {
         main_ctx.iteration(false);
     }
 
-    #[test]
+    #[gtk::test]
     fn test_data_guard_rt_kill() {
         let data = Box::new(DontDropBelow4(0_u8));
         let (tx, rx) = flume::unbounded();
@@ -169,7 +169,7 @@ mod test {
         let main_ctx = MainContext::default();
 
         let (data, rt) = DataGuard::new(data, |mut rt_data| async move {
-            while let Ok(_) = rx.recv_async().await {
+            while (rx.recv_async().await).is_ok() {
                 rt_data.add();
             }
         });
