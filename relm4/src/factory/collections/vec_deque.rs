@@ -14,6 +14,9 @@ use std::collections::VecDeque;
 use std::hash::{Hash, Hasher};
 use std::ops::{Deref, Index, IndexMut};
 
+/// Provides methods to edit the underlying [`FactoryVecDeque`].
+///
+/// The changes will be rendered on the widgets after the guard goes out of scope.
 #[derive(Debug)]
 pub struct FactoryVecDequeGuard<'a, Widget, C, ParentMsg>
 where
@@ -353,6 +356,8 @@ where
 
 /// A container similar to [`VecDeque`] that can be used to store
 /// data associated with components that implement [`FactoryComponent`].
+///
+/// To access mutable methods of the factory, create a guard using [`Self::guard`].
 #[derive(Debug)]
 pub struct FactoryVecDeque<Widget, C, ParentMsg>
 where
@@ -417,6 +422,9 @@ where
         }
     }
 
+    /// Provides a [`FactoryVecDequeGuard`] that can be used to edit the factory.
+    ///
+    /// The changes will be rendered on the widgets after the guard goes out of scope.
     pub fn guard(&mut self) -> FactoryVecDequeGuard<'_, Widget, C, ParentMsg> {
         FactoryVecDequeGuard::new(self)
     }
@@ -539,11 +547,6 @@ where
     ///
     /// Returns `None` is `index` is invalid.
     pub fn get(&self, index: usize) -> Option<&C> {
-        // Safety: This is safe because ownership is tracked by each
-        // component individually, an therefore violating ownership
-        // rules is impossible.
-        // The safe version struggles with lifetime, maybe this can
-        // be fixed soon.
         self.components.get(index).map(ComponentStorage::get)
     }
 
