@@ -33,6 +33,7 @@ enum CounterMsg {
     Update,
 }
 
+#[derive(Debug)]
 enum CounterOutput {
     StartGame(DynamicIndex),
     SelectedGuess(DynamicIndex),
@@ -319,6 +320,6 @@ impl Component for AppModel {
 }
 
 fn main() {
-    let app: RelmApp<AppModel> = RelmApp::new("relm4.test.tabGame");
-    app.run(());
+    let app = RelmApp::new("relm4.test.tabGame");
+    app.run::<AppModel>(());
 }

@@ -119,12 +119,13 @@ where
                         // Runs that command asynchronously in the background using tokio.
                         message = input => {
                             if let Some(message) = message {
-                                info_span!(
+                                let span = info_span!(
                                     "update_with_view",
                                     input=?message,
                                     component=any::type_name::<C>(),
                                     id=model.id(),
                                 );
+                                let _enter = span.enter();
 
                                 if let Some(command) = model.update_with_view(&mut widgets, message, &input_tx_, &output_tx)
                                 {
@@ -137,12 +138,13 @@ where
                         // Handles responses from a command.
                         message = cmd => {
                             if let Some(message) = message {
-                                info_span!(
+                                let span = info_span!(
                                     "update_cmd_with_view",
                                     cmd_output=?message,
                                     component=any::type_name::<C>(),
                                     id=model.id(),
                                 );
+                                let _enter = span.enter();
 
                                 model.update_cmd_with_view(&mut widgets, message, &input_tx_, &output_tx);
                             }

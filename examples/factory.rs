@@ -15,6 +15,7 @@ enum CounterMsg {
     Decrement,
 }
 
+#[derive(Debug)]
 enum CounterOutput {
     SendFront(DynamicIndex),
     MoveUp(DynamicIndex),
@@ -232,6 +233,6 @@ impl SimpleComponent for AppModel {
 }
 
 fn main() {
-    let app: RelmApp<AppModel> = RelmApp::new("relm4.test.factory");
-    app.run(0);
+    let app = RelmApp::new("relm4.test.factory");
+    app.run::<AppModel>(0);
 }

@@ -82,6 +82,14 @@ impl SimpleComponent for AppModel {
 }
 
 fn main() {
-    let app = RelmApp::new("relm4.test.simple");
-    app.run::<AppModel>(0);
+    // Show traces to find potential performance bottlenecks, for example
+    tracing_subscriber::fmt()
+        .with_span_events(tracing_subscriber::fmt::format::FmtSpan::FULL)
+        .with_max_level(tracing::Level::TRACE)
+        .init();
+
+    tracing::info!("Starting application!");
+
+    let app: RelmApp<AppModel> = RelmApp::new("relm4.test.log");
+    app.run(0);
 }

@@ -134,12 +134,13 @@ impl<C: Component> ComponentBuilder<C> {
                                 ref mut widgets,
                             } = &mut *watcher_.state.borrow_mut();
 
-                            info_span!(
+                            let span = info_span!(
                                 "update_with_view",
                                 input=?message,
                                 component=any::type_name::<C>(),
                                 id=model.id(),
                             );
+                            let _enter = span.enter();
 
                             model.update_with_view(widgets, message, &component_sender);
                         }
@@ -153,12 +154,13 @@ impl<C: Component> ComponentBuilder<C> {
                                 ref mut widgets,
                             } = &mut *watcher_.state.borrow_mut();
 
-                            info_span!(
+                            let span = info_span!(
                                 "update_cmd_with_view",
                                 cmd_output=?message,
                                 component=any::type_name::<C>(),
                                 id=model.id(),
                             );
+                            let _enter = span.enter();
 
                             model.update_cmd_with_view(widgets, message, &component_sender);
                         }

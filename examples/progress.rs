@@ -17,7 +17,7 @@ use gtk::prelude::*;
 use relm4::*;
 
 fn main() {
-    RelmApp::<App>::new("org.relm4.ProgressExample").run("Settings List Demo".into());
+    RelmApp::new("org.relm4.ProgressExample").run::<App>("Settings List Demo".into());
 }
 
 #[derive(Default)]
@@ -35,14 +35,17 @@ pub struct Widgets {
     progress: gtk::ProgressBar,
 }
 
+#[derive(Debug)]
 pub enum Input {
     Compute,
 }
 
+#[derive(Debug)]
 pub enum Output {
     Clicked(u32),
 }
 
+#[derive(Debug)]
 pub enum CmdOut {
     /// Progress update from a command.
     Progress(f32),
