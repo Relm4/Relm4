@@ -200,7 +200,7 @@ impl SimpleComponent for AppModel {
     }
 
     fn update(&mut self, msg: Self::Input, _sender: &ComponentSender<Self>) {
-        let mut counters_guard = self.counters.guard().unwrap();
+        let mut counters_guard = self.counters.guard();
         match msg {
             AppMsg::AddCounter => {
                 counters_guard.push_back(self.created_widgets);
