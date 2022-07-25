@@ -1,12 +1,14 @@
 //! Traits for for managing and updating factories.
 
+use gtk::prelude::IsA;
+
 use super::DynamicIndex;
 use crate::{component::CommandFuture, OnDestroy, Sender, ShutdownReceiver};
 
 use std::fmt::Debug;
 
 /// A trait implemented for GTK4 widgets that allows a factory to create and remove widgets.
-pub trait FactoryView {
+pub trait FactoryView: IsA<gtk::Widget> {
     /// The widget returned when inserting a widget.
     ///
     /// This doesn't matter on containers like [`gtk::Box`].

@@ -1,24 +1,33 @@
+use super::data_guard::DataGuard;
 use super::FactoryComponent;
 
-use std::cell::RefCell;
 use std::fmt;
-use std::rc::Rc;
 
 use super::FactoryView;
 use crate::Sender;
-use gtk::glib;
 
+/// Don't allow public access to a [`FactoryHandle`].
+///
+/// It might be unsafe to extract `data` or `runtime`.
+/// Inside this type, it is guaranteed that extracting `data` will drop `runtime` before to
+/// comply with all required safety guarantees.
 pub(super) struct FactoryHandle<Widget, C: FactoryComponent<Widget, ParentMsg>, ParentMsg>
 where
     Widget: FactoryView,
     C: FactoryComponent<Widget, ParentMsg>,
 {
-    pub(super) data: Rc<RefCell<C>>,
+    pub(super) data: DataGuard<C>,
     pub(super) root_widget: C::Root,
     pub(super) returned_widget: Widget::ReturnedWidget,
     pub(super) input: Sender<C::Input>,
     pub(super) notifier: Sender<()>,
-    pub(super) runtime_id: Rc<RefCell<Option<glib::SourceId>>>,
+}
+
+impl<Widget, C, ParentMsg> FactoryHandle<Widget, C, ParentMsg>
+where
+    Widget: FactoryView,
+    C: FactoryComponent<Widget, ParentMsg>,
+{
 }
 
 impl<Widget, C, ParentMsg> fmt::Debug for FactoryHandle<Widget, C, ParentMsg>
@@ -32,7 +41,6 @@ where
             .field("root_widget", &self.root_widget)
             .field("input", &self.input)
             .field("notifier", &self.notifier)
-            .field("runtime_id", &self.runtime_id)
             .finish()
     }
 }

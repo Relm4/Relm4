@@ -255,17 +255,21 @@ impl Component for AppModel {
             counters: FactoryVecDeque::new(widgets.tabs.clone(), &sender.input),
             start_index: None,
         };
+
+        let mut counters_guard = model.counters.guard();
         for i in 0..3 {
-            model.counters.push_back(i);
+            counters_guard.push_back(i);
         }
-        model.counters.render_changes();
+
+        // Explicitly drop the guard,
+        // so that 'model' is no longer borrowed
+        // and can be moved inside ComponentParts
+        drop(counters_guard);
 
         ComponentParts { model, widgets }
     }
 
     fn update(&mut self, msg: Self::Input, sender: &ComponentSender<Self>) {
-        self.counters.apply_external_updates();
-
         match msg {
             AppMsg::StartGame(index) => {
                 self.start_index = Some(index);
@@ -290,29 +294,27 @@ impl Component for AppModel {
                 **GAME_STATE.get_mut() = GameState::End(index == self.start_index.take().unwrap());
             }
         }
-        self.counters.render_changes();
     }
 
     fn update_cmd(&mut self, msg: Self::CommandOutput, sender: &ComponentSender<Self>) {
         if msg {
             sender.input(AppMsg::StopGame);
         } else {
-            self.counters.apply_external_updates();
+            let mut counters_guard = self.counters.guard();
             match rand::random::<u8>() % 3 {
                 0 => {
-                    self.counters.swap(1, 2);
+                    counters_guard.swap(1, 2);
                 }
                 1 => {
-                    self.counters.swap(0, 1);
+                    counters_guard.swap(0, 1);
                 }
                 _ => {
-                    let widget = self.counters.widget();
+                    let widget = counters_guard.widget();
                     if !widget.select_next_page() {
                         widget.select_previous_page();
                     }
                 }
             }
-            self.counters.render_changes();
         }
     }
 }
