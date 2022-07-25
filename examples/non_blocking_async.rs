@@ -1,24 +1,10 @@
-use std::convert::identity;
 use std::time::Duration;
 
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
-use relm4::{
-    gtk, worker::WorkerFuture, ComponentParts, ComponentSender, RelmApp, Sender, SimpleComponent,
-    WidgetPlus, Worker, WorkerController,
-};
-use tokio::time::sleep;
-
-struct AsyncHandler;
-
-#[derive(Debug)]
-enum AsyncHandlerMsg {
-    DelayedIncrement,
-    DelayedDecrement,
-}
+use relm4::{gtk, Component, ComponentParts, ComponentSender, RelmApp, WidgetPlus};
 
 struct AppModel {
     counter: u8,
-    worker: WorkerController<AsyncHandler>,
 }
 
 #[derive(Debug)]
@@ -27,38 +13,11 @@ enum AppMsg {
     Decrement,
 }
 
-impl Worker for AsyncHandler {
-    type InputParams = ();
-    type Input = AsyncHandlerMsg;
-    type Output = AppMsg;
-
-    fn init_inner(_: (), _: &mut Sender<AsyncHandlerMsg>, _: &mut Sender<AppMsg>) -> Self {
-        AsyncHandler
-    }
-
-    fn update(
-        &mut self,
-        msg: AsyncHandlerMsg,
-        _: &mut Sender<AsyncHandlerMsg>,
-        output: &mut Sender<AppMsg>,
-    ) -> WorkerFuture {
-        let output = output.clone();
-
-        Box::pin(async move {
-            sleep(Duration::from_secs(1)).await;
-
-            match msg {
-                AsyncHandlerMsg::DelayedIncrement => output.send(AppMsg::Increment),
-                AsyncHandlerMsg::DelayedDecrement => output.send(AppMsg::Decrement),
-            }
-        })
-    }
-}
-
 #[relm4::component]
-impl SimpleComponent for AppModel {
+impl Component for AppModel {
+    type CommandOutput = AppMsg;
     type InitParams = ();
-    type Input = AppMsg;
+    type Input = ();
     type Output = ();
     type Widgets = AppWidgets;
 
@@ -75,15 +34,28 @@ impl SimpleComponent for AppModel {
 
                 gtk::Button {
                     set_label: "Increment",
-                    connect_clicked[sender = model.worker.sender.clone()] => move |_| {
-                        sender.send(AsyncHandlerMsg::DelayedIncrement);
+                    // Messages are fully async, no blocking!
+                    connect_clicked[sender] => move |_| {
+                        sender.command(|out, shutdown| {
+                            shutdown.register(async move {
+                                tokio::time::sleep(Duration::from_secs(1)).await;
+                                out.send(AppMsg::Increment);
+                            }).drop_on_shutdown()
+                        })
                     },
                 },
+
                 gtk::Button::with_label("Decrement") {
-                    connect_clicked[sender = model.worker.sender.clone()] => move |_| {
-                        sender.send(AsyncHandlerMsg::DelayedDecrement);
+                    connect_clicked[sender] => move |_| {
+                        sender.command(|out, shutdown| {
+                            shutdown.register(async move {
+                                tokio::time::sleep(Duration::from_secs(1)).await;
+                                out.send(AppMsg::Decrement);
+                            }).drop_on_shutdown()
+                        });
                     },
                 },
+
                 gtk::Label {
                     set_margin_all: 5,
                     #[watch]
@@ -94,17 +66,14 @@ impl SimpleComponent for AppModel {
     }
 
     fn init(_: (), root: &Self::Root, sender: &ComponentSender<Self>) -> ComponentParts<Self> {
-        let model = AppModel {
-            counter: 0,
-            worker: AsyncHandler::init(()).forward(&sender.input, identity),
-        };
+        let model = AppModel { counter: 0 };
 
         let widgets = view_output!();
 
         ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, msg: Self::Input, _sender: &ComponentSender<Self>) {
+    fn update_cmd(&mut self, msg: Self::CommandOutput, _sender: &ComponentSender<Self>) {
         match msg {
             AppMsg::Increment => {
                 self.counter = self.counter.wrapping_add(1);
