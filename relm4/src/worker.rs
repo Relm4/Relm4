@@ -16,6 +16,22 @@ use std::fmt::Debug;
 use std::sync::Arc;
 use std::{any, thread};
 
+/// Receives inputs and outputs in the background.
+pub trait Worker: Sized + Send + 'static {
+    /// The initial parameters that will be used to build the worker state.
+    type InitParams: 'static + Send;
+    /// The type of inputs that this worker shall receive.
+    type Input: 'static + Send + Debug;
+    /// The typue of outputs that this worker shall send.
+    type Output: 'static + Send + Debug;
+
+    /// Defines the initial state of the worker.
+    fn init(params: Self::InitParams, sender: &crate::ComponentSender<Self>) -> Self;
+
+    /// Defines how inputs will bep processed
+    fn update(&mut self, message: Self::Input, sender: &crate::ComponentSender<Self>);
+}
+
 impl<T> SimpleComponent for T
 where
     T: Worker + 'static,
@@ -45,22 +61,6 @@ where
     }
 }
 
-/// Receives inputs and outputs in the background.
-pub trait Worker: Sized + Send + 'static {
-    /// The initial parameters that will be used to build the worker state.
-    type InitParams: 'static + Send;
-    /// The type of inputs that this worker shall receive.
-    type Input: 'static + Send + Debug;
-    /// The typue of outputs that this worker shall send.
-    type Output: 'static + Send + Debug;
-
-    /// Defines the initial state of the worker.
-    fn init(params: Self::InitParams, sender: &crate::ComponentSender<Self>) -> Self;
-
-    /// Defines how inputs will bep processed
-    fn update(&mut self, message: Self::Input, sender: &crate::ComponentSender<Self>);
-}
-
 impl<C> ComponentBuilder<C>
 where
     C: Component<Root = EmptyRoot, Widgets = ()> + Send,
@@ -68,7 +68,8 @@ where
     C::Output: Send,
     C::CommandOutput: Send,
 {
-    /// Starts the component, passing ownership to a future attached to a GLib context.
+    /// Starts a worker on a separate thread,
+    /// passing ownership to a future attached to a GLib context.
     pub fn detach_worker(self, payload: C::InitParams) -> WorkerHandle<C> {
         let ComponentBuilder { root, .. } = self;
 
@@ -191,12 +192,10 @@ where
 #[derive(Debug)]
 /// Handle to a worker task in the background
 pub struct WorkerHandle<W: Component> {
-    /// Sends inputs to the worker.
-    pub sender: Sender<W::Input>,
-
-    /// Where the worker will send its outputs to.
-    pub receiver: Receiver<W::Output>,
-
+    // Sends inputs to the worker.
+    sender: Sender<W::Input>,
+    // Where the worker will send its outputs to.
+    receiver: Receiver<W::Output>,
     _root: EmptyRoot,
 }
 
@@ -244,12 +243,38 @@ where
             _root,
         }
     }
+
+    /// Ignore outputs from the component and take the handle.
+    pub fn detach(self) -> WorkerController<W> {
+        let Self {
+            sender,
+            _root,
+            ..
+        } = self;
+
+        WorkerController {
+            sender,
+            _root,
+        }
+    }
 }
 
 /// Sends inputs to a worker. On drop, shuts down the worker.
 #[derive(Debug)]
 pub struct WorkerController<W: Component> {
-    /// Sends inputs to the worker.
-    pub sender: Sender<W::Input>,
+    // Sends inputs to the worker.
+    sender: Sender<W::Input>,
     _root: EmptyRoot,
+}
+
+impl<W: Component> WorkerController<W> {
+    /// Emits an input to the component.
+    pub fn emit(&self, event: W::Input) {
+        self.sender.send(event);
+    }
+
+    /// Provides access to the component's sender.
+    pub fn sender(&self) -> &Sender<W::Input> {
+        &self.sender
+    }
 }

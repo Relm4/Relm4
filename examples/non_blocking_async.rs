@@ -67,12 +67,12 @@ impl SimpleComponent for AppModel {
 
                 gtk::Button {
                     set_label: "Increment",
-                    connect_clicked[sender = model.worker.sender.clone()] => move |_| {
+                    connect_clicked[sender = model.worker.sender().clone()] => move |_| {
                         sender.send(AsyncHandlerMsg::DelayedIncrement);
                     },
                 },
                 gtk::Button::with_label("Decrement") {
-                    connect_clicked[sender = model.worker.sender.clone()] => move |_| {
+                    connect_clicked[sender = model.worker.sender().clone()] => move |_| {
                         sender.send(AsyncHandlerMsg::DelayedDecrement);
                     },
                 },
