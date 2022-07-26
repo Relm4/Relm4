@@ -264,7 +264,7 @@ impl Component for AppModel {
         // Explicitly drop the guard,
         // so that 'model' is no longer borrowed
         // and can be moved inside ComponentParts
-        drop(counters_guard);
+        counters_guard.drop();
 
         ComponentParts { model, widgets }
     }

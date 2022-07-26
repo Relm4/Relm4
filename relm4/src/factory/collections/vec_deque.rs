@@ -59,6 +59,12 @@ where
         guard
     }
 
+    /// Drops the guard and which renders all changes.
+    ///
+    /// Use this in situation where you don't want use scoped but have to
+    /// transfer full ownership back to the [`FactoryVecDeque`].
+    pub fn drop(self) {}
+
     /// Apply external updates that happened between the last render.
     ///
     /// [`FactoryVecDeque`] should not be edited between calling [`Self::render_changes`]
