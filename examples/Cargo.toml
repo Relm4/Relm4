@@ -46,3 +46,7 @@ path = "non_blocking_async.rs"
 [[example]]
 name = "menu"
 path = "menu.rs"
+
+[[example]]
+name = "components"
+path = "components.rs"
