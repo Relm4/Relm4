@@ -59,6 +59,11 @@ where
         guard
     }
 
+    /// Drops the guard and renders all changes.
+    ///
+    /// Use this to transfer full ownership back to the [`FactoryVecDeque`].
+    pub fn drop(self) {}
+
     /// Apply external updates that happened between the last render.
     ///
     /// [`FactoryVecDeque`] should not be edited between calling [`Self::render_changes`]
