@@ -13,21 +13,19 @@ enum AppMsg {
 }
 
 struct AppWidgets {
-    //window: gtk::Window,
-    //vbox: gtk::Box,
-    //inc_button: gtk::Button,
-    //dec_button: gtk::Button,
+    // window: gtk::Window,
+    // vbox: gtk::Box,
+    // inc_button: gtk::Button,
+    // dec_button: gtk::Button,
     label: gtk::Label,
 }
 
 impl SimpleComponent for AppModel {
-    type Widgets = AppWidgets;
-    type Root = gtk::Window;
-
     type InitParams = u8;
-
     type Input = AppMsg;
     type Output = ();
+    type Root = gtk::Window;
+    type Widgets = AppWidgets;
 
     fn init_root() -> Self::Root {
         gtk::Window::builder()
