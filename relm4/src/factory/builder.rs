@@ -1,15 +1,19 @@
 use super::data_guard::DataGuard;
+use super::FactoryComponentSender;
 use super::{handle::FactoryHandle, DynamicIndex, FactoryComponent, FactoryView};
 
+use crate::component::ComponentSenderInner;
+use crate::shutdown::ShutdownSender;
 use crate::{shutdown, OnDestroy, Receiver, Sender};
 
 use std::any;
-use std::fmt;
+use std::sync::Arc;
 
 use async_oneshot::oneshot;
 use futures::FutureExt;
 use tracing::info_span;
 
+#[derive(Debug)]
 pub(super) struct FactoryBuilder<Widget, C, ParentMsg>
 where
     Widget: FactoryView,
@@ -18,10 +22,11 @@ where
 {
     pub(super) data: Box<C>,
     pub(super) root_widget: C::Root,
-    pub(super) input_tx: Sender<C::Input>,
+    pub(super) component_sender: FactoryComponentSender<Widget, ParentMsg, C>,
     pub(super) input_rx: Receiver<C::Input>,
-    pub(super) output_tx: Sender<C::Output>,
     pub(super) output_rx: Receiver<C::Output>,
+    pub(super) cmd_rx: Receiver<C::CommandOutput>,
+    pub(super) death_notifier: ShutdownSender,
 }
 
 impl<Widget, C, ParentMsg> FactoryBuilder<Widget, C, ParentMsg>
@@ -37,16 +42,31 @@ where
         // Used by this component to send events to be handled externally by the caller.
         let (output_tx, output_rx) = crate::channel::<C::Output>();
 
-        let data = Box::new(C::init_model(params, index, &input_tx, &output_tx));
+        // Sends messages from commands executed from the background.
+        let (cmd_tx, cmd_rx) = crate::channel::<C::CommandOutput>();
+
+        // Notifies the component's child commands that it is now deceased.
+        let (death_notifier, death_recipient) = shutdown::channel();
+
+        // Encapsulates the senders used by component methods.
+        let component_sender = Arc::new(ComponentSenderInner {
+            command: cmd_tx,
+            input: input_tx,
+            output: output_tx,
+            shutdown: death_recipient,
+        });
+
+        let data = Box::new(C::init_model(params, index, &component_sender));
         let root_widget = data.init_root();
 
         Self {
             data,
             root_widget,
-            input_tx,
+            component_sender,
             input_rx,
-            output_tx,
             output_rx,
+            cmd_rx,
+            death_notifier,
         }
     }
 
@@ -64,10 +84,11 @@ where
         let Self {
             mut data,
             root_widget,
-            input_tx,
+            component_sender,
             input_rx,
-            output_tx,
             output_rx,
+            cmd_rx,
+            death_notifier,
         } = self;
 
         let forward_sender = parent_sender.0.clone();
@@ -81,23 +102,18 @@ where
             }
         });
 
-        // Sends messages from commands executed from the background.
-        let (cmd_tx, cmd_rx) = crate::channel::<C::CommandOutput>();
-
         // Gets notifications when a component's model and view is updated externally.
         let (notifier, notifier_rx) = flume::bounded(0);
-
-        let mut widgets =
-            data.init_widgets(index, &root_widget, &returned_widget, &input_tx, &output_tx);
 
         // The source ID of the component's service will be sent through this once the root
         // widget has been iced, which will give the component one last chance to say goodbye.
         let (mut burn_notifier, burn_recipient) = oneshot::<gtk::glib::SourceId>();
 
-        // Notifies the component's child commands that it is now deceased.
-        let (death_notifier, death_recipient) = shutdown::channel();
+        let mut widgets =
+            data.init_widgets(index, &root_widget, &returned_widget, &component_sender);
 
-        let input_tx_ = input_tx.clone();
+        let input_tx = component_sender.input.clone();
+        let output_tx = component_sender.output.clone();
 
         // Spawns the component's service. It will receive both `Self::Input` and
         // `Self::CommandOutput` messages. It will spawn commands as requested by
@@ -127,11 +143,7 @@ where
                                 );
                                 let _enter = span.enter();
 
-                                if let Some(command) = model.update_with_view(&mut widgets, message, &input_tx_, &output_tx)
-                                {
-                                    let recipient = death_recipient.clone();
-                                    crate::spawn(C::command(command, recipient, cmd_tx.clone()));
-                                }
+                                model.update_with_view(&mut widgets, message, &component_sender);
                             }
                         }
 
@@ -146,13 +158,13 @@ where
                                 );
                                 let _enter = span.enter();
 
-                                model.update_cmd_with_view(&mut widgets, message, &input_tx_, &output_tx);
+                                model.update_cmd_with_view(&mut widgets, message, &component_sender);
                             }
                         }
 
                         // Triggered when the model and view have been updated externally.
                         _ = notifier => {
-                            model.update_view(&mut widgets, &input_tx_, &output_tx);
+                            model.update_view(&mut widgets, &component_sender);
                         }
 
                         // Triggered when the component is destroyed
@@ -188,23 +200,5 @@ where
             input: input_tx,
             notifier: Sender(notifier),
         }
-    }
-}
-
-impl<Widget, C, ParentMsg> fmt::Debug for FactoryBuilder<Widget, C, ParentMsg>
-where
-    Widget: FactoryView,
-    C: FactoryComponent<Widget, ParentMsg>,
-    ParentMsg: 'static,
-{
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("FactoryBuilder")
-            .field("data", &self.data)
-            .field("root_widget", &self.root_widget)
-            .field("input_tx", &self.input_tx)
-            .field("input_rx", &self.input_rx)
-            .field("output_tx", &self.output_tx)
-            .field("output_rx", &self.output_rx)
-            .finish()
     }
 }

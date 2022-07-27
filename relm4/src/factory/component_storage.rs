@@ -45,7 +45,7 @@ where
 
     pub(super) fn send(&self, msg: C::Input) {
         match self {
-            Self::Builder(builder) => builder.input_tx.send(msg),
+            Self::Builder(builder) => builder.component_sender.input(msg),
             Self::Final(handle) => handle.input.send(msg),
         }
     }

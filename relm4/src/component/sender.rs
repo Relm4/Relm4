@@ -6,28 +6,36 @@ use std::future::Future;
 use std::sync::Arc;
 
 /// Contain senders used by the component.
-pub type ComponentSender<C> = Arc<ComponentSenderInner<C>>;
+pub type ComponentSender<C> = Arc<
+    ComponentSenderInner<
+        <C as Component>::Input,
+        <C as Component>::Output,
+        <C as Component>::CommandOutput,
+    >,
+>;
 
 /// Contains senders used by the component.
 #[derive(Debug)]
-pub struct ComponentSenderInner<C: Component> {
+pub struct ComponentSenderInner<Input, Output, Cmd> {
     /// Emits command outputs
-    pub(crate) command: Sender<C::CommandOutput>,
+    pub(crate) command: Sender<Cmd>,
 
     /// Emits component inputs
-    pub input: Sender<C::Input>,
+    pub input: Sender<Input>,
 
     /// Emits component outputs
-    pub output: Sender<C::Output>,
+    pub output: Sender<Output>,
 
     pub(crate) shutdown: ShutdownReceiver,
 }
 
-impl<C: Component> ComponentSenderInner<C> {
+impl<Input, Output, CommandOutput: Send + 'static>
+    ComponentSenderInner<Input, Output, CommandOutput>
+{
     /// Spawn a command managed by the lifetime of the component.
     pub fn command<Cmd, Fut>(&self, cmd: Cmd)
     where
-        Cmd: (Fn(Sender<C::CommandOutput>, ShutdownReceiver) -> Fut) + Send + Sync + 'static,
+        Cmd: (Fn(Sender<CommandOutput>, ShutdownReceiver) -> Fut) + Send + Sync + 'static,
         Fut: Future<Output = ()> + Send,
     {
         let recipient = self.shutdown.clone();
@@ -38,22 +46,22 @@ impl<C: Component> ComponentSenderInner<C> {
     }
 
     /// Emit an input to the component.
-    pub fn input(&self, message: C::Input) {
+    pub fn input(&self, message: Input) {
         self.input.send(message);
     }
 
     /// Equivalent to `&self.input`.
-    pub fn input_sender(&self) -> &Sender<C::Input> {
+    pub fn input_sender(&self) -> &Sender<Input> {
         &self.input
     }
 
     /// Emit an output to the component.
-    pub fn output(&self, message: C::Output) {
+    pub fn output(&self, message: Output) {
         self.output.send(message);
     }
 
     /// Equivalent to `&self.output`.
-    pub fn output_sender(&self) -> &Sender<C::Output> {
+    pub fn output_sender(&self) -> &Sender<Output> {
         &self.output
     }
 }

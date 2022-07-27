@@ -1,5 +1,5 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
-use relm4::factory::{DynamicIndex, FactoryComponent, FactoryVecDeque};
+use relm4::factory::{DynamicIndex, FactoryComponent, FactoryComponentSender, FactoryVecDeque};
 use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, Sender, SimpleComponent, WidgetPlus};
 
 #[derive(Debug)]
@@ -22,7 +22,6 @@ enum CounterOutput {
 
 #[relm4::factory]
 impl FactoryComponent<gtk::Box, AppMsg> for Counter {
-    type Command = ();
     type CommandOutput = ();
     type InitParams = u8;
     type Input = CounterMsg;
@@ -43,40 +42,40 @@ impl FactoryComponent<gtk::Box, AppMsg> for Counter {
             #[name = "add_button"]
             gtk::Button {
                 set_label: "+",
-                connect_clicked[input] => move |_| {
-                    input.send(CounterMsg::Increment)
+                connect_clicked[sender] => move |_| {
+                    sender.input(CounterMsg::Increment)
                 }
             },
 
             #[name = "remove_button"]
             gtk::Button {
                 set_label: "-",
-                connect_clicked[input] => move |_| {
-                    input.send(CounterMsg::Decrement)
+                connect_clicked[sender] => move |_| {
+                    sender.input(CounterMsg::Decrement)
                 }
             },
 
             #[name = "move_up_button"]
             gtk::Button {
                 set_label: "Up",
-                connect_clicked[output, index] => move |_| {
-                    output.send(CounterOutput::MoveUp(index.clone()))
+                connect_clicked[sender, index] => move |_| {
+                    sender.output(CounterOutput::MoveUp(index.clone()))
                 }
             },
 
             #[name = "move_down_button"]
             gtk::Button {
                 set_label: "Down",
-                connect_clicked[output, index] => move |_| {
-                    output.send(CounterOutput::MoveDown(index.clone()))
+                connect_clicked[sender, index] => move |_| {
+                    sender.output(CounterOutput::MoveDown(index.clone()))
                 }
             },
 
             #[name = "to_front_button"]
             gtk::Button {
                 set_label: "To start",
-                connect_clicked[output, index] => move |_| {
-                    output.send(CounterOutput::SendFront(index.clone()))
+                connect_clicked[sender, index] => move |_| {
+                    sender.output(CounterOutput::SendFront(index.clone()))
                 }
             }
         }
@@ -93,8 +92,7 @@ impl FactoryComponent<gtk::Box, AppMsg> for Counter {
     fn init_model(
         value: Self::InitParams,
         _index: &DynamicIndex,
-        _input: &Sender<Self::Input>,
-        _output: &Sender<Self::Output>,
+        _sender: &FactoryComponentSender<gtk::Box, AppMsg, Self>,
     ) -> Self {
         Self { value }
     }
@@ -102,9 +100,8 @@ impl FactoryComponent<gtk::Box, AppMsg> for Counter {
     fn update(
         &mut self,
         msg: Self::Input,
-        _input: &Sender<Self::Input>,
-        _ouput: &Sender<Self::Output>,
-    ) -> Option<Self::Command> {
+        _sender: &FactoryComponentSender<gtk::Box, AppMsg, Self>,
+    ) {
         match msg {
             CounterMsg::Increment => {
                 self.value = self.value.wrapping_add(1);
@@ -113,7 +110,6 @@ impl FactoryComponent<gtk::Box, AppMsg> for Counter {
                 self.value = self.value.wrapping_sub(1);
             }
         }
-        None
     }
 
     fn pre_view() {
