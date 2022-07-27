@@ -143,7 +143,10 @@ pub(crate) fn generate_tokens(
         }
         .unwrap_or_default()
         .into_iter();
-        (args.next().unwrap(), args.next().unwrap())
+        (
+            args.next().unwrap_or_else(|| syn::parse_quote!(())),
+            args.next().unwrap_or_else(|| syn::parse_quote!(())),
+        )
     };
 
     let init_injected = inject_view_code(
