@@ -3,7 +3,7 @@ use std::time::Duration;
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
 use relm4::{
     adw,
-    factory::{DynamicIndex, FactoryComponent, FactoryVecDeque},
+    factory::{DynamicIndex, FactoryComponent, FactoryComponentSender, FactoryVecDeque},
     gtk, Component, ComponentParts, ComponentSender, RelmApp, Sender, SharedState, WidgetPlus,
 };
 
@@ -48,7 +48,6 @@ impl FactoryComponent<adw::TabView, AppMsg> for GamePage {
     type Input = CounterMsg;
     type Output = CounterOutput;
 
-    type Command = ();
     type CommandOutput = ();
 
     fn output_to_parent_msg(output: Self::Output) -> Option<AppMsg> {
@@ -96,8 +95,8 @@ impl FactoryComponent<adw::TabView, AppMsg> for GamePage {
                             },
                             gtk::Button {
                                 set_label: "Start!",
-                                connect_clicked[output, index] => move |_| {
-                                    output.send(CounterOutput::StartGame(index.clone()));
+                                connect_clicked[sender, index] => move |_| {
+                                    sender.output(CounterOutput::StartGame(index.clone()));
                                 }
                             },
                         }
@@ -107,8 +106,8 @@ impl FactoryComponent<adw::TabView, AppMsg> for GamePage {
                             set_label: "This was my tab!",
                             set_valign: gtk::Align::Center,
 
-                            connect_clicked[output, index] => move |_| {
-                                output.send(CounterOutput::SelectedGuess(index.clone()));
+                            connect_clicked[sender, index] => move |_| {
+                                sender.output(CounterOutput::SelectedGuess(index.clone()));
                             }
                         }
                     }
@@ -156,10 +155,9 @@ impl FactoryComponent<adw::TabView, AppMsg> for GamePage {
     fn init_model(
         value: Self::InitParams,
         _index: &DynamicIndex,
-        input: &Sender<Self::Input>,
-        _output: &Sender<Self::Output>,
+        sender: &FactoryComponentSender<adw::TabView, AppMsg, Self>,
     ) -> Self {
-        GAME_STATE.subscribe(input, |_| CounterMsg::Update);
+        GAME_STATE.subscribe(&sender.input, |_| CounterMsg::Update);
         Self { id: value }
     }
 
@@ -168,8 +166,7 @@ impl FactoryComponent<adw::TabView, AppMsg> for GamePage {
         index: &DynamicIndex,
         root: &Self::Root,
         returned_widget: &adw::TabPage,
-        _input: &Sender<Self::Input>,
-        output: &Sender<Self::Output>,
+        sender: &FactoryComponentSender<adw::TabView, AppMsg, Self>,
     ) -> Self::Widgets {
         let state = GAME_STATE.get();
         let widgets = view_output!();
@@ -183,13 +180,11 @@ impl FactoryComponent<adw::TabView, AppMsg> for GamePage {
     fn update(
         &mut self,
         msg: Self::Input,
-        _input: &Sender<Self::Input>,
-        _ouput: &Sender<Self::Output>,
-    ) -> Option<Self::Command> {
+        sender: &FactoryComponentSender<adw::TabView, AppMsg, Self>,
+    ) {
         match msg {
             CounterMsg::Update => (),
         }
-        None
     }
 }
 

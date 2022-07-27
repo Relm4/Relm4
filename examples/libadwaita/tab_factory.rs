@@ -1,8 +1,8 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
 use relm4::{
     adw,
-    factory::{DynamicIndex, FactoryComponent, FactoryVecDeque},
-    gtk, ComponentParts, ComponentSender, RelmApp, Sender, SimpleComponent,
+    factory::{DynamicIndex, FactoryComponent, FactoryComponentSender, FactoryVecDeque},
+    gtk, ComponentParts, ComponentSender, RelmApp, SimpleComponent,
 };
 
 #[derive(Debug)]
@@ -36,7 +36,6 @@ impl FactoryComponent<adw::TabView, AppMsg> for Counter {
     type Output = CounterOutput;
 
     type Root = gtk::Box;
-    type Command = ();
     type CommandOutput = ();
 
     fn output_to_parent_msg(output: Self::Output) -> Option<AppMsg> {
@@ -60,8 +59,7 @@ impl FactoryComponent<adw::TabView, AppMsg> for Counter {
     fn init_model(
         value: Self::InitParams,
         _index: &DynamicIndex,
-        _input: &Sender<Self::Input>,
-        _output: &Sender<Self::Output>,
+        _sender: &FactoryComponentSender<adw::TabView, AppMsg, Self>,
     ) -> Self {
         Self { value }
     }
@@ -71,8 +69,7 @@ impl FactoryComponent<adw::TabView, AppMsg> for Counter {
         index: &DynamicIndex,
         root: &Self::Root,
         returned_widget: &adw::TabPage,
-        input: &Sender<Self::Input>,
-        output: &Sender<Self::Output>,
+        sender: &FactoryComponentSender<adw::TabView, AppMsg, Self>,
     ) -> Self::Widgets {
         relm4::view! {
             label = gtk::Label {
@@ -84,8 +81,8 @@ impl FactoryComponent<adw::TabView, AppMsg> for Counter {
         relm4::view! {
             add_button = gtk::Button {
                 set_label: "+",
-                connect_clicked[input] => move |_| {
-                    input.send(CounterMsg::Increment)
+                connect_clicked[sender] => move |_| {
+                    sender.input(CounterMsg::Increment)
                 }
             }
         }
@@ -93,8 +90,8 @@ impl FactoryComponent<adw::TabView, AppMsg> for Counter {
         relm4::view! {
             remove_button = gtk::Button {
                 set_label: "-",
-                connect_clicked[input] => move |_| {
-                    input.send(CounterMsg::Decrement)
+                connect_clicked[sender] => move |_| {
+                    sender.input(CounterMsg::Decrement)
                 }
             }
         }
@@ -102,8 +99,8 @@ impl FactoryComponent<adw::TabView, AppMsg> for Counter {
         relm4::view! {
             move_up_button = gtk::Button {
                 set_label: "Up",
-                connect_clicked[output, index] => move |_| {
-                    output.send(CounterOutput::MoveUp(index.clone()))
+                connect_clicked[sender, index] => move |_| {
+                    sender.output(CounterOutput::MoveUp(index.clone()))
                 }
             }
         }
@@ -111,8 +108,8 @@ impl FactoryComponent<adw::TabView, AppMsg> for Counter {
         relm4::view! {
             move_down_button = gtk::Button {
                 set_label: "Down",
-                connect_clicked[output, index] => move |_| {
-                    output.send(CounterOutput::MoveDown(index.clone()))
+                connect_clicked[sender, index] => move |_| {
+                    sender.output(CounterOutput::MoveDown(index.clone()))
                 }
             }
         }
@@ -120,8 +117,8 @@ impl FactoryComponent<adw::TabView, AppMsg> for Counter {
         relm4::view! {
             to_front_button = gtk::Button {
                 set_label: "To start",
-                connect_clicked[output, index] => move |_| {
-                    output.send(CounterOutput::SendFront(index.clone()))
+                connect_clicked[sender, index] => move |_| {
+                    sender.output(CounterOutput::SendFront(index.clone()))
                 }
             }
         }
@@ -141,9 +138,8 @@ impl FactoryComponent<adw::TabView, AppMsg> for Counter {
     fn update(
         &mut self,
         msg: Self::Input,
-        _input: &Sender<Self::Input>,
-        _ouput: &Sender<Self::Output>,
-    ) -> Option<Self::Command> {
+        _sender: &FactoryComponentSender<adw::TabView, AppMsg, Self>,
+    ) {
         match msg {
             CounterMsg::Increment => {
                 self.value = self.value.wrapping_add(1);
@@ -152,14 +148,12 @@ impl FactoryComponent<adw::TabView, AppMsg> for Counter {
                 self.value = self.value.wrapping_sub(1);
             }
         }
-        None
     }
 
     fn update_view(
         &self,
         widgets: &mut Self::Widgets,
-        _input: &Sender<Self::Input>,
-        _output: &Sender<Self::Output>,
+        _sender: &FactoryComponentSender<adw::TabView, AppMsg, Self>,
     ) {
         widgets.label.set_label(&self.value.to_string());
     }
