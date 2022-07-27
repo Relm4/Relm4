@@ -2,8 +2,8 @@
 
 use gtk::prelude::IsA;
 
-use super::DynamicIndex;
-use crate::{component::CommandFuture, OnDestroy, Sender, ShutdownReceiver};
+use super::{DynamicIndex, FactoryComponentSender};
+use crate::{OnDestroy, Sender};
 
 use std::fmt::Debug;
 
@@ -85,9 +85,6 @@ impl<C> Position<()> for C {
 /// Similar to [`Component`](crate::Component) but adjusted to fit the life cycle
 /// of factories.
 pub trait FactoryComponent<ParentWidget: FactoryView, ParentMsg>: Sized + Debug + 'static {
-    /// Internal commands to perform
-    type Command: Debug + Send + 'static;
-
     /// Messages which are received from commands executing in the background.
     type CommandOutput: Debug + Send + 'static;
 
@@ -110,8 +107,7 @@ pub trait FactoryComponent<ParentWidget: FactoryView, ParentMsg>: Sized + Debug 
     fn init_model(
         params: Self::InitParams,
         index: &DynamicIndex,
-        input: &Sender<Self::Input>,
-        output: &Sender<Self::Output>,
+        sender: &FactoryComponentSender<ParentWidget, ParentMsg, Self>,
     ) -> Self;
 
     /// Initializes the root widget
@@ -123,8 +119,7 @@ pub trait FactoryComponent<ParentWidget: FactoryView, ParentMsg>: Sized + Debug 
         index: &DynamicIndex,
         root: &Self::Root,
         returned_widget: &ParentWidget::ReturnedWidget,
-        input: &Sender<Self::Input>,
-        output: &Sender<Self::Output>,
+        sender: &FactoryComponentSender<ParentWidget, ParentMsg, Self>,
     ) -> Self::Widgets;
 
     /// Convert [`Self::Output`] into `ParentMsg` in order to
@@ -140,10 +135,8 @@ pub trait FactoryComponent<ParentWidget: FactoryView, ParentMsg>: Sized + Debug 
     fn update(
         &mut self,
         message: Self::Input,
-        input: &Sender<Self::Input>,
-        output: &Sender<Self::Output>,
-    ) -> Option<Self::Command> {
-        None
+        sender: &FactoryComponentSender<ParentWidget, ParentMsg, Self>,
+    ) {
     }
 
     /// Defines how the component should respond to command updates.
@@ -151,8 +144,7 @@ pub trait FactoryComponent<ParentWidget: FactoryView, ParentMsg>: Sized + Debug 
     fn update_cmd(
         &mut self,
         message: Self::CommandOutput,
-        input: &Sender<Self::Input>,
-        output: &Sender<Self::Output>,
+        sender: &FactoryComponentSender<ParentWidget, ParentMsg, Self>,
     ) {
     }
 
@@ -161,11 +153,10 @@ pub trait FactoryComponent<ParentWidget: FactoryView, ParentMsg>: Sized + Debug 
         &mut self,
         widgets: &mut Self::Widgets,
         message: Self::CommandOutput,
-        input: &Sender<Self::Input>,
-        output: &Sender<Self::Output>,
+        sender: &FactoryComponentSender<ParentWidget, ParentMsg, Self>,
     ) {
-        self.update_cmd(message, input, output);
-        self.update_view(widgets, input, output)
+        self.update_cmd(message, sender);
+        self.update_view(widgets, sender)
     }
 
     /// Updates the view after the model has been updated.
@@ -173,8 +164,7 @@ pub trait FactoryComponent<ParentWidget: FactoryView, ParentMsg>: Sized + Debug 
     fn update_view(
         &self,
         widgets: &mut Self::Widgets,
-        input: &Sender<Self::Input>,
-        output: &Sender<Self::Output>,
+        sender: &FactoryComponentSender<ParentWidget, ParentMsg, Self>,
     ) {
     }
 
@@ -183,22 +173,10 @@ pub trait FactoryComponent<ParentWidget: FactoryView, ParentMsg>: Sized + Debug 
         &mut self,
         widgets: &mut Self::Widgets,
         message: Self::Input,
-        input: &Sender<Self::Input>,
-        output: &Sender<Self::Output>,
-    ) -> Option<Self::Command> {
-        let cmd = self.update(message, input, output);
-        self.update_view(widgets, input, output);
-        cmd
-    }
-
-    /// A command to perform in a background thread.
-    #[allow(unused)]
-    fn command(
-        message: Self::Command,
-        shutdown: ShutdownReceiver,
-        output: Sender<Self::CommandOutput>,
-    ) -> CommandFuture {
-        Box::pin(async {})
+        sender: &FactoryComponentSender<ParentWidget, ParentMsg, Self>,
+    ) {
+        self.update(message, sender);
+        self.update_view(widgets, sender);
     }
 
     /// Last method called before a component is shut down.
