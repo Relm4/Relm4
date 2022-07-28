@@ -6,22 +6,12 @@ use crate::Sender;
 use std::fmt::Debug;
 
 #[derive(Debug)]
-pub(super) enum ComponentStorage<Widget, C, ParentMsg>
-where
-    Widget: FactoryView,
-    C: FactoryComponent<Widget, ParentMsg>,
-    ParentMsg: 'static,
-    Widget: 'static,
-{
-    Builder(FactoryBuilder<Widget, C, ParentMsg>),
-    Final(FactoryHandle<Widget, C, ParentMsg>),
+pub(super) enum ComponentStorage<C: FactoryComponent> {
+    Builder(FactoryBuilder<C>),
+    Final(FactoryHandle<C>),
 }
 
-impl<Widget, C, ParentMsg> ComponentStorage<Widget, C, ParentMsg>
-where
-    Widget: FactoryView,
-    C: FactoryComponent<Widget, ParentMsg>,
-{
+impl<C: FactoryComponent> ComponentStorage<C> {
     pub(super) fn get(&self) -> &C {
         match self {
             Self::Builder(builder) => &builder.data,
@@ -66,8 +56,8 @@ where
     pub(super) fn launch(
         self,
         index: &DynamicIndex,
-        returned_widget: Widget::ReturnedWidget,
-        parent_sender: &Sender<ParentMsg>,
+        returned_widget: <C::ParentWidget as FactoryView>::ReturnedWidget,
+        parent_sender: &Sender<C::ParentMsg>,
     ) -> Option<Self> {
         if let Self::Builder(builder) = self {
             Some(Self::Final(builder.launch(
@@ -81,7 +71,9 @@ where
         }
     }
 
-    pub(super) fn returned_widget(&self) -> Option<&Widget::ReturnedWidget> {
+    pub(super) fn returned_widget(
+        &self,
+    ) -> Option<&<C::ParentWidget as FactoryView>::ReturnedWidget> {
         if let Self::Final(handle) = self {
             Some(&handle.returned_widget)
         } else {

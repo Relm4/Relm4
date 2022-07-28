@@ -84,7 +84,15 @@ impl<C> Position<()> for C {
 /// A component that's stored inside a factory.
 /// Similar to [`Component`](crate::Component) but adjusted to fit the life cycle
 /// of factories.
-pub trait FactoryComponent<ParentWidget: FactoryView, ParentMsg>: Sized + Debug + 'static {
+pub trait FactoryComponent:
+    Position<<Self::ParentWidget as FactoryView>::Position> + Sized + Debug + 'static
+{
+    /// Widget to which all factory widgets are added.
+    type ParentWidget: FactoryView + 'static;
+
+    /// Messages sent to a parent component.
+    type ParentMsg: Debug + 'static;
+
     /// Messages which are received from commands executing in the background.
     type CommandOutput: Debug + Send + 'static;
 
@@ -98,7 +106,7 @@ pub trait FactoryComponent<ParentWidget: FactoryView, ParentMsg>: Sized + Debug 
     type InitParams;
 
     /// The widget that was constructed by the component.
-    type Root: Debug + OnDestroy + Clone;
+    type Root: AsRef<<Self::ParentWidget as FactoryView>::Children> + Debug + OnDestroy + Clone;
 
     /// The type that's used for storing widgets created for this component.
     type Widgets: 'static;
@@ -107,7 +115,7 @@ pub trait FactoryComponent<ParentWidget: FactoryView, ParentMsg>: Sized + Debug 
     fn init_model(
         params: Self::InitParams,
         index: &DynamicIndex,
-        sender: &FactoryComponentSender<ParentWidget, ParentMsg, Self>,
+        sender: &FactoryComponentSender<Self>,
     ) -> Self;
 
     /// Initializes the root widget
@@ -118,42 +126,32 @@ pub trait FactoryComponent<ParentWidget: FactoryView, ParentMsg>: Sized + Debug 
         &mut self,
         index: &DynamicIndex,
         root: &Self::Root,
-        returned_widget: &ParentWidget::ReturnedWidget,
-        sender: &FactoryComponentSender<ParentWidget, ParentMsg, Self>,
+        returned_widget: &<Self::ParentWidget as FactoryView>::ReturnedWidget,
+        sender: &FactoryComponentSender<Self>,
     ) -> Self::Widgets;
 
     /// Convert [`Self::Output`] into `ParentMsg` in order to
     /// send message to the parent.
     ///
     /// If [`None`] is returned, nothing is forwarded.
-    fn output_to_parent_msg(_output: Self::Output) -> Option<ParentMsg> {
+    fn output_to_parent_msg(_output: Self::Output) -> Option<Self::ParentMsg> {
         None
     }
 
     /// Processes inputs received by the component.
     #[allow(unused)]
-    fn update(
-        &mut self,
-        message: Self::Input,
-        sender: &FactoryComponentSender<ParentWidget, ParentMsg, Self>,
-    ) {
-    }
+    fn update(&mut self, message: Self::Input, sender: &FactoryComponentSender<Self>) {}
 
     /// Defines how the component should respond to command updates.
     #[allow(unused)]
-    fn update_cmd(
-        &mut self,
-        message: Self::CommandOutput,
-        sender: &FactoryComponentSender<ParentWidget, ParentMsg, Self>,
-    ) {
-    }
+    fn update_cmd(&mut self, message: Self::CommandOutput, sender: &FactoryComponentSender<Self>) {}
 
     /// Handles updates from a command.
     fn update_cmd_with_view(
         &mut self,
         widgets: &mut Self::Widgets,
         message: Self::CommandOutput,
-        sender: &FactoryComponentSender<ParentWidget, ParentMsg, Self>,
+        sender: &FactoryComponentSender<Self>,
     ) {
         self.update_cmd(message, sender);
         self.update_view(widgets, sender)
@@ -161,19 +159,14 @@ pub trait FactoryComponent<ParentWidget: FactoryView, ParentMsg>: Sized + Debug 
 
     /// Updates the view after the model has been updated.
     #[allow(unused)]
-    fn update_view(
-        &self,
-        widgets: &mut Self::Widgets,
-        sender: &FactoryComponentSender<ParentWidget, ParentMsg, Self>,
-    ) {
-    }
+    fn update_view(&self, widgets: &mut Self::Widgets, sender: &FactoryComponentSender<Self>) {}
 
     /// Updates the model and view. Optionally returns a command to run.
     fn update_with_view(
         &mut self,
         widgets: &mut Self::Widgets,
         message: Self::Input,
-        sender: &FactoryComponentSender<ParentWidget, ParentMsg, Self>,
+        sender: &FactoryComponentSender<Self>,
     ) {
         self.update(message, sender);
         self.update_view(widgets, sender);

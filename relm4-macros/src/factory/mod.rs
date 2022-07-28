@@ -134,28 +134,7 @@ pub(crate) fn generate_tokens(
         }
     };
 
-    let last_segment = trait_.segments.last().unwrap();
-
-    let (container_widget, parent_msg) = {
-        let mut args = match &last_segment.arguments {
-            syn::PathArguments::AngleBracketed(args) => Some(args.args.clone()),
-            _ => None,
-        }
-        .unwrap_or_default()
-        .into_iter();
-        (
-            args.next().unwrap_or_else(|| syn::parse_quote!(())),
-            args.next().unwrap_or_else(|| syn::parse_quote!(())),
-        )
-    };
-
-    let init_injected = inject_view_code(
-        init_widgets,
-        view_code,
-        widgets_return_code,
-        &container_widget,
-        &parent_msg,
-    );
+    let init_injected = inject_view_code(init_widgets, view_code, widgets_return_code);
 
     quote! {
         #[allow(dead_code)]
@@ -182,7 +161,7 @@ pub(crate) fn generate_tokens(
             fn update_view(
                 &self,
                 widgets: &mut Self::Widgets,
-                sender: &relm4::factory::FactoryComponentSender<#container_widget, #parent_msg, Self>,
+                sender: &relm4::factory::FactoryComponentSender<Self>,
             ) {
                 #[allow(unused_variables)]
                 let Self::Widgets {

@@ -1,6 +1,6 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
 use relm4::factory::{DynamicIndex, FactoryComponent, FactoryComponentSender, FactoryVecDeque};
-use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, Sender, SimpleComponent, WidgetPlus};
+use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, SimpleComponent, WidgetPlus};
 
 #[derive(Debug)]
 struct Counter {
@@ -21,7 +21,9 @@ enum CounterOutput {
 }
 
 #[relm4::factory]
-impl FactoryComponent<gtk::Box, AppMsg> for Counter {
+impl FactoryComponent for Counter {
+    type ParentWidget = gtk::Box;
+    type ParentMsg = AppMsg;
     type CommandOutput = ();
     type InitParams = u8;
     type Input = CounterMsg;
@@ -92,16 +94,12 @@ impl FactoryComponent<gtk::Box, AppMsg> for Counter {
     fn init_model(
         value: Self::InitParams,
         _index: &DynamicIndex,
-        _sender: &FactoryComponentSender<gtk::Box, AppMsg, Self>,
+        _sender: &FactoryComponentSender<Self>,
     ) -> Self {
         Self { value }
     }
 
-    fn update(
-        &mut self,
-        msg: Self::Input,
-        _sender: &FactoryComponentSender<gtk::Box, AppMsg, Self>,
-    ) {
+    fn update(&mut self, msg: Self::Input, _sender: &FactoryComponentSender<Self>) {
         match msg {
             CounterMsg::Increment => {
                 self.value = self.value.wrapping_add(1);
@@ -119,7 +117,7 @@ impl FactoryComponent<gtk::Box, AppMsg> for Counter {
 
 struct AppModel {
     created_widgets: u8,
-    counters: FactoryVecDeque<gtk::Box, Counter, AppMsg>,
+    counters: FactoryVecDeque<Counter>,
 }
 
 #[derive(Debug)]

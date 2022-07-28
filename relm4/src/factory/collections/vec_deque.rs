@@ -2,7 +2,7 @@ use crate::Sender;
 
 use crate::factory::{
     builder::FactoryBuilder, component_storage::ComponentStorage, DynamicIndex, FactoryComponent,
-    FactoryView, Position,
+    FactoryView,
 };
 
 use gtk::prelude::Cast;
@@ -18,39 +18,18 @@ use std::ops::{Deref, Index, IndexMut};
 ///
 /// The changes will be rendered on the widgets after the guard goes out of scope.
 #[derive(Debug)]
-pub struct FactoryVecDequeGuard<'a, Widget, C, ParentMsg>
-where
-    Widget: FactoryView,
-    C: FactoryComponent<Widget, ParentMsg> + Position<Widget::Position>,
-    C::Root: AsRef<Widget::Children>,
-    ParentMsg: 'static,
-    Widget: 'static,
-{
-    inner: &'a mut FactoryVecDeque<Widget, C, ParentMsg>,
+pub struct FactoryVecDequeGuard<'a, C: FactoryComponent> {
+    inner: &'a mut FactoryVecDeque<C>,
 }
 
-impl<'a, Widget, C, ParentMsg> Drop for FactoryVecDequeGuard<'a, Widget, C, ParentMsg>
-where
-    Widget: FactoryView,
-    C: FactoryComponent<Widget, ParentMsg> + Position<Widget::Position>,
-    C::Root: AsRef<Widget::Children>,
-    ParentMsg: 'static,
-    Widget: 'static,
-{
+impl<'a, C: FactoryComponent> Drop for FactoryVecDequeGuard<'a, C> {
     fn drop(&mut self) {
         self.inner.render_changes();
     }
 }
 
-impl<'a, Widget, C, ParentMsg> FactoryVecDequeGuard<'a, Widget, C, ParentMsg>
-where
-    Widget: FactoryView,
-    C: FactoryComponent<Widget, ParentMsg> + Position<Widget::Position>,
-    C::Root: AsRef<Widget::Children>,
-    ParentMsg: 'static,
-    Widget: 'static,
-{
-    fn new(inner: &'a mut FactoryVecDeque<Widget, C, ParentMsg>) -> Self {
+impl<'a, C: FactoryComponent> FactoryVecDequeGuard<'a, C> {
+    fn new(inner: &'a mut FactoryVecDeque<C>) -> Self {
         let mut guard = FactoryVecDequeGuard { inner };
 
         #[cfg(feature = "libadwaita")]
@@ -332,27 +311,15 @@ where
     }
 }
 
-impl<'a, Widget, C, ParentMsg> Deref for FactoryVecDequeGuard<'a, Widget, C, ParentMsg>
-where
-    Widget: FactoryView,
-    C: FactoryComponent<Widget, ParentMsg> + Position<Widget::Position>,
-    C::Root: AsRef<Widget::Children>,
-    ParentMsg: 'static,
-    Widget: 'static,
-{
-    type Target = FactoryVecDeque<Widget, C, ParentMsg>;
+impl<'a, C: FactoryComponent> Deref for FactoryVecDequeGuard<'a, C> {
+    type Target = FactoryVecDeque<C>;
 
     fn deref(&self) -> &Self::Target {
         self.inner
     }
 }
 
-impl<'a, Widget, C, ParentMsg> Index<usize> for FactoryVecDequeGuard<'a, Widget, C, ParentMsg>
-where
-    Widget: FactoryView,
-    C: FactoryComponent<Widget, ParentMsg> + Position<Widget::Position>,
-    C::Root: AsRef<Widget::Children>,
-{
+impl<'a, C: FactoryComponent> Index<usize> for FactoryVecDequeGuard<'a, C> {
     type Output = C;
 
     fn index(&self, index: usize) -> &Self::Output {
@@ -360,12 +327,7 @@ where
     }
 }
 
-impl<'a, Widget, C, ParentMsg> IndexMut<usize> for FactoryVecDequeGuard<'a, Widget, C, ParentMsg>
-where
-    Widget: FactoryView,
-    C: FactoryComponent<Widget, ParentMsg> + Position<Widget::Position>,
-    C::Root: AsRef<Widget::Children>,
-{
+impl<'a, C: FactoryComponent> IndexMut<usize> for FactoryVecDequeGuard<'a, C> {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         self.get_mut(index)
             .expect("Called `get_mut` on an invalid index")
@@ -377,28 +339,16 @@ where
 ///
 /// To access mutable methods of the factory, create a guard using [`Self::guard`].
 #[derive(Debug)]
-pub struct FactoryVecDeque<Widget, C, ParentMsg>
-where
-    Widget: FactoryView,
-    C: FactoryComponent<Widget, ParentMsg> + Position<Widget::Position>,
-    C::Root: AsRef<Widget::Children>,
-    ParentMsg: 'static,
-    Widget: 'static,
-{
-    widget: Widget,
-    parent_sender: Sender<ParentMsg>,
-    components: VecDeque<ComponentStorage<Widget, C, ParentMsg>>,
+pub struct FactoryVecDeque<C: FactoryComponent> {
+    widget: C::ParentWidget,
+    parent_sender: Sender<C::ParentMsg>,
+    components: VecDeque<ComponentStorage<C>>,
     model_state: VecDeque<ModelStateValue>,
     rendered_state: VecDeque<RenderedState>,
     uid_counter: u16,
 }
 
-impl<Widget, C, ParentMsg> Drop for FactoryVecDeque<Widget, C, ParentMsg>
-where
-    Widget: FactoryView,
-    C: FactoryComponent<Widget, ParentMsg> + Position<Widget::Position>,
-    C::Root: AsRef<Widget::Children>,
-{
+impl<C: FactoryComponent> Drop for FactoryVecDeque<C> {
     fn drop(&mut self) {
         for component in &mut self.components {
             if let Some(widget) = component.returned_widget() {
@@ -408,12 +358,7 @@ where
     }
 }
 
-impl<Widget, C, ParentMsg> Index<usize> for FactoryVecDeque<Widget, C, ParentMsg>
-where
-    Widget: FactoryView,
-    C: FactoryComponent<Widget, ParentMsg> + Position<Widget::Position>,
-    C::Root: AsRef<Widget::Children>,
-{
+impl<C: FactoryComponent> Index<usize> for FactoryVecDeque<C> {
     type Output = C;
 
     fn index(&self, index: usize) -> &Self::Output {
@@ -421,14 +366,9 @@ where
     }
 }
 
-impl<Widget, C, ParentMsg> FactoryVecDeque<Widget, C, ParentMsg>
-where
-    Widget: FactoryView,
-    C: FactoryComponent<Widget, ParentMsg> + Position<Widget::Position>,
-    C::Root: AsRef<Widget::Children>,
-{
+impl<C: FactoryComponent> FactoryVecDeque<C> {
     /// Creates a new [`FactoryVecDeque`].
-    pub fn new(widget: Widget, parent_sender: &Sender<ParentMsg>) -> Self {
+    pub fn new(widget: C::ParentWidget, parent_sender: &Sender<C::ParentMsg>) -> Self {
         Self {
             widget,
             parent_sender: parent_sender.clone(),
@@ -443,7 +383,7 @@ where
     /// Provides a [`FactoryVecDequeGuard`] that can be used to edit the factory.
     ///
     /// The changes will be rendered on the widgets after the guard goes out of scope.
-    pub fn guard(&mut self) -> FactoryVecDequeGuard<'_, Widget, C, ParentMsg> {
+    pub fn guard(&mut self) -> FactoryVecDequeGuard<'_, C> {
         FactoryVecDequeGuard::new(self)
     }
 
@@ -583,7 +523,7 @@ where
     }
 
     /// Returns the widget all components are attached to.
-    pub fn widget(&self) -> &Widget {
+    pub fn widget(&self) -> &C::ParentWidget {
         &self.widget
     }
 }

@@ -14,27 +14,17 @@ use futures::FutureExt;
 use tracing::info_span;
 
 #[derive(Debug)]
-pub(super) struct FactoryBuilder<Widget, C, ParentMsg>
-where
-    Widget: FactoryView,
-    C: FactoryComponent<Widget, ParentMsg>,
-    ParentMsg: 'static,
-{
+pub(super) struct FactoryBuilder<C: FactoryComponent> {
     pub(super) data: Box<C>,
     pub(super) root_widget: C::Root,
-    pub(super) component_sender: FactoryComponentSender<Widget, ParentMsg, C>,
+    pub(super) component_sender: FactoryComponentSender<C>,
     pub(super) input_rx: Receiver<C::Input>,
     pub(super) output_rx: Receiver<C::Output>,
     pub(super) cmd_rx: Receiver<C::CommandOutput>,
     pub(super) death_notifier: ShutdownSender,
 }
 
-impl<Widget, C, ParentMsg> FactoryBuilder<Widget, C, ParentMsg>
-where
-    Widget: FactoryView,
-    C: FactoryComponent<Widget, ParentMsg>,
-    ParentMsg: 'static,
-{
+impl<C: FactoryComponent> FactoryBuilder<C> {
     pub(super) fn new(index: &DynamicIndex, params: C::InitParams) -> Self {
         // Used for all events to be processed by this component's internal service.
         let (input_tx, input_rx) = crate::channel::<C::Input>();
@@ -74,12 +64,12 @@ where
     pub(super) fn launch<Transform>(
         self,
         index: &DynamicIndex,
-        returned_widget: Widget::ReturnedWidget,
-        parent_sender: &Sender<ParentMsg>,
+        returned_widget: <C::ParentWidget as FactoryView>::ReturnedWidget,
+        parent_sender: &Sender<C::ParentMsg>,
         transform: Transform,
-    ) -> FactoryHandle<Widget, C, ParentMsg>
+    ) -> FactoryHandle<C>
     where
-        Transform: Fn(C::Output) -> Option<ParentMsg> + 'static,
+        Transform: Fn(C::Output) -> Option<C::ParentMsg> + 'static,
     {
         let Self {
             mut data,

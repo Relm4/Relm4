@@ -4,7 +4,7 @@ use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
 use relm4::{
     adw,
     factory::{DynamicIndex, FactoryComponent, FactoryComponentSender, FactoryVecDeque},
-    gtk, Component, ComponentParts, ComponentSender, RelmApp, Sender, SharedState, WidgetPlus,
+    gtk, Component, ComponentParts, ComponentSender, RelmApp, SharedState, WidgetPlus,
 };
 
 enum GameState {
@@ -40,7 +40,10 @@ enum CounterOutput {
 }
 
 #[relm4::factory]
-impl FactoryComponent<adw::TabView, AppMsg> for GamePage {
+impl FactoryComponent for GamePage {
+    type ParentWidget = adw::TabView;
+    type ParentMsg = AppMsg;
+
     type Widgets = CounterWidgets;
 
     type InitParams = u8;
@@ -155,7 +158,7 @@ impl FactoryComponent<adw::TabView, AppMsg> for GamePage {
     fn init_model(
         value: Self::InitParams,
         _index: &DynamicIndex,
-        sender: &FactoryComponentSender<adw::TabView, AppMsg, Self>,
+        sender: &FactoryComponentSender<Self>,
     ) -> Self {
         GAME_STATE.subscribe(&sender.input, |_| CounterMsg::Update);
         Self { id: value }
@@ -166,7 +169,7 @@ impl FactoryComponent<adw::TabView, AppMsg> for GamePage {
         index: &DynamicIndex,
         root: &Self::Root,
         returned_widget: &adw::TabPage,
-        sender: &FactoryComponentSender<adw::TabView, AppMsg, Self>,
+        sender: &FactoryComponentSender<Self>,
     ) -> Self::Widgets {
         let state = GAME_STATE.get();
         let widgets = view_output!();
@@ -177,11 +180,7 @@ impl FactoryComponent<adw::TabView, AppMsg> for GamePage {
         let state = GAME_STATE.get();
     }
 
-    fn update(
-        &mut self,
-        msg: Self::Input,
-        sender: &FactoryComponentSender<adw::TabView, AppMsg, Self>,
-    ) {
+    fn update(&mut self, msg: Self::Input, _sender: &FactoryComponentSender<Self>) {
         match msg {
             CounterMsg::Update => (),
         }
@@ -189,7 +188,7 @@ impl FactoryComponent<adw::TabView, AppMsg> for GamePage {
 }
 
 struct AppModel {
-    counters: FactoryVecDeque<adw::TabView, GamePage, AppMsg>,
+    counters: FactoryVecDeque<GamePage>,
     start_index: Option<DynamicIndex>,
 }
 
