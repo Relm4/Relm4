@@ -8,11 +8,7 @@ pub(super) fn inject_view_code(
     func: Option<ImplItemMethod>,
     view_code: TokenStream2,
     widgets_return_code: TokenStream2,
-    container_widget: &GenericArgument,
-    parent_msg: &GenericArgument,
 ) -> TokenStream2 {
-    let container_widget_tokens = container_widget.to_token_stream();
-
     if let Some(func) = func {
         match component::inject_view_code::inject_view_code(func, view_code, widgets_return_code) {
             Ok(func) => func.to_token_stream(),
@@ -24,8 +20,8 @@ pub(super) fn inject_view_code(
                 &mut self,
                 index: &relm4::factory::DynamicIndex,
                 root: &Self::Root,
-                returned_widget: &<#container_widget_tokens as relm4::factory::FactoryView>::ReturnedWidget,
-                sender: &relm4::factory::FactoryComponentSender<#container_widget, #parent_msg, Self>,
+                returned_widget: &<Self::ParentWidget as relm4::factory::FactoryView>::ReturnedWidget,
+                sender: &relm4::factory::FactoryComponentSender<Self>,
             ) -> Self::Widgets {
                 #view_code
                 #widgets_return_code
