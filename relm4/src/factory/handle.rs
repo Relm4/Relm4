@@ -11,30 +11,15 @@ use crate::Sender;
 /// It might be unsafe to extract `data` or `runtime`.
 /// Inside this type, it is guaranteed that extracting `data` will drop `runtime` before to
 /// comply with all required safety guarantees.
-pub(super) struct FactoryHandle<Widget, C: FactoryComponent<Widget, ParentMsg>, ParentMsg>
-where
-    Widget: FactoryView,
-    C: FactoryComponent<Widget, ParentMsg>,
-{
+pub(super) struct FactoryHandle<C: FactoryComponent> {
     pub(super) data: DataGuard<C>,
     pub(super) root_widget: C::Root,
-    pub(super) returned_widget: Widget::ReturnedWidget,
+    pub(super) returned_widget: <C::ParentWidget as FactoryView>::ReturnedWidget,
     pub(super) input: Sender<C::Input>,
     pub(super) notifier: Sender<()>,
 }
 
-impl<Widget, C, ParentMsg> FactoryHandle<Widget, C, ParentMsg>
-where
-    Widget: FactoryView,
-    C: FactoryComponent<Widget, ParentMsg>,
-{
-}
-
-impl<Widget, C, ParentMsg> fmt::Debug for FactoryHandle<Widget, C, ParentMsg>
-where
-    Widget: FactoryView,
-    C: FactoryComponent<Widget, ParentMsg>,
-{
+impl<C: FactoryComponent> fmt::Debug for FactoryHandle<C> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("FactoryHandle")
             .field("data", &self.data)

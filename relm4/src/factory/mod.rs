@@ -23,10 +23,10 @@ pub use traits::*;
 use crate::component::ComponentSenderInner;
 
 /// Contain senders used by the factory component.
-pub type FactoryComponentSender<ParentWidget, ParentMsg, C> = Arc<
+pub type FactoryComponentSender<C> = Arc<
     ComponentSenderInner<
-        <C as FactoryComponent<ParentWidget, ParentMsg>>::Input,
-        <C as FactoryComponent<ParentWidget, ParentMsg>>::Output,
-        <C as FactoryComponent<ParentWidget, ParentMsg>>::CommandOutput,
+        <C as FactoryComponent>::Input,
+        <C as FactoryComponent>::Output,
+        <C as FactoryComponent>::CommandOutput,
     >,
 >;
