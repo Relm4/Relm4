@@ -27,7 +27,10 @@ struct CounterWidgets {
     label: gtk::Label,
 }
 
-impl FactoryComponent<adw::TabView, AppMsg> for Counter {
+impl FactoryComponent for Counter {
+    type ParentWidget = adw::TabView;
+    type ParentMsg = AppMsg;
+
     type Widgets = CounterWidgets;
 
     type InitParams = u8;
@@ -59,7 +62,7 @@ impl FactoryComponent<adw::TabView, AppMsg> for Counter {
     fn init_model(
         value: Self::InitParams,
         _index: &DynamicIndex,
-        _sender: &FactoryComponentSender<adw::TabView, AppMsg, Self>,
+        _sender: &FactoryComponentSender<Self>,
     ) -> Self {
         Self { value }
     }
@@ -69,7 +72,7 @@ impl FactoryComponent<adw::TabView, AppMsg> for Counter {
         index: &DynamicIndex,
         root: &Self::Root,
         returned_widget: &adw::TabPage,
-        sender: &FactoryComponentSender<adw::TabView, AppMsg, Self>,
+        sender: &FactoryComponentSender<Self>,
     ) -> Self::Widgets {
         relm4::view! {
             label = gtk::Label {
@@ -135,11 +138,7 @@ impl FactoryComponent<adw::TabView, AppMsg> for Counter {
         CounterWidgets { label }
     }
 
-    fn update(
-        &mut self,
-        msg: Self::Input,
-        _sender: &FactoryComponentSender<adw::TabView, AppMsg, Self>,
-    ) {
+    fn update(&mut self, msg: Self::Input, _sender: &FactoryComponentSender<Self>) {
         match msg {
             CounterMsg::Increment => {
                 self.value = self.value.wrapping_add(1);
@@ -150,18 +149,14 @@ impl FactoryComponent<adw::TabView, AppMsg> for Counter {
         }
     }
 
-    fn update_view(
-        &self,
-        widgets: &mut Self::Widgets,
-        _sender: &FactoryComponentSender<adw::TabView, AppMsg, Self>,
-    ) {
+    fn update_view(&self, widgets: &mut Self::Widgets, _sender: &FactoryComponentSender<Self>) {
         widgets.label.set_label(&self.value.to_string());
     }
 }
 
 struct AppModel {
     created_widgets: u8,
-    counters: FactoryVecDeque<adw::TabView, Counter, AppMsg>,
+    counters: FactoryVecDeque<Counter>,
 }
 
 #[derive(Debug)]

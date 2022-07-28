@@ -3,7 +3,7 @@ use relm4::factory::positions::GridPosition;
 use relm4::factory::{
     DynamicIndex, FactoryComponent, FactoryComponentSender, FactoryVecDeque, Position,
 };
-use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, Sender, SimpleComponent, WidgetPlus};
+use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, SimpleComponent, WidgetPlus};
 
 #[derive(Debug)]
 struct Counter {
@@ -40,7 +40,9 @@ impl Position<GridPosition> for Counter {
     }
 }
 
-impl FactoryComponent<gtk::Grid, AppMsg> for Counter {
+impl FactoryComponent for Counter {
+    type ParentWidget = gtk::Grid;
+    type ParentMsg = AppMsg;
     type CommandOutput = ();
     type InitParams = u8;
     type Input = CounterMsg;
@@ -69,7 +71,7 @@ impl FactoryComponent<gtk::Grid, AppMsg> for Counter {
     fn init_model(
         value: Self::InitParams,
         _index: &DynamicIndex,
-        _sender: &FactoryComponentSender<gtk::Grid, AppMsg, Self>,
+        _sender: &FactoryComponentSender<Self>,
     ) -> Self {
         Self { value }
     }
@@ -79,7 +81,7 @@ impl FactoryComponent<gtk::Grid, AppMsg> for Counter {
         index: &DynamicIndex,
         root: &Self::Root,
         _returned_widget: &gtk::Widget,
-        sender: &FactoryComponentSender<gtk::Grid, AppMsg, Self>,
+        sender: &FactoryComponentSender<Self>,
     ) -> Self::Widgets {
         relm4::view! {
             label = gtk::Label {
@@ -143,11 +145,7 @@ impl FactoryComponent<gtk::Grid, AppMsg> for Counter {
         CounterWidgets { label }
     }
 
-    fn update(
-        &mut self,
-        msg: Self::Input,
-        _sender: &FactoryComponentSender<gtk::Grid, AppMsg, Self>,
-    ) {
+    fn update(&mut self, msg: Self::Input, _sender: &FactoryComponentSender<Self>) {
         match msg {
             CounterMsg::Increment => {
                 self.value = self.value.wrapping_add(1);
@@ -158,18 +156,14 @@ impl FactoryComponent<gtk::Grid, AppMsg> for Counter {
         }
     }
 
-    fn update_view(
-        &self,
-        widgets: &mut Self::Widgets,
-        _sender: &FactoryComponentSender<gtk::Grid, AppMsg, Self>,
-    ) {
+    fn update_view(&self, widgets: &mut Self::Widgets, _sender: &FactoryComponentSender<Self>) {
         widgets.label.set_label(&self.value.to_string());
     }
 }
 
 struct AppModel {
     created_widgets: u8,
-    counters: FactoryVecDeque<gtk::Grid, Counter, AppMsg>,
+    counters: FactoryVecDeque<Counter>,
 }
 
 #[derive(Debug)]
