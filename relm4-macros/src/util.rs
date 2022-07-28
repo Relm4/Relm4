@@ -19,15 +19,15 @@ pub(crate) fn idents_to_snake_case(idents: &[Ident], span: Span2) -> Ident {
     let val = COUNTER.fetch_add(1, Ordering::Relaxed);
     let index_str = val.to_string();
 
-    let segements: Vec<String> = idents
+    let segments: Vec<String> = idents
         .iter()
         .map(|ident| ident.to_string().to_lowercase())
         .collect();
     let length: usize =
-        segements.iter().map(|seg| seg.len() + 1).sum::<usize>() + index_str.len() + 1;
+        segments.iter().map(|seg| seg.len() + 1).sum::<usize>() + index_str.len() + 1;
     let mut name: String = String::with_capacity(length);
 
-    for seg in &segements {
+    for seg in &segments {
         name.push('_');
         name.push_str(seg);
     }

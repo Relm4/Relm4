@@ -109,7 +109,7 @@ where
     }
 
     /// Returns a mutable reference to the widgets of this component or [`None`] if
-    /// you already have a refernce to the widgets.
+    /// you already have a reference to the widgets.
     ///
     /// Use this carefully and make sure the reference to the widgets is dropped after use because
     /// otherwise the view function can't be called as long you own the widgets (it uses [`RefCell`] internally).

@@ -71,7 +71,7 @@ where
 
         crate::APP
             .set(fragile::Fragile::new(app.clone()))
-            .expect("APP was alredy set");
+            .expect("APP was already set");
 
         let (sender, receiver) = glib::MainContext::channel(glib::PRIORITY_DEFAULT);
 

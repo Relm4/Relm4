@@ -70,7 +70,7 @@ pub use async_trait::async_trait;
 /// or this function is not called on the thread that also called [`RelmApp::new`].
 pub fn gtk_application() -> Application {
     APP.get()
-        .expect("The gloabl gtk application hasn't been initialized yet")
+        .expect("The global gtk application hasn't been initialized yet")
         .try_get()
         .expect("The global gtk application can only be read from the main thread")
         .clone()
@@ -107,7 +107,7 @@ pub fn set_global_css_from_file<P: AsRef<std::path::Path>>(path: P) {
             set_global_css(&bytes);
         }
         Err(err) => {
-            log::error!("Couln't load global CSS from file: {}", err);
+            log::error!("Couldn't load global CSS from file: {}", err);
         }
     }
 }

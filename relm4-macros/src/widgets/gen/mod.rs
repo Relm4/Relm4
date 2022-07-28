@@ -12,7 +12,7 @@ mod struct_fields;
 /// Initialize widgets.
 mod init_widgets;
 
-/// Intialize property values.
+/// Initialize property values.
 mod init_properties;
 
 /// Connect events.

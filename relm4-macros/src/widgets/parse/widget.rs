@@ -62,7 +62,7 @@ impl Parse for Widget {
         let _token = braced!(inner in input);
         let properties = inner.parse()?;
 
-        // Generat a name if no name was given.
+        // Generate a name if no name was given.
         let name = if let Some(name) = name_opt {
             name
         } else {
