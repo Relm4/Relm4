@@ -22,7 +22,7 @@ mod util;
 mod widget_macro;
 mod widgets;
 
-// Hack to make the macro visibile for other parts of this crate.
+// Hack to make the macro visible for other parts of this crate.
 pub(crate) use parse_func;
 
 use attrs::Attrs;

@@ -37,7 +37,7 @@ impl Attrs {
 impl Parse for Attrs {
     /// Rules for parsing attributes.
     ///
-    /// 1. It's fine if visibility is used unnamed so `#[widget(pub)]` must be valid but thats the only case.
+    /// 1. It's fine if visibility is used unnamed so `#[widget(pub)]` must be valid but that's the only case.
     /// 2. Widget visibility might be named `#[widget(visibility = pub)]`.
     /// 3. `relm4` argument must be named. Always.
     ///

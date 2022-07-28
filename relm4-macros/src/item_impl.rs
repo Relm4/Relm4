@@ -62,7 +62,7 @@ impl Parse for ItemImpl {
             } else if braced_input.peek(Token![fn]) {
                 funcs.push(braced_input.parse()?);
             } else {
-                return Err(braced_input.error("Expeted macro or method"));
+                return Err(braced_input.error("Expected macro or method"));
             }
         }
 

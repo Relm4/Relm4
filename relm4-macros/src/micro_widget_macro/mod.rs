@@ -42,7 +42,7 @@ pub(crate) fn generate_tokens(
 
     // Find the type of the model
 
-    // This can be unwrapped savely because the path must have at least one segement after parsing successful.
+    // This can be unwrapped safely because the path must have at least one segment after parsing successful.
     let path_args = trait_
         .segments
         .last()

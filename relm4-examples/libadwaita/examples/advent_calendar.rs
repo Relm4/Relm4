@@ -225,7 +225,7 @@ fn main() {
         ("Peace I leave with you, my peace I give unto you: not as the world giveth, give I unto you. Let not your heart be troubled, neither let it be afraid.", "John 14, 27"),
         ("But the fruit of the Spirit is love, joy, peace, longsuffering, gentleness, goodness, faith, meekness, temperance: against such there is no law.", "Romans 8, 22-23"),
         ("Then spake Jesus again unto them, saying, I am the light of the world: he that followeth me shall not walk in darkness, but shall have the light of life.", "John 8, 12"),
-        ("Rejoice in the Lord alway: and again I say, Rejoice. Let your moderation be known unto all men. The Lord is at hand.", "Philippians 4, 4-5"),
+        ("Rejoice in the Lord always: and again I say, Rejoice. Let your moderation be known unto all men. The Lord is at hand.", "Philippians 4, 4-5"),
         ("For the word of God is quick, and powerful, and sharper than any twoedged sword, piercing even to the dividing asunder of soul and spirit, and of the joints and marrow, and is a discerner of the thoughts and intents of the heart.", "Hebrews 4, 12"),
         ("Commit to the Lord whatever you do, and he will establish your plans.", "Proverbs 16:3"),
         ("Let the morning bring me word of your unfailing love, for I have put my trust in you. Show me the way I should go, for to you I entrust my life.", "Psalm 143:8"),
