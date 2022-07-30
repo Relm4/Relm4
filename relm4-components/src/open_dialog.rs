@@ -4,7 +4,7 @@
 use gtk::prelude::{Cast, FileChooserExt, FileExt, ListModelExt, NativeDialogExt};
 use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent};
 
-use std::{marker::PhantomData, path::PathBuf};
+use std::{fmt::Debug, marker::PhantomData, path::PathBuf};
 
 /// A component that prompts the user to choose a file.
 ///
@@ -17,9 +17,9 @@ pub type OpenDialog = OpenDialogInner<SingleSelection>;
 pub type OpenDialogMulti = OpenDialogInner<MultiSelection>;
 
 /// Type of selection used for the open dialog.
-pub trait Select {
+pub trait Select: Debug {
     /// Output of the selection.
-    type Selection;
+    type Selection: Debug;
     /// Whether to select multiple files inside the dialog.
     const SELECT_MULTIPLE: bool;
     /// Construct selection from the file chooser.
@@ -27,6 +27,7 @@ pub trait Select {
 }
 
 /// A type of selection where only one file can be chosen at a time.
+#[derive(Debug)]
 pub struct SingleSelection;
 
 impl Select for SingleSelection {
@@ -42,6 +43,7 @@ impl Select for SingleSelection {
 }
 
 /// A type of selection where multiple types can be chosen at a time.
+#[derive(Debug)]
 pub struct MultiSelection;
 impl Select for MultiSelection {
     type Selection = Vec<PathBuf>;
@@ -137,11 +139,13 @@ impl<S: Select + 'static> SimpleComponent for OpenDialogInner<S> {
             set_modal: settings.is_modal,
             set_accept_label: Some(&settings.accept_label),
             set_cancel_label: Some(&settings.cancel_label),
-            add_filter: iterate!(&settings.filters),
+            #[iterate]
+            add_filter: &settings.filters,
 
-            set_visible: watch!(model.visible),
+            #[watch]
+            set_visible: model.visible,
 
-            connect_response(sender) => move |dialog, res_ty| {
+            connect_response[sender] => move |dialog, res_ty| {
                 match res_ty {
                     gtk::ResponseType::Accept => {
                         let selection = S::select(dialog);
@@ -158,7 +162,7 @@ impl<S: Select + 'static> SimpleComponent for OpenDialogInner<S> {
     fn init(
         settings: Self::InitParams,
         root: &Self::Root,
-        sender: &ComponentSender<Self>,
+        sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = OpenDialogInner {
             visible: false,
@@ -170,7 +174,7 @@ impl<S: Select + 'static> SimpleComponent for OpenDialogInner<S> {
         ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, message: Self::Input, _sender: &ComponentSender<Self>) {
+    fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
         match message {
             OpenDialogMsg::Open => {
                 self.visible = true;

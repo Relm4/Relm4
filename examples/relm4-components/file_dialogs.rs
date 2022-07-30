@@ -15,6 +15,7 @@ struct App {
     message: Option<String>,
 }
 
+#[derive(Debug)]
 enum Input {
     OpenRequest,
     OpenResponse(PathBuf),
@@ -35,21 +36,25 @@ impl SimpleComponent for App {
 
     view! {
         root = gtk::ApplicationWindow {
-            set_title: watch!(Some(model.file_name.as_deref().unwrap_or_default())),
+            #[watch]
+            set_title: Some(model.file_name.as_deref().unwrap_or_default()),
+
             set_default_width: 600,
             set_default_height: 400,
 
-            set_titlebar = Some(&gtk::HeaderBar) {
+            #[wrap(Some)]
+            set_titlebar = &gtk::HeaderBar {
                 pack_start = &gtk::Button {
                     set_label: "Open",
-                    connect_clicked(sender) => move |_| {
+                    connect_clicked[sender] => move |_| {
                         sender.input(Input::OpenRequest);
                     },
                 },
                 pack_end = &gtk::Button {
                     set_label: "Save",
-                    set_sensitive: watch!(model.file_name.is_some()),
-                    connect_clicked(sender) => move |_| {
+                    #[watch]
+                    set_sensitive: model.file_name.is_some(),
+                    connect_clicked[sender] => move |_| {
                         sender.input(Input::SaveRequest);
                     },
                 }
@@ -62,8 +67,10 @@ impl SimpleComponent for App {
                 gtk::ScrolledWindow {
                     set_min_content_height: 380,
 
-                    set_child = Some(&gtk::TextView) {
-                        set_visible: watch!(model.file_name.is_some()),
+                    #[wrap(Some)]
+                    set_child = &gtk::TextView {
+                        #[watch]
+                        set_visible: model.file_name.is_some(),
                         set_buffer: Some(&model.buffer),
                     },
                 },
@@ -88,7 +95,7 @@ impl SimpleComponent for App {
     fn init(
         _: Self::InitParams,
         root: &Self::Root,
-        sender: &ComponentSender<Self>,
+        sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let open_dialog = OpenDialog::builder()
             .transient_for_native(root)
@@ -127,7 +134,7 @@ impl SimpleComponent for App {
         ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, message: Self::Input, sender: &ComponentSender<Self>) {
+    fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>) {
         match message {
             Input::OpenRequest => self.open_dialog.emit(OpenDialogMsg::Open),
             Input::OpenResponse(path) => match std::fs::read_to_string(&path) {
@@ -172,6 +179,6 @@ impl SimpleComponent for App {
 }
 
 fn main() {
-    let app: RelmApp<App> = RelmApp::new("relm4.example.file_dialogs");
-    app.run(());
+    let app = RelmApp::new("relm4.example.file_dialogs");
+    app.run::<App>(());
 }

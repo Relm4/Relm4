@@ -78,12 +78,15 @@ impl SimpleComponent for SaveDialog {
             set_modal: settings.is_modal,
             set_accept_label: Some(&settings.accept_label),
             set_cancel_label: Some(&settings.cancel_label),
-            add_filter: iterate!(&settings.filters),
+            #[iterate]
+            add_filter: &settings.filters,
 
-            set_current_name: watch!(&model.current_name),
-            set_visible: watch!(model.visible),
+            #[watch]
+            set_current_name: &model.current_name,
+            #[watch]
+            set_visible: model.visible,
 
-            connect_response(sender) => move |dialog, res_ty| {
+            connect_response[sender] => move |dialog, res_ty| {
                 match res_ty {
                     gtk::ResponseType::Accept => {
                         if let Some(file) = dialog.file() {
@@ -105,7 +108,7 @@ impl SimpleComponent for SaveDialog {
     fn init(
         settings: Self::InitParams,
         root: &Self::Root,
-        sender: &ComponentSender<Self>,
+        sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = SaveDialog {
             current_name: String::new(),
@@ -117,7 +120,7 @@ impl SimpleComponent for SaveDialog {
         ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, message: Self::Input, _sender: &ComponentSender<Self>) {
+    fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
         match message {
             SaveDialogMsg::Save => {
                 self.current_name = String::new();
