@@ -158,7 +158,7 @@ impl FactoryComponent for GamePage {
     fn init_model(
         value: Self::InitParams,
         _index: &DynamicIndex,
-        sender: &FactoryComponentSender<Self>,
+        sender: FactoryComponentSender<Self>,
     ) -> Self {
         GAME_STATE.subscribe(&sender.input, |_| CounterMsg::Update);
         Self { id: value }
@@ -169,7 +169,7 @@ impl FactoryComponent for GamePage {
         index: &DynamicIndex,
         root: &Self::Root,
         returned_widget: &adw::TabPage,
-        sender: &FactoryComponentSender<Self>,
+        sender: FactoryComponentSender<Self>,
     ) -> Self::Widgets {
         let state = GAME_STATE.get();
         let widgets = view_output!();
@@ -180,7 +180,7 @@ impl FactoryComponent for GamePage {
         let state = GAME_STATE.get();
     }
 
-    fn update(&mut self, msg: Self::Input, _sender: &FactoryComponentSender<Self>) {
+    fn update(&mut self, msg: Self::Input, _sender: FactoryComponentSender<Self>) {
         match msg {
             CounterMsg::Update => (),
         }
@@ -240,7 +240,7 @@ impl Component for AppModel {
     fn init(
         _init_params: (),
         root: &Self::Root,
-        sender: &ComponentSender<Self>,
+        sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         // Insert the macro codegen here
         let widgets = view_output!();
@@ -263,7 +263,7 @@ impl Component for AppModel {
         ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, msg: Self::Input, sender: &ComponentSender<Self>) {
+    fn update(&mut self, msg: Self::Input, sender: ComponentSender<Self>) {
         match msg {
             AppMsg::StartGame(index) => {
                 self.start_index = Some(index);
@@ -290,7 +290,7 @@ impl Component for AppModel {
         }
     }
 
-    fn update_cmd(&mut self, msg: Self::CommandOutput, sender: &ComponentSender<Self>) {
+    fn update_cmd(&mut self, msg: Self::CommandOutput, sender: ComponentSender<Self>) {
         if msg {
             sender.input(AppMsg::StopGame);
         } else {

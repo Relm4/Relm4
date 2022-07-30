@@ -21,7 +21,7 @@ pub(super) fn inject_view_code(
                 index: &relm4::factory::DynamicIndex,
                 root: &Self::Root,
                 returned_widget: &<Self::ParentWidget as relm4::factory::FactoryView>::ReturnedWidget,
-                sender: &relm4::factory::FactoryComponentSender<Self>,
+                sender: relm4::factory::FactoryComponentSender<Self>,
             ) -> Self::Widgets {
                 #view_code
                 #widgets_return_code

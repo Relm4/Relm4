@@ -100,7 +100,7 @@ impl<C: Component> ComponentBuilder<C> {
 
         // Constructs the initial model and view with the initial payload.
         let watcher = Rc::new(StateWatcher {
-            state: RefCell::new(C::init(payload, &root, &component_sender)),
+            state: RefCell::new(C::init(payload, &root, component_sender.clone())),
             notifier,
         });
 
@@ -142,7 +142,7 @@ impl<C: Component> ComponentBuilder<C> {
                             );
                             let _enter = span.enter();
 
-                            model.update_with_view(widgets, message, &component_sender);
+                            model.update_with_view(widgets, message, component_sender.clone());
                         }
                     }
 
@@ -162,7 +162,7 @@ impl<C: Component> ComponentBuilder<C> {
                             );
                             let _enter = span.enter();
 
-                            model.update_cmd_with_view(widgets, message, &component_sender);
+                            model.update_cmd_with_view(widgets, message, component_sender.clone());
                         }
                     }
 
@@ -173,7 +173,7 @@ impl<C: Component> ComponentBuilder<C> {
                             ref mut widgets,
                         } = &mut *watcher_.state.borrow_mut();
 
-                        model.update_view(widgets, &component_sender);
+                        model.update_view(widgets, component_sender.clone());
                     }
 
                     // Triggered when the component is destroyed

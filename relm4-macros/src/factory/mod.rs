@@ -161,7 +161,7 @@ pub(crate) fn generate_tokens(
             fn update_view(
                 &self,
                 widgets: &mut Self::Widgets,
-                sender: &relm4::factory::FactoryComponentSender<Self>,
+                sender: relm4::factory::FactoryComponentSender<Self>,
             ) {
                 #[allow(unused_variables)]
                 let Self::Widgets {

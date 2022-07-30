@@ -120,7 +120,7 @@ impl Component for App {
     fn init(
         title: Self::InitParams,
         root: &Self::Root,
-        sender: &ComponentSender<Self>,
+        sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         // Request the caller to reload its options.
         sender.output(Output::Reload);
@@ -150,7 +150,7 @@ impl Component for App {
         }
     }
 
-    fn update(&mut self, message: Self::Input, sender: &ComponentSender<Self>) {
+    fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>) {
         match message {
             Input::AddSetting {
                 description,
@@ -181,7 +181,7 @@ impl Component for App {
         }
     }
 
-    fn update_cmd(&mut self, message: Self::CommandOutput, sender: &ComponentSender<Self>) {
+    fn update_cmd(&mut self, message: Self::CommandOutput, sender: ComponentSender<Self>) {
         match message {
             CmdOut::Reload => {
                 sender.output(Output::Reload);
@@ -189,7 +189,7 @@ impl Component for App {
         }
     }
 
-    fn update_view(&self, widgets: &mut Self::Widgets, sender: &ComponentSender<Self>) {
+    fn update_view(&self, widgets: &mut Self::Widgets, sender: ComponentSender<Self>) {
         if self.options.is_empty() && !widgets.options.is_empty() {
             widgets.list.remove_all();
         } else if self.options.len() != widgets.options.len() {

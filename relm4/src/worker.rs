@@ -26,10 +26,10 @@ pub trait Worker: Sized + Send + 'static {
     type Output: 'static + Send + Debug;
 
     /// Defines the initial state of the worker.
-    fn init(params: Self::InitParams, sender: &crate::ComponentSender<Self>) -> Self;
+    fn init(params: Self::InitParams, sender: crate::ComponentSender<Self>) -> Self;
 
     /// Defines how inputs will bep processed
-    fn update(&mut self, message: Self::Input, sender: &crate::ComponentSender<Self>);
+    fn update(&mut self, message: Self::Input, sender: crate::ComponentSender<Self>);
 }
 
 impl<T> SimpleComponent for T
@@ -50,13 +50,13 @@ where
     fn init(
         params: Self::InitParams,
         _root: &Self::Root,
-        sender: &crate::ComponentSender<Self>,
+        sender: crate::ComponentSender<Self>,
     ) -> crate::ComponentParts<Self> {
         let model = Self::init(params, sender);
         ComponentParts { model, widgets: () }
     }
 
-    fn update(&mut self, message: Self::Input, sender: &crate::ComponentSender<Self>) {
+    fn update(&mut self, message: Self::Input, sender: crate::ComponentSender<Self>) {
         Self::update(self, message, sender);
     }
 }
@@ -97,7 +97,7 @@ where
         // widget has been iced, which will give the component one last chance to say goodbye.
         let (mut burn_notifier, burn_recipient) = oneshot::<()>();
 
-        let mut state = C::init(payload, &root, &component_sender);
+        let mut state = C::init(payload, &root, component_sender.clone());
 
         thread::spawn(move || {
             let context =
@@ -133,7 +133,7 @@ where
                                 );
                                 let _enter = span.enter();
 
-                                model.update_with_view(widgets, message, &component_sender);
+                                model.update_with_view(widgets, message, component_sender.clone());
                             }
                         }
 
@@ -153,7 +153,7 @@ where
                                 );
                                 let _enter = span.enter();
 
-                                model.update_cmd_with_view(widgets, message, &component_sender);
+                                model.update_cmd_with_view(widgets, message, component_sender.clone());
                             }
                         },
 

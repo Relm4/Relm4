@@ -1,6 +1,6 @@
 #![deny(unreachable_code)]
 
-use relm4::{gtk, SimpleComponent, ComponentParts, ComponentSender};
+use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent};
 
 struct TestComponent;
 
@@ -19,7 +19,11 @@ impl SimpleComponent for TestComponent {
         return;
     }
 
-    fn init(_init_param: (), _root: &Self::Root, _sender: &ComponentSender<Self>) -> ComponentParts<Self> {
+    fn init(
+        _init_param: (),
+        _root: &Self::Root,
+        _sender: ComponentSender<Self>,
+    ) -> ComponentParts<Self> {
         let model = Self;
 
         let widgets = view_output!();

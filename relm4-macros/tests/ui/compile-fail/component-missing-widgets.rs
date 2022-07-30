@@ -1,4 +1,4 @@
-use relm4::{gtk, SimpleComponent, ComponentParts, ComponentSender};
+use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent};
 
 struct TestComponent;
 
@@ -12,7 +12,11 @@ impl SimpleComponent for TestComponent {
         gtk::Window {}
     }
 
-    fn init(init_param: (), root: &Self::Root, sender: &ComponentSender<Self>) -> ComponentParts<Self> {
+    fn init(
+        init_param: (),
+        root: &Self::Root,
+        sender: ComponentSender<Self>,
+    ) -> ComponentParts<Self> {
         let model = Self;
 
         let widgets = view_output!();

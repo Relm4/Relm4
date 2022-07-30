@@ -79,7 +79,7 @@ impl SimpleComponent for Alert {
     fn init(
         settings: AlertSettings,
         root: &Self::Root,
-        sender: &ComponentSender<Self>,
+        sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = Alert {
             settings,

@@ -39,40 +39,40 @@ pub trait Component: Sized + 'static {
     fn init(
         params: Self::InitParams,
         root: &Self::Root,
-        sender: &ComponentSender<Self>,
+        sender: ComponentSender<Self>,
     ) -> ComponentParts<Self>;
 
     /// Processes inputs received by the component.
     #[allow(unused)]
-    fn update(&mut self, message: Self::Input, sender: &ComponentSender<Self>) {}
+    fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>) {}
 
     /// Defines how the component should respond to command updates.
     #[allow(unused)]
-    fn update_cmd(&mut self, message: Self::CommandOutput, sender: &ComponentSender<Self>) {}
+    fn update_cmd(&mut self, message: Self::CommandOutput, sender: ComponentSender<Self>) {}
 
     /// Handles updates from a command.
     fn update_cmd_with_view(
         &mut self,
         widgets: &mut Self::Widgets,
         message: Self::CommandOutput,
-        sender: &ComponentSender<Self>,
+        sender: ComponentSender<Self>,
     ) {
-        self.update_cmd(message, sender);
+        self.update_cmd(message, sender.clone());
         self.update_view(widgets, sender)
     }
 
     /// Updates the view after the model has been updated.
     #[allow(unused)]
-    fn update_view(&self, widgets: &mut Self::Widgets, sender: &ComponentSender<Self>) {}
+    fn update_view(&self, widgets: &mut Self::Widgets, sender: ComponentSender<Self>) {}
 
     /// Updates the model and view. Optionally returns a command to run.
     fn update_with_view(
         &mut self,
         widgets: &mut Self::Widgets,
         message: Self::Input,
-        sender: &ComponentSender<Self>,
+        sender: ComponentSender<Self>,
     ) {
-        self.update(message, sender);
+        self.update(message, sender.clone());
         self.update_view(widgets, sender);
     }
 
@@ -113,20 +113,20 @@ pub trait SimpleComponent: Sized + 'static {
     fn init(
         params: Self::InitParams,
         root: &Self::Root,
-        sender: &ComponentSender<Self>,
+        sender: ComponentSender<Self>,
     ) -> ComponentParts<Self>;
 
     /// Processes inputs received by the component.
     #[allow(unused)]
-    fn update(&mut self, message: Self::Input, sender: &ComponentSender<Self>) {}
+    fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>) {}
 
     /// Defines how the component should respond to command updates.
     #[allow(unused)]
-    fn update_cmd(&mut self, input: &Sender<Self::Input>, output: &Sender<Self::Output>) {}
+    fn update_cmd(&mut self, input: &Sender<Self::Input>, output: Sender<Self::Output>) {}
 
     /// Updates the view after the model has been updated.
     #[allow(unused)]
-    fn update_view(&self, widgets: &mut Self::Widgets, sender: &ComponentSender<Self>) {}
+    fn update_view(&self, widgets: &mut Self::Widgets, sender: ComponentSender<Self>) {}
 
     /// Last method called before a component is shut down.
     #[allow(unused)]
@@ -152,16 +152,16 @@ where
     fn init(
         params: Self::InitParams,
         root: &Self::Root,
-        sender: &ComponentSender<Self>,
+        sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         C::init(params, root, sender)
     }
 
-    fn update(&mut self, message: Self::Input, sender: &ComponentSender<Self>) {
+    fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>) {
         C::update(self, message, sender);
     }
 
-    fn update_view(&self, widgets: &mut Self::Widgets, sender: &ComponentSender<Self>) {
+    fn update_view(&self, widgets: &mut Self::Widgets, sender: ComponentSender<Self>) {
         C::update_view(self, widgets, sender)
     }
 

@@ -94,12 +94,12 @@ impl FactoryComponent for Counter {
     fn init_model(
         value: Self::InitParams,
         _index: &DynamicIndex,
-        _sender: &FactoryComponentSender<Self>,
+        _sender: FactoryComponentSender<Self>,
     ) -> Self {
         Self { value }
     }
 
-    fn update(&mut self, msg: Self::Input, _sender: &FactoryComponentSender<Self>) {
+    fn update(&mut self, msg: Self::Input, _sender: FactoryComponentSender<Self>) {
         match msg {
             CounterMsg::Increment => {
                 self.value = self.value.wrapping_add(1);
@@ -174,7 +174,7 @@ impl SimpleComponent for AppModel {
     fn init(
         counter: Self::InitParams,
         root: &Self::Root,
-        sender: &ComponentSender<Self>,
+        sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         // Insert the macro codegen here
         let widgets = view_output!();
@@ -187,7 +187,7 @@ impl SimpleComponent for AppModel {
         ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, msg: Self::Input, _sender: &ComponentSender<Self>) {
+    fn update(&mut self, msg: Self::Input, _sender: ComponentSender<Self>) {
         let mut counters_guard = self.counters.guard();
         match msg {
             AppMsg::AddCounter => {
