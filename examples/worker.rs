@@ -31,7 +31,7 @@ impl Worker for AsyncHandler {
     type Input = AsyncHandlerMsg;
     type Output = AppMsg;
 
-    fn init(_params: Self::InitParams, _sender: &relm4::ComponentSender<Self>) -> Self {
+    fn init(_params: Self::InitParams, _sender: ComponentSender<Self>) -> Self {
         Self
     }
 
@@ -39,7 +39,7 @@ impl Worker for AsyncHandler {
     // Only one message can be processed at the time.
     // If you don't want to block during processing, look for commands.
     // You'll find a good reference in the "non_blocking_async" example.
-    fn update(&mut self, msg: AsyncHandlerMsg, sender: &ComponentSender<Self>) {
+    fn update(&mut self, msg: AsyncHandlerMsg, sender: ComponentSender<Self>) {
         let output = sender.output.clone();
 
         std::thread::sleep(Duration::from_secs(1));
@@ -89,7 +89,7 @@ impl SimpleComponent for AppModel {
         }
     }
 
-    fn init(_: (), root: &Self::Root, sender: &ComponentSender<Self>) -> ComponentParts<Self> {
+    fn init(_: (), root: &Self::Root, sender: ComponentSender<Self>) -> ComponentParts<Self> {
         let model = AppModel {
             counter: 0,
             worker: AsyncHandler::builder()
@@ -102,7 +102,7 @@ impl SimpleComponent for AppModel {
         ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, msg: Self::Input, _sender: &ComponentSender<Self>) {
+    fn update(&mut self, msg: Self::Input, _sender: ComponentSender<Self>) {
         match msg {
             AppMsg::Increment => {
                 self.counter = self.counter.wrapping_add(1);

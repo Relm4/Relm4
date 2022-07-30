@@ -158,7 +158,7 @@ impl FactoryComponent for GamePage {
     fn init_model(
         value: Self::InitParams,
         _index: &DynamicIndex,
-        sender: &FactoryComponentSender<Self>,
+        sender: FactoryComponentSender<Self>,
     ) -> Self {
         GAME_STATE.subscribe(&sender.input, |_| CounterMsg::Update);
         Self { id: value }
@@ -169,7 +169,7 @@ impl FactoryComponent for GamePage {
         index: &DynamicIndex,
         root: &Self::Root,
         returned_widget: &adw::TabPage,
-        sender: &FactoryComponentSender<Self>,
+        sender: FactoryComponentSender<Self>,
     ) -> Self::Widgets {
         let state = GAME_STATE.get();
         let widgets = view_output!();
@@ -180,7 +180,7 @@ impl FactoryComponent for GamePage {
         let state = GAME_STATE.get();
     }
 
-    fn update(&mut self, msg: Self::Input, _sender: &FactoryComponentSender<Self>) {
+    fn update(&mut self, msg: Self::Input, _sender: FactoryComponentSender<Self>) {
         match msg {
             CounterMsg::Update => (),
         }
