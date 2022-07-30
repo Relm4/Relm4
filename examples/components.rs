@@ -56,7 +56,7 @@ impl SimpleComponent for Header {
     fn init(
         _init_params: Self::InitParams,
         root: &Self::Root,
-        sender: &ComponentSender<Self>,
+        sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = Header;
         let widgets = view_output!();
@@ -108,7 +108,7 @@ impl SimpleComponent for Dialog {
     fn init(
         parent_window: Self::InitParams,
         root: &Self::Root,
-        sender: &ComponentSender<Self>,
+        sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = Dialog { hidden: true };
 
@@ -117,7 +117,7 @@ impl SimpleComponent for Dialog {
         ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, msg: Self::Input, sender: &ComponentSender<Self>) {
+    fn update(&mut self, msg: Self::Input, sender: ComponentSender<Self>) {
         match msg {
             DialogMsg::Show => self.hidden = false,
             DialogMsg::Accept => {
@@ -178,7 +178,7 @@ impl SimpleComponent for App {
     fn init(
         application: Self::InitParams,
         root: &Self::Root,
-        sender: &ComponentSender<Self>,
+        sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let header = Header::builder()
             .launch(())
@@ -199,7 +199,7 @@ impl SimpleComponent for App {
         ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, msg: Self::Input, _sender: &ComponentSender<Self>) {
+    fn update(&mut self, msg: Self::Input, _sender: ComponentSender<Self>) {
         match msg {
             AppMsg::SetMode(mode) => {
                 self.mode = mode;

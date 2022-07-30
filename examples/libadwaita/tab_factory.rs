@@ -218,7 +218,7 @@ impl SimpleComponent for AppModel {
     fn init(
         counter: Self::InitParams,
         root: &Self::Root,
-        sender: &ComponentSender<Self>,
+        sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         // Insert the macro codegen here
         let widgets = view_output!();
@@ -231,7 +231,7 @@ impl SimpleComponent for AppModel {
         ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, msg: Self::Input, _sender: &ComponentSender<Self>) {
+    fn update(&mut self, msg: Self::Input, _sender: ComponentSender<Self>) {
         let mut counters_guard = self.counters.guard();
 
         match msg {

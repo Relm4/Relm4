@@ -115,7 +115,7 @@ pub trait FactoryComponent:
     fn init_model(
         params: Self::InitParams,
         index: &DynamicIndex,
-        sender: &FactoryComponentSender<Self>,
+        sender: FactoryComponentSender<Self>,
     ) -> Self;
 
     /// Initializes the root widget
@@ -127,7 +127,7 @@ pub trait FactoryComponent:
         index: &DynamicIndex,
         root: &Self::Root,
         returned_widget: &<Self::ParentWidget as FactoryView>::ReturnedWidget,
-        sender: &FactoryComponentSender<Self>,
+        sender: FactoryComponentSender<Self>,
     ) -> Self::Widgets;
 
     /// Convert [`Self::Output`] into `ParentMsg` in order to
@@ -140,35 +140,35 @@ pub trait FactoryComponent:
 
     /// Processes inputs received by the component.
     #[allow(unused)]
-    fn update(&mut self, message: Self::Input, sender: &FactoryComponentSender<Self>) {}
+    fn update(&mut self, message: Self::Input, sender: FactoryComponentSender<Self>) {}
 
     /// Defines how the component should respond to command updates.
     #[allow(unused)]
-    fn update_cmd(&mut self, message: Self::CommandOutput, sender: &FactoryComponentSender<Self>) {}
+    fn update_cmd(&mut self, message: Self::CommandOutput, sender: FactoryComponentSender<Self>) {}
 
     /// Handles updates from a command.
     fn update_cmd_with_view(
         &mut self,
         widgets: &mut Self::Widgets,
         message: Self::CommandOutput,
-        sender: &FactoryComponentSender<Self>,
+        sender: FactoryComponentSender<Self>,
     ) {
-        self.update_cmd(message, sender);
+        self.update_cmd(message, sender.clone());
         self.update_view(widgets, sender)
     }
 
     /// Updates the view after the model has been updated.
     #[allow(unused)]
-    fn update_view(&self, widgets: &mut Self::Widgets, sender: &FactoryComponentSender<Self>) {}
+    fn update_view(&self, widgets: &mut Self::Widgets, sender: FactoryComponentSender<Self>) {}
 
     /// Updates the model and view. Optionally returns a command to run.
     fn update_with_view(
         &mut self,
         widgets: &mut Self::Widgets,
         message: Self::Input,
-        sender: &FactoryComponentSender<Self>,
+        sender: FactoryComponentSender<Self>,
     ) {
-        self.update(message, sender);
+        self.update(message, sender.clone());
         self.update_view(widgets, sender);
     }
 

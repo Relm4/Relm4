@@ -82,7 +82,7 @@ impl SimpleComponent for AppModel {
     fn init(
         counter: Self::InitParams,
         root: &Self::Root,
-        sender: &ComponentSender<Self>,
+        sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         // ============================================================
         //
@@ -139,7 +139,7 @@ impl SimpleComponent for AppModel {
         ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, msg: Self::Input, _sender: &ComponentSender<Self>) {
+    fn update(&mut self, msg: Self::Input, _sender: ComponentSender<Self>) {
         match msg {
             AppMsg::Increment => {
                 self.counter = self.counter.wrapping_add(1);

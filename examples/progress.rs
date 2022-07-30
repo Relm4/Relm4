@@ -68,7 +68,7 @@ impl Component for App {
     fn init(
         _args: Self::InitParams,
         root: &Self::Root,
-        sender: &ComponentSender<Self>,
+        sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         relm4::view! {
             container = gtk::Box {
@@ -119,7 +119,7 @@ impl Component for App {
         }
     }
 
-    fn update(&mut self, message: Self::Input, sender: &ComponentSender<Self>) {
+    fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>) {
         match message {
             Input::Compute => {
                 self.computing = true;
@@ -146,7 +146,7 @@ impl Component for App {
         }
     }
 
-    fn update_cmd(&mut self, message: Self::CommandOutput, _sender: &ComponentSender<Self>) {
+    fn update_cmd(&mut self, message: Self::CommandOutput, _sender: ComponentSender<Self>) {
         if let CmdOut::Finished(_) = message {
             self.computing = false;
         }
@@ -154,7 +154,7 @@ impl Component for App {
         self.task = Some(message);
     }
 
-    fn update_view(&self, widgets: &mut Self::Widgets, _sender: &ComponentSender<Self>) {
+    fn update_view(&self, widgets: &mut Self::Widgets, _sender: ComponentSender<Self>) {
         widgets.button.set_sensitive(!self.computing);
 
         if let Some(ref progress) = self.task {

@@ -46,7 +46,7 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
             shutdown: death_recipient,
         });
 
-        let data = Box::new(C::init_model(params, index, &component_sender));
+        let data = Box::new(C::init_model(params, index, component_sender.clone()));
         let root_widget = data.init_root();
 
         Self {
@@ -99,8 +99,12 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
         // widget has been iced, which will give the component one last chance to say goodbye.
         let (mut burn_notifier, burn_recipient) = oneshot::<gtk::glib::SourceId>();
 
-        let mut widgets =
-            data.init_widgets(index, &root_widget, &returned_widget, &component_sender);
+        let mut widgets = data.init_widgets(
+            index,
+            &root_widget,
+            &returned_widget,
+            component_sender.clone(),
+        );
 
         let input_tx = component_sender.input.clone();
         let output_tx = component_sender.output.clone();
@@ -133,7 +137,7 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
                                 );
                                 let _enter = span.enter();
 
-                                model.update_with_view(&mut widgets, message, &component_sender);
+                                model.update_with_view(&mut widgets, message, component_sender.clone());
                             }
                         }
 
@@ -148,13 +152,13 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
                                 );
                                 let _enter = span.enter();
 
-                                model.update_cmd_with_view(&mut widgets, message, &component_sender);
+                                model.update_cmd_with_view(&mut widgets, message, component_sender.clone());
                             }
                         }
 
                         // Triggered when the model and view have been updated externally.
                         _ = notifier => {
-                            model.update_view(&mut widgets, &component_sender);
+                            model.update_view(&mut widgets, component_sender.clone());
                         }
 
                         // Triggered when the component is destroyed

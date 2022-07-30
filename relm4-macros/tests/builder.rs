@@ -28,7 +28,7 @@ impl SimpleComponent for AppModel {
     fn init(
         _init_params: Self::InitParams,
         _root: &Self::Root,
-        _sender: &ComponentSender<Self>,
+        _sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = Self;
 
@@ -37,7 +37,7 @@ impl SimpleComponent for AppModel {
         ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, _msg: (), _sender: &ComponentSender<Self>) {}
+    fn update(&mut self, _msg: (), _sender: ComponentSender<Self>) {}
 }
 
 fn assert_impls_debug<T: std::fmt::Debug>() {}

@@ -65,7 +65,7 @@ impl Component for AppModel {
         }
     }
 
-    fn init(_: (), root: &Self::Root, sender: &ComponentSender<Self>) -> ComponentParts<Self> {
+    fn init(_: (), root: &Self::Root, sender: ComponentSender<Self>) -> ComponentParts<Self> {
         let model = AppModel { counter: 0 };
 
         let widgets = view_output!();
@@ -73,7 +73,7 @@ impl Component for AppModel {
         ComponentParts { model, widgets }
     }
 
-    fn update_cmd(&mut self, msg: Self::CommandOutput, _sender: &ComponentSender<Self>) {
+    fn update_cmd(&mut self, msg: Self::CommandOutput, _sender: ComponentSender<Self>) {
         match msg {
             AppMsg::Increment => {
                 self.counter = self.counter.wrapping_add(1);

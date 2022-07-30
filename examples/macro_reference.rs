@@ -154,7 +154,7 @@ impl SimpleComponent for AppModel {
     fn init(
         params: Self::InitParams,
         renamed_root: &Self::Root,
-        sender: &ComponentSender<Self>,
+        sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let counter = AppModel {
             value: params.counter,
@@ -173,7 +173,7 @@ impl SimpleComponent for AppModel {
         }
     }
 
-    fn update(&mut self, msg: Self::Input, _sender: &ComponentSender<Self>) {
+    fn update(&mut self, msg: Self::Input, _sender: ComponentSender<Self>) {
         self.reset();
         match msg {
             AppMsg::Increment => {
