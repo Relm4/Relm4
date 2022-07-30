@@ -35,7 +35,7 @@ impl<Input, Output, CommandOutput: Send + 'static>
     /// Spawn a command managed by the lifetime of the component.
     pub fn command<Cmd, Fut>(&self, cmd: Cmd)
     where
-        Cmd: (Fn(Sender<CommandOutput>, ShutdownReceiver) -> Fut) + Send + Sync + 'static,
+        Cmd: (FnOnce(Sender<CommandOutput>, ShutdownReceiver) -> Fut) + Send + Sync + 'static,
         Fut: Future<Output = ()> + Send,
     {
         let recipient = self.shutdown.clone();
