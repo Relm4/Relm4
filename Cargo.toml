@@ -5,4 +5,5 @@ members = [
     "relm4-macros",
     "examples",
     "examples/libadwaita",
+    "examples/relm4-components"
 ]

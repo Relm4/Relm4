@@ -7,7 +7,7 @@ use crate::shutdown;
 use crate::RelmContainerExt;
 use async_oneshot::oneshot;
 use futures::FutureExt;
-use gtk::prelude::GtkWindowExt;
+use gtk::prelude::{GtkWindowExt, NativeDialogExt};
 use std::any;
 use std::cell::RefCell;
 use std::marker::PhantomData;
@@ -63,7 +63,25 @@ where
     C::Root: AsRef<gtk::Window>,
 {
     /// Set the component's root widget transient for a given window.
+    ///
+    /// If the root widget is a native dialog, such as [`gtk::FileChooserNative`],
+    /// you should use [`transient_for_native`][ComponentBuilder::transient_for_native] instead.
     pub fn transient_for(self, window: impl AsRef<gtk::Window>) -> Self {
+        self.root.as_ref().set_transient_for(Some(window.as_ref()));
+
+        self
+    }
+}
+
+impl<C: Component> ComponentBuilder<C>
+where
+    C::Root: AsRef<gtk::NativeDialog>,
+{
+    /// Set the component's root widget transient for a given window.
+    ///
+    /// Applicable to native dialogs only, such as [`gtk::FileChooserNative`].
+    /// If the root widget is a non-native dialog, you should use [`transient_for`][ComponentBuilder::transient_for] instead.
+    pub fn transient_for_native(self, window: impl AsRef<gtk::Window>) -> Self {
         self.root.as_ref().set_transient_for(Some(window.as_ref()));
 
         self
