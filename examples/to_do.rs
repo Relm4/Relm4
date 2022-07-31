@@ -20,16 +20,13 @@ enum TaskOutput {
 
 #[relm4::factory]
 impl FactoryComponent for Task {
-    type Widgets = TaskWidgets;
-    type ParentWidget = gtk::ListBox;
-    type ParentMsg = AppMsg;
-
+    type CommandOutput = ();
     type InitParams = String;
-
     type Input = TaskInput;
     type Output = TaskOutput;
-
-    type CommandOutput = ();
+    type ParentMsg = AppMsg;
+    type ParentWidget = gtk::ListBox;
+    type Widgets = TaskWidgets;
 
     view! {
         gtk::Box {
@@ -98,10 +95,10 @@ struct AppModel {
 
 #[relm4::component]
 impl SimpleComponent for AppModel {
+    type InitParams = ();
     type Input = AppMsg;
     type Output = ();
     type Widgets = AppWidgets;
-    type InitParams = ();
 
     view! {
         main_window = gtk::ApplicationWindow {

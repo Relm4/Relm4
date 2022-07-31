@@ -1,8 +1,6 @@
 //! An idiomatic GUI library inspired by Elm and based on gtk4-rs.
 
-#![doc(
-    html_logo_url = "https://raw.githubusercontent.com/Relm4/Relm4/main/assets/Relm_logo.svg"
-)]
+#![doc(html_logo_url = "https://raw.githubusercontent.com/Relm4/Relm4/main/assets/Relm_logo.svg")]
 #![doc(
     html_favicon_url = "https://raw.githubusercontent.com/Relm4/Relm4/main/assets/Relm_logo.svg"
 )]

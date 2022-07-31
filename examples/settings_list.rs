@@ -33,9 +33,7 @@ fn main() {
 
                         match id {
                             0 => xdg_open("https://github.com/Relm4/Relm4".into()),
-                            1 => {
-                                xdg_open("https://relm4.org/docs/stable/relm4/".into())
-                            }
+                            1 => xdg_open("https://relm4.org/docs/stable/relm4/".into()),
                             2 => {
                                 sender.send(Input::Clear);
                             }

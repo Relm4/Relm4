@@ -22,12 +22,12 @@ enum CounterOutput {
 
 #[relm4::factory]
 impl FactoryComponent for Counter {
-    type ParentWidget = gtk::Box;
-    type ParentMsg = AppMsg;
     type CommandOutput = ();
     type InitParams = u8;
     type Input = CounterMsg;
     type Output = CounterOutput;
+    type ParentMsg = AppMsg;
+    type ParentWidget = gtk::Box;
     type Widgets = CounterWidgets;
 
     view! {

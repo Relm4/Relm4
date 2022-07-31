@@ -41,12 +41,12 @@ impl Position<GridPosition> for Counter {
 }
 
 impl FactoryComponent for Counter {
-    type ParentWidget = gtk::Grid;
-    type ParentMsg = AppMsg;
     type CommandOutput = ();
     type InitParams = u8;
     type Input = CounterMsg;
     type Output = CounterOutput;
+    type ParentMsg = AppMsg;
+    type ParentWidget = gtk::Grid;
     type Root = gtk::Box;
     type Widgets = CounterWidgets;
 

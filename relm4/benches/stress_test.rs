@@ -3,7 +3,7 @@ use std::time::Duration;
 use criterion::{criterion_group, criterion_main, Criterion};
 use gtk::gio::ApplicationFlags;
 use gtk::glib::clone;
-use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, ApplicationExt};
+use gtk::prelude::{ApplicationExt, BoxExt, ButtonExt, GtkWindowExt};
 use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, SimpleComponent, WidgetPlus};
 
 // Iteration count that appear to be reasonable.
@@ -45,7 +45,10 @@ impl SimpleComponent for AppModel {
         window: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let model = AppModel { counter: 0, application };
+        let model = AppModel {
+            counter: 0,
+            application,
+        };
 
         let vbox = gtk::Box::builder()
             .orientation(gtk::Orientation::Vertical)
@@ -93,7 +96,7 @@ impl SimpleComponent for AppModel {
     }
 }
 
-criterion_group!{
+criterion_group! {
     name = benches;
     config = Criterion::default()
         .warm_up_time(Duration::from_millis(100))
@@ -104,7 +107,10 @@ criterion_main!(benches);
 
 fn benchmark(c: &mut Criterion) {
     c.bench_function("stress_test", move |b| {
-        let application = gtk::Application::new(Some("relm4.bench.stress_test"), ApplicationFlags::FLAGS_NONE);
+        let application = gtk::Application::new(
+            Some("relm4.bench.stress_test"),
+            ApplicationFlags::FLAGS_NONE,
+        );
 
         b.iter(move || {
             let app = RelmApp::with_app(application.clone());
