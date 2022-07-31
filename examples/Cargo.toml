@@ -9,6 +9,7 @@ relm4 = { path = "../relm4", features = ["macros"] }
 #relm4-components = { path = "../relm4-components" }
 tokio = { version = "1.15", features = ["rt", "macros", "time", "rt-multi-thread"] }
 futures = "0.3.19"
+rand = "0.8.5"
 tracker = "0.1"
 
 # log example
@@ -62,3 +63,11 @@ path = "log.rs"
 [[example]]
 name = "worker"
 path = "worker.rs"
+
+[[example]]
+name = "tracker"
+path = "tracker.rs"
+
+[[example]]
+name = "to_do"
+path = "to_do.rs"
