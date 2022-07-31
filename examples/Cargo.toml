@@ -54,6 +54,7 @@ path = "menu.rs"
 [[example]]
 name = "components"
 path = "components.rs"
+required-features = ["relm4/libadwaita"]
 
 [[example]]
 name = "log"
