@@ -77,7 +77,7 @@ impl FactoryComponent for Task {
     fn init_model(
         name: Self::InitParams,
         _index: &DynamicIndex,
-        _sender: &FactoryComponentSender<Self>,
+        _sender: FactoryComponentSender<Self>,
     ) -> Self {
         Self {
             name,
@@ -134,7 +134,7 @@ impl SimpleComponent for AppModel {
         }
     }
 
-    fn update(&mut self, msg: AppMsg, _sender: &ComponentSender<Self>) {
+    fn update(&mut self, msg: AppMsg, _sender: ComponentSender<Self>) {
         match msg {
             AppMsg::DeleteEntry(index) => {
                 self.tasks.guard().remove(index.current_index());
@@ -145,7 +145,7 @@ impl SimpleComponent for AppModel {
         }
     }
 
-    fn init(_param: (), root: &Self::Root, sender: &ComponentSender<Self>) -> ComponentParts<Self> {
+    fn init(_param: (), root: &Self::Root, sender: ComponentSender<Self>) -> ComponentParts<Self> {
         let widgets = view_output!();
 
         let model = AppModel {
