@@ -61,7 +61,7 @@ impl<'a, C: FactoryComponent> FactoryVecDequeGuard<'a, C> {
                 hashes.push(hasher.finish());
             }
 
-            // Tab rearrangment
+            // Tab rearrangement
             for (index, hash) in hashes.iter().enumerate() {
                 if self
                     .inner

@@ -19,7 +19,7 @@ proc-macro = true
 default = ["relm4"]
 
 # Without the default "relm4" feature, all imports of gtk will
-# be `use gtk;` instread of `use relm4::gtk;` thus making it 
+# be `use gtk;` instead of `use relm4::gtk;` thus making it 
 # easier to use this crate without Relm4.
 relm4 = []
 

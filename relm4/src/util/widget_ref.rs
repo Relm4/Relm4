@@ -2,7 +2,7 @@ use gtk::Widget;
 
 /// Get a reference to a widget.
 ///
-/// This trait is an extenstion of [`AsRef`]
+/// This trait is an extension of [`AsRef`]
 /// that always returns `&`[`Widget`].
 pub trait WidgetRef {
     /// Returns a reference to a widget.

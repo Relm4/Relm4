@@ -29,7 +29,7 @@ where
 
     /// Waits until a shutdown signal is received.
     ///
-    /// - `Either::Left(())` on cancelation.
+    /// - `Either::Left(())` on cancellation.
     /// - `Either::Right(Out)` on registered future completion.
     pub async fn wait(self) -> Either<(), Out> {
         let Self { receiver, future } = self;

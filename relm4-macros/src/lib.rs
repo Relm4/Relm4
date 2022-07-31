@@ -368,7 +368,7 @@ pub fn menu(input: TokenStream) -> TokenStream {
 ///
 /// // We've just used `gtk::Box` so we assume it has a `default()` method
 /// let vbox = gtk::Box::default();
-/// // `vbox` was named, yet the button doesn't have an explicit name and get's a generated one instead.
+/// // `vbox` was named, yet the button doesn't have an explicit name and gets a generated one instead.
 /// let _gtk_button_5 = gtk::Button::default();
 /// // For the label, we used a manual constructor method, so no `default()` method is required.
 /// let my_label = gtk::Label::builder().label("The view macro works!").build();
