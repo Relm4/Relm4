@@ -20,7 +20,7 @@ jobs:
           - stable
           - beta
           - nightly
-          - "1.56.0"
+          - "1.60"
     env:
         DISPLAY: ":99.0"
         # Workaround to avoid getting stuck by apt about choosing a timezone.
@@ -37,15 +37,15 @@ jobs:
         run: cargo clippy -- --deny warnings
 
       # nightly
-      - name: "relm: test nightly"
+      - name: "test nightly"
         run: xvfb-run --auto-servernum cargo test
         if: matrix.rust == 'nightly'
       # not nightly
-      - name: "relm: test"
+      - name: "test"
         run: xvfb-run --auto-servernum cargo test
         if: matrix.rust != 'nightly'
 
-      - name: "relm: check examples"
+      - name: "check examples"
         run: cargo check --examples
 
       - uses: bcomnes/cleanup-xvfb@v1.0.6
