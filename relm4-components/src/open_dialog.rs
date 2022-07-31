@@ -61,10 +61,7 @@ impl Select for MultiSelection {
 #[derive(Clone, Debug)]
 /// Configuration for the open dialog component
 pub struct OpenDialogSettings {
-    /// Select folders instead of files.
-    ///
-    /// You should be aware the user might be able to select folders
-    /// even if this setting is set to `false`. This is a technical limitation of gtk.
+    /// Select folders instead of files
     pub folder_mode: bool,
     /// Label for cancel button
     pub cancel_label: String,
