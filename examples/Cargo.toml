@@ -71,3 +71,7 @@ path = "tracker.rs"
 [[example]]
 name = "to_do"
 path = "to_do.rs"
+
+[[example]]
+name = "drawing"
+path = "drawing.rs"
