@@ -23,6 +23,7 @@ enum Input {
     SaveResponse(PathBuf),
     ShowMessage(String),
     ResetMessage,
+    Ignore,
 }
 
 #[relm4::component]
@@ -46,14 +47,17 @@ impl SimpleComponent for App {
             set_titlebar = &gtk::HeaderBar {
                 pack_start = &gtk::Button {
                     set_label: "Open",
+
                     connect_clicked[sender] => move |_| {
                         sender.input(Input::OpenRequest);
                     },
                 },
                 pack_end = &gtk::Button {
-                    set_label: "Save",
+                    set_label: "Save As",
+
                     #[watch]
                     set_sensitive: model.file_name.is_some(),
+
                     connect_clicked[sender] => move |_| {
                         sender.input(Input::SaveRequest);
                     },
@@ -69,9 +73,10 @@ impl SimpleComponent for App {
 
                     #[wrap(Some)]
                     set_child = &gtk::TextView {
+                        set_buffer: Some(&model.buffer),
+
                         #[watch]
                         set_visible: model.file_name.is_some(),
-                        set_buffer: Some(&model.buffer),
                     },
                 },
             }
@@ -82,6 +87,7 @@ impl SimpleComponent for App {
         if let Some(text) = &model.message {
             let dialog = gtk::MessageDialog::builder()
                 .text(text)
+                .use_markup(true)
                 .transient_for(&widgets.root)
                 .modal(true)
                 .buttons(gtk::ButtonsType::Ok)
@@ -100,21 +106,17 @@ impl SimpleComponent for App {
         let open_dialog = OpenDialog::builder()
             .transient_for_native(root)
             .launch(OpenDialogSettings::default())
-            .forward(sender.input_sender(), |response| match response {
+            .forward(&sender.input, |response| match response {
                 OpenDialogResponse::Accept(path) => Input::OpenResponse(path),
-                OpenDialogResponse::Cancel => {
-                    Input::ShowMessage(String::from("File opening was cancelled"))
-                }
+                OpenDialogResponse::Cancel => Input::Ignore,
             });
 
         let save_dialog = SaveDialog::builder()
             .transient_for_native(root)
             .launch(SaveDialogSettings::default())
-            .forward(sender.input_sender(), |response| match response {
+            .forward(&sender.input, |response| match response {
                 SaveDialogResponse::Accept(path) => Input::SaveResponse(path),
-                SaveDialogResponse::Cancel => {
-                    Input::ShowMessage(String::from("File saving was cancelled"))
-                }
+                SaveDialogResponse::Cancel => Input::Ignore,
             });
 
         let model = App {
@@ -128,7 +130,7 @@ impl SimpleComponent for App {
         let widgets = view_output!();
 
         sender.input(Input::ShowMessage(String::from(
-            "This is a simple text editor. Start by clicking \"Open\" on the header bar.",
+            "A simple text editor showing the usage of\n<b>OpenFileDialog</b> and <b>SaveFileDialog</b> components.\n\nStart by clicking <b>Open</b> on the header bar.",
         )));
 
         ComponentParts { model, widgets }
@@ -174,6 +176,7 @@ impl SimpleComponent for App {
             Input::ResetMessage => {
                 self.message = None;
             }
+            Input::Ignore => {}
         }
     }
 }
