@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens};
-use syn::{GenericArgument, ImplItemMethod};
+use syn::ImplItemMethod;
 
 use crate::component;
 
