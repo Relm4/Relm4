@@ -170,21 +170,6 @@ pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
     factory::generate_tokens(visibility, factory_impl).into()
 }
 
-// Macro that implements [`relm4::factory::FactoryPrototype`](https://aaronerhardt.github.io/docs/relm4/relm4/factory/trait.FactoryPrototype.html)
-// and generates the corresponding widget struct.
-//
-// It works very similar to [`macro@widget`].
-// #[proc_macro_attribute]
-// pub fn factory_prototype(attributes: TokenStream, input: TokenStream) -> TokenStream {
-// let Attrs {
-//     visibility,
-// } = parse_macro_input!(attributes as Attrs);
-// let data = parse_macro_input!(input as ItemImpl);
-
-// factory::generate_tokens(visibility, data).into()
-//    quote! {}.into()
-// }
-
 /// A macro to create menus.
 ///
 /// Use

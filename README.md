@@ -4,13 +4,13 @@
   </a>
 </h1>
 
-[![CI](https://github.com/AaronErhardt/relm4/actions/workflows/rust.yml/badge.svg)](https://github.com/AaronErhardt/relm4/actions/workflows/rust.yml)
+[![CI](https://github.com/Relm4/Relm4/actions/workflows/rust.yml/badge.svg)](https://github.com/Relm4/Relm4/actions/workflows/rust.yml)
 [![Matrix](https://img.shields.io/matrix/relm4:matrix.org?label=matrix%20chat)](https://matrix.to/#/#relm4:matrix.org)
 [![Relm4 on crates.io](https://img.shields.io/crates/v/relm4.svg)](https://crates.io/crates/relm4)
 [![Relm4 docs](https://img.shields.io/badge/rust-documentation-blue)](https://relm4.org/docs/stable/relm4/)
-[![Relm4 book](https://img.shields.io/badge/rust-book-fc0060)](https://aaronerhardt.github.io/relm4-book/book/)
-![Minimum Rust version 1.56](https://img.shields.io/badge/rustc-1.56+-06a096.svg)
-[![dependency status](https://deps.rs/repo/github/aaronerhardt/relm4/status.svg)](https://deps.rs/repo/github/aaronerhardt/relm4)
+[![Relm4 book](https://img.shields.io/badge/rust-book-fc0060)](https://relm4.org/book/stable/)
+![Minimum Rust version 1.60](https://img.shields.io/badge/rustc-1.60+-06a096.svg)
+[![dependency status](https://deps.rs/repo/github/Relm4/Relm4/status.svg)](https://deps.rs/repo/github/Relm4/Relm4)
 
 An idiomatic GUI library inspired by [Elm](https://elm-lang.org/) and based on [gtk4-rs](https://crates.io/crates/gtk4). 
 Relm4 is a new version of [relm](https://github.com/antoyo/relm) that's built from scratch and is compatible with [GTK4](https://www.gtk.org/) and [libadwaita](https://gitlab.gnome.org/GNOME/libadwaita).
@@ -30,7 +30,7 @@ Built on top of this foundation, Relm4 makes developing more idiomatic, simpler 
 
 ## Documentation
 
-+ 📖 **[The Relm4 book](https://aaronerhardt.github.io/relm4-book/book/)**
++ 📖 **[The Relm4 book](https://relm4.org/book/stable/)**
 + 📜 **[Rust documentation](https://relm4.org/docs/stable/relm4/)**
 
 ## Dependencies

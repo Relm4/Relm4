@@ -5,7 +5,7 @@ A collection of example apps built with Relm4.
 ## Setup
 
 ```bash
-git clone https://github.com/AaronErhardt/relm4.git
+git clone https://github.com/Relm4/Relm4.git
 cd relm4
 ```
 

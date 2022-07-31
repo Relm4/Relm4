@@ -32,9 +32,9 @@ fn main() {
                         eprintln!("ID {id} Clicked");
 
                         match id {
-                            0 => xdg_open("https://github.com/AaronErhardt/Relm4".into()),
+                            0 => xdg_open("https://github.com/Relm4/Relm4".into()),
                             1 => {
-                                xdg_open("https://aaronerhardt.github.io/docs/relm4/relm4/".into())
+                                xdg_open("https://relm4.org/docs/stable/relm4/".into())
                             }
                             2 => {
                                 sender.send(Input::Clear);
