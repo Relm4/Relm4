@@ -1,17 +1,7 @@
-use std::rc::Rc;
-
 use proc_macro2::Span as Span2;
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
 use syn::{Error, FnArg, Ident, ImplItemMethod, Pat, Path, PathArguments, PathSegment};
-
-thread_local! {
-    #[cfg(feature = "relm4")]
-    pub(super) static GTK_IMPORT: Rc<syn::Path> = Rc::new(strings_to_path(&["relm4", "gtk"]));
-
-    #[cfg(not(feature = "relm4"))]
-    pub(super) static GTK_IMPORT: Rc<syn::Path> = Rc::new(strings_to_path(&["gtk"]));
-}
 
 pub(super) fn strings_to_path(strings: &[&str]) -> Path {
     let path_segments: Vec<PathSegment> = strings
