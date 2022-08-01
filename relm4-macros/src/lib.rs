@@ -21,8 +21,12 @@ mod factory;
 use attrs::Attrs;
 use menu::Menus;
 
-fn gtk_import() -> std::rc::Rc<syn::Path> {
-    util::GTK_IMPORT.with(|p| p.clone())
+fn gtk_import() -> syn::Path {
+    if cfg!(feature = "relm4") {
+        util::strings_to_path(&["relm4", "gtk"])
+    } else {
+        util::strings_to_path(&["gtk"])
+    }
 }
 
 /// Macro that implements [`relm4::Component`](https://relm4.org/docs/next/relm4/trait.Component.html) and generates the corresponding struct.
