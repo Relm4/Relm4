@@ -10,4 +10,4 @@ error[E0046]: not all trait items implemented, missing: `Input`, `Output`, `Init
   = help: implement the missing item: `type Root = Type;`
   = help: implement the missing item: `type Widgets = Type;`
   = help: implement the missing item: `fn init_root() -> <Self as SimpleComponent>::Root { todo!() }`
-  = help: implement the missing item: `fn init(_: <Self as SimpleComponent>::InitParams, _: &<Self as SimpleComponent>::Root, _: &Arc<ComponentSenderInner<Self>>) -> ComponentParts<Self> { todo!() }`
+  = help: implement the missing item: `fn init(_: <Self as SimpleComponent>::InitParams, _: &<Self as SimpleComponent>::Root, _: Arc<ComponentSenderInner<<Self as relm4::Component>::Input, <Self as relm4::Component>::Output, <Self as relm4::Component>::CommandOutput>>) -> ComponentParts<Self> { todo!() }`
