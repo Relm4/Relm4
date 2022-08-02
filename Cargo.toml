@@ -1,9 +1,9 @@
 [workspace]
 members = [
     "relm4",
-    #"relm4-components",
+    "relm4-components",
     "relm4-macros",
     "examples",
     "examples/libadwaita",
-    #"examples/relm4-components"
+    "examples/relm4-components"
 ]

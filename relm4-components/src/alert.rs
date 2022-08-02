@@ -3,7 +3,7 @@
 //! **[Example implementation](https://github.com/AaronErhardt/relm4/blob/main/relm4-examples/examples/alert.rs)**
 
 use gtk::prelude::{DialogExt, GtkWindowExt, WidgetExt};
-use relm4::{gtk, send, ComponentParts, ComponentSender, SimpleComponent};
+use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent};
 
 /// Configuration for the alert dialog component
 pub struct AlertSettings {
@@ -30,6 +30,7 @@ pub struct Alert {
 }
 
 /// Messages that can be sent to the alert dialog component
+#[derive(Debug)]
 pub enum AlertMsg {
     /// Message sent by the parent to view the dialog
     Show,
@@ -60,19 +61,21 @@ impl SimpleComponent for Alert {
     type Output = AlertResponse;
 
     view! {
-        dialog = gtk::MessageDialog {
+        #[name = "dialog"]
+        gtk::MessageDialog {
             set_message_type: gtk::MessageType::Question,
-            set_visible: watch!(model.is_active),
-            connect_response(sender) => move |_, response| {
-                send!(sender.input, AlertMsg::Response(response));
+            #[watch]
+            set_visible: model.is_active,
+            connect_response[sender] => move |_, response| {
+                sender.input(AlertMsg::Response(response));
             },
 
             // Apply configuration
             set_text: Some(&model.settings.text),
             set_secondary_text: model.settings.secondary_text.as_deref(),
             set_modal: model.settings.is_modal,
-            add_button: args!(&model.settings.confirm_label, gtk::ResponseType::Accept),
-            add_button: args!(&model.settings.cancel_label, gtk::ResponseType::Cancel),
+            add_button: (&model.settings.confirm_label, gtk::ResponseType::Accept),
+            add_button: (&model.settings.cancel_label, gtk::ResponseType::Cancel),
         }
     }
 
@@ -105,21 +108,18 @@ impl SimpleComponent for Alert {
         ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, input: AlertMsg, sender: &ComponentSender<Self>) {
+    fn update(&mut self, input: AlertMsg, sender: ComponentSender<Self>) {
         match input {
             AlertMsg::Show => {
                 self.is_active = true;
             }
             AlertMsg::Response(ty) => {
                 self.is_active = false;
-                send!(
-                    sender.output,
-                    match ty {
-                        gtk::ResponseType::Accept => AlertResponse::Confirm,
-                        gtk::ResponseType::Other(_) => AlertResponse::Option,
-                        _ => AlertResponse::Cancel,
-                    }
-                );
+                sender.output(match ty {
+                    gtk::ResponseType::Accept => AlertResponse::Confirm,
+                    gtk::ResponseType::Other(_) => AlertResponse::Option,
+                    _ => AlertResponse::Cancel,
+                });
             }
         }
     }
