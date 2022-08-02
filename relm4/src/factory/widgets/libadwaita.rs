@@ -104,3 +104,58 @@ impl FactoryView for adw::ExpanderRow {
         self.factory_append(widget, position);
     }
 }
+
+impl FactoryView for adw::Carousel {
+    type Children = gtk::Widget;
+    type ReturnedWidget = gtk::Widget;
+    type Position = ();
+
+    fn factory_remove(&self, widget: &Self::ReturnedWidget) {
+        self.remove(widget);
+    }
+
+    fn factory_append(
+        &self,
+        widget: impl AsRef<Self::Children>,
+        _: &Self::Position,
+    ) -> Self::ReturnedWidget {
+        self.append(widget.as_ref());
+        widget.as_ref().clone()
+    }
+
+    fn factory_prepend(
+        &self,
+        widget: impl AsRef<Self::Children>,
+        _position: &(),
+    ) -> Self::ReturnedWidget {
+        self.prepend(widget.as_ref());
+        widget.as_ref().clone()
+    }
+
+    fn factory_insert_after(
+        &self,
+        widget: impl AsRef<Self::Children>,
+        position: &(),
+        _other: &Self::ReturnedWidget,
+    ) -> Self::ReturnedWidget {
+        self.factory_append(widget.as_ref(), position);
+        widget.as_ref().clone()
+    }
+
+    fn returned_widget_to_child(returned_widget: &Self::ReturnedWidget) -> Self::Children {
+        returned_widget.clone()
+    }
+
+    fn factory_move_after(&self, widget: &Self::ReturnedWidget, other: &Self::ReturnedWidget) {
+        for i in 0..self.n_pages() {
+            if self.nth_page(i).eq(other) {
+                self.reorder(widget, (i + 1) as i32);
+                return;
+            }
+        }
+    }
+
+    fn factory_move_start(&self, widget: &Self::ReturnedWidget) {
+        self.reorder(widget, 0);
+    }
+}
