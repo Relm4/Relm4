@@ -32,10 +32,12 @@ pub struct ComponentSenderInner<Input, Output, Cmd> {
 impl<Input, Output, CommandOutput: Send + 'static>
     ComponentSenderInner<Input, Output, CommandOutput>
 {
-    /// Spawn a command managed by the lifetime of the component.
+    /// Spawn a command.
+    /// You can bind the the command to the lifetime of the component
+    /// by using a [`ShutdownReceiver`].
     pub fn command<Cmd, Fut>(&self, cmd: Cmd)
     where
-        Cmd: (FnOnce(Sender<CommandOutput>, ShutdownReceiver) -> Fut) + Send + Sync + 'static,
+        Cmd: FnOnce(Sender<CommandOutput>, ShutdownReceiver) -> Fut + Send + 'static,
         Fut: Future<Output = ()> + Send,
     {
         let recipient = self.shutdown.clone();
@@ -43,6 +45,21 @@ impl<Input, Output, CommandOutput: Send + 'static>
         crate::spawn(async move {
             cmd(sender, recipient).await;
         });
+    }
+
+    /// Spawn a future that will be dropped as soon as the component is shut down.
+    ///
+    /// Essentially, this is a simpler version of [`command()`].
+    pub fn simple_command<Fut>(&self, future: Fut)
+    where
+        Fut: Future<Output = CommandOutput> + Send + 'static,
+    {
+        // Async closures would be awesome here...
+        self.command(move |out, shutdown| {
+            shutdown
+                .register(async move { out.send(future.await) })
+                .drop_on_shutdown()
+        })
     }
 
     /// Emit an input to the component.
