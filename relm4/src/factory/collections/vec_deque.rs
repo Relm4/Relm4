@@ -5,14 +5,18 @@ use crate::factory::{
     FactoryView,
 };
 
-use gtk::prelude::Cast;
-
 use super::{ModelStateValue, RenderedState};
 
 use std::collections::hash_map::DefaultHasher;
 use std::collections::VecDeque;
-use std::hash::{Hash, Hasher};
+use std::hash::Hash;
 use std::ops::{Deref, Index, IndexMut};
+
+#[cfg(feature = "libadwaita")]
+use gtk::prelude::Cast;
+
+#[cfg(feature = "libadwaita")]
+use std::hash::Hasher;
 
 /// Provides methods to edit the underlying [`FactoryVecDeque`].
 ///
@@ -30,6 +34,8 @@ impl<'a, C: FactoryComponent> Drop for FactoryVecDequeGuard<'a, C> {
 
 impl<'a, C: FactoryComponent> FactoryVecDequeGuard<'a, C> {
     fn new(inner: &'a mut FactoryVecDeque<C>) -> Self {
+        #[allow(unused_mut)]
+        #[allow(clippy::let_and_return)]
         let mut guard = FactoryVecDequeGuard { inner };
 
         #[cfg(feature = "libadwaita")]
@@ -471,6 +477,7 @@ impl<C: FactoryComponent> FactoryVecDeque<C> {
 
                 RenderedState {
                     uid: s.uid,
+                    #[cfg(feature = "libadwaita")]
                     widget_hash: hasher.finish(),
                 }
             })
