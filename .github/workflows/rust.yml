@@ -36,6 +36,9 @@ jobs:
       - name: "clippy"
         run: cargo clippy -- --deny warnings
 
+      - name: "clippy all features"
+        run: cargo clippy --all-features -- --deny warnings
+
       # nightly
       - name: "test nightly"
         run: xvfb-run --auto-servernum cargo test
