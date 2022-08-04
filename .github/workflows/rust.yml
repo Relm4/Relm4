@@ -23,9 +23,6 @@ jobs:
           - "1.61"
     env:
         DISPLAY: ":99.0"
-        # Workaround to avoid getting stuck by apt about choosing a timezone.
-        DEBIAN_FRONTEND: noninteractive
-        TZ: America/New_York
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
