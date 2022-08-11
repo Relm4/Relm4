@@ -79,7 +79,7 @@ impl WidgetFunc {
         if let Some(method_chain) = method_chain {
             stream.extend(quote! {
                 .#method_chain
-            })
+            });
         }
 
         stream

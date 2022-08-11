@@ -61,9 +61,8 @@ impl AssignProperty {
                     Attr::Iterate(_) => {
                         if iterative {
                             return Err(attr_twice_error(span));
-                        } else {
-                            iterative = true;
                         }
+                        iterative = true;
                     }
                     Attr::Watch(_) => {
                         if watch == AssignPropertyAttr::None {

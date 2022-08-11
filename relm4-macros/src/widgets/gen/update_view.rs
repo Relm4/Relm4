@@ -25,10 +25,10 @@ impl Property {
                 conditional_branch,
             ),
             PropertyType::Widget(widget) => {
-                widget.update_view_stream(stream, model_name, conditional_branch)
+                widget.update_view_stream(stream, model_name, conditional_branch);
             }
             PropertyType::ConditionalWidget(cond_widget) => {
-                cond_widget.update_view_stream(stream, model_name)
+                cond_widget.update_view_stream(stream, model_name);
             }
             PropertyType::SignalHandler(_) | PropertyType::ParseError(_) => (),
         }
@@ -110,7 +110,7 @@ impl ConditionalWidget {
                             #inner_update_stream
                             #index
                         },
-                    })
+                    });
                 }
                 quote! {
                     #match_token #expr {

@@ -37,15 +37,8 @@ impl Funcs {
             let ident = &func.sig.ident;
 
             if ident == "init_widgets" {
-                if init_widgets.is_some() {
-                    return Err(Error::new(
-                        func.span().unwrap().into(),
-                        "`init_widgets` method defined multiple times",
-                    ));
-                } else {
-                    root_name = Some(util::get_ident_of_nth_func_input(&func, 2)?);
-                    init_widgets = Some(func);
-                }
+                root_name = Some(util::get_ident_of_nth_func_input(&func, 2)?);
+                parse_func!(init_widgets, func, func);
             } else if ident == "pre_view" {
                 let stmts = &func.block.stmts;
                 let tokens = quote! { #(#stmts)* };
@@ -62,10 +55,10 @@ impl Funcs {
         let root_name = root_name.unwrap_or_else(|| Ident::new("root", Span2::call_site()));
 
         Ok(Funcs {
+            unhandled_fns,
             init_widgets,
             pre_view,
             post_view,
-            unhandled_fns,
             root_name,
         })
     }

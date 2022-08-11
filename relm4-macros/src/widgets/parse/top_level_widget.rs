@@ -16,7 +16,7 @@ impl TopLevelWidget {
                 inner: Vec::with_capacity(prev_attributes.inner.len()),
             };
             let mut root_attr = None;
-            for attr in prev_attributes.inner.into_iter() {
+            for attr in prev_attributes.inner {
                 match attr {
                     Attr::Root(ident) => {
                         // Save root attribute and don't push it to the new list

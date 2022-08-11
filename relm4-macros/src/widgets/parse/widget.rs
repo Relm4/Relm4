@@ -31,11 +31,10 @@ impl Widget {
         let name_opt: Option<Ident> = if input.peek2(Token![=]) {
             if attr.is_local_attr() {
                 return Err(input.error("When using the `local` or `local_ref` attributes you cannot rename the existing local variable.").into());
-            } else {
-                let name = input.parse()?;
-                let _token: Token![=] = input.parse()?;
-                Some(name)
             }
+            let name = input.parse()?;
+            let _token: Token![=] = input.parse()?;
+            Some(name)
         } else {
             None
         };
@@ -47,9 +46,8 @@ impl Widget {
         if new_name.is_some() {
             if name_set {
                 return Err(Error::new(name_opt.unwrap().span(), "Widget name is specified more than once (attribute, assignment or local attribute).").into());
-            } else {
-                name_set = true;
             }
+            name_set = true;
         }
 
         if attr.is_local_attr() && name_set {
@@ -177,16 +175,14 @@ impl Widget {
                     Attr::Name(_, name_value) => {
                         if name.is_some() {
                             return Err(attr_twice_error(span).into());
-                        } else {
-                            name = Some(name_value);
                         }
+                        name = Some(name_value);
                     }
                     Attr::Wrap(_, path) => {
                         if assign_wrapper.is_some() {
                             return Err(attr_twice_error(span).into());
-                        } else {
-                            assign_wrapper = Some(path.clone());
                         }
+                        assign_wrapper = Some(path.clone());
                     }
                     _ => {
                         return Err(Error::new(

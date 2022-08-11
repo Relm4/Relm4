@@ -7,16 +7,16 @@ impl Spanned for Attr {
     fn span(&self) -> Span2 {
         match self {
             Self::Doc(tokens) => tokens.span(),
-            Self::Local(ident) => ident.span(),
-            Self::LocalRef(ident) => ident.span(),
-            Self::Root(ident) => ident.span(),
-            Self::Iterate(ident) => ident.span(),
-            Self::Watch(ident) => ident.span(),
-            Self::Track(ident, _) => ident.span(),
-            Self::BlockSignal(ident, _) => ident.span(),
-            Self::Name(ident, _) => ident.span(),
-            Self::Transition(ident, _) => ident.span(),
-            Self::Wrap(ident, _) => ident.span(),
+            Self::Local(ident)
+            | Self::LocalRef(ident)
+            | Self::Root(ident)
+            | Self::Iterate(ident)
+            | Self::Watch(ident)
+            | Self::Track(ident, _)
+            | Self::BlockSignal(ident, _)
+            | Self::Name(ident, _)
+            | Self::Transition(ident, _)
+            | Self::Wrap(ident, _) => ident.span(),
         }
     }
 }

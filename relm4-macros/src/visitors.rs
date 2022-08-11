@@ -26,13 +26,7 @@ impl VisitMut for ComponentVisitor {
 
         match item {
             syn::ImplItem::Macro(mac) => {
-                match mac
-                    .mac
-                    .path
-                    .get_ident()
-                    .map(|ident| ident.to_string())
-                    .as_deref()
-                {
+                match mac.mac.path.get_ident().map(ToString::to_string).as_deref() {
                     Some("view") => {
                         match mac.mac.parse_body::<ViewWidgets>() {
                             Ok(widgets) => {
@@ -181,7 +175,7 @@ impl<'ast> Visit<'ast> for InitFnVisitor {
             for field in &expr_struct.fields {
                 let member_name = match &field.member {
                     syn::Member::Named(ident) => Some(ident.to_string()),
-                    _ => None,
+                    syn::Member::Unnamed(_) => None,
                 };
 
                 if member_name.as_deref() == Some("model") {

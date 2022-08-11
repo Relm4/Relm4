@@ -16,7 +16,7 @@ impl Property {
             }
             PropertyType::Widget(widget) => widget.connect_signals_stream(stream),
             PropertyType::ConditionalWidget(cond_widget) => {
-                cond_widget.connect_signals_stream(stream)
+                cond_widget.connect_signals_stream(stream);
             }
             PropertyType::Assign(_) | PropertyType::ParseError(_) => (),
         }

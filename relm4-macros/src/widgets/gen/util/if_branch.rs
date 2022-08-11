@@ -28,6 +28,6 @@ impl IfBranch {
                 #inner_update_tokens
                 #index
             }
-        })
+        });
     }
 }
