@@ -115,7 +115,6 @@ impl SimpleComponent for AppModel {
         let group = RelmActionGroup::<WindowActionGroup>::new();
 
         let action: RelmAction<TestAction> = {
-            let sender = sender.clone();
             RelmAction::new_stateless(move |_| {
                 println!("Statelesss action!");
                 sender.input(AppMsg::Increment);

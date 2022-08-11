@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 /// A dynamic index that updates automatically when items are shifted inside a factory container.
 ///
-/// For example a [`FactoryVecDeque`](super::FactoryVecDeque) has an [`insert`](super::FactoryVecDeque::insert)
+/// For example a [`FactoryVecDeque`](super::FactoryVecDeque) has an [`insert`](super::FactoryVecDequeGuard::insert)
 /// method that allows users to insert data at arbitrary positions.
 /// If we insert at the front all following widgets will be moved by one which would
 /// invalidate their indices.
