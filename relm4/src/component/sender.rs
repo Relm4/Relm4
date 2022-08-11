@@ -59,7 +59,7 @@ impl<Input, Output, CommandOutput: Send + 'static>
             shutdown
                 .register(async move { out.send(future.await) })
                 .drop_on_shutdown()
-        })
+        });
     }
 
     /// Emit an input to the component.

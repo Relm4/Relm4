@@ -154,7 +154,7 @@ pub trait FactoryComponent:
         sender: FactoryComponentSender<Self>,
     ) {
         self.update_cmd(message, sender.clone());
-        self.update_view(widgets, sender)
+        self.update_view(widgets, sender);
     }
 
     /// Updates the view after the model has been updated.

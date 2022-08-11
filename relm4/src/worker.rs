@@ -22,7 +22,7 @@ pub trait Worker: Sized + Send + 'static {
     type InitParams: 'static + Send;
     /// The type of inputs that this worker shall receive.
     type Input: 'static + Send + Debug;
-    /// The typue of outputs that this worker shall send.
+    /// The type of outputs that this worker shall send.
     type Output: 'static + Send + Debug;
 
     /// Defines the initial state of the worker.
@@ -184,7 +184,7 @@ where
         WorkerHandle {
             sender: input_tx,
             receiver: output_rx,
-            _root: root,
+            root,
         }
     }
 }
@@ -196,7 +196,7 @@ pub struct WorkerHandle<W: Component> {
     sender: Sender<W::Input>,
     // Where the worker will send its outputs to.
     receiver: Receiver<W::Output>,
-    _root: EmptyRoot,
+    root: EmptyRoot,
 }
 
 impl<W: Component> WorkerHandle<W>
@@ -212,7 +212,7 @@ where
         let WorkerHandle {
             sender,
             receiver,
-            _root,
+            root,
         } = self;
 
         let mut sender_ = sender.clone();
@@ -222,7 +222,7 @@ where
             }
         });
 
-        WorkerController { sender, _root }
+        WorkerController { sender, root }
     }
 
     /// Forwards output events to the designated sender.
@@ -234,21 +234,21 @@ where
         let WorkerHandle {
             sender: own_sender,
             receiver,
-            _root,
+            root,
         } = self;
 
         crate::spawn_local(receiver.forward(sender.clone(), transform));
         WorkerController {
             sender: own_sender,
-            _root,
+            root,
         }
     }
 
     /// Ignore outputs from the component and take the handle.
     pub fn detach(self) -> WorkerController<W> {
-        let Self { sender, _root, .. } = self;
+        let Self { sender, root, .. } = self;
 
-        WorkerController { sender, _root }
+        WorkerController { sender, root }
     }
 }
 
@@ -257,7 +257,8 @@ where
 pub struct WorkerController<W: Component> {
     // Sends inputs to the worker.
     sender: Sender<W::Input>,
-    _root: EmptyRoot,
+    #[allow(unused)]
+    root: EmptyRoot,
 }
 
 impl<W: Component> WorkerController<W> {

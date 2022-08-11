@@ -52,9 +52,9 @@ impl<C: Component> ComponentController<C> for Controller<C> {
     }
 }
 
-impl<C: Component> Debug for Controller<C>
+impl<C> Debug for Controller<C>
 where
-    C: Debug,
+    C: Component + Debug,
     C::Widgets: Debug,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

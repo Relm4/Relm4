@@ -48,7 +48,9 @@ impl<'a, C: FactoryComponent> FactoryVecDequeGuard<'a, C> {
     /// Drops the guard and renders all changes.
     ///
     /// Use this to transfer full ownership back to the [`FactoryVecDeque`].
-    pub fn drop(self) {}
+    pub fn drop(self) {
+        drop(self);
+    }
 
     /// Apply external updates that happened between the last render.
     ///
@@ -293,7 +295,7 @@ impl<'a, C: FactoryComponent> FactoryVecDequeGuard<'a, C> {
     ///
     /// Panics if index is out of bounds.
     pub fn move_front(&mut self, current_position: usize) {
-        self.move_to(current_position, 0)
+        self.move_to(current_position, 0);
     }
 
     /// Moves an element at index `current_position` to the back,
@@ -303,7 +305,7 @@ impl<'a, C: FactoryComponent> FactoryVecDequeGuard<'a, C> {
     ///
     /// Panics if index is out of bounds.
     pub fn move_back(&mut self, current_position: usize) {
-        self.move_to(current_position, self.len() - 1)
+        self.move_to(current_position, self.len() - 1);
     }
 
     /// Remove all components from the [`FactoryVecDeque`].
@@ -506,7 +508,7 @@ impl<C: FactoryComponent> FactoryVecDeque<C> {
 
     /// Send a message to one of the elements.
     pub fn send(&self, index: usize, msg: C::Input) {
-        self.components[index].send(msg)
+        self.components[index].send(msg);
     }
 
     /// Tries to get an immutable reference to

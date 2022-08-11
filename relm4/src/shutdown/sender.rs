@@ -15,7 +15,7 @@ pub struct ShutdownSender {
 impl ShutdownSender {
     /// Broadcasts a shutdown signal to listening receivers.
     pub fn shutdown(&self) {
-        let _ = self.sender.broadcast(());
+        drop(self.sender.broadcast(()));
     }
 }
 

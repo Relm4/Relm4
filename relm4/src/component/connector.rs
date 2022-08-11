@@ -104,9 +104,9 @@ impl<C: Component> ComponentController<C> for Connector<C> {
     }
 }
 
-impl<C: Component> Debug for Connector<C>
+impl<C> Debug for Connector<C>
 where
-    C: Debug,
+    C: Component + Debug,
     C::Widgets: Debug,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

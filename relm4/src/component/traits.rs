@@ -4,8 +4,7 @@
 
 use std::fmt::Debug;
 
-use super::*;
-use crate::{ComponentSender, Sender};
+use crate::{ComponentBuilder, ComponentParts, ComponentSender, OnDestroy, Sender};
 
 /// Elm-style variant of a Component with view updates separated from input updates
 pub trait Component: Sized + 'static {
@@ -59,7 +58,7 @@ pub trait Component: Sized + 'static {
         sender: ComponentSender<Self>,
     ) {
         self.update_cmd(message, sender.clone());
-        self.update_view(widgets, sender)
+        self.update_view(widgets, sender);
     }
 
     /// Updates the view after the model has been updated.
@@ -163,7 +162,7 @@ where
     }
 
     fn update_view(&self, widgets: &mut Self::Widgets, sender: ComponentSender<Self>) {
-        C::update_view(self, widgets, sender)
+        C::update_view(self, widgets, sender);
     }
 
     fn shutdown(&mut self, widgets: &mut Self::Widgets, output: Sender<Self::Output>) {
