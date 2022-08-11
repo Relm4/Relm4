@@ -35,6 +35,7 @@ impl<C: Component> ComponentBuilder<C> {
     }
 
     /// Configure the root widget before launching.
+    #[must_use]
     pub fn update_root<F: FnOnce(&mut C::Root)>(mut self, func: F) -> Self {
         func(&mut self.root);
         self
@@ -51,6 +52,7 @@ where
     C::Root: AsRef<gtk::Widget>,
 {
     /// Attach the component's root widget to a given container.
+    #[must_use]
     pub fn attach_to(self, container: &impl RelmContainerExt) -> Self {
         container.container_add(self.root.as_ref());
 
@@ -66,6 +68,7 @@ where
     ///
     /// If the root widget is a native dialog, such as [`gtk::FileChooserNative`],
     /// you should use [`transient_for_native`][ComponentBuilder::transient_for_native] instead.
+    #[must_use]
     pub fn transient_for(self, window: impl AsRef<gtk::Window>) -> Self {
         self.root.as_ref().set_transient_for(Some(window.as_ref()));
 
@@ -81,6 +84,7 @@ where
     ///
     /// Applicable to native dialogs only, such as [`gtk::FileChooserNative`].
     /// If the root widget is a non-native dialog, you should use [`transient_for`][ComponentBuilder::transient_for] instead.
+    #[must_use]
     pub fn transient_for_native(self, window: impl AsRef<gtk::Window>) -> Self {
         self.root.as_ref().set_transient_for(Some(window.as_ref()));
 

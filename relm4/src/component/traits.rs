@@ -28,6 +28,7 @@ pub trait Component: Sized + 'static {
     type Widgets: 'static;
 
     /// Create a builder for this component.
+    #[must_use]
     fn builder() -> ComponentBuilder<Self> {
         ComponentBuilder::<Self>::new()
     }

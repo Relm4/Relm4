@@ -43,6 +43,7 @@ impl DynamicIndex {
     /// Get the current index number.
     ///
     /// This value is updated by the factory container and might change after each update function.
+    #[must_use]
     pub fn current_index(&self) -> usize {
         self.inner.load(Ordering::Relaxed)
     }

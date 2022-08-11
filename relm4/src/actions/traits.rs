@@ -30,6 +30,7 @@ pub trait ActionName {
     const NAME: &'static str;
 
     /// The full action name (group.action).
+    #[must_use]
     fn action_name() -> String {
         format!("{}.{}", Self::Group::NAME, Self::NAME)
     }

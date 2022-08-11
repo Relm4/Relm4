@@ -22,6 +22,7 @@ use std::hash::Hasher;
 ///
 /// The changes will be rendered on the widgets after the guard goes out of scope.
 #[derive(Debug)]
+#[must_use]
 pub struct FactoryVecDequeGuard<'a, C: FactoryComponent> {
     inner: &'a mut FactoryVecDeque<C>,
 }
@@ -374,6 +375,7 @@ impl<C: FactoryComponent> Index<usize> for FactoryVecDeque<C> {
 
 impl<C: FactoryComponent> FactoryVecDeque<C> {
     /// Creates a new [`FactoryVecDeque`].
+    #[must_use]
     pub fn new(widget: C::ParentWidget, parent_sender: &Sender<C::ParentMsg>) -> Self {
         Self {
             widget,

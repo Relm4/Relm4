@@ -68,6 +68,7 @@ impl<Input, Output, CommandOutput: Send + 'static>
     }
 
     /// Equivalent to `&self.input`.
+    #[must_use]
     pub fn input_sender(&self) -> &Sender<Input> {
         &self.input
     }
@@ -78,6 +79,7 @@ impl<Input, Output, CommandOutput: Send + 'static>
     }
 
     /// Equivalent to `&self.output`.
+    #[must_use]
     pub fn output_sender(&self) -> &Sender<Output> {
         &self.output
     }

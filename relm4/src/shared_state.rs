@@ -48,6 +48,7 @@ where
     /// use relm4::SharedState;
     /// static STATE: SharedState<MyData> = SharedState::new();
     /// ```
+    #[must_use]
     pub const fn new() -> Self {
         Self {
             data: Lazy::new(|| RwLock::new(Data::default())),

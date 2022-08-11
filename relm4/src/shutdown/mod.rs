@@ -16,6 +16,7 @@ use std::sync::Arc;
 ///
 /// The sending side is responsible for initiating a shutdown.
 /// The receiving side is responsible for responding to shutdowns.
+#[must_use]
 pub fn channel() -> (ShutdownSender, ShutdownReceiver) {
     let alive = Arc::new(AtomicBool::new(true));
     let (sender, receiver) = async_broadcast::broadcast(1);

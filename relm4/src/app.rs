@@ -18,6 +18,7 @@ pub struct RelmApp {
 
 impl RelmApp {
     /// Create a Relm4 application.
+    #[must_use]
     pub fn new(app_id: &str) -> Self {
         let app = Application::builder().application_id(app_id).build();
 
