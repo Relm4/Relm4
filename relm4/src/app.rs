@@ -42,7 +42,7 @@ impl RelmApp {
     /// Unlike [`gtk::prelude::ApplicationExtManual::run`], this function
     /// does not handle command-line arguments. To pass arguments to GTK, use
     /// [`RelmApp::run_with_args`].
-    pub fn run<C>(self, payload: C::InitParams)
+    pub fn run<C>(self, payload: C::Init)
     where
         C: Component,
         C::Root: IsA<gtk::Window> + WidgetExt,
@@ -52,7 +52,7 @@ impl RelmApp {
 
     /// Runs the application with the provided command-line arguments, returns once the application
     /// is closed.
-    pub fn run_with_args<C, S>(self, payload: C::InitParams, args: &[S])
+    pub fn run_with_args<C, S>(self, payload: C::Init, args: &[S])
     where
         C: Component,
         C::Root: IsA<gtk::Window> + WidgetExt,

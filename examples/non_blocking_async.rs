@@ -16,7 +16,7 @@ enum AppMsg {
 #[relm4::component]
 impl Component for AppModel {
     type CommandOutput = AppMsg;
-    type InitParams = ();
+    type Init = ();
     type Input = ();
     type Output = ();
     type Widgets = AppWidgets;

@@ -17,8 +17,8 @@ pub trait Component: Sized + 'static {
     /// The message type that the component provides as outputs.
     type Output: Debug + 'static;
 
-    /// The initial parameter(s) for launch.
-    type InitParams;
+    /// The parameter used to initialize the component.
+    type Init;
 
     /// The widget that was constructed by the component.
     type Root: Debug + OnDestroy;
@@ -37,7 +37,7 @@ pub trait Component: Sized + 'static {
 
     /// Creates the initial model and view, docking it into the component.
     fn init(
-        params: Self::InitParams,
+        params: Self::Init,
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self>;
@@ -137,7 +137,7 @@ impl<C> Component for C
 where
     C: SimpleComponent,
 {
-    type InitParams = C::InitParams;
+    type Init = C::InitParams;
     type Input = C::Input;
     type Output = C::Output;
     type Root = C::Root;
@@ -150,7 +150,7 @@ where
     }
 
     fn init(
-        params: Self::InitParams,
+        params: Self::Init,
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {

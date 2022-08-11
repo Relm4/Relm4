@@ -23,7 +23,7 @@ enum CounterOutput {
 #[relm4::factory]
 impl FactoryComponent for Counter {
     type CommandOutput = ();
-    type InitParams = u8;
+    type Init = u8;
     type Input = CounterMsg;
     type Output = CounterOutput;
     type ParentMsg = AppMsg;
@@ -92,7 +92,7 @@ impl FactoryComponent for Counter {
     }
 
     fn init_model(
-        value: Self::InitParams,
+        value: Self::Init,
         _index: &DynamicIndex,
         _sender: FactoryComponentSender<Self>,
     ) -> Self {

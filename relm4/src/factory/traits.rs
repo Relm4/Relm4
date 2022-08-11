@@ -87,7 +87,7 @@ impl<C> Position<()> for C {
 pub trait FactoryComponent:
     Position<<Self::ParentWidget as FactoryView>::Position> + Sized + Debug + 'static
 {
-    /// Widget to which all factory widgets are added.
+    /// Container widget to which all widgets of the factory will be added.
     type ParentWidget: FactoryView + 'static;
 
     /// Messages sent to a parent component.
@@ -96,24 +96,24 @@ pub trait FactoryComponent:
     /// Messages which are received from commands executing in the background.
     type CommandOutput: Debug + Send + 'static;
 
-    /// The message type that the component accepts as inputs.
+    /// The message type that the factory component accepts as inputs.
     type Input: Debug + 'static;
 
-    /// The message type that the component provides as outputs.
+    /// The message type that the factory component provides as outputs.
     type Output: Debug + 'static;
 
-    /// The initial parameter(s) for launch.
-    type InitParams;
+    /// The parameter used to initialize the factory component.
+    type Init;
 
-    /// The widget that was constructed by the component.
+    /// The widget that was constructed by the factory component.
     type Root: AsRef<<Self::ParentWidget as FactoryView>::Children> + Debug + OnDestroy + Clone;
 
-    /// The type that's used for storing widgets created for this component.
+    /// The type that's used for storing widgets created for this factory component.
     type Widgets: 'static;
 
     /// Initializes the model.
     fn init_model(
-        params: Self::InitParams,
+        params: Self::Init,
         index: &DynamicIndex,
         sender: FactoryComponentSender<Self>,
     ) -> Self;

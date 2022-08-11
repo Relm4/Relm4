@@ -24,7 +24,7 @@ struct AppModel {
 
 #[relm4::component]
 impl Component for AppModel {
-    type InitParams = ();
+    type Init = ();
     type Input = AppMsg;
     type Output = ();
     type CommandOutput = UpdatePointsMsg;

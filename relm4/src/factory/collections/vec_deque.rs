@@ -176,13 +176,13 @@ impl<'a, C: FactoryComponent> FactoryVecDequeGuard<'a, C> {
     }
 
     /// Appends an element at the end of the [`FactoryVecDeque`].
-    pub fn push_back(&mut self, init_params: C::InitParams) {
+    pub fn push_back(&mut self, init_params: C::Init) {
         let index = self.len();
         self.insert(index, init_params);
     }
 
     /// Prepends an element to the [`FactoryVecDeque`].
-    pub fn push_front(&mut self, init_params: C::InitParams) {
+    pub fn push_front(&mut self, init_params: C::Init) {
         self.insert(0, init_params);
     }
 
@@ -195,7 +195,7 @@ impl<'a, C: FactoryComponent> FactoryVecDequeGuard<'a, C> {
     /// # Panics
     ///
     /// Panics if index is greater than [`FactoryVecDeque`]’s length.
-    pub fn insert(&mut self, index: usize, init_params: C::InitParams) {
+    pub fn insert(&mut self, index: usize, init_params: C::Init) {
         let dyn_index = DynamicIndex::new(index);
 
         // Increment the indexes of the following elements.

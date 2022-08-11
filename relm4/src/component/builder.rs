@@ -95,7 +95,7 @@ where
 
 impl<C: Component> ComponentBuilder<C> {
     /// Starts the component, passing ownership to a future attached to a GLib context.
-    pub fn launch(self, payload: C::InitParams) -> Connector<C> {
+    pub fn launch(self, payload: C::Init) -> Connector<C> {
         let ComponentBuilder { root, .. } = self;
 
         // Used for all events to be processed by this component's internal service.

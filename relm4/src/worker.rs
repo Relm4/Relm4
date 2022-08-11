@@ -70,7 +70,7 @@ where
 {
     /// Starts a worker on a separate thread,
     /// passing ownership to a future attached to a GLib context.
-    pub fn detach_worker(self, payload: C::InitParams) -> WorkerHandle<C> {
+    pub fn detach_worker(self, payload: C::Init) -> WorkerHandle<C> {
         let ComponentBuilder { root, .. } = self;
 
         // Used for all events to be processed by this component's internal service.
