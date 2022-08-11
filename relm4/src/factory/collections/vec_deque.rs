@@ -59,17 +59,17 @@ impl<'a, C: FactoryComponent> FactoryVecDequeGuard<'a, C> {
     fn apply_external_updates(&mut self) {
         if let Some(tab_view) = self.inner.widget().dynamic_cast_ref::<adw::TabView>() {
             let length = tab_view.n_pages();
-            let mut hashes: Vec<u64> = Vec::with_capacity(length as usize);
+            let mut hash_values: Vec<u64> = Vec::with_capacity(usize::try_from(length).unwrap());
 
             for i in 0..length {
                 let page = tab_view.nth_page(i);
                 let mut hasher = DefaultHasher::default();
                 page.hash(&mut hasher);
-                hashes.push(hasher.finish());
+                hash_values.push(hasher.finish());
             }
 
             // Tab rearrangement
-            for (index, hash) in hashes.iter().enumerate() {
+            for (index, hash) in hash_values.iter().enumerate() {
                 if self
                     .inner
                     .rendered_state
@@ -95,12 +95,12 @@ impl<'a, C: FactoryComponent> FactoryVecDequeGuard<'a, C> {
             let mut index = 0;
             while index < self.inner.rendered_state.len() {
                 let hash = self.inner.rendered_state[index].widget_hash;
-                if !hashes.contains(&hash) {
+                if hash_values.contains(&hash) {
+                    index += 1;
+                } else {
                     self.inner.rendered_state.remove(index);
 
                     self.remove(index);
-                } else {
-                    index += 1;
                 }
             }
         }

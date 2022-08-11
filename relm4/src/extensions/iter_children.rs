@@ -111,10 +111,10 @@ impl RelmIterChildrenExt for gtk::Grid {
         }
 
         vec.sort_by(|(col_a, row_a, _), (col_b, row_b, _)| {
-            if row_a != row_b {
-                row_a.cmp(row_b)
-            } else {
+            if row_a == row_b {
                 col_a.cmp(col_b)
+            } else {
+                row_a.cmp(row_b)
             }
         });
 

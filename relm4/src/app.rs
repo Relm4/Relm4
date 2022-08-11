@@ -66,12 +66,13 @@ impl RelmApp {
 
         app.connect_activate(move |app| {
             if let Some(payload) = payload.take() {
-                if !app.is_registered() {
-                    panic!("App should be already registered when activated");
-                }
+                assert!(
+                    app.is_registered(),
+                    "App should be already registered when activated"
+                );
 
-                let bridge = ComponentBuilder::<C>::new();
-                let controller = bridge.launch(payload).detach();
+                let builder = ComponentBuilder::<C>::default();
+                let controller = builder.launch(payload).detach();
                 let window = controller.widget().clone();
 
                 app.add_window(window.as_ref());
