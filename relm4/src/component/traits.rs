@@ -30,7 +30,7 @@ pub trait Component: Sized + 'static {
     /// Create a builder for this component.
     #[must_use]
     fn builder() -> ComponentBuilder<Self> {
-        ComponentBuilder::<Self>::new()
+        ComponentBuilder::<Self>::default()
     }
 
     /// Initializes the root widget
