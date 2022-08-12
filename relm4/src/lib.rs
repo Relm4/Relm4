@@ -55,7 +55,7 @@ use once_cell::sync::OnceCell;
 use std::future::Future;
 use tokio::runtime::Runtime;
 
-/// Defines how many threads that Relm should use for background tasks.
+/// Defines how many threads that Relm4 should use for background tasks.
 ///
 /// NOTE: The default thread count is 1.
 pub static RELM_THREADS: OnceCell<usize> = OnceCell::new();
@@ -151,7 +151,7 @@ where
     runtime().spawn(future)
 }
 
-/// Spawns a blocking task in a background thread pool
+/// Spawns a blocking task in a background thread pool.
 pub fn spawn_blocking<F, R>(func: F) -> JoinHandle<R>
 where
     F: FnOnce() -> R + Send + 'static,
@@ -164,7 +164,7 @@ where
 ///
 /// The message is sent using the sender and the [`Result`] is unwrapped automatically.
 #[macro_export]
-#[deprecated(since = "0.5.0", note = "Use `sender.input(msg)` instead.")]
+#[deprecated(since = "0.5.0-beta.1", note = "Use `sender.input(msg)` instead.")]
 macro_rules! send {
     ($sender:expr, $msg:expr) => {
         $sender.input($msg)

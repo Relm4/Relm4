@@ -33,7 +33,7 @@ impl FactoryComponent for Counter {
 
     type Widgets = CounterWidgets;
 
-    type InitParams = u8;
+    type Init = u8;
 
     type Input = CounterMsg;
     type Output = CounterOutput;
@@ -60,7 +60,7 @@ impl FactoryComponent for Counter {
     }
 
     fn init_model(
-        value: Self::InitParams,
+        value: Self::Init,
         _index: &DynamicIndex,
         _sender: FactoryComponentSender<Self>,
     ) -> Self {

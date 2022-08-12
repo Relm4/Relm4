@@ -12,10 +12,10 @@ impl Property {
         match &self.ty {
             PropertyType::Widget(widget) => widget.struct_fields_stream(stream, vis),
             PropertyType::SignalHandler(signal_handler) => {
-                signal_handler.struct_fields_stream(stream, vis)
+                signal_handler.struct_fields_stream(stream, vis);
             }
             PropertyType::ConditionalWidget(cond_widget) => {
-                cond_widget.struct_fields_stream(stream, vis)
+                cond_widget.struct_fields_stream(stream, vis);
             }
             PropertyType::Assign(_) | PropertyType::ParseError(_) => (),
         }

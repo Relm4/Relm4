@@ -12,7 +12,6 @@
 //! component, which forwards the reload command back to the caller of the
 //! component, which then issues to reload the widgets again.
 
-use futures::FutureExt;
 use gtk::prelude::*;
 use relm4::*;
 
@@ -101,7 +100,7 @@ pub enum CmdOut {
 
 impl Component for App {
     type CommandOutput = CmdOut;
-    type InitParams = String;
+    type Init = String;
     type Input = Input;
     type Output = Output;
     type Root = gtk::Box;
@@ -116,7 +115,7 @@ impl Component for App {
     }
 
     fn init(
-        title: Self::InitParams,
+        title: Self::Init,
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
@@ -161,15 +160,10 @@ impl Component for App {
             Input::Clear => {
                 self.options.clear();
 
-                sender.command(|out, shutdown| {
-                    // Perform this async operation.
-                    let task = async move {
-                        tokio::time::sleep(std::time::Duration::from_secs(2)).await;
-                        out.send(CmdOut::Reload);
-                    };
-
-                    // Designate for it to drop on component death.
-                    shutdown.register(task).drop_on_shutdown().boxed()
+                // Perform this async operation.
+                sender.oneshot_command(async move {
+                    tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+                    CmdOut::Reload
                 });
             }
 

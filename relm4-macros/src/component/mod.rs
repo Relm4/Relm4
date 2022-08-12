@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens};
 use syn::visit_mut::VisitMut;
-use syn::{parse_quote, Visibility};
+use syn::{parse_quote, Error, Visibility};
 
 use crate::visitors::ComponentVisitor;
 
@@ -19,10 +19,7 @@ pub(crate) fn generate_tokens(
     let mut component_visitor = ComponentVisitor::default();
     component_visitor.visit_item_impl_mut(&mut component_impl);
 
-    let errors = component_visitor
-        .errors
-        .iter()
-        .map(|err| err.to_compile_error());
+    let errors = component_visitor.errors.iter().map(Error::to_compile_error);
 
     let additional_fields = component_visitor.additional_fields.take();
 

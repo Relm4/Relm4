@@ -48,6 +48,7 @@ where
     /// use relm4::SharedState;
     /// static STATE: SharedState<MyData> = SharedState::new();
     /// ```
+    #[must_use]
     pub const fn new() -> Self {
         Self {
             data: Lazy::new(|| RwLock::new(Data::default())),
@@ -161,7 +162,7 @@ impl<'a, Data> DerefMut for SharedStateWriteGuard<'a, Data> {
 impl<'a, Data> Drop for SharedStateWriteGuard<'a, Data> {
     // Notify subscribers
     fn drop(&mut self) {
-        let data = self.data.deref();
+        let data = &*self.data;
         self.subscribers
             .iter()
             .for_each(|subscriber| subscriber(data));

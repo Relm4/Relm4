@@ -17,9 +17,8 @@ impl Parse for ViewWidgets {
             if let Some(root_attr) = &widget.root_attr {
                 if root_exists {
                     return Err(Error::new(root_attr.span(), "You cannot have two roots."));
-                } else {
-                    root_exists = true;
                 }
+                root_exists = true;
             }
             top_level_widgets.push(widget);
         }
@@ -28,13 +27,13 @@ impl Parse for ViewWidgets {
             top_level_widgets[0].root_attr = Some(Ident::new("root", input.span()));
         }
 
-        if !input.is_empty() {
-            Err(input.error("Expected end of input. Maybe a missing colon?"))
-        } else {
+        if input.is_empty() {
             Ok(Self {
                 span,
                 top_level_widgets,
             })
+        } else {
+            Err(input.error("Expected end of input. Maybe a missing colon?"))
         }
     }
 }

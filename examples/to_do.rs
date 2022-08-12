@@ -21,7 +21,7 @@ enum TaskOutput {
 #[relm4::factory]
 impl FactoryComponent for Task {
     type CommandOutput = ();
-    type InitParams = String;
+    type Init = String;
     type Input = TaskInput;
     type Output = TaskOutput;
     type ParentMsg = AppMsg;
@@ -72,7 +72,7 @@ impl FactoryComponent for Task {
     }
 
     fn init_model(
-        name: Self::InitParams,
+        name: Self::Init,
         _index: &DynamicIndex,
         _sender: FactoryComponentSender<Self>,
     ) -> Self {

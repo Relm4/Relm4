@@ -11,7 +11,7 @@ impl Property {
         match &self.ty {
             PropertyType::Widget(widget) => widget.destructure_stream(stream),
             PropertyType::SignalHandler(signal_handler) => {
-                signal_handler.destructure_stream(stream)
+                signal_handler.destructure_stream(stream);
             }
             PropertyType::ConditionalWidget(cond_widget) => {
                 cond_widget.destructure_stream(stream);

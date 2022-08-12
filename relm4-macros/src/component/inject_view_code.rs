@@ -46,9 +46,8 @@ pub(crate) fn inject_view_code(
                     #view_code
                     let #ident = #widgets_return_code;
                 }));
-            } else {
-                new_stmts.push(stmt);
             }
+            new_stmts.push(stmt);
         } else {
             return Err(Error::new(func_span, "Expected an injection point for the view macro. Try using `let widgets = view_output!();`"));
         }

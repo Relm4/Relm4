@@ -8,6 +8,7 @@ use super::DynamicIndex;
 #[derive(Debug)]
 struct RenderedState {
     uid: u16,
+    #[cfg(feature = "libadwaita")]
     widget_hash: u64,
 }
 

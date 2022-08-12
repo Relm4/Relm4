@@ -2,7 +2,7 @@ use proc_macro2::{Literal, Punct};
 use syn::ext::IdentExt;
 use syn::parse::discouraged::Speculative;
 use syn::parse::ParseStream;
-use syn::punctuated::Punctuated;
+use syn::punctuated::{Pair, Punctuated};
 use syn::token::{And, At, Caret, Colon, Div, Dot, Gt, Lt, Or, Question, Tilde, Underscore};
 use syn::{braced, bracketed, parenthesized, token, Ident, Lifetime, Token};
 
@@ -30,9 +30,7 @@ impl Properties {
 
             if let Err(prop) = parse_comma_error(input) {
                 // If there's already an error, ignore the additional comma error
-                if !contains_error {
-                    props.push(prop);
-                } else {
+                if contains_error {
                     // Skip to next token to start with "fresh" and hopefully correct syntax.
                     while !parse_next_token(input).unwrap() {
                         let next_input = input.fork();
@@ -49,11 +47,13 @@ impl Properties {
                             break;
                         }
                     }
+                } else {
+                    props.push(prop);
                 }
             }
         }
 
-        let properties = props.into_pairs().map(|pair| pair.into_value()).collect();
+        let properties = props.into_pairs().map(Pair::into_value).collect();
         Properties { properties }
     }
 }

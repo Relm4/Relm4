@@ -16,7 +16,7 @@ enum AppMsg {
 #[relm4::component]
 impl Component for AppModel {
     type CommandOutput = AppMsg;
-    type InitParams = ();
+    type Init = ();
     type Input = ();
     type Output = ();
     type Widgets = AppWidgets;
@@ -36,23 +36,19 @@ impl Component for AppModel {
                     set_label: "Increment",
                     // Messages are fully async, no blocking!
                     connect_clicked[sender] => move |_| {
-                        sender.command(|out, shutdown| {
-                            shutdown.register(async move {
-                                tokio::time::sleep(Duration::from_secs(1)).await;
-                                out.send(AppMsg::Increment);
-                            }).drop_on_shutdown()
+                        sender.oneshot_command(async move {
+                            tokio::time::sleep(Duration::from_secs(1)).await;
+                            AppMsg::Increment
                         })
                     },
                 },
 
                 gtk::Button::with_label("Decrement") {
                     connect_clicked[sender] => move |_| {
-                        sender.command(|out, shutdown| {
-                            shutdown.register(async move {
-                                tokio::time::sleep(Duration::from_secs(1)).await;
-                                out.send(AppMsg::Decrement);
-                            }).drop_on_shutdown()
-                        });
+                        sender.oneshot_command(async move {
+                            tokio::time::sleep(Duration::from_secs(1)).await;
+                            AppMsg::Decrement
+                        })
                     },
                 },
 

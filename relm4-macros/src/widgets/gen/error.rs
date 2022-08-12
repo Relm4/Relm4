@@ -62,7 +62,7 @@ impl ConditionalWidget {
             }
             ConditionalBranches::Match((_, _, match_arms)) => {
                 for arm in match_arms {
-                    arm.widget.error_stream(stream)
+                    arm.widget.error_stream(stream);
                 }
             }
         }

@@ -156,9 +156,9 @@ fn expect_ident_from_path(path: &Path) -> Result<Ident> {
 }
 
 fn expect_one_nested_expr(nested: &Punctuated<Expr, token::Comma>) -> Result<&Expr> {
-    if nested.len() != 1 {
-        Err(Error::new(nested.span(), "Expected only one expression."))
-    } else {
+    if nested.len() == 1 {
         Ok(nested.first().unwrap())
+    } else {
+        Err(Error::new(nested.span(), "Expected only one expression."))
     }
 }

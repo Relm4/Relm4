@@ -115,7 +115,7 @@ fn gtk_import() -> syn::Path {
 /// }
 /// ```
 ///
-/// # Notes on pre_view
+/// # Notes on `pre_view`
 ///
 /// Using `return` in `pre_view` will cause a compiler warning.
 /// In general, you don't want to use `return` in `pre_view` as it will
@@ -180,7 +180,7 @@ pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// + `"Label text" => ActionType,` to create new entries.
 /// + `"Label text" => ActionType(value),` to create new entries with action value.
-/// + `custom => "widget_id",` add a placeholder for custom widgets you can add later with [set_attribute_name](https://gtk-rs.org/gtk-rs-core/stable/0.15/docs/gio/struct.MenuItem.html#method.set_attribute_value).
+/// + `custom => "widget_id",` add a placeholder for custom widgets you can add later with [`set_attribute_name`](https://gtk-rs.org/gtk-rs-core/stable/0.15/docs/gio/struct.MenuItem.html#method.set_attribute_value).
 /// + `section! { ... }` to create new sections.
 ///
 /// # Example

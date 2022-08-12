@@ -63,21 +63,21 @@ impl ConditionalWidget {
             let branches = ConditionalBranches::parse_if(input)?;
             Ok(Self {
                 doc_attr,
-                name,
                 transition,
                 assign_wrapper,
-                branches,
+                name,
                 args,
+                branches,
             })
         } else if input.peek(Token![match]) {
             let branches = ConditionalBranches::parse_match(input)?;
             Ok(Self {
-                name,
-                transition,
-                branches,
-                assign_wrapper,
-                args,
                 doc_attr,
+                transition,
+                assign_wrapper,
+                name,
+                args,
+                branches,
             })
         } else {
             Err(input.error("Expected `if` or `match`").into())
@@ -111,9 +111,8 @@ impl ConditionalWidget {
                     Attr::Wrap(_, path) => {
                         if assign_wrapper.is_some() {
                             return Err(attr_twice_error(span).into());
-                        } else {
-                            assign_wrapper = Some(path.clone());
                         }
+                        assign_wrapper = Some(path.clone());
                     }
                     Attr::Doc(tokens) => {
                         if let Some(doc_tokens) = &mut doc_attr {

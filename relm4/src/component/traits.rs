@@ -4,8 +4,7 @@
 
 use std::fmt::Debug;
 
-use super::*;
-use crate::{ComponentSender, Sender};
+use crate::{ComponentBuilder, ComponentParts, ComponentSender, OnDestroy, Sender};
 
 /// Elm-style variant of a Component with view updates separated from input updates
 pub trait Component: Sized + 'static {
@@ -18,8 +17,8 @@ pub trait Component: Sized + 'static {
     /// The message type that the component provides as outputs.
     type Output: Debug + 'static;
 
-    /// The initial parameter(s) for launch.
-    type InitParams;
+    /// The parameter used to initialize the component.
+    type Init;
 
     /// The widget that was constructed by the component.
     type Root: Debug + OnDestroy;
@@ -28,8 +27,9 @@ pub trait Component: Sized + 'static {
     type Widgets: 'static;
 
     /// Create a builder for this component.
+    #[must_use]
     fn builder() -> ComponentBuilder<Self> {
-        ComponentBuilder::<Self>::new()
+        ComponentBuilder::<Self>::default()
     }
 
     /// Initializes the root widget
@@ -37,7 +37,7 @@ pub trait Component: Sized + 'static {
 
     /// Creates the initial model and view, docking it into the component.
     fn init(
-        params: Self::InitParams,
+        params: Self::Init,
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self>;
@@ -58,7 +58,7 @@ pub trait Component: Sized + 'static {
         sender: ComponentSender<Self>,
     ) {
         self.update_cmd(message, sender.clone());
-        self.update_view(widgets, sender)
+        self.update_view(widgets, sender);
     }
 
     /// Updates the view after the model has been updated.
@@ -137,7 +137,7 @@ impl<C> Component for C
 where
     C: SimpleComponent,
 {
-    type InitParams = C::InitParams;
+    type Init = C::InitParams;
     type Input = C::Input;
     type Output = C::Output;
     type Root = C::Root;
@@ -150,7 +150,7 @@ where
     }
 
     fn init(
-        params: Self::InitParams,
+        params: Self::Init,
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
@@ -162,7 +162,7 @@ where
     }
 
     fn update_view(&self, widgets: &mut Self::Widgets, sender: ComponentSender<Self>) {
-        C::update_view(self, widgets, sender)
+        C::update_view(self, widgets, sender);
     }
 
     fn shutdown(&mut self, widgets: &mut Self::Widgets, output: Sender<Self::Output>) {

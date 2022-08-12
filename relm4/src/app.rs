@@ -18,6 +18,7 @@ pub struct RelmApp {
 
 impl RelmApp {
     /// Create a Relm4 application.
+    #[must_use]
     pub fn new(app_id: &str) -> Self {
         let app = Application::builder().application_id(app_id).build();
 
@@ -41,7 +42,7 @@ impl RelmApp {
     /// Unlike [`gtk::prelude::ApplicationExtManual::run`], this function
     /// does not handle command-line arguments. To pass arguments to GTK, use
     /// [`RelmApp::run_with_args`].
-    pub fn run<C>(self, payload: C::InitParams)
+    pub fn run<C>(self, payload: C::Init)
     where
         C: Component,
         C::Root: IsA<gtk::Window> + WidgetExt,
@@ -51,7 +52,7 @@ impl RelmApp {
 
     /// Runs the application with the provided command-line arguments, returns once the application
     /// is closed.
-    pub fn run_with_args<C, S>(self, payload: C::InitParams, args: &[S])
+    pub fn run_with_args<C, S>(self, payload: C::Init, args: &[S])
     where
         C: Component,
         C::Root: IsA<gtk::Window> + WidgetExt,
@@ -65,12 +66,13 @@ impl RelmApp {
 
         app.connect_activate(move |app| {
             if let Some(payload) = payload.take() {
-                if !app.is_registered() {
-                    panic!("App should be already registered when activated");
-                }
+                assert!(
+                    app.is_registered(),
+                    "App should be already registered when activated"
+                );
 
-                let bridge = ComponentBuilder::<C>::new();
-                let controller = bridge.launch(payload).detach();
+                let builder = ComponentBuilder::<C>::default();
+                let controller = builder.launch(payload).detach();
                 let window = controller.widget().clone();
 
                 app.add_window(window.as_ref());

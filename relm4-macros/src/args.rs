@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote_spanned, ToTokens};
 use syn::parse::{Parse, ParseStream};
-use syn::punctuated::Punctuated;
+use syn::punctuated::{Pair, Punctuated};
 use syn::spanned::Spanned;
 use syn::{Error, Result, Token};
 
@@ -21,7 +21,7 @@ where
         if punct.is_empty() {
             return Err(Error::new(input.span(), "Expected at least one element. This is probably caused by empty arguments and macros."));
         }
-        let inner = punct.into_pairs().map(|pair| pair.into_value()).collect();
+        let inner = punct.into_pairs().map(Pair::into_value).collect();
 
         Ok(Args { inner })
     }

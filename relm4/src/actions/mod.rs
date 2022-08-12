@@ -189,6 +189,7 @@ where
     Name::Target: EmptyType,
 {
     /// Create a menu item for this action.
+    #[must_use]
     pub fn to_menu_item(label: &str) -> gio::MenuItem {
         gio::MenuItem::new(Some(label), Some(&Name::action_name()))
     }
@@ -208,11 +209,13 @@ impl<GroupName: ActionGroupName> RelmActionGroup<GroupName> {
     }
 
     /// Convert [`RelmActionGroup`] into a [`gio::SimpleActionGroup`].
+    #[must_use]
     pub fn into_action_group(self) -> gio::SimpleActionGroup {
         self.group
     }
 
     /// Create a new [`SimpleActionGroup`](gio::SimpleActionGroup).
+    #[must_use]
     pub fn new() -> Self {
         Self {
             group_name: PhantomData,

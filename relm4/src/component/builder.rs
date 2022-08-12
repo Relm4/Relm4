@@ -24,17 +24,19 @@ pub struct ComponentBuilder<C: Component> {
     pub(super) component: PhantomData<C>,
 }
 
-impl<C: Component> ComponentBuilder<C> {
-    #[allow(clippy::new_without_default)]
+impl<C: Component> Default for ComponentBuilder<C> {
     /// Prepares a component for initialization.
-    pub fn new() -> Self {
+    fn default() -> Self {
         ComponentBuilder {
             root: C::init_root(),
             component: PhantomData,
         }
     }
+}
 
+impl<C: Component> ComponentBuilder<C> {
     /// Configure the root widget before launching.
+    #[must_use]
     pub fn update_root<F: FnOnce(&mut C::Root)>(mut self, func: F) -> Self {
         func(&mut self.root);
         self
@@ -51,6 +53,7 @@ where
     C::Root: AsRef<gtk::Widget>,
 {
     /// Attach the component's root widget to a given container.
+    #[must_use]
     pub fn attach_to(self, container: &impl RelmContainerExt) -> Self {
         container.container_add(self.root.as_ref());
 
@@ -66,6 +69,7 @@ where
     ///
     /// If the root widget is a native dialog, such as [`gtk::FileChooserNative`],
     /// you should use [`transient_for_native`][ComponentBuilder::transient_for_native] instead.
+    #[must_use]
     pub fn transient_for(self, window: impl AsRef<gtk::Window>) -> Self {
         self.root.as_ref().set_transient_for(Some(window.as_ref()));
 
@@ -81,6 +85,7 @@ where
     ///
     /// Applicable to native dialogs only, such as [`gtk::FileChooserNative`].
     /// If the root widget is a non-native dialog, you should use [`transient_for`][ComponentBuilder::transient_for] instead.
+    #[must_use]
     pub fn transient_for_native(self, window: impl AsRef<gtk::Window>) -> Self {
         self.root.as_ref().set_transient_for(Some(window.as_ref()));
 
@@ -90,7 +95,7 @@ where
 
 impl<C: Component> ComponentBuilder<C> {
     /// Starts the component, passing ownership to a future attached to a GLib context.
-    pub fn launch(self, payload: C::InitParams) -> Connector<C> {
+    pub fn launch(self, payload: C::Init) -> Connector<C> {
         let ComponentBuilder { root, .. } = self;
 
         // Used for all events to be processed by this component's internal service.

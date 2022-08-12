@@ -25,7 +25,7 @@ pub(super) struct FactoryBuilder<C: FactoryComponent> {
 }
 
 impl<C: FactoryComponent> FactoryBuilder<C> {
-    pub(super) fn new(index: &DynamicIndex, params: C::InitParams) -> Self {
+    pub(super) fn new(index: &DynamicIndex, params: C::Init) -> Self {
         // Used for all events to be processed by this component's internal service.
         let (input_tx, input_rx) = crate::channel::<C::Input>();
 

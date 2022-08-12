@@ -55,7 +55,7 @@ pub enum CmdOut {
 
 impl Component for App {
     type CommandOutput = CmdOut;
-    type InitParams = String;
+    type Init = String;
     type Input = Input;
     type Output = Output;
     type Root = gtk::Window;
@@ -66,7 +66,7 @@ impl Component for App {
     }
 
     fn init(
-        _args: Self::InitParams,
+        _args: Self::Init,
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {

@@ -5,6 +5,7 @@ use std::fmt;
 
 /// Create an unbounded channel to send messages
 /// between different parts of you application.
+#[must_use]
 pub fn channel<T>() -> (Sender<T>, Receiver<T>) {
     let (tx, rx) = flume::unbounded();
     (Sender(tx), Receiver(rx))
@@ -22,9 +23,7 @@ impl<T> From<flume::Sender<T>> for Sender<T> {
 impl<T> Sender<T> {
     /// Sends messages to a component or worker.
     pub fn send(&self, message: T) {
-        if self.0.send(message).is_err() {
-            panic!("receiver was dropped");
-        }
+        assert!(self.0.send(message).is_ok(), "Receiver was dropped");
     }
 }
 
@@ -50,6 +49,7 @@ impl<T> Receiver<T> {
     }
 
     /// Receives a message synchronously from a component or worker.
+    #[must_use]
     pub fn recv_sync(&self) -> Option<T> {
         self.0.recv().ok()
     }

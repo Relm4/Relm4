@@ -3,7 +3,7 @@ use std::sync::Arc;
 
 /// A dynamic index that updates automatically when items are shifted inside a factory container.
 ///
-/// For example a [`FactoryVecDeque`](super::FactoryVecDeque) has an [`insert`](super::FactoryVecDeque::insert)
+/// For example a [`FactoryVecDeque`](super::FactoryVecDeque) has an [`insert`](super::FactoryVecDequeGuard::insert)
 /// method that allows users to insert data at arbitrary positions.
 /// If we insert at the front all following widgets will be moved by one which would
 /// invalidate their indices.
@@ -43,6 +43,7 @@ impl DynamicIndex {
     /// Get the current index number.
     ///
     /// This value is updated by the factory container and might change after each update function.
+    #[must_use]
     pub fn current_index(&self) -> usize {
         self.inner.load(Ordering::Relaxed)
     }

@@ -25,10 +25,10 @@ impl Property {
                 is_conditional,
             ),
             PropertyType::Widget(widget) => {
-                widget.conditional_init_stream(stream, model_name, is_conditional)
+                widget.conditional_init_stream(stream, model_name, is_conditional);
             }
             PropertyType::ConditionalWidget(cond_widget) => {
-                cond_widget.conditional_init_stream(stream, model_name)
+                cond_widget.conditional_init_stream(stream, model_name);
             }
             PropertyType::SignalHandler(_) | PropertyType::ParseError(_) => (),
         }
@@ -116,7 +116,7 @@ impl ConditionalWidget {
                             #inner_update_stream
                             #index
                         },
-                    })
+                    });
                 }
                 quote! {
                     #match_token #expr {

@@ -5,19 +5,24 @@ use crate::factory::{
     FactoryView,
 };
 
-use gtk::prelude::Cast;
-
 use super::{ModelStateValue, RenderedState};
 
 use std::collections::hash_map::DefaultHasher;
 use std::collections::VecDeque;
-use std::hash::{Hash, Hasher};
+use std::hash::Hash;
 use std::ops::{Deref, Index, IndexMut};
+
+#[cfg(feature = "libadwaita")]
+use gtk::prelude::Cast;
+
+#[cfg(feature = "libadwaita")]
+use std::hash::Hasher;
 
 /// Provides methods to edit the underlying [`FactoryVecDeque`].
 ///
 /// The changes will be rendered on the widgets after the guard goes out of scope.
 #[derive(Debug)]
+#[must_use]
 pub struct FactoryVecDequeGuard<'a, C: FactoryComponent> {
     inner: &'a mut FactoryVecDeque<C>,
 }
@@ -30,6 +35,8 @@ impl<'a, C: FactoryComponent> Drop for FactoryVecDequeGuard<'a, C> {
 
 impl<'a, C: FactoryComponent> FactoryVecDequeGuard<'a, C> {
     fn new(inner: &'a mut FactoryVecDeque<C>) -> Self {
+        #[allow(unused_mut)]
+        #[allow(clippy::let_and_return)]
         let mut guard = FactoryVecDequeGuard { inner };
 
         #[cfg(feature = "libadwaita")]
@@ -41,7 +48,9 @@ impl<'a, C: FactoryComponent> FactoryVecDequeGuard<'a, C> {
     /// Drops the guard and renders all changes.
     ///
     /// Use this to transfer full ownership back to the [`FactoryVecDeque`].
-    pub fn drop(self) {}
+    pub fn drop(self) {
+        drop(self);
+    }
 
     /// Apply external updates that happened between the last render.
     ///
@@ -52,17 +61,17 @@ impl<'a, C: FactoryComponent> FactoryVecDequeGuard<'a, C> {
     fn apply_external_updates(&mut self) {
         if let Some(tab_view) = self.inner.widget().dynamic_cast_ref::<adw::TabView>() {
             let length = tab_view.n_pages();
-            let mut hashes: Vec<u64> = Vec::with_capacity(length as usize);
+            let mut hash_values: Vec<u64> = Vec::with_capacity(usize::try_from(length).unwrap());
 
             for i in 0..length {
                 let page = tab_view.nth_page(i);
                 let mut hasher = DefaultHasher::default();
                 page.hash(&mut hasher);
-                hashes.push(hasher.finish());
+                hash_values.push(hasher.finish());
             }
 
             // Tab rearrangement
-            for (index, hash) in hashes.iter().enumerate() {
+            for (index, hash) in hash_values.iter().enumerate() {
                 if self
                     .inner
                     .rendered_state
@@ -88,12 +97,12 @@ impl<'a, C: FactoryComponent> FactoryVecDequeGuard<'a, C> {
             let mut index = 0;
             while index < self.inner.rendered_state.len() {
                 let hash = self.inner.rendered_state[index].widget_hash;
-                if !hashes.contains(&hash) {
+                if hash_values.contains(&hash) {
+                    index += 1;
+                } else {
                     self.inner.rendered_state.remove(index);
 
                     self.remove(index);
-                } else {
-                    index += 1;
                 }
             }
         }
@@ -167,13 +176,13 @@ impl<'a, C: FactoryComponent> FactoryVecDequeGuard<'a, C> {
     }
 
     /// Appends an element at the end of the [`FactoryVecDeque`].
-    pub fn push_back(&mut self, init_params: C::InitParams) {
+    pub fn push_back(&mut self, init_params: C::Init) {
         let index = self.len();
         self.insert(index, init_params);
     }
 
     /// Prepends an element to the [`FactoryVecDeque`].
-    pub fn push_front(&mut self, init_params: C::InitParams) {
+    pub fn push_front(&mut self, init_params: C::Init) {
         self.insert(0, init_params);
     }
 
@@ -186,7 +195,7 @@ impl<'a, C: FactoryComponent> FactoryVecDequeGuard<'a, C> {
     /// # Panics
     ///
     /// Panics if index is greater than [`FactoryVecDeque`]’s length.
-    pub fn insert(&mut self, index: usize, init_params: C::InitParams) {
+    pub fn insert(&mut self, index: usize, init_params: C::Init) {
         let dyn_index = DynamicIndex::new(index);
 
         // Increment the indexes of the following elements.
@@ -286,7 +295,7 @@ impl<'a, C: FactoryComponent> FactoryVecDequeGuard<'a, C> {
     ///
     /// Panics if index is out of bounds.
     pub fn move_front(&mut self, current_position: usize) {
-        self.move_to(current_position, 0)
+        self.move_to(current_position, 0);
     }
 
     /// Moves an element at index `current_position` to the back,
@@ -296,7 +305,7 @@ impl<'a, C: FactoryComponent> FactoryVecDequeGuard<'a, C> {
     ///
     /// Panics if index is out of bounds.
     pub fn move_back(&mut self, current_position: usize) {
-        self.move_to(current_position, self.len() - 1)
+        self.move_to(current_position, self.len() - 1);
     }
 
     /// Remove all components from the [`FactoryVecDeque`].
@@ -368,6 +377,7 @@ impl<C: FactoryComponent> Index<usize> for FactoryVecDeque<C> {
 
 impl<C: FactoryComponent> FactoryVecDeque<C> {
     /// Creates a new [`FactoryVecDeque`].
+    #[must_use]
     pub fn new(widget: C::ParentWidget, parent_sender: &Sender<C::ParentMsg>) -> Self {
         Self {
             widget,
@@ -471,6 +481,7 @@ impl<C: FactoryComponent> FactoryVecDeque<C> {
 
                 RenderedState {
                     uid: s.uid,
+                    #[cfg(feature = "libadwaita")]
                     widget_hash: hasher.finish(),
                 }
             })
@@ -497,7 +508,7 @@ impl<C: FactoryComponent> FactoryVecDeque<C> {
 
     /// Send a message to one of the elements.
     pub fn send(&self, index: usize, msg: C::Input) {
-        self.components[index].send(msg)
+        self.components[index].send(msg);
     }
 
     /// Tries to get an immutable reference to
