@@ -2,9 +2,14 @@
 
 ## Unreleased
 
+## 0.5.0-beta.2 - 2022-8-12
+
++ core: Rename InitParams to Init
++ core: Add oneshot_command method to ComponentSender
 + core: Pass senders by value
 + core: Make factories use FactoryComponentSender instead of individual senders for input and output
 + core: Remove generics from FactoryComponent
++ core: Implement FactoryComponent for adw::Carousel
 + macros: Fix unsoundness with thread local memory
 + relm4-components: Complete port to 0.5
 + examples: More examples ported to 0.5
