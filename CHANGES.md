@@ -9,7 +9,7 @@
 + core: Pass senders by value
 + core: Make factories use FactoryComponentSender instead of individual senders for input and output
 + core: Remove generics from FactoryComponent
-+ core: Implement FactoryComponent for adw::Carousel
++ core: Implement FactoryView for adw::Carousel
 + macros: Fix unsoundness with thread local memory
 + relm4-components: Complete port to 0.5
 + examples: More examples ported to 0.5
