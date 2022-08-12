@@ -50,10 +50,6 @@ impl<Input, Output, CommandOutput: Send + 'static>
     /// Spawns a future that will be dropped as soon as the component is shut down.
     ///
     /// Essentially, this is a simpler version of [`Self::command()`].
-    ///
-    /// ```rust
-    ///
-    /// ```
     pub fn oneshot_command<Fut>(&self, future: Fut)
     where
         Fut: Future<Output = CommandOutput> + Send + 'static,
