@@ -95,7 +95,7 @@ struct AppModel {
 
 #[relm4::component]
 impl SimpleComponent for AppModel {
-    type InitParams = ();
+    type Init = ();
     type Input = AppMsg;
     type Output = ();
     type Widgets = AppWidgets;

@@ -118,7 +118,7 @@ pub enum OpenDialogResponse<S: Select> {
 impl<S: Select + 'static> SimpleComponent for OpenDialogInner<S> {
     type Widgets = OpenDialogWidgets;
 
-    type InitParams = OpenDialogSettings;
+    type Init = OpenDialogSettings;
 
     type Input = OpenDialogMsg;
     type Output = OpenDialogResponse<S>;
@@ -157,7 +157,7 @@ impl<S: Select + 'static> SimpleComponent for OpenDialogInner<S> {
     }
 
     fn init(
-        settings: Self::InitParams,
+        settings: Self::Init,
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {

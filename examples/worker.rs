@@ -27,11 +27,11 @@ enum AppMsg {
 }
 
 impl Worker for AsyncHandler {
-    type InitParams = ();
+    type Init = ();
     type Input = AsyncHandlerMsg;
     type Output = AppMsg;
 
-    fn init(_params: Self::InitParams, _sender: ComponentSender<Self>) -> Self {
+    fn init(_params: Self::Init, _sender: ComponentSender<Self>) -> Self {
         Self
     }
 
@@ -53,7 +53,7 @@ impl Worker for AsyncHandler {
 
 #[relm4::component]
 impl SimpleComponent for AppModel {
-    type InitParams = ();
+    type Init = ();
     type Input = AppMsg;
     type Output = ();
     type Widgets = AppWidgets;

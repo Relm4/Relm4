@@ -12,7 +12,7 @@ struct Header;
 
 #[relm4::component]
 impl SimpleComponent for Header {
-    type InitParams = ();
+    type Init = ();
     type Input = ();
     type Output = AppMsg;
     type Widgets = HeaderWidgets;
@@ -54,7 +54,7 @@ impl SimpleComponent for Header {
     }
 
     fn init(
-        _init_params: Self::InitParams,
+        _init_params: Self::Init,
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
@@ -78,7 +78,7 @@ enum DialogMsg {
 
 #[relm4::component]
 impl SimpleComponent for Dialog {
-    type InitParams = gtk::Window;
+    type Init = gtk::Window;
     type Input = DialogMsg;
     type Output = AppMsg;
     type Widgets = DialogWidgets;
@@ -106,7 +106,7 @@ impl SimpleComponent for Dialog {
     }
 
     fn init(
-        parent_window: Self::InitParams,
+        parent_window: Self::Init,
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
@@ -152,7 +152,7 @@ struct App {
 
 #[relm4::component]
 impl SimpleComponent for App {
-    type InitParams = adw::Application;
+    type Init = adw::Application;
     type Input = AppMsg;
     type Output = ();
     type Widgets = AppWidgets;
@@ -176,7 +176,7 @@ impl SimpleComponent for App {
     }
 
     fn init(
-        application: Self::InitParams,
+        application: Self::Init,
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {

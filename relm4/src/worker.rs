@@ -19,14 +19,14 @@ use std::{any, thread};
 /// Receives inputs and outputs in the background.
 pub trait Worker: Sized + Send + 'static {
     /// The initial parameters that will be used to build the worker state.
-    type InitParams: 'static + Send;
+    type Init: 'static + Send;
     /// The type of inputs that this worker shall receive.
     type Input: 'static + Send + Debug;
     /// The type of outputs that this worker shall send.
     type Output: 'static + Send + Debug;
 
     /// Defines the initial state of the worker.
-    fn init(params: Self::InitParams, sender: crate::ComponentSender<Self>) -> Self;
+    fn init(params: Self::Init, sender: crate::ComponentSender<Self>) -> Self;
 
     /// Defines how inputs will bep processed
     fn update(&mut self, message: Self::Input, sender: crate::ComponentSender<Self>);
@@ -39,7 +39,7 @@ where
     type Root = EmptyRoot;
     type Widgets = ();
 
-    type InitParams = <Self as Worker>::InitParams;
+    type Init = <Self as Worker>::Init;
     type Input = <Self as Worker>::Input;
     type Output = <Self as Worker>::Output;
 
@@ -48,7 +48,7 @@ where
     }
 
     fn init(
-        params: Self::InitParams,
+        params: Self::Init,
         _root: &Self::Root,
         sender: crate::ComponentSender<Self>,
     ) -> crate::ComponentParts<Self> {

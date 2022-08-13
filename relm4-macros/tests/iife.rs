@@ -4,7 +4,7 @@ struct AppModel;
 
 #[relm4_macros::component]
 impl SimpleComponent for AppModel {
-    type InitParams = ();
+    type Init = ();
     type Input = ();
     type Output = ();
     type Widgets = AppWidgets;
@@ -26,7 +26,7 @@ impl SimpleComponent for AppModel {
     }
 
     fn init(
-        _counter: Self::InitParams,
+        _counter: Self::Init,
         root: &Self::Root,
         _sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
