@@ -6,7 +6,7 @@ struct TestComponent;
 
 #[relm4_macros::component]
 impl SimpleComponent for TestComponent {
-    type InitParams = ();
+    type Init = ();
     type Input = ();
     type Output = ();
     type Widgets = TestWidgets;
