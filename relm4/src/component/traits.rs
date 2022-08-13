@@ -169,3 +169,27 @@ where
         self.shutdown(widgets, output);
     }
 }
+
+/// An empty, non-interactive component as a placeholder for tests.
+impl SimpleComponent for () {
+    type Input = ();
+    type Output = ();
+    type Init = ();
+    type Root = super::EmptyRoot;
+    type Widgets = ();
+
+    fn init_root() -> Self::Root {
+        super::EmptyRoot::default()
+    }
+
+    fn init(
+        _init: Self::Init,
+        _root: &Self::Root,
+        _sender: ComponentSender<Self>,
+    ) -> ComponentParts<Self> {
+        ComponentParts {
+            model: (),
+            widgets: (),
+        }
+    }
+}
