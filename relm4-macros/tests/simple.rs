@@ -14,7 +14,7 @@ enum AppMsg {
 
 #[relm4_macros::component]
 impl SimpleComponent for AppModel {
-    type InitParams = u8;
+    type Init = u8;
     type Input = AppMsg;
     type Output = ();
     type Widgets = AppWidgets;
@@ -52,7 +52,7 @@ impl SimpleComponent for AppModel {
     }
 
     fn init(
-        counter: Self::InitParams,
+        counter: Self::Init,
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {

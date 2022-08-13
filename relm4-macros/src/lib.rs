@@ -54,7 +54,7 @@ fn gtk_import() -> syn::Path {
 ///
 /// #[relm4_macros::component]
 /// impl SimpleComponent for AppModel {
-///     type InitParams = u8;
+///     type Init = u8;
 ///     type Input = AppMsg;
 ///     type Output = ();
 ///     type Widgets = AppWidgets;
@@ -91,7 +91,7 @@ fn gtk_import() -> syn::Path {
 ///     }
 ///
 ///     fn init(
-///         counter: Self::InitParams,
+///         counter: Self::Init,
 ///         root: &Self::Root,
 ///         sender: ComponentSender<Self>,
 ///     ) -> ComponentParts<Self> {
@@ -132,7 +132,7 @@ fn gtk_import() -> syn::Path {
 /// #[relm4_macros::component]
 /// impl SimpleComponent for AppModel {
 ///       /* Code omitted */
-/// #     type InitParams = ();
+/// #     type Init = ();
 /// #     type Input = ();
 /// #     type Output = ();
 /// #     type Widgets = AppWidgets;
@@ -146,7 +146,7 @@ fn gtk_import() -> syn::Path {
 ///       }
 /// #
 /// #     fn init(
-/// #         counter: Self::InitParams,
+/// #         counter: Self::Init,
 /// #         root: &Self::Root,
 /// #         sender: ComponentSender<Self>,
 /// #     ) -> ComponentParts<Self> {

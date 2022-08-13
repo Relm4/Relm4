@@ -65,7 +65,7 @@ pub enum SaveDialogResponse {
 impl SimpleComponent for SaveDialog {
     type Widgets = SaveDialogWidgets;
 
-    type InitParams = SaveDialogSettings;
+    type Init = SaveDialogSettings;
 
     type Input = SaveDialogMsg;
     type Output = SaveDialogResponse;
@@ -106,7 +106,7 @@ impl SimpleComponent for SaveDialog {
     }
 
     fn init(
-        settings: Self::InitParams,
+        settings: Self::Init,
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
++ core: Rename InitParams to Init in SimpleComponent and Worker too
+
 ## 0.5.0-beta.2 - 2022-8-12
 
 + core: Rename InitParams to Init

@@ -30,7 +30,7 @@ enum Input {
 impl SimpleComponent for App {
     type Widgets = AppWidgets;
 
-    type InitParams = ();
+    type Init = ();
 
     type Input = Input;
     type Output = ();
@@ -99,7 +99,7 @@ impl SimpleComponent for App {
     }
 
     fn init(
-        _: Self::InitParams,
+        _: Self::Init,
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {

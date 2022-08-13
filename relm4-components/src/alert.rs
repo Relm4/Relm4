@@ -56,7 +56,7 @@ pub enum AlertResponse {
 #[relm4::component(pub)]
 impl SimpleComponent for Alert {
     type Widgets = AlertWidgets;
-    type InitParams = AlertSettings;
+    type Init = AlertSettings;
     type Input = AlertMsg;
     type Output = AlertResponse;
 

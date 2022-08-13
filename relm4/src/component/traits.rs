@@ -37,7 +37,7 @@ pub trait Component: Sized + 'static {
 
     /// Creates the initial model and view, docking it into the component.
     fn init(
-        params: Self::Init,
+        init: Self::Init,
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self>;
@@ -97,11 +97,11 @@ pub trait SimpleComponent: Sized + 'static {
     /// The message type that the component provides as outputs.
     type Output: Debug + 'static;
 
-    /// The initial parameter(s) for launch.
-    type InitParams;
+    /// The parameter used to initialize the component.
+    type Init;
 
     /// The widget that was constructed by the component.
-    type Root: std::fmt::Debug + OnDestroy;
+    type Root: Debug + OnDestroy;
 
     /// The type that's used for storing widgets created for this component.
     type Widgets: 'static;
@@ -111,7 +111,7 @@ pub trait SimpleComponent: Sized + 'static {
 
     /// Creates the initial model and view, docking it into the component.
     fn init(
-        params: Self::InitParams,
+        init: Self::Init,
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self>;
@@ -137,7 +137,7 @@ impl<C> Component for C
 where
     C: SimpleComponent,
 {
-    type Init = C::InitParams;
+    type Init = C::Init;
     type Input = C::Input;
     type Output = C::Output;
     type Root = C::Root;
@@ -150,11 +150,11 @@ where
     }
 
     fn init(
-        params: Self::Init,
+        init: Self::Init,
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        C::init(params, root, sender)
+        C::init(init, root, sender)
     }
 
     fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>) {

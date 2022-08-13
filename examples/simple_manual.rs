@@ -21,7 +21,7 @@ struct AppWidgets {
 }
 
 impl SimpleComponent for AppModel {
-    type InitParams = u8;
+    type Init = u8;
     type Input = AppMsg;
     type Output = ();
     type Root = gtk::Window;
@@ -37,7 +37,7 @@ impl SimpleComponent for AppModel {
 
     /// Initialize the UI.
     fn init(
-        counter: Self::InitParams,
+        counter: Self::Init,
         window: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
