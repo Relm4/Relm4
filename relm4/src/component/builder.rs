@@ -2,9 +2,12 @@
 // Copyright 2022 System76 <info@system76.com>
 // SPDX-License-Identifier: MIT or Apache-2.0
 
+use super::message_broker::MessageBroker;
 use super::{Component, ComponentParts, ComponentSenderInner, Connector, OnDestroy, StateWatcher};
 use crate::shutdown;
+use crate::Receiver;
 use crate::RelmContainerExt;
+use crate::Sender;
 use async_oneshot::oneshot;
 use futures::FutureExt;
 use gtk::prelude::{GtkWindowExt, NativeDialogExt};
@@ -96,10 +99,33 @@ where
 impl<C: Component> ComponentBuilder<C> {
     /// Starts the component, passing ownership to a future attached to a GLib context.
     pub fn launch(self, payload: C::Init) -> Connector<C> {
-        let ComponentBuilder { root, .. } = self;
-
         // Used for all events to be processed by this component's internal service.
         let (input_tx, input_rx) = crate::channel::<C::Input>();
+
+        self.launch_with_input_channel(payload, input_tx, input_rx)
+    }
+
+    /// Similar to [`launch()`](ComponentBuilder::launch) but also initializes a [`MessageBroker`].
+    ///
+    /// # Panics
+    ///
+    /// This method panics if the message broker was already initialized in another launch.
+    pub fn launch_with_broker(self, payload: C::Init, broker: &MessageBroker<C>) -> Connector<C> {
+        let (input_tx, input_rx) = broker.get_channel();
+        self.launch_with_input_channel(
+            payload,
+            input_tx,
+            input_rx.expect("Message broker launched multiple times"),
+        )
+    }
+
+    fn launch_with_input_channel(
+        self,
+        payload: C::Init,
+        input_tx: Sender<C::Input>,
+        input_rx: Receiver<C::Input>,
+    ) -> Connector<C> {
+        let ComponentBuilder { root, .. } = self;
 
         // Used by this component to send events to be handled externally by the caller.
         let (output_tx, output_rx) = crate::channel::<C::Output>();
