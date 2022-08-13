@@ -152,12 +152,12 @@ impl SimpleComponent for AppModel {
 
     // Initialize the UI.
     fn init(
-        params: Self::Init,
+        init: Self::Init,
         renamed_root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let counter = AppModel {
-            value: params.counter,
+            value: init.counter,
             tracker: 0,
         };
 

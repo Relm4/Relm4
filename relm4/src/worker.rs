@@ -26,7 +26,7 @@ pub trait Worker: Sized + Send + 'static {
     type Output: 'static + Send + Debug;
 
     /// Defines the initial state of the worker.
-    fn init(params: Self::Init, sender: crate::ComponentSender<Self>) -> Self;
+    fn init(init: Self::Init, sender: crate::ComponentSender<Self>) -> Self;
 
     /// Defines how inputs will bep processed
     fn update(&mut self, message: Self::Input, sender: crate::ComponentSender<Self>);
@@ -48,11 +48,11 @@ where
     }
 
     fn init(
-        params: Self::Init,
+        init: Self::Init,
         _root: &Self::Root,
         sender: crate::ComponentSender<Self>,
     ) -> crate::ComponentParts<Self> {
-        let model = Self::init(params, sender);
+        let model = Self::init(init, sender);
         ComponentParts { model, widgets: () }
     }
 

@@ -113,7 +113,7 @@ pub trait FactoryComponent:
 
     /// Initializes the model.
     fn init_model(
-        params: Self::Init,
+        init: Self::Init,
         index: &DynamicIndex,
         sender: FactoryComponentSender<Self>,
     ) -> Self;

@@ -31,7 +31,7 @@ impl Worker for AsyncHandler {
     type Input = AsyncHandlerMsg;
     type Output = AppMsg;
 
-    fn init(_params: Self::Init, _sender: ComponentSender<Self>) -> Self {
+    fn init(_init: Self::Init, _sender: ComponentSender<Self>) -> Self {
         Self
     }
 

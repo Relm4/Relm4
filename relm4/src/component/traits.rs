@@ -37,7 +37,7 @@ pub trait Component: Sized + 'static {
 
     /// Creates the initial model and view, docking it into the component.
     fn init(
-        params: Self::Init,
+        init: Self::Init,
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self>;
@@ -111,7 +111,7 @@ pub trait SimpleComponent: Sized + 'static {
 
     /// Creates the initial model and view, docking it into the component.
     fn init(
-        params: Self::Init,
+        init: Self::Init,
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self>;
@@ -150,11 +150,11 @@ where
     }
 
     fn init(
-        params: Self::Init,
+        init: Self::Init,
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        C::init(params, root, sender)
+        C::init(init, root, sender)
     }
 
     fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>) {

@@ -26,7 +26,7 @@ impl SimpleComponent for AppModel {
     }
 
     fn init(
-        _init_params: Self::Init,
+        _init: Self::Init,
         _root: &Self::Root,
         _sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
