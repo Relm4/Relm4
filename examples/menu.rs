@@ -33,7 +33,7 @@ impl SimpleComponent for AppModel {
 
                 gtk::Button {
                     set_label: "Increment",
-                    //set_action::<TestU8Action>: 1,
+                    ActionablePlus::set_action::<TestU8Action>: 1,
                     connect_clicked[sender] => move |_| {
                         sender.input(AppMsg::Increment);
                     },
