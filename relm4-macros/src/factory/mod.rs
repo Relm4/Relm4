@@ -4,7 +4,7 @@ use syn::visit_mut::VisitMut;
 use syn::{parse_quote, Ident, Visibility};
 
 use crate::component::token_streams;
-use crate::visitors::FactoryComponentVisitor;
+use crate::visitors::{FactoryComponentVisitor, PreAndPostView};
 
 mod inject_view_code;
 
@@ -14,15 +14,10 @@ pub(crate) fn generate_tokens(
     vis: Option<Visibility>,
     mut factory_impl: syn::ItemImpl,
 ) -> TokenStream2 {
-    let outer_attrs = factory_impl.attrs.clone();
+    let mut errors = vec![];
 
-    let mut factory_visitor = FactoryComponentVisitor::default();
+    let mut factory_visitor = FactoryComponentVisitor::new(&mut errors);
     factory_visitor.visit_item_impl_mut(&mut factory_impl);
-
-    let errors = factory_visitor
-        .errors
-        .iter()
-        .map(syn::Error::to_compile_error);
 
     let additional_fields = factory_visitor.additional_fields.take();
 
@@ -34,6 +29,7 @@ pub(crate) fn generate_tokens(
         view_widgets: Some(view_widgets),
         root_name,
         init_widgets,
+        errors,
         ..
     } = factory_visitor
     {
@@ -104,14 +100,11 @@ pub(crate) fn generate_tokens(
             }
         });
 
-        let pre_view_stmts = factory_visitor
-            .pre_view
-            .map(|f| f.block.stmts)
-            .unwrap_or_default();
-        let post_view_stmts = factory_visitor
-            .post_view
-            .map(|f| f.block.stmts)
-            .unwrap_or_default();
+        let PreAndPostView {
+            pre_view,
+            post_view,
+            ..
+        } = PreAndPostView::extract(&mut factory_impl, errors);
 
         factory_impl.items.push(parse_quote! {
             /// Update the view to represent the updated model.
@@ -127,9 +120,9 @@ pub(crate) fn generate_tokens(
                 } = widgets;
 
                 // Wrap post_view code to prevent early returns from skipping other view code.
-                #(#pre_view_stmts)*
+                #(#pre_view)*
                 #update_view
-                (|| { #(#post_view_stmts)* })();
+                (|| { #(#post_view)* })();
             }
         });
 
@@ -138,6 +131,7 @@ pub(crate) fn generate_tokens(
             .push(syn::ImplItem::Method(init_injected));
     }
 
+    let outer_attrs = &factory_impl.attrs;
     let widgets_struct = factory_visitor.widgets_ty.map(|ty| {
         quote! {
             #[allow(dead_code)]
@@ -149,6 +143,8 @@ pub(crate) fn generate_tokens(
             }
         }
     });
+
+    let errors = errors.iter().map(syn::Error::to_compile_error);
 
     quote! {
         #widgets_struct

@@ -6,21 +6,33 @@ use crate::additional_fields::AdditionalFields;
 use crate::menu::Menus;
 use crate::widgets::ViewWidgets;
 
-#[derive(Default)]
-pub(crate) struct ComponentVisitor {
+pub(crate) struct ComponentVisitor<'errors> {
     pub view_widgets: Option<ViewWidgets>,
     pub widgets_ty: Option<syn::Type>,
     pub init: Option<syn::ImplItemMethod>,
-    pub pre_view: Option<syn::ImplItemMethod>,
-    pub post_view: Option<syn::ImplItemMethod>,
     pub root_name: Option<syn::Ident>,
     pub model_name: Option<syn::Ident>,
     pub additional_fields: Option<AdditionalFields>,
     pub menus: Option<Menus>,
-    pub errors: Vec<syn::Error>,
+    pub errors: &'errors mut Vec<syn::Error>,
 }
 
-impl VisitMut for ComponentVisitor {
+impl<'errors> ComponentVisitor<'errors> {
+    pub fn new(errors: &'errors mut Vec<syn::Error>) -> Self {
+        ComponentVisitor {
+            view_widgets: None,
+            widgets_ty: None,
+            init: None,
+            root_name: None,
+            model_name: None,
+            additional_fields: None,
+            menus: None,
+            errors,
+        }
+    }
+}
+
+impl VisitMut for ComponentVisitor<'_> {
     fn visit_impl_item_mut(&mut self, item: &mut syn::ImplItem) {
         let mut remove = false;
 
@@ -82,8 +94,8 @@ impl VisitMut for ComponentVisitor {
                     _ => (),
                 }
             }
-            syn::ImplItem::Method(func) => match &*func.sig.ident.to_string() {
-                "init" => {
+            syn::ImplItem::Method(func) => {
+                if &*func.sig.ident.to_string() == "init" {
                     let mut init_fn_visitor = InitFnVisitor::default();
                     init_fn_visitor.visit_impl_item_method(func);
 
@@ -98,31 +110,12 @@ impl VisitMut for ComponentVisitor {
                     }
                     remove = true;
                 }
-                "pre_view" => {
-                    let existing = self.pre_view.replace(func.clone());
-                    if existing.is_some() {
-                        self.errors
-                            .push(syn::Error::new_spanned(func, "duplicate pre_view function"));
-                    }
-                    remove = true;
-                }
-                "post_view" => {
-                    let existing = self.post_view.replace(func.clone());
-                    if existing.is_some() {
-                        self.errors.push(syn::Error::new_spanned(
-                            func,
-                            "duplicate post_view function",
-                        ));
-                    }
-                    remove = true;
-                }
-                _ => (),
-            },
+            }
             _ => (),
         }
 
         if remove {
-            *item = syn::ImplItem::Verbatim(quote! {});
+            *item = null_item();
         }
 
         visit_mut::visit_impl_item_mut(self, item);
@@ -135,20 +128,31 @@ impl VisitMut for ComponentVisitor {
     }
 }
 
-#[derive(Default)]
-pub(crate) struct FactoryComponentVisitor {
+pub(crate) struct FactoryComponentVisitor<'errors> {
     pub view_widgets: Option<ViewWidgets>,
     pub widgets_ty: Option<syn::Type>,
     pub init_widgets: Option<syn::ImplItemMethod>,
-    pub pre_view: Option<syn::ImplItemMethod>,
-    pub post_view: Option<syn::ImplItemMethod>,
     pub root_name: Option<syn::Ident>,
     pub additional_fields: Option<AdditionalFields>,
     pub menus: Option<Menus>,
-    pub errors: Vec<syn::Error>,
+    pub errors: &'errors mut Vec<syn::Error>,
 }
 
-impl VisitMut for FactoryComponentVisitor {
+impl<'errors> FactoryComponentVisitor<'errors> {
+    pub fn new(errors: &'errors mut Vec<syn::Error>) -> Self {
+        FactoryComponentVisitor {
+            view_widgets: None,
+            widgets_ty: None,
+            init_widgets: None,
+            root_name: None,
+            additional_fields: None,
+            menus: None,
+            errors,
+        }
+    }
+}
+
+impl VisitMut for FactoryComponentVisitor<'_> {
     fn visit_impl_item_mut(&mut self, item: &mut syn::ImplItem) {
         let mut remove = false;
 
@@ -210,8 +214,8 @@ impl VisitMut for FactoryComponentVisitor {
                     _ => (),
                 }
             }
-            syn::ImplItem::Method(func) => match &*func.sig.ident.to_string() {
-                "init_widgets" => {
+            syn::ImplItem::Method(func) => {
+                if &*func.sig.ident.to_string() == "init_widgets" {
                     let mut init_fn_visitor = InitWidgetsFnVisitor::default();
                     init_fn_visitor.visit_impl_item_method(func);
 
@@ -227,31 +231,12 @@ impl VisitMut for FactoryComponentVisitor {
                     }
                     remove = true;
                 }
-                "pre_view" => {
-                    let existing = self.pre_view.replace(func.clone());
-                    if existing.is_some() {
-                        self.errors
-                            .push(syn::Error::new_spanned(func, "duplicate pre_view function"));
-                    }
-                    remove = true;
-                }
-                "post_view" => {
-                    let existing = self.post_view.replace(func.clone());
-                    if existing.is_some() {
-                        self.errors.push(syn::Error::new_spanned(
-                            func,
-                            "duplicate post_view function",
-                        ));
-                    }
-                    remove = true;
-                }
-                _ => (),
-            },
+            }
             _ => (),
         }
 
         if remove {
-            *item = syn::ImplItem::Verbatim(quote! {});
+            *item = null_item();
         }
 
         visit_mut::visit_impl_item_mut(self, item);
@@ -375,4 +360,63 @@ impl<'ast> Visit<'ast> for InitWidgetsFnVisitor {
 
         visit::visit_impl_item_method(self, func);
     }
+}
+
+pub struct PreAndPostView<'errors> {
+    pub pre_view: Vec<syn::Stmt>,
+    pub post_view: Vec<syn::Stmt>,
+    errors: &'errors mut Vec<syn::Error>,
+}
+
+impl<'errors> PreAndPostView<'errors> {
+    pub fn extract(impl_: &mut syn::ItemImpl, errors: &'errors mut Vec<syn::Error>) -> Self {
+        let mut visitor = PreAndPostView {
+            pre_view: vec![],
+            post_view: vec![],
+            errors,
+        };
+
+        visitor.visit_item_impl_mut(impl_);
+
+        visitor
+    }
+}
+
+impl VisitMut for PreAndPostView<'_> {
+    fn visit_impl_item_mut(&mut self, item: &mut syn::ImplItem) {
+        if let syn::ImplItem::Method(func) = item {
+            match &*func.sig.ident.to_string() {
+                "pre_view" => {
+                    if !self.pre_view.is_empty() {
+                        self.errors.push(syn::Error::new_spanned(
+                            &func,
+                            "duplicate pre_view function",
+                        ));
+                    }
+
+                    self.pre_view = func.block.stmts.clone();
+                    *item = null_item();
+                }
+                "post_view" => {
+                    if !self.post_view.is_empty() {
+                        self.errors.push(syn::Error::new_spanned(
+                            &func,
+                            "duplicate post_view function",
+                        ));
+                    }
+
+                    self.post_view = func.block.stmts.clone();
+                    *item = null_item();
+                }
+                _ => (),
+            }
+        }
+
+        visit_mut::visit_impl_item_mut(self, item)
+    }
+}
+
+/// Returns an empty impl item that can be used to remove an existing item in a mutable visitor.
+fn null_item() -> syn::ImplItem {
+    syn::ImplItem::Verbatim(quote! {})
 }
