@@ -1,9 +1,9 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, ToTokens};
 use syn::visit_mut::VisitMut;
-use syn::{parse_quote, Error, Visibility};
+use syn::{parse_quote, Visibility};
 
-use crate::visitors::ComponentVisitor;
+use crate::visitors::{ComponentVisitor, PreAndPostView};
 
 pub(super) mod inject_view_code;
 pub(crate) mod token_streams;
@@ -14,12 +14,10 @@ pub(crate) fn generate_tokens(
     vis: Option<Visibility>,
     mut component_impl: syn::ItemImpl,
 ) -> TokenStream2 {
-    let outer_attrs = component_impl.attrs.clone();
+    let mut errors = vec![];
 
-    let mut component_visitor = ComponentVisitor::default();
+    let mut component_visitor = ComponentVisitor::new(&mut errors);
     component_visitor.visit_item_impl_mut(&mut component_impl);
-
-    let errors = component_visitor.errors.iter().map(Error::to_compile_error);
 
     let additional_fields = component_visitor.additional_fields.take();
 
@@ -35,6 +33,7 @@ pub(crate) fn generate_tokens(
         model_name: Some(model_name),
         root_name: Some(root_name),
         init: Some(init),
+        errors,
         ..
     } = component_visitor
     {
@@ -99,14 +98,11 @@ pub(crate) fn generate_tokens(
             }
         });
 
-        let pre_view_stmts = component_visitor
-            .pre_view
-            .map(|f| f.block.stmts)
-            .unwrap_or_default();
-        let post_view_stmts = component_visitor
-            .post_view
-            .map(|f| f.block.stmts)
-            .unwrap_or_default();
+        let PreAndPostView {
+            pre_view,
+            post_view,
+            ..
+        } = PreAndPostView::extract(&mut component_impl, errors);
 
         component_impl.items.push(parse_quote! {
             /// Update the view to represent the updated model.
@@ -124,9 +120,9 @@ pub(crate) fn generate_tokens(
                 #[allow(unused_variables)]
                 let #model_name = self;
 
-                #(#pre_view_stmts)*
+                #(#pre_view)*
                 #update_view
-                (|| { #(#post_view_stmts)* })();
+                (|| { #(#post_view)* })();
             }
         });
 
@@ -135,6 +131,7 @@ pub(crate) fn generate_tokens(
             .push(syn::ImplItem::Method(init_injected));
     }
 
+    let outer_attrs = &component_impl.attrs;
     let widgets_struct = component_visitor.widgets_ty.map(|ty| {
         quote! {
             #[allow(dead_code)]
@@ -146,6 +143,8 @@ pub(crate) fn generate_tokens(
             }
         }
     });
+
+    let errors = errors.iter().map(syn::Error::to_compile_error);
 
     quote! {
         #widgets_struct

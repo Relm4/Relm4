@@ -8,7 +8,6 @@ mod additional_fields;
 mod args;
 mod attrs;
 mod component;
-mod macros;
 mod menu;
 mod view;
 mod visitors;

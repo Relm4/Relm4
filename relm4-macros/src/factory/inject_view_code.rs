@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote, ToTokens};
-use syn::ImplItemMethod;
+
+use syn::{parse_quote, ImplItemMethod, Result};
 
 use crate::component;
 
@@ -8,14 +8,15 @@ pub(super) fn inject_view_code(
     func: Option<ImplItemMethod>,
     view_code: TokenStream2,
     widgets_return_code: TokenStream2,
-) -> TokenStream2 {
+) -> Result<ImplItemMethod> {
     if let Some(func) = func {
-        match component::inject_view_code::inject_view_code(func, view_code, widgets_return_code) {
-            Ok(func) => func.to_token_stream(),
-            Err(err) => err.to_compile_error(),
-        }
+        Ok(component::inject_view_code::inject_view_code(
+            func,
+            view_code,
+            widgets_return_code,
+        )?)
     } else {
-        quote! {
+        Ok(parse_quote! {
             fn init_widgets(
                 &mut self,
                 index: &relm4::factory::DynamicIndex,
@@ -26,6 +27,6 @@ pub(super) fn inject_view_code(
                 #view_code
                 #widgets_return_code
             }
-        }
+        })
     }
 }
