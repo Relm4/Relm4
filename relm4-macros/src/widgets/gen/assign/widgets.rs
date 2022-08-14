@@ -49,7 +49,7 @@ impl Widget {
             let return_assign_stream = ret_widget.return_assign_tokens();
             let unwrap = ret_widget.is_optional.then(|| quote! { .unwrap() });
             quote_spanned! {
-                span => #return_assign_stream #assign_fn(#self_assign_args #assign #args) #unwrap;
+                span => #return_assign_stream = #assign_fn(#self_assign_args #assign #args) #unwrap;
             }
         } else {
             quote_spanned! {

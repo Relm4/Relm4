@@ -4,6 +4,7 @@
 
 + core: Add MessageBroker type to allow communication between components on different levels
 + core: Rename InitParams to Init in SimpleComponent and Worker too
++ macros: Fix returned widgets assignment in the view macro
 
 ## 0.5.0-beta.2 - 2022-8-12
 
