@@ -1,6 +1,7 @@
 use quote::quote;
 use syn::visit::{self, Visit};
 use syn::visit_mut::{self, VisitMut};
+use syn::LitStr;
 
 use crate::additional_fields::AdditionalFields;
 use crate::menu::Menus;
@@ -37,6 +38,53 @@ impl VisitMut for ComponentVisitor {
                                         .push(syn::Error::new_spanned(mac, "duplicate view macro"));
                                 }
                             }
+                            Err(e) => {
+                                self.errors.push(e);
+                            }
+                        };
+
+                        remove = true;
+                    }
+                    Some("include") => {
+                        match mac.mac.parse_body::<LitStr>() {
+                            Ok(file_name) => match std::fs::read_to_string(file_name.value()) {
+                                Ok(file_content) => match syn::parse_file(&file_content) {
+                                    Ok(file) => {
+                                        for item in file.items {
+                                            if let syn::Item::Macro(syn::ItemMacro {
+                                                attrs,
+                                                ident: None,
+                                                mac,
+                                                semi_token,
+                                            }) = item
+                                            {
+                                                let mac = syn::ImplItemMacro {
+                                                    attrs,
+                                                    mac,
+                                                    semi_token,
+                                                };
+                                                self.visit_impl_item_mut(
+                                                    &mut syn::ImplItem::Macro(mac),
+                                                );
+                                            } else {
+                                                self.errors.push(syn::Error::new_spanned(
+                                                    item,
+                                                    "unexpected item",
+                                                ));
+                                            }
+                                        }
+                                    }
+                                    Err(e) => {
+                                        self.errors.push(e);
+                                    }
+                                },
+                                Err(io_err) => {
+                                    self.errors.push(syn::Error::new_spanned(
+                                        file_name,
+                                        &format!("Error opening file: {}", io_err.to_string()),
+                                    ));
+                                }
+                            },
                             Err(e) => {
                                 self.errors.push(e);
                             }
