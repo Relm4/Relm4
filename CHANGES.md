@@ -161,7 +161,7 @@
 
 ### Added
 
-+ core: Added with_app method that allows passing an existing gtk::Appliaction to Relm4
++ core: Added with_app method that allows passing an existing gtk::Application to Relm4
 + core: Methods to access the widgets of components
 + core: Re-export for gtk
 + macros: Support named arguments in the widget macro (by [mskorkowski](https://github.com/mskorkowski))
