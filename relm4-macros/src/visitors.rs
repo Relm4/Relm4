@@ -81,7 +81,7 @@ impl VisitMut for ComponentVisitor {
                                 Err(io_err) => {
                                     self.errors.push(syn::Error::new_spanned(
                                         file_name,
-                                        &format!("Error opening file: {}", io_err.to_string()),
+                                        &format!("Error opening file: {}", io_err),
                                     ));
                                 }
                             },
