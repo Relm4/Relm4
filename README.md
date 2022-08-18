@@ -53,18 +53,17 @@ relm4-components = "0.4"
 
 ### Features
 
-The `relm4` crate has four feature flags:
+The `relm4` crate has three feature flags:
 
-| &nbsp;Flag       | &nbsp;Purpose                                                                                                                                                  |
-| :--------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| &nbsp;macros     | &nbsp;Enable macros by re-exporting [`relm4-macros`](https://crates.io/crates/relm4-macros)                                                                    |
-| &nbsp;tokio-rt   | &nbsp;Adds the [`AsyncRelmWorker`](https://aaronerhardt.github.io/docs/relm4/relm4/struct.AsyncRelmWorker.html) type that uses an asynchronous update function |
-| &nbsp;libadwaita | &nbsp;Improved support for [libadwaita](https://gitlab.gnome.org/World/Rust/libadwaita-rs)                                                                     |
-| &nbsp;all        | &nbsp;Enable all features                                                                                                                                      |
+| Flag | Purpose |
+| :--- | :------ |
+| macros | Enable macros by re-exporting [`relm4-macros`](https://crates.io/crates/relm4-macros) |
+| libadwaita | Improved support for [libadwaita](https://gitlab.gnome.org/World/Rust/libadwaita-rs) |
+| libpanel | Improved support for [libpanel](https://gitlab.gnome.org/World/Rust/libpanel-rs) |
 
 ## Examples
 
-Several example applications are available at [relm4-examples/](relm4-examples/).
+Several example applications are available at [examples/](examples/).
 
 #### [📸 Screenshots from the example apps](assets/screenshots)
 
