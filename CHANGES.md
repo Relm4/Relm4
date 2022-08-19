@@ -2,6 +2,7 @@
 
 ## Unreleased
 
++ core: Add getter for global application for easier quitting of applications
 + core: Add MessageBroker type to allow communication between components on different levels
 + core: Rename InitParams to Init in SimpleComponent and Worker too
 + macros: Fix returned widgets assignment in the view macro
