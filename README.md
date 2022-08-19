@@ -39,9 +39,9 @@ Relm4 depends on GTK4: [How to install GTK4](https://www.gtk.org/docs/installati
 
 ## Ecosystem
 
-+ [relm4-macros](https://crates.io/crates/relm4-macros) provides a [`component`]() macro for declarative UI definitions
-+ [relm4-components](https://crates.io/crates/relm4-components) is a collections of reusable components you can easily integrate into your application
-+ [relm4-template](https://github.com/Relm4/relm4-template) is a starter template for creating Relm4 applications in the Flatpak package format
++ [relm4-macros](https://crates.io/crates/relm4-macros) several macros for declarative UI definitions.
++ [relm4-components](https://crates.io/crates/relm4-components) is a collections of reusable components you can easily integrate into your application.
++ [relm4-template](https://github.com/Relm4/relm4-template) is a starter template for creating Relm4 applications in the Flatpak package format.
 
 To use all features, just add this to your `Cargo.toml`:
 
