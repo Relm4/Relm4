@@ -20,6 +20,7 @@ default = []
 libadwaita = ["adw"]
 libpanel = ["panel"]
 macros = ["relm4-macros"]
+all = ["libadwaita", "macros"]
 
 [dependencies]
 #adw = { version = "0.2", optional = true, package = "libadwaita" }
