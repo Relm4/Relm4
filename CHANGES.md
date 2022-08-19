@@ -223,7 +223,7 @@
 ### Added
 
 + core: Support for libadwaita 🎉
-+ macros: Fully qualified syntax for trait disabiguation
++ macros: Fully qualified syntax for trait disambiguation
 + macros: Allow passing additional arguments to widget initialization (useful e.g. for grids)
 + book: Reusable components and widget macro reference chapters
 
