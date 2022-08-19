@@ -1,5 +1,3 @@
-//! A collection of macros for Relm4, gtk-rs and regular Rust code in general.
-
 #![doc(html_logo_url = "https://relm4.org/icons/relm4_logo.svg")]
 #![doc(html_favicon_url = "https://relm4.org/icons/relm4_org.svg")]
 
