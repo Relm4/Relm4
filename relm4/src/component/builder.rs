@@ -4,8 +4,8 @@
 
 use super::message_broker::MessageBroker;
 use super::{Component, ComponentParts, ComponentSenderInner, Connector, OnDestroy, StateWatcher};
-use crate::{Receiver, RelmContainerExt, RelmWidgetExt, Sender};
 use crate::{late_initialization, shutdown};
+use crate::{Receiver, RelmContainerExt, RelmWidgetExt, Sender};
 use async_oneshot::oneshot;
 use futures::FutureExt;
 use gtk::prelude::{GtkWindowExt, NativeDialogExt};
