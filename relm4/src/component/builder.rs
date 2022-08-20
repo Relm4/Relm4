@@ -101,7 +101,7 @@ where
     /// Therefore, you don't have to pass a window to every component.
     ///
     /// Applicable to native dialogs only, such as [`gtk::FileChooserNative`].
-    /// If the root widget is a non-native dialog, 
+    /// If the root widget is a non-native dialog,
     /// you should use [`transient_for`][ComponentBuilder::transient_for] instead.
     #[must_use]
     pub fn transient_for_native(self, widget: impl AsRef<gtk::Widget>) -> Self {
