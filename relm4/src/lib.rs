@@ -33,6 +33,7 @@ pub mod shared_state;
 
 pub mod util;
 
+pub(crate) mod late_initialization;
 /// A simpler version of components that does work
 /// in the background.
 pub mod worker;

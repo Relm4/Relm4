@@ -72,8 +72,12 @@ impl RelmApp {
                 );
 
                 let builder = ComponentBuilder::<C>::default();
-                let controller = builder.launch(payload).detach();
-                let window = controller.widget().clone();
+                let connector = builder.launch(payload);
+
+                // Run late initialization for transient windows for example.
+                crate::late_initialization::run_late_init();
+
+                let window = connector.detach().widget().clone();
 
                 app.add_window(window.as_ref());
                 window.show();
