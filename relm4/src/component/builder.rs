@@ -4,13 +4,11 @@
 
 use super::message_broker::MessageBroker;
 use super::{Component, ComponentParts, ComponentSenderInner, Connector, OnDestroy, StateWatcher};
-use crate::Receiver;
-use crate::RelmContainerExt;
-use crate::Sender;
+use crate::{Receiver, RelmContainerExt, RelmWidgetExt, Sender};
 use crate::{late_initialization, shutdown};
 use async_oneshot::oneshot;
 use futures::FutureExt;
-use gtk::prelude::{Cast, GtkWindowExt, NativeDialogExt, WidgetExt};
+use gtk::prelude::{GtkWindowExt, NativeDialogExt};
 use std::any;
 use std::cell::RefCell;
 use std::marker::PhantomData;
@@ -74,17 +72,15 @@ where
     /// you should use [`transient_for_native`][ComponentBuilder::transient_for_native] instead.
     #[must_use]
     pub fn transient_for(self, widget: impl AsRef<gtk::Widget>) -> Self {
-        let root = widget.as_ref().root();
-        if let Some(root) = root {
-            let window = root.downcast::<gtk::Window>().unwrap();
-            let root = self.root.clone();
-
-            late_initialization::register_callback(Box::new(move || {
+        let widget = widget.as_ref().clone();
+        let root = self.root.clone();
+        late_initialization::register_callback(Box::new(move || {
+            if let Some(window) = widget.toplevel_window() {
                 root.as_ref().set_transient_for(Some(&window));
-            }))
-        } else {
-            tracing::error!("Couldn't find root of transient widget")
-        }
+            } else {
+                tracing::error!("Couldn't find root of transient widget")
+            }
+        }));
 
         self
     }
