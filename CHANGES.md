@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-+ core: Use late initialization for set_transient_for
++ core: Use late initialization for transient_for and its native variant
 + core: Add MessageBroker type to allow communication between components on different levels
 + core: Rename InitParams to Init in SimpleComponent and Worker too
 + macros: Fix returned widgets assignment in the view macro

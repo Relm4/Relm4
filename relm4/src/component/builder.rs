@@ -67,6 +67,10 @@ where
     C::Root: AsRef<gtk::Window> + Clone,
 {
     /// Set the component's root widget transient for a given window.
+    /// This function doesn't require a [`gtk::Window`] as parameter,
+    /// but instead uses [`RelmWidgetExt::toplevel_window()`] to retrieve the toplevel
+    /// window of any [`gtk::Widget`].
+    /// Therefore, you don't have to pass a window to every component.
     ///
     /// If the root widget is a native dialog, such as [`gtk::FileChooserNative`],
     /// you should use [`transient_for_native`][ComponentBuilder::transient_for_native] instead.
@@ -91,9 +95,14 @@ where
     C::Root: AsRef<gtk::NativeDialog> + Clone,
 {
     /// Set the component's root widget transient for a given window.
+    /// This function doesn't require a [`gtk::Window`] as parameter,
+    /// but instead uses [`RelmWidgetExt::toplevel_window()`] to retrieve the toplevel
+    /// window of any [`gtk::Widget`].
+    /// Therefore, you don't have to pass a window to every component.
     ///
     /// Applicable to native dialogs only, such as [`gtk::FileChooserNative`].
-    /// If the root widget is a non-native dialog, you should use [`transient_for`][ComponentBuilder::transient_for] instead.
+    /// If the root widget is a non-native dialog, 
+    /// you should use [`transient_for`][ComponentBuilder::transient_for] instead.
     #[must_use]
     pub fn transient_for_native(self, widget: impl AsRef<gtk::Widget>) -> Self {
         let widget = widget.as_ref().clone();
