@@ -5,6 +5,7 @@
 + core: Add getter for global application for easier quitting of applications
 + core: Add MessageBroker type to allow communication between components on different levels
 + core: Rename InitParams to Init in SimpleComponent and Worker too
++ core: Return a clone of the `DynamicIndex` after inserting into a factory
 + macros: Fix returned widgets assignment in the view macro
 
 ## 0.5.0-beta.2 - 2022-8-12
@@ -43,9 +44,9 @@
 + core: Always initialize GTK/Libadwaita before running apps
 + macros: Some doc link fixes
 
-## 0.4.3 - 2022-3-13 
+## 0.4.3 - 2022-3-13
 
-### Added 
+### Added
 
 + core: Add WidgetRef trait to make AsRef easier accessible for widgets
 + macros: Destructure widgets in Widgets::view
@@ -58,7 +59,7 @@
 + core: Fixed state changes in FactoryVec (by [V02460](https://github.com/V02460))
 + macros: Parse whole expressions instead of just literals
 
-## 0.4.2 - 2022-2-4 
+## 0.4.2 - 2022-2-4
 
 ### Added
 
@@ -111,7 +112,7 @@
 + core: A factory view implementation for libadwaita's StackView
 + macros: Allow early returns in manual_view (by [euclio](https://github.com/euclio))
 
-### Changed 
+### Changed
 
 + core: Make GTK's command line argument handling optional (by [euclio](https://github.com/euclio))
 + core: DynamicIndex now implements Send but panics when used on other threads
@@ -217,7 +218,7 @@
 ### Fixed
 
 + macros: Parsing additional fields should be more stable now
-+ macros: Widgets can not include comments at the top 
++ macros: Widgets can not include comments at the top
 
 ## 0.1.0-beta.8 - 2021-08-20
 
@@ -254,7 +255,7 @@
 
 + core: Improved and adjusted the FactoryPrototype trait
 
-### Added 
+### Added
 
 + core: Added the FactoryListView trait for more flexibility
 + core: Added a FactoryVecDeque container
