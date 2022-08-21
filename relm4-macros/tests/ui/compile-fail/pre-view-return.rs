@@ -1,8 +1,9 @@
-#![deny(unreachable_code)]
-
 use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent};
 
-struct TestComponent;
+#[derive(Default)]
+struct TestComponent {
+    counter: u8,
+}
 
 #[relm4_macros::component]
 impl SimpleComponent for TestComponent {
@@ -16,7 +17,9 @@ impl SimpleComponent for TestComponent {
     }
 
     fn pre_view() {
-        return;
+        if model.counter == 0 {
+            return;
+        }
     }
 
     fn init(
@@ -24,7 +27,7 @@ impl SimpleComponent for TestComponent {
         _root: &Self::Root,
         _sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let model = Self;
+        let model = Self::default();
 
         let widgets = view_output!();
 
