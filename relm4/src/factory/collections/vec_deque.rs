@@ -176,14 +176,14 @@ impl<'a, C: FactoryComponent> FactoryVecDequeGuard<'a, C> {
     }
 
     /// Appends an element at the end of the [`FactoryVecDeque`].
-    pub fn push_back(&mut self, init_params: C::Init) {
+    pub fn push_back(&mut self, init_params: C::Init) -> DynamicIndex {
         let index = self.len();
-        self.insert(index, init_params);
+        self.insert(index, init_params)
     }
 
     /// Prepends an element to the [`FactoryVecDeque`].
-    pub fn push_front(&mut self, init_params: C::Init) {
-        self.insert(0, init_params);
+    pub fn push_front(&mut self, init_params: C::Init) -> DynamicIndex {
+        self.insert(0, init_params)
     }
 
     /// Inserts an element at index within the [`FactoryVecDeque`],
@@ -195,7 +195,7 @@ impl<'a, C: FactoryComponent> FactoryVecDequeGuard<'a, C> {
     /// # Panics
     ///
     /// Panics if index is greater than [`FactoryVecDeque`]’s length.
-    pub fn insert(&mut self, index: usize, init_params: C::Init) {
+    pub fn insert(&mut self, index: usize, init_params: C::Init) -> DynamicIndex {
         let dyn_index = DynamicIndex::new(index);
 
         // Increment the indexes of the following elements.
@@ -211,12 +211,14 @@ impl<'a, C: FactoryComponent> FactoryVecDequeGuard<'a, C> {
         self.inner.model_state.insert(
             index,
             ModelStateValue {
-                index: dyn_index,
+                index: dyn_index.clone(),
                 uid: self.uid_counter,
                 changed: false,
             },
         );
         self.inner.uid_counter += 1;
+
+        dyn_index
     }
 
     /// Swaps elements at indices `first` and `second`.
