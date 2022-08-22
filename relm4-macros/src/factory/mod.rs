@@ -113,16 +113,22 @@ pub(crate) fn generate_tokens(
                 widgets: &mut Self::Widgets,
                 sender: relm4::factory::FactoryComponentSender<Self>,
             ) {
-                #[allow(unused_variables)]
-                let Self::Widgets {
-                    #destructure_fields
-                    #additional_fields_return_stream
-                } = widgets;
+                struct __DoNotReturnManually;
 
-                // Wrap post_view code to prevent early returns from skipping other view code.
-                #(#pre_view)*
-                #update_view
-                (|| { #(#post_view)* })();
+                let _no_manual_return: __DoNotReturnManually = (move || {
+                    #[allow(unused_variables)]
+                    let Self::Widgets {
+                        #destructure_fields
+                        #additional_fields_return_stream
+                    } = widgets;
+
+                    #(#pre_view)*
+                    #update_view
+                    // In post_view returning early is ok
+                    (move || { #(#post_view)* })();
+
+                    __DoNotReturnManually
+                })();
             }
         });
 
