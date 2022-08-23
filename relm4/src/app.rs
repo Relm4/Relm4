@@ -10,7 +10,7 @@ use crate::ComponentBuilder;
 pub struct RelmApp {
     /// The [`Application`] that's used internally to setup
     /// and run your application.
-    pub app: Application,
+    app: Application,
 }
 
 impl RelmApp {

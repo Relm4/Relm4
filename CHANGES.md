@@ -2,6 +2,7 @@
 
 ## Unreleased
 
++ core: Make `app` field on `RelmApp` private
 + core: Use late initialization for transient_for and its native variant
 + core: Add getter for global application to simplify graceful shutdown of applications
 + core: Add MessageBroker type to allow communication between components on different levels

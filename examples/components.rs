@@ -1,10 +1,10 @@
 use std::convert::identity;
 
 use gtk::prelude::{BoxExt, ButtonExt, DialogExt, GtkWindowExt, ToggleButtonExt, WidgetExt};
+use relm4::gtk;
 use relm4::gtk::prelude::{ApplicationExt, Cast};
-use relm4::gtk::{self};
 use relm4::{
-    adw, Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,
+    Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,
     SimpleComponent,
 };
 
@@ -145,14 +145,13 @@ enum AppMsg {
 
 struct App {
     mode: AppMode,
-    application: adw::Application,
     dialog: Controller<Dialog>,
     header: Controller<Header>,
 }
 
 #[relm4::component]
 impl SimpleComponent for App {
-    type Init = adw::Application;
+    type Init = ();
     type Input = AppMsg;
     type Output = ();
     type Widgets = AppWidgets;
@@ -176,7 +175,7 @@ impl SimpleComponent for App {
     }
 
     fn init(
-        application: Self::Init,
+        _: Self::Init,
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
@@ -191,7 +190,6 @@ impl SimpleComponent for App {
             mode: AppMode::View,
             header,
             dialog,
-            application,
         };
 
         let widgets = view_output!();
@@ -208,7 +206,7 @@ impl SimpleComponent for App {
                 self.dialog.emit(DialogMsg::Show);
             }
             AppMsg::Close => {
-                self.application.quit();
+                relm4::main_application().quit();
             }
         }
     }
@@ -216,6 +214,5 @@ impl SimpleComponent for App {
 
 fn main() {
     let relm_app = RelmApp::new("relm4.example.components");
-    let application = relm_app.app.clone();
-    relm_app.run::<App>(application);
+    relm_app.run::<App>(());
 }
