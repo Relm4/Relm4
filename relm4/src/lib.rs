@@ -86,14 +86,6 @@ pub use panel;
 pub use once_cell;
 pub use tokio;
 
-/// Initialize GTK and (optionally) libadwaita
-fn init() {
-    gtk::init().unwrap();
-
-    #[cfg(feature = "libadwaita")]
-    adw::init();
-}
-
 thread_local! {
     static MAIN_APPLICATION: Cell<Option<gtk::Application>> = Cell::default();
 }

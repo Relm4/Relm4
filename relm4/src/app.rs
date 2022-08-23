@@ -22,8 +22,6 @@ impl RelmApp {
     /// object to [`RelmApp::with_app`].
     #[must_use]
     pub fn new(app_id: &str) -> Self {
-        crate::init();
-
         let app = crate::main_application();
         app.set_application_id(Some(app_id));
 
@@ -32,8 +30,6 @@ impl RelmApp {
 
     /// Create a Relm4 application with a provided [`gtk::Application`].
     pub fn with_app(app: impl IsA<gtk::Application>) -> Self {
-        crate::init();
-
         let app = app.upcast();
         crate::set_main_application(app.clone());
 

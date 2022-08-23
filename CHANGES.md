@@ -2,6 +2,7 @@
 
 ## Unreleased
 
++ core: Do not call `gtk_init` and `adw_init` in favor of the application startup handler
 + core: Remove `Application` type alias in favor of `gtk::Application`
 + core: Make `app` field on `RelmApp` private
 + core: Use late initialization for transient_for and its native variant
