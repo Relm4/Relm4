@@ -2,19 +2,24 @@ use gtk::prelude::{ApplicationExt, ApplicationExtManual, Cast, GtkApplicationExt
 
 use crate::component::Component;
 use crate::component::ComponentController;
-use crate::Application;
 use crate::ComponentBuilder;
 
 /// An app that runs the main application.
 #[derive(Debug)]
 pub struct RelmApp {
-    /// The [`Application`] that's used internally to setup
+    /// The [`gtk::Application`] that's used internally to setup
     /// and run your application.
-    app: Application,
+    app: gtk::Application,
 }
 
 impl RelmApp {
-    /// Create a Relm4 application.
+    /// Create a new Relm4 application.
+    ///
+    /// This function will create a new [`gtk::Application`] object if necessary.
+    ///
+    /// If the `libadwaita` feature is enabled, then the created [`gtk::Application`] will be an
+    /// instance of [`adw::Application`]. This can be overridden by passing your own application
+    /// object to [`RelmApp::with_app`].
     #[must_use]
     pub fn new(app_id: &str) -> Self {
         crate::init();
@@ -25,8 +30,8 @@ impl RelmApp {
         Self { app }
     }
 
-    /// Create a Relm4 application.
-    pub fn with_app(app: impl IsA<Application> + Cast) -> Self {
+    /// Create a Relm4 application with a provided [`gtk::Application`].
+    pub fn with_app(app: impl IsA<gtk::Application>) -> Self {
         crate::init();
 
         let app = app.upcast();
