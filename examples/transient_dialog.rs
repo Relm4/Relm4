@@ -96,7 +96,7 @@ impl SimpleComponent for Button {
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        // We don't have access to the parent window from here 
+        // We don't have access to the parent window from here
         // but we can just use the button to set the transient window for the dialog.
         // Relm4 will get the window later by calling [`WidgetExt::root()`]
         // on the button once all widgets are connected.
