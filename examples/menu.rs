@@ -156,7 +156,7 @@ relm4::new_stateless_action!(TestAction, WindowActionGroup, "test");
 relm4::new_stateful_action!(TestU8Action, WindowActionGroup, "test2", u8, u8);
 
 fn main() {
-    let app = RelmApp::new("relm4.test.menu");
+    let app = RelmApp::new("relm4.example.menu");
     app.app
         .set_accelerators_for_action::<TestAction>(&["<primary>W"]);
 

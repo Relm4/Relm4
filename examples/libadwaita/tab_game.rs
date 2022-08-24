@@ -314,6 +314,6 @@ impl Component for AppModel {
 }
 
 fn main() {
-    let app = RelmApp::new("relm4.test.tabGame");
+    let app = RelmApp::new("relm4.example.tabGame");
     app.run::<AppModel>(());
 }

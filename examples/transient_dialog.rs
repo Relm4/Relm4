@@ -148,6 +148,6 @@ impl SimpleComponent for App {
 }
 
 fn main() {
-    let app = RelmApp::new("relm4.test.transient_dialog");
+    let app = RelmApp::new("relm4.example.transient_dialog");
     app.run::<App>(());
 }

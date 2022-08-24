@@ -82,6 +82,6 @@ impl Component for AppModel {
 }
 
 fn main() {
-    let app = RelmApp::new("relm4.test.non_blocking_async");
+    let app = RelmApp::new("relm4.example.non_blocking_async");
     app.run::<AppModel>(());
 }

@@ -220,6 +220,6 @@ impl SimpleComponent for AppModel {
 }
 
 fn main() {
-    let app = RelmApp::new("relm4.test.factory");
+    let app = RelmApp::new("relm4.example.factory");
     app.run::<AppModel>(0);
 }
