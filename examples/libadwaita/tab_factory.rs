@@ -265,6 +265,6 @@ impl SimpleComponent for AppModel {
 }
 
 fn main() {
-    let app = RelmApp::new("relm4.test.tabFactory");
+    let app = RelmApp::new("relm4.example.tabFactory");
     app.run::<AppModel>(0);
 }

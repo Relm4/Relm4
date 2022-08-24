@@ -187,6 +187,6 @@ impl SimpleComponent for AppModel {
 }
 
 fn main() {
-    let app = RelmApp::new("relm4.test.macro_reference");
+    let app = RelmApp::new("relm4.example.macro_reference");
     app.run::<AppModel>(AppInit { counter: 0 });
 }

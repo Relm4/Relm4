@@ -215,7 +215,7 @@ impl SimpleComponent for App {
 }
 
 fn main() {
-    let relm_app = RelmApp::new("relm4.test.components");
+    let relm_app = RelmApp::new("relm4.example.components");
     let application = relm_app.app.clone();
     relm_app.run::<App>(application);
 }

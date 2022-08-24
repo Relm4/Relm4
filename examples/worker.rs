@@ -115,6 +115,6 @@ impl SimpleComponent for AppModel {
 }
 
 fn main() {
-    let app = RelmApp::new("relm4.test.worker");
+    let app = RelmApp::new("relm4.example.worker");
     app.run::<AppModel>(());
 }

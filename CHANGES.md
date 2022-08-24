@@ -2,7 +2,8 @@
 
 ## Unreleased
 
-+ core: Add getter for global application for easier quitting of applications
++ core: Use late initialization for transient_for and its native variant
++ core: Add getter for global application to simplify graceful shutdown of applications
 + core: Add MessageBroker type to allow communication between components on different levels
 + core: Rename InitParams to Init in SimpleComponent and Worker too
 + core: Return a clone of the `DynamicIndex` after inserting into a factory

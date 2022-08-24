@@ -79,3 +79,7 @@ path = "drawing.rs"
 [[example]]
 name = "message_broker"
 path = "message_broker.rs"
+
+[[example]]
+name = "transient_dialog"
+path = "transient_dialog.rs"

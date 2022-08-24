@@ -93,6 +93,6 @@ impl SimpleComponent for AppModel {
 }
 
 fn main() {
-    let app = RelmApp::new("relm4.test.simple_manual");
+    let app = RelmApp::new("relm4.example.simple_manual");
     app.run::<AppModel>(0);
 }
