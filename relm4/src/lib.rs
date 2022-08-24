@@ -53,6 +53,7 @@ pub use tokio::task::JoinHandle;
 pub use util::{WidgetPlus, WidgetRef};
 
 use once_cell::sync::OnceCell;
+use std::cell::Cell;
 use std::future::Future;
 use tokio::runtime::Runtime;
 
@@ -82,12 +83,53 @@ pub use adw;
 pub use panel;
 
 #[cfg(feature = "libadwaita")]
-type Application = adw::Application;
+/// The application type used by [`RelmApp`] internally.
+///
+/// This is either [`gtk::Application`] or [`adw::Application`]
+/// depending on the feature flags.
+pub type Application = adw::Application;
 
 #[cfg(not(feature = "libadwaita"))]
-type Application = gtk::Application;
+/// The application type used by [`RelmApp`] internally.
+///
+/// This is either [`gtk::Application`] or `adw::Application`
+/// depending on the feature flags.
+pub type Application = gtk::Application;
 
+pub use once_cell;
 pub use tokio;
+
+/// Initialize GTK and (optionally) libadwaita
+fn init() {
+    gtk::init().unwrap();
+
+    #[cfg(feature = "libadwaita")]
+    adw::init();
+}
+
+thread_local! {
+    static MAIN_APPLICATION: Cell<Option<Application>> = Cell::default();
+}
+
+fn set_main_application(app: Application) {
+    MAIN_APPLICATION.with(move |cell| cell.set(Some(app)));
+}
+
+/// Returns a global [`Application`] that's used internally
+/// by [`RelmApp`].
+///
+/// This can be useful for graceful shutdown for example
+/// by calling [`gtk::prelude::ApplicationExt::quit()`].
+///
+/// Note: The global application will be overwritten by calling
+/// [`RelmApp::with_app()`].
+pub fn main_application() -> Application {
+    MAIN_APPLICATION.with(|cell| {
+        let app = cell.take().unwrap_or_default();
+        cell.set(Some(app.clone()));
+        app
+    })
+}
 
 /// Sets a custom global stylesheet.
 ///

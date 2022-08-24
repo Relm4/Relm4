@@ -8,11 +8,8 @@ use crate::ComponentBuilder;
 /// An app that runs the main application.
 #[derive(Debug)]
 pub struct RelmApp {
-    /// The application that's used internally to setup
-    /// and run the application.
-    ///
-    /// Depending on your feature flag this is either
-    /// [`gtk::Application`] or [`adw::Application`].
+    /// The [`Application`] that's used internally to setup
+    /// and run your application.
     pub app: Application,
 }
 
@@ -20,19 +17,20 @@ impl RelmApp {
     /// Create a Relm4 application.
     #[must_use]
     pub fn new(app_id: &str) -> Self {
-        let app = Application::builder().application_id(app_id).build();
+        crate::init();
 
-        Self::with_app(app)
+        let app = crate::main_application();
+        app.set_application_id(Some(app_id));
+
+        Self { app }
     }
 
     /// Create a Relm4 application.
     pub fn with_app(app: impl IsA<Application> + Cast) -> Self {
-        gtk::init().unwrap();
-
-        #[cfg(feature = "libadwaita")]
-        adw::init();
+        crate::init();
 
         let app = app.upcast();
+        crate::set_main_application(app.clone());
 
         Self { app }
     }
