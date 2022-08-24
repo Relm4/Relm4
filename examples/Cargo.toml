@@ -81,5 +81,5 @@ name = "message_broker"
 path = "message_broker.rs"
 
 [[example]]
-name = "transient_example"
-path = "transient_example.rs"
+name = "transient_dialog"
+path = "transient_dialog.rs"

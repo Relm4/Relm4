@@ -37,7 +37,12 @@ impl Component for Dialog {
                 set_height_request: 80,
                 set_halign: gtk::Align::Center,
                 set_valign: gtk::Align::Center,
-                set_label: "Am I transient?",
+                #[watch]
+                set_label: if dialog.transient_for().is_some() {
+                    "I'm transient!"
+                } else {
+                    "I'm not transient..."
+                },
             },
             connect_close_request[sender] => move |_| {
                 sender.input(DialogMsg::Hide);
@@ -45,6 +50,7 @@ impl Component for Dialog {
             }
         }
     }
+
     fn init(
         _init: Self::Init,
         root: &Self::Root,
@@ -54,6 +60,7 @@ impl Component for Dialog {
         let widgets = view_output!();
         ComponentParts { model, widgets }
     }
+
     fn update(&mut self, msg: Self::Input, _sender: ComponentSender<Self>) {
         match msg {
             DialogMsg::Show => self.visible = true,
@@ -89,6 +96,10 @@ impl SimpleComponent for Button {
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
+        // We don't have access to the parent window from here 
+        // but we can just use the button to set the transient window for the dialog.
+        // Relm4 will get the window later by calling [`WidgetExt::root()`]
+        // on the button once all widgets are connected.
         let dialog = Dialog::builder()
             .transient_for(root)
             .launch_with_broker((), &DIALOG_BROKER)
@@ -137,6 +148,6 @@ impl SimpleComponent for App {
 }
 
 fn main() {
-    let app = RelmApp::new("relm4.test.dialog");
+    let app = RelmApp::new("relm4.test.transient_dialog");
     app.run::<App>(());
 }
