@@ -25,6 +25,7 @@ jobs:
         DISPLAY: ":99.0"
     steps:
       - uses: actions/checkout@v2
+      - uses: rui314/setup-mold@v1
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: ${{ matrix.rust }}
