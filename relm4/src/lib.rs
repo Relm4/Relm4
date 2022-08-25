@@ -52,6 +52,7 @@ pub use app::RelmApp;
 pub use tokio::task::JoinHandle;
 pub use util::{WidgetPlus, WidgetRef};
 
+use gtk::prelude::*;
 use once_cell::sync::OnceCell;
 use std::cell::Cell;
 use std::future::Future;
@@ -82,50 +83,38 @@ pub use adw;
 /// Re-export of libpanel
 pub use panel;
 
-#[cfg(feature = "libadwaita")]
-/// The application type used by [`RelmApp`] internally.
-///
-/// This is either [`gtk::Application`] or [`adw::Application`]
-/// depending on the feature flags.
-pub type Application = adw::Application;
-
-#[cfg(not(feature = "libadwaita"))]
-/// The application type used by [`RelmApp`] internally.
-///
-/// This is either [`gtk::Application`] or `adw::Application`
-/// depending on the feature flags.
-pub type Application = gtk::Application;
-
 pub use once_cell;
 pub use tokio;
 
-/// Initialize GTK and (optionally) libadwaita
-fn init() {
-    gtk::init().unwrap();
-
-    #[cfg(feature = "libadwaita")]
-    adw::init();
-}
-
 thread_local! {
-    static MAIN_APPLICATION: Cell<Option<Application>> = Cell::default();
+    static MAIN_APPLICATION: Cell<Option<gtk::Application>> = Cell::default();
 }
 
-fn set_main_application(app: Application) {
-    MAIN_APPLICATION.with(move |cell| cell.set(Some(app)));
+fn set_main_application(app: impl IsA<gtk::Application>) {
+    MAIN_APPLICATION.with(move |cell| cell.set(Some(app.upcast())));
 }
 
-/// Returns a global [`Application`] that's used internally
+#[cfg(feature = "libadwaita")]
+fn new_application() -> gtk::Application {
+    adw::Application::default().upcast()
+}
+
+#[cfg(not(feature = "libadwaita"))]
+fn new_application() -> gtk::Application {
+    gtk::Application::default()
+}
+
+/// Returns the global [`gtk::Application`] that's used internally
 /// by [`RelmApp`].
 ///
-/// This can be useful for graceful shutdown for example
-/// by calling [`gtk::prelude::ApplicationExt::quit()`].
+/// Retrieving this value can be useful for graceful shutdown
+/// by calling [`ApplicationExt::quit()`][gtk::prelude::ApplicationExt::quit] on it.
 ///
-/// Note: The global application will be overwritten by calling
+/// Note: The global application can be overwritten by calling
 /// [`RelmApp::with_app()`].
-pub fn main_application() -> Application {
+pub fn main_application() -> gtk::Application {
     MAIN_APPLICATION.with(|cell| {
-        let app = cell.take().unwrap_or_default();
+        let app = cell.take().unwrap_or_else(new_application);
         cell.set(Some(app.clone()));
         app
     })
