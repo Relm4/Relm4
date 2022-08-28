@@ -29,7 +29,7 @@ struct CounterWidgets {
 
 impl FactoryComponent for Counter {
     type ParentWidget = adw::TabView;
-    type ParentMsg = AppMsg;
+    type ParentInput = AppMsg;
 
     type Widgets = CounterWidgets;
 
@@ -41,7 +41,7 @@ impl FactoryComponent for Counter {
     type Root = gtk::Box;
     type CommandOutput = ();
 
-    fn output_to_parent_msg(output: Self::Output) -> Option<AppMsg> {
+    fn output_to_parent_input(output: Self::Output) -> Option<AppMsg> {
         Some(match output {
             CounterOutput::SendFront(index) => AppMsg::SendFront(index),
             CounterOutput::MoveUp(index) => AppMsg::MoveUp(index),

@@ -352,7 +352,7 @@ impl<'a, C: FactoryComponent> IndexMut<usize> for FactoryVecDequeGuard<'a, C> {
 #[derive(Debug)]
 pub struct FactoryVecDeque<C: FactoryComponent> {
     widget: C::ParentWidget,
-    parent_sender: Sender<C::ParentMsg>,
+    parent_sender: Sender<C::ParentInput>,
     components: VecDeque<ComponentStorage<C>>,
     model_state: VecDeque<ModelStateValue>,
     rendered_state: VecDeque<RenderedState>,
@@ -380,7 +380,7 @@ impl<C: FactoryComponent> Index<usize> for FactoryVecDeque<C> {
 impl<C: FactoryComponent> FactoryVecDeque<C> {
     /// Creates a new [`FactoryVecDeque`].
     #[must_use]
-    pub fn new(widget: C::ParentWidget, parent_sender: &Sender<C::ParentMsg>) -> Self {
+    pub fn new(widget: C::ParentWidget, parent_sender: &Sender<C::ParentInput>) -> Self {
         Self {
             widget,
             parent_sender: parent_sender.clone(),

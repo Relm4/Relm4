@@ -45,12 +45,12 @@ impl FactoryComponent for Counter {
     type Init = u8;
     type Input = CounterMsg;
     type Output = CounterOutput;
-    type ParentMsg = AppMsg;
+    type ParentInput = AppMsg;
     type ParentWidget = gtk::Grid;
     type Root = gtk::Box;
     type Widgets = CounterWidgets;
 
-    fn output_to_parent_msg(output: Self::Output) -> Option<AppMsg> {
+    fn output_to_parent_input(output: Self::Output) -> Option<AppMsg> {
         Some(match output {
             CounterOutput::SendFront(index) => AppMsg::SendFront(index),
             CounterOutput::MoveUp(index) => AppMsg::MoveUp(index),

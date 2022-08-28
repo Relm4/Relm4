@@ -65,11 +65,11 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
         self,
         index: &DynamicIndex,
         returned_widget: <C::ParentWidget as FactoryView>::ReturnedWidget,
-        parent_sender: &Sender<C::ParentMsg>,
+        parent_sender: &Sender<C::ParentInput>,
         transform: Transform,
     ) -> FactoryHandle<C>
     where
-        Transform: Fn(C::Output) -> Option<C::ParentMsg> + 'static,
+        Transform: Fn(C::Output) -> Option<C::ParentInput> + 'static,
     {
         let Self {
             mut data,
