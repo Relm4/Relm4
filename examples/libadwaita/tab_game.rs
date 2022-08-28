@@ -42,7 +42,7 @@ enum CounterOutput {
 #[relm4::factory]
 impl FactoryComponent for GamePage {
     type ParentWidget = adw::TabView;
-    type ParentMsg = AppMsg;
+    type ParentInput = AppMsg;
 
     type Widgets = CounterWidgets;
 
@@ -53,7 +53,7 @@ impl FactoryComponent for GamePage {
 
     type CommandOutput = ();
 
-    fn output_to_parent_msg(output: Self::Output) -> Option<AppMsg> {
+    fn output_to_parent_input(output: Self::Output) -> Option<AppMsg> {
         Some(match output {
             CounterOutput::StartGame(index) => AppMsg::StartGame(index),
             CounterOutput::SelectedGuess(guess) => AppMsg::SelectedGuess(guess),

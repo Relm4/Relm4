@@ -24,7 +24,7 @@ impl FactoryComponent for Task {
     type Init = String;
     type Input = TaskInput;
     type Output = TaskOutput;
-    type ParentMsg = AppMsg;
+    type ParentInput = AppMsg;
     type ParentWidget = gtk::ListBox;
     type Widgets = TaskWidgets;
 
@@ -65,7 +65,7 @@ impl FactoryComponent for Task {
         widgets.label.set_attributes(Some(&attrs));
     }
 
-    fn output_to_parent_msg(output: Self::Output) -> Option<AppMsg> {
+    fn output_to_parent_input(output: Self::Output) -> Option<AppMsg> {
         Some(match output {
             TaskOutput::Delete(index) => AppMsg::DeleteEntry(index),
         })

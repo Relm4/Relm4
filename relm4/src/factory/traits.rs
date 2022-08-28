@@ -90,8 +90,8 @@ pub trait FactoryComponent:
     /// Container widget to which all widgets of the factory will be added.
     type ParentWidget: FactoryView + 'static;
 
-    /// Messages sent to a parent component.
-    type ParentMsg: Debug + 'static;
+    /// Input messages sent to the parent component.
+    type ParentInput: Debug + 'static;
 
     /// Messages which are received from commands executing in the background.
     type CommandOutput: Debug + Send + 'static;
@@ -130,11 +130,11 @@ pub trait FactoryComponent:
         sender: FactoryComponentSender<Self>,
     ) -> Self::Widgets;
 
-    /// Convert [`Self::Output`] into `ParentMsg` in order to
-    /// send message to the parent.
+    /// Optionally convert an output message from this component to an input message for the
+    /// parent component.
     ///
     /// If [`None`] is returned, nothing is forwarded.
-    fn output_to_parent_msg(_output: Self::Output) -> Option<Self::ParentMsg> {
+    fn output_to_parent_input(_output: Self::Output) -> Option<Self::ParentInput> {
         None
     }
 

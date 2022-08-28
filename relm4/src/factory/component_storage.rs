@@ -57,14 +57,14 @@ impl<C: FactoryComponent> ComponentStorage<C> {
         self,
         index: &DynamicIndex,
         returned_widget: <C::ParentWidget as FactoryView>::ReturnedWidget,
-        parent_sender: &Sender<C::ParentMsg>,
+        parent_sender: &Sender<C::ParentInput>,
     ) -> Option<Self> {
         if let Self::Builder(builder) = self {
             Some(Self::Final(builder.launch(
                 index,
                 returned_widget,
                 parent_sender,
-                C::output_to_parent_msg,
+                C::output_to_parent_input,
             )))
         } else {
             None
