@@ -36,17 +36,14 @@ jobs:
       - name: "clippy all features"
         run: cargo clippy --all-features -- --deny warnings
 
-      # nightly
-      - name: "test nightly"
-        run: xvfb-run --auto-servernum cargo test
-        if: matrix.rust == 'nightly'
-      # not nightly
       - name: "test"
         run: xvfb-run --auto-servernum cargo test
-        if: matrix.rust != 'nightly'
 
+      # Only run stable clippy lints to avoid
+      # lints for unstable features
       - name: "check examples"
         run: cargo clippy --examples -- --deny warnings
+        if: matrix.rust == 'stable'
 
       - uses: bcomnes/cleanup-xvfb@v1.0.6
 
