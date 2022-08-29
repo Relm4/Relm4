@@ -41,7 +41,7 @@ impl SimpleComponent for AppModel {
 
                 append: inc_button = &gtk::Button {
                     set_label: "Increment",
-                    // Only set this is `icon_name` is Some
+                    // Only set this if `icon_name` is Some
                     set_icon_name?: icon_name,
                     connect_clicked[sender] => move |_| {
                         sender.input(AppMsg::Increment);
@@ -55,7 +55,6 @@ impl SimpleComponent for AppModel {
                     }
                 },
 
-                //gtk::Dialog::builder().header_bar(true).build() {
                 gtk::Grid {
                     attach[1, 1, 1, 1] = &gtk::Label {
                         // Alternative: #[track = "counter.value % 10 == 0"]
@@ -64,7 +63,7 @@ impl SimpleComponent for AppModel {
                     }
                 },
 
-                /// A conditional widget, wow!
+                // A conditional widget
                 // Alternative: #[transition = "SlideLeft"]
                 #[transition(SlideLeft)]
                 append = if counter.value % 2 == 0 {
