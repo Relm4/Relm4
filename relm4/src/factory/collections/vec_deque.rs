@@ -539,4 +539,9 @@ impl<C: FactoryComponent> FactoryVecDeque<C> {
     pub fn widget(&self) -> &C::ParentWidget {
         &self.widget
     }
+
+    /// Returns an iterator over the components.
+    pub fn iter(&self) -> impl Iterator<Item = &C> {
+        self.components.iter().map(|component| component.get())
+    }
 }
