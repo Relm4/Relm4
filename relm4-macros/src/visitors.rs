@@ -304,7 +304,7 @@ impl<'ast> Visit<'ast> for InitFnVisitor {
                                 Ok(ident.clone())
                             } else {
                                 Err(syn::Error::new_spanned(
-                                    &path,
+                                    path,
                                     "unable to determine model name",
                                 ))
                             }
