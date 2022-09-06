@@ -1,61 +1,46 @@
 //! Reusable and easily configurable open button dialog component.
 //!
-//! **[Example implementation](https://github.com/AaronErhardt/relm4/blob/main/relm4-examples/examples/open_button.rs)**
-use gtk::prelude::{BoxExt, ButtonExt, PopoverExt, WidgetExt};
-use relm4::factory::{DynamicIndex, Factory, FactoryVecDeque};
-use relm4::{gtk, send, ComponentUpdate, Components, Model, RelmComponent, Widgets};
-
-use crate::open_dialog::{
-    OpenDialogConfig, OpenDialogModel, OpenDialogMsg, OpenDialogParent, OpenDialogSettings,
+//! **[Example implementation](https://github.com/relm4/relm4/blob/main/examples/relm4-components/open_button.rs)**
+use relm4::factory::{DynamicIndex, FactoryVecDeque};
+use relm4::gtk::prelude::*;
+use relm4::{
+    gtk, Component, ComponentController, ComponentParts, ComponentSender, Controller,
+    SimpleComponent,
 };
-use crate::ParentWindow;
 
-use std::io::Read;
-use std::marker::PhantomData;
+use crate::open_dialog::{OpenDialog, OpenDialogMsg, OpenDialogResponse, OpenDialogSettings};
+
+use std::fs;
 use std::path::PathBuf;
 
 mod factory;
 
 use factory::FileListItem;
 
-/// Builds configuration for OpenButton
-pub trait OpenButtonConfig: OpenDialogConfig {
-    /// Returns a configuration for the open button.
-    fn open_button_config(model: &Self::Model) -> OpenButtonSettings;
-}
-
+/// Open button component.
+///
+/// Creates a button with custom text that can be used to open a file chooser dialog. If a file is
+/// chosen, then it will be emitted as an output. The component can also optionally display a
+/// popover list of open files if [`OpenButtonSettings::recently_opened_files`] is set to a value.
 #[tracker::track]
 #[derive(Debug)]
-/// Model of the open button component
-pub struct OpenButtonModel<Conf: OpenButtonConfig + 'static> {
+pub struct OpenButton {
     #[do_not_track]
     config: OpenButtonSettings,
     #[do_not_track]
-    dialog_config: OpenDialogSettings,
+    dialog: Controller<OpenDialog>,
     #[do_not_track]
     recent_files: Option<FactoryVecDeque<FileListItem>>,
     initialized: bool,
     #[do_not_track]
     reset_popover: bool,
-    #[do_not_track]
-    _conf_provider: PhantomData<*const Conf>, //we don't own Conf, there is no instance of Conf
-}
-
-struct DialogConfig<Conf> {
-    _config_provider: PhantomData<*const Conf>,
-}
-
-impl<Conf: OpenButtonConfig + 'static> OpenDialogConfig for DialogConfig<Conf> {
-    type Model = OpenButtonModel<Conf>;
-
-    fn open_dialog_config(model: &Self::Model) -> OpenDialogSettings {
-        model.dialog_config.clone()
-    }
 }
 
 #[derive(Debug)]
 /// Configuration for the open button component
 pub struct OpenButtonSettings {
+    /// Settings for the open file dialog.
+    pub dialog_settings: OpenDialogSettings,
     /// Text of the open button.
     pub text: &'static str,
     /// Path to a file where recent files should be stored.
@@ -75,234 +60,136 @@ pub enum OpenButtonMsg {
     Ignore,
 }
 
-impl<Conf: OpenButtonConfig + 'static> Model for OpenButtonModel<Conf> {
-    type Msg = OpenButtonMsg;
+/// Widgets of the open button component
+#[relm4::component(pub)]
+impl SimpleComponent for OpenButton {
+    type Init = OpenButtonSettings;
+    type Input = OpenButtonMsg;
+    type Output = PathBuf;
     type Widgets = OpenButtonWidgets;
-    type Components = OpenButtonComponents<Conf>;
-}
 
-/// Interface for the parent model of the open button component
-pub trait OpenButtonParent: Model
-where
-    Self::Widgets: ParentWindow,
-{
-    /// Returns the message the button will send to the parent
-    /// with the file path the user wants to open.
-    fn open_msg(path: PathBuf) -> Self::Msg;
-}
+    view! {
+        gtk::Box {
+            add_css_class: "linked",
+            gtk::Button {
+                set_label: model.config.text,
+                connect_clicked[sender] => move |_| {
+                    sender.input(OpenButtonMsg::ShowDialog);
+                }
+            },
+            gtk::MenuButton {
+                set_visible: model.config.recently_opened_files.is_some(),
 
-impl<ParentModel, Conf> ComponentUpdate<ParentModel> for OpenButtonModel<Conf>
-where
-    ParentModel: Model + OpenButtonParent,
-    ParentModel::Widgets: ParentWindow,
-    Conf: OpenButtonConfig<Model = ParentModel>,
-{
-    fn init_model(parent_model: &ParentModel) -> Self {
-        Self {
-            config: Conf::open_button_config(parent_model),
-            dialog_config: Conf::open_dialog_config(parent_model),
-            recent_files: None,
-            initialized: false,
-            reset_popover: false,
-            tracker: 0,
-            _conf_provider: PhantomData,
-        }
-    }
+                #[wrap(Some)]
+                #[name = "popover"]
+                set_popover = &gtk::Popover {
+                    gtk::ScrolledWindow {
+                        set_hscrollbar_policy: gtk::PolicyType::Never,
+                        set_min_content_width: 100,
+                        set_min_content_height: 100,
+                        set_min_content_height: 300,
 
-    fn update(
-        &mut self,
-        msg: Self::Msg,
-        components: &Self::Components,
-        sender: relm4::Sender<Self::Msg>,
-        parent_sender: relm4::Sender<ParentModel::Msg>,
-    ) {
-        self.reset();
-        self.reset_popover = false;
-
-        if !self.initialized {
-            self.set_initialized(true);
-            if let Some(path) = self.config.recently_opened_files {
-                let mut file = std::fs::OpenOptions::new()
-                    .create(true)
-                    .read(true)
-                    .write(true)
-                    .open(path)
-                    .expect("Couldn't create nor open recent files file");
-                let mut entries = String::new();
-                match file.read_to_string(&mut entries) {
-                    Ok(_) => {
-                        let mut list = FactoryVecDeque::new();
-                        for file_name in entries.split('\n') {
-                            if !file_name.is_empty() {
-                                list.push_back(FileListItem {
-                                    path: PathBuf::from(file_name),
-                                });
-                            }
+                        #[name = "recent_files_list"]
+                        gtk::Box {
+                            set_orientation: gtk::Orientation::Vertical,
+                            set_vexpand: true,
+                            set_hexpand: true,
                         }
-                        self.recent_files = Some(list);
-                    }
-                    Err(err) => {
-                        log::warn!("{}", err);
                     }
                 }
             }
         }
+    }
+
+    fn update(&mut self, msg: Self::Input, sender: ComponentSender<Self>) {
+        self.reset_popover = false;
+
         match msg {
             OpenButtonMsg::ShowDialog => {
-                components.dialog.send(OpenDialogMsg::Open).unwrap();
+                self.dialog.emit(OpenDialogMsg::Open);
             }
             OpenButtonMsg::Open(path) => {
-                send!(parent_sender, ParentModel::open_msg(path.clone()));
+                sender.output(path.clone());
                 self.reset_popover = true;
+
                 if let Some(recent_files) = &mut self.recent_files {
-                    if let Some(index) = recent_files.iter().position(|item| item.path == path) {
-                        let data = recent_files.remove(index).unwrap();
-                        recent_files.push_front(data);
-                    } else {
-                        recent_files.push_front(FileListItem { path });
+                    let index = recent_files.iter().position(|item| item.path == path);
+
+                    if let Some(index) = index {
+                        recent_files.guard().remove(index);
                     }
-                    if recent_files.len() > self.config.max_recent_files {
-                        recent_files.pop_back();
+
+                    if recent_files.len() < self.config.max_recent_files {
+                        recent_files.guard().push_front(path);
                     }
-                    let file_content: String = recent_files
+
+                    let contents = recent_files
                         .iter()
-                        .map(|item| {
-                            format!(
-                                "{}\n",
-                                item.path.to_str().expect("Couldn't convert path to string")
-                            )
+                        .flat_map(|recent_path| {
+                            recent_path.path.to_str().map(|s| format!("{}\n", s))
                         })
-                        .collect();
-                    std::fs::write(self.config.recently_opened_files.unwrap(), &file_content)
-                        .expect("Couldn't write to recent files list");
+                        .collect::<String>();
+
+                    let _ = fs::write(self.config.recently_opened_files.unwrap(), contents);
                 }
             }
             OpenButtonMsg::OpenRecent(index) => {
                 if let Some(item) = self
                     .recent_files
                     .as_ref()
-                    .unwrap()
-                    .get(index.current_index())
+                    .and_then(|recent_files| recent_files.get(index.current_index()))
                 {
-                    send!(sender, OpenButtonMsg::Open(PathBuf::from(&item.path)));
+                    sender.input(OpenButtonMsg::Open(PathBuf::from(&item.path)));
                 }
             }
             OpenButtonMsg::Ignore => (),
         }
     }
-}
-
-impl<Conf: OpenButtonConfig + 'static> OpenDialogParent for OpenButtonModel<Conf> {
-    fn open_msg(path: PathBuf) -> OpenButtonMsg {
-        OpenButtonMsg::Open(path)
-    }
-}
-
-impl ParentWindow for OpenButtonWidgets {
-    fn parent_window(&self) -> Option<gtk::Window> {
-        self.parent_window.clone()
-    }
-}
-
-/// Components of the open button component
-pub struct OpenButtonComponents<Conf: OpenButtonConfig + 'static> {
-    dialog: RelmComponent<OpenDialogModel<DialogConfig<Conf>>, OpenButtonModel<Conf>>,
-}
-
-impl<Conf> Components<OpenButtonModel<Conf>> for OpenButtonComponents<Conf>
-where
-    Conf: OpenDialogConfig + OpenButtonConfig,
-{
-    fn init_components(
-        parent_model: &OpenButtonModel<Conf>,
-        parent_sender: relm4::Sender<OpenButtonMsg>,
-    ) -> Self {
-        Self {
-            dialog: RelmComponent::new(parent_model, parent_sender),
-        }
-    }
-
-    fn connect_parent(&mut self, parent_widgets: &OpenButtonWidgets) {
-        self.dialog.connect_parent(parent_widgets);
-    }
-}
-
-#[relm4::widget(pub)]
-/// Widgets of the open button component
-impl<ParentModel, Conf> Widgets<OpenButtonModel<Conf>, ParentModel> for OpenButtonWidgets
-where
-    ParentModel: Model + OpenButtonParent,
-    ParentModel::Widgets: ParentWindow,
-    Conf: OpenButtonConfig<Model = ParentModel> + OpenDialogConfig<Model = ParentModel>,
-{
-    view! {
-        open_box = gtk::Box {
-            add_css_class: "linked",
-            append = &gtk::Button {
-                set_label: model.config.text,
-                connect_clicked(sender) => move |_| {
-                    send!(sender, OpenButtonMsg::ShowDialog);
-                }
-            },
-        }
-    }
-
-    additional_fields! {
-        parent_window: Option<gtk::Window>,
-        view: Option<gtk::Box>,
-        popover: Option<gtk::Popover>,
-        scroll_window: Option<gtk::ScrolledWindow>
-    }
-
-    fn post_init() {
-        let parent_window = None; //parent_widgets.parent_window();
-
-        let (view, popover, scroll_window) = if model.config.recently_opened_files.is_some() {
-            let drop_down_button = gtk::MenuButton::new();
-            let popover = gtk::Popover::new();
-            let window = gtk::ScrolledWindow::builder()
-                .hscrollbar_policy(gtk::PolicyType::Never)
-                .min_content_width(100)
-                .min_content_height(100)
-                .max_content_height(300)
-                .build();
-            let view = gtk::Box::builder()
-                .orientation(gtk::Orientation::Vertical)
-                .vexpand(true)
-                .hexpand(true)
-                .build();
-            view.add_css_class("linked");
-
-            open_box.append(&drop_down_button);
-            drop_down_button.set_popover(Some(&popover));
-            window.set_child(Some(&view));
-            popover.set_child(Some(&window));
-
-            send!(sender, OpenButtonMsg::Ignore);
-
-            (Some(view), Some(popover), Some(window))
-        } else {
-            (None, None, None)
-        };
-    }
-
-    fn pre_connect_parent() {
-        self.parent_window = parent_widgets.parent_window();
-    }
 
     fn pre_view() {
-        if let Some(model) = &model.recent_files {
-            model.generate(self.view.as_ref().expect("Box wasn't generated"), sender);
+        if self.reset_popover {
+            popover.popdown();
         }
+    }
 
-        if model.reset_popover {
-            if let Some(popover) = &self.popover {
-                popover.popdown();
+    fn init(
+        settings: Self::Init,
+        root: &Self::Root,
+        sender: ComponentSender<Self>,
+    ) -> ComponentParts<Self> {
+        let dialog = OpenDialog::builder()
+            .transient_for_native(root)
+            .launch(settings.dialog_settings.clone())
+            .forward(&sender.input, |response| match response {
+                OpenDialogResponse::Accept(path) => OpenButtonMsg::Open(path),
+                OpenDialogResponse::Cancel => OpenButtonMsg::Ignore,
+            });
+
+        let mut model = Self {
+            config: settings,
+            dialog,
+            initialized: false,
+            recent_files: None,
+            reset_popover: false,
+            tracker: 0,
+        };
+
+        let widgets = view_output!();
+
+        if let Some(filename) = model.config.recently_opened_files {
+            let mut factory =
+                FactoryVecDeque::new(widgets.recent_files_list.clone(), &sender.input);
+
+            if let Ok(entries) = fs::read_to_string(filename) {
+                let mut guard = factory.guard();
+                for entry in entries.lines() {
+                    guard.push_back(PathBuf::from(entry));
+                }
             }
+
+            model.recent_files = Some(factory);
         }
 
-        if let Some(window) = &self.scroll_window {
-            window.emit_scroll_child(gtk::ScrollType::Start, false);
-        }
+        ComponentParts { model, widgets }
     }
 }

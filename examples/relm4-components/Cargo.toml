@@ -13,3 +13,7 @@ relm4-components = { path = "../../relm4-components" }
 [[example]]
 name = "file_dialogs"
 path = "file_dialogs.rs"
+
+[[example]]
+name = "open_button"
+path = "open_button.rs"

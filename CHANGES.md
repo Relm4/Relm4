@@ -2,6 +2,8 @@
 
 ## Unreleased
 
++ relm4-components: Port `OpenButton` to 0.5
++ core: Add `iter()` method to `FactoryVecDeque`
 + core: Rename `ParentMsg` and `output_to_parent_msg` to `ParentInput` and `output_to_parent_input`, respectively.
 + core: Do not call `gtk_init` and `adw_init` in favor of the application startup handler
 + core: Remove `Application` type alias in favor of `gtk::Application`
