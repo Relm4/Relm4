@@ -41,6 +41,8 @@ impl SimpleComponent for AppModel {
 
                 append: inc_button = &gtk::Button {
                     set_label: "Increment",
+                    // Only set this if `icon_name` is Some
+                    set_icon_name?: icon_name,
                     connect_clicked[sender] => move |_| {
                         sender.input(AppMsg::Increment);
                     }
@@ -53,7 +55,6 @@ impl SimpleComponent for AppModel {
                     }
                 },
 
-                //gtk::Dialog::builder().header_bar(true).build() {
                 gtk::Grid {
                     attach[1, 1, 1, 1] = &gtk::Label {
                         // Alternative: #[track = "counter.value % 10 == 0"]
@@ -62,7 +63,7 @@ impl SimpleComponent for AppModel {
                     }
                 },
 
-                /// A conditional widget, wow!
+                // A conditional widget
                 // Alternative: #[transition = "SlideLeft"]
                 #[transition(SlideLeft)]
                 append = if counter.value % 2 == 0 {
@@ -140,6 +141,7 @@ impl SimpleComponent for AppModel {
             set_transient_for: Some(&main_window),
             // Empty args
             hide: (),
+
             #[watch]
             set_visible: counter.value == 42,
 
@@ -160,6 +162,9 @@ impl SimpleComponent for AppModel {
             value: init.counter,
             tracker: 0,
         };
+
+        // Set icon name randomly to Some("go-up-symbolic") or None
+        let icon_name = rand::random::<bool>().then(|| "go-up-symbolic");
 
         let local_label = gtk::Label::new(Some("local_label"));
         let local_ref_label_value = gtk::Label::new(Some("local_ref_label"));
