@@ -2,6 +2,7 @@
 
 ## Unreleased
 
++ core: Increase MSRV to 1.63 to match the gtk4 crate
 + core: Implement RelmContainerExt for Leaflet, Carousel and TabView
 + relm4-components: Port `OpenButton` to 0.5
 + core: Add `iter()` method to `FactoryVecDeque`
