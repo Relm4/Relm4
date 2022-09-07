@@ -20,7 +20,7 @@ jobs:
           - stable
           - beta
           - nightly
-          - "1.61"
+          - "1.63"
     env:
         DISPLAY: ":99.0"
     steps:
