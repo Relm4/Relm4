@@ -40,3 +40,6 @@ macro_rules! add_child_impl {
 
 append_impl!(gtk::Box, gtk::ListBox);
 add_child_impl!(gtk::InfoBar, gtk::Stack);
+
+#[cfg(feature = "libadwaita")]
+append_impl!(adw::Leaflet, adw::Carousel, adw::TabView);

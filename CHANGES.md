@@ -2,6 +2,7 @@
 
 ## Unreleased
 
++ core: Implement RelmContainerExt for Leaflet, Carousel and TabView
 + relm4-components: Port `OpenButton` to 0.5
 + core: Add `iter()` method to `FactoryVecDeque`
 + core: Rename `ParentMsg` and `output_to_parent_msg` to `ParentInput` and `output_to_parent_input`, respectively.
