@@ -11,6 +11,10 @@ relm4 = { path = "../../relm4", features = ["macros"] }
 relm4-components = { path = "../../relm4-components" }
 
 [[example]]
+name = "alert"
+path = "alert.rs"
+
+[[example]]
 name = "file_dialogs"
 path = "file_dialogs.rs"
 
