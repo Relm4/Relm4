@@ -57,7 +57,7 @@ impl SimpleComponent for App {
                 recently_opened_files: Some(".recent_files"),
                 max_recent_files: 10,
             })
-            .forward(&sender.input, AppMsg::Open);
+            .forward(sender.input_sender(), AppMsg::Open);
 
         let widgets = view_output!();
 

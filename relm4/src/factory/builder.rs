@@ -2,12 +2,10 @@ use super::data_guard::DataGuard;
 use super::FactoryComponentSender;
 use super::{handle::FactoryHandle, DynamicIndex, FactoryComponent, FactoryView};
 
-use crate::component::ComponentSenderInner;
 use crate::shutdown::ShutdownSender;
 use crate::{shutdown, OnDestroy, Receiver, Sender};
 
 use std::any;
-use std::sync::Arc;
 
 use async_oneshot::oneshot;
 use futures::FutureExt;
@@ -39,12 +37,8 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
         let (death_notifier, death_recipient) = shutdown::channel();
 
         // Encapsulates the senders used by component methods.
-        let component_sender = Arc::new(ComponentSenderInner {
-            command: cmd_tx,
-            input: input_tx,
-            output: output_tx,
-            shutdown: death_recipient,
-        });
+        let component_sender =
+            FactoryComponentSender::new(input_tx, output_tx, cmd_tx, death_recipient);
 
         let data = Box::new(C::init_model(params, index, component_sender.clone()));
         let root_widget = data.init_root();
@@ -106,8 +100,8 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
             component_sender.clone(),
         );
 
-        let input_tx = component_sender.input.clone();
-        let output_tx = component_sender.output.clone();
+        let input_tx = component_sender.input_sender().clone();
+        let output_tx = component_sender.output_sender().clone();
 
         // Spawns the component's service. It will receive both `Self::Input` and
         // `Self::CommandOutput` messages. It will spawn commands as requested by

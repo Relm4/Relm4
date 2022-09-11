@@ -117,7 +117,7 @@ impl SimpleComponent for App {
                     is_modal: true,
                     destructive_accept: true,
                 })
-                .forward(&sender.input, convert_alert_response),
+                .forward(sender.input_sender(), convert_alert_response),
             second_dialog: Alert::builder()
                 .transient_for(root)
                 .launch(AlertSettings {
@@ -129,7 +129,7 @@ impl SimpleComponent for App {
                     is_modal: true,
                     destructive_accept: true,
                 })
-                .forward(&sender.input, convert_alert_response),
+                .forward(sender.input_sender(), convert_alert_response),
         };
 
         let widgets = view_output!();

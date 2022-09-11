@@ -7,13 +7,13 @@ use futures::FutureExt;
 use gtk::glib;
 use tracing::info_span;
 
-use crate::component::{ComponentSenderInner, EmptyRoot};
+use crate::component::EmptyRoot;
+use crate::sender::ComponentSender;
 use crate::{
     shutdown, Component, ComponentBuilder, ComponentParts, OnDestroy, Receiver, Sender,
     SimpleComponent,
 };
 use std::fmt::Debug;
-use std::sync::Arc;
 use std::{any, thread};
 
 /// Receives inputs and outputs in the background.
@@ -86,12 +86,8 @@ where
         let (death_notifier, death_recipient) = shutdown::channel();
 
         // Encapsulates the senders used by component methods.
-        let component_sender = Arc::new(ComponentSenderInner {
-            command: cmd_tx,
-            input: input_tx.clone(),
-            output: output_tx.clone(),
-            shutdown: death_recipient,
-        });
+        let component_sender =
+            ComponentSender::new(input_tx.clone(), output_tx.clone(), cmd_tx, death_recipient);
 
         // The source ID of the component's service will be sent through this once the root
         // widget has been iced, which will give the component one last chance to say goodbye.

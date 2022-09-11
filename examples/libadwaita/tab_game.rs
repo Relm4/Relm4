@@ -160,7 +160,7 @@ impl FactoryComponent for GamePage {
         _index: &DynamicIndex,
         sender: FactoryComponentSender<Self>,
     ) -> Self {
-        GAME_STATE.subscribe(&sender.input, |_| CounterMsg::Update);
+        GAME_STATE.subscribe(sender.input_sender(), |_| CounterMsg::Update);
         Self { id: value }
     }
 
@@ -246,7 +246,7 @@ impl Component for AppModel {
         let widgets = view_output!();
 
         let mut model = AppModel {
-            counters: FactoryVecDeque::new(widgets.tabs.clone(), &sender.input),
+            counters: FactoryVecDeque::new(widgets.tabs.clone(), sender.input_sender()),
             start_index: None,
         };
 

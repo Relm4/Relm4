@@ -106,7 +106,7 @@ impl SimpleComponent for App {
         let open_dialog = OpenDialog::builder()
             .transient_for_native(root)
             .launch(OpenDialogSettings::default())
-            .forward(&sender.input, |response| match response {
+            .forward(sender.input_sender(), |response| match response {
                 OpenDialogResponse::Accept(path) => Input::OpenResponse(path),
                 OpenDialogResponse::Cancel => Input::Ignore,
             });
@@ -114,7 +114,7 @@ impl SimpleComponent for App {
         let save_dialog = SaveDialog::builder()
             .transient_for_native(root)
             .launch(SaveDialogSettings::default())
-            .forward(&sender.input, |response| match response {
+            .forward(sender.input_sender(), |response| match response {
                 SaveDialogResponse::Accept(path) => Input::SaveResponse(path),
                 SaveDialogResponse::Cancel => Input::Ignore,
             });

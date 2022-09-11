@@ -40,13 +40,11 @@ impl Worker for AsyncHandler {
     // If you don't want to block during processing, look for commands.
     // You'll find a good reference in the "non_blocking_async" example.
     fn update(&mut self, msg: AsyncHandlerMsg, sender: ComponentSender<Self>) {
-        let output = sender.output.clone();
-
         std::thread::sleep(Duration::from_secs(1));
 
         match msg {
-            AsyncHandlerMsg::DelayedIncrement => output.send(AppMsg::Increment),
-            AsyncHandlerMsg::DelayedDecrement => output.send(AppMsg::Decrement),
+            AsyncHandlerMsg::DelayedIncrement => sender.output(AppMsg::Increment),
+            AsyncHandlerMsg::DelayedDecrement => sender.output(AppMsg::Decrement),
         }
     }
 }
@@ -94,7 +92,7 @@ impl SimpleComponent for AppModel {
             counter: 0,
             worker: AsyncHandler::builder()
                 .detach_worker(())
-                .forward(&sender.input, identity),
+                .forward(sender.input_sender(), identity),
         };
 
         let widgets = view_output!();

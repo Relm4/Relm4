@@ -2,6 +2,8 @@
 
 ## Unreleased
 
++ core: Remove `input` and `output` fields on `ComponentSender` and `FactoryComponentSender` in favor of `input_sender` and `output_sender` methods
++ core: Make `ComponentSender` and `FactoryComponentSender` structs instead of type aliases
 + core: Add a `prelude` module that contains commonly imported traits and types
 + core: Increase MSRV to 1.63 to match the gtk4 crate
 + core: Implement RelmContainerExt for Leaflet, Carousel and TabView
