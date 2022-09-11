@@ -2,6 +2,7 @@
 
 ## Unreleased
 
++ core: Add a `prelude` module that contains commonly imported traits and types
 + core: Increase MSRV to 1.63 to match the gtk4 crate
 + core: Implement RelmContainerExt for Leaflet, Carousel and TabView
 + relm4-components: Port `OpenButton` to 0.5
