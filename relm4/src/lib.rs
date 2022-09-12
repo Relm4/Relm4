@@ -68,6 +68,8 @@ pub static RELM_THREADS: OnceCell<usize> = OnceCell::new();
 /// NOTE: The default max is 512.
 pub static RELM_BLOCKING_THREADS: OnceCell<usize> = OnceCell::new();
 
+pub mod prelude;
+
 /// Re-export of gtk4
 pub use gtk;
 

@@ -1,6 +1,6 @@
 use gtk::prelude::*;
-use relm4::factory::{DynamicIndex, FactoryComponent, FactoryComponentSender, FactoryVecDeque};
-use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, SimpleComponent, WidgetPlus};
+use relm4::factory::FactoryVecDeque;
+use relm4::prelude::*;
 
 #[derive(Debug)]
 struct Task {

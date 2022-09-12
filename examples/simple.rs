@@ -1,5 +1,5 @@
-use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
-use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, SimpleComponent, WidgetPlus};
+use gtk::prelude::*;
+use relm4::prelude::*;
 
 struct AppModel {
     counter: u8,
