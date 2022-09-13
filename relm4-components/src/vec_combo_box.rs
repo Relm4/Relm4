@@ -1,23 +1,15 @@
-use std::marker::PhantomData;
-
 use relm4::gtk;
 use relm4::gtk::prelude::{ComboBoxExt, ComboBoxExtManual};
 use relm4::{component, ComponentParts, SimpleComponent};
 
 #[derive(Debug)]
-pub struct VecComboBox<Fields> {
-    fields: PhantomData<Fields>,
-}
+pub struct VecComboBox;
 
 #[component(pub)]
-impl<Fields, Str> SimpleComponent for VecComboBox<Fields>
-where
-    Fields: Iterator<Item = Str> + 'static,
-    Str: AsRef<str>,
-{
+impl SimpleComponent for VecComboBox {
     type Input = ();
     type Output = usize;
-    type Init = Fields;
+    type Init = Vec<String>;
     type Widgets = EnumComboBoxWidget;
 
     view! {
@@ -35,14 +27,12 @@ where
         root: &Self::Root,
         sender: relm4::ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let model = Self {
-            fields: PhantomData,
-        };
+        let model = Self;
 
         let widgets = view_output!();
 
-        for (idx, string) in init.enumerate() {
-            root.insert_text(idx as i32, string.as_ref());
+        for (idx, string) in init.iter().enumerate() {
+            root.insert_text(idx as i32, string);
         }
 
         ComponentParts { model, widgets }
