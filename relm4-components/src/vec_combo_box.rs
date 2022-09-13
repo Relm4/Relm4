@@ -2,6 +2,7 @@ use relm4::gtk::prelude::{ComboBoxExt, ComboBoxExtManual};
 use relm4::{component, ComponentParts, SimpleComponent};
 use relm4::{gtk, ComponentSender};
 
+#[derive(Debug)]
 pub struct VecComboBox {
     data: VecComboBoxData,
     root: gtk::ComboBoxText,
@@ -74,6 +75,7 @@ impl VecComboBox {
             self.root.insert_text(idx as i32, string);
         }
 
-        self.root.set_active(u32::try_from(self.data.active_index).ok());
+        self.root
+            .set_active(u32::try_from(self.data.active_index).ok());
     }
 }
