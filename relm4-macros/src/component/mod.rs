@@ -109,7 +109,7 @@ pub(crate) fn generate_tokens(
             fn update_view(
                 &self,
                 widgets: &mut Self::Widgets,
-                sender: ComponentSender<Self>,
+                sender: relm4::ComponentSender<Self>,
             ) {
                 struct __DoNotReturnManually;
 
