@@ -25,6 +25,8 @@ pub mod drawing;
 mod extensions;
 pub mod factory;
 
+mod sender;
+
 /// Cancellation mechanism used by Relm4.
 pub mod shutdown;
 
@@ -40,10 +42,11 @@ pub mod worker;
 
 pub use self::channel::{channel, Receiver, Sender};
 pub use self::component::{
-    Component, ComponentBuilder, ComponentController, ComponentParts, ComponentSender, Controller,
-    MessageBroker, OnDestroy, SimpleComponent,
+    Component, ComponentBuilder, ComponentController, ComponentParts, Controller, MessageBroker,
+    OnDestroy, SimpleComponent,
 };
 pub use self::extensions::*;
+pub use self::sender::ComponentSender;
 pub use self::shared_state::SharedState;
 pub use self::shutdown::ShutdownReceiver;
 pub use self::worker::{Worker, WorkerController, WorkerHandle};

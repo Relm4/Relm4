@@ -7,7 +7,6 @@ mod widgets;
 
 pub mod collections;
 mod data_guard;
-use std::sync::Arc;
 
 pub use collections::*;
 
@@ -20,13 +19,4 @@ pub use positions::*;
 pub mod traits;
 pub use traits::*;
 
-use crate::component::ComponentSenderInner;
-
-/// Contain senders used by the factory component.
-pub type FactoryComponentSender<C> = Arc<
-    ComponentSenderInner<
-        <C as FactoryComponent>::Input,
-        <C as FactoryComponent>::Output,
-        <C as FactoryComponent>::CommandOutput,
-    >,
->;
+pub use crate::sender::FactoryComponentSender;

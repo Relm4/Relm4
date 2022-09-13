@@ -3,7 +3,8 @@
 // SPDX-License-Identifier: MIT or Apache-2.0
 
 use super::message_broker::MessageBroker;
-use super::{Component, ComponentParts, ComponentSenderInner, Connector, OnDestroy, StateWatcher};
+use super::{Component, ComponentParts, Connector, OnDestroy, StateWatcher};
+use crate::sender::ComponentSender;
 use crate::{late_initialization, shutdown};
 use crate::{Receiver, RelmContainerExt, RelmWidgetExt, Sender};
 use async_oneshot::oneshot;
@@ -13,7 +14,6 @@ use std::any;
 use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::rc::Rc;
-use std::sync::Arc;
 use tracing::info_span;
 
 /// A component that is ready for docking and launch.
@@ -163,12 +163,8 @@ impl<C: Component> ComponentBuilder<C> {
         let (death_notifier, death_recipient) = shutdown::channel();
 
         // Encapsulates the senders used by component methods.
-        let component_sender = Arc::new(ComponentSenderInner {
-            command: cmd_tx,
-            input: input_tx.clone(),
-            output: output_tx.clone(),
-            shutdown: death_recipient,
-        });
+        let component_sender =
+            ComponentSender::new(input_tx.clone(), output_tx.clone(), cmd_tx, death_recipient);
 
         // Constructs the initial model and view with the initial payload.
         let watcher = Rc::new(StateWatcher {

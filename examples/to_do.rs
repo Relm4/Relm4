@@ -146,7 +146,7 @@ impl SimpleComponent for AppModel {
         let widgets = view_output!();
 
         let model = AppModel {
-            tasks: FactoryVecDeque::new(widgets.tasks.clone(), &sender.input),
+            tasks: FactoryVecDeque::new(widgets.tasks.clone(), sender.input_sender()),
         };
 
         ComponentParts { model, widgets }

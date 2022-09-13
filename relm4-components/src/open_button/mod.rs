@@ -160,7 +160,7 @@ impl SimpleComponent for OpenButton {
         let dialog = OpenDialog::builder()
             .transient_for_native(root)
             .launch(settings.dialog_settings.clone())
-            .forward(&sender.input, |response| match response {
+            .forward(sender.input_sender(), |response| match response {
                 OpenDialogResponse::Accept(path) => OpenButtonMsg::Open(path),
                 OpenDialogResponse::Cancel => OpenButtonMsg::Ignore,
             });
@@ -178,7 +178,7 @@ impl SimpleComponent for OpenButton {
 
         if let Some(filename) = model.config.recently_opened_files {
             let mut factory =
-                FactoryVecDeque::new(widgets.recent_files_list.clone(), &sender.input);
+                FactoryVecDeque::new(widgets.recent_files_list.clone(), sender.input_sender());
 
             if let Ok(entries) = fs::read_to_string(filename) {
                 let mut guard = factory.guard();

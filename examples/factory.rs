@@ -181,7 +181,7 @@ impl SimpleComponent for AppModel {
 
         let model = AppModel {
             created_widgets: counter,
-            counters: FactoryVecDeque::new(widgets.counter_box.clone(), &sender.input),
+            counters: FactoryVecDeque::new(widgets.counter_box.clone(), sender.input_sender()),
         };
 
         ComponentParts { model, widgets }
