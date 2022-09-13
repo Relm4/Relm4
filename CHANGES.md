@@ -1,7 +1,7 @@
 # Changelog
 
 ## Unreleased
-
++ core: Append children for `gtk::Dialog` to its content area instead of using `set_child`
 + core: Remove `input` and `output` fields on `ComponentSender` and `FactoryComponentSender` in favor of `input_sender` and `output_sender` methods
 + core: Make `ComponentSender` and `FactoryComponentSender` structs instead of type aliases
 + core: Add a `prelude` module that contains commonly imported traits and types
