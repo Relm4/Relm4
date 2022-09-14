@@ -3,8 +3,6 @@ use crate::factory::{
 };
 use crate::Sender;
 
-use std::fmt::Debug;
-
 #[derive(Debug)]
 pub(super) enum ComponentStorage<C: FactoryComponent> {
     Builder(FactoryBuilder<C>),
