@@ -11,7 +11,7 @@
 + core: Add a `prelude` module that contains commonly imported traits and types
 + core: Increase MSRV to 1.63 to match the gtk4 crate
 + core: Implement RelmContainerExt for Leaflet, Carousel and TabView
-+ relm4-components: Port `OpenButton` to 0.5
++ components: Port `OpenButton` to 0.5
 + core: Add `iter()` method to `FactoryVecDeque`
 + core: Rename `ParentMsg` and `output_to_parent_msg` to `ParentInput` and `output_to_parent_input`, respectively.
 + core: Do not call `gtk_init` and `adw_init` in favor of the application startup handler
@@ -33,7 +33,7 @@
 + core: Remove generics from FactoryComponent
 + core: Implement FactoryView for adw::Carousel
 + macros: Fix unsoundness with thread local memory
-+ relm4-components: Complete port to 0.5
++ components: Complete port to 0.5
 + examples: More examples ported to 0.5
 
 ## 0.5.0-beta.1 - 2022-7-26
@@ -209,7 +209,7 @@
 + book: Many book improvements by [tronta](https://github.com/tronta)
 + core: The send! macro no longer clones the sender
 + macros: Make fields of public widgets public
-+ relm4-components: Use &'static str instead of String for configurations
++ components: Use &'static str instead of String for configurations
 + examples: Many improvements
 
 ### Fixed
@@ -221,8 +221,8 @@
 
 ### Added
 
-+ relm4-components: Open button with automatic recent files list
-+ relm4-components: Removed trait duplication and added more docs
++ components: Open button with automatic recent files list
++ components: Removed trait duplication and added more docs
 + core: Iterators added to factory data structures
 + core: More widgets added as FactoryView
 
