@@ -30,6 +30,14 @@ impl RelmRemoveExt for gtk::FlowBox {
     }
 }
 
+#[cfg(feature = "libadwaita")]
+impl RelmRemoveExt for adw::PreferencesGroup {
+    fn container_remove(&self, widget: &impl AsRef<Self::Child>) {
+        use adw::prelude::PreferencesGroupExt;
+        self.remove(widget.as_ref());
+    }
+}
+
 macro_rules! remove_impl {
     ($($type:ty),+) => {
         $(
