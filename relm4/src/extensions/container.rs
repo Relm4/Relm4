@@ -20,6 +20,14 @@ impl RelmContainerExt for gtk::Dialog {
     }
 }
 
+#[cfg(feature = "libadwaita")]
+impl RelmContainerExt for adw::PreferencesGroup {
+    fn container_add(&self, widget: &impl AsRef<gtk::Widget>) {
+        use adw::prelude::PreferencesGroupExt;
+        self.add(widget.as_ref());
+    }
+}
+
 macro_rules! append_impl {
     ($($type:ty),+) => {
         $(

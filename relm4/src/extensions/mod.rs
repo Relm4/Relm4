@@ -179,5 +179,6 @@ mod libadwaita {
         adw::ClampScrollable
         adw::SplitButton
         adw::StatusPage
+        adw::PreferencesGroup
     }
 }
