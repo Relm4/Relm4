@@ -7,7 +7,7 @@ use relm4::gtk::prelude::{ComboBoxExt, ComboBoxExtManual};
 use relm4::{gtk, ComponentSender};
 use relm4::{Component, ComponentParts};
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 /// A simple wrapper around [`gtk::ComboBox`].
 ///
 /// This can be used with enums, [`String`]s or any custom type you want.
@@ -23,7 +23,7 @@ pub struct SimpleComboBox<E: ToString> {
     pub active_index: usize,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 /// The message type of [`SimpleComboBox`].
 pub enum SimpleComboBoxMsg<E: ToString> {
     /// Overwrite the current values.
