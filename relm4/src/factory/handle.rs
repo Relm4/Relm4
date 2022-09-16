@@ -22,7 +22,7 @@ pub(super) struct FactoryHandle<C: FactoryComponent> {
 impl<C: FactoryComponent> fmt::Debug for FactoryHandle<C> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("FactoryHandle")
-            .field("data", &self.data)
+            .field("data", &"<FactoryComponent>")
             .field("root_widget", &self.root_widget)
             .field("input", &self.input)
             .field("notifier", &self.notifier)

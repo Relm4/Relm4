@@ -85,7 +85,7 @@ impl<C> Position<()> for C {
 /// Similar to [`Component`](crate::Component) but adjusted to fit the life cycle
 /// of factories.
 pub trait FactoryComponent:
-    Position<<Self::ParentWidget as FactoryView>::Position> + Sized + Debug + 'static
+    Position<<Self::ParentWidget as FactoryView>::Position> + Sized + 'static
 {
     /// Container widget to which all widgets of the factory will be added.
     type ParentWidget: FactoryView + 'static;
