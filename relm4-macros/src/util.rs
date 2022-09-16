@@ -21,7 +21,7 @@ pub(super) fn strings_to_path(strings: &[&str]) -> Path {
 }
 
 pub(super) fn item_impl_error(original_input: TokenStream) -> TokenStream {
-    let macro_impls = quote::quote!{
+    let macro_impls = quote::quote! {
         macro_rules! view_output {
             () => { todo!() };
         }
@@ -30,6 +30,7 @@ pub(super) fn item_impl_error(original_input: TokenStream) -> TokenStream {
             ($tt:tt) => {};
             ($tt:tt $($y:tt)+) => {}
         }
-    }.into();
+    }
+    .into();
     vec![macro_impls, original_input].into_iter().collect()
 }

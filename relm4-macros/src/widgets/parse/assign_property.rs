@@ -37,7 +37,9 @@ impl AssignProperty {
         let ProcessedAttrs {
             watch,
             iterative,
-            block_signals, chain } = Self::process_attributes(&expr, attributes)?;
+            block_signals,
+            chain,
+        } = Self::process_attributes(&expr, attributes)?;
 
         Ok(Self {
             attr: watch,

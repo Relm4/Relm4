@@ -164,12 +164,8 @@ pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let component_impl_res = syn::parse_macro_input::parse::<syn::ItemImpl>(input);
 
     match component_impl_res {
-        Ok(component_impl) => {
-            component::generate_tokens(visibility, component_impl).into()
-        },
-        Err(_) => {
-            util::item_impl_error(backup_input)
-        }
+        Ok(component_impl) => component::generate_tokens(visibility, component_impl).into(),
+        Err(_) => util::item_impl_error(backup_input),
     }
 }
 
@@ -180,12 +176,8 @@ pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let factory_impl_res = syn::parse_macro_input::parse::<syn::ItemImpl>(input);
 
     match factory_impl_res {
-        Ok(factory_impl) => {
-            factory::generate_tokens(visibility, factory_impl).into()
-        },
-        Err(_) => {
-            util::item_impl_error(backup_input)
-        }
+        Ok(factory_impl) => factory::generate_tokens(visibility, factory_impl).into(),
+        Err(_) => util::item_impl_error(backup_input),
     }
 }
 
