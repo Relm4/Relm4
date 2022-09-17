@@ -3,6 +3,7 @@
 ## Unreleased
 
 + core: Add `iter_mut` to `FactoryVecDeque`
++ core: Remove Debug requirement for FactoryComponent
 + core: Impl extension traits and `FactoryView` for `adw::PreferencesGroup`
 + components: Add `SimpleComboBox` type as a more idiomatic wrapper around `gtk::ComboBoxText`
 + core: Append children for `gtk::Dialog` to its content area instead of using `set_child`

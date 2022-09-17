@@ -8,12 +8,12 @@ use gtk::glib;
 /// This type is a safe wrapper that prevent's misuse,
 /// except if you move the data passed to the runtime outside
 /// of the runtime (through senders for example).
-pub(super) struct DataGuard<Data: std::fmt::Debug> {
+pub(super) struct DataGuard<Data> {
     data: Box<Data>,
     rt: RuntimeDropper,
 }
 
-impl<Data: std::fmt::Debug> DataGuard<Data> {
+impl<Data> DataGuard<Data> {
     /// DO NOT MOVE THE DATA PASSED TO THE CLOSURE OUTSIDE OF THE RUNTIME!
     /// SAFETY IS ONLY GUARANTEED BECAUSE THE DATA IS BOUND TO THE LIFETIME OF THE RUNTIME!
     pub(super) fn new<F, Fut>(data: Box<Data>, f: F) -> (Self, Rc<Cell<Option<glib::SourceId>>>)
