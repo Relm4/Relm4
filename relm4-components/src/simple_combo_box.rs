@@ -19,8 +19,8 @@ use relm4::{Component, ComponentParts};
 pub struct SimpleComboBox<E: ToString> {
     /// The variants that can be selected.
     pub variants: Vec<E>,
-    /// The index of the active element.
-    pub active_index: usize,
+    /// The index of the active element or [`None`] is nothing is selected.
+    pub active_index: Option<usize>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -76,11 +76,11 @@ where
         match input {
             SimpleComboBoxMsg::UpdateIndex(idx) => {
                 sender.output(idx);
-                self.active_index = idx;
+                self.active_index = Some(idx);
             }
             SimpleComboBoxMsg::SetActiveIdx(idx) => {
                 if idx < self.variants.len() {
-                    self.active_index = idx;
+                    self.active_index = Some(idx);
                     widgets.set_active(u32::try_from(idx).ok());
                 }
             }
@@ -103,11 +103,11 @@ where
             combo_box.insert_text(idx as i32, &e.to_string());
         }
 
-        combo_box.set_active(u32::try_from(self.active_index).ok());
+        combo_box.set_active(self.active_index.and_then(|val| u32::try_from(val).ok()));
     }
 
-    /// Return the value of the currently selected element.
-    pub fn get_active_elem(&self) -> &E {
-        &self.variants[self.active_index]
+    /// Return the value of the currently selected element or [`None`] if nothing is selected.
+    pub fn get_active_elem(&self) -> Option<&E> {
+        self.active_index.map(|idx| &self.variants[idx])
     }
 }
