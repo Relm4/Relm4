@@ -32,14 +32,3 @@ error[E0046]: not all trait items implemented, missing: `Root`, `init_root`
   |
   = help: implement the missing item: `type Root = Type;`
   = help: implement the missing item: `fn init_root() -> <Self as SimpleComponent>::Root { todo!() }`
-
-warning: unreachable expression
-  --> tests/ui/compile-fail/bad_impl.rs:26:9
-   |
-24 |         let widgets = view_output!();
-   |                       -------------- any code following this expression is unreachable
-25 |
-26 |         ComponentParts { model, widgets }
-   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable expression
-   |
-   = note: `#[warn(unreachable_code)]` on by default
