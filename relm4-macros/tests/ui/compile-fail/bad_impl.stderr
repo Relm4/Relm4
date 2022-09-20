@@ -1,0 +1,25 @@
+error: expected identifier, found `}`
+  --> tests/ui/compile-fail/bad_impl.rs:30:1
+   |
+6  | impl SimpleComponent for TestComponent {
+   |                                        - while parsing this item list starting here
+...
+30 | }
+   | ^
+   | |
+   | expected identifier
+   | the item list ends here
+
+error: unexpected end of input, expected identifier
+  --> tests/ui/compile-fail/bad_impl.rs:30:1
+   |
+30 | }
+   | ^
+
+warning: unused imports: `ComponentParts`, `ComponentSender`, `SimpleComponent`, `gtk`
+ --> tests/ui/compile-fail/bad_impl.rs:1:13
+  |
+1 | use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent};
+  |             ^^^  ^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
