@@ -1,6 +1,6 @@
 use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent};
 
-#[derive(default)]
+#[derive(Default)]
 struct TestComponent;
 
 #[relm4_macros::component]

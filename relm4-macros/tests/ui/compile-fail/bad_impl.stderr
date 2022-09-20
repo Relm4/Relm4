@@ -1,25 +1,45 @@
 error: expected identifier, found `}`
-  --> tests/ui/compile-fail/bad_impl.rs:30:1
+  --> tests/ui/compile-fail/bad_impl.rs:31:1
    |
-6  | impl SimpleComponent for TestComponent {
+7  | impl SimpleComponent for TestComponent {
    |                                        - while parsing this item list starting here
 ...
-30 | }
+31 | }
    | ^
    | |
    | expected identifier
    | the item list ends here
 
-error: unexpected end of input, expected identifier
-  --> tests/ui/compile-fail/bad_impl.rs:30:1
+error[E0412]: cannot find type `TestWidgets` in this scope
+  --> tests/ui/compile-fail/bad_impl.rs:11:20
    |
-30 | }
-   | ^
+11 |     type Widgets = TestWidgets;
+   |                    ^^^^^^^^^^^ not found in this scope
 
-warning: unused imports: `ComponentParts`, `ComponentSender`, `SimpleComponent`, `gtk`
+warning: unused import: `gtk`
  --> tests/ui/compile-fail/bad_impl.rs:1:13
   |
 1 | use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent};
-  |             ^^^  ^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^  ^^^^^^^^^^^^^^^
+  |             ^^^
   |
   = note: `#[warn(unused_imports)]` on by default
+
+error[E0046]: not all trait items implemented, missing: `Root`, `init_root`
+ --> tests/ui/compile-fail/bad_impl.rs:7:1
+  |
+7 | impl SimpleComponent for TestComponent {
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ missing `Root`, `init_root` in implementation
+  |
+  = help: implement the missing item: `type Root = Type;`
+  = help: implement the missing item: `fn init_root() -> <Self as SimpleComponent>::Root { todo!() }`
+
+warning: unreachable expression
+  --> tests/ui/compile-fail/bad_impl.rs:26:9
+   |
+24 |         let widgets = view_output!();
+   |                       -------------- any code following this expression is unreachable
+25 |
+26 |         ComponentParts { model, widgets }
+   |         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ unreachable expression
+   |
+   = note: `#[warn(unreachable_code)]` on by default
