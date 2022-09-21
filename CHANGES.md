@@ -2,6 +2,7 @@
 
 ## Unreleased
 
++ macros: Don't generate dead code in the widgets struct
 + core: Remove Debug requirement for FactoryComponent
 + core: Impl extension traits and `FactoryView` for `adw::PreferencesGroup`
 + components: Add `SimpleComboBox` type as a more idiomatic wrapper around `gtk::ComboBoxText`

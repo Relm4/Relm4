@@ -32,20 +32,22 @@ impl Properties {
 
 impl Widget {
     pub fn struct_fields_stream(&self, stream: &mut TokenStream2, vis: &Option<Visibility>) {
-        let name = &self.name;
-        let ty = self.func_type_token_stream();
+        if self.has_struct_field() {
+            let name = &self.name;
+            let ty = self.func_type_token_stream();
 
-        stream.extend(if let Some(docs) = &self.doc_attr {
-            quote! {
-                #[doc = #docs]
-                #vis #name: #ty,
-            }
-        } else {
-            quote! {
-                #[allow(missing_docs)]
-                #vis #name: #ty,
-            }
-        });
+            stream.extend(if let Some(docs) = &self.doc_attr {
+                quote! {
+                    #[doc = #docs]
+                    #vis #name: #ty,
+                }
+            } else {
+                quote! {
+                    #[allow(missing_docs)]
+                    #vis #name: #ty,
+                }
+            });
+        }
 
         self.properties.struct_fields_stream(stream, vis);
         if let Some(returned_widget) = &self.returned_widget {

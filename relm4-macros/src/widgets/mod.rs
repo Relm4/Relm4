@@ -98,6 +98,7 @@ pub(super) struct Widget {
     attr: WidgetAttr,
     mutable: Option<Mut>,
     pub(super) name: Ident,
+    name_assigned_by_user: bool,
     func: WidgetFunc,
     args: Option<Args<Expr>>,
     properties: Properties,

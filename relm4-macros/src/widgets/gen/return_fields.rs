@@ -27,14 +27,16 @@ impl Properties {
 
 impl Widget {
     pub fn return_stream(&self, stream: &mut TokenStream2) {
-        let name = &self.name;
+        if self.has_struct_field() {
+            let name = &self.name;
 
-        stream.extend(if self.attr == WidgetAttr::LocalRef {
-            // The local reference must be cloned first
-            quote! { #name: #name.clone(), }
-        } else {
-            quote! { #name, }
-        });
+            stream.extend(if self.attr == WidgetAttr::LocalRef {
+                // The local reference must be cloned first
+                quote! { #name: #name.clone(), }
+            } else {
+                quote! { #name, }
+            });
+        }
 
         self.properties.return_stream(stream);
         if let Some(returned_widget) = &self.returned_widget {
