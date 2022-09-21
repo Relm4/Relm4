@@ -2,6 +2,7 @@
 
 ## Unreleased
 
++ core: Improve `SharedState` interface and prefer method names related to `RwLock`
 + core: Remove Debug requirement for FactoryComponent
 + core: Impl extension traits and `FactoryView` for `adw::PreferencesGroup`
 + components: Add `SimpleComboBox` type as a more idiomatic wrapper around `gtk::ComboBoxText`
