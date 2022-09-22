@@ -10,6 +10,7 @@ use super::{ModelStateValue, RenderedState};
 use std::collections::hash_map::DefaultHasher;
 use std::collections::VecDeque;
 use std::hash::Hash;
+use std::iter::FusedIterator;
 use std::ops::{Deref, Index, IndexMut};
 
 #[cfg(feature = "libadwaita")]
@@ -320,6 +321,21 @@ impl<'a, C: FactoryComponent> FactoryVecDequeGuard<'a, C> {
             }
         }
     }
+
+    /// Returns an iterator over the components that returns mutable references.
+    pub fn iter_mut(
+        &mut self,
+    ) -> impl Iterator<Item = &mut C> + DoubleEndedIterator + ExactSizeIterator + FusedIterator
+    {
+        self.inner
+            .components
+            .iter_mut()
+            .zip(self.inner.model_state.iter_mut())
+            .map(|(component, state)| {
+                state.changed = true;
+                component.get_mut()
+            })
+    }
 }
 
 impl<'a, C: FactoryComponent> Deref for FactoryVecDequeGuard<'a, C> {
@@ -541,7 +557,9 @@ impl<C: FactoryComponent> FactoryVecDeque<C> {
     }
 
     /// Returns an iterator over the components.
-    pub fn iter(&self) -> impl Iterator<Item = &C> {
+    pub fn iter(
+        &self,
+    ) -> impl Iterator<Item = &C> + DoubleEndedIterator + ExactSizeIterator + FusedIterator {
         self.components.iter().map(|component| component.get())
     }
 }
