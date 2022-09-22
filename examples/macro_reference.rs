@@ -1,7 +1,10 @@
 use gtk::prelude::{
     BoxExt, ButtonExt, GridExt, GtkWindowExt, OrientableExt, ToggleButtonExt, WidgetExt,
 };
-use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, SimpleComponent, WidgetPlus};
+use relm4::{
+    gtk::{self, prelude::ObjectExt},
+    ComponentParts, ComponentSender, RelmApp, SimpleComponent, WidgetPlus,
+};
 
 #[tracker::track]
 struct AppModel {
@@ -104,12 +107,20 @@ impl SimpleComponent for AppModel {
                 gtk::Label::new(Some("Constructors work!")),
 
                 /// Counter label
+                #[name = "counter_label"]
                 gtk::Label {
+                    // Mirror property "label" for widget "bind_label"
+                    #[chain(build())]
+                    bind_property: ("label", &bind_label, "label"),
+
                     #[watch]
                     set_label: &format!("Counter: {}", counter.value),
                     #[track]
                     set_margin_all: counter.value.into(),
                 },
+
+                #[name = "bind_label"]
+                gtk::Label {},
 
                 gtk::ToggleButton {
                     set_label: "Counter is even",

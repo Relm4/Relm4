@@ -68,6 +68,9 @@ impl Parse for Attrs {
                         let expr = expect_one_nested_expr(&nested)?;
                         let path = expect_path_from_expr(expr)?;
                         Attr::Wrap(ident.clone(), path)
+                    } else if ident == "chain" {
+                        let expr = expect_one_nested_expr(&nested)?;
+                        Attr::Chain(ident.clone(), Box::new(expr.clone()))
                     } else {
                         return Err(unexpected_attr_name(ident));
                     }
