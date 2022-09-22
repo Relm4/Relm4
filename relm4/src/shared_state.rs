@@ -71,8 +71,8 @@ where
     /// STATE.subscribe(&sender, |data| *data);
     ///
     /// {
-    ///     let mut data = STATE.get_mut();
-    ///     **data += 1;
+    ///     let mut data = STATE.write();
+    ///     *data += 1;
     /// }
     ///
     /// assert_eq!(receiver.recv_sync().unwrap(), 1);
@@ -161,7 +161,7 @@ where
     ///
     /// # Panic example
     ///
-    /// ```should_panic
+    /// ```no_run
     /// # use relm4::SharedState;
     /// static STATE: SharedState<u8> = SharedState::new();
     ///
