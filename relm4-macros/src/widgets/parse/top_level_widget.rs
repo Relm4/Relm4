@@ -37,6 +37,7 @@ impl TopLevelWidget {
                 attr: WidgetAttr::None,
                 mutable: None,
                 name: parse_util::string_to_snake_case("incorrect_top_level_widget"),
+                name_assigned_by_user: false,
                 func: WidgetFunc {
                     path: util::strings_to_path(&["gtk", "Box"]),
                     args: None,
