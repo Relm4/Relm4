@@ -31,9 +31,11 @@ impl Properties {
 
 impl Widget {
     pub fn destructure_stream(&self, stream: &mut TokenStream2) {
-        let name = &self.name;
+        if self.has_struct_field() {
+            let name = &self.name;
 
-        stream.extend(quote! { #name, });
+            stream.extend(quote! { #name, });
+        }
 
         self.properties.destructure_stream(stream);
     }

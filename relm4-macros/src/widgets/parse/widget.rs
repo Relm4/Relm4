@@ -55,14 +55,12 @@ impl Widget {
         }
 
         // Generate a name if no name was given.
-        let name = if let Some(name) = name_opt {
-            name
-        } else if let Some(name) = new_name {
-            name
+        let (name, name_assigned_by_user) = if let Some(name) = name_opt.or(new_name) {
+            (name, true)
         } else if attr.is_local_attr() {
-            Self::local_attr_name(&func)?
+            (Self::local_attr_name(&func)?, true)
         } else {
-            func.snake_case_name()
+            (func.snake_case_name(), false)
         };
 
         let returned_widget = if input.peek(Token![->]) {
@@ -77,6 +75,7 @@ impl Widget {
             attr,
             mutable,
             name,
+            name_assigned_by_user,
             func,
             args,
             properties,
@@ -116,12 +115,12 @@ impl Widget {
             }
         }
         // Generate a name
-        let name = if let Some(name) = new_name {
-            name
+        let (name, name_assigned_by_user) = if let Some(name) = new_name {
+            (name, true)
         } else if attr.is_local_attr() {
-            Self::local_attr_name(&func)?
+            (Self::local_attr_name(&func)?, true)
         } else {
-            func.snake_case_name()
+            (func.snake_case_name(), false)
         };
 
         let ref_token = Some(And::default());
@@ -131,6 +130,7 @@ impl Widget {
             attr,
             mutable: None,
             name,
+            name_assigned_by_user,
             func,
             args: None,
             properties,
