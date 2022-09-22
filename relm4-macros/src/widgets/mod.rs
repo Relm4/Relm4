@@ -52,6 +52,7 @@ struct AssignProperty {
     /// Iterate through elements to generate tokens
     iterative: bool,
     block_signals: Vec<Ident>,
+    chain: Option<Box<Expr>>,
 }
 
 struct SignalHandler {
@@ -166,6 +167,7 @@ enum Attr {
     Name(Ident, Ident),
     Transition(Ident, Ident),
     Wrap(Ident, Path),
+    Chain(Ident, Box<Expr>),
 }
 
 struct Attrs {

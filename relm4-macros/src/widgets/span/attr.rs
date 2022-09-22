@@ -16,6 +16,7 @@ impl Spanned for Attr {
             | Self::BlockSignal(ident, _)
             | Self::Name(ident, _)
             | Self::Transition(ident, _)
+            | Self::Chain(ident, _)
             | Self::Wrap(ident, _) => ident.span(),
         }
     }
