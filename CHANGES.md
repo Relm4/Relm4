@@ -3,6 +3,8 @@
 ## Unreleased
 
 + core: Improve `SharedState` interface and prefer method names related to `RwLock`
++ macros: Improve error reporting on invalid trait implementations
++ macros: Add chain attribute for properties
 + core: Add `iter_mut` to `FactoryVecDeque`
 + core: Remove Debug requirement for FactoryComponent
 + core: Impl extension traits and `FactoryView` for `adw::PreferencesGroup`

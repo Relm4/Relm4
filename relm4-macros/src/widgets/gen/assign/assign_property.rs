@@ -50,6 +50,12 @@ impl AssignProperty {
             self.expr.to_token_stream()
         };
 
+        let chain = self.chain.as_ref().map(|chain| {
+            quote_spanned! {
+                chain.span() => .#chain
+            }
+        });
+
         let (block_stream, unblock_stream) = if self.block_signals.is_empty() {
             (None, None)
         } else {
@@ -81,7 +87,7 @@ impl AssignProperty {
             (false, false) => {
                 quote_spanned! { span =>
                     #block_stream
-                    #assign_fn(#self_assign_args #assign #args);
+                    #assign_fn(#self_assign_args #assign #args) #chain;
                     #unblock_stream
                 }
             }
@@ -89,7 +95,7 @@ impl AssignProperty {
                 quote_spanned! {
                     span => if let Some(__p_assign) = #assign {
                         #block_stream
-                        #assign_fn(#self_assign_args __p_assign #args);
+                        #assign_fn(#self_assign_args __p_assign #args) #chain;
                         #unblock_stream
                     }
                 }
@@ -99,7 +105,7 @@ impl AssignProperty {
                     span =>
                         #block_stream
                         for __elem in #assign {
-                            #assign_fn(#self_assign_args __elem #args);
+                            #assign_fn(#self_assign_args __elem #args) #chain;
                         }
                         #unblock_stream
                 }
@@ -110,7 +116,7 @@ impl AssignProperty {
                         #block_stream
                         for __elem in #assign {
                             if let Some(__p_assign) = __elem {
-                                #assign_fn(#self_assign_args __p_assign #args);
+                                #assign_fn(#self_assign_args __p_assign #args) #chain;
                             }
                         }
                         #unblock_stream

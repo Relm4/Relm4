@@ -160,17 +160,25 @@ fn gtk_import() -> syn::Path {
 #[proc_macro_attribute]
 pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let Attrs { visibility } = parse_macro_input!(attributes as Attrs);
-    let component_impl = parse_macro_input!(input as syn::ItemImpl);
+    let backup_input = input.clone();
+    let component_impl_res = syn::parse_macro_input::parse::<syn::ItemImpl>(input);
 
-    component::generate_tokens(visibility, component_impl).into()
+    match component_impl_res {
+        Ok(component_impl) => component::generate_tokens(visibility, component_impl).into(),
+        Err(_) => util::item_impl_error(backup_input),
+    }
 }
 
 #[proc_macro_attribute]
 pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let Attrs { visibility } = parse_macro_input!(attributes as Attrs);
-    let factory_impl = parse_macro_input!(input as syn::ItemImpl);
+    let backup_input = input.clone();
+    let factory_impl_res = syn::parse_macro_input::parse::<syn::ItemImpl>(input);
 
-    factory::generate_tokens(visibility, factory_impl).into()
+    match factory_impl_res {
+        Ok(factory_impl) => factory::generate_tokens(visibility, factory_impl).into(),
+        Err(_) => util::item_impl_error(backup_input),
+    }
 }
 
 /// A macro to create menus.

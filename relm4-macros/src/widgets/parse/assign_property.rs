@@ -12,6 +12,7 @@ struct ProcessedAttrs {
     watch: AssignPropertyAttr,
     iterative: bool,
     block_signals: Vec<Ident>,
+    chain: Option<Box<Expr>>,
 }
 
 impl AssignProperty {
@@ -37,6 +38,7 @@ impl AssignProperty {
             watch,
             iterative,
             block_signals,
+            chain,
         } = Self::process_attributes(&expr, attributes)?;
 
         Ok(Self {
@@ -46,6 +48,7 @@ impl AssignProperty {
             optional_assign,
             iterative,
             block_signals,
+            chain,
         })
     }
 
@@ -54,6 +57,7 @@ impl AssignProperty {
             let mut iterative = false;
             let mut watch = AssignPropertyAttr::None;
             let mut block_signals = Vec::with_capacity(0);
+            let mut chain = None;
 
             for attr in attrs.inner {
                 let span = attr.span();
@@ -92,6 +96,13 @@ impl AssignProperty {
                             return Err(attr_twice_error(span));
                         }
                     }
+                    Attr::Chain(_, expr) => {
+                        if chain.is_none() {
+                            chain = Some(expr);
+                        } else {
+                            return Err(attr_twice_error(span));
+                        }
+                    }
                     _ => {
                         return Err(Error::new(
                             attr.span(),
@@ -104,12 +115,14 @@ impl AssignProperty {
                 watch,
                 iterative,
                 block_signals,
+                chain,
             })
         } else {
             Ok(ProcessedAttrs {
                 watch: AssignPropertyAttr::None,
                 iterative: false,
                 block_signals: Vec::with_capacity(0),
+                chain: None,
             })
         }
     }
