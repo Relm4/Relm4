@@ -2,6 +2,7 @@
 
 ## Unreleased
 
++ macros: Add shorthand syntax for simple input messages
 + macros: Don't generate dead code in the widgets struct
 + macros: Improve error reporting on invalid trait implementations
 + macros: Add chain attribute for properties

@@ -16,6 +16,7 @@ mod widgets;
 #[macro_use]
 mod util;
 mod factory;
+mod token_streams;
 
 use attrs::Attrs;
 use menu::Menus;

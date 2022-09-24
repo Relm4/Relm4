@@ -3,10 +3,10 @@ use quote::{quote, ToTokens};
 use syn::visit_mut::VisitMut;
 use syn::{parse_quote, Visibility};
 
+use crate::token_streams::{TokenStreams, TraitImplDetails};
 use crate::visitors::{ComponentVisitor, PreAndPostView};
 
 pub(super) mod inject_view_code;
-pub(crate) mod token_streams;
 
 use inject_view_code::inject_view_code;
 
@@ -32,12 +32,20 @@ pub(crate) fn generate_tokens(
         view_widgets: Some(view_widgets),
         model_name: Some(model_name),
         root_name: Some(root_name),
+        sender_name: Some(sender_name),
         init: Some(init),
         errors,
         ..
     } = component_visitor
     {
-        let token_streams::TokenStreams {
+        let trait_impl_details = TraitImplDetails {
+            vis: vis.clone(),
+            model_name,
+            sender_name,
+            root_name: Some(root_name),
+        };
+
+        let TokenStreams {
             error,
             init_root,
             rename_root,
@@ -48,7 +56,9 @@ pub(crate) fn generate_tokens(
             return_fields,
             destructure_fields,
             update_view,
-        } = view_widgets.generate_streams(&vis, &model_name, Some(&root_name), false);
+        } = view_widgets.generate_streams(&trait_impl_details, false);
+
+        let model_name = trait_impl_details.model_name;
 
         struct_fields = Some(struct_fields_stream);
         let root_widget_type = view_widgets.root_type();
