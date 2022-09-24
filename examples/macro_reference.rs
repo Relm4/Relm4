@@ -175,7 +175,7 @@ impl SimpleComponent for AppModel {
         };
 
         // Set icon name randomly to Some("go-up-symbolic") or None
-        let icon_name = rand::random::<bool>().then(|| "go-up-symbolic");
+        let icon_name = rand::random::<bool>().then_some("go-up-symbolic");
 
         let local_label = gtk::Label::new(Some("local_label"));
         let local_ref_label_value = gtk::Label::new(Some("local_ref_label"));
