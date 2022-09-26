@@ -91,8 +91,9 @@ impl SignalHandler {
 
         let (clone_stream, assignment) = match &self.inner {
             SignalHandlerVariant::Expr(expr) => (
-                quote_spanned! {
-                    span => let sender = #sender_name.clone();
+                quote_spanned! { span =>
+                    #[allow(clippy::redundant_clone)]
+                    let sender = #sender_name.clone();
                 },
                 quote_spanned! {
                     span => move |_| {
