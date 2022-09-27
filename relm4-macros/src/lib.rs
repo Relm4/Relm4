@@ -1,5 +1,15 @@
+//! A collection of macros for gtk-rs, Relm4 and Rust in general.
+
 #![doc(html_logo_url = "https://relm4.org/icons/relm4_logo.svg")]
 #![doc(html_favicon_url = "https://relm4.org/icons/relm4_org.svg")]
+#![warn(
+    missing_debug_implementations,
+    missing_docs,
+    rust_2018_idioms,
+    unreachable_pub,
+    clippy::cargo,
+    clippy::must_use_candidate
+)]
 
 use proc_macro::TokenStream;
 use syn::parse_macro_input;
@@ -29,7 +39,7 @@ fn gtk_import() -> syn::Path {
     }
 }
 
-/// Macro that implements [`relm4::Component`](https://relm4.org/docs/next/relm4/trait.Component.html) and generates the corresponding struct.
+/// Macro that implements [`relm4::Component`] and generates the corresponding widgets struct.
 ///
 /// # Attributes
 ///
@@ -38,8 +48,8 @@ fn gtk_import() -> syn::Path {
 /// # Example
 ///
 /// ```
-/// use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
-/// use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent, WidgetPlus};
+/// use relm4::prelude::*;
+/// use gtk::prelude::*;
 ///
 /// #[derive(Default)]
 /// struct AppModel {
@@ -52,7 +62,7 @@ fn gtk_import() -> syn::Path {
 ///     Decrement,
 /// }
 ///
-/// #[relm4_macros::component]
+/// #[relm4_macros::component(pub)]
 /// impl SimpleComponent for AppModel {
 ///     type Init = u8;
 ///     type Input = AppMsg;
@@ -71,9 +81,7 @@ fn gtk_import() -> syn::Path {
 ///
 ///                 gtk::Button {
 ///                     set_label: "Increment",
-///                     connect_clicked[sender] => move |_| {
-///                         sender.input(AppMsg::Increment);
-///                     },
+///                     connect_clicked => AppMsg::Increment,
 ///                 },
 ///                 gtk::Button {
 ///                     set_label: "Decrement",
@@ -122,8 +130,6 @@ fn gtk_import() -> syn::Path {
 /// cause all following update functionality to be skipped.
 ///
 /// ```compile_fail
-/// #![deny(unreachable_code)]
-///
 /// # use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
 /// # use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent, WidgetPlus};
 /// #
@@ -170,6 +176,112 @@ pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
     }
 }
 
+/// Macro that implements [`relm4::factory::FactoryComponent`] and generates the corresponding widgets struct.
+///
+/// # Attributes
+///
+/// To create public struct use `#[factory(pub)]` or `#[factory(visibility = pub)]`.
+///
+/// # Example
+///
+/// ```
+/// use relm4::prelude::*;
+/// use relm4::factory::*;
+/// use gtk::prelude::*;
+///
+/// # #[derive(Debug)]
+/// # enum AppMsg {
+/// #     AddCounter,
+/// #     RemoveCounter,
+/// #     SendFront(DynamicIndex)
+/// # }
+///
+/// #[derive(Debug)]
+/// struct Counter {
+///     value: u8,
+/// }
+///
+/// #[derive(Debug)]
+/// enum CounterMsg {
+///     Increment,
+///     Decrement,
+/// }
+///
+/// #[derive(Debug)]
+/// enum CounterOutput {
+///     SendFront(DynamicIndex),
+/// }
+///
+/// #[relm4::factory(pub)]
+/// impl FactoryComponent for Counter {
+///     type CommandOutput = ();
+///     type Init = u8;
+///     type Input = CounterMsg;
+///     type Output = CounterOutput;
+///     type ParentInput = AppMsg;
+///     type ParentWidget = gtk::Box;
+///     type Widgets = CounterWidgets;
+///
+///     view! {
+///         root = gtk::Box {
+///             set_orientation: gtk::Orientation::Horizontal,
+///             set_spacing: 10,
+///
+///             #[name = "label"]
+///             gtk::Label {
+///                 #[watch]
+///                 set_label: &self.value.to_string(),
+///                 set_width_chars: 3,
+///             },
+///
+///             #[name = "add_button"]
+///             gtk::Button {
+///                 set_label: "+",
+///                 connect_clicked => CounterMsg::Increment,
+///             },
+///
+///             #[name = "remove_button"]
+///             gtk::Button {
+///                 set_label: "-",
+///                 connect_clicked => CounterMsg::Decrement,
+///             },
+///
+///             #[name = "to_front_button"]
+///             gtk::Button {
+///                 set_label: "To start",
+///                 connect_clicked[sender, index] => move |_| {
+///                     sender.output(CounterOutput::SendFront(index.clone()))
+///                 }
+///             }
+///         }
+///     }
+///
+///     fn output_to_parent_input(output: Self::Output) -> Option<AppMsg> {
+///         Some(match output {
+///             CounterOutput::SendFront(index) => AppMsg::SendFront(index),
+///         })
+///     }
+///
+///     fn init_model(
+///         value: Self::Init,
+///         _index: &DynamicIndex,
+///         _sender: FactoryComponentSender<Self>,
+///     ) -> Self {
+///         Self { value }
+///     }
+///
+///     fn update(&mut self, msg: Self::Input, _sender: FactoryComponentSender<Self>) {
+///         match msg {
+///             CounterMsg::Increment => {
+///                 self.value = self.value.wrapping_add(1);
+///             }
+///             CounterMsg::Decrement => {
+///                 self.value = self.value.wrapping_sub(1);
+///             }
+///         }
+///     }
+/// }
+/// ```
 #[proc_macro_attribute]
 pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let Attrs { visibility } = parse_macro_input!(attributes as Attrs);

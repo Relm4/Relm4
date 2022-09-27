@@ -50,7 +50,11 @@ impl Properties {
 }
 
 impl Widget {
-    pub fn init_conditional_init_stream(&self, stream: &mut TokenStream2, model_name: &Ident) {
+    pub(crate) fn init_conditional_init_stream(
+        &self,
+        stream: &mut TokenStream2,
+        model_name: &Ident,
+    ) {
         self.conditional_init_stream(stream, model_name, false);
     }
 

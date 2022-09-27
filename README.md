@@ -74,8 +74,8 @@ Several example applications are available at [examples/](examples/).
 ![Simple app screenshot dark](assets/screenshots/simple-dark.png)
 
 ```rust
-use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
-use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, SimpleComponent, WidgetPlus};
+use gtk::prelude::*;
+use relm4::prelude::*;
 
 struct AppModel {
     counter: u8,
@@ -108,16 +108,12 @@ impl SimpleComponent for AppModel {
 
                 gtk::Button {
                     set_label: "Increment",
-                    connect_clicked[sender] => move |_| {
-                        sender.input(AppMsg::Increment);
-                    }
+                    connect_clicked => AppMsg::Increment,
                 },
 
                 gtk::Button {
                     set_label: "Decrement",
-                    connect_clicked[sender] => move |_| {
-                        sender.input(AppMsg::Decrement);
-                    }
+                    connect_clicked => AppMsg::Decrement,
                 },
 
                 gtk::Label {

@@ -4,7 +4,10 @@ use syn::{Expr, Result, Token};
 use crate::widgets::{Args, ClosureSignalHandler, SignalHandler, SignalHandlerVariant};
 
 impl SignalHandler {
-    pub(super) fn parse_with_args(input: ParseStream, args: Option<Args<Expr>>) -> Result<Self> {
+    pub(super) fn parse_with_args(
+        input: ParseStream<'_>,
+        args: Option<Args<Expr>>,
+    ) -> Result<Self> {
         let inner = if args.is_some() || input.peek(Token![move]) || input.peek(Token![|]) {
             ClosureSignalHandler::parse_with_args(input, args).map(SignalHandlerVariant::Closure)
         } else {
@@ -23,7 +26,10 @@ impl SignalHandler {
 }
 
 impl ClosureSignalHandler {
-    pub(super) fn parse_with_args(input: ParseStream, args: Option<Args<Expr>>) -> Result<Self> {
+    pub(super) fn parse_with_args(
+        input: ParseStream<'_>,
+        args: Option<Args<Expr>>,
+    ) -> Result<Self> {
         let closure = input.parse()?;
 
         Ok(Self { closure, args })

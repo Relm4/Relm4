@@ -50,7 +50,7 @@ impl Properties {
 }
 
 impl Widget {
-    pub fn init_update_view_stream(&self, stream: &mut TokenStream2, model_name: &Ident) {
+    pub(crate) fn init_update_view_stream(&self, stream: &mut TokenStream2, model_name: &Ident) {
         self.update_view_stream(stream, model_name, false);
     }
 

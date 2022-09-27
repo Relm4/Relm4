@@ -8,7 +8,7 @@ use crate::args::Args;
 use crate::widgets::{parse_util, IfBranch, ParseError, Widget};
 
 impl IfBranch {
-    pub(super) fn parse(input: ParseStream, index: usize) -> Result<Self, ParseError> {
+    pub(super) fn parse(input: ParseStream<'_>, index: usize) -> Result<Self, ParseError> {
         let cond = input.parse()?;
 
         let braced = parse_util::braces(input)?;

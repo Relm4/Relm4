@@ -10,7 +10,7 @@ pub(super) enum ComponentStorage<C: FactoryComponent> {
 }
 
 impl<C: FactoryComponent> ComponentStorage<C> {
-    pub(super) fn get(&self) -> &C {
+    pub(super) const fn get(&self) -> &C {
         match self {
             Self::Builder(builder) => &builder.data,
             Self::Final(handle) => handle.data.get(),
@@ -24,7 +24,7 @@ impl<C: FactoryComponent> ComponentStorage<C> {
         }
     }
 
-    pub(super) fn widget(&self) -> &C::Root {
+    pub(super) const fn widget(&self) -> &C::Root {
         match self {
             Self::Builder(builder) => &builder.root_widget,
             Self::Final(handle) => &handle.root_widget,
@@ -69,7 +69,7 @@ impl<C: FactoryComponent> ComponentStorage<C> {
         }
     }
 
-    pub(super) fn returned_widget(
+    pub(super) const fn returned_widget(
         &self,
     ) -> Option<&<C::ParentWidget as FactoryView>::ReturnedWidget> {
         if let Self::Final(handle) = self {

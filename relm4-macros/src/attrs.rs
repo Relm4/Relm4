@@ -9,9 +9,9 @@ enum AttributeType {
     Unnamed { span: Span },
 }
 
-pub struct Attrs {
+pub(super) struct Attrs {
     /// Keeps information about visibility of the widget
-    pub visibility: Option<Visibility>,
+    pub(super) visibility: Option<Visibility>,
 }
 
 impl Attrs {
@@ -26,7 +26,7 @@ impl Parse for Attrs {
     /// 1. It's fine if visibility is used unnamed so `#[widget(pub)]` must be valid but that's the only case.
     /// 2. Widget visibility might be named `#[widget(visibility = pub)]`.
     /// 3. `relm4` argument must be named. Always.
-    fn parse(input: ParseStream) -> Result<Self> {
+    fn parse(input: ParseStream<'_>) -> Result<Self> {
         let mut attrs = Attrs::new();
         let mut attrs_type = AttributeType::None;
 

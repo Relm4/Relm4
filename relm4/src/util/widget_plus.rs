@@ -4,7 +4,7 @@ use gtk::Widget;
 /// Trait that extends [`gtk::prelude::WidgetExt`].
 ///
 /// This trait's main goal is to reduce redundant code and
-/// to provide helpful methods for the widgets macro of relm4-macros.
+/// to provide helpful methods for the view macro from relm4-macros.
 pub trait WidgetPlus {
     /// Set margin at start, end, top and bottom all at once.
     fn set_margin_all(&self, margin: i32);
@@ -24,8 +24,9 @@ pub trait WidgetPlus {
 
     /// Try to remove a widget from a widget.
     ///
-    /// Returns [`true`] if the removal was successful and
-    /// [`false`] if nothing was done.
+    /// Returns [`true`] if the removal is supported on the type of widget.
+    /// **This doesn't mean that the widget was actually removed.**
+    #[deprecated(since = "0.5.0-beta.3", note = "This method has no real use-case and isn't maintained anymore.")]
     fn try_remove(&self, widget: &impl IsA<Widget>) -> bool;
 }
 

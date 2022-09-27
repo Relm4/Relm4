@@ -552,7 +552,7 @@ impl<C: FactoryComponent> FactoryVecDeque<C> {
     }
 
     /// Returns the widget all components are attached to.
-    pub fn widget(&self) -> &C::ParentWidget {
+    pub const fn widget(&self) -> &C::ParentWidget {
         &self.widget
     }
 

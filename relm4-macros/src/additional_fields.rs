@@ -4,12 +4,12 @@ use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
 use syn::{Field, Result, Token};
 
-pub struct AdditionalFields {
-    pub inner: Punctuated<Field, Token![,]>,
+pub(super) struct AdditionalFields {
+    pub(super) inner: Punctuated<Field, Token![,]>,
 }
 
 impl Parse for AdditionalFields {
-    fn parse(input: ParseStream) -> Result<Self> {
+    fn parse(input: ParseStream<'_>) -> Result<Self> {
         Ok(AdditionalFields {
             inner: input.parse_terminated(Field::parse_named)?,
         })

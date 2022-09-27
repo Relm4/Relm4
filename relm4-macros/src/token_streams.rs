@@ -5,42 +5,42 @@ use syn::{Error, Ident, Visibility};
 use crate::widgets::{TopLevelWidget, ViewWidgets, Widget};
 
 #[derive(Default)]
-pub(crate) struct TokenStreams {
+pub(super) struct TokenStreams {
     /// Parsing errors
-    pub error: TokenStream2,
+    pub(super) error: TokenStream2,
     /// Initialize the root widget.
-    pub init_root: TokenStream2,
+    pub(super) init_root: TokenStream2,
     /// Rename root to the actual widget name.
-    pub rename_root: TokenStream2,
+    pub(super) rename_root: TokenStream2,
     /// The tokens for the struct fields -> name: Type,
-    pub struct_fields: TokenStream2,
+    pub(super) struct_fields: TokenStream2,
     /// The tokens initializing the widgets.
-    pub init: TokenStream2,
+    pub(super) init: TokenStream2,
     /// The tokens initializing the properties.
-    pub assign: TokenStream2,
+    pub(super) assign: TokenStream2,
     /// The tokens for connecting events.
-    pub connect: TokenStream2,
+    pub(super) connect: TokenStream2,
     /// The tokens for the returned struct fields -> name,
-    pub return_fields: TokenStream2,
+    pub(super) return_fields: TokenStream2,
     /// For destructuring the widget struct field
-    pub destructure_fields: TokenStream2,
+    pub(super) destructure_fields: TokenStream2,
     /// The view tokens (watch! macro)
-    pub update_view: TokenStream2,
+    pub(super) update_view: TokenStream2,
 }
 
-pub(crate) struct TraitImplDetails {
+pub(super) struct TraitImplDetails {
     /// The visibility of the widgets struct.
-    pub vis: Option<Visibility>,
+    pub(super) vis: Option<Visibility>,
     /// The name of the model.
-    pub model_name: Ident,
+    pub(super) model_name: Ident,
     /// The name of the root widget.
-    pub root_name: Option<Ident>,
+    pub(super) root_name: Option<Ident>,
     /// The name of the sender used in the init function.
-    pub sender_name: Ident,
+    pub(super) sender_name: Ident,
 }
 
 impl ViewWidgets {
-    pub fn generate_streams(
+    pub(super) fn generate_streams(
         &self,
         trait_impl_details: &TraitImplDetails,
         standalone_view: bool,
@@ -55,7 +55,7 @@ impl ViewWidgets {
     }
 
     /// Generate root type for `Root` parameter in `Component` impl
-    pub fn root_type(&self) -> TokenStream2 {
+    pub(super) fn root_type(&self) -> TokenStream2 {
         for top_level_widget in &self.top_level_widgets {
             if top_level_widget.root_attr.is_some() {
                 return top_level_widget.inner.func_type_token_stream();
