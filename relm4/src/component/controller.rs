@@ -24,18 +24,18 @@ pub trait ComponentController<C: Component> {
     fn state(&self) -> &Rc<StateWatcher<C>>;
 
     /// Returns a reference to the [`Component`].
-    fn get_model(&self) -> Ref<'_, C> {
+    fn model(&self) -> Ref<'_, C> {
         let part_ref = self.state().as_ref().get();
         Ref::map(part_ref, |part| &part.model)
     }
 
     /// Returns a reference to the [`Component::Widgets`].
-    fn get_widgets(&self) -> Ref<'_, C::Widgets> {
+    fn widgets(&self) -> Ref<'_, C::Widgets> {
         let part_ref = self.state().as_ref().get();
         Ref::map(part_ref, |part| &part.widgets)
     }
 
-    /// The root widget of the component.
+    /// Returns the root widget of the component.
     fn widget(&self) -> &C::Root;
 }
 
