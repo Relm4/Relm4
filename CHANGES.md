@@ -18,6 +18,7 @@
 + macros: Add chain attribute for properties
 + components: Add `SimpleComboBox` type as a more idiomatic wrapper around `gtk::ComboBoxText`
 + components: Port `OpenButton` to 0.5
++ book: Many chapters ported to 0.5
 
 ### Changed
 
