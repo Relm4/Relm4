@@ -12,6 +12,7 @@ pub(crate) struct ComponentVisitor<'errors> {
     pub init: Option<syn::ImplItemMethod>,
     pub root_name: Option<syn::Ident>,
     pub model_name: Option<syn::Ident>,
+    pub sender_name: Option<syn::Ident>,
     pub additional_fields: Option<AdditionalFields>,
     pub menus: Option<Menus>,
     pub errors: &'errors mut Vec<syn::Error>,
@@ -25,6 +26,7 @@ impl<'errors> ComponentVisitor<'errors> {
             init: None,
             root_name: None,
             model_name: None,
+            sender_name: None,
             additional_fields: None,
             menus: None,
             errors,
@@ -100,6 +102,7 @@ impl VisitMut for ComponentVisitor<'_> {
                     init_fn_visitor.visit_impl_item_method(func);
 
                     self.model_name = init_fn_visitor.model_name;
+                    self.sender_name = init_fn_visitor.sender_name;
                     self.root_name = init_fn_visitor.root_name;
                     self.errors.append(&mut init_fn_visitor.errors);
 
@@ -258,6 +261,7 @@ impl VisitMut for FactoryComponentVisitor<'_> {
 struct InitFnVisitor {
     root_name: Option<syn::Ident>,
     model_name: Option<syn::Ident>,
+    sender_name: Option<syn::Ident>,
     errors: Vec<syn::Error>,
 }
 
@@ -283,6 +287,29 @@ impl<'ast> Visit<'ast> for InitFnVisitor {
 
         match root_name {
             Ok(root_name) => self.root_name = Some(root_name),
+            Err(e) => self.errors.push(e),
+        }
+
+        let sender_name = match func.sig.inputs.iter().nth(2) {
+            Some(syn::FnArg::Typed(pat_type)) => match &*pat_type.pat {
+                syn::Pat::Ident(ident) => Ok(ident.ident.clone()),
+                _ => Err(syn::Error::new_spanned(
+                    pat_type,
+                    "unable to determine sender name",
+                )),
+            },
+            Some(arg) => Err(syn::Error::new_spanned(
+                arg,
+                "unable to determine sender name",
+            )),
+            None => Err(syn::Error::new_spanned(
+                &func.sig,
+                "unable to determine sender name",
+            )),
+        };
+
+        match sender_name {
+            Ok(sender_name) => self.sender_name = Some(sender_name),
             Err(e) => self.errors.push(e),
         }
 

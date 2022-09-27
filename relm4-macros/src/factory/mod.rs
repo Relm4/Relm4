@@ -3,7 +3,7 @@ use quote::{quote, ToTokens};
 use syn::visit_mut::VisitMut;
 use syn::{parse_quote, Ident, Visibility};
 
-use crate::component::token_streams;
+use crate::token_streams::{TokenStreams, TraitImplDetails};
 use crate::visitors::{FactoryComponentVisitor, PreAndPostView};
 
 mod inject_view_code;
@@ -33,7 +33,7 @@ pub(crate) fn generate_tokens(
         ..
     } = factory_visitor
     {
-        let token_streams::TokenStreams {
+        let TokenStreams {
             error,
             init_root,
             rename_root,
@@ -45,9 +45,14 @@ pub(crate) fn generate_tokens(
             destructure_fields,
             update_view,
         } = view_widgets.generate_streams(
-            &vis,
-            &Ident::new("self", Span2::call_site()),
-            Some(&root_name.unwrap_or_else(|| Ident::new("root", Span2::call_site()))),
+            &TraitImplDetails {
+                vis: vis.clone(),
+                model_name: Ident::new("self", Span2::call_site()),
+                root_name: Some(
+                    root_name.unwrap_or_else(|| Ident::new("root", Span2::call_site())),
+                ),
+                sender_name: Ident::new("sender", Span2::call_site()),
+            },
             false,
         );
 

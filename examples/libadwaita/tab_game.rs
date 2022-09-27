@@ -71,7 +71,7 @@ impl FactoryComponent for GamePage {
                 set_vexpand: true,
 
                 #[wrap(Some)]
-                set_center_widget = match **state {
+                set_center_widget = match *state {
                     GameState::Countdown(value) => {
                         gtk::Label {
                             set_valign: gtk::Align::Center,
@@ -132,7 +132,7 @@ impl FactoryComponent for GamePage {
                             gtk::Button {
                                 set_label: "Start again",
                                 connect_clicked => move |_| {
-                                    **GAME_STATE.get_mut() = GameState::Start;
+                                    *GAME_STATE.write() = GameState::Start;
                                 }
                             },
                         }
@@ -144,14 +144,14 @@ impl FactoryComponent for GamePage {
         #[local_ref]
         returned_widget -> adw::TabPage {
             #[watch]
-            set_title: &match **state {
+            set_title: &match *state {
                 GameState::Running | GameState::Guessing => {
                     "???".to_string()
                 }
                 _ => format!("Tab {}", self.id),
             },
             #[watch]
-            set_loading: matches!(**state, GameState::Running),
+            set_loading: matches!(*state, GameState::Running),
         }
     }
 
@@ -171,13 +171,13 @@ impl FactoryComponent for GamePage {
         returned_widget: &adw::TabPage,
         sender: FactoryComponentSender<Self>,
     ) -> Self::Widgets {
-        let state = GAME_STATE.get();
+        let state = GAME_STATE.read();
         let widgets = view_output!();
         widgets
     }
 
     fn pre_view() {
-        let state = GAME_STATE.get();
+        let state = GAME_STATE.read();
     }
 
     fn update(&mut self, msg: Self::Input, _sender: FactoryComponentSender<Self>) {
@@ -269,10 +269,10 @@ impl Component for AppModel {
                 self.start_index = Some(index);
                 sender.command(|sender, _| async move {
                     for i in (1..4).rev() {
-                        **GAME_STATE.get_mut() = GameState::Countdown(i);
+                        *GAME_STATE.write() = GameState::Countdown(i);
                         relm4::tokio::time::sleep(Duration::from_millis(1000)).await;
                     }
-                    **GAME_STATE.get_mut() = GameState::Running;
+                    *GAME_STATE.write() = GameState::Running;
                     for _ in 0..20 {
                         relm4::tokio::time::sleep(Duration::from_millis(500)).await;
                         sender.send(false);
@@ -282,10 +282,10 @@ impl Component for AppModel {
                 });
             }
             AppMsg::StopGame => {
-                **GAME_STATE.get_mut() = GameState::Guessing;
+                *GAME_STATE.write() = GameState::Guessing;
             }
             AppMsg::SelectedGuess(index) => {
-                **GAME_STATE.get_mut() = GameState::End(index == self.start_index.take().unwrap());
+                *GAME_STATE.write() = GameState::End(index == self.start_index.take().unwrap());
             }
         }
     }

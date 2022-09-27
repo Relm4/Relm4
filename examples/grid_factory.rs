@@ -93,18 +93,14 @@ impl FactoryComponent for Counter {
         relm4::view! {
             add_button = gtk::Button {
                 set_label: "+",
-                connect_clicked[sender] => move |_| {
-                    sender.input(CounterMsg::Increment)
-                }
+                connect_clicked => CounterMsg::Increment,
             }
         }
 
         relm4::view! {
             remove_button = gtk::Button {
                 set_label: "-",
-                connect_clicked[sender] => move |_| {
-                    sender.input(CounterMsg::Decrement)
-                }
+                connect_clicked => CounterMsg::Decrement,
             }
         }
 

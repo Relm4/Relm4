@@ -56,8 +56,17 @@ struct AssignProperty {
 }
 
 struct SignalHandler {
-    closure: ExprClosure,
+    inner: SignalHandlerVariant,
     handler_id: Option<Ident>,
+}
+
+enum SignalHandlerVariant {
+    Expr(Expr),
+    Closure(ClosureSignalHandler),
+}
+
+struct ClosureSignalHandler {
+    closure: ExprClosure,
     args: Option<Args<Expr>>,
 }
 

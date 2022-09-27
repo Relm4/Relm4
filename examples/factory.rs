@@ -44,17 +44,13 @@ impl FactoryComponent for Counter {
             #[name = "add_button"]
             gtk::Button {
                 set_label: "+",
-                connect_clicked[sender] => move |_| {
-                    sender.input(CounterMsg::Increment)
-                }
+                connect_clicked => CounterMsg::Increment,
             },
 
             #[name = "remove_button"]
             gtk::Button {
                 set_label: "-",
-                connect_clicked[sender] => move |_| {
-                    sender.input(CounterMsg::Decrement)
-                }
+                connect_clicked => CounterMsg::Decrement,
             },
 
             #[name = "move_up_button"]
