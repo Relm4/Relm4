@@ -13,11 +13,11 @@ type SubscriberFn<Data> = Box<dyn Fn(&Data) + 'static + Send + Sync>;
 /// application easily.
 /// Get immutable and mutable access to the data and subscribe to changes.
 ///
-/// # Locking
+/// # Panics
 ///
 /// [`SharedState`] uses a [`RwLock`] internally.
-/// If you use [`Self::get()`] and [`Self::get_mut()`] in the same scope
-/// this might cause a panic or a deadlock.
+/// If you use [`Self::read()`] and [`Self::write()`] in the same scope
+/// your code might be stuck in a deadlock or panic.
 pub struct SharedState<Data> {
     data: Lazy<RwLock<Data>>,
     subscribers: Lazy<RwLock<Vec<SubscriberFn<Data>>>>,
@@ -71,8 +71,8 @@ where
     /// STATE.subscribe(&sender, |data| *data);
     ///
     /// {
-    ///     let mut data = STATE.get_mut();
-    ///     **data += 1;
+    ///     let mut data = STATE.write();
+    ///     *data += 1;
     /// }
     ///
     /// assert_eq!(receiver.recv_sync().unwrap(), 1);
@@ -92,25 +92,141 @@ where
             }));
     }
 
+    /// An alternative version of [`subscribe()`](Self::subscribe()) that only send a message if
+    /// the closure returns [`Some`].
+    pub fn subscribe_optional<Msg, F>(&self, sender: &Sender<Msg>, f: F)
+    where
+        F: Fn(&Data) -> Option<Msg> + 'static + Send + Sync,
+        Msg: Send + 'static,
+    {
+        let sender = sender.clone();
+        self.subscribers
+            .write()
+            .unwrap()
+            .push(Box::new(move |data: &Data| {
+                if let Some(msg) = f(data) {
+                    sender.send(msg);
+                }
+            }));
+    }
+
     /// Get immutable access to the shared data.
-    pub fn get(&self) -> SharedStateReadGuard<'_, Data> {
+    ///
+    /// Returns an RAII guard which will release this thread’s shared access
+    /// once it is dropped.
+    ///
+    /// The calling thread will be blocked until there are no more writers
+    /// which hold the lock (see [`RwLock`]).
+    ///
+    /// # Panics
+    ///
+    /// This function will panic if the internal [`RwLock`] is poisoned.
+    /// An [`RwLock`] is poisoned whenever a writer panics while holding an exclusive lock.
+    /// The failure will occur immediately after the lock has been acquired.
+    ///
+    /// Also, this function might panic when called if the lock is already
+    /// held by the current thread.
+    pub fn read(&self) -> SharedStateReadGuard<'_, Data> {
         SharedStateReadGuard {
             inner: self.data.read().unwrap(),
         }
     }
 
     /// Get mutable access to the shared data.
-    /// Once the lock is dropped all subscribers will be notified.
-    pub fn get_mut(&self) -> SharedStateWriteGuard<'_, Data> {
-        SharedStateWriteGuard {
-            data: self.data.write().unwrap(),
-            subscribers: self.subscribers.write().unwrap(),
-        }
+    ///
+    /// Returns an RAII guard which will **notify all subscribers** and
+    /// release this thread’s shared access once it is dropped.
+    ///
+    /// This function will not return while other writers or other readers
+    /// currently have access to the internal lock (see [`RwLock`]).
+    ///
+    /// # Panics
+    ///
+    /// This function will panic if the internal [`RwLock`] is poisoned.
+    /// An [`RwLock`] is poisoned whenever a writer panics while holding an exclusive lock.
+    /// The failure will occur immediately after the lock has been acquired.
+    ///
+    /// Also, this function might panic when called if the lock is already
+    /// held by the current thread.
+    ///
+    /// # Example
+    ///
+    /// ```
+    /// # use relm4::SharedState;
+    /// static STATE: SharedState<u8> = SharedState::new();
+    ///
+    /// // Overwrite the current value with 1
+    /// *STATE.write() = 1;
+    /// ```
+    ///
+    /// # Panic example
+    ///
+    /// ```no_run
+    /// # use relm4::SharedState;
+    /// static STATE: SharedState<u8> = SharedState::new();
+    ///
+    /// let read_guard = STATE.read();
+    ///
+    /// // This is fine
+    /// let another_read_guard = STATE.read();
+    ///
+    /// // This might panic or result in a dead lock
+    /// // because you cannot read and write at the same time.
+    /// // To solve this, drop all read guards on this thread first.
+    /// let another_write_guard = STATE.write();
+    /// ```
+    pub fn write(&self) -> SharedStateWriteGuard<'_, Data> {
+        let subscribers = self.subscribers.write().unwrap();
+        let data = self.data.write().unwrap();
+
+        SharedStateWriteGuard { data, subscribers }
     }
 
     /// Get mutable access to the shared data.
+    /// Since this call borrows the [`SharedState`] mutably,
+    /// no actual locking needs to take place, but the mutable
+    /// borrow statically guarantees no locks exist.
+    ///
     /// **This method will not notify any subscribers!**
-    pub fn get_mut_raw(&self) -> RwLockWriteGuard<'_, Data> {
+    ///
+    /// # Panics
+    ///
+    /// This function will panic if the internal [`RwLock`] is poisoned.
+    /// An [`RwLock`] is poisoned whenever a writer panics while holding an exclusive lock.
+    /// The failure will occur immediately after the lock has been acquired.
+    pub fn get_mut(&mut self) -> &mut Data {
+        self.data.get_mut().unwrap()
+    }
+
+    /// Get immutable access to the shared data.
+    ///
+    /// **This method will not notify any subscribers!**
+    ///
+    /// # Panics
+    ///
+    /// This function will panic if the internal [`RwLock`] is poisoned.
+    /// An [`RwLock`] is poisoned whenever a writer panics while holding an exclusive lock.
+    /// The failure will occur immediately after the lock has been acquired.
+    ///
+    /// Also, this function might panic when called if the lock is already
+    /// held by the current thread.
+    pub fn read_inner(&self) -> RwLockReadGuard<'_, Data> {
+        self.data.read().unwrap()
+    }
+
+    /// Get mutable access to the shared data.
+    ///
+    /// **This method will not notify any subscribers!**
+    ///
+    /// # Panics
+    ///
+    /// This function will panic if the internal [`RwLock`] is poisoned.
+    /// An [`RwLock`] is poisoned whenever a writer panics while holding an exclusive lock.
+    /// The failure will occur immediately after the lock has been acquired.
+    ///
+    /// Also, this function might panic when called if the lock is already
+    /// held by the current thread.
+    pub fn write_inner(&self) -> RwLockWriteGuard<'_, Data> {
         self.data.write().unwrap()
     }
 }
@@ -122,10 +238,10 @@ pub struct SharedStateReadGuard<'a, Data> {
 }
 
 impl<'a, Data> Deref for SharedStateReadGuard<'a, Data> {
-    type Target = RwLockReadGuard<'a, Data>;
+    type Target = Data;
 
     fn deref(&self) -> &Self::Target {
-        &self.inner
+        self.inner.deref()
     }
 }
 
@@ -146,16 +262,16 @@ impl<'a, Data: std::fmt::Debug> std::fmt::Debug for SharedStateWriteGuard<'a, Da
 }
 
 impl<'a, Data> Deref for SharedStateWriteGuard<'a, Data> {
-    type Target = RwLockWriteGuard<'a, Data>;
+    type Target = Data;
 
     fn deref(&self) -> &Self::Target {
-        &self.data
+        self.data.deref()
     }
 }
 
 impl<'a, Data> DerefMut for SharedStateWriteGuard<'a, Data> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.data
+        self.data.deref_mut()
     }
 }
 
@@ -177,25 +293,25 @@ mod test {
 
     #[test]
     fn shared_state() {
-        assert_eq!(**STATE.get(), 0);
+        assert_eq!(*STATE.read(), 0);
 
         {
-            let mut data = STATE.get_mut();
-            **data += 1;
+            let mut data = STATE.write();
+            *data += 1;
         }
 
-        assert_eq!(**STATE.get(), 1);
+        assert_eq!(*STATE.read(), 1);
 
         let (sender, receiver) = crate::channel();
 
         STATE.subscribe(&sender, |data| *data);
 
         {
-            let mut data = STATE.get_mut();
-            **data += 1;
+            let mut data = STATE.write();
+            *data += 1;
         }
 
         assert_eq!(receiver.recv_sync().unwrap(), 2);
-        assert_eq!(**STATE.get(), 2);
+        assert_eq!(*STATE.read(), 2);
     }
 }

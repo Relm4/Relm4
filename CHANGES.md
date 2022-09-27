@@ -2,6 +2,7 @@
 
 ## Unreleased
 
++ core: Improve `SharedState` interface and prefer method names related to `RwLock`
 + macros: Don't generate dead code in the widgets struct
 + macros: Improve error reporting on invalid trait implementations
 + macros: Add chain attribute for properties
