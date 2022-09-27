@@ -26,7 +26,10 @@ pub trait WidgetPlus {
     ///
     /// Returns [`true`] if the removal is supported on the type of widget.
     /// **This doesn't mean that the widget was actually removed.**
-    #[deprecated(since = "0.5.0-beta.3", note = "This method has no real use-case and isn't maintained anymore.")]
+    #[deprecated(
+        since = "0.5.0-beta.3",
+        note = "This method has no real use-case and isn't maintained anymore."
+    )]
     fn try_remove(&self, widget: &impl IsA<Widget>) -> bool;
 }
 
