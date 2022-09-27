@@ -53,9 +53,7 @@ impl SimpleComponent for AppModel {
 
                 gtk::Button {
                     set_label: "Decrement",
-                    connect_clicked[sender] => move |_| {
-                        sender.input(AppMsg::Decrement);
-                    }
+                    connect_clicked => AppMsg::Decrement,
                 },
 
                 gtk::Grid {
