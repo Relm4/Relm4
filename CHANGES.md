@@ -2,6 +2,7 @@
 
 ## Unreleased
 
++ examples: Port entry, actions and popover examples to 0.5
 + macros: Add shorthand syntax for simple input messages
 + core: Improve `SharedState` interface and prefer method names related to `RwLock`
 + macros: Don't generate dead code in the widgets struct
