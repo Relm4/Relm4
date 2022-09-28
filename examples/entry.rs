@@ -1,5 +1,5 @@
 use gtk::prelude::*;
-use relm4::factory::*;
+use relm4::factory::FactoryVecDeque;
 use relm4::prelude::*;
 
 #[derive(Debug)]
