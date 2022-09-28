@@ -52,7 +52,7 @@ where
     fn init(
         model: Self::Init,
         root: &Self::Root,
-        sender: relm4::ComponentSender<Self>,
+        sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let widgets = root.clone();
 
