@@ -29,24 +29,25 @@ adw = { git = "https://gitlab.gnome.org/World/Rust/libadwaita-rs", optional = tr
 async-broadcast = "0.4"
 async-oneshot = "0.5.0"
 flume = "0.10.14"
-futures = "0.3.21"
 fragile = "1.2.1"
+futures = "0.3.21"
 gtk = { git = "https://github.com/gtk-rs/gtk4-rs", package = "gtk4" }
 #gtk = { version = "0.5", package = "gtk4" }
 log = "0.4.17"
 once_cell = "1.13"
+paste = "1"
 panel = { git = "https://gitlab.gnome.org/World/Rust/libpanel-rs", rev = "517d3f0459a9da16d300e2ee0b7508205494f845", optional = true, package = "libpanel" }
-#panel = { version = "0.1.0-alpha-0", optional = true, package = "libpanel }
-tokio = { version = "1.20", features = ["rt", "rt-multi-thread"] }
 
 #relm4-macros = { version = "0.4.1", optional = true }
 relm4-macros = { path = "../relm4-macros", optional = true }
+#panel = { version = "0.1.0-alpha-0", optional = true, package = "libpanel }
+tokio = { version = "1.20", features = ["rt", "rt-multi-thread"] }
 tracing = { version = "0.1.36", features = ["log"] }
 
 [dev-dependencies]
+criterion = "0.4"
 relm4-macros = { path = "../relm4-macros" }
 tokio = { version = "1.20", features = ["full"] }
-criterion = "0.3"
 
 [[bench]]
 name = "stress_test"

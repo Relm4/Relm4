@@ -35,6 +35,7 @@ pub mod shared_state;
 
 pub mod util;
 
+mod global_widgets;
 pub(crate) mod late_initialization;
 /// A simpler version of components that does work
 /// in the background.
@@ -90,6 +91,9 @@ pub use panel;
 
 pub use once_cell;
 pub use tokio;
+
+#[doc(hidden)]
+pub use paste::paste as __relm4_private_paste;
 
 thread_local! {
     static MAIN_APPLICATION: Cell<Option<gtk::Application>> = Cell::default();

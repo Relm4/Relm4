@@ -4,8 +4,6 @@ version = "0.0.0"
 publish = false
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dev-dependencies]
 relm4 = { path = "../../relm4", features = ["macros"] }
 relm4-components = { path = "../../relm4-components" }
