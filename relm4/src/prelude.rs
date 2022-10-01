@@ -5,8 +5,8 @@
 
 pub use crate::factory::{DynamicIndex, FactoryComponent, FactoryComponentSender};
 pub use crate::{
-    Component, ComponentController, ComponentParts, ComponentSender, RelmApp, SimpleComponent,
-    WidgetPlus,
+    Component, ComponentController, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt,
+    SimpleComponent, WidgetRef,
 };
 #[cfg(feature = "libadwaita")]
 pub use adw;

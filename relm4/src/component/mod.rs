@@ -9,20 +9,13 @@ mod message_broker;
 mod state_watcher;
 mod traits;
 
-#[allow(unreachable_pub)]
-pub use self::builder::ComponentBuilder;
-#[allow(unreachable_pub)]
-pub use self::connector::Connector;
-#[allow(unreachable_pub)]
-pub use self::controller::{ComponentController, Controller};
-#[allow(unreachable_pub)]
-pub use self::message_broker::MessageBroker;
-#[allow(unreachable_pub)]
-pub use self::state_watcher::StateWatcher;
-#[allow(unreachable_pub)]
-pub use self::traits::Component;
-#[allow(unreachable_pub)]
-pub use self::traits::SimpleComponent;
+pub use builder::ComponentBuilder;
+pub use connector::Connector;
+pub use controller::{ComponentController, Controller};
+pub use message_broker::MessageBroker;
+pub use state_watcher::StateWatcher;
+pub use traits::Component;
+pub use traits::SimpleComponent;
 
 use std::cell::RefCell;
 use std::future::Future;

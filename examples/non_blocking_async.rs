@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
-use relm4::{gtk, Component, ComponentParts, ComponentSender, RelmApp, WidgetPlus};
+use relm4::{gtk, Component, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt};
 
 struct AppModel {
     counter: u8,

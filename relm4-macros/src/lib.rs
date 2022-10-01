@@ -39,7 +39,7 @@ fn gtk_import() -> syn::Path {
 ///
 /// ```
 /// use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
-/// use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent, WidgetPlus};
+/// use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent, RelmWidgetExt};
 ///
 /// #[derive(Default)]
 /// struct AppModel {
@@ -125,7 +125,7 @@ fn gtk_import() -> syn::Path {
 /// #![deny(unreachable_code)]
 ///
 /// # use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
-/// # use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent, WidgetPlus};
+/// # use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent, RelmWidgetExt};
 /// #
 /// struct AppModel {}
 ///

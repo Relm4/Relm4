@@ -75,7 +75,7 @@ Several example applications are available at [examples/](examples/).
 
 ```rust
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
-use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, SimpleComponent, WidgetPlus};
+use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, SimpleComponent, RelmWidgetExt};
 
 struct AppModel {
     counter: u8,

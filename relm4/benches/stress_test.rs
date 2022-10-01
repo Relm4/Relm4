@@ -4,7 +4,7 @@ use criterion::{criterion_group, criterion_main, Criterion};
 use gtk::gio::ApplicationFlags;
 use gtk::glib::clone;
 use gtk::prelude::{ApplicationExt, BoxExt, ButtonExt, GtkWindowExt};
-use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, SimpleComponent, WidgetPlus};
+use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent};
 
 // Iteration count that appear to be reasonable.
 // Constant delays like GTK's runtime are negligible at this number.

@@ -5,17 +5,34 @@ mod set_child;
 
 #[cfg(test)]
 mod tests;
+mod widget_ext;
 
-#[allow(unreachable_pub)]
-pub use self::container::RelmContainerExt;
-#[allow(unreachable_pub)]
-pub use self::iter_children::RelmIterChildrenExt;
-#[allow(unreachable_pub)]
-pub use self::remove::{RelmRemoveAllExt, RelmRemoveExt};
-#[allow(unreachable_pub)]
-pub use self::set_child::RelmSetChildExt;
+pub use container::RelmContainerExt;
+pub use iter_children::RelmIterChildrenExt;
+pub use remove::{RelmRemoveAllExt, RelmRemoveExt};
+pub use set_child::RelmSetChildExt;
+pub use widget_ext::RelmWidgetExt;
 
-use gtk::prelude::*;
+use gtk::prelude::{
+    ApplicationExt, ApplicationExtManual, Cast, IsA, ListBoxRowExt, StaticType, WidgetExt,
+};
+
+/// Get a reference to a widget.
+///
+/// This trait is an extension of [`AsRef`]
+/// that always returns `&`[`Widget`].
+pub trait WidgetRef {
+    /// Returns a reference to a widget.
+    ///
+    /// Like [`AsRef::as_ref`] it will auto-dereference.
+    fn widget_ref(&self) -> &gtk::Widget;
+}
+
+impl<T: AsRef<gtk::Widget>> WidgetRef for T {
+    fn widget_ref(&self) -> &gtk::Widget {
+        self.as_ref()
+    }
+}
 
 /// Additional methods for `gtk::builders::ApplicationBuilder`
 pub trait ApplicationBuilderExt {
@@ -41,28 +58,6 @@ impl ApplicationBuilderExt for gtk::builders::ApplicationBuilder {
         });
 
         app.run();
-    }
-}
-
-/// Additional methods for `gtk::Widget`
-pub trait RelmWidgetExt {
-    /// Attach widget to a `gtk::SizeGroup`.
-    fn set_size_group(&self, size_group: &gtk::SizeGroup);
-
-    /// Locate the top level window this widget is attached to.
-    ///
-    /// Equivalent to `widget.ancestor(gtk::Window::static_type())`, then casting.
-    fn toplevel_window(&self) -> Option<gtk::Window>;
-}
-
-impl<T: gtk::glib::IsA<gtk::Widget>> RelmWidgetExt for T {
-    fn set_size_group(&self, size_group: &gtk::SizeGroup) {
-        size_group.add_widget(self);
-    }
-
-    fn toplevel_window(&self) -> Option<gtk::Window> {
-        self.ancestor(gtk::Window::static_type())
-            .and_then(|widget| widget.dynamic_cast::<gtk::Window>().ok())
     }
 }
 
