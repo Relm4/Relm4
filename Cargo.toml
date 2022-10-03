@@ -2,7 +2,7 @@
 name = "relm4"
 authors = ["Aaron Erhardt <aaron.erhardt@t-online.de>"]
 edition = "2021"
-version = "0.4.4"
+version = "0.4.5"
 description = "An idiomatic GUI library inspired by Elm and based on gtk4-rs"
 repository = "https://github.com/Relm4/relm4"
 readme = "README.md"
@@ -19,6 +19,10 @@ members = [
     "relm4-examples/libadwaita",
     "relm4-macros",
 ]
+
+[package.metadata.docs.rs]
+features = ["dox"]
+cargo-args = ["-Zunstable-options", "-Zrustdoc-scrape-examples=examples"]
 
 [dependencies]
 adw = { version = "0.1", optional = true, package = "libadwaita" }
@@ -37,11 +41,17 @@ tokio = { version = "1.15", optional = true, features = ["rt"] }
 
 [features]
 default = []
+dox = ["gtk/dox", "adw/dox"]
 libadwaita = ["adw"]
 libpanel = ["panel"]
 tokio-rt = ["tokio", "async-trait"]
 macros = ["relm4-macros"]
-all = ["tokio-rt", "libadwaita", "macros"]
+all = [
+    "tokio-rt",
+    "libadwaita",
+    "macros",
+] # dox is not part of the 'all' feature, because it is only used for generating the documentation
+
 
 [dev-dependencies]
 futures-channel = "0.3"
