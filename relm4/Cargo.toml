@@ -46,7 +46,7 @@ tracing = { version = "0.1.36", features = ["log"] }
 [dev-dependencies]
 relm4-macros = { path = "../relm4-macros" }
 tokio = { version = "1.20", features = ["full"] }
-criterion = "0.3"
+criterion = "0.4"
 
 [[bench]]
 name = "stress_test"
