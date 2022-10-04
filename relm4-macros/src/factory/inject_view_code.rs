@@ -6,8 +6,8 @@ use crate::component;
 
 pub(super) fn inject_view_code(
     func: Option<ImplItemMethod>,
-    view_code: TokenStream2,
-    widgets_return_code: TokenStream2,
+    view_code: &TokenStream2,
+    widgets_return_code: &TokenStream2,
 ) -> Result<ImplItemMethod> {
     if let Some(func) = func {
         Ok(component::inject_view_code::inject_view_code(

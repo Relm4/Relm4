@@ -22,6 +22,10 @@
 
 ### Changed
 
++ macros: `parse_with_path` takes a reference to the `Path` instead of a value
++ macros: `update_stream` takes a reference to the `inner_update_tokens: TokenStream2` instead of a value
++ macros: `inject_view_code` takes references to the two `TokenStream2` instead of a value in components and factory
++ macros: `generate_tokens` takes a reference to `Option<Visibility>` instead of a value in components and factory
 + core: Improve `SharedState` interface and prefer method names related to `RwLock`
 + core: Remove Debug requirement for FactoryComponent
 + core: Remove `input` and `output` fields on `ComponentSender` and `FactoryComponentSender` in favor of `input_sender` and `output_sender` methods
