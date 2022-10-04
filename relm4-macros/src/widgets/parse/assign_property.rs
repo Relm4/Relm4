@@ -17,7 +17,7 @@ struct ProcessedAttrs {
 
 impl AssignProperty {
     pub(super) fn parse(
-        input: ParseStream,
+        input: ParseStream<'_>,
         attributes: Option<Attrs>,
         args: Option<Args<Expr>>,
     ) -> Result<Self> {

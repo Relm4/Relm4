@@ -241,7 +241,7 @@ impl<'a, Data> Deref for SharedStateReadGuard<'a, Data> {
     type Target = Data;
 
     fn deref(&self) -> &Self::Target {
-        self.inner.deref()
+        &self.inner
     }
 }
 
@@ -265,13 +265,13 @@ impl<'a, Data> Deref for SharedStateWriteGuard<'a, Data> {
     type Target = Data;
 
     fn deref(&self) -> &Self::Target {
-        self.data.deref()
+        &self.data
     }
 }
 
 impl<'a, Data> DerefMut for SharedStateWriteGuard<'a, Data> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        self.data.deref_mut()
+        &mut self.data
     }
 }
 

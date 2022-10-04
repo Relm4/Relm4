@@ -31,7 +31,7 @@ impl Properties {
 }
 
 impl Widget {
-    pub fn struct_fields_stream(&self, stream: &mut TokenStream2, vis: &Option<Visibility>) {
+    pub(crate) fn struct_fields_stream(&self, stream: &mut TokenStream2, vis: &Option<Visibility>) {
         if self.has_struct_field() {
             let name = &self.name;
             let ty = self.func_type_token_stream();

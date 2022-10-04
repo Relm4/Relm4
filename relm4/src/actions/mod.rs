@@ -204,7 +204,7 @@ pub struct RelmActionGroup<GroupName: ActionGroupName> {
 
 impl<GroupName: ActionGroupName> RelmActionGroup<GroupName> {
     /// Add an action to the group.
-    pub fn add_action<Name: ActionName>(&self, action: RelmAction<Name>) {
+    pub fn add_action<Name: ActionName>(&self, action: &RelmAction<Name>) {
         self.group.add_action(&action.action);
     }
 

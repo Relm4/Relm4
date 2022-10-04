@@ -127,8 +127,8 @@ impl SimpleComponent for AppModel {
                 dbg!(state);
             });
 
-        group.add_action(action);
-        group.add_action(action2);
+        group.add_action(&action);
+        group.add_action(&action2);
 
         let actions = group.into_action_group();
         widgets

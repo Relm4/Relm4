@@ -4,7 +4,7 @@ use syn::{Result, Token};
 use crate::widgets::PropertyName;
 
 impl Parse for PropertyName {
-    fn parse(input: ParseStream) -> Result<Self> {
+    fn parse(input: ParseStream<'_>) -> Result<Self> {
         Ok(if input.peek(Token![::]) || input.peek2(Token! [::]) {
             PropertyName::Path(input.parse()?)
         } else {

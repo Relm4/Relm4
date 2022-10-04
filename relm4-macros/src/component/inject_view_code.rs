@@ -5,8 +5,8 @@ use syn::{Error, Expr, ImplItemMethod, Pat, Result, Stmt};
 
 pub(crate) fn inject_view_code(
     mut func: ImplItemMethod,
-    view_code: TokenStream2,
-    widgets_return_code: TokenStream2,
+    view_code: &TokenStream2,
+    widgets_return_code: &TokenStream2,
 ) -> Result<ImplItemMethod> {
     let func_span = func.span();
     let mut stmts = func.block.stmts;

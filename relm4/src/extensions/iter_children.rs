@@ -24,7 +24,7 @@ impl<T: RelmIterChildrenExt> ChildrenIterator<T> {
                 .expect("The type of children does not match.")
         });
         let done = start.is_none();
-        ChildrenIterator { start, end, done }
+        Self { start, end, done }
     }
 }
 

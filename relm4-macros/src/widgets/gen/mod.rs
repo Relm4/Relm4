@@ -22,7 +22,7 @@ mod init;
 mod update_view;
 
 impl Widget {
-    pub fn widget_assignment(&self) -> TokenStream2 {
+    pub(super) fn widget_assignment(&self) -> TokenStream2 {
         let w_name = &self.name;
 
         let ref_token = &self.ref_token;

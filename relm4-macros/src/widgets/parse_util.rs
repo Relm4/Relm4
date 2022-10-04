@@ -113,7 +113,7 @@ pub(crate) fn idents_to_snake_case<'a, I: Iterator<Item = &'a Ident>>(
 ///
 /// Sadly, the regular Rust API won't be made public,
 /// see [#1190](https://github.com/dtolnay/syn/issues/1190).
-pub(super) fn parens<'a>(input: &'a ParseBuffer) -> Result<ParseBuffer<'a>, ParseError> {
+pub(super) fn parens<'a>(input: &'a ParseBuffer<'_>) -> Result<ParseBuffer<'a>, ParseError> {
     let content = (move || {
         let content;
         parenthesized!(content in input);
@@ -128,7 +128,7 @@ pub(super) fn parens<'a>(input: &'a ParseBuffer) -> Result<ParseBuffer<'a>, Pars
 ///
 /// Sadly, the regular Rust API won't be made public,
 /// see [#1190](https://github.com/dtolnay/syn/issues/1190).
-pub(super) fn braces<'a>(input: &'a ParseBuffer) -> Result<ParseBuffer<'a>, ParseError> {
+pub(super) fn braces<'a>(input: &'a ParseBuffer<'_>) -> Result<ParseBuffer<'a>, ParseError> {
     let content = (move || {
         let content;
         braced!(content in input);
@@ -143,7 +143,7 @@ pub(super) fn braces<'a>(input: &'a ParseBuffer) -> Result<ParseBuffer<'a>, Pars
 ///
 /// Sadly, the regular Rust API won't be made public,
 /// see [#1190](https://github.com/dtolnay/syn/issues/1190).
-pub(super) fn brackets<'a>(input: &'a ParseBuffer) -> Result<ParseBuffer<'a>, ParseError> {
+pub(super) fn brackets<'a>(input: &'a ParseBuffer<'_>) -> Result<ParseBuffer<'a>, ParseError> {
     let content = (move || {
         let content;
         bracketed!(content in input);

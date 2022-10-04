@@ -8,7 +8,7 @@ use crate::widgets::{
 };
 
 impl Property {
-    pub(super) fn parse(input: ParseStream) -> (Self, bool) {
+    pub(super) fn parse(input: ParseStream<'_>) -> (Self, bool) {
         match Self::parse_failing(input) {
             Ok(prop) => (prop, false),
             Err(err) => (
@@ -21,7 +21,7 @@ impl Property {
         }
     }
 
-    fn parse_failing(input: ParseStream) -> Result<Self, ParseError> {
+    fn parse_failing(input: ParseStream<'_>) -> Result<Self, ParseError> {
         // Handle `#[attrs]`
         let mut attributes: Option<Attrs> = if input.peek(Token![#]) {
             Some(input.parse()?)

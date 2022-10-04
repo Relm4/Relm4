@@ -69,9 +69,9 @@ where
     C::CommandOutput: Send,
 {
     /// Starts a worker on a separate thread,
-    /// passing ownership to a future attached to a GLib context.
+    /// passing ownership to a future attached to a [gtk::glib::MainContext].
     pub fn detach_worker(self, payload: C::Init) -> WorkerHandle<C> {
-        let ComponentBuilder { root, .. } = self;
+        let Self { root, .. } = self;
 
         // Used for all events to be processed by this component's internal service.
         let (input_tx, input_rx) = crate::channel::<C::Input>();
@@ -205,7 +205,7 @@ where
         self,
         mut func: F,
     ) -> WorkerController<W> {
-        let WorkerHandle {
+        let Self {
             sender,
             receiver,
             root,
@@ -227,7 +227,7 @@ where
         sender: &Sender<X>,
         transform: F,
     ) -> WorkerController<W> {
-        let WorkerHandle {
+        let Self {
             sender: own_sender,
             receiver,
             root,
@@ -264,7 +264,7 @@ impl<W: Component> WorkerController<W> {
     }
 
     /// Provides access to the component's sender.
-    pub fn sender(&self) -> &Sender<W::Input> {
+    pub const fn sender(&self) -> &Sender<W::Input> {
         &self.sender
     }
 }

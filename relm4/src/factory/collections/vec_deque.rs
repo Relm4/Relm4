@@ -552,7 +552,7 @@ impl<C: FactoryComponent> FactoryVecDeque<C> {
     }
 
     /// Returns the widget all components are attached to.
-    pub fn widget(&self) -> &C::ParentWidget {
+    pub const fn widget(&self) -> &C::ParentWidget {
         &self.widget
     }
 
@@ -560,6 +560,6 @@ impl<C: FactoryComponent> FactoryVecDeque<C> {
     pub fn iter(
         &self,
     ) -> impl Iterator<Item = &C> + DoubleEndedIterator + ExactSizeIterator + FusedIterator {
-        self.components.iter().map(|component| component.get())
+        self.components.iter().map(ComponentStorage::get)
     }
 }

@@ -19,7 +19,7 @@ type AttributeInfo = (
 
 impl Widget {
     pub(super) fn parse(
-        input: ParseStream,
+        input: ParseStream<'_>,
         attributes: Option<Attrs>,
         args: Option<Args<Expr>>,
     ) -> Result<Self, ParseError> {
@@ -87,7 +87,7 @@ impl Widget {
     }
 
     pub(super) fn parse_for_container_ext(
-        input: ParseStream,
+        input: ParseStream<'_>,
         func: WidgetFunc,
         attributes: Option<Attrs>,
     ) -> Result<Self, ParseError> {
@@ -214,7 +214,7 @@ impl Widget {
     }
 
     /// Parse information related to the widget function.
-    fn parse_widget_func(input: ParseStream) -> Result<WidgetFuncInfo, ParseError> {
+    fn parse_widget_func(input: ParseStream<'_>) -> Result<WidgetFuncInfo, ParseError> {
         // Look for &
         let ref_token = input.parse().ok();
 
