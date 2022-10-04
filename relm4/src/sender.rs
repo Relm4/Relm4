@@ -40,7 +40,7 @@ impl<C: Component> ComponentSender<C> {
         Cmd: FnOnce(Sender<C::CommandOutput>, ShutdownReceiver) -> Fut + Send + 'static,
         Fut: Future<Output = ()> + Send,
     {
-        self.shared.command(cmd)
+        self.shared.command(cmd);
     }
 
     /// Spawns a future that will be dropped as soon as the component is shut down.
@@ -50,12 +50,12 @@ impl<C: Component> ComponentSender<C> {
     where
         Fut: Future<Output = C::CommandOutput> + Send + 'static,
     {
-        self.shared.oneshot_command(future)
+        self.shared.oneshot_command(future);
     }
 
     /// Emit an input to the component.
     pub fn input(&self, message: C::Input) {
-        self.shared.input.send(message)
+        self.shared.input.send(message);
     }
 
     /// Retrieve the sender for input messages.
@@ -69,7 +69,7 @@ impl<C: Component> ComponentSender<C> {
 
     /// Emit an output to the component.
     pub fn output(&self, message: C::Output) {
-        self.shared.output.send(message)
+        self.shared.output.send(message);
     }
 
     /// Retrieve the sender for output messages.
@@ -121,7 +121,7 @@ impl<C: FactoryComponent> FactoryComponentSender<C> {
         Cmd: FnOnce(Sender<C::CommandOutput>, ShutdownReceiver) -> Fut + Send + 'static,
         Fut: Future<Output = ()> + Send,
     {
-        self.shared.command(cmd)
+        self.shared.command(cmd);
     }
 
     /// Spawns a future that will be dropped as soon as the component is shut down.
@@ -131,12 +131,12 @@ impl<C: FactoryComponent> FactoryComponentSender<C> {
     where
         Fut: Future<Output = C::CommandOutput> + Send + 'static,
     {
-        self.shared.oneshot_command(future)
+        self.shared.oneshot_command(future);
     }
 
     /// Emit an input to the component.
     pub fn input(&self, message: C::Input) {
-        self.shared.input.send(message)
+        self.shared.input.send(message);
     }
 
     /// Retrieve the sender for input messages.
@@ -150,7 +150,7 @@ impl<C: FactoryComponent> FactoryComponentSender<C> {
 
     /// Emit an output to the component.
     pub fn output(&self, message: C::Output) {
-        self.shared.output.send(message)
+        self.shared.output.send(message);
     }
 
     /// Retrieve the sender for output messages.

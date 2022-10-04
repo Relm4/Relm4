@@ -82,7 +82,7 @@ where
             if let Some(window) = widget.toplevel_window() {
                 root.as_ref().set_transient_for(Some(&window));
             } else {
-                tracing::error!("Couldn't find root of transient widget")
+                tracing::error!("Couldn't find root of transient widget");
             }
         }));
 
@@ -111,7 +111,7 @@ where
             if let Some(window) = widget.toplevel_window() {
                 root.as_ref().set_transient_for(Some(&window));
             } else {
-                tracing::error!("Couldn't find root of transient widget")
+                tracing::error!("Couldn't find root of transient widget");
             }
         }));
 
@@ -120,7 +120,7 @@ where
 }
 
 impl<C: Component> ComponentBuilder<C> {
-    /// Starts the component, passing ownership to a future attached to a GLib context.
+    /// Starts the component, passing ownership to a future attached to a ``GLib`` context.
     pub fn launch(self, payload: C::Init) -> Connector<C> {
         // Used for all events to be processed by this component's internal service.
         let (input_tx, input_rx) = crate::channel::<C::Input>();
