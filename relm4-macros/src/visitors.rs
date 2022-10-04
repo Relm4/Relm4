@@ -439,7 +439,7 @@ impl VisitMut for PreAndPostView<'_> {
             }
         }
 
-        visit_mut::visit_impl_item_mut(self, item)
+        visit_mut::visit_impl_item_mut(self, item);
     }
 }
 
