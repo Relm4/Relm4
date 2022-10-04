@@ -7,7 +7,7 @@ impl IfBranch {
     pub(crate) fn update_stream(
         &self,
         stream: &mut TokenStream2,
-        inner_update_tokens: TokenStream2,
+        inner_update_tokens: &TokenStream2,
         index: usize,
     ) {
         let index = index.to_string();

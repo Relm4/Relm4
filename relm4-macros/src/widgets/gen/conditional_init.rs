@@ -86,7 +86,7 @@ impl ConditionalWidget {
                         model_name,
                         true,
                     );
-                    branch.update_stream(&mut stream, inner_update_stream, index);
+                    branch.update_stream(&mut stream, &inner_update_stream, index);
                 }
                 stream
             }
