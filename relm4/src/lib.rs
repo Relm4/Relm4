@@ -1,14 +1,14 @@
 //! An idiomatic GUI library inspired by Elm and based on gtk4-rs.
 
-#![doc(html_logo_url = "https://raw.githubusercontent.com/Relm4/Relm4/main/assets/Relm_logo.svg")]
-#![doc(
-    html_favicon_url = "https://raw.githubusercontent.com/Relm4/Relm4/main/assets/Relm_logo.svg"
-)]
+#![doc(html_logo_url = "https://relm4.org/icons/relm4_logo.svg")]
+#![doc(html_favicon_url = "https://relm4.org/icons/relm4_org.svg")]
 #![warn(
     missing_debug_implementations,
     missing_docs,
     rust_2018_idioms,
-    unreachable_pub
+    unreachable_pub,
+    clippy::cargo,
+    clippy::must_use_candidate
 )]
 // Configuration for doc builds on the nightly toolchain.
 #![cfg_attr(dox, feature(doc_cfg))]
@@ -117,6 +117,7 @@ fn new_application() -> gtk::Application {
 ///
 /// Note: The global application can be overwritten by calling
 /// [`RelmApp::with_app()`].
+#[must_use]
 pub fn main_application() -> gtk::Application {
     MAIN_APPLICATION.with(|cell| {
         let app = cell.take().unwrap_or_else(new_application);

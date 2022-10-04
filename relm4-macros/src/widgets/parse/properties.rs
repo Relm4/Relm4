@@ -9,7 +9,7 @@ use syn::{braced, bracketed, parenthesized, token, Ident, Lifetime, Token};
 use crate::widgets::{parse_util, ParseError, Properties, Property, PropertyName, PropertyType};
 
 impl Properties {
-    pub(super) fn parse(input: ParseStream) -> Self {
+    pub(super) fn parse(input: ParseStream<'_>) -> Self {
         let mut props: Punctuated<Property, Token![,]> = Punctuated::new();
         loop {
             if input.is_empty() {
@@ -58,7 +58,7 @@ impl Properties {
     }
 }
 
-fn parse_comma_error(input: ParseStream) -> Result<(), Property> {
+fn parse_comma_error(input: ParseStream<'_>) -> Result<(), Property> {
     let lookahead = input.lookahead1();
     if lookahead.peek(Token![,]) {
         input.parse::<Token![,]>().unwrap();
@@ -79,14 +79,14 @@ macro_rules! parse_type {
     };
 }
 
-fn skip_inner_tokens(input: ParseStream) -> Result<(), syn::Error> {
+fn skip_inner_tokens(input: ParseStream<'_>) -> Result<(), syn::Error> {
     while !input.is_empty() {
         parse_next_token(input)?;
     }
     Ok(())
 }
 
-fn parse_next_token(input: ParseStream) -> Result<bool, syn::Error> {
+fn parse_next_token(input: ParseStream<'_>) -> Result<bool, syn::Error> {
     let inner_tokens;
     if input.is_empty() {
         Ok(true)

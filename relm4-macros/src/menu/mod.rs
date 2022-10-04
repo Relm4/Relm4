@@ -5,7 +5,7 @@ use syn::{Expr, Ident, LitStr, Path};
 mod gen;
 mod parse;
 
-pub struct Menus {
+pub(crate) struct Menus {
     items: Punctuated<Menu, Comma>,
 }
 

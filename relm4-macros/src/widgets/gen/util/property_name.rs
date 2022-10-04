@@ -5,7 +5,7 @@ use syn::Ident;
 use crate::widgets::gen::PropertyName;
 
 impl PropertyName {
-    pub fn assign_fn_stream(&self, w_name: &Ident) -> TokenStream2 {
+    pub(crate) fn assign_fn_stream(&self, w_name: &Ident) -> TokenStream2 {
         match self {
             PropertyName::Ident(ident) => {
                 quote! { #w_name.#ident }
@@ -17,7 +17,7 @@ impl PropertyName {
         }
     }
 
-    pub fn assign_args_stream(&self, w_name: &Ident) -> Option<TokenStream2> {
+    pub(crate) fn assign_args_stream(&self, w_name: &Ident) -> Option<TokenStream2> {
         match self {
             PropertyName::Ident(_) => None,
             PropertyName::Path(_) | PropertyName::RelmContainerExtAssign => {

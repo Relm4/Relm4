@@ -37,6 +37,7 @@ impl FactoryComponent for Counter {
 
             #[name = "label"]
             gtk::Label {
+                #[watch]
                 set_label: &self.value.to_string(),
                 set_width_chars: 3,
             },
@@ -104,10 +105,6 @@ impl FactoryComponent for Counter {
                 self.value = self.value.wrapping_sub(1);
             }
         }
-    }
-
-    fn pre_view() {
-        widgets.label.set_label(&self.value.to_string());
     }
 }
 

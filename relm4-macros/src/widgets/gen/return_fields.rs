@@ -26,7 +26,7 @@ impl Properties {
 }
 
 impl Widget {
-    pub fn return_stream(&self, stream: &mut TokenStream2) {
+    pub(crate) fn return_stream(&self, stream: &mut TokenStream2) {
         if self.has_struct_field() {
             let name = &self.name;
 

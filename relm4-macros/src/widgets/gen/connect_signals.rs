@@ -42,7 +42,7 @@ impl Properties {
 }
 
 impl Widget {
-    pub fn connect_signals_stream(&self, stream: &mut TokenStream2, sender_name: &Ident) {
+    pub(crate) fn connect_signals_stream(&self, stream: &mut TokenStream2, sender_name: &Ident) {
         let w_name = &self.name;
         self.properties
             .connect_signals_stream(stream, w_name, sender_name);

@@ -6,6 +6,7 @@ use gtk::prelude::{DialogExt, GtkWindowExt, WidgetExt};
 use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent};
 
 /// Configuration for the alert dialog component
+#[derive(Debug)]
 pub struct AlertSettings {
     /// Large text
     pub text: String,
@@ -24,6 +25,7 @@ pub struct AlertSettings {
 }
 
 /// Alert dialog component.
+#[derive(Debug)]
 pub struct Alert {
     settings: AlertSettings,
     is_active: bool,

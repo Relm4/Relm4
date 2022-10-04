@@ -7,7 +7,7 @@ use syn::{bracketed, parenthesized, token, Error, Expr, Ident, Lit, LitStr, Path
 use crate::widgets::{Attr, Attrs};
 
 impl Parse for Attrs {
-    fn parse(input: ParseStream) -> Result<Self> {
+    fn parse(input: ParseStream<'_>) -> Result<Self> {
         let mut attrs = Vec::new();
 
         while input.peek(Token![#]) {

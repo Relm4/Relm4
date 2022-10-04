@@ -6,20 +6,20 @@ use crate::additional_fields::AdditionalFields;
 use crate::menu::Menus;
 use crate::widgets::ViewWidgets;
 
-pub(crate) struct ComponentVisitor<'errors> {
-    pub view_widgets: Option<ViewWidgets>,
-    pub widgets_ty: Option<syn::Type>,
-    pub init: Option<syn::ImplItemMethod>,
-    pub root_name: Option<syn::Ident>,
-    pub model_name: Option<syn::Ident>,
-    pub sender_name: Option<syn::Ident>,
-    pub additional_fields: Option<AdditionalFields>,
-    pub menus: Option<Menus>,
-    pub errors: &'errors mut Vec<syn::Error>,
+pub(super) struct ComponentVisitor<'errors> {
+    pub(super) view_widgets: Option<ViewWidgets>,
+    pub(super) widgets_ty: Option<syn::Type>,
+    pub(super) init: Option<syn::ImplItemMethod>,
+    pub(super) root_name: Option<syn::Ident>,
+    pub(super) model_name: Option<syn::Ident>,
+    pub(super) sender_name: Option<syn::Ident>,
+    pub(super) additional_fields: Option<AdditionalFields>,
+    pub(super) menus: Option<Menus>,
+    pub(super) errors: &'errors mut Vec<syn::Error>,
 }
 
 impl<'errors> ComponentVisitor<'errors> {
-    pub fn new(errors: &'errors mut Vec<syn::Error>) -> Self {
+    pub(super) fn new(errors: &'errors mut Vec<syn::Error>) -> Self {
         ComponentVisitor {
             view_widgets: None,
             widgets_ty: None,
@@ -131,18 +131,18 @@ impl VisitMut for ComponentVisitor<'_> {
     }
 }
 
-pub(crate) struct FactoryComponentVisitor<'errors> {
-    pub view_widgets: Option<ViewWidgets>,
-    pub widgets_ty: Option<syn::Type>,
-    pub init_widgets: Option<syn::ImplItemMethod>,
-    pub root_name: Option<syn::Ident>,
-    pub additional_fields: Option<AdditionalFields>,
-    pub menus: Option<Menus>,
-    pub errors: &'errors mut Vec<syn::Error>,
+pub(super) struct FactoryComponentVisitor<'errors> {
+    pub(super) view_widgets: Option<ViewWidgets>,
+    pub(super) widgets_ty: Option<syn::Type>,
+    pub(super) init_widgets: Option<syn::ImplItemMethod>,
+    pub(super) root_name: Option<syn::Ident>,
+    pub(super) additional_fields: Option<AdditionalFields>,
+    pub(super) menus: Option<Menus>,
+    pub(super) errors: &'errors mut Vec<syn::Error>,
 }
 
 impl<'errors> FactoryComponentVisitor<'errors> {
-    pub fn new(errors: &'errors mut Vec<syn::Error>) -> Self {
+    pub(super) fn new(errors: &'errors mut Vec<syn::Error>) -> Self {
         FactoryComponentVisitor {
             view_widgets: None,
             widgets_ty: None,
@@ -355,7 +355,7 @@ impl<'ast> Visit<'ast> for InitFnVisitor {
 }
 
 #[derive(Default)]
-pub struct InitWidgetsFnVisitor {
+struct InitWidgetsFnVisitor {
     root_name: Option<syn::Ident>,
     errors: Vec<syn::Error>,
 }
@@ -389,14 +389,14 @@ impl<'ast> Visit<'ast> for InitWidgetsFnVisitor {
     }
 }
 
-pub struct PreAndPostView<'errors> {
-    pub pre_view: Vec<syn::Stmt>,
-    pub post_view: Vec<syn::Stmt>,
+pub(super) struct PreAndPostView<'errors> {
+    pub(super) pre_view: Vec<syn::Stmt>,
+    pub(super) post_view: Vec<syn::Stmt>,
     errors: &'errors mut Vec<syn::Error>,
 }
 
 impl<'errors> PreAndPostView<'errors> {
-    pub fn extract(impl_: &mut syn::ItemImpl, errors: &'errors mut Vec<syn::Error>) -> Self {
+    pub(super) fn extract(impl_: &mut syn::ItemImpl, errors: &'errors mut Vec<syn::Error>) -> Self {
         let mut visitor = PreAndPostView {
             pre_view: vec![],
             post_view: vec![],
@@ -439,7 +439,7 @@ impl VisitMut for PreAndPostView<'_> {
             }
         }
 
-        visit_mut::visit_impl_item_mut(self, item)
+        visit_mut::visit_impl_item_mut(self, item);
     }
 }
 

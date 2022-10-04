@@ -59,7 +59,7 @@ impl RelmApp {
     {
         use std::cell::Cell;
 
-        let RelmApp { app } = self;
+        let Self { app } = self;
 
         let payload = Cell::new(Some(payload));
 

@@ -4,7 +4,7 @@ use syn::{Error, Ident, Token};
 use crate::widgets::{TopLevelWidget, ViewWidgets};
 
 impl Parse for ViewWidgets {
-    fn parse(input: ParseStream) -> Result<Self> {
+    fn parse(input: ParseStream<'_>) -> Result<Self> {
         let span = input.span();
 
         let first_widget = TopLevelWidget::parse(input);
