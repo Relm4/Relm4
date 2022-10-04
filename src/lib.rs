@@ -8,6 +8,7 @@
 )]
 #![doc(html_logo_url = "https://relm4.org/icons/relm4_logo.svg")]
 #![doc(html_favicon_url = "https://relm4.org/icons/relm4_org.svg")]
+#![feature(doc_cfg)]
 
 pub mod actions;
 mod app;
