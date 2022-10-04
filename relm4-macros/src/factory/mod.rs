@@ -11,7 +11,7 @@ mod inject_view_code;
 use inject_view_code::inject_view_code;
 
 pub(crate) fn generate_tokens(
-    vis: Option<Visibility>,
+    vis: &Option<Visibility>,
     mut factory_impl: syn::ItemImpl,
 ) -> TokenStream2 {
     let mut errors = vec![];
@@ -90,7 +90,7 @@ pub(crate) fn generate_tokens(
             }
         };
 
-        let init_injected = match inject_view_code(init_widgets, view_code, widgets_return_code) {
+        let init_injected = match inject_view_code(init_widgets, &view_code, &widgets_return_code) {
             Ok(method) => method,
             Err(err) => return err.to_compile_error(),
         };

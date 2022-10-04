@@ -28,12 +28,12 @@ impl Properties {
 }
 
 impl Widget {
-    pub fn init_stream(&self, stream: &mut TokenStream2) {
+    pub(crate) fn init_stream(&self, stream: &mut TokenStream2) {
         self.self_init_stream(stream);
         self.other_init_stream(stream);
     }
 
-    pub fn init_root_init_streams(
+    pub(crate) fn init_root_init_streams(
         &self,
         init_root_stream: &mut TokenStream2,
         init_stream: &mut TokenStream2,

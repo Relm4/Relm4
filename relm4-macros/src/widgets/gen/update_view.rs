@@ -50,7 +50,7 @@ impl Properties {
 }
 
 impl Widget {
-    pub fn init_update_view_stream(&self, stream: &mut TokenStream2, model_name: &Ident) {
+    pub(crate) fn init_update_view_stream(&self, stream: &mut TokenStream2, model_name: &Ident) {
         self.update_view_stream(stream, model_name, false);
     }
 
@@ -80,7 +80,7 @@ impl ConditionalWidget {
                     branch
                         .widget
                         .update_view_stream(&mut inner_update_stream, model_name, true);
-                    branch.update_stream(&mut stream, inner_update_stream, index);
+                    branch.update_stream(&mut stream, &inner_update_stream, index);
                 }
                 stream
             }

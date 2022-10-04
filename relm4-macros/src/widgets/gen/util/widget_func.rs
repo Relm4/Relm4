@@ -7,7 +7,7 @@ use crate::widgets::{Widget, WidgetFunc};
 
 impl Widget {
     /// Get tokens for the widget's type.
-    pub fn func_type_token_stream(&self) -> TokenStream2 {
+    pub(crate) fn func_type_token_stream(&self) -> TokenStream2 {
         let is_local = self.attr.is_local_attr();
         let func = &self.func;
         let path = &self.func.path;
@@ -60,7 +60,7 @@ impl Widget {
 
 impl WidgetFunc {
     /// Get the tokens of the widget's function.
-    pub fn func_token_stream(&self) -> TokenStream2 {
+    pub(crate) fn func_token_stream(&self) -> TokenStream2 {
         let WidgetFunc {
             path,
             args,

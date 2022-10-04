@@ -57,7 +57,7 @@ impl SimpleComponent for AppModel {
     ) -> ComponentParts<Self> {
         let model = AppModel { counter };
 
-        // Insert the macro code generation here
+        // Insert the code generation of the view! macro here
         let widgets = view_output!();
 
         ComponentParts { model, widgets }

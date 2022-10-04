@@ -22,7 +22,7 @@ impl ReturnedWidget {
 }
 
 impl Widget {
-    pub fn start_assign_stream(&self, stream: &mut TokenStream2) {
+    pub(crate) fn start_assign_stream(&self, stream: &mut TokenStream2) {
         let w_name = &self.name;
         self.properties.assign_stream(stream, w_name, false);
     }

@@ -1,12 +1,7 @@
 use std::convert::identity;
 
-use gtk::prelude::{BoxExt, ButtonExt, DialogExt, GtkWindowExt, ToggleButtonExt, WidgetExt};
-use relm4::gtk;
-use relm4::gtk::prelude::{ApplicationExt, Cast};
-use relm4::{
-    Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,
-    SimpleComponent,
-};
+use gtk::prelude::*;
+use relm4::prelude::*;
 
 struct Header;
 

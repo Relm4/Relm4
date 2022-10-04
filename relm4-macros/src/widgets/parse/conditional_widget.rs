@@ -16,7 +16,7 @@ type ConditionalAttrs = (
 
 impl ConditionalWidget {
     pub(super) fn parse(
-        input: ParseStream,
+        input: ParseStream<'_>,
         attrs: Option<Attrs>,
         args: Option<Args<Expr>>,
     ) -> Result<Self, ParseError> {
@@ -31,7 +31,7 @@ impl ConditionalWidget {
     }
 
     pub(super) fn parse_with_name(
-        input: ParseStream,
+        input: ParseStream<'_>,
         name: Option<Ident>,
         attrs: Option<Attrs>,
         args: Option<Args<Expr>>,

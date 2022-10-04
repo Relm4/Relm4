@@ -4,10 +4,10 @@ use quote::quote;
 use crate::widgets::{IfBranch, IfCondition};
 
 impl IfBranch {
-    pub fn update_stream(
+    pub(crate) fn update_stream(
         &self,
         stream: &mut TokenStream2,
-        inner_update_tokens: TokenStream2,
+        inner_update_tokens: &TokenStream2,
         index: usize,
     ) {
         let index = index.to_string();

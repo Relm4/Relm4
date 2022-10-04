@@ -31,7 +31,7 @@ impl<C: Component> Connector<C> {
         sender_: &Sender<X>,
         transform: F,
     ) -> Controller<C> {
-        let Connector {
+        let Self {
             state,
             widget,
             sender,
@@ -52,7 +52,7 @@ impl<C: Component> Connector<C> {
         self,
         mut func: F,
     ) -> Controller<C> {
-        let Connector {
+        let Self {
             state,
             widget,
             sender,

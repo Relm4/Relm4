@@ -11,7 +11,7 @@ pub(super) mod inject_view_code;
 use inject_view_code::inject_view_code;
 
 pub(crate) fn generate_tokens(
-    vis: Option<Visibility>,
+    vis: &Option<Visibility>,
     mut component_impl: syn::ItemImpl,
 ) -> TokenStream2 {
     let mut errors = vec![];
@@ -93,7 +93,7 @@ pub(crate) fn generate_tokens(
             }
         };
 
-        let init_injected = match inject_view_code(init, view_code, widgets_return_code) {
+        let init_injected = match inject_view_code(init, &view_code, &widgets_return_code) {
             Ok(method) => method,
             Err(err) => return err.to_compile_error(),
         };
@@ -119,7 +119,7 @@ pub(crate) fn generate_tokens(
             fn update_view(
                 &self,
                 widgets: &mut Self::Widgets,
-                sender: relm4::ComponentSender<Self>,
+                sender: ComponentSender<Self>,
             ) {
                 struct __DoNotReturnManually;
 

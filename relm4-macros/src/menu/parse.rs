@@ -8,7 +8,7 @@ use super::{Menu, MenuEntry, MenuItem, MenuSection, Menus};
 syn::custom_keyword!(custom);
 
 impl Parse for Menus {
-    fn parse(input: ParseStream) -> Result<Self> {
+    fn parse(input: ParseStream<'_>) -> Result<Self> {
         let items = input.call(Punctuated::parse_separated_nonempty)?;
 
         Ok(Menus { items })
@@ -16,7 +16,7 @@ impl Parse for Menus {
 }
 
 impl Parse for Menu {
-    fn parse(input: ParseStream) -> Result<Self> {
+    fn parse(input: ParseStream<'_>) -> Result<Self> {
         let name = input.parse()?;
         let _colon: Token![:] = input.parse()?;
 
@@ -30,7 +30,7 @@ impl Parse for Menu {
 }
 
 impl Parse for MenuEntry {
-    fn parse(input: ParseStream) -> Result<Self> {
+    fn parse(input: ParseStream<'_>) -> Result<Self> {
         let string = input.parse()?;
         let _arrow: Token![=>] = input.parse()?;
         let action_ty = input.call(Path::parse_mod_style)?;
@@ -52,7 +52,7 @@ impl Parse for MenuEntry {
 }
 
 impl Parse for MenuItem {
-    fn parse(input: ParseStream) -> Result<Self> {
+    fn parse(input: ParseStream<'_>) -> Result<Self> {
         Ok(if input.peek(custom) {
             let _custom: custom = input.parse()?;
             let _colon: Token![:] = input.parse()?;
@@ -66,7 +66,7 @@ impl Parse for MenuItem {
 }
 
 impl Parse for MenuSection {
-    fn parse(input: ParseStream) -> Result<Self> {
+    fn parse(input: ParseStream<'_>) -> Result<Self> {
         let name: Ident = input.parse()?;
         assert!(name == "section");
         let _excl: Token![!] = input.parse()?;

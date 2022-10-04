@@ -5,7 +5,7 @@ use syn::{Ident, LitStr};
 use super::{Menu, MenuEntry, MenuItem, MenuSection, Menus};
 
 impl Menus {
-    pub fn menus_stream(&self) -> TokenStream2 {
+    pub(crate) fn menus_stream(&self) -> TokenStream2 {
         let mut menu_stream = TokenStream2::new();
 
         for item in &self.items {
