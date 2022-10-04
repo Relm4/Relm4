@@ -560,6 +560,6 @@ impl<C: FactoryComponent> FactoryVecDeque<C> {
     pub fn iter(
         &self,
     ) -> impl Iterator<Item = &C> + DoubleEndedIterator + ExactSizeIterator + FusedIterator {
-        self.components.iter().map(|component| component.get())
+        self.components.iter().map(ComponentStorage::get)
     }
 }
