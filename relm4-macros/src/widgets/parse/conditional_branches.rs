@@ -4,7 +4,7 @@ use syn::{Expr, Token};
 use crate::widgets::{parse_util, ConditionalBranches, IfBranch, MatchArm, ParseError};
 
 impl ConditionalBranches {
-    pub(super) fn parse_if(input: ParseStream) -> Result<Self, ParseError> {
+    pub(super) fn parse_if(input: ParseStream<'_>) -> Result<Self, ParseError> {
         let mut if_branches = Vec::new();
         let mut index = 0_usize;
         while input.peek(Token![if]) || input.peek(Token![else]) {
@@ -14,7 +14,7 @@ impl ConditionalBranches {
         Ok(Self::If(if_branches))
     }
 
-    pub(super) fn parse_match(input: ParseStream) -> Result<Self, ParseError> {
+    pub(super) fn parse_match(input: ParseStream<'_>) -> Result<Self, ParseError> {
         let match_token = input.parse()?;
         let expr = Box::new(Expr::parse_without_eager_brace(input)?);
 

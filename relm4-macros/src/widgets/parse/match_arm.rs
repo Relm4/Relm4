@@ -6,7 +6,7 @@ use crate::widgets::parse::if_branch::args_from_index;
 use crate::widgets::{parse_util, MatchArm, ParseError, Widget};
 
 impl MatchArm {
-    pub(super) fn parse(input: ParseStream, index: usize) -> Result<Self, ParseError> {
+    pub(super) fn parse(input: ParseStream<'_>, index: usize) -> Result<Self, ParseError> {
         if input.peek(Token![,]) {
             let _comma: Token![,] = input.parse()?;
         }

@@ -6,14 +6,14 @@ use syn::{token, Ident, Path, Token};
 use crate::widgets::{parse_util, ParseError, WidgetFunc};
 
 impl WidgetFunc {
-    pub(super) fn parse_with_path(input: ParseStream, path: Path) -> Result<Self, ParseError> {
+    pub(super) fn parse_with_path(input: ParseStream<'_>, path: Path) -> Result<Self, ParseError> {
         match Self::parse_with_path_internal(input, &path) {
             Ok(func) => Ok(func),
             Err(err) => Err(err.add_path(&path)),
         }
     }
 
-    fn parse_with_path_internal(input: ParseStream, path: &Path) -> Result<Self, ParseError> {
+    fn parse_with_path_internal(input: ParseStream<'_>, path: &Path) -> Result<Self, ParseError> {
         if input.peek(Ident) {
             return Err(ParseError::Generic(
                 syn::Error::new(
@@ -57,7 +57,7 @@ impl WidgetFunc {
 }
 
 impl WidgetFunc {
-    pub(super) fn parse(input: ParseStream) -> Result<Self, ParseError> {
+    pub(super) fn parse(input: ParseStream<'_>) -> Result<Self, ParseError> {
         let path = input.parse()?;
         Self::parse_with_path(input, path)
     }

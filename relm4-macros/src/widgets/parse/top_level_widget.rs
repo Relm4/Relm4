@@ -7,7 +7,7 @@ use crate::widgets::{
 };
 
 impl TopLevelWidget {
-    pub(super) fn parse(input: ParseStream) -> Self {
+    pub(super) fn parse(input: ParseStream<'_>) -> Self {
         let attributes: Option<Attrs> = input.parse().ok();
 
         // Look for #[root] attribute and remove it from the list if it exists

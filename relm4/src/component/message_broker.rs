@@ -40,6 +40,7 @@ impl<C: Component> MessageBroker<C> {
     /// Creates a new [`MessageBroker`].
     ///
     /// The returned message broker will not forward messages until it's initialized.
+    #[must_use]
     pub const fn new() -> Self {
         let inner: Lazy<MessageBrokerInner<C>> = Lazy::new(|| MessageBrokerInner::<C>::new());
         Self { inner }

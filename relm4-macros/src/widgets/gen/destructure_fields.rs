@@ -30,7 +30,7 @@ impl Properties {
 }
 
 impl Widget {
-    pub fn destructure_stream(&self, stream: &mut TokenStream2) {
+    pub(crate) fn destructure_stream(&self, stream: &mut TokenStream2) {
         if self.has_struct_field() {
             let name = &self.name;
 

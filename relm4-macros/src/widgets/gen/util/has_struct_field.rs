@@ -3,7 +3,7 @@ use crate::widgets::{AssignPropertyAttr, Properties, PropertyType, Widget};
 impl Widget {
     /// Don't generate any fields if the widget wasn't named by the user and
     /// isn't used for any property updates either.
-    pub fn has_struct_field(&self) -> bool {
+    pub(crate) fn has_struct_field(&self) -> bool {
         self.name_assigned_by_user || self.properties.are_properties_updated()
     }
 }

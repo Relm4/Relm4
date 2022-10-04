@@ -22,7 +22,7 @@ impl<C: Component> ComponentSender<C> {
         command_tx: Sender<C::CommandOutput>,
         shutdown_tx: ShutdownReceiver,
     ) -> Self {
-        ComponentSender {
+        Self {
             shared: Arc::new(ComponentSenderInner {
                 input: input_tx,
                 output: output_tx,
@@ -84,7 +84,7 @@ impl<C: Component> ComponentSender<C> {
 
 impl<C: Component> Clone for ComponentSender<C> {
     fn clone(&self) -> Self {
-        ComponentSender {
+        Self {
             shared: Arc::clone(&self.shared),
         }
     }
@@ -103,7 +103,7 @@ impl<C: FactoryComponent> FactoryComponentSender<C> {
         command_tx: Sender<C::CommandOutput>,
         shutdown_tx: ShutdownReceiver,
     ) -> Self {
-        FactoryComponentSender {
+        Self {
             shared: Arc::new(ComponentSenderInner {
                 input: input_tx,
                 output: output_tx,
@@ -165,7 +165,7 @@ impl<C: FactoryComponent> FactoryComponentSender<C> {
 
 impl<C: FactoryComponent> Clone for FactoryComponentSender<C> {
     fn clone(&self) -> Self {
-        FactoryComponentSender {
+        Self {
             shared: Arc::clone(&self.shared),
         }
     }

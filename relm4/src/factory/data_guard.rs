@@ -56,7 +56,7 @@ impl<Data> DataGuard<Data> {
         )
     }
 
-    pub(super) fn get(&self) -> &Data {
+    pub(super) const fn get(&self) -> &Data {
         &self.data
     }
 

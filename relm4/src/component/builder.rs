@@ -28,7 +28,7 @@ pub struct ComponentBuilder<C: Component> {
 impl<C: Component> Default for ComponentBuilder<C> {
     /// Prepares a component for initialization.
     fn default() -> Self {
-        ComponentBuilder {
+        Self {
             root: C::init_root(),
             component: PhantomData,
         }
@@ -44,7 +44,7 @@ impl<C: Component> ComponentBuilder<C> {
     }
 
     /// Access the root widget before the component is initialized.
-    pub fn widget(&self) -> &C::Root {
+    pub const fn widget(&self) -> &C::Root {
         &self.root
     }
 }
@@ -148,7 +148,7 @@ impl<C: Component> ComponentBuilder<C> {
         input_tx: Sender<C::Input>,
         input_rx: Receiver<C::Input>,
     ) -> Connector<C> {
-        let ComponentBuilder { root, .. } = self;
+        let Self { root, .. } = self;
 
         // Used by this component to send events to be handled externally by the caller.
         let (output_tx, output_rx) = crate::channel::<C::Output>();

@@ -5,7 +5,7 @@ use syn::{braced, Ident, Result, Token};
 use crate::widgets::{parse_util, Properties, ReturnedWidget};
 
 impl Parse for ReturnedWidget {
-    fn parse(input: ParseStream) -> Result<Self> {
+    fn parse(input: ParseStream<'_>) -> Result<Self> {
         let mut is_optional = false;
 
         let (name, ty) = if input.peek(Ident) {

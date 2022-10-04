@@ -2,52 +2,80 @@
 
 ## Unreleased
 
-+ macros: Add shorthand syntax for simple input messages
-+ core: Improve `SharedState` interface and prefer method names related to `RwLock`
-+ macros: Don't generate dead code in the widgets struct
-+ macros: Improve error reporting on invalid trait implementations
-+ macros: Add chain attribute for properties
+## 0.5.0-beta.3 - 2022-9-28
+
+### Added
+
 + core: Add `iter_mut` to `FactoryVecDeque`
-+ core: Remove Debug requirement for FactoryComponent
 + core: Impl extension traits and `FactoryView` for `adw::PreferencesGroup`
++ core: Add a `prelude` module that contains commonly imported traits and types
++ core: Implement RelmContainerExt for Leaflet, Carousel and TabView
++ core: Add `iter()` method to `FactoryVecDeque`
++ core: Add getter for global application to simplify graceful shutdown of applications
++ core: Add MessageBroker type to allow communication between components on different levels
++ core: Return a clone of the `DynamicIndex` after inserting into a factory
++ macros: Add shorthand syntax for simple input messages
++ macros: Add chain attribute for properties
 + components: Add `SimpleComboBox` type as a more idiomatic wrapper around `gtk::ComboBoxText`
-+ core: Append children for `gtk::Dialog` to its content area instead of using `set_child`
++ components: Port `OpenButton` to 0.5
++ book: Many chapters ported to 0.5
+
+### Changed
+
++ core: Improve `SharedState` interface and prefer method names related to `RwLock`
++ core: Remove Debug requirement for FactoryComponent
 + core: Remove `input` and `output` fields on `ComponentSender` and `FactoryComponentSender` in favor of `input_sender` and `output_sender` methods
 + core: Make `ComponentSender` and `FactoryComponentSender` structs instead of type aliases
-+ core: Add a `prelude` module that contains commonly imported traits and types
 + core: Increase MSRV to 1.63 to match the gtk4 crate
-+ core: Implement RelmContainerExt for Leaflet, Carousel and TabView
-+ components: Port `OpenButton` to 0.5
-+ core: Add `iter()` method to `FactoryVecDeque`
 + core: Rename `ParentMsg` and `output_to_parent_msg` to `ParentInput` and `output_to_parent_input`, respectively.
 + core: Do not call `gtk_init` and `adw_init` in favor of the application startup handler
 + core: Remove `Application` type alias in favor of `gtk::Application`
 + core: Make `app` field on `RelmApp` private
 + core: Use late initialization for transient_for and its native variant
-+ core: Add getter for global application to simplify graceful shutdown of applications
-+ core: Add MessageBroker type to allow communication between components on different levels
 + core: Rename InitParams to Init in SimpleComponent and Worker too
-+ core: Return a clone of the `DynamicIndex` after inserting into a factory
++ macros: Don't generate dead code in the widgets struct
++ macros: Improve error reporting on invalid trait implementations
+
+### Fixed
+
++ core: Append children for `gtk::Dialog` to its content area instead of using `set_child`
 + macros: Fix returned widgets assignment in the view macro
+
+### Misc
+
++ all: Use more clippy lints and clean up the code in general
 
 ## 0.5.0-beta.2 - 2022-8-12
 
-+ core: Rename InitParams to Init
+### Added
+
 + core: Add oneshot_command method to ComponentSender
-+ core: Pass senders by value
-+ core: Make factories use FactoryComponentSender instead of individual senders for input and output
-+ core: Remove generics from FactoryComponent
 + core: Implement FactoryView for adw::Carousel
-+ macros: Fix unsoundness with thread local memory
 + components: Complete port to 0.5
 + examples: More examples ported to 0.5
 
+### Changed
+
++ core: Rename InitParams to Init
++ core: Pass senders by value
++ core: Make factories use FactoryComponentSender instead of individual senders for input and output
++ core: Remove generics from FactoryComponent
+
+### Fixed
+
++ macros: Fix unsoundness with thread local memory
+
 ## 0.5.0-beta.1 - 2022-7-26
+
+### Added
+
++ core: Introduce commands
+
+### Changed
 
 + core: The Component trait replaces AppUpdate, ComponentUpdate, AsyncComponentUpdate, MessageHandler, MicroModel, MicroWidgets, Components and Widgets
 + core: Replace FactoryPrototype with FactoryComponent
 + core: Drop FactoryVec and make FactoryVecDeque easier to use
-+ core: Introduce commands
 + core: Improved component initialization and lifecycle
 + macros: Replace iterate, track and watch with attributes
 + macros: Replace args! with only parenthesis
@@ -56,7 +84,7 @@
 
 ## 0.4.4 - 2022-3-30
 
-## Changed
+### Changed
 
 + all: Repositories were transferred to the Relm4 organization
 
@@ -96,7 +124,7 @@
 
 ## 0.4.1 - 2022-1-17
 
-#### Added
+### Added
 
 + macros: Improved documentation
 

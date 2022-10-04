@@ -52,7 +52,7 @@ where
     fn init(
         model: Self::Init,
         root: &Self::Root,
-        sender: relm4::ComponentSender<Self>,
+        sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let widgets = root.clone();
 
@@ -107,6 +107,7 @@ where
     }
 
     /// Return the value of the currently selected element or [`None`] if nothing is selected.
+    #[must_use]
     pub fn get_active_elem(&self) -> Option<&E> {
         self.active_index.map(|idx| &self.variants[idx])
     }
