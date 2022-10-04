@@ -41,6 +41,7 @@ tokio = { version = "1.15", optional = true, features = ["rt"] }
 
 [features]
 default = []
+# The dox feature can be used for building the docs without the dependencies and requires Rust Nightly
 dox = ["gtk/dox", "adw/dox", "panel/dox"]
 libadwaita = ["adw"]
 libpanel = ["panel"]
