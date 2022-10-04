@@ -54,7 +54,7 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
         }
     }
 
-    /// Starts the component, passing ownership to a future attached to a ``GLib`` context.
+    /// Starts the component, passing ownership to a future attached to a [gtk::glib::MainContext].
     pub(super) fn launch<Transform>(
         self,
         index: &DynamicIndex,

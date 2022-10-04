@@ -2,6 +2,8 @@
 
 ## Unreleased
 
++ core: `add_action` of `RelmActionGroup` now takes a reference to a `RelmAction` as a parameter
+
 ## 0.5.0-beta.3 - 2022-9-28
 
 ### Added
@@ -22,7 +24,6 @@
 
 ### Changed
 
-+ core: `add_action` of `RelmActionGroup` now takes a reference to a `RelmAction` as a parameter
 + core: Improve `SharedState` interface and prefer method names related to `RwLock`
 + core: Remove Debug requirement for FactoryComponent
 + core: Remove `input` and `output` fields on `ComponentSender` and `FactoryComponentSender` in favor of `input_sender` and `output_sender` methods

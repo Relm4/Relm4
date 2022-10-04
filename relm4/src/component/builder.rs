@@ -120,7 +120,7 @@ where
 }
 
 impl<C: Component> ComponentBuilder<C> {
-    /// Starts the component, passing ownership to a future attached to a ``GLib`` context.
+    /// Starts the component, passing ownership to a future attached to a [gtk::glib::MainContext].
     pub fn launch(self, payload: C::Init) -> Connector<C> {
         // Used for all events to be processed by this component's internal service.
         let (input_tx, input_rx) = crate::channel::<C::Input>();

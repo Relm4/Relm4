@@ -69,7 +69,7 @@ where
     C::CommandOutput: Send,
 {
     /// Starts a worker on a separate thread,
-    /// passing ownership to a future attached to a ``GLib`` context.
+    /// passing ownership to a future attached to a [gtk::glib::MainContext].
     pub fn detach_worker(self, payload: C::Init) -> WorkerHandle<C> {
         let Self { root, .. } = self;
 
