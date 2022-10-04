@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.4.5 - 2022-10-04
+
+### Fixed
+
++ relm4: Builds on docs.rs succeed
++ relm4-components: Builds on docs.rs succeed
+
 ## 0.4.4 - 2022-3-30
 
 ## Changed
