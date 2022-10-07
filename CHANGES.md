@@ -3,6 +3,7 @@
 ## Unreleased
 
 + core: `add_action` of `RelmActionGroup` now takes a reference to a `RelmAction` as a parameter
++ core: Impl `ContainerChild` and `RelmSetChildExt` for `adw::ToastOverlay`
 + macros: `parse_with_path`, `update_stream`, `inject_view_code` and `generate_tokens` take references for some of their parameters
 
 ## 0.5.0-beta.3 - 2022-9-28
