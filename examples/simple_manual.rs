@@ -35,7 +35,7 @@ impl SimpleComponent for App {
             .build()
     }
 
-    /// Initialize the UI.
+    // Initialize the component.
     fn init(
         counter: Self::Init,
         window: &Self::Root,
@@ -84,7 +84,7 @@ impl SimpleComponent for App {
         }
     }
 
-    /// Update the view to represent the updated model.
+    // Update the view to represent the updated model.
     fn update_view(&self, widgets: &mut Self::Widgets, _sender: ComponentSender<Self>) {
         widgets
             .label

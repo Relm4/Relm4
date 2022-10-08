@@ -236,13 +236,13 @@ impl Component for App {
         }
     }
 
-    // Initialize the UI.
+    // Initialize the component.
     fn init(
         _: Self::Init,
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        // Insert the macro codegen here
+        // Insert the code generation of the view! macro here
         let widgets = view_output!();
 
         let mut model = App {

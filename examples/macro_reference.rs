@@ -158,7 +158,7 @@ impl SimpleComponent for App {
         }
     }
 
-    // Initialize the UI.
+    // Initialize the component.
     fn init(
         init: Self::Init,
         renamed_root: &Self::Root,
