@@ -37,7 +37,7 @@ impl SimpleComponent for AppModel {
         ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, _msg: (), _sender: ComponentSender<Self>) {}
+    fn update(&mut self, _msg: Self::Input, _sender: ComponentSender<Self>) {}
 }
 
 fn assert_impls_debug<T: std::fmt::Debug>() {}

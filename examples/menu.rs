@@ -3,20 +3,20 @@ use relm4::actions::{AccelsPlus, ActionablePlus, RelmAction, RelmActionGroup};
 use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent};
 
 #[derive(Default)]
-struct AppModel {
+struct App {
     counter: u8,
 }
 
 #[derive(Debug)]
-enum AppMsg {
+enum Msg {
     Increment,
     Decrement,
 }
 
 #[relm4::component]
-impl SimpleComponent for AppModel {
+impl SimpleComponent for App {
     type Init = u8;
-    type Input = AppMsg;
+    type Input = Msg;
     type Output = ();
     type Widgets = AppWidgets;
 
@@ -35,12 +35,12 @@ impl SimpleComponent for AppModel {
                     set_label: "Increment",
                     ActionablePlus::set_action::<TestU8Action>: 1,
                     connect_clicked[sender] => move |_| {
-                        sender.input(AppMsg::Increment);
+                        sender.input(Msg::Increment);
                     },
                 },
                 gtk::Button::with_label("Decrement") {
                     connect_clicked[sender] => move |_| {
-                        sender.input(AppMsg::Decrement);
+                        sender.input(Msg::Decrement);
                     },
                 },
                 gtk::Label {
@@ -117,7 +117,7 @@ impl SimpleComponent for AppModel {
         let action: RelmAction<TestAction> = {
             RelmAction::new_stateless(move |_| {
                 println!("Statelesss action!");
-                sender.input(AppMsg::Increment);
+                sender.input(Msg::Increment);
             })
         };
 
@@ -140,10 +140,10 @@ impl SimpleComponent for AppModel {
 
     fn update(&mut self, msg: Self::Input, _sender: ComponentSender<Self>) {
         match msg {
-            AppMsg::Increment => {
+            Msg::Increment => {
                 self.counter = self.counter.wrapping_add(1);
             }
-            AppMsg::Decrement => {
+            Msg::Decrement => {
                 self.counter = self.counter.wrapping_sub(1);
             }
         }
@@ -159,5 +159,5 @@ fn main() {
     let app = RelmApp::new("relm4.example.menu");
     relm4::main_application().set_accelerators_for_action::<TestAction>(&["<primary>W"]);
 
-    app.run::<AppModel>(0);
+    app.run::<App>(0);
 }

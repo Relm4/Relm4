@@ -23,7 +23,7 @@ pub(super) struct FactoryBuilder<C: FactoryComponent> {
 }
 
 impl<C: FactoryComponent> FactoryBuilder<C> {
-    pub(super) fn new(index: &DynamicIndex, params: C::Init) -> Self {
+    pub(super) fn new(index: &DynamicIndex, init: C::Init) -> Self {
         // Used for all events to be processed by this component's internal service.
         let (input_tx, input_rx) = crate::channel::<C::Input>();
 
@@ -40,7 +40,7 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
         let component_sender =
             FactoryComponentSender::new(input_tx, output_tx, cmd_tx, death_recipient);
 
-        let data = Box::new(C::init_model(params, index, component_sender.clone()));
+        let data = Box::new(C::init_model(init, index, component_sender.clone()));
         let root_widget = data.init_root();
 
         Self {

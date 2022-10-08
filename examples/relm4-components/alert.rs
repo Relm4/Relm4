@@ -102,7 +102,11 @@ impl SimpleComponent for App {
         }
     }
 
-    fn init(_: (), root: &Self::Root, sender: ComponentSender<Self>) -> ComponentParts<Self> {
+    fn init(
+        _: Self::Init,
+        root: &Self::Root,
+        sender: ComponentSender<Self>,
+    ) -> ComponentParts<Self> {
         let model = App {
             counter: 0,
             alert_toggle: false,

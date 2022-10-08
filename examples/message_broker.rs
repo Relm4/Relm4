@@ -222,6 +222,6 @@ impl SimpleComponent for App {
 }
 
 fn main() {
-    let relm_app = RelmApp::new("relm4.example.message_broker");
-    relm_app.run::<App>(());
+    let app = RelmApp::new("relm4.example.message_broker");
+    app.run::<App>(());
 }

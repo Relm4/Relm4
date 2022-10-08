@@ -2,12 +2,12 @@ use gtk::glib::clone;
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt};
 use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent};
 
-struct AppModel {
+struct App {
     counter: u8,
 }
 
 #[derive(Debug)]
-enum AppMsg {
+enum Msg {
     Increment,
     Decrement,
 }
@@ -20,9 +20,9 @@ struct AppWidgets {
     label: gtk::Label,
 }
 
-impl SimpleComponent for AppModel {
+impl SimpleComponent for App {
     type Init = u8;
-    type Input = AppMsg;
+    type Input = Msg;
     type Output = ();
     type Root = gtk::Window;
     type Widgets = AppWidgets;
@@ -41,7 +41,7 @@ impl SimpleComponent for AppModel {
         window: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let model = AppModel { counter };
+        let model = App { counter };
 
         let vbox = gtk::Box::builder()
             .orientation(gtk::Orientation::Vertical)
@@ -61,11 +61,11 @@ impl SimpleComponent for AppModel {
         vbox.append(&label);
 
         inc_button.connect_clicked(clone!(@strong sender => move |_| {
-            sender.input(AppMsg::Increment);
+            sender.input(Msg::Increment);
         }));
 
         dec_button.connect_clicked(clone!(@strong sender => move |_| {
-            sender.input(AppMsg::Decrement);
+            sender.input(Msg::Decrement);
         }));
 
         let widgets = AppWidgets { label };
@@ -75,10 +75,10 @@ impl SimpleComponent for AppModel {
 
     fn update(&mut self, msg: Self::Input, _sender: ComponentSender<Self>) {
         match msg {
-            AppMsg::Increment => {
+            Msg::Increment => {
                 self.counter = self.counter.wrapping_add(1);
             }
-            AppMsg::Decrement => {
+            Msg::Decrement => {
                 self.counter = self.counter.wrapping_sub(1);
             }
         }
@@ -94,5 +94,5 @@ impl SimpleComponent for AppModel {
 
 fn main() {
     let app = RelmApp::new("relm4.example.simple_manual");
-    app.run::<AppModel>(0);
+    app.run::<App>(0);
 }

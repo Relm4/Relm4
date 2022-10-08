@@ -52,20 +52,20 @@ fn gtk_import() -> syn::Path {
 /// use gtk::prelude::*;
 ///
 /// #[derive(Default)]
-/// struct AppModel {
+/// struct App {
 ///     counter: u8,
 /// }
 ///
 /// #[derive(Debug)]
-/// enum AppMsg {
+/// enum Msg {
 ///     Increment,
 ///     Decrement,
 /// }
 ///
 /// #[relm4_macros::component(pub)]
-/// impl SimpleComponent for AppModel {
+/// impl SimpleComponent for App {
 ///     type Init = u8;
-///     type Input = AppMsg;
+///     type Input = Msg;
 ///     type Output = ();
 ///     type Widgets = AppWidgets;
 ///
@@ -81,12 +81,12 @@ fn gtk_import() -> syn::Path {
 ///
 ///                 gtk::Button {
 ///                     set_label: "Increment",
-///                     connect_clicked => AppMsg::Increment,
+///                     connect_clicked => Msg::Increment,
 ///                 },
 ///                 gtk::Button {
 ///                     set_label: "Decrement",
 ///                     connect_clicked[sender] => move |_| {
-///                         sender.input(AppMsg::Decrement);
+///                         sender.input(Msg::Decrement);
 ///                     },
 ///                 },
 ///                 gtk::Label {
@@ -110,12 +110,12 @@ fn gtk_import() -> syn::Path {
 ///         ComponentParts { model, widgets }
 ///     }
 ///
-///     fn update(&mut self, msg: AppMsg, _sender: ComponentSender<Self>) {
+///     fn update(&mut self, msg: Msg, _sender: ComponentSender<Self>) {
 ///         match msg {
-///             AppMsg::Increment => {
+///             Msg::Increment => {
 ///                 self.counter = self.counter.wrapping_add(1);
 ///             }
-///             AppMsg::Decrement => {
+///             Msg::Decrement => {
 ///                 self.counter = self.counter.wrapping_sub(1);
 ///             }
 ///         }
@@ -133,10 +133,10 @@ fn gtk_import() -> syn::Path {
 /// # use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
 /// # use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent, RelmWidgetExt};
 /// #
-/// struct AppModel {}
+/// struct App {}
 ///
 /// #[relm4_macros::component]
-/// impl SimpleComponent for AppModel {
+/// impl SimpleComponent for App {
 ///       /* Code omitted */
 /// #     type Init = ();
 /// #     type Input = ();

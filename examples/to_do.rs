@@ -89,12 +89,12 @@ enum AppMsg {
     AddEntry(String),
 }
 
-struct AppModel {
+struct App {
     tasks: FactoryVecDeque<Task>,
 }
 
 #[relm4::component]
-impl SimpleComponent for AppModel {
+impl SimpleComponent for App {
     type Init = ();
     type Input = AppMsg;
     type Output = ();
@@ -142,10 +142,14 @@ impl SimpleComponent for AppModel {
         }
     }
 
-    fn init(_param: (), root: &Self::Root, sender: ComponentSender<Self>) -> ComponentParts<Self> {
+    fn init(
+        _: Self::Init,
+        root: &Self::Root,
+        sender: ComponentSender<Self>,
+    ) -> ComponentParts<Self> {
         let widgets = view_output!();
 
-        let model = AppModel {
+        let model = App {
             tasks: FactoryVecDeque::new(widgets.tasks.clone(), sender.input_sender()),
         };
 
@@ -155,5 +159,5 @@ impl SimpleComponent for AppModel {
 
 fn main() {
     let app = RelmApp::new("relm4.example.to_do");
-    app.run::<AppModel>(());
+    app.run::<App>(());
 }

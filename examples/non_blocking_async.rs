@@ -3,19 +3,19 @@ use std::time::Duration;
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
 use relm4::{gtk, Component, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt};
 
-struct AppModel {
+struct App {
     counter: u8,
 }
 
 #[derive(Debug)]
-enum AppMsg {
+enum Msg {
     Increment,
     Decrement,
 }
 
 #[relm4::component]
-impl Component for AppModel {
-    type CommandOutput = AppMsg;
+impl Component for App {
+    type CommandOutput = Msg;
     type Init = ();
     type Input = ();
     type Output = ();
@@ -38,7 +38,7 @@ impl Component for AppModel {
                     connect_clicked[sender] => move |_| {
                         sender.oneshot_command(async move {
                             tokio::time::sleep(Duration::from_secs(1)).await;
-                            AppMsg::Increment
+                            Msg::Increment
                         })
                     },
                 },
@@ -47,7 +47,7 @@ impl Component for AppModel {
                     connect_clicked[sender] => move |_| {
                         sender.oneshot_command(async move {
                             tokio::time::sleep(Duration::from_secs(1)).await;
-                            AppMsg::Decrement
+                            Msg::Decrement
                         })
                     },
                 },
@@ -61,8 +61,12 @@ impl Component for AppModel {
         }
     }
 
-    fn init(_: (), root: &Self::Root, sender: ComponentSender<Self>) -> ComponentParts<Self> {
-        let model = AppModel { counter: 0 };
+    fn init(
+        _: Self::Init,
+        root: &Self::Root,
+        sender: ComponentSender<Self>,
+    ) -> ComponentParts<Self> {
+        let model = App { counter: 0 };
 
         let widgets = view_output!();
 
@@ -71,10 +75,10 @@ impl Component for AppModel {
 
     fn update_cmd(&mut self, msg: Self::CommandOutput, _sender: ComponentSender<Self>) {
         match msg {
-            AppMsg::Increment => {
+            Msg::Increment => {
                 self.counter = self.counter.wrapping_add(1);
             }
-            AppMsg::Decrement => {
+            Msg::Decrement => {
                 self.counter = self.counter.wrapping_sub(1);
             }
         }
@@ -83,5 +87,5 @@ impl Component for AppModel {
 
 fn main() {
     let app = RelmApp::new("relm4.example.non_blocking_async");
-    app.run::<AppModel>(());
+    app.run::<App>(());
 }

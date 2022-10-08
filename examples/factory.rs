@@ -108,7 +108,7 @@ impl FactoryComponent for Counter {
     }
 }
 
-struct AppModel {
+struct App {
     created_widgets: u8,
     counters: FactoryVecDeque<Counter>,
 }
@@ -123,7 +123,7 @@ enum AppMsg {
 }
 
 #[relm4::component]
-impl SimpleComponent for AppModel {
+impl SimpleComponent for App {
     type Init = u8;
     type Input = AppMsg;
     type Output = ();
@@ -172,7 +172,7 @@ impl SimpleComponent for AppModel {
         // Insert the macro codegen here
         let widgets = view_output!();
 
-        let model = AppModel {
+        let model = App {
             created_widgets: counter,
             counters: FactoryVecDeque::new(widgets.counter_box.clone(), sender.input_sender()),
         };
@@ -214,5 +214,5 @@ impl SimpleComponent for AppModel {
 
 fn main() {
     let app = RelmApp::new("relm4.example.factory");
-    app.run::<AppModel>(0);
+    app.run::<App>(0);
 }
