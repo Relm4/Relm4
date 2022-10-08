@@ -226,26 +226,26 @@ pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
 ///             set_orientation: gtk::Orientation::Horizontal,
 ///             set_spacing: 10,
 ///
-///             #[name = "label"]
+///             #[name(label)]
 ///             gtk::Label {
 ///                 #[watch]
 ///                 set_label: &self.value.to_string(),
 ///                 set_width_chars: 3,
 ///             },
 ///
-///             #[name = "add_button"]
+///             #[name(add_button)]
 ///             gtk::Button {
 ///                 set_label: "+",
 ///                 connect_clicked => CounterMsg::Increment,
 ///             },
 ///
-///             #[name = "remove_button"]
+///             #[name(remove_button)]
 ///             gtk::Button {
 ///                 set_label: "-",
 ///                 connect_clicked => CounterMsg::Decrement,
 ///             },
 ///
-///             #[name = "to_front_button"]
+///             #[name(to_front_button)]
 ///             gtk::Button {
 ///                 set_label: "To start",
 ///                 connect_clicked[sender, index] => move |_| {

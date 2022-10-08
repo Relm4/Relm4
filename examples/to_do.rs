@@ -43,7 +43,7 @@ impl FactoryComponent for Task {
                 }
             },
 
-            #[name = "label"]
+            #[name(label)]
             gtk::Label {
                 set_label: &self.name,
                 set_hexpand: true,

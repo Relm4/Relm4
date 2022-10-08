@@ -81,7 +81,7 @@ impl SimpleComponent for OpenButton {
                 set_visible: model.config.recently_opened_files.is_some(),
 
                 #[wrap(Some)]
-                #[name = "popover"]
+                #[name(popover)]
                 set_popover = &gtk::Popover {
                     gtk::ScrolledWindow {
                         set_hscrollbar_policy: gtk::PolicyType::Never,
@@ -89,7 +89,7 @@ impl SimpleComponent for OpenButton {
                         set_min_content_height: 100,
                         set_min_content_height: 300,
 
-                        #[name = "recent_files_list"]
+                        #[name(recent_files_list)]
                         gtk::Box {
                             set_orientation: gtk::Orientation::Vertical,
                             set_vexpand: true,

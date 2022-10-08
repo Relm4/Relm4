@@ -38,26 +38,26 @@ impl FactoryComponent for Counter {
             set_orientation: gtk::Orientation::Horizontal,
             set_spacing: 10,
 
-            #[name = "label"]
+            #[name(label)]
             gtk::Label {
                 #[watch]
                 set_label: &self.value.to_string(),
                 set_width_chars: 3,
             },
 
-            #[name = "add_button"]
+            #[name(add_button)]
             gtk::Button {
                 set_label: "+",
                 connect_clicked => CounterMsg::Increment,
             },
 
-            #[name = "remove_button"]
+            #[name(remove_button)]
             gtk::Button {
                 set_label: "-",
                 connect_clicked => CounterMsg::Decrement,
             },
 
-            #[name = "move_up_button"]
+            #[name(move_up_button)]
             gtk::Button {
                 set_label: "Up",
                 connect_clicked[sender, index] => move |_| {
@@ -65,7 +65,7 @@ impl FactoryComponent for Counter {
                 }
             },
 
-            #[name = "move_down_button"]
+            #[name(move_down_button)]
             gtk::Button {
                 set_label: "Down",
                 connect_clicked[sender, index] => move |_| {
@@ -73,7 +73,7 @@ impl FactoryComponent for Counter {
                 }
             },
 
-            #[name = "to_front_button"]
+            #[name(to_front_button)]
             gtk::Button {
                 set_label: "To start",
                 connect_clicked[sender, index] => move |_| {

@@ -46,7 +46,7 @@ impl Component for App {
             set_label: "Left-click to add circles, resize or right-click to reset!",
           },
 
-          #[name = "area"]
+          #[name(area)]
           gtk::DrawingArea {
             set_vexpand: true,
             set_hexpand: true,
