@@ -24,10 +24,12 @@ struct App {
 
 #[relm4::component]
 impl Component for App {
-    type CommandOutput = UpdatePointsMsg;
     type Init = ();
+
     type Input = Msg;
     type Output = ();
+    type CommandOutput = UpdatePointsMsg;
+
     type Widgets = AppWidgets;
 
     view! {

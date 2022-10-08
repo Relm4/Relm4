@@ -21,8 +21,10 @@ struct App {
 #[relm4::component]
 impl SimpleComponent for App {
     type Init = ();
+
     type Input = AppMsg;
     type Output = ();
+
     type Widgets = AppWidgets;
 
     view! {

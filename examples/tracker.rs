@@ -39,8 +39,10 @@ struct App {
 #[relm4::component]
 impl SimpleComponent for App {
     type Init = ();
+
     type Input = Msg;
     type Output = ();
+
     type Widgets = AppWidgets;
 
     view! {
@@ -107,7 +109,11 @@ impl SimpleComponent for App {
         self.set_identical(self.first_icon == self.second_icon);
     }
 
-    fn init(_: Self::Init, root: &Self::Root, sender: ComponentSender<Self>) -> ComponentParts<Self> {
+    fn init(
+        _: Self::Init,
+        root: &Self::Root,
+        sender: ComponentSender<Self>,
+    ) -> ComponentParts<Self> {
         let model = App {
             first_icon: random_icon_name(),
             second_icon: random_icon_name(),
@@ -123,7 +129,6 @@ impl SimpleComponent for App {
 
 fn main() {
     let app = RelmApp::new("relm4.example.tracker");
-
     relm4::set_global_css(b".identical { background: #00ad5c; }");
 
     app.run::<App>(());

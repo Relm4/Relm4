@@ -28,12 +28,12 @@ enum Input {
 
 #[relm4::component]
 impl SimpleComponent for App {
-    type Widgets = AppWidgets;
-
     type Init = ();
 
     type Input = Input;
     type Output = ();
+
+    type Widgets = AppWidgets;
 
     view! {
         root = gtk::ApplicationWindow {

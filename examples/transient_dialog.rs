@@ -24,8 +24,8 @@ impl Component for Dialog {
     type Init = ();
     type Input = DialogMsg;
     type Output = ButtonMsg;
-    type Widgets = DialogWidgets;
     type CommandOutput = ();
+    type Widgets = DialogWidgets;
     view! {
         dialog = gtk::Dialog {
             #[watch]

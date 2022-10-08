@@ -15,10 +15,12 @@ enum Msg {
 
 #[relm4::component]
 impl Component for App {
-    type CommandOutput = Msg;
     type Init = ();
+
     type Input = ();
     type Output = ();
+    type CommandOutput = Msg;
+
     type Widgets = AppWidgets;
 
     view! {

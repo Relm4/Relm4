@@ -99,12 +99,15 @@ pub enum CmdOut {
 }
 
 impl Component for App {
-    type CommandOutput = CmdOut;
     type Init = String;
+
     type Input = Input;
     type Output = Output;
-    type Root = gtk::Box;
+
+    type CommandOutput = CmdOut;
+
     type Widgets = Widgets;
+    type Root = gtk::Box;
 
     fn init_root() -> Self::Root {
         gtk::Box::builder()

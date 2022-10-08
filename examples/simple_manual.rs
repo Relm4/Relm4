@@ -22,10 +22,12 @@ struct AppWidgets {
 
 impl SimpleComponent for App {
     type Init = u8;
+
     type Input = Msg;
     type Output = ();
-    type Root = gtk::Window;
+
     type Widgets = AppWidgets;
+    type Root = gtk::Window;
 
     fn init_root() -> Self::Root {
         gtk::Window::builder()

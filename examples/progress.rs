@@ -54,12 +54,14 @@ pub enum CmdOut {
 }
 
 impl Component for App {
-    type CommandOutput = CmdOut;
     type Init = String;
+
     type Input = Input;
     type Output = Output;
-    type Root = gtk::Window;
+    type CommandOutput = CmdOut;
+
     type Widgets = Widgets;
+    type Root = gtk::Window;
 
     fn init_root() -> Self::Root {
         gtk::Window::default()
