@@ -123,8 +123,8 @@ impl SimpleComponent for App {
                     set_min_content_height: 360,
                     set_vexpand: true,
 
-                    #[name = "tasks"]
-                    gtk::ListBox {}
+                    #[local_ref]
+                    task_list_box -> gtk::ListBox {}
                 }
             }
 
@@ -147,11 +147,12 @@ impl SimpleComponent for App {
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let widgets = view_output!();
-
         let model = App {
-            tasks: FactoryVecDeque::new(widgets.tasks.clone(), sender.input_sender()),
+            tasks: FactoryVecDeque::new(gtk::ListBox::default(), sender.input_sender()),
         };
+
+        let task_list_box = model.tasks.widget();
+        let widgets = view_output!();
 
         ComponentParts { model, widgets }
     }

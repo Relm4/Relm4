@@ -204,7 +204,8 @@ impl SimpleComponent for App {
                     }
                 },
 
-                append: counter_box = &gtk::Grid {
+                #[local_ref]
+                counter_grid -> gtk::Grid {
                     set_orientation: gtk::Orientation::Vertical,
                     set_column_spacing: 15,
                     set_row_spacing: 5,
@@ -219,13 +220,15 @@ impl SimpleComponent for App {
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        // Insert the code generation of the view! macro here
-        let widgets = view_output!();
-
+        let counters = FactoryVecDeque::new(gtk::Grid::default(), sender.input_sender());
         let model = App {
             created_widgets: counter,
-            counters: FactoryVecDeque::new(widgets.counter_box.clone(), sender.input_sender()),
+            counters,
         };
+
+        let counter_grid = model.counters.widget();
+        // Insert the code generation of the view! macro here
+        let widgets = view_output!();
 
         ComponentParts { model, widgets }
     }

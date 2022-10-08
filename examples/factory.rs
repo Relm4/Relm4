@@ -155,7 +155,8 @@ impl SimpleComponent for App {
                     }
                 },
 
-                append: counter_box = &gtk::Box {
+                #[local_ref]
+                counter_box -> gtk::Box {
                     set_orientation: gtk::Orientation::Vertical,
                     set_spacing: 5,
                 }
@@ -169,13 +170,15 @@ impl SimpleComponent for App {
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        // Insert the code generation of the view! macro here
-        let widgets = view_output!();
-
+        let counters = FactoryVecDeque::new(gtk::Box::default(), sender.input_sender());
         let model = App {
             created_widgets: counter,
-            counters: FactoryVecDeque::new(widgets.counter_box.clone(), sender.input_sender()),
+            counters,
         };
+
+        let counter_box = model.counters.widget();
+        // Insert the code generation of the view! macro here
+        let widgets = view_output!();
 
         ComponentParts { model, widgets }
     }

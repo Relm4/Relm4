@@ -191,7 +191,7 @@ impl SimpleComponent for App {
                 adw::HeaderBar {},
 
                 adw::TabBar {
-                    set_view: Some(&tabs),
+                    set_view: Some(tab_view),
                     set_autohide: false,
                 },
 
@@ -209,7 +209,8 @@ impl SimpleComponent for App {
                     }
                 },
 
-                append: tabs = &adw::TabView {}
+                #[local_ref]
+                tab_view -> adw::TabView {}
             }
         }
     }
@@ -220,13 +221,15 @@ impl SimpleComponent for App {
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        // Insert the code generation of the view! macro here
-        let widgets = view_output!();
-
+        let counters = FactoryVecDeque::new(adw::TabView::default(), sender.input_sender());
         let model = App {
             created_widgets: counter,
-            counters: FactoryVecDeque::new(widgets.tabs.clone(), sender.input_sender()),
+            counters,
         };
+
+        let tab_view = model.counters.widget();
+        // Insert the code generation of the view! macro here
+        let widgets = view_output!();
 
         ComponentParts { model, widgets }
     }

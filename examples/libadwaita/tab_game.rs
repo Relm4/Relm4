@@ -223,11 +223,12 @@ impl Component for App {
                 adw::HeaderBar {},
 
                 adw::TabBar {
-                    set_view: Some(&tabs),
+                    set_view: Some(tab_view),
                     set_autohide: false,
                 },
 
-                append: tabs = &adw::TabView {
+                #[local_ref]
+                tab_view -> adw::TabView {
                     connect_close_page => |_, _| {
                         true
                     }
@@ -242,13 +243,15 @@ impl Component for App {
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        // Insert the code generation of the view! macro here
-        let widgets = view_output!();
-
+        let counters = FactoryVecDeque::new(adw::TabView::default(), sender.input_sender());
         let mut model = App {
-            counters: FactoryVecDeque::new(widgets.tabs.clone(), sender.input_sender()),
+            counters,
             start_index: None,
         };
+
+        let tab_view = model.counters.widget();
+        // Insert the code generation of the view! macro here
+        let widgets = view_output!();
 
         let mut counters_guard = model.counters.guard();
         for i in 0..3 {
