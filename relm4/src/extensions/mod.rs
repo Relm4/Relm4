@@ -6,14 +6,13 @@ mod set_child;
 #[cfg(test)]
 mod tests;
 
-#[allow(unreachable_pub)]
-pub use self::container::RelmContainerExt;
-#[allow(unreachable_pub)]
-pub use self::iter_children::RelmIterChildrenExt;
-#[allow(unreachable_pub)]
-pub use self::remove::{RelmRemoveAllExt, RelmRemoveExt};
-#[allow(unreachable_pub)]
-pub use self::set_child::RelmSetChildExt;
+pub use container::RelmContainerExt;
+
+pub use iter_children::RelmIterChildrenExt;
+
+pub use remove::{RelmRemoveAllExt, RelmRemoveExt};
+
+pub use set_child::RelmSetChildExt;
 
 use gtk::prelude::*;
 
