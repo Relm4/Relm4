@@ -6,6 +6,7 @@ use crate::additional_fields::AdditionalFields;
 use crate::menu::Menus;
 use crate::widgets::ViewWidgets;
 
+#[derive(Debug)]
 pub(super) struct ComponentVisitor<'errors> {
     pub(super) view_widgets: Option<ViewWidgets>,
     pub(super) widgets_ty: Option<syn::Type>,
@@ -131,6 +132,7 @@ impl VisitMut for ComponentVisitor<'_> {
     }
 }
 
+#[derive(Debug)]
 pub(super) struct FactoryComponentVisitor<'errors> {
     pub(super) view_widgets: Option<ViewWidgets>,
     pub(super) widgets_ty: Option<syn::Type>,
@@ -354,7 +356,7 @@ impl<'ast> Visit<'ast> for InitFnVisitor {
     }
 }
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 struct InitWidgetsFnVisitor {
     root_name: Option<syn::Ident>,
     errors: Vec<syn::Error>,
@@ -389,6 +391,7 @@ impl<'ast> Visit<'ast> for InitWidgetsFnVisitor {
     }
 }
 
+#[derive(Debug)]
 pub(super) struct PreAndPostView<'errors> {
     pub(super) pre_view: Vec<syn::Stmt>,
     pub(super) post_view: Vec<syn::Stmt>,

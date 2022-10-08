@@ -4,6 +4,7 @@ use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
 use syn::{Field, Result, Token};
 
+#[derive(Debug)]
 pub(super) struct AdditionalFields {
     pub(super) inner: Punctuated<Field, Token![,]>,
 }
