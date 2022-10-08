@@ -9,6 +9,7 @@ use crate::{late_initialization, shutdown};
 use crate::{Receiver, RelmContainerExt, RelmWidgetExt, Sender};
 use async_oneshot::oneshot;
 use futures::FutureExt;
+use gtk::glib;
 use gtk::prelude::{GtkWindowExt, NativeDialogExt};
 use std::any;
 use std::cell::RefCell;
@@ -21,6 +22,7 @@ use tracing::info_span;
 pub struct ComponentBuilder<C: Component> {
     /// The root widget of the component.
     pub root: C::Root,
+    priority: glib::Priority,
 
     pub(super) component: PhantomData<C>,
 }
@@ -30,6 +32,7 @@ impl<C: Component> Default for ComponentBuilder<C> {
     fn default() -> Self {
         Self {
             root: C::init_root(),
+            priority: glib::Priority::default(),
             component: PhantomData,
         }
     }
@@ -46,6 +49,18 @@ impl<C: Component> ComponentBuilder<C> {
     /// Access the root widget before the component is initialized.
     pub const fn widget(&self) -> &C::Root {
         &self.root
+    }
+
+    /// Change the priority at which the messages of this component
+    /// are handled.
+    ///
+    /// + Use [`glib::PRIORITY_HIGH`] for high priority event sources.
+    /// + Use [`glib::PRIORITY_LOW`] for very low priority background tasks.
+    /// + Use [`glib::PRIORITY_DEFAULT_IDLE`] for default priority idle functions.
+    /// + Use [`glib::PRIORITY_HIGH_IDLE`] for high priority idle functions.
+    pub fn priority(mut self, priority: glib::Priority) -> Self {
+        self.priority = priority;
+        self
     }
 }
 
@@ -148,7 +163,7 @@ impl<C: Component> ComponentBuilder<C> {
         input_tx: Sender<C::Input>,
         input_rx: Receiver<C::Input>,
     ) -> Connector<C> {
-        let Self { root, .. } = self;
+        let Self { root, priority, .. } = self;
 
         // Used by this component to send events to be handled externally by the caller.
         let (output_tx, output_rx) = crate::channel::<C::Output>();
@@ -181,7 +196,7 @@ impl<C: Component> ComponentBuilder<C> {
         // Spawns the component's service. It will receive both `Self::Input` and
         // `Self::CommandOutput` messages. It will spawn commands as requested by
         // updates, and send `Self::Output` messages externally.
-        let id = crate::spawn_local(async move {
+        let id = crate::spawn_local_with_priority(priority, async move {
             let mut burn_notice = burn_recipient.fuse();
             loop {
                 let notifier = notifier_rx.recv_async().fuse();
