@@ -168,7 +168,10 @@ pub fn spawn_local<F: Future<Output = ()> + 'static>(func: F) -> gtk::glib::Sour
 }
 
 /// Spawns a thread-local future on GLib's executor, for non-[`Send`] futures.
-pub fn spawn_local_with_priority<F: Future<Output = ()> + 'static>(priority: gtk::glib::Priority, func: F) -> gtk::glib::SourceId {
+pub fn spawn_local_with_priority<F: Future<Output = ()> + 'static>(
+    priority: gtk::glib::Priority,
+    func: F,
+) -> gtk::glib::SourceId {
     gtk::glib::MainContext::ref_thread_default().spawn_local_with_priority(priority, func)
 }
 
