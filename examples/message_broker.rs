@@ -177,9 +177,7 @@ impl SimpleComponent for App {
             },
             gtk::Button {
                 set_label: "Change header style",
-                connect_clicked[sender] => move |_| {
-                    sender.input(AppMsg::ShowDialog);
-                }
+                connect_clicked => AppMsg::ShowDialog,
             }
         }
     }

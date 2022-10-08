@@ -73,9 +73,7 @@ impl SimpleComponent for OpenButton {
             add_css_class: "linked",
             gtk::Button {
                 set_label: model.config.text,
-                connect_clicked[sender] => move |_| {
-                    sender.input(OpenButtonMsg::ShowDialog);
-                }
+                connect_clicked => OpenButtonMsg::ShowDialog,
             },
             gtk::MenuButton {
                 set_visible: model.config.recently_opened_files.is_some(),

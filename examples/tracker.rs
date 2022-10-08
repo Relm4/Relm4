@@ -67,9 +67,7 @@ impl SimpleComponent for App {
 
                     gtk::Button {
                         set_label: "New random image",
-                        connect_clicked[sender] => move |_| {
-                            sender.input(Msg::UpdateFirst);
-                        }
+                        connect_clicked => Msg::UpdateFirst,
                     }
                 },
 
@@ -85,9 +83,7 @@ impl SimpleComponent for App {
 
                     gtk::Button {
                         set_label: "New random image",
-                        connect_clicked[sender] => move |_| {
-                            sender.input(Msg::UpdateSecond);
-                        }
+                        connect_clicked => Msg::UpdateSecond,
                     }
                 },
             }

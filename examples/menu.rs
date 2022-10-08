@@ -35,15 +35,12 @@ impl SimpleComponent for App {
 
                 gtk::Button {
                     set_label: "Increment",
+                    connect_clicked => Msg::Increment,
                     ActionablePlus::set_action::<TestU8Action>: 1,
-                    connect_clicked[sender] => move |_| {
-                        sender.input(Msg::Increment);
-                    },
                 },
-                gtk::Button::with_label("Decrement") {
-                    connect_clicked[sender] => move |_| {
-                        sender.input(Msg::Decrement);
-                    },
+                gtk::Button {
+                    set_label: "Decrement",
+                    connect_clicked => Msg::Decrement,
                 },
                 gtk::Label {
                     set_margin_all: 5,

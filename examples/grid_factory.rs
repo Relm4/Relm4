@@ -127,7 +127,7 @@ impl FactoryComponent for Counter {
 
         relm4::view! {
             to_front_button = gtk::Button {
-                set_label: "To start",
+                set_label: "To Start",
                 connect_clicked[sender, index] => move |_| {
                     sender.output(CounterOutput::SendFront(index.clone()))
                 }
@@ -196,16 +196,12 @@ impl SimpleComponent for App {
 
                 gtk::Button {
                     set_label: "Add counter",
-                    connect_clicked[sender] => move |_| {
-                        sender.input(AppMsg::AddCounter);
-                    }
+                    connect_clicked => AppMsg::AddCounter,
                 },
 
                 gtk::Button {
                     set_label: "Remove counter",
-                    connect_clicked[sender] => move |_| {
-                        sender.input(AppMsg::RemoveCounter);
-                    }
+                    connect_clicked => AppMsg::RemoveCounter,
                 },
 
                 #[local_ref]

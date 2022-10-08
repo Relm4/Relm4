@@ -46,20 +46,14 @@ impl SimpleComponent for App {
             set_titlebar = &gtk::HeaderBar {
                 pack_start = &gtk::Button {
                     set_label: "Open",
-
-                    connect_clicked[sender] => move |_| {
-                        sender.input(Input::OpenRequest);
-                    },
+                    connect_clicked => Input::OpenRequest,
                 },
                 pack_end = &gtk::Button {
                     set_label: "Save As",
+                    connect_clicked => Input::SaveRequest,
 
                     #[watch]
                     set_sensitive: model.file_name.is_some(),
-
-                    connect_clicked[sender] => move |_| {
-                        sender.input(Input::SaveRequest);
-                    },
                 }
             },
 

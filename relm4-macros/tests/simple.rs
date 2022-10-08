@@ -31,15 +31,11 @@ impl SimpleComponent for AppModel {
 
                 append = &gtk::Button {
                     set_label: "Increment",
-                    connect_clicked[sender] => move |_| {
-                        sender.input(AppMsg::Increment);
-                    },
+                    connect_clicked => AppMsg::Increment,
                 },
                 append = &gtk::Button {
                     set_label: "Decrement",
-                    connect_clicked[sender] => move |_| {
-                        sender.input(AppMsg::Decrement);
-                    },
+                    connect_clicked => AppMsg::Decrement,
                 },
                 append = &gtk::Label {
                     set_margin_all: 5,

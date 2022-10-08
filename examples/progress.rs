@@ -102,9 +102,7 @@ impl Component for App {
 
                 append: button = &gtk::Button {
                     set_label: "Compute",
-                    connect_clicked[sender] => move |_| {
-                        sender.input(Input::Compute);
-                    }
+                    connect_clicked => Input::Compute,
                 }
             }
         }

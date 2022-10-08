@@ -37,8 +37,8 @@ impl FactoryComponent for Counter {
     type Widgets = CounterWidgets;
     type Root = gtk::Box;
 
-    type ParentWidget = adw::TabView;
     type ParentInput = AppMsg;
+    type ParentWidget = adw::TabView;
 
     fn output_to_parent_input(output: Self::Output) -> Option<AppMsg> {
         Some(match output {
@@ -83,18 +83,14 @@ impl FactoryComponent for Counter {
         relm4::view! {
             add_button = gtk::Button {
                 set_label: "+",
-                connect_clicked[sender] => move |_| {
-                    sender.input(CounterMsg::Increment)
-                }
+                connect_clicked => CounterMsg::Increment,
             }
         }
 
         relm4::view! {
             remove_button = gtk::Button {
                 set_label: "-",
-                connect_clicked[sender] => move |_| {
-                    sender.input(CounterMsg::Decrement)
-                }
+                connect_clicked => CounterMsg::Decrement,
             }
         }
 
@@ -118,7 +114,7 @@ impl FactoryComponent for Counter {
 
         relm4::view! {
             to_front_button = gtk::Button {
-                set_label: "To start",
+                set_label: "To Start",
                 connect_clicked[sender, index] => move |_| {
                     sender.output(CounterOutput::SendFront(index.clone()))
                 }
@@ -195,16 +191,12 @@ impl SimpleComponent for App {
 
                 gtk::Button {
                     set_label: "Add counter",
-                    connect_clicked[sender] => move |_| {
-                        sender.input(AppMsg::AddCounter);
-                    }
+                    connect_clicked => AppMsg::AddCounter,
                 },
 
                 gtk::Button {
                     set_label: "Remove counter",
-                    connect_clicked[sender] => move |_| {
-                        sender.input(AppMsg::RemoveCounter);
-                    }
+                    connect_clicked => AppMsg::RemoveCounter,
                 },
 
                 #[local_ref]
