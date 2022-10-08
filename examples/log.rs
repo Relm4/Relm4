@@ -42,9 +42,9 @@ impl SimpleComponent for App {
                 },
 
                 gtk::Label {
+                    set_margin_all: 5,
                     #[watch]
                     set_label: &format!("Counter: {}", model.counter),
-                    set_margin_all: 5,
                 }
             }
         }

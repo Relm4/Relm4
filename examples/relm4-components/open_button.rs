@@ -14,7 +14,6 @@ enum AppMsg {
 }
 
 struct App {
-    #[allow(unused)]
     open_button: Controller<OpenButton>,
 }
 
