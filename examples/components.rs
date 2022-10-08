@@ -73,14 +73,13 @@ enum DialogMsg {
 
 #[relm4::component]
 impl SimpleComponent for Dialog {
-    type Init = gtk::Window;
+    type Init = ();
     type Input = DialogMsg;
     type Output = AppMsg;
     type Widgets = DialogWidgets;
 
     view! {
         dialog = gtk::MessageDialog {
-            set_transient_for: Some(&parent_window),
             set_modal: true,
             set_text: Some("Do you want to close before saving?"),
             set_secondary_text: Some("All unsaved changes will be lost"),
@@ -101,12 +100,11 @@ impl SimpleComponent for Dialog {
     }
 
     fn init(
-        parent_window: Self::Init,
+        _: Self::Init,
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = Dialog { hidden: true };
-
         let widgets = view_output!();
 
         ComponentParts { model, widgets }
@@ -177,7 +175,8 @@ impl SimpleComponent for App {
             .launch(())
             .forward(sender.input_sender(), identity);
         let dialog = Dialog::builder()
-            .launch(root.clone().upcast())
+            .transient_for(&root)
+            .launch(())
             .forward(sender.input_sender(), identity);
 
         let model = App {
@@ -185,7 +184,6 @@ impl SimpleComponent for App {
             header,
             dialog,
         };
-
         let widgets = view_output!();
 
         ComponentParts { model, widgets }
