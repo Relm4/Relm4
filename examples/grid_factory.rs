@@ -87,59 +87,46 @@ impl FactoryComponent for Counter {
         sender: FactoryComponentSender<Self>,
     ) -> Self::Widgets {
         relm4::view! {
-            label = gtk::Label {
-                set_label: &self.value.to_string(),
-                set_width_chars: 3,
-            }
-        }
+            #[local_ref]
+            root -> gtk::Box {
+                #[name(label)]
+                gtk::Label {
+                    set_label: &self.value.to_string(),
+                    set_width_chars: 3,
+                },
 
-        relm4::view! {
-            add_button = gtk::Button {
-                set_label: "+",
-                connect_clicked => CounterMsg::Increment,
-            }
-        }
+                gtk::Button {
+                    set_label: "+",
+                    connect_clicked => CounterMsg::Increment,
+                },
 
-        relm4::view! {
-            remove_button = gtk::Button {
-                set_label: "-",
-                connect_clicked => CounterMsg::Decrement,
-            }
-        }
+                gtk::Button {
+                    set_label: "-",
+                    connect_clicked => CounterMsg::Decrement,
+                },
 
-        relm4::view! {
-            move_up_button = gtk::Button {
-                set_label: "Up",
-                connect_clicked[sender, index] => move |_| {
-                    sender.output(CounterOutput::MoveUp(index.clone()))
+                gtk::Button {
+                    set_label: "Up",
+                    connect_clicked[sender, index] => move |_| {
+                        sender.output(CounterOutput::MoveUp(index.clone()))
+                    }
+                },
+
+                gtk::Button {
+                    set_label: "Down",
+                    connect_clicked[sender, index] => move |_| {
+                        sender.output(CounterOutput::MoveDown(index.clone()))
+                    }
+                },
+
+                gtk::Button {
+                    set_label: "To Start",
+                    connect_clicked[sender, index] => move |_| {
+                        sender.output(CounterOutput::SendFront(index.clone()))
+                    }
                 }
             }
         }
-
-        relm4::view! {
-            move_down_button = gtk::Button {
-                set_label: "Down",
-                connect_clicked[sender, index] => move |_| {
-                    sender.output(CounterOutput::MoveDown(index.clone()))
-                }
-            }
-        }
-
-        relm4::view! {
-            to_front_button = gtk::Button {
-                set_label: "To Start",
-                connect_clicked[sender, index] => move |_| {
-                    sender.output(CounterOutput::SendFront(index.clone()))
-                }
-            }
-        }
-
-        root.append(&label);
-        root.append(&add_button);
-        root.append(&remove_button);
-        root.append(&move_up_button);
-        root.append(&move_down_button);
-        root.append(&to_front_button);
 
         CounterWidgets { label }
     }
