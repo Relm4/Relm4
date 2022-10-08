@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote, ToTokens};
+use quote::{quote, quote_spanned, ToTokens};
 use syn::spanned::Spanned;
 use syn::Error;
 
@@ -71,8 +71,8 @@ impl WidgetFunc {
         let mut stream = if let Some(args) = args {
             quote! { #path(#args) }
         } else {
-            quote! {
-                #path::default()
+            quote_spanned! {
+                path.span() => #path::default()
             }
         };
 
