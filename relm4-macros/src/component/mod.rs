@@ -4,11 +4,7 @@ use syn::visit_mut::VisitMut;
 use syn::{parse_quote, Visibility};
 
 use crate::token_streams::{TokenStreams, TraitImplDetails};
-use crate::visitors::{ComponentVisitor, PreAndPostView};
-
-pub(super) mod inject_view_code;
-
-use inject_view_code::inject_view_code;
+use crate::visitors::{ComponentVisitor, PreAndPostView, ViewOutputExpander};
 
 pub(crate) fn generate_tokens(
     vis: &Option<Visibility>,
@@ -17,6 +13,7 @@ pub(crate) fn generate_tokens(
     let mut errors = vec![];
 
     let mut component_visitor = ComponentVisitor::new(&mut errors);
+
     component_visitor.visit_item_impl_mut(&mut component_impl);
 
     let additional_fields = component_visitor.additional_fields.take();
@@ -33,7 +30,6 @@ pub(crate) fn generate_tokens(
         model_name: Some(model_name),
         root_name: Some(root_name),
         sender_name: Some(sender_name),
-        init: Some(init),
         errors,
         ..
     } = component_visitor
@@ -86,17 +82,14 @@ pub(crate) fn generate_tokens(
             #assign
         };
 
-        let widgets_return_code = quote! {
+        let widgets_return_code = parse_quote! {
             Self::Widgets {
                 #return_fields
                 #additional_fields_return_stream
             }
         };
 
-        let init_injected = match inject_view_code(init, &view_code, &widgets_return_code) {
-            Ok(method) => method,
-            Err(err) => return err.to_compile_error(),
-        };
+        ViewOutputExpander::expand(&mut component_impl, view_code, widgets_return_code, errors);
 
         component_impl.items.push(parse_quote! {
             type Root = #root_widget_type;
@@ -142,10 +135,6 @@ pub(crate) fn generate_tokens(
                 })();
             }
         });
-
-        component_impl
-            .items
-            .push(syn::ImplItem::Method(init_injected));
     }
 
     let outer_attrs = &component_impl.attrs;
