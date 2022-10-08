@@ -37,11 +37,10 @@ impl SimpleComponent for App {
 
     view! {
         root = gtk::ApplicationWindow {
+            set_default_size: (600, 400),
+
             #[watch]
             set_title: Some(model.file_name.as_deref().unwrap_or_default()),
-
-            set_default_width: 600,
-            set_default_height: 400,
 
             #[wrap(Some)]
             set_titlebar = &gtk::HeaderBar {

@@ -213,8 +213,7 @@ impl Component for App {
     view! {
         adw::Window {
             set_title: Some("Tab game!"),
-            set_default_width: 400,
-            set_default_height: 200,
+            set_default_size: (400, 200),
 
             gtk::Box {
                 set_orientation: gtk::Orientation::Vertical,

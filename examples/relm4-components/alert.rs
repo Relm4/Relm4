@@ -32,8 +32,7 @@ impl SimpleComponent for App {
     view! {
         main_window = gtk::ApplicationWindow {
             set_title: Some("Alert example"),
-            set_default_width: 300,
-            set_default_height: 100,
+            set_default_size: (300, 100),
 
             connect_close_request[sender] => move |_| {
                 sender.input(AppMsg::CloseRequest);

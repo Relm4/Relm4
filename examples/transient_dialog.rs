@@ -127,8 +127,7 @@ impl SimpleComponent for App {
     type Widgets = AppWidgets;
     view! {
         main_window = gtk::ApplicationWindow {
-            set_default_width: 500,
-            set_default_height: 250,
+            set_default_size: (500, 250),
             set_child: Some(model.button.widget()),
         }
     }

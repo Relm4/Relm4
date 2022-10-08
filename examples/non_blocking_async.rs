@@ -24,8 +24,7 @@ impl Component for App {
     view! {
         gtk::Window {
             set_title: Some("Async Counter"),
-            set_default_width: 300,
-            set_default_height: 100,
+            set_default_size: (300, 100),
 
             gtk::Box {
                 set_orientation: gtk::Orientation::Vertical,

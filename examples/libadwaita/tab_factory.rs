@@ -181,8 +181,7 @@ impl SimpleComponent for App {
     view! {
         adw::Window {
             set_title: Some("Tab factory example"),
-            set_default_width: 300,
-            set_default_height: 100,
+            set_default_size: (300, 100),
 
             gtk::Box {
                 set_orientation: gtk::Orientation::Vertical,

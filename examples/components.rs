@@ -153,8 +153,7 @@ impl SimpleComponent for App {
 
     view! {
         main_window = gtk::ApplicationWindow {
-            set_default_width: 500,
-            set_default_height: 250,
+            set_default_size: (500, 250),
             set_titlebar: Some(model.header.widget()),
 
             #[wrap(Some)]

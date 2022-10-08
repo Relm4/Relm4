@@ -27,8 +27,7 @@ impl SimpleComponent for App {
 
     view! {
         gtk::ApplicationWindow {
-            set_default_width: 300,
-            set_default_height: 100,
+            set_default_size: (300, 100),
 
             #[wrap(Some)]
             set_titlebar = &gtk::HeaderBar {

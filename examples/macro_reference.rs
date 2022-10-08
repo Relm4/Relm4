@@ -31,8 +31,7 @@ impl SimpleComponent for App {
         #[name(main_window)]
         gtk::Window {
             set_title: Some("Macro reference example"),
-            set_default_width: 300,
-            set_default_height: 100,
+            set_default_size: (300, 100),
 
             gtk::Box {
                 set_orientation: gtk::Orientation::Vertical,
@@ -142,8 +141,7 @@ impl SimpleComponent for App {
         },
         gtk::Window {
             set_title: Some("Another window"),
-            set_default_width: 300,
-            set_default_height: 100,
+            set_default_size: (300, 100),
             set_transient_for: Some(&main_window),
             // Empty args
             hide: (),
