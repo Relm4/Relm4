@@ -212,7 +212,7 @@ pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
 ///     SendFront(DynamicIndex),
 /// }
 ///
-/// #[relm4::factory(pub)]
+/// #[relm4_macros::factory(pub)]
 /// impl FactoryComponent for Counter {
 ///     type CommandOutput = ();
 ///     type Init = u8;
