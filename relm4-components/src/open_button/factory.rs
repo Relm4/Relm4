@@ -1,6 +1,6 @@
 use gtk::prelude::*;
 use relm4::factory::{DynamicIndex, FactoryComponent, FactoryComponentSender};
-use relm4::{gtk, WidgetPlus};
+use relm4::{gtk, RelmWidgetExt};
 
 use super::OpenButtonMsg;
 

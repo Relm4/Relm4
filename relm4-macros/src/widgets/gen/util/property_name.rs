@@ -11,18 +11,16 @@ impl PropertyName {
                 quote! { #w_name.#ident }
             }
             PropertyName::Path(path) => path.to_token_stream(),
-            PropertyName::RelmContainerExtAssign => {
-                quote_spanned! { w_name.span() => relm4::RelmContainerExt::container_add }
+            PropertyName::RelmContainerExtAssign(span) => {
+                quote_spanned! { *span => #w_name.container_add }
             }
         }
     }
 
     pub(crate) fn assign_args_stream(&self, w_name: &Ident) -> Option<TokenStream2> {
         match self {
-            PropertyName::Ident(_) => None,
-            PropertyName::Path(_) | PropertyName::RelmContainerExtAssign => {
-                Some(quote_spanned! { w_name.span() => & #w_name, })
-            }
+            PropertyName::RelmContainerExtAssign(_) | PropertyName::Ident(_) => None,
+            PropertyName::Path(_) => Some(quote_spanned! { w_name.span() => & #w_name, }),
         }
     }
 }

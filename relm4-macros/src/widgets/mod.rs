@@ -73,7 +73,7 @@ struct ClosureSignalHandler {
 enum PropertyName {
     Ident(Ident),
     Path(Path),
-    RelmContainerExtAssign,
+    RelmContainerExtAssign(Span2),
 }
 
 struct Property {

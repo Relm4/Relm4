@@ -4,7 +4,7 @@ use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
 use relm4::{
     adw,
     factory::{DynamicIndex, FactoryComponent, FactoryComponentSender, FactoryVecDeque},
-    gtk, Component, ComponentParts, ComponentSender, RelmApp, SharedState, WidgetPlus,
+    gtk, Component, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SharedState,
 };
 
 enum GameState {

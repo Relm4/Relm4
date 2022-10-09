@@ -2,9 +2,24 @@
 
 ## Unreleased
 
+### Added
+
 + core: Allow changing the priority of event loops of components
++ core: Impl `ContainerChild` and `RelmSetChildExt` for `adw::ToastOverlay`
++ examples: Port entry, actions and popover examples to 0.5
+
+### Changed
+
++ core: Remove async-oneshot dependency and replace it with tokio's oneshot channel
++ core: Remove WidgetPlus in favor of RelmWidgetExt
++ core: Add convenience getter-methods to Controller
 + core: `add_action` of `RelmActionGroup` now takes a reference to a `RelmAction` as a parameter
 + macros: `parse_with_path`, `update_stream`, `inject_view_code` and `generate_tokens` take references for some of their parameters
+
+### Fixed
+
++ macros: Fix usage of RelmContainerExt with local_ref attribute
++ macros: Report RelmContainerExt error at the correct span
 
 ## 0.5.0-beta.3 - 2022-9-28
 

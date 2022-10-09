@@ -57,6 +57,7 @@ mod libadwaita {
         adw::Clamp,
         adw::ClampScrollable,
         adw::SplitButton,
-        adw::StatusPage
+        adw::StatusPage,
+        adw::ToastOverlay
     );
 }

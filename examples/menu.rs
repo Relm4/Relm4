@@ -1,6 +1,6 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
 use relm4::actions::{AccelsPlus, ActionablePlus, RelmAction, RelmActionGroup};
-use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, SimpleComponent, WidgetPlus};
+use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent};
 
 #[derive(Default)]
 struct AppModel {
@@ -23,7 +23,7 @@ impl SimpleComponent for AppModel {
     view! {
         #[root]
         main_window = gtk::ApplicationWindow {
-            set_title: Some("Simple app"),
+            set_title: Some("Menu example"),
             set_default_width: 300,
             set_default_height: 100,
             gtk::Box {

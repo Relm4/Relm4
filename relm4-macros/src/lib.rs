@@ -131,7 +131,7 @@ fn gtk_import() -> syn::Path {
 ///
 /// ```compile_fail
 /// # use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
-/// # use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent, WidgetPlus};
+/// # use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent, RelmWidgetExt};
 /// #
 /// struct AppModel {}
 ///
@@ -212,7 +212,7 @@ pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
 ///     SendFront(DynamicIndex),
 /// }
 ///
-/// #[relm4::factory(pub)]
+/// #[relm4_macros::factory(pub)]
 /// impl FactoryComponent for Counter {
 ///     type CommandOutput = ();
 ///     type Init = u8;
