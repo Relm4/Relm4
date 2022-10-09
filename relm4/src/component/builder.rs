@@ -7,13 +7,13 @@ use super::{Component, ComponentParts, Connector, OnDestroy, StateWatcher};
 use crate::sender::ComponentSender;
 use crate::{late_initialization, shutdown};
 use crate::{Receiver, RelmContainerExt, RelmWidgetExt, Sender};
-use async_oneshot::oneshot;
 use futures::FutureExt;
 use gtk::prelude::{GtkWindowExt, NativeDialogExt};
 use std::any;
 use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::rc::Rc;
+use tokio::sync::oneshot;
 use tracing::info_span;
 
 /// A component that is ready for docking and launch.
@@ -174,7 +174,7 @@ impl<C: Component> ComponentBuilder<C> {
 
         // The source ID of the component's service will be sent through this once the root
         // widget has been iced, which will give the component one last chance to say goodbye.
-        let (mut burn_notifier, burn_recipient) = oneshot::<gtk::glib::SourceId>();
+        let (burn_notifier, burn_recipient) = oneshot::channel::<gtk::glib::SourceId>();
 
         let watcher_ = watcher.clone();
 
