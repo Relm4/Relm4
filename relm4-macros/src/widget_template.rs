@@ -21,12 +21,16 @@ pub(crate) fn generate_tokens(vis: Option<Visibility>, mut item_impl: ItemImpl) 
     if let ImplItem::Macro(mac) = item {
         if Some("view") == mac.mac.path.get_ident().map(|i| i.to_string()).as_deref() {
             match syn::parse_macro_input::parse::<ViewWidgets>(mac.mac.tokens.into()) {
-                Ok(view_widgets) => {
+                Ok(mut view_widgets) => {
+                    view_widgets.mark_root_as_used();
+
                     let TokenStreams {
                         error,
                         init,
                         assign,
                         connect,
+                        struct_fields,
+                        return_fields,
                         ..
                     } = view_widgets.generate_streams(
                         &TraitImplDetails {
@@ -52,24 +56,32 @@ pub(crate) fn generate_tokens(vis: Option<Visibility>, mut item_impl: ItemImpl) 
                         type Widget = #root_widget_type;
                     }));
 
-                    let root_name = &view_widgets
-                        .top_level_widgets
-                        .iter()
-                        .find(|w| w.root_attr.is_some())
-                        .unwrap()
-                        .inner
-                        .name;
+                    let root_name = view_widgets.root_name();
 
                     item_impl.items.push(ImplItem::Verbatim(quote! {
-                        fn init() -> Self::Widget {
+                        fn init() -> Self {
                             #view_output
-                            #root_name
+                            Self {
+                                #return_fields
+                            }
                         }
                     }));
 
                     let type_name = &item_impl.self_ty;
+
                     quote! {
-                        #vis struct #type_name;
+                        #[derive(Debug)]
+                        #vis struct #type_name {
+                            #struct_fields
+                        }
+
+                        impl ::std::ops::Deref for #type_name {
+                            type Target = #root_widget_type;
+
+                            fn deref(&self) -> &Self::Target {
+                                &self.#root_name
+                            }
+                        }
 
                         #item_impl
                     }

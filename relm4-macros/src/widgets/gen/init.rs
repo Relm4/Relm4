@@ -3,6 +3,7 @@ use quote::{quote_spanned, ToTokens};
 
 use crate::widgets::{
     ConditionalBranches, ConditionalWidget, Properties, Property, PropertyType, Widget, WidgetAttr,
+    WidgetTemplateAttr,
 };
 
 impl Property {
@@ -56,18 +57,25 @@ impl Widget {
             .as_ref()
             .map(|ty| quote_spanned!(span => : #ty));
         if self.attr == WidgetAttr::None {
-            if self.uses_template {
-                let widget_ty = &self.func.path;
-                stream.extend(quote_spanned! {
-                    span => let #mutability #name #ty = <#widget_ty as relm4::WidgetTemplate>::init();
-                });
-            } else {
-                let func = self.func.func_token_stream();
-                stream.extend(quote_spanned! {
-                    span => let #mutability #name #ty = #func;
-                });
+            match self.template_attr {
+                WidgetTemplateAttr::None => {
+                    let func = self.func.func_token_stream();
+                    stream.extend(quote_spanned! {
+                        span => let #mutability #name #ty = #func;
+                    });
+                }
+                WidgetTemplateAttr::Template => {
+                    let widget_ty = &self.func.path;
+                    stream.extend(quote_spanned! {
+                        span => let #mutability #name #ty = <#widget_ty as relm4::WidgetTemplate>::init();
+                    });
+                }
+                // Template children are already initialized by their template.
+                WidgetTemplateAttr::TemplateChild => (),
             }
         }
+
+        self.get_template_child_in_scope(stream);
     }
 
     fn other_init_stream(&self, stream: &mut TokenStream2) {

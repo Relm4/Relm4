@@ -1,7 +1,29 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
-use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent, WidgetPlus, WidgetTemplate};
+use relm4::{
+    gtk, ComponentParts, ComponentSender, RelmApp, SimpleComponent, WidgetPlus, WidgetTemplate,
+};
 
-#[relm4_macros::widget_template]
+#[relm4::widget_template]
+impl WidgetTemplate for MyBox {
+    view! {
+        gtk::Box {
+            set_margin_all: 10,
+            // Make the boxes visible
+            inline_css: "border: 2px solid blue",
+        }
+    }
+}
+
+#[relm4::widget_template]
+impl WidgetTemplate for MySpinner {
+    view! {
+        gtk::Spinner {
+            set_spinning: true,
+        }
+    }
+}
+
+#[relm4::widget_template]
 impl WidgetTemplate for CustomBox {
     view! {
         gtk::Box {
@@ -9,9 +31,28 @@ impl WidgetTemplate for CustomBox {
             set_margin_all: 5,
             set_spacing: 5,
 
-            #[name = "child_label"]
-            gtk::Label {
-                set_label: "This is a test",
+            #[template]
+            MyBox {
+                #[template]
+                MySpinner,
+
+                #[template]
+                MyBox {
+                    #[template]
+                    MySpinner,
+
+                    #[template]
+                    MyBox {
+                        #[template]
+                        MySpinner,
+
+                        // Deeply nested!
+                        #[name = "child_label"]
+                        gtk::Label {
+                            set_label: "This is a test",
+                        }
+                    }
+                }
             }
         }
     }
@@ -28,7 +69,7 @@ enum AppMsg {
     Decrement,
 }
 
-#[relm4_macros::component]
+#[relm4::component]
 impl SimpleComponent for AppModel {
     type Init = u8;
     type Input = AppMsg;
@@ -37,7 +78,7 @@ impl SimpleComponent for AppModel {
 
     view! {
         gtk::Window {
-            set_title: Some("Simple app"),
+            set_title: Some("Widget template"),
             set_default_width: 300,
             set_default_height: 100,
 
@@ -57,7 +98,6 @@ impl SimpleComponent for AppModel {
                 },
                 #[template_child]
                 child_label {
-                    set_margin_all: 5,
                     #[watch]
                     set_label: &format!("Counter: {}", model.counter),
                 }
@@ -89,9 +129,7 @@ impl SimpleComponent for AppModel {
     }
 }
 
-fn assert_impls_debug<T: std::fmt::Debug>() {}
-
-#[test]
-fn assert_widgets_impl_debug() {
-    assert_impls_debug::<AppWidgets>();
+fn main() {
+    let app = RelmApp::new("relm4.example.widget_template");
+    app.run::<AppModel>(0);
 }

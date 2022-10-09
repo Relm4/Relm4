@@ -17,10 +17,10 @@ pub use self::set_child::RelmSetChildExt;
 
 use gtk::prelude::*;
 
-pub trait WidgetTemplate {
+pub trait WidgetTemplate: Sized + std::fmt::Debug + std::ops::Deref<Target = Self::Widget> {
     type Widget;
 
-    fn init() -> Self::Widget;
+    fn init() -> Self;
 }
 
 /// Additional methods for `gtk::builders::ApplicationBuilder`

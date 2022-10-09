@@ -3,7 +3,7 @@ use syn::parse::ParseStream;
 use crate::util;
 use crate::widgets::{
     parse_util, Attr, Attrs, Properties, Property, PropertyName, PropertyType, TopLevelWidget,
-    Widget, WidgetAttr, WidgetFunc,
+    Widget, WidgetAttr, WidgetFunc, WidgetTemplateAttr,
 };
 
 impl TopLevelWidget {
@@ -35,6 +35,7 @@ impl TopLevelWidget {
             Err(err) => Widget {
                 doc_attr: None,
                 attr: WidgetAttr::None,
+                template_attr: WidgetTemplateAttr::None,
                 mutable: None,
                 name: parse_util::string_to_snake_case("incorrect_top_level_widget"),
                 name_assigned_by_user: false,
@@ -57,7 +58,6 @@ impl TopLevelWidget {
                 ref_token: None,
                 deref_token: None,
                 returned_widget: None,
-                uses_template: false,
             },
         };
 

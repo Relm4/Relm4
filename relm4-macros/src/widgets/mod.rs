@@ -106,6 +106,7 @@ struct WidgetFuncMethod {
 pub(super) struct Widget {
     doc_attr: Option<TokenStream2>,
     attr: WidgetAttr,
+    template_attr: WidgetTemplateAttr,
     mutable: Option<Mut>,
     pub(super) name: Ident,
     name_assigned_by_user: bool,
@@ -116,7 +117,6 @@ pub(super) struct Widget {
     ref_token: Option<token::And>,
     deref_token: Option<token::Star>,
     returned_widget: Option<ReturnedWidget>,
-    uses_template: bool,
 }
 
 #[derive(PartialEq)]
@@ -124,6 +124,13 @@ enum WidgetAttr {
     None,
     Local,
     LocalRef,
+}
+
+#[derive(PartialEq)]
+enum WidgetTemplateAttr {
+    None,
+    Template,
+    TemplateChild,
 }
 
 struct ReturnedWidget {
@@ -179,6 +186,7 @@ enum Attr {
     Wrap(Ident, Path),
     Chain(Ident, Box<Expr>),
     Template(Ident),
+    TemplateChild(Ident),
 }
 
 struct Attrs {

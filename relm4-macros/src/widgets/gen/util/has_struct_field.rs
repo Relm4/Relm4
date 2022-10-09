@@ -1,10 +1,16 @@
-use crate::widgets::{AssignPropertyAttr, Properties, PropertyType, Widget};
+use crate::widgets::{AssignPropertyAttr, Properties, PropertyType, Widget, WidgetTemplateAttr};
 
 impl Widget {
     /// Don't generate any fields if the widget wasn't named by the user and
     /// isn't used for any property updates either.
     pub(crate) fn has_struct_field(&self) -> bool {
-        self.name_assigned_by_user || self.properties.are_properties_updated()
+        match self.template_attr {
+            WidgetTemplateAttr::None => {
+                self.name_assigned_by_user || self.properties.are_properties_updated()
+            }
+            WidgetTemplateAttr::Template => true,
+            WidgetTemplateAttr::TemplateChild => false,
+        }
     }
 }
 
