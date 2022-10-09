@@ -21,8 +21,17 @@ pub(crate) fn generate_tokens(
 
     let mut struct_fields = None;
 
+    match &factory_visitor.view_widgets {
+        None => factory_visitor.errors.push(syn::Error::new_spanned(
+            &factory_impl,
+            "expected `view!` macro invocation",
+        )),
+        Some(Err(e)) => factory_visitor.errors.push(e.clone()),
+        _ => (),
+    }
+
     if let FactoryComponentVisitor {
-        view_widgets: Some(view_widgets),
+        view_widgets: Some(Ok(view_widgets)),
         root_name,
         init_widgets,
         errors,

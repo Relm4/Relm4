@@ -11,7 +11,7 @@ use crate::widgets::ViewWidgets;
 
 #[derive(Debug)]
 pub(super) struct ComponentVisitor<'errors> {
-    pub(super) view_widgets: Option<ViewWidgets>,
+    pub(super) view_widgets: Option<syn::Result<ViewWidgets>>,
     pub(super) widgets_ty: Option<syn::Type>,
     pub(super) root_name: Option<syn::Ident>,
     pub(super) model_name: Option<syn::Ident>,
@@ -44,19 +44,12 @@ impl VisitMut for ComponentVisitor<'_> {
             syn::ImplItem::Macro(mac) => {
                 match mac.mac.path.get_ident().map(ToString::to_string).as_deref() {
                     Some("view") => {
-                        match mac.mac.parse_body::<ViewWidgets>() {
-                            Ok(widgets) => {
-                                let existing = self.view_widgets.replace(widgets);
+                        if self.view_widgets.is_some() {
+                            self.errors
+                                .push(syn::Error::new_spanned(&mac, "duplicate view macro"));
+                        }
 
-                                if existing.is_some() {
-                                    self.errors
-                                        .push(syn::Error::new_spanned(mac, "duplicate view macro"));
-                                }
-                            }
-                            Err(e) => {
-                                self.errors.push(e);
-                            }
-                        };
+                        self.view_widgets.replace(mac.mac.parse_body());
 
                         remove = true;
                     }
@@ -128,7 +121,7 @@ impl VisitMut for ComponentVisitor<'_> {
 
 #[derive(Debug)]
 pub(super) struct FactoryComponentVisitor<'errors> {
-    pub(super) view_widgets: Option<ViewWidgets>,
+    pub(super) view_widgets: Option<syn::Result<ViewWidgets>>,
     pub(super) widgets_ty: Option<syn::Type>,
     pub(super) init_widgets: Option<syn::ImplItemMethod>,
     pub(super) root_name: Option<syn::Ident>,
@@ -159,19 +152,12 @@ impl VisitMut for FactoryComponentVisitor<'_> {
             syn::ImplItem::Macro(mac) => {
                 match mac.mac.path.get_ident().map(ToString::to_string).as_deref() {
                     Some("view") => {
-                        match mac.mac.parse_body::<ViewWidgets>() {
-                            Ok(widgets) => {
-                                let existing = self.view_widgets.replace(widgets);
+                        if self.view_widgets.is_some() {
+                            self.errors
+                                .push(syn::Error::new_spanned(&mac, "duplicate view macro"));
+                        }
 
-                                if existing.is_some() {
-                                    self.errors
-                                        .push(syn::Error::new_spanned(mac, "duplicate view macro"));
-                                }
-                            }
-                            Err(e) => {
-                                self.errors.push(e);
-                            }
-                        };
+                        self.view_widgets.replace(mac.mac.parse_body());
 
                         remove = true;
                     }
