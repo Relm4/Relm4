@@ -110,6 +110,11 @@ impl Widget {
             self.init_stream(&mut streams.init);
         }
 
+        #[cfg(feature = "relm4")]
+        streams.assign.extend(quote::quote! {
+            use relm4::RelmContainerExt as _;
+        });
+
         self.error_stream(&mut streams.error);
         self.start_assign_stream(&mut streams.assign);
         self.init_conditional_init_stream(&mut streams.assign, model_name);
