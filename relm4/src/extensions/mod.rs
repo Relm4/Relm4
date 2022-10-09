@@ -175,5 +175,6 @@ mod libadwaita {
         adw::SplitButton
         adw::StatusPage
         adw::PreferencesGroup
+        adw::ToastOverlay
     }
 }

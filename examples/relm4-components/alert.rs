@@ -31,7 +31,7 @@ impl SimpleComponent for App {
 
     view! {
         main_window = gtk::ApplicationWindow {
-            set_title: Some("Simple app"),
+            set_title: Some("Alert example"),
             set_default_width: 300,
             set_default_height: 100,
 

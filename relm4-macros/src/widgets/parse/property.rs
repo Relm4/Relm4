@@ -32,7 +32,7 @@ impl Property {
         // parse `if something { WIDGET } else { WIDGET}` or a similar match expression.
         if input.peek(Token![if]) || input.peek(Token![match]) {
             return Ok(Property {
-                name: PropertyName::RelmContainerExtAssign,
+                name: PropertyName::RelmContainerExtAssign(input.span()),
                 ty: PropertyType::ConditionalWidget(ConditionalWidget::parse_with_name(
                     input,
                     None,
@@ -47,11 +47,12 @@ impl Property {
 
         // `gtk::Box { ... }`, `data.init_widget() -> gtk::Button { ... }` or `gtk::Box,`
         if input.peek(token::Brace) || input.peek(Token![->]) || input.peek(Token![,]) {
+            let span = func.span();
             let ty =
                 PropertyType::Widget(Widget::parse_for_container_ext(input, func, attributes)?);
 
             Ok(Property {
-                name: PropertyName::RelmContainerExtAssign,
+                name: PropertyName::RelmContainerExtAssign(span),
                 ty,
             })
         } else {

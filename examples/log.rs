@@ -21,7 +21,7 @@ impl SimpleComponent for AppModel {
 
     view! {
         gtk::Window {
-            set_title: Some("Simple app"),
+            set_title: Some("Log example"),
             set_default_width: 300,
             set_default_height: 100,
 
