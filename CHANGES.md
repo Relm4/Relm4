@@ -4,6 +4,7 @@
 
 ### Added
 
++ core: Allow changing the priority of event loops of components
 + core: Impl `ContainerChild` and `RelmSetChildExt` for `adw::ToastOverlay`
 + examples: Port entry, actions and popover examples to 0.5
 
