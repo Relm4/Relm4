@@ -116,6 +116,7 @@ pub(super) struct Widget {
     ref_token: Option<token::And>,
     deref_token: Option<token::Star>,
     returned_widget: Option<ReturnedWidget>,
+    uses_template: bool,
 }
 
 #[derive(PartialEq)]
@@ -177,6 +178,7 @@ enum Attr {
     Transition(Ident, Ident),
     Wrap(Ident, Path),
     Chain(Ident, Box<Expr>),
+    Template(Ident),
 }
 
 struct Attrs {

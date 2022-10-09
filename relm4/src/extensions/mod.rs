@@ -17,6 +17,12 @@ pub use self::set_child::RelmSetChildExt;
 
 use gtk::prelude::*;
 
+pub trait WidgetTemplate {
+    type Widget;
+
+    fn init() -> Self::Widget;
+}
+
 /// Additional methods for `gtk::builders::ApplicationBuilder`
 pub trait ApplicationBuilderExt {
     /// Convenience method for launching an application and initializing the window.

@@ -12,7 +12,7 @@
 )]
 
 use proc_macro::TokenStream;
-use syn::parse_macro_input;
+use syn::{parse_macro_input, ItemImpl};
 
 mod additional_fields;
 mod args;
@@ -27,6 +27,7 @@ mod widgets;
 mod util;
 mod factory;
 mod token_streams;
+mod widget_template;
 
 use attrs::Attrs;
 use menu::Menus;
@@ -518,6 +519,13 @@ pub fn menu(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn view(input: TokenStream) -> TokenStream {
     view::generate_tokens(input)
+}
+
+#[proc_macro_attribute]
+pub fn widget_template(attributes: TokenStream, input: TokenStream) -> TokenStream {
+    let Attrs { visibility } = parse_macro_input!(attributes as Attrs);
+    let item_impl = parse_macro_input!(input as ItemImpl);
+    widget_template::generate_tokens(visibility, item_impl).into()
 }
 
 #[test]

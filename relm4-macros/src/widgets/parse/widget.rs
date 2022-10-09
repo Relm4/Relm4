@@ -15,6 +15,7 @@ type AttributeInfo = (
     Option<TokenStream2>,
     Option<Ident>,
     Option<Path>,
+    bool,
 );
 
 impl Widget {
@@ -23,7 +24,8 @@ impl Widget {
         attributes: Option<Attrs>,
         args: Option<Args<Expr>>,
     ) -> Result<Self, ParseError> {
-        let (attr, doc_attr, new_name, assign_wrapper) = Self::process_attributes(attributes)?;
+        let (attr, doc_attr, new_name, assign_wrapper, uses_template) =
+            Self::process_attributes(attributes)?;
         // Check if first token is `mut`
         let mutable = input.parse().ok();
 
@@ -83,6 +85,7 @@ impl Widget {
             ref_token,
             deref_token,
             returned_widget,
+            uses_template,
         })
     }
 
@@ -91,7 +94,8 @@ impl Widget {
         func: WidgetFunc,
         attributes: Option<Attrs>,
     ) -> Result<Self, ParseError> {
-        let (attr, doc_attr, new_name, assign_wrapper) = Self::process_attributes(attributes)?;
+        let (attr, doc_attr, new_name, assign_wrapper, uses_template) =
+            Self::process_attributes(attributes)?;
 
         if let Some(wrapper) = assign_wrapper {
             return Err(Error::new(
@@ -138,6 +142,7 @@ impl Widget {
             ref_token,
             deref_token: None,
             returned_widget: None,
+            uses_template,
         })
     }
 
@@ -147,6 +152,7 @@ impl Widget {
             let mut doc_attr: Option<TokenStream2> = None;
             let mut name = None;
             let mut assign_wrapper = None;
+            let mut uses_template = false;
 
             for attr in attrs.inner {
                 let span = attr.span();
@@ -184,6 +190,12 @@ impl Widget {
                         }
                         assign_wrapper = Some(path.clone());
                     }
+                    Attr::Template(_) => {
+                        if uses_template {
+                            return Err(attr_twice_error(span).into());
+                        }
+                        uses_template = true;
+                    }
                     _ => {
                         return Err(Error::new(
                             attr.span(),
@@ -193,9 +205,9 @@ impl Widget {
                 }
             }
 
-            Ok((widget_attr, doc_attr, name, assign_wrapper))
+            Ok((widget_attr, doc_attr, name, assign_wrapper, uses_template))
         } else {
-            Ok((WidgetAttr::None, None, None, None))
+            Ok((WidgetAttr::None, None, None, None, false))
         }
     }
 

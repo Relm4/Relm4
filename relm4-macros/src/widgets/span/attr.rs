@@ -17,6 +17,7 @@ impl Spanned for Attr {
             | Self::Name(ident, _)
             | Self::Transition(ident, _)
             | Self::Chain(ident, _)
+            | Self::Template(ident)
             | Self::Wrap(ident, _) => ident.span(),
         }
     }

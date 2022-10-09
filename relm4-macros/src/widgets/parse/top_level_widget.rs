@@ -57,6 +57,7 @@ impl TopLevelWidget {
                 ref_token: None,
                 deref_token: None,
                 returned_widget: None,
+                uses_template: false,
             },
         };
 

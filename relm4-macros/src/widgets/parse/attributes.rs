@@ -31,6 +31,8 @@ impl Parse for Attrs {
                         Attr::Track(ident.clone(), None)
                     } else if ident == "iterate" {
                         Attr::Iterate(ident.clone())
+                    } else if ident == "template" {
+                        Attr::Template(ident.clone())
                     } else {
                         return Err(unexpected_attr_name(ident));
                     }
