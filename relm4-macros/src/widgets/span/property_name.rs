@@ -8,7 +8,7 @@ impl Spanned for PropertyName {
         match self {
             PropertyName::Ident(ident) => ident.span(),
             PropertyName::Path(path) => path.span(),
-            PropertyName::RelmContainerExtAssign => Span2::call_site(),
+            PropertyName::RelmContainerExtAssign(span) => *span,
         }
     }
 }

@@ -1,10 +1,7 @@
 use gtk::prelude::{
-    BoxExt, ButtonExt, GridExt, GtkWindowExt, OrientableExt, ToggleButtonExt, WidgetExt,
+    BoxExt, ButtonExt, GridExt, GtkWindowExt, ObjectExt, OrientableExt, ToggleButtonExt, WidgetExt,
 };
-use relm4::{
-    gtk::{self, prelude::ObjectExt},
-    ComponentParts, ComponentSender, RelmApp, SimpleComponent, WidgetPlus,
-};
+use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent};
 
 #[tracker::track]
 struct AppModel {

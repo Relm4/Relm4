@@ -4,7 +4,7 @@ use criterion::{criterion_group, criterion_main, Criterion};
 use gtk::gio::ApplicationFlags;
 use gtk::glib::clone;
 use gtk::prelude::{ApplicationExt, BoxExt, ButtonExt, GtkWindowExt};
-use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, SimpleComponent, WidgetPlus};
+use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent};
 
 // Iteration count that appear to be reasonable.
 // Constant delays like GTK's runtime are negligible at this number.
@@ -33,7 +33,7 @@ impl SimpleComponent for AppModel {
 
     fn init_root() -> Self::Root {
         gtk::Window::builder()
-            .title("Simple app")
+            .title("Stress test benchmark")
             .default_width(300)
             .default_height(100)
             .build()

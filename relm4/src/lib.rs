@@ -33,8 +33,6 @@ pub mod shutdown;
 /// Shared state that can be accessed by many components.
 pub mod shared_state;
 
-pub mod util;
-
 pub(crate) mod late_initialization;
 /// A simpler version of components that does work
 /// in the background.
@@ -53,7 +51,6 @@ pub use worker::{Worker, WorkerController, WorkerHandle};
 
 pub use app::RelmApp;
 pub use tokio::task::JoinHandle;
-pub use util::{WidgetPlus, WidgetRef};
 
 use gtk::prelude::*;
 use once_cell::sync::OnceCell;

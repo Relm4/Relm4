@@ -83,3 +83,15 @@ path = "message_broker.rs"
 [[example]]
 name = "transient_dialog"
 path = "transient_dialog.rs"
+
+[[example]]
+name = "actions"
+path = "actions.rs"
+
+[[example]]
+name = "entry"
+path = "entry.rs"
+
+[[example]]
+name = "popover"
+path = "popover.rs"

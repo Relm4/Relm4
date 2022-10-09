@@ -1,6 +1,6 @@
 use gtk::prelude::{BoxExt, ButtonExt, OrientableExt};
 use rand::prelude::IteratorRandom;
-use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, SimpleComponent, WidgetPlus};
+use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent};
 
 const ICON_LIST: &[&str] = &[
     "bookmark-new-symbolic",

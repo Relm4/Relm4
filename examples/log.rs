@@ -1,5 +1,5 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
-use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, SimpleComponent, WidgetPlus};
+use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent};
 
 struct AppModel {
     counter: u8,
@@ -21,7 +21,7 @@ impl SimpleComponent for AppModel {
 
     view! {
         gtk::Window {
-            set_title: Some("Simple app"),
+            set_title: Some("Log example"),
             set_default_width: 300,
             set_default_height: 100,
 

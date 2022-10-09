@@ -3,7 +3,7 @@ use relm4::factory::positions::GridPosition;
 use relm4::factory::{
     DynamicIndex, FactoryComponent, FactoryComponentSender, FactoryVecDeque, Position,
 };
-use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, SimpleComponent, WidgetPlus};
+use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent};
 
 #[derive(Debug)]
 struct Counter {

@@ -10,17 +10,11 @@ mod state_watcher;
 mod traits;
 
 pub use builder::ComponentBuilder;
-
 pub use connector::Connector;
-
 pub use controller::{ComponentController, Controller};
-
 pub use message_broker::MessageBroker;
-
 pub use state_watcher::StateWatcher;
-
 pub use traits::Component;
-
 pub use traits::SimpleComponent;
 
 use std::cell::RefCell;
