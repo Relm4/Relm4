@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote_spanned, ToTokens};
+use quote::quote_spanned;
 
 use crate::widgets::{
     ConditionalBranches, ConditionalWidget, Properties, Property, PropertyType, Widget, WidgetAttr,
@@ -38,9 +38,8 @@ impl Widget {
         init_root_stream: &mut TokenStream2,
         init_stream: &mut TokenStream2,
     ) {
-        // Init and name as return value
-        self.self_init_stream(init_root_stream);
-        self.name.to_tokens(init_root_stream);
+        // Init function as return value
+        init_root_stream.extend(self.func.func_token_stream());
 
         self.other_init_stream(init_stream);
     }
