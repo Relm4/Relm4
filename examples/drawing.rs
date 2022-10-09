@@ -3,7 +3,7 @@ use std::time::Duration;
 use gtk::cairo::{Context, Operator};
 use gtk::prelude::*;
 use relm4::drawing::DrawHandler;
-use relm4::{gtk, Component, ComponentParts, ComponentSender, RelmApp, WidgetPlus};
+use relm4::{gtk, Component, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt};
 
 #[derive(Debug)]
 enum AppMsg {

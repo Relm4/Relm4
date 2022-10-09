@@ -33,27 +33,24 @@ pub mod shutdown;
 /// Shared state that can be accessed by many components.
 pub mod shared_state;
 
-pub mod util;
-
 pub(crate) mod late_initialization;
 /// A simpler version of components that does work
 /// in the background.
 pub mod worker;
 
-pub use self::channel::{channel, Receiver, Sender};
-pub use self::component::{
+pub use channel::{channel, Receiver, Sender};
+pub use component::{
     Component, ComponentBuilder, ComponentController, ComponentParts, Controller, MessageBroker,
     OnDestroy, SimpleComponent,
 };
-pub use self::extensions::*;
-pub use self::sender::ComponentSender;
-pub use self::shared_state::SharedState;
-pub use self::shutdown::ShutdownReceiver;
-pub use self::worker::{Worker, WorkerController, WorkerHandle};
+pub use extensions::*;
+pub use sender::ComponentSender;
+pub use shared_state::SharedState;
+pub use shutdown::ShutdownReceiver;
+pub use worker::{Worker, WorkerController, WorkerHandle};
 
 pub use app::RelmApp;
 pub use tokio::task::JoinHandle;
-pub use util::{WidgetPlus, WidgetRef};
 
 use gtk::prelude::*;
 use once_cell::sync::OnceCell;
@@ -165,6 +162,14 @@ pub fn set_global_css_from_file<P: AsRef<std::path::Path>>(path: P) {
 /// Spawns a thread-local future on GLib's executor, for non-[`Send`] futures.
 pub fn spawn_local<F: Future<Output = ()> + 'static>(func: F) -> gtk::glib::SourceId {
     gtk::glib::MainContext::ref_thread_default().spawn_local(func)
+}
+
+/// Spawns a thread-local future on GLib's executor, for non-[`Send`] futures.
+pub fn spawn_local_with_priority<F: Future<Output = ()> + 'static>(
+    priority: gtk::glib::Priority,
+    func: F,
+) -> gtk::glib::SourceId {
+    gtk::glib::MainContext::ref_thread_default().spawn_local_with_priority(priority, func)
 }
 
 static RUNTIME: OnceCell<Runtime> = OnceCell::new();

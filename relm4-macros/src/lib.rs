@@ -132,7 +132,7 @@ fn gtk_import() -> syn::Path {
 ///
 /// ```compile_fail
 /// # use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
-/// # use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent, WidgetPlus};
+/// # use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent, RelmWidgetExt};
 /// #
 /// struct AppModel {}
 ///

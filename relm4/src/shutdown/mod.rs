@@ -5,9 +5,9 @@ mod attached;
 mod receiver;
 mod sender;
 
-pub use self::attached::AttachedShutdown;
-pub use self::receiver::ShutdownReceiver;
-pub use self::sender::ShutdownSender;
+pub use attached::AttachedShutdown;
+pub use receiver::ShutdownReceiver;
+pub use sender::ShutdownSender;
 
 use std::sync::atomic::AtomicBool;
 use std::sync::Arc;

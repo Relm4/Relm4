@@ -2,9 +2,9 @@
 // Copyright 2022 System76 <info@system76.com>
 // SPDX-License-Identifier: MIT or Apache-2.0
 
-use async_oneshot::oneshot;
 use futures::FutureExt;
 use gtk::glib;
+use tokio::sync::oneshot;
 use tracing::info_span;
 
 use crate::component::EmptyRoot;
@@ -91,7 +91,7 @@ where
 
         // The source ID of the component's service will be sent through this once the root
         // widget has been iced, which will give the component one last chance to say goodbye.
-        let (mut burn_notifier, burn_recipient) = oneshot::<()>();
+        let (burn_notifier, burn_recipient) = oneshot::channel::<()>();
 
         let mut state = C::init(payload, &root, component_sender.clone());
 

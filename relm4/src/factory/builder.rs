@@ -7,8 +7,8 @@ use crate::{shutdown, OnDestroy, Receiver, Sender};
 
 use std::any;
 
-use async_oneshot::oneshot;
 use futures::FutureExt;
+use tokio::sync::oneshot;
 use tracing::info_span;
 
 #[derive(Debug)]
@@ -91,7 +91,7 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
 
         // The source ID of the component's service will be sent through this once the root
         // widget has been iced, which will give the component one last chance to say goodbye.
-        let (mut burn_notifier, burn_recipient) = oneshot::<gtk::glib::SourceId>();
+        let (burn_notifier, burn_recipient) = oneshot::channel::<gtk::glib::SourceId>();
 
         let mut widgets = data.init_widgets(
             index,

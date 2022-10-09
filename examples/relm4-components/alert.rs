@@ -1,7 +1,7 @@
 use gtk::prelude::*;
 use relm4::{
     gtk, Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,
-    SimpleComponent, WidgetPlus,
+    RelmWidgetExt, SimpleComponent,
 };
 use relm4_components::alert::{Alert, AlertMsg, AlertResponse, AlertSettings};
 
@@ -31,7 +31,7 @@ impl SimpleComponent for App {
 
     view! {
         main_window = gtk::ApplicationWindow {
-            set_title: Some("Simple app"),
+            set_title: Some("Alert example"),
             set_default_width: 300,
             set_default_height: 100,
 
