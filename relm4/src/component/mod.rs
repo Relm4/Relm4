@@ -7,6 +7,7 @@ mod connector;
 mod controller;
 mod message_broker;
 mod state_watcher;
+mod stream;
 mod traits;
 
 pub use builder::ComponentBuilder;
