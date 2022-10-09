@@ -84,6 +84,11 @@ impl SimpleComponent for AppModel {
 
             #[template]
             CustomBox {
+                #[template_child]
+                child_label {
+                    #[watch]
+                    set_label: &format!("Counter: {}", model.counter),
+                },
                 gtk::Button {
                     set_label: "Increment",
                     connect_clicked[sender] => move |_| {
@@ -96,11 +101,6 @@ impl SimpleComponent for AppModel {
                         sender.input(AppMsg::Decrement);
                     },
                 },
-                #[template_child]
-                child_label {
-                    #[watch]
-                    set_label: &format!("Counter: {}", model.counter),
-                }
             },
         }
     }
