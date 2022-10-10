@@ -24,16 +24,15 @@ enum AppMsg {
 
 #[relm4::component]
 impl SimpleComponent for App {
+    type Init = ();
     type Input = AppMsg;
     type Output = ();
-    type Init = ();
     type Widgets = AppWidgets;
 
     view! {
         main_window = gtk::ApplicationWindow {
             set_title: Some("Alert example"),
-            set_default_width: 300,
-            set_default_height: 100,
+            set_default_size: (300, 100),
 
             connect_close_request[sender] => move |_| {
                 sender.input(AppMsg::CloseRequest);
@@ -47,15 +46,11 @@ impl SimpleComponent for App {
 
                 append = &gtk::Button {
                     set_label: "Increment",
-                    connect_clicked[sender] => move |_| {
-                        sender.input(AppMsg::Increment);
-                    },
+                    connect_clicked => AppMsg::Increment,
                 },
                 append = &gtk::Button {
                     set_label: "Decrement",
-                    connect_clicked[sender] => move |_| {
-                        sender.input(AppMsg::Decrement);
-                    },
+                    connect_clicked => AppMsg::Decrement,
                 },
                 append = &gtk::Label {
                     set_margin_all: 5,
@@ -64,9 +59,7 @@ impl SimpleComponent for App {
                 },
                 append = &gtk::Button {
                     set_label: "Close",
-                    connect_clicked[sender] => move |_| {
-                        sender.input(AppMsg::CloseRequest);
-                    },
+                    connect_clicked => AppMsg::CloseRequest,
                 },
             },
         }
@@ -102,7 +95,11 @@ impl SimpleComponent for App {
         }
     }
 
-    fn init(_: (), root: &Self::Root, sender: ComponentSender<Self>) -> ComponentParts<Self> {
+    fn init(
+        _: Self::Init,
+        root: &Self::Root,
+        sender: ComponentSender<Self>,
+    ) -> ComponentParts<Self> {
         let model = App {
             counter: 0,
             alert_toggle: false,

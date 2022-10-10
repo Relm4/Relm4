@@ -112,7 +112,7 @@ pub(crate) fn generate_tokens(
         } = PreAndPostView::extract(&mut factory_impl, errors);
 
         factory_impl.items.push(parse_quote! {
-            /// Update the view to represent the updated model.
+            // Update the view to represent the updated model.
             fn update_view(
                 &self,
                 widgets: &mut Self::Widgets,

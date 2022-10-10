@@ -13,7 +13,7 @@ impl SimpleComponent for TestComponent {
     }
 
     fn init(
-        init_param: (),
+        init: Self::Init,
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {

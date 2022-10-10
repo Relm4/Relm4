@@ -15,7 +15,7 @@ enum AsyncHandlerMsg {
     DelayedDecrement,
 }
 
-struct AppModel {
+struct App {
     counter: u8,
     worker: WorkerController<AsyncHandler>,
 }
@@ -50,7 +50,7 @@ impl Worker for AsyncHandler {
 }
 
 #[relm4::component]
-impl SimpleComponent for AppModel {
+impl SimpleComponent for App {
     type Init = ();
     type Input = AppMsg;
     type Output = ();
@@ -59,8 +59,7 @@ impl SimpleComponent for AppModel {
     view! {
         gtk::Window {
             set_title: Some("Worker Counter"),
-            set_default_width: 300,
-            set_default_height: 100,
+            set_default_size: (300, 100),
 
             gtk::Box {
                 set_orientation: gtk::Orientation::Vertical,
@@ -87,8 +86,12 @@ impl SimpleComponent for AppModel {
         }
     }
 
-    fn init(_: (), root: &Self::Root, sender: ComponentSender<Self>) -> ComponentParts<Self> {
-        let model = AppModel {
+    fn init(
+        _: Self::Init,
+        root: &Self::Root,
+        sender: ComponentSender<Self>,
+    ) -> ComponentParts<Self> {
+        let model = App {
             counter: 0,
             worker: AsyncHandler::builder()
                 .detach_worker(())
@@ -114,5 +117,5 @@ impl SimpleComponent for AppModel {
 
 fn main() {
     let app = RelmApp::new("relm4.example.worker");
-    app.run::<AppModel>(());
+    app.run::<App>(());
 }
