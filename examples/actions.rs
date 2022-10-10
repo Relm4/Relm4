@@ -3,28 +3,27 @@ use relm4::actions::*;
 use relm4::prelude::*;
 
 #[derive(Default)]
-struct AppModel {
+struct App {
     counter: u8,
 }
 
 #[derive(Debug)]
-enum AppMsg {
+enum Msg {
     Increment,
     Decrement,
 }
 
 #[relm4::component]
-impl SimpleComponent for AppModel {
+impl SimpleComponent for App {
     type Init = ();
-    type Input = AppMsg;
+    type Input = Msg;
     type Output = ();
     type Widgets = AppWidgets;
 
     view! {
         main_window = gtk::ApplicationWindow {
             set_title: Some("Action example"),
-            set_default_width: 300,
-            set_default_height: 100,
+            set_default_size: (300, 100),
 
             gtk::Box {
                 set_orientation: gtk::Orientation::Vertical,
@@ -33,12 +32,12 @@ impl SimpleComponent for AppModel {
 
                 gtk::Button {
                     set_label: "Increment",
-                    ActionablePlus::set_action::<TestU8Action>: 1,
-                    connect_clicked => AppMsg::Increment,
+                    connect_clicked => Msg::Increment,
+                    ActionablePlus::set_action::<ExampleU8Action>: 1,
                 },
 
                 gtk::Button::with_label("Decrement") {
-                    connect_clicked => AppMsg::Decrement,
+                    connect_clicked => Msg::Decrement,
                 },
 
                 gtk::Label {
@@ -60,30 +59,30 @@ impl SimpleComponent for AppModel {
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let menu_model = gtk::gio::Menu::new();
-        menu_model.append(Some("Stateless"), Some(&TestAction::action_name()));
+        menu_model.append(Some("Stateless"), Some(&ExampleAction::action_name()));
 
         let model = Self { counter: 0 };
 
         let widgets = view_output!();
 
         let app = relm4::main_application();
-        app.set_accelerators_for_action::<TestAction>(&["<primary>W"]);
+        app.set_accelerators_for_action::<ExampleAction>(&["<primary>W"]);
 
         let group = RelmActionGroup::<WindowActionGroup>::new();
 
-        let action: RelmAction<TestAction> = RelmAction::new_stateless(move |_| {
+        let action: RelmAction<ExampleAction> = RelmAction::new_stateless(move |_| {
             println!("Statelesss action!");
-            sender.input(AppMsg::Increment);
+            sender.input(Msg::Increment);
         });
 
-        let action2: RelmAction<TestU8Action> =
+        let action2: RelmAction<ExampleU8Action> =
             RelmAction::new_stateful_with_target_value(&0, |_, state, value| {
                 println!("Stateful action -> state: {}, value: {}", state, value);
                 *state += value;
             });
 
-        group.add_action(action);
-        group.add_action(action2);
+        group.add_action(&action);
+        group.add_action(&action2);
 
         let actions = group.into_action_group();
         widgets
@@ -95,10 +94,10 @@ impl SimpleComponent for AppModel {
 
     fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
         match message {
-            AppMsg::Increment => {
+            Msg::Increment => {
                 self.counter = self.counter.wrapping_add(1);
             }
-            AppMsg::Decrement => {
+            Msg::Decrement => {
                 self.counter = self.counter.wrapping_sub(1);
             }
         }
@@ -107,10 +106,10 @@ impl SimpleComponent for AppModel {
 
 relm4::new_action_group!(WindowActionGroup, "win");
 
-relm4::new_stateless_action!(TestAction, WindowActionGroup, "test");
-relm4::new_stateful_action!(TestU8Action, WindowActionGroup, "test2", u8, u8);
+relm4::new_stateless_action!(ExampleAction, WindowActionGroup, "example");
+relm4::new_stateful_action!(ExampleU8Action, WindowActionGroup, "example2", u8, u8);
 
 fn main() {
     let app = RelmApp::new("relm4.example.actions");
-    app.run::<AppModel>(());
+    app.run::<App>(());
 }

@@ -2,28 +2,27 @@ use gtk::prelude::*;
 use relm4::prelude::*;
 
 #[derive(Default)]
-struct AppModel {
+struct App {
     counter: u8,
 }
 
 #[derive(Debug)]
-enum AppMsg {
+enum Msg {
     Increment,
     Decrement,
 }
 
 #[relm4::component]
-impl SimpleComponent for AppModel {
+impl SimpleComponent for App {
     type Init = ();
-    type Input = AppMsg;
+    type Input = Msg;
     type Output = ();
     type Widgets = AppWidgets;
 
     view! {
         gtk::ApplicationWindow {
             set_title: Some("Popup example"),
-            set_default_width: 300,
-            set_default_height: 100,
+            set_default_size: (300, 100),
 
             gtk::Box {
                 set_orientation: gtk::Orientation::Vertical,
@@ -44,12 +43,12 @@ impl SimpleComponent for AppModel {
 
                             gtk::Button {
                                 set_label: "Increment counter",
-                                connect_clicked => AppMsg::Increment,
+                                connect_clicked => Msg::Increment,
                             },
 
                             gtk::Button {
                                 set_label: "Decrement counter",
-                                connect_clicked => AppMsg::Decrement,
+                                connect_clicked => Msg::Decrement,
                             },
                         },
                     },
@@ -69,7 +68,6 @@ impl SimpleComponent for AppModel {
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = Self { counter: 0 };
-
         let widgets = view_output!();
 
         ComponentParts { model, widgets }
@@ -77,10 +75,10 @@ impl SimpleComponent for AppModel {
 
     fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
         match message {
-            AppMsg::Increment => {
+            Msg::Increment => {
                 self.counter = self.counter.wrapping_add(1);
             }
-            AppMsg::Decrement => {
+            Msg::Decrement => {
                 self.counter = self.counter.wrapping_sub(1);
             }
         }
@@ -89,5 +87,5 @@ impl SimpleComponent for AppModel {
 
 fn main() {
     let app = RelmApp::new("relm4.example.popover");
-    app.run::<AppModel>(());
+    app.run::<App>(());
 }
