@@ -36,7 +36,7 @@ impl SimpleComponent for App {
                 gtk::Button {
                     set_label: "Increment",
                     connect_clicked => Msg::Increment,
-                    ActionablePlus::set_action::<TestU8Action>: 1,
+                    ActionablePlus::set_action::<ExampleU8Action>: 1,
                 },
                 gtk::Button {
                     set_label: "Decrement",
@@ -63,17 +63,17 @@ impl SimpleComponent for App {
     menu! {
         main_menu: {
             custom: "my_widget",
-            "Test" => TestAction,
-            "Test2" => TestAction,
-            "Test toggle" => TestU8Action(1_u8),
+            "Example" => ExampleAction,
+            "Example2" => ExampleAction,
+            "Example toggle" => ExampleU8Action(1_u8),
             section! {
-                "Section test" => TestAction,
-                "Test toggle" => TestU8Action(1_u8),
+                "Section example" => ExampleAction,
+                "Example toggle" => ExampleU8Action(1_u8),
             },
             section! {
-                "Test" => TestAction,
-                "Test2" => TestAction,
-                "Test Value" => TestU8Action(1_u8),
+                "Example" => ExampleAction,
+                "Example2" => ExampleAction,
+                "Example Value" => ExampleU8Action(1_u8),
             }
         }
     }
@@ -93,17 +93,17 @@ impl SimpleComponent for App {
         // relm4::menu! {
         //     main_menu: {
         //         custom: "my_widget",
-        //         "Test" => TestAction,
-        //         "Test2" => TestAction,
-        //         "Test toggle" => TestU8Action(1_u8),
+        //         "Example" => ExampleAction,
+        //         "Example2" => ExampleAction,
+        //         "Example toggle" => ExampleU8Action(1_u8),
         //         section! {
-        //             "Section test" => TestAction,
-        //             "Test toggle" => TestU8Action(1_u8),
+        //             "Section example" => ExampleAction,
+        //             "Example toggle" => ExampleU8Action(1_u8),
         //         },
         //         section! {
-        //             "Test" => TestAction,
-        //             "Test2" => TestAction,
-        //             "Test Value" => TestU8Action(1_u8),
+        //             "Example" => ExampleAction,
+        //             "Example2" => ExampleAction,
+        //             "Example Value" => ExampleU8Action(1_u8),
         //         }
         //     }
         // };
@@ -111,16 +111,19 @@ impl SimpleComponent for App {
         let model = Self { counter };
         let widgets = view_output!();
 
+        let app = relm4::main_application();
+        app.set_accelerators_for_action::<ExampleAction>(&["<primary>W"]);
+
         let group = RelmActionGroup::<WindowActionGroup>::new();
 
-        let action: RelmAction<TestAction> = {
+        let action: RelmAction<ExampleAction> = {
             RelmAction::new_stateless(move |_| {
                 println!("Statelesss action!");
                 sender.input(Msg::Increment);
             })
         };
 
-        let action2: RelmAction<TestU8Action> =
+        let action2: RelmAction<ExampleU8Action> =
             RelmAction::new_stateful_with_target_value(&0, |_, state, _value| {
                 *state ^= 1;
                 dbg!(state);
@@ -151,12 +154,10 @@ impl SimpleComponent for App {
 
 relm4::new_action_group!(WindowActionGroup, "win");
 
-relm4::new_stateless_action!(TestAction, WindowActionGroup, "test");
-relm4::new_stateful_action!(TestU8Action, WindowActionGroup, "test2", u8, u8);
+relm4::new_stateless_action!(ExampleAction, WindowActionGroup, "example");
+relm4::new_stateful_action!(ExampleU8Action, WindowActionGroup, "example2", u8, u8);
 
 fn main() {
     let app = RelmApp::new("relm4.example.menu");
-    relm4::main_application().set_accelerators_for_action::<TestAction>(&["<primary>W"]);
-
     app.run::<App>(0);
 }
