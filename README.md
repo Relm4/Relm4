@@ -1,6 +1,6 @@
 <h1>
   <a href="https://relm4.org">
-    <img src="assets/Relm_logo_with_text.png" width="190" alt="Relm4">
+    <img src="assets/Relm_logo_with_text.png" width="200" alt="Relm4">
   </a>
 </h1>
 
