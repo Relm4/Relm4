@@ -76,6 +76,8 @@ enum DialogMsg {
 struct DialogInit {
     text: String,
     secondary_text: Option<String>,
+    accept_text: String,
+    cancel_text: String,
 }
 
 #[relm4::component]
@@ -90,8 +92,8 @@ impl SimpleComponent for Dialog {
             set_modal: true,
             set_text: Some(&init.text),
             set_secondary_text: init.secondary_text.as_deref(),
-            add_button: ("Close", gtk::ResponseType::Accept),
-            add_button: ("Cancel", gtk::ResponseType::Cancel),
+            add_button: (&init.accept_text, gtk::ResponseType::Accept),
+            add_button: (&init.cancel_text, gtk::ResponseType::Cancel),
 
             #[watch]
             set_visible: !model.hidden,
@@ -188,6 +190,8 @@ impl SimpleComponent for App {
             .launch(DialogInit {
                 text: "Do you want to close before saving?".to_string(),
                 secondary_text: Some("All unsaved changes will be lost".to_string()),
+                accept_text: "Close".to_string(),
+                cancel_text: "Cancel".to_string(),
             })
             .forward(sender.input_sender(), identity);
 
