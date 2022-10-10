@@ -16,6 +16,7 @@
 + core: `add_action` of `RelmActionGroup` now takes a reference to a `RelmAction` as a parameter
 + examples: Many improvements
 + macros: `parse_with_path`, `update_stream`, `inject_view_code` and `generate_tokens` take references for some of their parameters
++ artwork: Update logo
 
 ### Fixed
 
