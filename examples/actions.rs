@@ -105,7 +105,6 @@ impl SimpleComponent for App {
 }
 
 relm4::new_action_group!(WindowActionGroup, "win");
-
 relm4::new_stateless_action!(ExampleAction, WindowActionGroup, "example");
 relm4::new_stateful_action!(ExampleU8Action, WindowActionGroup, "example2", u8, u8);
 

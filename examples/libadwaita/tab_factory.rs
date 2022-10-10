@@ -29,14 +29,11 @@ struct CounterWidgets {
 
 impl FactoryComponent for Counter {
     type Init = u8;
-
     type Input = CounterMsg;
     type Output = CounterOutput;
     type CommandOutput = ();
-
     type Widgets = CounterWidgets;
     type Root = gtk::Box;
-
     type ParentInput = AppMsg;
     type ParentWidget = adw::TabView;
 
@@ -153,10 +150,8 @@ enum AppMsg {
 #[relm4::component]
 impl SimpleComponent for App {
     type Init = u8;
-
     type Input = AppMsg;
     type Output = ();
-
     type Widgets = AppWidgets;
 
     view! {

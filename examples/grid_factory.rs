@@ -42,14 +42,11 @@ impl Position<GridPosition> for Counter {
 
 impl FactoryComponent for Counter {
     type Init = u8;
-
     type Input = CounterMsg;
     type Output = CounterOutput;
     type CommandOutput = ();
-
     type Root = gtk::Box;
     type Widgets = CounterWidgets;
-
     type ParentInput = AppMsg;
     type ParentWidget = gtk::Grid;
 
@@ -164,10 +161,8 @@ enum AppMsg {
 #[relm4::component]
 impl SimpleComponent for App {
     type Init = u8;
-
     type Input = AppMsg;
     type Output = ();
-
     type Widgets = AppWidgets;
 
     view! {

@@ -16,10 +16,8 @@ enum Msg {
 #[relm4::component]
 impl SimpleComponent for App {
     type Init = u8;
-
     type Input = Msg;
     type Output = ();
-
     type Widgets = AppWidgets;
 
     view! {

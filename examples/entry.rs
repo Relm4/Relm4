@@ -22,13 +22,10 @@ struct App {
 #[relm4::factory]
 impl FactoryComponent for Counter {
     type Init = u8;
-
     type Input = ();
     type Output = AppMsg;
     type CommandOutput = ();
-
     type Widgets = FactoryWidgets;
-
     type ParentInput = AppMsg;
     type ParentWidget = gtk::Box;
 

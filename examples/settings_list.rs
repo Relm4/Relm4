@@ -100,12 +100,9 @@ pub enum CmdOut {
 
 impl Component for App {
     type Init = String;
-
     type Input = Input;
     type Output = Output;
-
     type CommandOutput = CmdOut;
-
     type Widgets = Widgets;
     type Root = gtk::Box;
 

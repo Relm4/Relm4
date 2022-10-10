@@ -26,11 +26,13 @@ impl Component for Dialog {
     type Output = ButtonMsg;
     type CommandOutput = ();
     type Widgets = DialogWidgets;
+
     view! {
         dialog = gtk::Dialog {
             #[watch]
             set_visible: model.visible,
             set_modal: true,
+
             #[wrap(Some)]
             set_child = &gtk::Label {
                 set_width_request: 200,
@@ -44,6 +46,7 @@ impl Component for Dialog {
                     "I'm not transient..."
                 },
             },
+
             connect_close_request[sender] => move |_| {
                 sender.input(DialogMsg::Hide);
                 gtk::Inhibit(false)
@@ -83,6 +86,7 @@ impl SimpleComponent for Button {
     type Input = ButtonMsg;
     type Output = AppMsg;
     type Widgets = MiddleComponentWidgets;
+
     view! {
         button = &gtk::Button {
             set_label: "Show the dialog",
@@ -91,6 +95,7 @@ impl SimpleComponent for Button {
             }
         }
     }
+
     fn init(
         _init: Self::Init,
         root: &Self::Root,
@@ -109,6 +114,7 @@ impl SimpleComponent for Button {
         let widgets = view_output!();
         ComponentParts { model, widgets }
     }
+
     fn update(&mut self, _msg: Self::Input, _sender: ComponentSender<Self>) {}
 }
 
@@ -125,12 +131,14 @@ impl SimpleComponent for App {
     type Input = AppMsg;
     type Output = ();
     type Widgets = AppWidgets;
+
     view! {
         main_window = gtk::ApplicationWindow {
             set_default_size: (500, 250),
             set_child: Some(model.button.widget()),
         }
     }
+
     fn init(
         _init: Self::Init,
         root: &Self::Root,
@@ -143,6 +151,7 @@ impl SimpleComponent for App {
         let widgets = view_output!();
         ComponentParts { model, widgets }
     }
+
     fn update(&mut self, _msg: Self::Input, _sender: ComponentSender<Self>) {}
 }
 

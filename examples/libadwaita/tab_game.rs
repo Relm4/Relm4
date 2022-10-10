@@ -42,13 +42,10 @@ enum CounterOutput {
 #[relm4::factory]
 impl FactoryComponent for GamePage {
     type Init = u8;
-
     type Input = CounterMsg;
     type Output = CounterOutput;
     type CommandOutput = ();
-
     type Widgets = CounterWidgets;
-
     type ParentInput = AppMsg;
     type ParentWidget = adw::TabView;
 
@@ -201,11 +198,9 @@ enum AppMsg {
 #[relm4::component]
 impl Component for App {
     type Init = ();
-
     type Input = AppMsg;
     type Output = ();
     type CommandOutput = bool;
-
     type Widgets = AppWidgets;
 
     view! {

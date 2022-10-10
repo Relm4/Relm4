@@ -28,7 +28,6 @@ enum AppMsg {
 
 impl Worker for AsyncHandler {
     type Init = ();
-
     type Input = AsyncHandlerMsg;
     type Output = AppMsg;
 
@@ -53,10 +52,8 @@ impl Worker for AsyncHandler {
 #[relm4::component]
 impl SimpleComponent for App {
     type Init = ();
-
     type Input = AppMsg;
     type Output = ();
-
     type Widgets = AppWidgets;
 
     view! {

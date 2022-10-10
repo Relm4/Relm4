@@ -21,13 +21,10 @@ enum TaskOutput {
 #[relm4::factory]
 impl FactoryComponent for Task {
     type Init = String;
-
     type Input = TaskInput;
     type Output = TaskOutput;
     type CommandOutput = ();
-
     type Widgets = TaskWidgets;
-
     type ParentInput = AppMsg;
     type ParentWidget = gtk::ListBox;
 
