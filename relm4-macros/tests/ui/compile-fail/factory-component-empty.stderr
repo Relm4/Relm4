@@ -1,3 +1,11 @@
+error: expected `view!` macro invocation
+ --> tests/ui/compile-fail/factory-component-empty.rs:7:1
+  |
+7 | / impl FactoryComponent for TestFactoryComponent {
+8 | |
+9 | | }
+  | |_^
+
 error[E0046]: not all trait items implemented, missing: `ParentWidget`, `ParentInput`, `CommandOutput`, `Input`, `Output`, `Init`, `Root`, `Widgets`, `init_model`, `init_root`, `init_widgets`
  --> tests/ui/compile-fail/factory-component-empty.rs:7:1
   |

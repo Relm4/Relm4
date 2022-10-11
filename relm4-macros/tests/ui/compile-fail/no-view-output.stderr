@@ -1,0 +1,11 @@
+error: expected an injection point for the view macro. Try using `let widgets = view_output!();`
+  --> tests/ui/compile-fail/no-view-output.rs:16:5
+   |
+16 | /     #[allow(unreachable_code)]
+17 | |     fn init(
+18 | |         _: (),
+19 | |         root: &Self::Root,
+...  |
+26 | |         ComponentParts { model, widgets }
+27 | |     }
+   | |_____^
