@@ -3,7 +3,6 @@
 /// Shrink the window small enough to see the sidebar and content pages become folded.
 ///
 /// [libadwaita documentation]: https://gnome.pages.gitlab.gnome.org/libadwaita/doc/main/adaptive-layouts.html#leaflet
-
 use adw::prelude::*;
 use gtk::glib;
 use relm4::prelude::*;
