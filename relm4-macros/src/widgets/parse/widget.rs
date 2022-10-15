@@ -55,7 +55,8 @@ impl Widget {
             name_set = true;
         }
 
-        if name_set && (attr.is_local_attr() || template_attr == WidgetTemplateAttr::TemplateChild) {
+        if name_set && (attr.is_local_attr() || template_attr == WidgetTemplateAttr::TemplateChild)
+        {
             return Err(Error::new(input.span(), "Widget name is specified more than once (attribute, assignment or local attribute).").into());
         }
 
@@ -154,7 +155,10 @@ impl Widget {
         })
     }
 
-    fn check_props(props: &Properties, template_attr: &WidgetTemplateAttr) -> Result<(), ParseError> {
+    fn check_props(
+        props: &Properties,
+        template_attr: &WidgetTemplateAttr,
+    ) -> Result<(), ParseError> {
         // Make sure template_child is only used in a valid context.
         if template_attr != &WidgetTemplateAttr::Template {
             for prop in &props.properties {
@@ -173,7 +177,6 @@ impl Widget {
         }
         Ok(())
     }
-
 
     fn process_attributes(attrs: Option<Attrs>) -> Result<AttributeInfo, ParseError> {
         if let Some(attrs) = attrs {

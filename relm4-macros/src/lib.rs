@@ -520,6 +520,93 @@ pub fn view(input: TokenStream) -> TokenStream {
     view::generate_tokens(input)
 }
 
+/// A macro to generate widget templates.
+///
+/// This macro generates a new type that implements
+/// [`relm4::WidgetTemplate`].
+///
+/// # Example
+///
+/// ```
+/// use relm4::prelude::*;
+/// use gtk::prelude::*;
+///
+/// #[relm4::widget_template]
+/// impl WidgetTemplate for MyBox {
+///     view! {
+///         gtk::Box {
+///             set_margin_all: 10,
+///            // Make the boxes visible
+///             inline_css: "border: 2px solid blue",
+///         }
+///     }
+/// }
+/// ```
+///
+/// The template allows you the generate deeply nested
+/// structures. All named items will be directly accessible
+/// as a child of the template, even if they are nested.
+/// In this example the "child_label" is a template child.
+///
+/// ```
+/// # use relm4::prelude::*;
+/// # use gtk::prelude::*;
+/// #
+/// # #[relm4::widget_template]
+/// # impl WidgetTemplate for MyBox {
+/// #     view! {
+/// #         gtk::Box {
+/// #             set_margin_all: 10,
+/// #            // Make the boxes visible
+/// #             inline_css: "border: 2px solid blue",
+/// #         }
+/// #     }
+/// # }
+/// #
+/// #[relm4::widget_template]
+/// impl WidgetTemplate for MySpinner {
+///     view! {
+///         gtk::Spinner {
+///             set_spinning: true,
+///         }
+///     }
+/// }
+///
+/// #[relm4::widget_template]
+/// impl WidgetTemplate for CustomBox {
+///     view! {
+///         gtk::Box {
+///             set_orientation: gtk::Orientation::Vertical,
+///             set_margin_all: 5,
+///             set_spacing: 5,
+///
+///             #[template]
+///             MyBox {
+///                 #[template]
+///                 MySpinner,
+///
+///                 #[template]
+///                 MyBox {
+///                     #[template]
+///                     MySpinner,
+///
+///                     #[template]
+///                     MyBox {
+///                         #[template]
+///                         MySpinner,
+///
+///                         // Deeply nested!
+///                         #[name = "child_label"]
+///                         gtk::Label {
+///                             set_label: "This is a test",
+///                         }
+///                     }
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
 #[proc_macro_attribute]
 pub fn widget_template(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let Attrs { visibility } = parse_macro_input!(attributes as Attrs);

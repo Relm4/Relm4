@@ -1,5 +1,5 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
-use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent, WidgetPlus, WidgetTemplate};
+use relm4::{gtk, ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, WidgetTemplate};
 
 #[relm4_macros::widget_template]
 impl WidgetTemplate for CustomBox {

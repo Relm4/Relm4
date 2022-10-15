@@ -34,9 +34,15 @@ impl<T: AsRef<gtk::Widget>> WidgetRef for T {
     }
 }
 
-pub trait WidgetTemplate: Sized + std::fmt::Debug + std::ops::Deref<Target = Self::Widget> {
-    type Widget;
+/// A trait that describes a widget template.
+///
+/// Widget templates can be created manually by implementing this trait
+/// or by using the [`widget_template`](crate::widget_template) macro.
+pub trait WidgetTemplate: Sized + std::fmt::Debug + std::ops::Deref<Target = Self::Root> {
+    /// The root of the template.
+    type Root;
 
+    /// Initializes the template.
     fn init() -> Self;
 }
 

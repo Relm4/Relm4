@@ -1,6 +1,6 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
 use relm4::{
-    gtk, ComponentParts, ComponentSender, RelmApp, SimpleComponent, WidgetPlus, WidgetTemplate,
+    gtk, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent, WidgetTemplate,
 };
 
 #[relm4::widget_template]

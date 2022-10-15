@@ -53,7 +53,7 @@ pub(crate) fn generate_tokens(vis: Option<Visibility>, mut item_impl: ItemImpl) 
 
                     let root_widget_type = view_widgets.root_type();
                     item_impl.items.push(ImplItem::Verbatim(quote! {
-                        type Widget = #root_widget_type;
+                        type Root = #root_widget_type;
                     }));
 
                     let root_name = view_widgets.root_name();
