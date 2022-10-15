@@ -11,6 +11,7 @@
 
 ### Changed
 
++ core: Improved `DrawHandler`
 + core: Remove async-oneshot dependency and replace it with tokio's oneshot channel
 + core: Remove WidgetPlus in favor of RelmWidgetExt
 + core: Add convenience getter-methods to Controller
