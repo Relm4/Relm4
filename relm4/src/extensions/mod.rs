@@ -20,7 +20,7 @@ use gtk::prelude::{
 /// Get a reference to a widget.
 ///
 /// This trait is an extension of [`AsRef`]
-/// that always returns `&`[`Widget`].
+/// that always returns `&`[`gtk::Widget`].
 pub trait WidgetRef {
     /// Returns a reference to a widget.
     ///
