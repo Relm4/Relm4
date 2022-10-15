@@ -13,6 +13,10 @@ tokio = { version = "1", features = ["time"] }
 #relm4-components = { path = "../../relm4-components" }
 
 [[example]]
+name = "leaflet_sidebar"
+path = "leaflet_sidebar.rs"
+
+[[example]]
 name = "tab_factory"
 path = "tab_factory.rs"
 

@@ -7,13 +7,14 @@ use super::{Component, ComponentParts, Connector, OnDestroy, StateWatcher};
 use crate::sender::ComponentSender;
 use crate::{late_initialization, shutdown};
 use crate::{Receiver, RelmContainerExt, RelmWidgetExt, Sender};
-use async_oneshot::oneshot;
 use futures::FutureExt;
+use gtk::glib;
 use gtk::prelude::{GtkWindowExt, NativeDialogExt};
 use std::any;
 use std::cell::RefCell;
 use std::marker::PhantomData;
 use std::rc::Rc;
+use tokio::sync::oneshot;
 use tracing::info_span;
 
 /// A component that is ready for docking and launch.
@@ -21,6 +22,7 @@ use tracing::info_span;
 pub struct ComponentBuilder<C: Component> {
     /// The root widget of the component.
     pub root: C::Root,
+    priority: glib::Priority,
 
     pub(super) component: PhantomData<C>,
 }
@@ -30,6 +32,7 @@ impl<C: Component> Default for ComponentBuilder<C> {
     fn default() -> Self {
         Self {
             root: C::init_root(),
+            priority: glib::Priority::default(),
             component: PhantomData,
         }
     }
@@ -46,6 +49,18 @@ impl<C: Component> ComponentBuilder<C> {
     /// Access the root widget before the component is initialized.
     pub const fn widget(&self) -> &C::Root {
         &self.root
+    }
+
+    /// Change the priority at which the messages of this component
+    /// are handled.
+    ///
+    /// + Use [`glib::PRIORITY_HIGH`] for high priority event sources.
+    /// + Use [`glib::PRIORITY_LOW`] for very low priority background tasks.
+    /// + Use [`glib::PRIORITY_DEFAULT_IDLE`] for default priority idle functions.
+    /// + Use [`glib::PRIORITY_HIGH_IDLE`] for high priority idle functions.
+    pub fn priority(mut self, priority: glib::Priority) -> Self {
+        self.priority = priority;
+        self
     }
 }
 
@@ -148,7 +163,7 @@ impl<C: Component> ComponentBuilder<C> {
         input_tx: Sender<C::Input>,
         input_rx: Receiver<C::Input>,
     ) -> Connector<C> {
-        let Self { root, .. } = self;
+        let Self { root, priority, .. } = self;
 
         // Used by this component to send events to be handled externally by the caller.
         let (output_tx, output_rx) = crate::channel::<C::Output>();
@@ -174,14 +189,14 @@ impl<C: Component> ComponentBuilder<C> {
 
         // The source ID of the component's service will be sent through this once the root
         // widget has been iced, which will give the component one last chance to say goodbye.
-        let (mut burn_notifier, burn_recipient) = oneshot::<gtk::glib::SourceId>();
+        let (burn_notifier, burn_recipient) = oneshot::channel::<gtk::glib::SourceId>();
 
         let watcher_ = watcher.clone();
 
         // Spawns the component's service. It will receive both `Self::Input` and
         // `Self::CommandOutput` messages. It will spawn commands as requested by
         // updates, and send `Self::Output` messages externally.
-        let id = crate::spawn_local(async move {
+        let id = crate::spawn_local_with_priority(priority, async move {
             let mut burn_notice = burn_recipient.fuse();
             loop {
                 let notifier = notifier_rx.recv_async().fuse();

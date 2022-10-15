@@ -14,8 +14,7 @@ impl SimpleComponent for AppModel {
     view! {
         gtk::Window {
             set_title: Some("Simple app"),
-            set_default_width: 300,
-            set_default_height: 100,
+            set_default_size: (300, 100),
 
             gtk::Box {
                 gtk::Builder::from_string("<Label id=\"label\"></Label>")
@@ -37,7 +36,7 @@ impl SimpleComponent for AppModel {
         ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, _msg: (), _sender: ComponentSender<Self>) {}
+    fn update(&mut self, _msg: Self::Input, _sender: ComponentSender<Self>) {}
 }
 
 fn assert_impls_debug<T: std::fmt::Debug>() {}

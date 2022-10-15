@@ -85,5 +85,17 @@ name = "transient_dialog"
 path = "transient_dialog.rs"
 
 [[example]]
+name = "actions"
+path = "actions.rs"
+
+[[example]]
+name = "entry"
+path = "entry.rs"
+
+[[example]]
+name = "popover"
+path = "popover.rs"
+
+[[example]]
 name = "widget_template"
 path = "widget_template.rs"

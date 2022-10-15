@@ -5,6 +5,7 @@ use syn::punctuated::{Pair, Punctuated};
 use syn::spanned::Spanned;
 use syn::{Error, Result, Token};
 
+#[derive(Debug)]
 pub(super) struct Args<T>
 where
     T: Parse + ToTokens,

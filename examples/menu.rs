@@ -1,31 +1,31 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
 use relm4::actions::{AccelsPlus, ActionablePlus, RelmAction, RelmActionGroup};
-use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, SimpleComponent, WidgetPlus};
+use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent};
 
 #[derive(Default)]
-struct AppModel {
+struct App {
     counter: u8,
 }
 
 #[derive(Debug)]
-enum AppMsg {
+enum Msg {
     Increment,
     Decrement,
 }
 
 #[relm4::component]
-impl SimpleComponent for AppModel {
+impl SimpleComponent for App {
     type Init = u8;
-    type Input = AppMsg;
+    type Input = Msg;
     type Output = ();
     type Widgets = AppWidgets;
 
     view! {
         #[root]
         main_window = gtk::ApplicationWindow {
-            set_title: Some("Simple app"),
-            set_default_width: 300,
-            set_default_height: 100,
+            set_title: Some("Menu example"),
+            set_default_size: (300, 100),
+
             gtk::Box {
                 set_orientation: gtk::Orientation::Vertical,
                 set_margin_all: 5,
@@ -33,15 +33,12 @@ impl SimpleComponent for AppModel {
 
                 gtk::Button {
                     set_label: "Increment",
-                    ActionablePlus::set_action::<TestU8Action>: 1,
-                    connect_clicked[sender] => move |_| {
-                        sender.input(AppMsg::Increment);
-                    },
+                    connect_clicked => Msg::Increment,
+                    ActionablePlus::set_action::<ExampleU8Action>: 1,
                 },
-                gtk::Button::with_label("Decrement") {
-                    connect_clicked[sender] => move |_| {
-                        sender.input(AppMsg::Decrement);
-                    },
+                gtk::Button {
+                    set_label: "Decrement",
+                    connect_clicked => Msg::Decrement,
                 },
                 gtk::Label {
                     set_margin_all: 5,
@@ -64,17 +61,17 @@ impl SimpleComponent for AppModel {
     menu! {
         main_menu: {
             custom: "my_widget",
-            "Test" => TestAction,
-            "Test2" => TestAction,
-            "Test toggle" => TestU8Action(1_u8),
+            "Example" => ExampleAction,
+            "Example2" => ExampleAction,
+            "Example toggle" => ExampleU8Action(1_u8),
             section! {
-                "Section test" => TestAction,
-                "Test toggle" => TestU8Action(1_u8),
+                "Section example" => ExampleAction,
+                "Example toggle" => ExampleU8Action(1_u8),
             },
             section! {
-                "Test" => TestAction,
-                "Test2" => TestAction,
-                "Test Value" => TestU8Action(1_u8),
+                "Example" => ExampleAction,
+                "Example2" => ExampleAction,
+                "Example Value" => ExampleU8Action(1_u8),
             }
         }
     }
@@ -94,17 +91,17 @@ impl SimpleComponent for AppModel {
         // relm4::menu! {
         //     main_menu: {
         //         custom: "my_widget",
-        //         "Test" => TestAction,
-        //         "Test2" => TestAction,
-        //         "Test toggle" => TestU8Action(1_u8),
+        //         "Example" => ExampleAction,
+        //         "Example2" => ExampleAction,
+        //         "Example toggle" => ExampleU8Action(1_u8),
         //         section! {
-        //             "Section test" => TestAction,
-        //             "Test toggle" => TestU8Action(1_u8),
+        //             "Section example" => ExampleAction,
+        //             "Example toggle" => ExampleU8Action(1_u8),
         //         },
         //         section! {
-        //             "Test" => TestAction,
-        //             "Test2" => TestAction,
-        //             "Test Value" => TestU8Action(1_u8),
+        //             "Example" => ExampleAction,
+        //             "Example2" => ExampleAction,
+        //             "Example Value" => ExampleU8Action(1_u8),
         //         }
         //     }
         // };
@@ -112,16 +109,19 @@ impl SimpleComponent for AppModel {
         let model = Self { counter };
         let widgets = view_output!();
 
+        let app = relm4::main_application();
+        app.set_accelerators_for_action::<ExampleAction>(&["<primary>W"]);
+
         let group = RelmActionGroup::<WindowActionGroup>::new();
 
-        let action: RelmAction<TestAction> = {
+        let action: RelmAction<ExampleAction> = {
             RelmAction::new_stateless(move |_| {
                 println!("Statelesss action!");
-                sender.input(AppMsg::Increment);
+                sender.input(Msg::Increment);
             })
         };
 
-        let action2: RelmAction<TestU8Action> =
+        let action2: RelmAction<ExampleU8Action> =
             RelmAction::new_stateful_with_target_value(&0, |_, state, _value| {
                 *state ^= 1;
                 dbg!(state);
@@ -140,10 +140,10 @@ impl SimpleComponent for AppModel {
 
     fn update(&mut self, msg: Self::Input, _sender: ComponentSender<Self>) {
         match msg {
-            AppMsg::Increment => {
+            Msg::Increment => {
                 self.counter = self.counter.wrapping_add(1);
             }
-            AppMsg::Decrement => {
+            Msg::Decrement => {
                 self.counter = self.counter.wrapping_sub(1);
             }
         }
@@ -152,12 +152,10 @@ impl SimpleComponent for AppModel {
 
 relm4::new_action_group!(WindowActionGroup, "win");
 
-relm4::new_stateless_action!(TestAction, WindowActionGroup, "test");
-relm4::new_stateful_action!(TestU8Action, WindowActionGroup, "test2", u8, u8);
+relm4::new_stateless_action!(ExampleAction, WindowActionGroup, "example");
+relm4::new_stateful_action!(ExampleU8Action, WindowActionGroup, "example2", u8, u8);
 
 fn main() {
     let app = RelmApp::new("relm4.example.menu");
-    relm4::main_application().set_accelerators_for_action::<TestAction>(&["<primary>W"]);
-
-    app.run::<AppModel>(0);
+    app.run::<App>(0);
 }

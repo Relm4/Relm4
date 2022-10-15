@@ -20,13 +20,13 @@ enum TaskOutput {
 
 #[relm4::factory]
 impl FactoryComponent for Task {
-    type CommandOutput = ();
     type Init = String;
     type Input = TaskInput;
     type Output = TaskOutput;
+    type CommandOutput = ();
+    type Widgets = TaskWidgets;
     type ParentInput = AppMsg;
     type ParentWidget = gtk::ListBox;
-    type Widgets = TaskWidgets;
 
     view! {
         gtk::Box {
@@ -40,7 +40,7 @@ impl FactoryComponent for Task {
                 }
             },
 
-            #[name = "label"]
+            #[name(label)]
             gtk::Label {
                 set_label: &self.name,
                 set_hexpand: true,
@@ -89,12 +89,12 @@ enum AppMsg {
     AddEntry(String),
 }
 
-struct AppModel {
+struct App {
     tasks: FactoryVecDeque<Task>,
 }
 
 #[relm4::component]
-impl SimpleComponent for AppModel {
+impl SimpleComponent for App {
     type Init = ();
     type Input = AppMsg;
     type Output = ();
@@ -123,8 +123,8 @@ impl SimpleComponent for AppModel {
                     set_min_content_height: 360,
                     set_vexpand: true,
 
-                    #[name = "tasks"]
-                    gtk::ListBox {}
+                    #[local_ref]
+                    task_list_box -> gtk::ListBox {}
                 }
             }
 
@@ -142,12 +142,17 @@ impl SimpleComponent for AppModel {
         }
     }
 
-    fn init(_param: (), root: &Self::Root, sender: ComponentSender<Self>) -> ComponentParts<Self> {
-        let widgets = view_output!();
-
-        let model = AppModel {
-            tasks: FactoryVecDeque::new(widgets.tasks.clone(), sender.input_sender()),
+    fn init(
+        _: Self::Init,
+        root: &Self::Root,
+        sender: ComponentSender<Self>,
+    ) -> ComponentParts<Self> {
+        let model = App {
+            tasks: FactoryVecDeque::new(gtk::ListBox::default(), sender.input_sender()),
         };
+
+        let task_list_box = model.tasks.widget();
+        let widgets = view_output!();
 
         ComponentParts { model, widgets }
     }
@@ -155,5 +160,5 @@ impl SimpleComponent for AppModel {
 
 fn main() {
     let app = RelmApp::new("relm4.example.to_do");
-    app.run::<AppModel>(());
+    app.run::<App>(());
 }

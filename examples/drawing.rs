@@ -3,10 +3,10 @@ use std::time::Duration;
 use gtk::cairo::{Context, Operator};
 use gtk::prelude::*;
 use relm4::drawing::DrawHandler;
-use relm4::{gtk, Component, ComponentParts, ComponentSender, RelmApp, WidgetPlus};
+use relm4::{gtk, Component, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt};
 
 #[derive(Debug)]
-enum AppMsg {
+enum Msg {
     AddPoint((f64, f64)),
     Reset,
     Resize((i32, i32)),
@@ -15,7 +15,7 @@ enum AppMsg {
 #[derive(Debug)]
 struct UpdatePointsMsg;
 
-struct AppModel {
+struct App {
     width: f64,
     height: f64,
     points: Vec<Point>,
@@ -23,17 +23,16 @@ struct AppModel {
 }
 
 #[relm4::component]
-impl Component for AppModel {
-    type CommandOutput = UpdatePointsMsg;
+impl Component for App {
     type Init = ();
-    type Input = AppMsg;
+    type Input = Msg;
     type Output = ();
+    type CommandOutput = UpdatePointsMsg;
     type Widgets = AppWidgets;
 
     view! {
       gtk::Window {
-        set_default_height: 300,
-        set_default_width: 600,
+        set_default_size: (600, 300),
 
         gtk::Box {
           set_orientation: gtk::Orientation::Vertical,
@@ -45,7 +44,7 @@ impl Component for AppModel {
             set_label: "Left-click to add circles, resize or right-click to reset!",
           },
 
-          #[name = "area"]
+          #[name(area)]
           gtk::DrawingArea {
             set_vexpand: true,
             set_hexpand: true,
@@ -54,32 +53,32 @@ impl Component for AppModel {
               set_button: 0,
               connect_pressed[sender] => move |controller, _, x, y| {
                 if controller.current_button() == gtk::gdk::BUTTON_SECONDARY {
-                    sender.input(AppMsg::Reset);
+                    sender.input(Msg::Reset);
                 } else {
-                    sender.input(AppMsg::AddPoint((x, y)));
+                    sender.input(Msg::AddPoint((x, y)));
                 }
               }
             },
             connect_resize[sender] => move |_, x, y| {
-                sender.input(AppMsg::Resize((x, y)));
+                sender.input(Msg::Resize((x, y)));
             }
           },
         }
       }
     }
 
-    fn update(&mut self, msg: AppMsg, _sender: ComponentSender<Self>) {
+    fn update(&mut self, msg: Msg, _sender: ComponentSender<Self>) {
         let cx = self.handler.get_context().unwrap();
 
         match msg {
-            AppMsg::AddPoint((x, y)) => {
+            Msg::AddPoint((x, y)) => {
                 self.points.push(Point::new(x, y));
             }
-            AppMsg::Resize((x, y)) => {
+            Msg::Resize((x, y)) => {
                 self.width = x as f64;
                 self.height = y as f64;
             }
-            AppMsg::Reset => {
+            Msg::Reset => {
                 cx.set_operator(Operator::Clear);
                 cx.set_source_rgba(0.0, 0.0, 0.0, 0.0);
                 cx.paint().expect("Couldn't fill context");
@@ -113,8 +112,12 @@ impl Component for AppModel {
         draw(&cx, &self.points);
     }
 
-    fn init(_params: (), root: &Self::Root, sender: ComponentSender<Self>) -> ComponentParts<Self> {
-        let mut model = AppModel {
+    fn init(
+        _: Self::Init,
+        root: &Self::Root,
+        sender: ComponentSender<Self>,
+    ) -> ComponentParts<Self> {
+        let mut model = App {
             width: 100.0,
             height: 100.0,
             points: Vec::new(),
@@ -192,6 +195,6 @@ fn draw(cx: &Context, points: &[Point]) {
 }
 
 fn main() {
-    let relm = RelmApp::new("relm4.examples.drawing");
-    relm.run::<AppModel>(());
+    let app = RelmApp::new("relm4.examples.drawing");
+    app.run::<App>(());
 }

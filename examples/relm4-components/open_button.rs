@@ -14,7 +14,6 @@ enum AppMsg {
 }
 
 struct App {
-    #[allow(unused)]
     open_button: Controller<OpenButton>,
 }
 
@@ -27,12 +26,11 @@ impl SimpleComponent for App {
 
     view! {
         gtk::ApplicationWindow {
-            set_default_width: 300,
-            set_default_height: 100,
+            set_default_size: (300, 100),
 
             #[wrap(Some)]
             set_titlebar = &gtk::HeaderBar {
-                pack_start: open_button.widget(),
+                pack_start: model.open_button.widget(),
             }
         }
     }
@@ -58,10 +56,9 @@ impl SimpleComponent for App {
                 max_recent_files: 10,
             })
             .forward(sender.input_sender(), AppMsg::Open);
+        let model = App { open_button };
 
         let widgets = view_output!();
-
-        let model = App { open_button };
 
         ComponentParts { model, widgets }
     }

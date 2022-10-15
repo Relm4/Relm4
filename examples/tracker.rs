@@ -1,6 +1,6 @@
 use gtk::prelude::{BoxExt, ButtonExt, OrientableExt};
 use rand::prelude::IteratorRandom;
-use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, SimpleComponent, WidgetPlus};
+use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent};
 
 const ICON_LIST: &[&str] = &[
     "bookmark-new-symbolic",
@@ -22,7 +22,7 @@ fn random_icon_name() -> &'static str {
 }
 
 #[derive(Debug)]
-enum AppMsg {
+enum Msg {
     UpdateFirst,
     UpdateSecond,
 }
@@ -30,22 +30,22 @@ enum AppMsg {
 // The track proc macro allows to easily track changes to different
 // fields of the model
 #[tracker::track]
-struct AppModel {
+struct App {
     first_icon: &'static str,
     second_icon: &'static str,
     identical: bool,
 }
 
 #[relm4::component]
-impl SimpleComponent for AppModel {
+impl SimpleComponent for App {
     type Init = ();
-    type Input = AppMsg;
+    type Input = Msg;
     type Output = ();
     type Widgets = AppWidgets;
 
     view! {
         gtk::Window {
-            #[track(model.changed(AppModel::identical()))]
+            #[track(model.changed(App::identical()))]
             set_class_active: ("identical", model.identical),
 
             gtk::Box {
@@ -59,15 +59,13 @@ impl SimpleComponent for AppModel {
 
                     gtk::Image {
                         set_pixel_size: 50,
-                        #[track(model.changed(AppModel::first_icon()))]
+                        #[track(model.changed(App::first_icon()))]
                         set_icon_name: Some(model.first_icon),
                     },
 
                     gtk::Button {
                         set_label: "New random image",
-                        connect_clicked[sender] => move |_| {
-                            sender.input(AppMsg::UpdateFirst);
-                        }
+                        connect_clicked => Msg::UpdateFirst,
                     }
                 },
 
@@ -77,38 +75,40 @@ impl SimpleComponent for AppModel {
 
                     gtk::Image {
                         set_pixel_size: 50,
-                        #[track(model.changed(AppModel::second_icon()))]
+                        #[track(model.changed(App::second_icon()))]
                         set_icon_name: Some(model.second_icon),
                     },
 
                     gtk::Button {
                         set_label: "New random image",
-                        connect_clicked[sender] => move |_| {
-                            sender.input(AppMsg::UpdateSecond);
-                        }
+                        connect_clicked => Msg::UpdateSecond,
                     }
                 },
             }
         }
     }
 
-    fn update(&mut self, msg: AppMsg, _sender: ComponentSender<Self>) {
+    fn update(&mut self, msg: Msg, _sender: ComponentSender<Self>) {
         // reset tracker value of the model
         self.reset();
 
         match msg {
-            AppMsg::UpdateFirst => {
+            Msg::UpdateFirst => {
                 self.set_first_icon(random_icon_name());
             }
-            AppMsg::UpdateSecond => {
+            Msg::UpdateSecond => {
                 self.set_second_icon(random_icon_name());
             }
         }
         self.set_identical(self.first_icon == self.second_icon);
     }
 
-    fn init(_param: (), root: &Self::Root, sender: ComponentSender<Self>) -> ComponentParts<Self> {
-        let model = AppModel {
+    fn init(
+        _: Self::Init,
+        root: &Self::Root,
+        sender: ComponentSender<Self>,
+    ) -> ComponentParts<Self> {
+        let model = App {
             first_icon: random_icon_name(),
             second_icon: random_icon_name(),
             identical: false,
@@ -123,8 +123,7 @@ impl SimpleComponent for AppModel {
 
 fn main() {
     let app = RelmApp::new("relm4.example.tracker");
-
     relm4::set_global_css(b".identical { background: #00ad5c; }");
 
-    app.run::<AppModel>(());
+    app.run::<App>(());
 }

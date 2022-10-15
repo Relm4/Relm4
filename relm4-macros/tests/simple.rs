@@ -1,5 +1,5 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
-use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent, WidgetPlus};
+use relm4::{gtk, ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent};
 
 #[derive(Default)]
 struct AppModel {
@@ -22,8 +22,7 @@ impl SimpleComponent for AppModel {
     view! {
         gtk::Window {
             set_title: Some("Simple app"),
-            set_default_width: 300,
-            set_default_height: 100,
+            set_default_size: (300, 100),
 
             gtk::Box {
                 set_orientation: gtk::Orientation::Vertical,
@@ -32,15 +31,11 @@ impl SimpleComponent for AppModel {
 
                 append = &gtk::Button {
                     set_label: "Increment",
-                    connect_clicked[sender] => move |_| {
-                        sender.input(AppMsg::Increment);
-                    },
+                    connect_clicked => AppMsg::Increment,
                 },
                 append = &gtk::Button {
                     set_label: "Decrement",
-                    connect_clicked[sender] => move |_| {
-                        sender.input(AppMsg::Decrement);
-                    },
+                    connect_clicked => AppMsg::Decrement,
                 },
                 append = &gtk::Label {
                     set_margin_all: 5,

@@ -2,6 +2,7 @@
 // Copyright 2022 System76 <info@system76.com>
 // SPDX-License-Identifier: MIT or Apache-2.0
 
+use std::cell::Ref;
 use std::fmt::{self, Debug};
 use std::rc::Rc;
 
@@ -22,7 +23,19 @@ pub trait ComponentController<C: Component> {
     /// Provides access to the state of a component.
     fn state(&self) -> &Rc<StateWatcher<C>>;
 
-    /// The root widget of the component.
+    /// Returns a reference to the [`Component`].
+    fn model(&self) -> Ref<'_, C> {
+        let part_ref = self.state().as_ref().get();
+        Ref::map(part_ref, |part| &part.model)
+    }
+
+    /// Returns a reference to the [`Component::Widgets`].
+    fn widgets(&self) -> Ref<'_, C::Widgets> {
+        let part_ref = self.state().as_ref().get();
+        Ref::map(part_ref, |part| &part.widgets)
+    }
+
+    /// Returns the root widget of the component.
     fn widget(&self) -> &C::Root;
 }
 

@@ -53,28 +53,27 @@ fn gtk_import() -> syn::Path {
 /// use gtk::prelude::*;
 ///
 /// #[derive(Default)]
-/// struct AppModel {
+/// struct App {
 ///     counter: u8,
 /// }
 ///
 /// #[derive(Debug)]
-/// enum AppMsg {
+/// enum Msg {
 ///     Increment,
 ///     Decrement,
 /// }
 ///
 /// #[relm4_macros::component(pub)]
-/// impl SimpleComponent for AppModel {
+/// impl SimpleComponent for App {
 ///     type Init = u8;
-///     type Input = AppMsg;
+///     type Input = Msg;
 ///     type Output = ();
 ///     type Widgets = AppWidgets;
 ///
 ///     view! {
 ///         gtk::Window {
 ///             set_title: Some("Simple app"),
-///             set_default_width: 300,
-///             set_default_height: 100,
+///             set_default_size: (300, 100),
 ///             gtk::Box {
 ///                 set_orientation: gtk::Orientation::Vertical,
 ///                 set_margin_all: 5,
@@ -82,12 +81,12 @@ fn gtk_import() -> syn::Path {
 ///
 ///                 gtk::Button {
 ///                     set_label: "Increment",
-///                     connect_clicked => AppMsg::Increment,
+///                     connect_clicked => Msg::Increment,
 ///                 },
 ///                 gtk::Button {
 ///                     set_label: "Decrement",
 ///                     connect_clicked[sender] => move |_| {
-///                         sender.input(AppMsg::Decrement);
+///                         sender.input(Msg::Decrement);
 ///                     },
 ///                 },
 ///                 gtk::Label {
@@ -111,12 +110,12 @@ fn gtk_import() -> syn::Path {
 ///         ComponentParts { model, widgets }
 ///     }
 ///
-///     fn update(&mut self, msg: AppMsg, _sender: ComponentSender<Self>) {
+///     fn update(&mut self, msg: Msg, _sender: ComponentSender<Self>) {
 ///         match msg {
-///             AppMsg::Increment => {
+///             Msg::Increment => {
 ///                 self.counter = self.counter.wrapping_add(1);
 ///             }
-///             AppMsg::Decrement => {
+///             Msg::Decrement => {
 ///                 self.counter = self.counter.wrapping_sub(1);
 ///             }
 ///         }
@@ -132,12 +131,12 @@ fn gtk_import() -> syn::Path {
 ///
 /// ```compile_fail
 /// # use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
-/// # use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent, WidgetPlus};
+/// # use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent, RelmWidgetExt};
 /// #
-/// struct AppModel {}
+/// struct App {}
 ///
 /// #[relm4_macros::component]
-/// impl SimpleComponent for AppModel {
+/// impl SimpleComponent for App {
 ///       /* Code omitted */
 /// #     type Init = ();
 /// #     type Input = ();
@@ -228,26 +227,26 @@ pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
 ///             set_orientation: gtk::Orientation::Horizontal,
 ///             set_spacing: 10,
 ///
-///             #[name = "label"]
+///             #[name(label)]
 ///             gtk::Label {
 ///                 #[watch]
 ///                 set_label: &self.value.to_string(),
 ///                 set_width_chars: 3,
 ///             },
 ///
-///             #[name = "add_button"]
+///             #[name(add_button)]
 ///             gtk::Button {
 ///                 set_label: "+",
 ///                 connect_clicked => CounterMsg::Increment,
 ///             },
 ///
-///             #[name = "remove_button"]
+///             #[name(remove_button)]
 ///             gtk::Button {
 ///                 set_label: "-",
 ///                 connect_clicked => CounterMsg::Decrement,
 ///             },
 ///
-///             #[name = "to_front_button"]
+///             #[name(to_front_button)]
 ///             gtk::Button {
 ///                 set_label: "To start",
 ///                 connect_clicked[sender, index] => move |_| {
