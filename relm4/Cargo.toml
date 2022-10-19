@@ -29,7 +29,7 @@ adw = { git = "https://gitlab.gnome.org/World/Rust/libadwaita-rs", optional = tr
 async-broadcast = "0.4"
 flume = "0.10.14"
 futures = "0.3.21"
-fragile = "1.2.1"
+fragile = "2.0.0"
 gtk = { git = "https://github.com/gtk-rs/gtk4-rs", package = "gtk4" }
 #gtk = { version = "0.5", package = "gtk4" }
 log = "0.4.17"
