@@ -3,7 +3,8 @@
 ## Unreleased
 
 ### Added
-
++ relm4: Added `dox` feature to be able to build the docs without the dependencies
++ relm4-components: Added `dox` feature to be able to build the docs without the dependencies
 + core: Added widget templates
 + examples: Add libadwaita Leaflet sidebar example
 + core: Allow changing the priority of event loops of components
