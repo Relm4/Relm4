@@ -20,17 +20,12 @@ all-features = true
 cargo-args = ["-Zunstable-options", "-Zrustdoc-scrape-examples=examples"]
 
 [features]
-default = []
+default = ["macros"]
 # The dox feature can be used for building the docs without the dependencies and requires Rust Nightly
 dox = ["gtk/dox", "adw/dox", "panel/dox"]
 libadwaita = ["adw"]
 libpanel = ["panel"]
 macros = ["relm4-macros"]
-all = [
-    "libadwaita",
-    "macros",
-    # dox is not part of the 'all' feature, because it is only used for generating the documentation
-]
 
 [dependencies]
 #adw = { version = "0.2", optional = true, package = "libadwaita" }

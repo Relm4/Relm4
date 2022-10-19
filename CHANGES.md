@@ -13,6 +13,8 @@
 
 ### Changed
 
++ relm4: Made the `macros` feature a default feature
++ relm4: Removed `all` feature
 + core: Remove async-oneshot dependency and replace it with tokio's oneshot channel
 + core: Remove WidgetPlus in favor of RelmWidgetExt
 + core: Add convenience getter-methods to Controller
