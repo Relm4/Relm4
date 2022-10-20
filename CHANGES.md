@@ -3,8 +3,9 @@
 ## Unreleased
 
 ### Added
-+ relm4: Added `dox` feature to be able to build the docs without the dependencies
-+ relm4-components: Added `dox` feature to be able to build the docs without the dependencies
+
++ core: Added `dox` feature to be able to build the docs without the dependencies
++ components: Added `dox` feature to be able to build the docs without the dependencies
 + core: Added widget templates
 + examples: Add libadwaita Leaflet sidebar example
 + core: Allow changing the priority of event loops of components
@@ -13,8 +14,9 @@
 
 ### Changed
 
-+ relm4: Made the `macros` feature a default feature
-+ relm4: Removed `all` feature
++ core: Improved `DrawHandler`
++ core: Made the `macros` feature a default feature
++ core: Removed `all` feature
 + core: Remove async-oneshot dependency and replace it with tokio's oneshot channel
 + core: Remove WidgetPlus in favor of RelmWidgetExt
 + core: Add convenience getter-methods to Controller

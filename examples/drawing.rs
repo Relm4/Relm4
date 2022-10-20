@@ -44,8 +44,8 @@ impl Component for App {
             set_label: "Left-click to add circles, resize or right-click to reset!",
           },
 
-          #[name(area)]
-          gtk::DrawingArea {
+          #[local_ref]
+          area -> gtk::DrawingArea {
             set_vexpand: true,
             set_hexpand: true,
 
@@ -68,7 +68,7 @@ impl Component for App {
     }
 
     fn update(&mut self, msg: Msg, _sender: ComponentSender<Self>) {
-        let cx = self.handler.get_context().unwrap();
+        let cx = self.handler.get_context();
 
         match msg {
             Msg::AddPoint((x, y)) => {
@@ -108,7 +108,7 @@ impl Component for App {
             *y += point.ys;
         }
 
-        let cx = self.handler.get_context().unwrap();
+        let cx = self.handler.get_context();
         draw(&cx, &self.points);
     }
 
@@ -117,16 +117,15 @@ impl Component for App {
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let mut model = App {
+        let model = App {
             width: 100.0,
             height: 100.0,
             points: Vec::new(),
-            handler: DrawHandler::new().unwrap(),
+            handler: DrawHandler::new(),
         };
 
+        let area = model.handler.drawing_area();
         let widgets = view_output!();
-
-        model.handler.init(&widgets.area);
 
         sender.command(|out, shutdown| {
             shutdown
