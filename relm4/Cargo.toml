@@ -26,6 +26,8 @@ dox = ["gtk/dox", "adw/dox"] #, "panel/dox"]
 libadwaita = ["adw"]
 #libpanel = ["panel"]
 macros = ["relm4-macros"]
+# All features except docs. This is also used in the CI
+all = ["macros", "libadwaita"] #, "panel"]
 
 [dependencies]
 adw = { version = "0.2", optional = true, package = "libadwaita" }
