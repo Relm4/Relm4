@@ -1,8 +1,8 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned};
-use syn::spanned::Spanned;
+use syn::{spanned::Spanned, token};
 
-use super::{PropertyName, ReturnedWidget, Widget};
+use super::{PropertyName, ReturnedWidget, Widget, WidgetTemplateAttr};
 
 /// Utility methods and functions.
 mod util;
@@ -27,8 +27,10 @@ impl Widget {
 
         let ref_token = &self.ref_token;
         let deref_token = &self.deref_token;
+        let template_deref =
+            (self.template_attr == WidgetTemplateAttr::Template).then(token::Star::default);
 
-        let out_stream = quote! { #ref_token #deref_token #w_name };
+        let out_stream = quote! { #ref_token #deref_token #template_deref #w_name };
 
         if let Some(wrapper) = &self.assign_wrapper {
             quote_spanned! {

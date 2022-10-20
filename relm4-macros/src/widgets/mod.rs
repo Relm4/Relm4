@@ -120,6 +120,7 @@ struct WidgetFuncMethod {
 pub(super) struct Widget {
     doc_attr: Option<TokenStream2>,
     attr: WidgetAttr,
+    template_attr: WidgetTemplateAttr,
     mutable: Option<Mut>,
     pub(super) name: Ident,
     name_assigned_by_user: bool,
@@ -137,6 +138,13 @@ enum WidgetAttr {
     None,
     Local,
     LocalRef,
+}
+
+#[derive(Debug, PartialEq)]
+enum WidgetTemplateAttr {
+    None,
+    Template,
+    TemplateChild,
 }
 
 #[derive(Debug)]
@@ -197,6 +205,8 @@ enum Attr {
     Transition(Ident, Ident),
     Wrap(Ident, Path),
     Chain(Ident, Box<Expr>),
+    Template(Ident),
+    TemplateChild(Ident),
 }
 
 struct Attrs {

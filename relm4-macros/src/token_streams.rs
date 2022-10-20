@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::quote_spanned;
+use quote::{quote_spanned, ToTokens};
 use syn::{Error, Ident, Visibility};
 
 use crate::widgets::{TopLevelWidget, ViewWidgets, Widget};
@@ -54,18 +54,34 @@ impl ViewWidgets {
         streams
     }
 
+    /// Get the root widget
+    pub(super) fn get_root_widget(&self) -> syn::Result<&Widget> {
+        self.top_level_widgets
+            .iter()
+            .find(|w| w.root_attr.is_some())
+            .map(|w| &w.inner)
+            .ok_or_else(|| {
+                Error::new(
+                    self.span,
+                    "You need to specify the root widget using the `#[root]` attribute.",
+                )
+            })
+    }
+
     /// Generate root type for `Root` parameter in `Component` impl
     pub(super) fn root_type(&self) -> TokenStream2 {
-        for top_level_widget in &self.top_level_widgets {
-            if top_level_widget.root_attr.is_some() {
-                return top_level_widget.inner.func_type_token_stream();
-            }
+        match self.get_root_widget() {
+            Ok(root_widget) => root_widget.func_type_token_stream(),
+            Err(err) => err.to_compile_error(),
         }
-        Error::new(
-            self.span,
-            "You need to specify the root widget using the `#[root]` attribute.",
-        )
-        .to_compile_error()
+    }
+
+    /// Get the name of the root widget
+    pub(super) fn root_name(&self) -> TokenStream2 {
+        match self.get_root_widget() {
+            Ok(root_widget) => root_widget.name.to_token_stream(),
+            Err(err) => err.to_compile_error(),
+        }
     }
 }
 

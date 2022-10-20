@@ -15,12 +15,17 @@ documentation = "https://relm4.org/docs/stable/relm4/"
 keywords = ["gui", "gtk", "gtk4", "elm"]
 categories = ["gui"]
 
+[package.metadata.docs.rs]
+all-features = true
+cargo-args = ["-Zunstable-options", "-Zrustdoc-scrape-examples=examples"]
+
 [features]
-default = []
+default = ["macros"]
+# The dox feature can be used for building the docs without the dependencies and requires Rust Nightly
+dox = ["gtk/dox", "adw/dox", "panel/dox"]
 libadwaita = ["adw"]
 libpanel = ["panel"]
 macros = ["relm4-macros"]
-all = ["libadwaita", "macros"]
 
 [dependencies]
 #adw = { version = "0.2", optional = true, package = "libadwaita" }
@@ -29,7 +34,7 @@ adw = { git = "https://gitlab.gnome.org/World/Rust/libadwaita-rs", optional = tr
 async-broadcast = "0.4"
 flume = "0.10.14"
 futures = "0.3.21"
-fragile = "1.2.1"
+fragile = "2.0.0"
 gtk = { git = "https://github.com/gtk-rs/gtk4-rs", package = "gtk4" }
 #gtk = { version = "0.5", package = "gtk4" }
 once_cell = "1.13"

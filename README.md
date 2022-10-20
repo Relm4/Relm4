@@ -1,6 +1,6 @@
 <h1>
   <a href="https://relm4.org">
-    <img src="assets/Relm_logo_with_text.png" width="190" alt="Relm4">
+    <img src="assets/Relm_logo_with_text.png" width="200" alt="Relm4">
   </a>
 </h1>
 
@@ -54,13 +54,16 @@ relm4-components = { git = "https://github.com/Relm4/Relm4.git" }
 
 ### Features
 
-The `relm4` crate has three feature flags:
+The `relm4` crate has four feature flags:
 
 | Flag | Purpose |
 | :--- | :------ |
 | macros | Enable macros by re-exporting [`relm4-macros`](https://crates.io/crates/relm4-macros) |
 | libadwaita | Improved support for [libadwaita](https://gitlab.gnome.org/World/Rust/libadwaita-rs) |
 | libpanel | Improved support for [libpanel](https://gitlab.gnome.org/World/Rust/libpanel-rs) |
+| dox | Linking to the underlying C libraries is skipped to allow building the docs without the dependencies |
+
+The `macros` feature is a default feature.
 
 ## Examples
 
