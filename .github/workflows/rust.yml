@@ -19,7 +19,8 @@ jobs:
         rust:
           - stable
           - beta
-          - nightly
+          # Disable nightly due to a false positive with the unreachable_pub lint
+          #- nightly
           - "1.63"
     env:
         DISPLAY: ":99.0"
