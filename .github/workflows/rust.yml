@@ -19,7 +19,8 @@ jobs:
         rust:
           - stable
           - beta
-          - nightly
+          # Disable nightly due to a false positive with the unreachable_pub lint
+          #- nightly
           - "1.63"
     env:
         DISPLAY: ":99.0"
@@ -34,7 +35,7 @@ jobs:
         run: cargo clippy -- --deny warnings
 
       - name: "clippy all features"
-        run: cargo clippy --all-features -- --deny warnings
+        run: cargo clippy --features "all" -- --deny warnings
 
       - name: "test"
         run: xvfb-run --auto-servernum cargo test
