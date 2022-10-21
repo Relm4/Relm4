@@ -21,15 +21,15 @@ jobs:
           - beta
           # Disable nightly due to a false positive with the unreachable_pub lint
           #- nightly
-          - "1.63"
+          - "1.63.0"
     env:
         DISPLAY: ":99.0"
     steps:
       - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.rust }}
-          override: true
+          components: clippy
 
       - name: "clippy"
         run: cargo clippy -- --deny warnings
@@ -53,11 +53,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          profile: minimal
-          toolchain: stable
-          override: true
+          components: rustfmt
       - run: rustup component add rustfmt
       - uses: actions-rs/cargo@v1
         with:
