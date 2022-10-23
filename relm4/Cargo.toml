@@ -24,7 +24,7 @@ default = ["macros"]
 # The dox feature can be used for building the docs without the dependencies and requires Rust Nightly
 dox = ["gtk/dox", "adw/dox"] #, "panel/dox"]
 libadwaita = ["adw"]
-#libpanel = ["panel"]
+libpanel = ["panel"]
 macros = ["relm4-macros"]
 # All features except docs. This is also used in the CI
 all = ["macros", "libadwaita"] #, "panel"]
@@ -38,7 +38,7 @@ futures = "0.3.21"
 fragile = "2.0.0"
 gtk = { version = "0.5", package = "gtk4" }
 once_cell = "1.13"
-#panel = { version = "0.1.0-alpha.4", git = "https://gitlab.gnome.org/World/Rust/libpanel-rs", optional = true, package = "libpanel" }
+panel = { version = "0.1", optional = true, package = "libpanel" }
 tokio = { version = "1.20", features = ["rt", "rt-multi-thread", "sync"] }
 
 relm4-macros = { version = "0.5.0-beta.3", path = "../relm4-macros", optional = true }
