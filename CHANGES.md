@@ -2,14 +2,16 @@
 
 ## Unreleased
 
+## 0.5.0-beta.4 - 2022-10-24
+
 ### Added
 
 + core: Added `dox` feature to be able to build the docs without the dependencies
-+ components: Added `dox` feature to be able to build the docs without the dependencies
 + core: Added widget templates
-+ examples: Add libadwaita Leaflet sidebar example
 + core: Allow changing the priority of event loops of components
 + core: Impl `ContainerChild` and `RelmSetChildExt` for `adw::ToastOverlay`
++ components: Added `dox` feature to be able to build the docs without the dependencies
++ examples: Add libadwaita Leaflet sidebar example
 + examples: Port entry, actions and popover examples to 0.5
 
 ### Changed
