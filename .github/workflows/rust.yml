@@ -55,11 +55,25 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
-      - run: rustup component add rustfmt
       - uses: actions-rs/cargo@v1
         with:
           command: fmt
           args: --all -- --check
+
+  docs:
+    name: check-docs
+    runs-on: ubuntu-latest
+    env: 
+      RUSTDOCFLAGS: "-D warnings"
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: nightly
+      - uses: actions-rs/cargo@v1
+        with:
+          command: doc
+          args: --all-features
 
   codespell:
     runs-on: ubuntu-latest
