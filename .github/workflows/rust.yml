@@ -19,7 +19,6 @@ jobs:
         rust:
           - stable
           - beta
-          - nightly
           - "1.63.0"
     env:
         DISPLAY: ":99.0"
@@ -39,11 +38,8 @@ jobs:
       - name: "test"
         run: xvfb-run --auto-servernum cargo test
 
-      # Only run stable clippy lints to avoid
-      # lints for unstable features
       - name: "check examples"
         run: cargo clippy --examples -- --deny warnings
-        if: matrix.rust == 'stable'
 
       - uses: bcomnes/cleanup-xvfb@v1.0.6
 
