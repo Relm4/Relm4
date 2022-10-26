@@ -45,7 +45,7 @@ jobs:
         run: cargo clippy --examples -- --deny warnings
         if: matrix.rust == 'stable'
 
-      - uses: bcomnes/cleanup-xvfb@v1.0.6
+      - uses: bcomnes/cleanup-xvfb@v1.0.8
 
   fmt:
     name: rustfmt
