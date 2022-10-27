@@ -32,7 +32,7 @@ impl<C: Component> ComponentSender<C> {
         }
     }
 
-    /// Spawns a command.
+    /// Spawns an asynchronous command.
     /// You can bind the the command to the lifetime of the component
     /// by using a [`ShutdownReceiver`].
     pub fn command<Cmd, Fut>(&self, cmd: Cmd)
@@ -43,6 +43,18 @@ impl<C: Component> ComponentSender<C> {
         self.shared.command(cmd);
     }
 
+    /// Spawns a synchronous command.
+    ///
+    /// The command will always complete, so it's better to
+    /// call [`try_send`](Sender::try_send) if you expect the component
+    /// to be dropped while the command is running.
+    pub fn sync_command<Cmd>(&self, cmd: Cmd)
+    where
+        Cmd: FnOnce(Sender<C::CommandOutput>) + Send + 'static,
+    {
+        self.shared.sync_command(cmd);
+    }
+
     /// Spawns a future that will be dropped as soon as the component is shut down.
     ///
     /// Essentially, this is a simpler version of [`Self::command()`].
@@ -51,6 +63,16 @@ impl<C: Component> ComponentSender<C> {
         Fut: Future<Output = C::CommandOutput> + Send + 'static,
     {
         self.shared.oneshot_command(future);
+    }
+
+    /// Spawns a synchronous command that will be dropped as soon as the component is shut down.
+    ///
+    /// Essentially, this is a simpler version of [`Self::sync_command()`].
+    pub fn sync_oneshot_command<Cmd>(&self, command: Cmd)
+    where
+        Cmd: FnOnce() -> C::CommandOutput + Send + 'static,
+    {
+        self.shared.sync_oneshot_command(command);
     }
 
     /// Emit an input to the component.
@@ -114,7 +136,7 @@ impl<C: FactoryComponent> FactoryComponentSender<C> {
     }
 
     /// Spawns a command.
-    /// You can bind the the command to the lifetime of the component
+    /// You can bind the the command to the lifetime of the factory component
     /// by using a [`ShutdownReceiver`].
     pub fn command<Cmd, Fut>(&self, cmd: Cmd)
     where
@@ -124,7 +146,19 @@ impl<C: FactoryComponent> FactoryComponentSender<C> {
         self.shared.command(cmd);
     }
 
-    /// Spawns a future that will be dropped as soon as the component is shut down.
+    /// Spawns a synchronous command.
+    ///
+    /// The command will always complete, so it's better to
+    /// call [`try_send`](Sender::try_send) if you expect the component
+    /// to be dropped while the command is running.
+    pub fn sync_command<Cmd>(&self, cmd: Cmd)
+    where
+        Cmd: FnOnce(Sender<C::CommandOutput>) + Send + 'static,
+    {
+        self.shared.sync_command(cmd);
+    }
+
+    /// Spawns a future that will be dropped as soon as the factory component is shut down.
     ///
     /// Essentially, this is a simpler version of [`Self::command()`].
     pub fn oneshot_command<Fut>(&self, future: Fut)
@@ -137,6 +171,16 @@ impl<C: FactoryComponent> FactoryComponentSender<C> {
     /// Emit an input to the component.
     pub fn input(&self, message: C::Input) {
         self.shared.input.send(message);
+    }
+
+    /// Spawns a synchronous command that will be dropped as soon as the factory component is shut down.
+    ///
+    /// Essentially, this is a simpler version of [`Self::sync_command()`].
+    pub fn sync_oneshot_command<Cmd>(&self, command: Cmd)
+    where
+        Cmd: FnOnce() -> C::CommandOutput + Send + 'static,
+    {
+        self.shared.sync_oneshot_command(command);
     }
 
     /// Retrieve the sender for input messages.
@@ -201,6 +245,14 @@ impl<Input, Output, CommandOutput: Send + 'static>
         });
     }
 
+    fn sync_command<Cmd>(&self, cmd: Cmd)
+    where
+        Cmd: FnOnce(Sender<CommandOutput>) + Send + 'static,
+    {
+        let sender = self.command.clone();
+        crate::spawn_blocking(move || cmd(sender));
+    }
+
     fn oneshot_command<Fut>(&self, future: Fut)
     where
         Fut: Future<Output = CommandOutput> + Send + 'static,
@@ -211,5 +263,13 @@ impl<Input, Output, CommandOutput: Send + 'static>
                 .register(async move { out.send(future.await) })
                 .drop_on_shutdown()
         });
+    }
+
+    fn sync_oneshot_command<Cmd>(&self, cmd: Cmd)
+    where
+        Cmd: FnOnce() -> CommandOutput + Send + 'static,
+    {
+        let handle = crate::spawn_blocking(move || cmd());
+        self.oneshot_command(async move { handle.await.unwrap() })
     }
 }

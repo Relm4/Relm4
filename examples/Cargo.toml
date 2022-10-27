@@ -48,6 +48,10 @@ name = "non_blocking_async"
 path = "non_blocking_async.rs"
 
 [[example]]
+name = "non_blocking_sync"
+path = "non_blocking_sync.rs"
+
+[[example]]
 name = "menu"
 path = "menu.rs"
 

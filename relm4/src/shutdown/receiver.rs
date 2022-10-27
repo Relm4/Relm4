@@ -7,7 +7,7 @@ use std::sync::{
 };
 
 use super::AttachedShutdown;
-use async_broadcast::Receiver;
+use tokio::sync::broadcast::Receiver;
 
 /// Listens to shutdown signals and constructs shutdown futures.
 #[derive(Debug)]
@@ -37,7 +37,7 @@ impl Clone for ShutdownReceiver {
     fn clone(&self) -> Self {
         Self {
             alive: self.alive.clone(),
-            receiver: self.receiver.clone(),
+            receiver: self.receiver.resubscribe(),
         }
     }
 }

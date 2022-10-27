@@ -21,9 +21,16 @@ impl<T> From<flume::Sender<T>> for Sender<T> {
 }
 
 impl<T> Sender<T> {
-    /// Sends messages to a component or worker.
+    /// Sends a message to a component or worker.
     pub fn send(&self, message: T) {
         assert!(self.0.send(message).is_ok(), "Receiver was dropped");
+    }
+
+    /// Tries to send a message to a component or worker.
+    ///
+    /// If all receivers where dropped, [`None`] is returned.
+    pub fn try_send(&self, message: T) -> Option<()> {
+        self.0.send(message).ok()
     }
 }
 

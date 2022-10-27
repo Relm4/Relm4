@@ -8,6 +8,7 @@ mod sender;
 pub use attached::AttachedShutdown;
 pub use receiver::ShutdownReceiver;
 pub use sender::ShutdownSender;
+use tokio::sync::broadcast;
 
 use std::sync::atomic::AtomicBool;
 use std::sync::Arc;
@@ -19,7 +20,7 @@ use std::sync::Arc;
 #[must_use]
 pub fn channel() -> (ShutdownSender, ShutdownReceiver) {
     let alive = Arc::new(AtomicBool::new(true));
-    let (sender, receiver) = async_broadcast::broadcast(1);
+    let (sender, receiver) = broadcast::channel(1);
     (
         ShutdownSender {
             alive: alive.clone(),

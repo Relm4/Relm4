@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Added
+
++ core: Synchronous API for commands
++ core: Add `try_send` method for fallible sending of messages
++ core: Remove async-broadcast dependency
+
 ## 0.5.0-beta.4 - 2022-10-24
 
 ### Added
