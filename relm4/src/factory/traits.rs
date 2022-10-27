@@ -3,7 +3,7 @@
 use gtk::prelude::IsA;
 
 use super::{DynamicIndex, FactoryComponentSender};
-use crate::{OnDestroy, Sender};
+use crate::Sender;
 
 use std::fmt::Debug;
 
@@ -106,7 +106,7 @@ pub trait FactoryComponent:
     type Init;
 
     /// The widget that was constructed by the factory component.
-    type Root: AsRef<<Self::ParentWidget as FactoryView>::Children> + Debug + OnDestroy + Clone;
+    type Root: AsRef<<Self::ParentWidget as FactoryView>::Children> + Debug + Clone;
 
     /// The type that's used for storing widgets created for this factory component.
     type Widgets: 'static;

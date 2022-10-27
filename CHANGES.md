@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## Fixed
+
++ core: `shutdown` on `FactoryComponent` now works as expected
+
 ## 0.5.0-beta.4 - 2022-10-24
 
 ### Added
