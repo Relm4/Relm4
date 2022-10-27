@@ -45,6 +45,9 @@ impl<C: Component> ComponentSender<C> {
 
     /// Spawns a synchronous command.
     ///
+    /// This is particularly useful for CPU-intensive background jobs that
+    /// need to run on a thread-pool in the background.
+    ///
     /// The command will always complete, so it's better to
     /// call [`try_send`](Sender::try_send) if you expect the component
     /// to be dropped while the command is running.
@@ -147,6 +150,9 @@ impl<C: FactoryComponent> FactoryComponentSender<C> {
     }
 
     /// Spawns a synchronous command.
+    ///
+    /// This is particularly useful for CPU-intensive background jobs that
+    /// need to run on a thread-pool in the background.
     ///
     /// The command will always complete, so it's better to
     /// call [`try_send`](Sender::try_send) if you expect the component
