@@ -71,21 +71,27 @@ enum DialogMsg {
     Cancel,
 }
 
+struct DialogInit {
+    text: String,
+    secondary_text: Option<String>,
+    accept_text: String,
+    cancel_text: String,
+}
+
 #[relm4::component]
 impl SimpleComponent for Dialog {
-    type Init = gtk::Window;
+    type Init = DialogInit;
     type Input = DialogMsg;
     type Output = AppMsg;
     type Widgets = DialogWidgets;
 
     view! {
         dialog = gtk::MessageDialog {
-            set_transient_for: Some(&parent_window),
             set_modal: true,
-            set_text: Some("Do you want to close before saving?"),
-            set_secondary_text: Some("All unsaved changes will be lost"),
-            add_button: ("Close", gtk::ResponseType::Accept),
-            add_button: ("Cancel", gtk::ResponseType::Cancel),
+            set_text: Some(&init.text),
+            set_secondary_text: init.secondary_text.as_deref(),
+            add_button: (&init.accept_text, gtk::ResponseType::Accept),
+            add_button: (&init.cancel_text, gtk::ResponseType::Cancel),
 
             #[watch]
             set_visible: !model.hidden,
@@ -101,12 +107,11 @@ impl SimpleComponent for Dialog {
     }
 
     fn init(
-        parent_window: Self::Init,
+        init: Self::Init,
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = Dialog { hidden: true };
-
         let widgets = view_output!();
 
         ComponentParts { model, widgets }
@@ -153,8 +158,7 @@ impl SimpleComponent for App {
 
     view! {
         main_window = gtk::ApplicationWindow {
-            set_default_width: 500,
-            set_default_height: 250,
+            set_default_size: (500, 250),
             set_titlebar: Some(model.header.widget()),
 
             #[wrap(Some)]
@@ -178,7 +182,13 @@ impl SimpleComponent for App {
             .launch(())
             .forward(sender.input_sender(), identity);
         let dialog = Dialog::builder()
-            .launch(root.clone().upcast())
+            .transient_for(&root)
+            .launch(DialogInit {
+                text: "Do you want to close before saving?".to_string(),
+                secondary_text: Some("All unsaved changes will be lost".to_string()),
+                accept_text: "Close".to_string(),
+                cancel_text: "Cancel".to_string(),
+            })
             .forward(sender.input_sender(), identity);
 
         let model = App {
@@ -186,7 +196,6 @@ impl SimpleComponent for App {
             header,
             dialog,
         };
-
         let widgets = view_output!();
 
         ComponentParts { model, widgets }
@@ -208,6 +217,6 @@ impl SimpleComponent for App {
 }
 
 fn main() {
-    let relm_app = RelmApp::new("relm4.example.components");
-    relm_app.run::<App>(());
+    let app = RelmApp::new("relm4.example.components");
+    app.run::<App>(());
 }

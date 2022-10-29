@@ -1,6 +1,6 @@
 <h1>
   <a href="https://relm4.org">
-    <img src="assets/Relm_logo_with_text.png" width="190" alt="Relm4">
+    <img src="assets/Relm_logo_with_text.png" width="200" alt="Relm4">
   </a>
 </h1>
 
@@ -46,21 +46,22 @@ Relm4 depends on GTK4: [How to install GTK4](https://www.gtk.org/docs/installati
 To use all features, just add this to your `Cargo.toml`:
 
 ```toml
-relm4 = { git = "https://github.com/Relm4/Relm4.git", features = ["macros"] }
-relm4-components = { git = "https://github.com/Relm4/Relm4.git" }
-# relm4 = { version = "0.5", features = ["macros"] }
-# relm4-components = "0.5"
+relm4 = "0.5.0-beta.4"
+relm4-components = "0.5.0-beta.4"
 ```
 
 ### Features
 
-The `relm4` crate has three feature flags:
+The `relm4` crate has four feature flags:
 
 | Flag | Purpose |
 | :--- | :------ |
 | macros | Enable macros by re-exporting [`relm4-macros`](https://crates.io/crates/relm4-macros) |
 | libadwaita | Improved support for [libadwaita](https://gitlab.gnome.org/World/Rust/libadwaita-rs) |
 | libpanel | Improved support for [libpanel](https://gitlab.gnome.org/World/Rust/libpanel-rs) |
+| dox | Linking to the underlying C libraries is skipped to allow building the docs without the dependencies |
+
+The `macros` feature is a default feature.
 
 ## Examples
 
@@ -77,28 +78,27 @@ Several example applications are available at [examples/](examples/).
 use gtk::prelude::*;
 use relm4::prelude::*;
 
-struct AppModel {
+struct App {
     counter: u8,
 }
 
 #[derive(Debug)]
-enum AppMsg {
+enum Msg {
     Increment,
     Decrement,
 }
 
 #[relm4::component]
-impl SimpleComponent for AppModel {
+impl SimpleComponent for App {
     type Init = u8;
-    type Input = AppMsg;
+    type Input = Msg;
     type Output = ();
     type Widgets = AppWidgets;
 
     view! {
         gtk::Window {
             set_title: Some("Simple app"),
-            set_default_width: 300,
-            set_default_height: 100,
+            set_default_size: (300, 100),
 
             gtk::Box {
                 set_orientation: gtk::Orientation::Vertical,
@@ -124,13 +124,13 @@ impl SimpleComponent for AppModel {
         }
     }
 
-    // Initialize the UI.
+    // Initialize the component.
     fn init(
         counter: Self::Init,
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let model = AppModel { counter };
+        let model = App { counter };
 
         // Insert the code generation of the view! macro here
         let widgets = view_output!();
@@ -140,10 +140,10 @@ impl SimpleComponent for AppModel {
 
     fn update(&mut self, msg: Self::Input, _sender: ComponentSender<Self>) {
         match msg {
-            AppMsg::Increment => {
+            Msg::Increment => {
                 self.counter = self.counter.wrapping_add(1);
             }
-            AppMsg::Decrement => {
+            Msg::Decrement => {
                 self.counter = self.counter.wrapping_sub(1);
             }
         }
@@ -152,7 +152,7 @@ impl SimpleComponent for AppModel {
 
 fn main() {
     let app = RelmApp::new("relm4.example.simple");
-    app.run::<AppModel>(0);
+    app.run::<App>(0);
 }
 ```
 

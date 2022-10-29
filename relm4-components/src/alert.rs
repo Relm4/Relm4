@@ -63,7 +63,7 @@ impl SimpleComponent for Alert {
     type Output = AlertResponse;
 
     view! {
-        #[name = "dialog"]
+        #[name(dialog)]
         gtk::MessageDialog {
             set_message_type: gtk::MessageType::Question,
             #[watch]

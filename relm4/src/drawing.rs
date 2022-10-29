@@ -8,7 +8,7 @@ use std::cell::RefCell;
 use std::ops::Deref;
 use std::rc::Rc;
 
-use gtk::cairo::{self, Context, Format, ImageSurface};
+use gtk::cairo::{Context, Format, ImageSurface};
 use gtk::prelude::{DrawingAreaExtManual, WidgetExt};
 
 #[derive(Clone, Debug)]
@@ -39,23 +39,21 @@ pub struct DrawContext {
     context: Context,
     draw_surface: Surface,
     edit_surface: ImageSurface,
-    draw_area: gtk::DrawingArea,
+    drawing_area: gtk::DrawingArea,
 }
 
 impl DrawContext {
     fn new(
         draw_surface: &Surface,
         edit_surface: &ImageSurface,
-        draw_area: &gtk::DrawingArea,
-    ) -> Result<Self, cairo::Error> {
-        let draw_context = Self {
-            context: Context::new(edit_surface)?,
+        drawing_area: &gtk::DrawingArea,
+    ) -> Self {
+        Self {
+            context: Context::new(edit_surface).unwrap(),
             draw_surface: draw_surface.clone(),
             edit_surface: edit_surface.clone(),
-            draw_area: draw_area.clone(),
-        };
-
-        Ok(draw_context)
+            drawing_area: drawing_area.clone(),
+        }
     }
 }
 
@@ -70,67 +68,93 @@ impl Deref for DrawContext {
 impl Drop for DrawContext {
     fn drop(&mut self) {
         self.draw_surface.set(&self.edit_surface);
-        self.draw_area.queue_draw();
+        self.drawing_area.queue_draw();
     }
 }
 
 /// Manager for drawing operations.
 #[derive(Debug)]
+#[must_use]
 pub struct DrawHandler {
     draw_surface: Surface,
     edit_surface: ImageSurface,
-    draw_area: Option<gtk::DrawingArea>,
+    drawing_area: gtk::DrawingArea,
+}
+
+impl Default for DrawHandler {
+    fn default() -> Self {
+        Self::new()
+    }
 }
 
 impl DrawHandler {
     /// Create a new [`DrawHandler`].
-    pub fn new() -> Result<Self, cairo::Error> {
-        Ok(Self {
-            draw_surface: Surface::new(ImageSurface::create(Format::ARgb32, 100, 100)?),
-            edit_surface: ImageSurface::create(Format::ARgb32, 100, 100)?,
-            draw_area: None,
-        })
+    pub fn new() -> Self {
+        Self::new_with_drawing_area(gtk::DrawingArea::default())
+    }
+
+    /// Create a new [`DrawHandler`] with an existing [`gtk::DrawingArea`].
+    pub fn new_with_drawing_area(drawing_area: gtk::DrawingArea) -> Self {
+        let draw_surface = Surface::new(ImageSurface::create(Format::ARgb32, 100, 100).unwrap());
+        let edit_surface = ImageSurface::create(Format::ARgb32, 100, 100).unwrap();
+
+        use gtk::glib;
+        drawing_area.set_draw_func(
+            glib::clone!(@strong draw_surface => move |_, context, _, _| {
+                // TODO: only copy the area that was exposed?
+                if let Err(error) = context.set_source_surface(&draw_surface.get(), 0.0, 0.0) {
+                    tracing::error!("Cannot set source surface: {:?}", error);
+                }
+
+                if let Err(error) = context.paint() {
+                    tracing::error!("Cannot paint: {:?}", error);
+                }
+            }),
+        );
+
+        Self {
+            draw_surface,
+            edit_surface,
+            drawing_area,
+        }
     }
 
     /// Get the drawing context to draw on a [`gtk::DrawingArea`].
     /// If the size of the [`gtk::DrawingArea`] changed, the contents of the
     /// surface will be replaced by a new, empty surface.
-    pub fn get_context(&mut self) -> Result<DrawContext, cairo::Error> {
-        if let Some(ref draw_area) = self.draw_area {
-            let allocation = draw_area.allocation();
-            let scale = draw_area.scale_factor();
-            let width = allocation.width() * scale;
-            let height = allocation.height() * scale;
+    pub fn get_context(&mut self) -> DrawContext {
+        let allocation = self.drawing_area.allocation();
+        let scale = self.drawing_area.scale_factor();
+        let width = allocation.width() * scale;
+        let height = allocation.height() * scale;
 
-            if (width, height) != (self.edit_surface.width(), self.edit_surface.height()) {
-                // TODO: also copy the old small surface to the new bigger one?
-                match ImageSurface::create(Format::ARgb32, width, height) {
-                    Ok(surface) => {
-                        surface.set_device_scale(f64::from(scale), f64::from(scale));
-                        self.edit_surface = surface;
-                    }
-                    Err(error) => log::error!("Cannot resize image surface: {:?}", error),
+        if (width, height) != (self.edit_surface.width(), self.edit_surface.height()) {
+            match ImageSurface::create(Format::ARgb32, width, height) {
+                Ok(surface) => {
+                    surface.set_device_scale(f64::from(scale), f64::from(scale));
+                    self.edit_surface = surface;
                 }
+                Err(error) => tracing::error!("Cannot resize image surface: {:?}", error),
             }
-            DrawContext::new(&self.draw_surface, &self.edit_surface, draw_area)
-        } else {
-            panic!("Call DrawHandler::init() before DrawHandler::get_context().");
         }
+        DrawContext::new(&self.draw_surface, &self.edit_surface, &self.drawing_area)
     }
 
-    /// Initialize the draw handler.
-    pub fn init(&mut self, draw_area: &gtk::DrawingArea) {
-        self.draw_area = Some(draw_area.clone());
-        let draw_surface = self.draw_surface.clone();
-        draw_area.set_draw_func(move |_, context, _, _| {
-            // TODO: only copy the area that was exposed?
-            if let Err(error) = context.set_source_surface(&draw_surface.get(), 0.0, 0.0) {
-                log::error!("Cannot set source surface: {:?}", error);
-            }
+    /// Get the height of the [`DrawHandler`].
+    #[must_use]
+    pub fn height(&self) -> i32 {
+        self.edit_surface.height()
+    }
 
-            if let Err(error) = context.paint() {
-                log::error!("Cannot paint: {:?}", error);
-            }
-        });
+    /// Get the width of the [`DrawHandler`].
+    #[must_use]
+    pub fn width(&self) -> i32 {
+        self.edit_surface.width()
+    }
+
+    /// Get the [`gtk::DrawingArea`] of the [`DrawHandler`].
+    #[must_use]
+    pub fn drawing_area(&self) -> &gtk::DrawingArea {
+        &self.drawing_area
     }
 }

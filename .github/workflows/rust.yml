@@ -20,21 +20,21 @@ jobs:
           - stable
           - beta
           - nightly
-          - "1.63"
+          - "1.63.0"
     env:
         DISPLAY: ":99.0"
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.rust }}
-          override: true
+          components: clippy
 
       - name: "clippy"
         run: cargo clippy -- --deny warnings
 
       - name: "clippy all features"
-        run: cargo clippy --all-features -- --deny warnings
+        run: cargo clippy --features "all" -- --deny warnings
 
       - name: "test"
         run: xvfb-run --auto-servernum cargo test
@@ -45,18 +45,16 @@ jobs:
         run: cargo clippy --examples -- --deny warnings
         if: matrix.rust == 'stable'
 
-      - uses: bcomnes/cleanup-xvfb@v1.0.6
+      - uses: bcomnes/cleanup-xvfb@v1.0.8
 
   fmt:
     name: rustfmt
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions-rs/toolchain@v1
+      - uses: actions/checkout@v3
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          profile: minimal
-          toolchain: stable
-          override: true
+          components: rustfmt
       - run: rustup component add rustfmt
       - uses: actions-rs/cargo@v1
         with:
@@ -66,7 +64,7 @@ jobs:
   codespell:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: codespell-project/actions-codespell@master
         with:
           check_filenames: true

@@ -20,7 +20,7 @@ use gtk::prelude::{
 /// Get a reference to a widget.
 ///
 /// This trait is an extension of [`AsRef`]
-/// that always returns `&`[`Widget`].
+/// that always returns `&`[`gtk::Widget`].
 pub trait WidgetRef {
     /// Returns a reference to a widget.
     ///
@@ -32,6 +32,18 @@ impl<T: AsRef<gtk::Widget>> WidgetRef for T {
     fn widget_ref(&self) -> &gtk::Widget {
         self.as_ref()
     }
+}
+
+/// A trait that describes a widget template.
+///
+/// Widget templates can be created manually by implementing this trait
+/// or by using the [`widget_template`](crate::widget_template) macro.
+pub trait WidgetTemplate: Sized + std::fmt::Debug + std::ops::Deref<Target = Self::Root> {
+    /// The root of the template.
+    type Root;
+
+    /// Initializes the template.
+    fn init() -> Self;
 }
 
 /// Additional methods for `gtk::builders::ApplicationBuilder`

@@ -4,11 +4,7 @@ use syn::visit_mut::VisitMut;
 use syn::{parse_quote, Ident, Visibility};
 
 use crate::token_streams::{TokenStreams, TraitImplDetails};
-use crate::visitors::{FactoryComponentVisitor, PreAndPostView};
-
-mod inject_view_code;
-
-use inject_view_code::inject_view_code;
+use crate::visitors::{FactoryComponentVisitor, PreAndPostView, ViewOutputExpander};
 
 pub(crate) fn generate_tokens(
     vis: &Option<Visibility>,
@@ -25,8 +21,17 @@ pub(crate) fn generate_tokens(
 
     let mut struct_fields = None;
 
+    match &factory_visitor.view_widgets {
+        None => factory_visitor.errors.push(syn::Error::new_spanned(
+            &factory_impl,
+            "expected `view!` macro invocation",
+        )),
+        Some(Err(e)) => factory_visitor.errors.push(e.clone()),
+        _ => (),
+    }
+
     if let FactoryComponentVisitor {
-        view_widgets: Some(view_widgets),
+        view_widgets: Some(Ok(view_widgets)),
         root_name,
         init_widgets,
         errors,
@@ -83,17 +88,29 @@ pub(crate) fn generate_tokens(
             #assign
         };
 
-        let widgets_return_code = quote! {
+        let widgets_return_code = parse_quote! {
             Self::Widgets {
                 #return_fields
                 #additional_fields_return_stream
             }
         };
 
-        let init_injected = match inject_view_code(init_widgets, &view_code, &widgets_return_code) {
-            Ok(method) => method,
-            Err(err) => return err.to_compile_error(),
-        };
+        if init_widgets.is_some() {
+            ViewOutputExpander::expand(&mut factory_impl, view_code, widgets_return_code, errors);
+        } else {
+            factory_impl.items.push(parse_quote! {
+                fn init_widgets(
+                    &mut self,
+                    index: &relm4::factory::DynamicIndex,
+                    root: &Self::Root,
+                    returned_widget: &<Self::ParentWidget as relm4::factory::FactoryView>::ReturnedWidget,
+                    sender: relm4::factory::FactoryComponentSender<Self>,
+                ) -> Self::Widgets {
+                    #view_code
+                    #widgets_return_code
+                }
+            });
+        }
 
         factory_impl.items.push(parse_quote! {
             type Root = #root_widget_type;
@@ -112,7 +129,7 @@ pub(crate) fn generate_tokens(
         } = PreAndPostView::extract(&mut factory_impl, errors);
 
         factory_impl.items.push(parse_quote! {
-            /// Update the view to represent the updated model.
+            // Update the view to represent the updated model.
             fn update_view(
                 &self,
                 widgets: &mut Self::Widgets,
@@ -136,10 +153,6 @@ pub(crate) fn generate_tokens(
                 })();
             }
         });
-
-        factory_impl
-            .items
-            .push(syn::ImplItem::Method(init_injected));
     }
 
     let outer_attrs = &factory_impl.attrs;

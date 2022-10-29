@@ -154,7 +154,7 @@ pub fn set_global_css_from_file<P: AsRef<std::path::Path>>(path: P) {
             set_global_css(&bytes);
         }
         Err(err) => {
-            log::error!("Couldn't load global CSS from file: {}", err);
+            tracing::error!("Couldn't load global CSS from file: {}", err);
         }
     }
 }

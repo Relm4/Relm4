@@ -1,25 +1,27 @@
-use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent};
+use relm4::prelude::*;
 
-struct TestComponent;
+struct AppModel;
 
 #[relm4_macros::component]
-impl SimpleComponent for TestComponent {
+impl SimpleComponent for AppModel {
     type Init = ();
     type Input = ();
     type Output = ();
+    type Widgets = AppWidgets;
 
     view! {
         gtk::Window {}
     }
 
+    #[allow(unreachable_code)]
     fn init(
-        init: Self::Init,
+        _: (),
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = Self;
 
-        let widgets = view_output!();
+        let widgets = todo!();
 
         ComponentParts { model, widgets }
     }

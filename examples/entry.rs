@@ -12,7 +12,7 @@ struct Counter {
     value: u8,
 }
 
-struct AppModel {
+struct App {
     counters: FactoryVecDeque<Counter>,
     created_counters: u8,
     // stores entered values
@@ -25,9 +25,8 @@ impl FactoryComponent for Counter {
     type Input = ();
     type Output = AppMsg;
     type CommandOutput = ();
-    type ParentInput = AppMsg;
-
     type Widgets = FactoryWidgets;
+    type ParentInput = AppMsg;
     type ParentWidget = gtk::Box;
 
     view! {
@@ -57,7 +56,7 @@ impl FactoryComponent for Counter {
 }
 
 #[relm4::component]
-impl SimpleComponent for AppModel {
+impl SimpleComponent for App {
     type Init = ();
     type Input = AppMsg;
     type Output = ();
@@ -66,8 +65,7 @@ impl SimpleComponent for AppModel {
     view! {
         gtk::ApplicationWindow {
             set_title: Some("Entry example"),
-            set_default_width: 300,
-            set_default_height: 200,
+            set_default_size: (300, 200),
 
             gtk::Box {
                 set_orientation: gtk::Orientation::Vertical,
@@ -97,7 +95,7 @@ impl SimpleComponent for AppModel {
     ) -> ComponentParts<Self> {
         let factory_box = gtk::Box::default();
 
-        let model = AppModel {
+        let model = App {
             counters: FactoryVecDeque::new(factory_box.clone(), sender.input_sender()),
             created_counters: 0,
             entry: gtk::EntryBuffer::new(None),
@@ -142,5 +140,5 @@ impl SimpleComponent for AppModel {
 
 fn main() {
     let app = RelmApp::new("relm4.example.entry");
-    app.run::<AppModel>(());
+    app.run::<App>(());
 }

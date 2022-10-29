@@ -12,7 +12,7 @@
 )]
 
 use proc_macro::TokenStream;
-use syn::parse_macro_input;
+use syn::{parse_macro_input, ItemImpl};
 
 mod additional_fields;
 mod args;
@@ -27,6 +27,7 @@ mod widgets;
 mod util;
 mod factory;
 mod token_streams;
+mod widget_template;
 
 use attrs::Attrs;
 use menu::Menus;
@@ -52,28 +53,27 @@ fn gtk_import() -> syn::Path {
 /// use gtk::prelude::*;
 ///
 /// #[derive(Default)]
-/// struct AppModel {
+/// struct App {
 ///     counter: u8,
 /// }
 ///
 /// #[derive(Debug)]
-/// enum AppMsg {
+/// enum Msg {
 ///     Increment,
 ///     Decrement,
 /// }
 ///
 /// #[relm4_macros::component(pub)]
-/// impl SimpleComponent for AppModel {
+/// impl SimpleComponent for App {
 ///     type Init = u8;
-///     type Input = AppMsg;
+///     type Input = Msg;
 ///     type Output = ();
 ///     type Widgets = AppWidgets;
 ///
 ///     view! {
 ///         gtk::Window {
 ///             set_title: Some("Simple app"),
-///             set_default_width: 300,
-///             set_default_height: 100,
+///             set_default_size: (300, 100),
 ///             gtk::Box {
 ///                 set_orientation: gtk::Orientation::Vertical,
 ///                 set_margin_all: 5,
@@ -81,12 +81,12 @@ fn gtk_import() -> syn::Path {
 ///
 ///                 gtk::Button {
 ///                     set_label: "Increment",
-///                     connect_clicked => AppMsg::Increment,
+///                     connect_clicked => Msg::Increment,
 ///                 },
 ///                 gtk::Button {
 ///                     set_label: "Decrement",
 ///                     connect_clicked[sender] => move |_| {
-///                         sender.input(AppMsg::Decrement);
+///                         sender.input(Msg::Decrement);
 ///                     },
 ///                 },
 ///                 gtk::Label {
@@ -110,12 +110,12 @@ fn gtk_import() -> syn::Path {
 ///         ComponentParts { model, widgets }
 ///     }
 ///
-///     fn update(&mut self, msg: AppMsg, _sender: ComponentSender<Self>) {
+///     fn update(&mut self, msg: Msg, _sender: ComponentSender<Self>) {
 ///         match msg {
-///             AppMsg::Increment => {
+///             Msg::Increment => {
 ///                 self.counter = self.counter.wrapping_add(1);
 ///             }
-///             AppMsg::Decrement => {
+///             Msg::Decrement => {
 ///                 self.counter = self.counter.wrapping_sub(1);
 ///             }
 ///         }
@@ -133,10 +133,10 @@ fn gtk_import() -> syn::Path {
 /// # use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
 /// # use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent, RelmWidgetExt};
 /// #
-/// struct AppModel {}
+/// struct App {}
 ///
 /// #[relm4_macros::component]
-/// impl SimpleComponent for AppModel {
+/// impl SimpleComponent for App {
 ///       /* Code omitted */
 /// #     type Init = ();
 /// #     type Input = ();
@@ -227,26 +227,26 @@ pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
 ///             set_orientation: gtk::Orientation::Horizontal,
 ///             set_spacing: 10,
 ///
-///             #[name = "label"]
+///             #[name(label)]
 ///             gtk::Label {
 ///                 #[watch]
 ///                 set_label: &self.value.to_string(),
 ///                 set_width_chars: 3,
 ///             },
 ///
-///             #[name = "add_button"]
+///             #[name(add_button)]
 ///             gtk::Button {
 ///                 set_label: "+",
 ///                 connect_clicked => CounterMsg::Increment,
 ///             },
 ///
-///             #[name = "remove_button"]
+///             #[name(remove_button)]
 ///             gtk::Button {
 ///                 set_label: "-",
 ///                 connect_clicked => CounterMsg::Decrement,
 ///             },
 ///
-///             #[name = "to_front_button"]
+///             #[name(to_front_button)]
 ///             gtk::Button {
 ///                 set_label: "To start",
 ///                 connect_clicked[sender, index] => move |_| {
@@ -518,6 +518,100 @@ pub fn menu(input: TokenStream) -> TokenStream {
 #[proc_macro]
 pub fn view(input: TokenStream) -> TokenStream {
     view::generate_tokens(input)
+}
+
+/// A macro to generate widget templates.
+///
+/// This macro generates a new type that implements
+/// [`relm4::WidgetTemplate`].
+///
+/// # Example
+///
+/// ```
+/// use relm4::prelude::*;
+/// use gtk::prelude::*;
+///
+/// #[relm4::widget_template]
+/// impl WidgetTemplate for MyBox {
+///     view! {
+///         gtk::Box {
+///             set_margin_all: 10,
+///            // Make the boxes visible
+///             inline_css: "border: 2px solid blue",
+///         }
+///     }
+/// }
+/// ```
+///
+/// The template allows you the generate deeply nested
+/// structures. All named items will be directly accessible
+/// as a child of the template, even if they are nested.
+/// In this example the "child_label" is a template child.
+///
+/// ```
+/// # use relm4::prelude::*;
+/// # use gtk::prelude::*;
+/// #
+/// # #[relm4::widget_template]
+/// # impl WidgetTemplate for MyBox {
+/// #     view! {
+/// #         gtk::Box {
+/// #             set_margin_all: 10,
+/// #            // Make the boxes visible
+/// #             inline_css: "border: 2px solid blue",
+/// #         }
+/// #     }
+/// # }
+/// #
+/// #[relm4::widget_template]
+/// impl WidgetTemplate for MySpinner {
+///     view! {
+///         gtk::Spinner {
+///             set_spinning: true,
+///         }
+///     }
+/// }
+///
+/// #[relm4::widget_template]
+/// impl WidgetTemplate for CustomBox {
+///     view! {
+///         gtk::Box {
+///             set_orientation: gtk::Orientation::Vertical,
+///             set_margin_all: 5,
+///             set_spacing: 5,
+///
+///             #[template]
+///             MyBox {
+///                 #[template]
+///                 MySpinner,
+///
+///                 #[template]
+///                 MyBox {
+///                     #[template]
+///                     MySpinner,
+///
+///                     #[template]
+///                     MyBox {
+///                         #[template]
+///                         MySpinner,
+///
+///                         // Deeply nested!
+///                         #[name = "child_label"]
+///                         gtk::Label {
+///                             set_label: "This is a test",
+///                         }
+///                     }
+///                 }
+///             }
+///         }
+///     }
+/// }
+/// ```
+#[proc_macro_attribute]
+pub fn widget_template(attributes: TokenStream, input: TokenStream) -> TokenStream {
+    let Attrs { visibility } = parse_macro_input!(attributes as Attrs);
+    let item_impl = parse_macro_input!(input as ItemImpl);
+    widget_template::generate_tokens(visibility, item_impl).into()
 }
 
 #[test]

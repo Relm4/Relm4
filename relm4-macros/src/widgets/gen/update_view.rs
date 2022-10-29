@@ -60,6 +60,8 @@ impl Widget {
         model_name: &Ident,
         conditional_branch: bool,
     ) {
+        self.get_template_child_in_scope(stream);
+
         let w_name = &self.name;
         self.properties
             .update_view_stream(stream, w_name, model_name, conditional_branch);

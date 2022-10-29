@@ -28,39 +28,30 @@ enum Input {
 
 #[relm4::component]
 impl SimpleComponent for App {
-    type Widgets = AppWidgets;
-
     type Init = ();
-
     type Input = Input;
     type Output = ();
+    type Widgets = AppWidgets;
 
     view! {
         root = gtk::ApplicationWindow {
+            set_default_size: (600, 400),
+
             #[watch]
             set_title: Some(model.file_name.as_deref().unwrap_or_default()),
-
-            set_default_width: 600,
-            set_default_height: 400,
 
             #[wrap(Some)]
             set_titlebar = &gtk::HeaderBar {
                 pack_start = &gtk::Button {
                     set_label: "Open",
-
-                    connect_clicked[sender] => move |_| {
-                        sender.input(Input::OpenRequest);
-                    },
+                    connect_clicked => Input::OpenRequest,
                 },
                 pack_end = &gtk::Button {
                     set_label: "Save As",
+                    connect_clicked => Input::SaveRequest,
 
                     #[watch]
                     set_sensitive: model.file_name.is_some(),
-
-                    connect_clicked[sender] => move |_| {
-                        sender.input(Input::SaveRequest);
-                    },
                 }
             },
 

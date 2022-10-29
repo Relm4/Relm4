@@ -10,16 +10,19 @@ mod parse;
 mod parse_util;
 mod span;
 
+#[derive(Debug)]
 pub(super) struct ViewWidgets {
     pub(super) span: Span2,
     pub(super) top_level_widgets: Vec<TopLevelWidget>,
 }
 
+#[derive(Debug)]
 pub(super) struct TopLevelWidget {
     pub(super) root_attr: Option<Ident>,
     pub(super) inner: Widget,
 }
 
+#[derive(Debug)]
 enum PropertyType {
     Assign(AssignProperty),
     SignalHandler(SignalHandler),
@@ -28,12 +31,14 @@ enum PropertyType {
     ParseError(ParseError),
 }
 
+#[derive(Debug)]
 enum ParseError {
     Ident((Ident, TokenStream2)),
     Path((Path, TokenStream2)),
     Generic(TokenStream2),
 }
 
+#[derive(Debug)]
 enum AssignPropertyAttr {
     None,
     Watch,
@@ -42,6 +47,7 @@ enum AssignPropertyAttr {
     Track((TokenStream2, bool)),
 }
 
+#[derive(Debug)]
 struct AssignProperty {
     attr: AssignPropertyAttr,
     /// Optional arguments like param_name[arg1, arg2, ...]
@@ -55,34 +61,39 @@ struct AssignProperty {
     chain: Option<Box<Expr>>,
 }
 
+#[derive(Debug)]
 struct SignalHandler {
     inner: SignalHandlerVariant,
     handler_id: Option<Ident>,
 }
 
+#[derive(Debug)]
 enum SignalHandlerVariant {
     Expr(Expr),
     Closure(ClosureSignalHandler),
 }
 
+#[derive(Debug)]
 struct ClosureSignalHandler {
     closure: ExprClosure,
     args: Option<Args<Expr>>,
 }
 
+#[derive(Debug)]
 enum PropertyName {
     Ident(Ident),
     Path(Path),
     RelmContainerExtAssign(Span2),
 }
 
+#[derive(Debug)]
 struct Property {
     /// Either a path or just an ident
     name: PropertyName,
     ty: PropertyType,
 }
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 struct Properties {
     properties: Vec<Property>,
 }
@@ -90,6 +101,7 @@ struct Properties {
 /// The function that initializes the widget.
 ///
 /// This might be a real function or just something like `gtk::Label`.
+#[derive(Debug)]
 struct WidgetFunc {
     path: Path,
     args: Option<Punctuated<Expr, token::Comma>>,
@@ -97,15 +109,18 @@ struct WidgetFunc {
     ty: Option<Path>,
 }
 
+#[derive(Debug)]
 struct WidgetFuncMethod {
     ident: Ident,
     turbofish: Option<MethodTurbofish>,
     args: Option<Punctuated<Expr, token::Comma>>,
 }
 
+#[derive(Debug)]
 pub(super) struct Widget {
     doc_attr: Option<TokenStream2>,
     attr: WidgetAttr,
+    template_attr: WidgetTemplateAttr,
     mutable: Option<Mut>,
     pub(super) name: Ident,
     name_assigned_by_user: bool,
@@ -118,13 +133,21 @@ pub(super) struct Widget {
     returned_widget: Option<ReturnedWidget>,
 }
 
-#[derive(PartialEq)]
+#[derive(Debug, PartialEq)]
 enum WidgetAttr {
     None,
     Local,
     LocalRef,
 }
 
+#[derive(Debug, PartialEq)]
+enum WidgetTemplateAttr {
+    None,
+    Template,
+    TemplateChild,
+}
+
+#[derive(Debug)]
 struct ReturnedWidget {
     name: Ident,
     ty: Option<Path>,
@@ -132,6 +155,7 @@ struct ReturnedWidget {
     is_optional: bool,
 }
 
+#[derive(Debug)]
 struct ConditionalWidget {
     doc_attr: Option<TokenStream2>,
     transition: Option<Ident>,
@@ -141,22 +165,26 @@ struct ConditionalWidget {
     branches: ConditionalBranches,
 }
 
+#[derive(Debug)]
 enum ConditionalBranches {
     If(Vec<IfBranch>),
     Match((Match, Box<Expr>, Vec<MatchArm>)),
 }
 
+#[derive(Debug)]
 enum IfCondition {
     If(If, Expr),
     ElseIf(Else, If, Expr),
     Else(Else),
 }
 
+#[derive(Debug)]
 struct IfBranch {
     cond: IfCondition,
     widget: Widget,
 }
 
+#[derive(Debug)]
 struct MatchArm {
     pattern: Pat,
     guard: Option<(If, Box<Expr>)>,
@@ -177,6 +205,8 @@ enum Attr {
     Transition(Ident, Ident),
     Wrap(Ident, Path),
     Chain(Ident, Box<Expr>),
+    Template(Ident),
+    TemplateChild(Ident),
 }
 
 struct Attrs {

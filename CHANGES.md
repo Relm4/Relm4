@@ -5,17 +5,30 @@
 ### Added
 
 + core: Add `ComponentStream` as alternative to `Controller` that implements `Stream` for async message handling
+
+## 0.5.0-beta.4 - 2022-10-24
+
+### Added
+
++ core: Added `dox` feature to be able to build the docs without the dependencies
++ core: Added widget templates
 + core: Allow changing the priority of event loops of components
 + core: Impl `ContainerChild` and `RelmSetChildExt` for `adw::ToastOverlay`
++ components: Added `dox` feature to be able to build the docs without the dependencies
++ examples: Add libadwaita Leaflet sidebar example
 + examples: Port entry, actions and popover examples to 0.5
 
 ### Changed
 
++ core: Improved `DrawHandler`
++ core: Made the `macros` feature a default feature
 + core: Remove async-oneshot dependency and replace it with tokio's oneshot channel
 + core: Remove WidgetPlus in favor of RelmWidgetExt
 + core: Add convenience getter-methods to Controller
 + core: `add_action` of `RelmActionGroup` now takes a reference to a `RelmAction` as a parameter
++ examples: Many improvements
 + macros: `parse_with_path`, `update_stream`, `inject_view_code` and `generate_tokens` take references for some of their parameters
++ artwork: Update logo
 
 ### Fixed
 

@@ -1,5 +1,21 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
-use relm4::{gtk, ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent};
+use relm4::{gtk, ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, WidgetTemplate};
+
+#[relm4_macros::widget_template]
+impl WidgetTemplate for CustomBox {
+    view! {
+        gtk::Box {
+            set_orientation: gtk::Orientation::Vertical,
+            set_margin_all: 5,
+            set_spacing: 5,
+
+            #[name = "child_label"]
+            gtk::Label {
+                set_label: "This is a test",
+            }
+        }
+    }
+}
 
 #[derive(Default)]
 struct AppModel {
@@ -22,22 +38,25 @@ impl SimpleComponent for AppModel {
     view! {
         gtk::Window {
             set_title: Some("Simple app"),
-            set_default_size: (300, 100),
+            set_default_width: 300,
+            set_default_height: 100,
 
-            gtk::Box {
-                set_orientation: gtk::Orientation::Vertical,
-                set_margin_all: 5,
-                set_spacing: 5,
-
-                append = &gtk::Button {
+            #[template]
+            CustomBox {
+                gtk::Button {
                     set_label: "Increment",
-                    connect_clicked => AppMsg::Increment,
+                    connect_clicked[sender] => move |_| {
+                        sender.input(AppMsg::Increment);
+                    },
                 },
-                append = &gtk::Button {
+                gtk::Button {
                     set_label: "Decrement",
-                    connect_clicked => AppMsg::Decrement,
+                    connect_clicked[sender] => move |_| {
+                        sender.input(AppMsg::Decrement);
+                    },
                 },
-                append = &gtk::Label {
+                #[template_child]
+                child_label {
                     set_margin_all: 5,
                     #[watch]
                     set_label: &format!("Counter: {}", model.counter),

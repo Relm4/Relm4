@@ -167,8 +167,7 @@ impl SimpleComponent for App {
 
     view! {
         main_window = gtk::ApplicationWindow {
-            set_default_width: 500,
-            set_default_height: 250,
+            set_default_size: (500, 250),
             set_titlebar: Some(model.header.widget()),
 
             #[wrap(Some)]
@@ -178,9 +177,7 @@ impl SimpleComponent for App {
             },
             gtk::Button {
                 set_label: "Change header style",
-                connect_clicked[sender] => move |_| {
-                    sender.input(AppMsg::ShowDialog);
-                }
+                connect_clicked => AppMsg::ShowDialog,
             }
         }
     }
@@ -222,6 +219,6 @@ impl SimpleComponent for App {
 }
 
 fn main() {
-    let relm_app = RelmApp::new("relm4.example.message_broker");
-    relm_app.run::<App>(());
+    let app = RelmApp::new("relm4.example.message_broker");
+    app.run::<App>(());
 }
