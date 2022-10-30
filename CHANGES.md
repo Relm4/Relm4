@@ -6,6 +6,10 @@
 
 + core: Add `ComponentStream` as alternative to `Controller` that implements `Stream` for async message handling
 
+### Changed
+
++ macros: Allow using methods calls as widget initializers in the `view` macro
+
 ## 0.5.0-beta.4 - 2022-10-24
 
 ### Added
