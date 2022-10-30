@@ -93,18 +93,10 @@ impl<C: Component> Connector<C> {
     /// Convert his type into a [`Stream`](futures::Stream) that yields output events
     /// as futures.
     pub fn into_stream(self) -> ComponentStream<C> {
-        let Self {
-            state,
-            widget,
-            sender,
-            receiver,
-        } = self;
+        let Self { receiver, .. } = self;
 
         ComponentStream {
-            state,
-            widget,
-            sender,
-            receiver,
+            stream: receiver.into_stream(),
         }
     }
 }
