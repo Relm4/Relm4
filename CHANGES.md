@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
++ core: Add `gnome_42` and `gnome_43` feature flags
+
 ## 0.5.0-beta.4 - 2022-10-24
 
 ### Added
