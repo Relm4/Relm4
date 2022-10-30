@@ -10,6 +10,7 @@ tokio = { version = "1.20", features = ["rt", "macros", "time", "rt-multi-thread
 futures = "0.3.21"
 rand = "0.8.5"
 tracker = "0.1"
+reqwest = "0.11.12"
 
 # log example
 tracing = "0.1.36"
@@ -99,3 +100,7 @@ path = "popover.rs"
 [[example]]
 name = "widget_template"
 path = "widget_template.rs"
+
+[[example]]
+name = "message_stream"
+path = "message_stream.rs"
