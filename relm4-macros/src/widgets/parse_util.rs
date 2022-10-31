@@ -6,7 +6,7 @@ use syn::spanned::Spanned;
 use syn::{braced, bracketed, parenthesized, Error, Ident, Path};
 
 use super::{ParseError, PropertyName};
-use crate::widgets::{parse_util, AssignPropertyAttr, WidgetAttr, WidgetFunc};
+use crate::widgets::{AssignPropertyAttr, WidgetAttr, WidgetFunc};
 
 pub(super) fn attr_twice_error(span: Span2) -> Error {
     Error::new(span, "Cannot use the same attribute twice.")
@@ -56,7 +56,7 @@ impl WidgetFunc {
 
 impl WidgetFunc {
     pub(super) fn snake_case_name(&self) -> Ident {
-        parse_util::idents_to_snake_case(
+        idents_to_snake_case(
             self.path.segments.iter().map(|seg| &seg.ident),
             self.path.span(),
         )

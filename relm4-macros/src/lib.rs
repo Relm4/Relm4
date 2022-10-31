@@ -7,6 +7,7 @@
     missing_docs,
     rust_2018_idioms,
     unreachable_pub,
+    unused_qualifications,
     clippy::cargo,
     clippy::must_use_candidate
 )]
@@ -168,7 +169,7 @@ fn gtk_import() -> syn::Path {
 pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let Attrs { visibility } = parse_macro_input!(attributes as Attrs);
     let backup_input = input.clone();
-    let component_impl_res = syn::parse_macro_input::parse::<syn::ItemImpl>(input);
+    let component_impl_res = syn::parse_macro_input::parse::<ItemImpl>(input);
 
     match component_impl_res {
         Ok(component_impl) => component::generate_tokens(&visibility, component_impl).into(),
@@ -286,7 +287,7 @@ pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
 pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let Attrs { visibility } = parse_macro_input!(attributes as Attrs);
     let backup_input = input.clone();
-    let factory_impl_res = syn::parse_macro_input::parse::<syn::ItemImpl>(input);
+    let factory_impl_res = syn::parse_macro_input::parse::<ItemImpl>(input);
 
     match factory_impl_res {
         Ok(factory_impl) => factory::generate_tokens(&visibility, factory_impl).into(),
