@@ -117,7 +117,7 @@ impl Parse for Attrs {
 fn unexpected_attr_name(ident: &Ident) -> Error {
     Error::new(
         ident.span(),
-        &format!("Unexpected attribute name `{}`.", ident),
+        format!("Unexpected attribute name `{}`.", ident),
     )
 }
 
@@ -138,7 +138,7 @@ fn expect_path_from_expr(expr: &Expr) -> Result<Path> {
     } else {
         Err(Error::new(
             expr.span(),
-            &format!("Expected path `{}`.", expr.to_token_stream()),
+            format!("Expected path `{}`.", expr.to_token_stream()),
         ))
     }
 }
@@ -149,7 +149,7 @@ fn expect_ident_from_expr(expr: &Expr) -> Result<Ident> {
     } else {
         Err(Error::new(
             expr.span(),
-            &format!("Expected identifier `{}`.", expr.to_token_stream()),
+            format!("Expected identifier `{}`.", expr.to_token_stream()),
         ))
     }
 }

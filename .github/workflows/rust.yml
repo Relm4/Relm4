@@ -51,10 +51,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
-      - uses: actions-rs/cargo@v1
-        with:
-          command: fmt
-          args: --all -- --check
+      - name: "Check if the formatting is correct"
+        run: cargo fmt --all -- --check
 
   docs:
     name: check-docs
@@ -66,10 +64,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: nightly
-      - uses: actions-rs/cargo@v1
-        with:
-          command: doc
-          args: --all-features
+      - name: "Build docs for all features"
+        run: cargo doc --all-features
 
   codespell:
     runs-on: ubuntu-latest

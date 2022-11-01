@@ -18,7 +18,7 @@ impl Widget {
             (&ty.segments, ty.segments.len())
         } else if is_local {
             return Error::new(func.span().unwrap().into(),
-                    &format!("You need to specify the type of the local variable. Use this instead: {} -> Type {{ ...", 
+                    format!("You need to specify the type of the local variable. Use this instead: {} -> Type {{ ...", 
                     self.name)).into_compile_error();
         } else if func.args.is_some() {
             // If for example gtk::Box::new() was used, ignore ::new()
@@ -28,7 +28,7 @@ impl Widget {
                 panic!("Path can't be empty");
             } else if len == 1 {
                 return Error::new(func.span().unwrap().into(),
-                        &format!("You need to specify a type of your function. Use this instead: {}() -> Type {{ ...",
+                        format!("You need to specify a type of your function. Use this instead: {}() -> Type {{ ...",
                         path.to_token_stream())).into_compile_error();
             } else {
                 (&path.segments, len - 1)
