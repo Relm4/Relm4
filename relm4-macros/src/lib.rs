@@ -41,7 +41,8 @@ fn gtk_import() -> syn::Path {
     }
 }
 
-/// Macro that implements [`relm4::Component`] and generates the corresponding widgets struct.
+/// Macro that implements `relm4::Component` or `relm4::SimpleComponent`
+/// and generates the corresponding widgets struct.
 ///
 /// # Attributes
 ///
@@ -177,7 +178,7 @@ pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
     }
 }
 
-/// Macro that implements [`relm4::factory::FactoryComponent`] and generates the corresponding widgets struct.
+/// Macro that implements `relm4::factory::FactoryComponent` and generates the corresponding widgets struct.
 ///
 /// # Attributes
 ///
@@ -523,8 +524,7 @@ pub fn view(input: TokenStream) -> TokenStream {
 
 /// A macro to generate widget templates.
 ///
-/// This macro generates a new type that implements
-/// [`relm4::WidgetTemplate`].
+/// This macro generates a new type that implements `relm4::WidgetTemplate`.
 ///
 /// # Example
 ///

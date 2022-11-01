@@ -143,7 +143,7 @@ pub fn set_global_css(style_data: &[u8]) {
 
 /// Sets a custom global stylesheet from a file.
 ///
-/// If the file doesn't exist a [`log::error`] message will be emitted.
+/// If the file doesn't exist a [`tracing::error`] message will be emitted.
 ///
 /// # Panics
 ///
