@@ -19,7 +19,6 @@ jobs:
         rust:
           - stable
           - beta
-          - nightly
           - "1.63.0"
     env:
         DISPLAY: ":99.0"
@@ -39,11 +38,8 @@ jobs:
       - name: "test"
         run: xvfb-run --auto-servernum cargo test
 
-      # Only run stable clippy lints to avoid
-      # lints for unstable features
       - name: "check examples"
         run: cargo clippy --examples -- --deny warnings
-        if: matrix.rust == 'stable'
 
       - uses: bcomnes/cleanup-xvfb@v1.0.8
 
@@ -55,11 +51,25 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
-      - run: rustup component add rustfmt
       - uses: actions-rs/cargo@v1
         with:
           command: fmt
           args: --all -- --check
+
+  docs:
+    name: check-docs
+    runs-on: ubuntu-latest
+    env: 
+      RUSTDOCFLAGS: "-D warnings"
+    steps:
+      - uses: actions/checkout@v2
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: nightly
+      - uses: actions-rs/cargo@v1
+        with:
+          command: doc
+          args: --all-features
 
   codespell:
     runs-on: ubuntu-latest
