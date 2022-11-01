@@ -12,6 +12,7 @@
 
 ### Fixed
 
++ all: Fix doc builds on docs.rs and add a CI job to prevent future doc failures
 + core: `transient_for` on `ComponentBuilder` now works properly when called after the application has been initialized
 
 ## 0.5.0-beta.4 - 2022-10-24
