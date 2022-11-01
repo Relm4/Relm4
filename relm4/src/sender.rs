@@ -275,7 +275,7 @@ impl<Input, Output, CommandOutput: Send + 'static>
     where
         Cmd: FnOnce() -> CommandOutput + Send + 'static,
     {
-        let handle = crate::spawn_blocking(move || cmd());
+        let handle = crate::spawn_blocking(cmd);
         self.oneshot_command(async move { handle.await.unwrap() })
     }
 }
