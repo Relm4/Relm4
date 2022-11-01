@@ -21,7 +21,7 @@ impl ShutdownReceiver {
 
     /// Waits until a shutdown signal is received.
     pub async fn wait(mut self) {
-        drop(self.receiver.recv().await)
+        let _ = self.receiver.recv().await;
     }
 
     #[cfg(test)]
