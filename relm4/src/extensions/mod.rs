@@ -166,6 +166,7 @@ container_child_impl! {
     gtk::ToggleButton
     gtk::Overlay
     gtk::Revealer
+    gtk::WindowHandle
 }
 
 container_child_impl! {

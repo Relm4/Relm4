@@ -5,6 +5,7 @@
 ### Added
 
 + core: Implement `RelmContainerExt` for `adw::Squeezer`
++ core: Implement `RelmSetChildExt` for `gtk::WindowHandle`
 
 ## 0.5.0-beta.4 - 2022-10-24
 
