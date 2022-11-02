@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
++ core: `Reducer` as message based alternative to `SharedState`
+
 ### Fixed
 
 + all: Fix doc builds on docs.rs and add a CI job to prevent future doc failures

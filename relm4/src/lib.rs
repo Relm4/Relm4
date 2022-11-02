@@ -45,15 +45,15 @@ pub use component::{
 };
 pub use extensions::*;
 pub use sender::ComponentSender;
-pub use shared_state::SharedState;
+pub use shared_state::{Reducer, Reducible, SharedState};
 pub use shutdown::ShutdownReceiver;
 pub use worker::{Worker, WorkerController, WorkerHandle};
 
 pub use app::RelmApp;
 pub use tokio::task::JoinHandle;
 
-use gtk::prelude::*;
-use once_cell::sync::OnceCell;
+use gtk::prelude::{Cast, IsA};
+use once_cell::sync::{Lazy, OnceCell};
 use std::cell::Cell;
 use std::future::Future;
 use tokio::runtime::Runtime;
@@ -172,18 +172,14 @@ pub fn spawn_local_with_priority<F: Future<Output = ()> + 'static>(
     gtk::glib::MainContext::ref_thread_default().spawn_local_with_priority(priority, func)
 }
 
-static RUNTIME: OnceCell<Runtime> = OnceCell::new();
-
-fn runtime() -> &'static Runtime {
-    RUNTIME.get_or_init(|| {
-        tokio::runtime::Builder::new_multi_thread()
-            .enable_all()
-            .worker_threads(*RELM_THREADS.get_or_init(|| 1))
-            .max_blocking_threads(*RELM_BLOCKING_THREADS.get_or_init(|| 512))
-            .build()
-            .unwrap()
-    })
-}
+static RUNTIME: Lazy<Runtime> = Lazy::new(|| {
+    tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .worker_threads(*RELM_THREADS.get_or_init(|| 1))
+        .max_blocking_threads(*RELM_BLOCKING_THREADS.get_or_init(|| 512))
+        .build()
+        .unwrap()
+});
 
 /// Spawns a [`Send`]-able future to the shared component runtime.
 pub fn spawn<F>(future: F) -> JoinHandle<F::Output>
@@ -191,7 +187,7 @@ where
     F: Future + Send + 'static,
     F::Output: Send + 'static,
 {
-    runtime().spawn(future)
+    RUNTIME.spawn(future)
 }
 
 /// Spawns a blocking task in a background thread pool.
@@ -200,7 +196,7 @@ where
     F: FnOnce() -> R + Send + 'static,
     R: Send + 'static,
 {
-    runtime().spawn_blocking(func)
+    RUNTIME.spawn_blocking(func)
 }
 
 /// A short macro for conveniently sending messages.
