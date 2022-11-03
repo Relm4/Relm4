@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
++ core: Add `gnome_42` and `gnome_43` feature flags
+
 ### Fixed
 
 + all: Fix doc builds on docs.rs and add a CI job to prevent future doc failures
