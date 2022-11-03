@@ -26,6 +26,10 @@ dox = ["gtk/dox", "adw/dox", "panel/dox"]
 libadwaita = ["adw"]
 libpanel = ["panel"]
 macros = ["relm4-macros"]
+
+gnome_43 = ["gtk/gnome_43", "adw/v1_2"]
+gnome_42 = ["gtk/gnome_42"]
+
 # All features except docs. This is also used in the CI
 all = ["macros", "libadwaita", "panel"]
 
