@@ -8,6 +8,7 @@
 
 ### Changed
 
++ core: Add `gnome_42` and `gnome_43` feature flags
 + macros: Allow using methods calls as widget initializers in the `view` macro
 
 ### Fixed
