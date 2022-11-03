@@ -164,7 +164,8 @@ mod test {
             _: &Self::Root,
             _: &<Self::ParentWidget as crate::factory::FactoryView>::ReturnedWidget,
             _: crate::prelude::FactoryComponentSender<Self>,
-        ) -> Self::Widgets {}
+        ) -> Self::Widgets {
+        }
 
         fn shutdown(&mut self, _: &mut Self::Widgets, _: crate::Sender<Self::Output>) {
             self.add();
