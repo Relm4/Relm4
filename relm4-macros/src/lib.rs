@@ -69,7 +69,6 @@ fn gtk_import() -> syn::Path {
 ///     type Init = u8;
 ///     type Input = Msg;
 ///     type Output = ();
-///     type Widgets = AppWidgets;
 ///
 ///     view! {
 ///         gtk::Window {
@@ -142,7 +141,6 @@ fn gtk_import() -> syn::Path {
 /// #     type Init = ();
 /// #     type Input = ();
 /// #     type Output = ();
-/// #     type Widgets = AppWidgets;
 /// #
 /// #     view! {
 /// #         gtk::Window {}
@@ -221,7 +219,6 @@ pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
 ///     type Output = CounterOutput;
 ///     type ParentInput = AppMsg;
 ///     type ParentWidget = gtk::Box;
-///     type Widgets = CounterWidgets;
 ///
 ///     view! {
 ///         root = gtk::Box {

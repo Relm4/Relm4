@@ -28,7 +28,6 @@ impl Component for App {
     type Input = Msg;
     type Output = ();
     type CommandOutput = UpdatePointsMsg;
-    type Widgets = AppWidgets;
 
     view! {
       gtk::Window {

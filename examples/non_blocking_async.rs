@@ -19,7 +19,6 @@ impl Component for App {
     type Input = ();
     type Output = ();
     type CommandOutput = Msg;
-    type Widgets = AppWidgets;
 
     view! {
         gtk::Window {

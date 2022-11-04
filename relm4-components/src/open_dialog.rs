@@ -116,10 +116,7 @@ pub enum OpenDialogResponse<S: Select> {
 /// Widgets of the open dialog component.
 #[relm4::component(pub)]
 impl<S: Select + 'static> SimpleComponent for OpenDialogInner<S> {
-    type Widgets = OpenDialogWidgets;
-
     type Init = OpenDialogSettings;
-
     type Input = OpenDialogMsg;
     type Output = OpenDialogResponse<S>;
 

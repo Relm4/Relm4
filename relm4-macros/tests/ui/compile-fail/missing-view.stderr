@@ -6,8 +6,8 @@ error: expected `view!` macro invocation
 8  | |     type Input = ();
 9  | |     type Output = ();
 ...  |
-14 | |     }
-15 | | }
+13 | |     }
+14 | | }
    | |_^
 
 error[E0046]: not all trait items implemented, missing: `Root`, `init_root`

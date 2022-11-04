@@ -5,6 +5,7 @@
 ### Added
 
 + core: Add `gnome_42` and `gnome_43` feature flags
++ macros: Auto-generate the name of the `Widgets` type if possible
 
 ### Fixed
 
