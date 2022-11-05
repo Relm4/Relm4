@@ -143,22 +143,6 @@ impl<C: AsyncComponent> AsyncComponentBuilder<C> {
         self.launch_with_input_channel(payload, input_tx, input_rx)
     }
 
-    /*
-     /// Similar to [`launch()`](ComponentBuilder::launch) but also initializes a [`MessageBroker`].
-     ///
-     /// # Panics
-     ///
-     /// This method panics if the message broker was already initialized in another launch.
-     pub fn launch_with_broker(self, payload: C::Init, broker: &MessageBroker<C>) -> AsyncConnector<C> {
-         let (input_tx, input_rx) = broker.get_channel();
-         self.launch_with_input_channel(
-             payload,
-             input_tx,
-             input_rx.expect("Message broker launched multiple times"),
-         )
-     }
-    */
-
     fn launch_with_input_channel(
         self,
         payload: C::Init,
