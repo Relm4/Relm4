@@ -18,11 +18,13 @@ impl ViewWidgets {
 
 impl Widget {
     // Find all template children and get their variables in scope.
-    pub(crate) fn get_template_child_in_scope(&self, stream: &mut TokenStream2) {
+    pub(crate) fn get_template_child_in_scope(&self, stream: &mut TokenStream2, init: bool) {
         if self.template_attr == WidgetTemplateAttr::Template {
             for prop in &self.properties.properties {
                 if let PropertyType::Widget(widget) = &prop.ty {
-                    if widget.template_attr == WidgetTemplateAttr::TemplateChild {
+                    if (init || widget.properties.are_properties_updated())
+                        && widget.template_attr == WidgetTemplateAttr::TemplateChild
+                    {
                         let template_name = &self.name;
                         let child_name = &widget.name;
                         stream.extend(quote_spanned! {

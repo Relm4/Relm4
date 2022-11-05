@@ -15,7 +15,7 @@ impl Widget {
 }
 
 impl Properties {
-    fn are_properties_updated(&self) -> bool {
+    pub(crate) fn are_properties_updated(&self) -> bool {
         // Is there any property with watch or track attribute?
         self.properties.iter().any(|prop| match &prop.ty {
             PropertyType::Assign(assign_prop) => matches!(

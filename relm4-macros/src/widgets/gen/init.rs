@@ -74,7 +74,7 @@ impl Widget {
             }
         }
 
-        self.get_template_child_in_scope(stream);
+        self.get_template_child_in_scope(stream, true);
     }
 
     fn other_init_stream(&self, stream: &mut TokenStream2) {

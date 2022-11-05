@@ -9,6 +9,8 @@
 ### Fixed
 
 + all: Fix doc builds on docs.rs and add a CI job to prevent future doc failures
++ macros: Mark template children of public widget templates as public as well
++ macros: Only get template children in scope when they are actually used
 
 ## 0.5.0-beta.4 - 2022-10-24
 
