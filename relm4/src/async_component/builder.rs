@@ -88,7 +88,7 @@ where
     /// Therefore, you don't have to pass a window to every component.
     ///
     /// If the root widget is a native dialog, such as [`gtk::FileChooserNative`],
-    /// you should use [`transient_for_native`][ComponentBuilder::transient_for_native] instead.
+    /// you should use [`transient_for_native`][AsyncComponentBuilder::transient_for_native] instead.
     #[must_use]
     pub fn transient_for(self, widget: impl AsRef<gtk::Widget>) -> Self {
         let widget = widget.as_ref().clone();
@@ -117,7 +117,7 @@ where
     ///
     /// Applicable to native dialogs only, such as [`gtk::FileChooserNative`].
     /// If the root widget is a non-native dialog,
-    /// you should use [`transient_for`][ComponentBuilder::transient_for] instead.
+    /// you should use [`transient_for`][AsyncComponentBuilder::transient_for] instead.
     #[must_use]
     pub fn transient_for_native(self, widget: impl AsRef<gtk::Widget>) -> Self {
         let widget = widget.as_ref().clone();
