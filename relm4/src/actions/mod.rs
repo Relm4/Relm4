@@ -1,8 +1,8 @@
 //! Action utility.
 
-use glib::variant;
+use gtk::gio;
+use gtk::glib::FromVariant;
 use gtk::prelude::{ActionExt, ActionMapExt, StaticVariantType, ToVariant};
-use gtk::{gio, glib};
 
 use std::marker::PhantomData;
 
@@ -65,8 +65,8 @@ pub struct RelmAction<Name: ActionName> {
 
 impl<Name: ActionName> RelmAction<Name>
 where
-    Name::State: variant::ToVariant + variant::FromVariant,
-    Name::Target: variant::ToVariant + variant::FromVariant,
+    Name::State: ToVariant + FromVariant,
+    Name::Target: ToVariant + FromVariant,
 {
     /// Create a new stateful action with target value.
     pub fn new_stateful_with_target_value<
@@ -97,7 +97,7 @@ where
 
 impl<Name: ActionName> RelmAction<Name>
 where
-    Name::State: variant::ToVariant + variant::FromVariant,
+    Name::State: ToVariant + FromVariant,
     Name::Target: EmptyType,
 {
     /// Create a new stateful action.
@@ -123,7 +123,7 @@ where
 impl<Name: ActionName> RelmAction<Name>
 where
     Name::State: EmptyType,
-    Name::Target: variant::ToVariant + variant::FromVariant,
+    Name::Target: ToVariant + FromVariant,
 {
     /// Create a new stateless action with a target value.
     pub fn new_with_target_value<Callback: Fn(&gio::SimpleAction, Name::Target) + 'static>(
@@ -167,7 +167,7 @@ where
 
 impl<Name: ActionName> RelmAction<Name>
 where
-    Name::Target: variant::ToVariant + variant::FromVariant,
+    Name::Target: ToVariant + FromVariant,
 {
     /// Create a menu item for this action with the target value sent to the action on activation.
     pub fn to_menu_item_with_target_value(

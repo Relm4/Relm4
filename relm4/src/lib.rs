@@ -7,6 +7,7 @@
     missing_docs,
     rust_2018_idioms,
     unreachable_pub,
+    unused_qualifications,
     clippy::cargo,
     clippy::must_use_candidate
 )]
