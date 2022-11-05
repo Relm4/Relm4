@@ -1,88 +1,50 @@
-use proc_macro2::Span;
 use syn::parse::{Parse, ParseStream};
 use syn::spanned::Spanned;
-use syn::{Error, Ident, Result, Token, Visibility};
-
-enum AttributeType {
-    None,
-    Named,
-    Unnamed { span: Span },
-}
+use syn::token::Async;
+use syn::{Error, Result, Token, Visibility};
 
 pub(super) struct Attrs {
     /// Keeps information about visibility of the widget
     pub(super) visibility: Option<Visibility>,
+    /// Whether an async trait is used or not
+    pub(super) asyncness: Option<Async>
 }
 
-impl Attrs {
-    fn new() -> Self {
-        Attrs { visibility: None }
+pub(super) struct SyncOnlyAttrs {
+    /// Keeps information about visibility of the widget
+    pub(super) visibility: Option<Visibility>,
+}
+
+impl Parse for SyncOnlyAttrs {
+    fn parse(input: ParseStream<'_>) -> Result<Self> {
+        let Attrs { visibility, asyncness } = input.parse()?;
+
+        if let Some(async_token)= asyncness {
+            Err(syn::Error::new(async_token.span, "this macro doesn't support async traits"))
+        } else {
+            Ok(Self { visibility })            
+        }
     }
 }
 
 impl Parse for Attrs {
-    /// Rules for parsing attributes.
-    ///
-    /// 1. It's fine if visibility is used unnamed so `#[widget(pub)]` must be valid but that's the only case.
-    /// 2. Widget visibility might be named `#[widget(visibility = pub)]`.
-    /// 3. `relm4` argument must be named. Always.
     fn parse(input: ParseStream<'_>) -> Result<Self> {
-        let mut attrs = Attrs::new();
-        let mut attrs_type = AttributeType::None;
-
-        // Allows to track if relm4 path was already set.
-        // You can't set relm4 path twice.
-        //
-        // ```rust, ignore
-        // #[widget(relm4 = ::my::path, relm4 = ::my::other::path ) ]
-        // ```
-        // is illegal.
-        let mixed_use_error_message =
-            "You can't mix named and unnamed arguments. \n\
-            \n\
-            You can use one of\n\
-            \n\
-            1. `#[relm4_macros::widget()]` to define widget with private visibility\n\
-            2. `#[relm4_macros::widget(pub)]` to define widget with public visibility\n\
-            3. `#[relm4_macros::widget(visibility = pub)]` to define widget with public visibility and potentially other arguments\n\
-            \n\
-            Please use `visibility = pub` to fix this error";
+        let mut attrs = Attrs { visibility: None, asyncness: None };
 
         while !input.is_empty() {
-            if input.peek(Token![pub]) {
-                if matches!(attrs_type, AttributeType::Named) {
-                    return Err(input.error(mixed_use_error_message));
-                }
-                if attrs.visibility.is_some() {
-                    return Err(input.error("You can't assign visibility twice"));
-                }
-                let pub_vis: Visibility = input.parse()?;
-
-                attrs_type = AttributeType::Unnamed {
-                    span: pub_vis.span(),
-                };
-                attrs.visibility = Some(pub_vis);
-            } else {
-                let ident: Ident = input.parse()?;
-                let _eq: Token![=] = input.parse()?;
-
-                if ident == "visibility" {
-                    let pub_vis: Visibility = input.parse()?;
-
-                    if let AttributeType::Unnamed { span } = attrs_type {
-                        return Err(Error::new(span, mixed_use_error_message));
-                    }
-                    if attrs.visibility.is_some() {
-                        return Err(Error::new(
-                            pub_vis.span(),
-                            "You can't assign visibility twice",
-                        ));
-                    }
-
-                    attrs.visibility = Some(pub_vis);
-                    attrs_type = AttributeType::Named;
+            if input.peek(Async) {
+                let new_asyncness: Async = input.parse()?;
+                if attrs.asyncness.is_some() {
+                    return Err(syn::Error::new(new_asyncness.span, "cannot specify asyncness twice"));
                 } else {
-                    return Err(input.error("Unknown argument. Expected `visibility`"));
+                    attrs.asyncness = Some(new_asyncness);
+                }
+            } else {
+                let new_vis: Visibility = input.parse()?;
+                if attrs.visibility.is_some() {
+                    return Err(syn::Error::new(new_vis.span(), "cannot specify visibility twice"));
+                } else {
+                    attrs.visibility = Some(new_vis);
                 }
             }
 
@@ -90,7 +52,7 @@ impl Parse for Attrs {
                 let comma: Token![,] = input.parse()?;
                 if input.is_empty() {
                     // We've just consumed last token in stream (which is comma) and that's wrong
-                    return Err(Error::new(comma.span, "Unexpected comma found"));
+                    return Err(Error::new(comma.span, "expected visibility or `async`"));
                 }
             }
         }

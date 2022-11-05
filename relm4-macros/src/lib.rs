@@ -29,7 +29,7 @@ mod factory;
 mod token_streams;
 mod widget_template;
 
-use attrs::Attrs;
+use attrs::{Attrs, SyncOnlyAttrs};
 use menu::Menus;
 
 fn gtk_import() -> syn::Path {
@@ -167,12 +167,12 @@ fn gtk_import() -> syn::Path {
 /// ```
 #[proc_macro_attribute]
 pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
-    let Attrs { visibility } = parse_macro_input!(attributes as Attrs);
+    let global_attributes: Attrs= parse_macro_input!(attributes);
     let backup_input = input.clone();
     let component_impl_res = syn::parse_macro_input::parse::<syn::ItemImpl>(input);
 
     match component_impl_res {
-        Ok(component_impl) => component::generate_tokens(&visibility, component_impl).into(),
+        Ok(component_impl) => component::generate_tokens(global_attributes, component_impl).into(),
         Err(_) => util::item_impl_error(backup_input),
     }
 }
@@ -285,7 +285,7 @@ pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
 /// ```
 #[proc_macro_attribute]
 pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
-    let Attrs { visibility } = parse_macro_input!(attributes as Attrs);
+    let SyncOnlyAttrs { visibility} = parse_macro_input!(attributes);
     let backup_input = input.clone();
     let factory_impl_res = syn::parse_macro_input::parse::<syn::ItemImpl>(input);
 
@@ -609,7 +609,8 @@ pub fn view(input: TokenStream) -> TokenStream {
 /// ```
 #[proc_macro_attribute]
 pub fn widget_template(attributes: TokenStream, input: TokenStream) -> TokenStream {
-    let Attrs { visibility } = parse_macro_input!(attributes as Attrs);
+    let SyncOnlyAttrs { visibility} = parse_macro_input!(attributes);
+
     let item_impl = parse_macro_input!(input as ItemImpl);
     widget_template::generate_tokens(visibility, item_impl).into()
 }

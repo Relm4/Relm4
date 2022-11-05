@@ -18,7 +18,7 @@ struct AppInit {
     counter: u8,
 }
 
-#[relm4::component(visibility = pub)]
+#[relm4::component(pub)]
 impl SimpleComponent for App {
     type Init = AppInit;
     type Input = Msg;

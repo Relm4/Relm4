@@ -298,7 +298,8 @@ impl<'ast> Visit<'ast> for InitFnVisitor {
     }
 
     fn visit_expr_struct(&mut self, expr_struct: &'ast syn::ExprStruct) {
-        if expr_struct.path.segments.last().unwrap().ident == "ComponentParts" {
+        let ident = &expr_struct.path.segments.last().unwrap().ident;
+        if ident == "ComponentParts" || ident == "AsyncComponentParts" {
             for field in &expr_struct.fields {
                 let member_name = match &field.member {
                     syn::Member::Named(ident) => Some(ident.to_string()),

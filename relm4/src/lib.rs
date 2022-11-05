@@ -33,6 +33,8 @@ pub mod shutdown;
 /// Shared state that can be accessed by many components.
 pub mod shared_state;
 
+/// Types and traits used for async components.
+pub mod async_component;
 pub(crate) mod late_initialization;
 /// A simpler version of components that does work
 /// in the background.
@@ -87,6 +89,7 @@ pub use panel;
 
 pub use once_cell;
 pub use tokio;
+pub use async_trait;
 
 thread_local! {
     static MAIN_APPLICATION: Cell<Option<gtk::Application>> = Cell::default();

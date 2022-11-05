@@ -4,7 +4,12 @@
 
 ### Added
 
++ core: Added asynchronous components including macro support
 + core: Add `gnome_42` and `gnome_43` feature flags
+
+### Changed
+
++ macros: Explicitly using `visibility` as attribute name is no longer supported
 
 ### Fixed
 
