@@ -56,10 +56,12 @@ The `relm4` crate has four feature flags:
 
 | Flag | Purpose |
 | :--- | :------ |
-| macros | Enable macros by re-exporting [`relm4-macros`](https://crates.io/crates/relm4-macros) |
-| libadwaita | Improved support for [libadwaita](https://gitlab.gnome.org/World/Rust/libadwaita-rs) |
-| libpanel | Improved support for [libpanel](https://gitlab.gnome.org/World/Rust/libpanel-rs) |
-| dox | Linking to the underlying C libraries is skipped to allow building the docs without the dependencies |
+| `macros` | Enable macros by re-exporting [`relm4-macros`](https://crates.io/crates/relm4-macros) |
+| `libadwaita` | Improved support for [libadwaita](https://gitlab.gnome.org/World/Rust/libadwaita-rs) |
+| `libpanel` | Improved support for [libpanel](https://gitlab.gnome.org/World/Rust/libpanel-rs) |
+| `dox` | Linking to the underlying C libraries is skipped to allow building the docs without the dependencies |
+| `gnome_43` | Enable all version feature flags of all dependencies to match the GNOME 43 SDK |
+| `gnome_42` | Enable all version feature flags of all dependencies to match the GNOME 42 SDK |
 
 The `macros` feature is a default feature.
 
@@ -107,12 +109,12 @@ impl SimpleComponent for App {
 
                 gtk::Button {
                     set_label: "Increment",
-                    connect_clicked => AppMsg::Increment,
+                    connect_clicked => Msg::Increment,
                 },
 
                 gtk::Button {
                     set_label: "Decrement",
-                    connect_clicked => AppMsg::Decrement,
+                    connect_clicked => Msg::Decrement,
                 },
 
                 gtk::Label {
