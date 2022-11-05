@@ -1,8 +1,8 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote, ToTokens, quote_spanned};
+use quote::{quote, quote_spanned, ToTokens};
+use syn::parse_quote;
 use syn::spanned::Spanned;
 use syn::visit_mut::VisitMut;
-use syn::parse_quote;
 
 use crate::attrs::Attrs;
 use crate::token_streams::{TokenStreams, TraitImplDetails};
@@ -12,7 +12,10 @@ pub(crate) fn generate_tokens(
     global_attributes: Attrs,
     mut component_impl: syn::ItemImpl,
 ) -> TokenStream2 {
-    let Attrs { visibility, asyncness } = global_attributes;
+    let Attrs {
+        visibility,
+        asyncness,
+    } = global_attributes;
 
     let mut errors = vec![];
 
@@ -121,9 +124,9 @@ pub(crate) fn generate_tokens(
         } = PreAndPostView::extract(&mut component_impl, errors);
 
         let sender_ty: syn::Ident = if asyncness.is_some() {
-            parse_quote!{ AsyncComponentSender }
+            parse_quote! { AsyncComponentSender }
         } else {
-            parse_quote!{ ComponentSender }
+            parse_quote! { ComponentSender }
         };
 
         component_impl.items.push(parse_quote! {

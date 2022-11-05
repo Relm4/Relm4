@@ -87,9 +87,9 @@ pub use adw;
 /// Re-export of libpanel
 pub use panel;
 
+pub use async_trait;
 pub use once_cell;
 pub use tokio;
-pub use async_trait;
 
 thread_local! {
     static MAIN_APPLICATION: Cell<Option<gtk::Application>> = Cell::default();

@@ -1,7 +1,10 @@
 use std::time::Duration;
 
 use gtk::prelude::*;
-use relm4::{gtk, RelmWidgetExt, RelmApp, async_component::{AsyncComponent, AsyncComponentParts, AsyncComponentSender}, Sender};
+use relm4::{
+    async_component::{AsyncComponent, AsyncComponentParts, AsyncComponentSender},
+    gtk, RelmApp, RelmWidgetExt, Sender,
+};
 
 struct App {
     counter: u8,
@@ -79,7 +82,7 @@ impl AsyncComponent for App {
         }
     }
 
-    fn shutdown(&mut self,_widgets: &mut Self::Widgets, _output:Sender<Self::Output>) {
+    fn shutdown(&mut self, _widgets: &mut Self::Widgets, _output: Sender<Self::Output>) {
         println!("SHUTDOWN");
     }
 }
