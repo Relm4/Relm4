@@ -1,7 +1,7 @@
 //! A collection of macros for gtk-rs, Relm4 and Rust in general.
 //!
 //! The docs are available in two versions.
-//! Use the [stable docs](https://docs.rs/relm4_macros) if you want get information about a version that was already published.
+//! Use the [stable docs](https://relm4.org/docs/stable/relm4_macros/) if you want get information about a version that was already published.
 //! Visit the [nightly docs](https://relm4.org/docs/next/relm4_macros/) if are trying out the newest but possibly unstable version of the crate.
 //!
 //! Docs of related crates:
