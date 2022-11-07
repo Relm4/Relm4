@@ -7,6 +7,7 @@ edition = "2021"
 [dev-dependencies]
 relm4 = { path = "../relm4", features = ["macros"] }
 tokio = { version = "1.20", features = ["rt", "macros", "time", "rt-multi-thread"] }
+async-std = "1"
 futures = "0.3.21"
 rand = "0.8.5"
 tracker = "0.1"
@@ -23,6 +24,10 @@ path = "simple.rs"
 [[example]]
 name = "simple_manual"
 path = "simple_manual.rs"
+
+[[example]]
+name = "simple_async"
+path = "simple_async.rs"
 
 [[example]]
 name = "factory"

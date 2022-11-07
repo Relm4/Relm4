@@ -7,6 +7,7 @@
     missing_docs,
     rust_2018_idioms,
     unreachable_pub,
+    unused_qualifications,
     clippy::cargo,
     clippy::must_use_candidate
 )]
@@ -33,6 +34,8 @@ pub mod shutdown;
 /// Shared state that can be accessed by many components.
 pub mod shared_state;
 
+/// Types and traits used for async components.
+pub mod async_component;
 pub(crate) mod late_initialization;
 /// A simpler version of components that does work
 /// in the background.
@@ -85,6 +88,7 @@ pub use adw;
 /// Re-export of libpanel
 pub use panel;
 
+pub use async_trait;
 pub use once_cell;
 pub use tokio;
 
