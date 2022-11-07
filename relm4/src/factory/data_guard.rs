@@ -1,25 +1,39 @@
-use std::{cell::Cell, mem::ManuallyDrop, rc::Rc};
+use std::mem::ManuallyDrop;
 
 use futures::Future;
 use gtk::glib;
+
+use crate::{shutdown::ShutdownSender, Sender};
+
+use super::FactoryComponent;
 
 /// # SAFETY
 ///
 /// This type is a safe wrapper that prevent's misuse,
 /// except if you move the data passed to the runtime outside
 /// of the runtime (through senders for example).
-pub(super) struct DataGuard<Data> {
-    data: Box<Data>,
-    rt: RuntimeDropper,
+#[derive(Debug)]
+pub(super) struct DataGuard<C: FactoryComponent> {
+    data: Box<C>,
+    widgets: Box<C::Widgets>,
+    rt_dropper: RuntimeDropper,
+    output_tx: Sender<C::Output>,
+    shutdown_notifier: ShutdownSender,
 }
 
-impl<Data> DataGuard<Data> {
+impl<C: FactoryComponent> DataGuard<C> {
     /// DO NOT MOVE THE DATA PASSED TO THE CLOSURE OUTSIDE OF THE RUNTIME!
     /// SAFETY IS ONLY GUARANTEED BECAUSE THE DATA IS BOUND TO THE LIFETIME OF THE RUNTIME!
-    pub(super) fn new<F, Fut>(data: Box<Data>, f: F) -> (Self, Rc<Cell<Option<glib::SourceId>>>)
+    pub(super) fn new<F, Fut>(
+        data: Box<C>,
+        widgets: Box<C::Widgets>,
+        shutdown_notifier: ShutdownSender,
+        output_tx: Sender<C::Output>,
+        f: F,
+    ) -> Self
     where
         Fut: Future<Output = ()> + 'static,
-        F: FnOnce(ManuallyDrop<Box<Data>>) -> Fut,
+        F: FnOnce(ManuallyDrop<Box<C>>, ManuallyDrop<Box<C::Widgets>>) -> Fut,
     {
         // Duplicate the references to `data`
         //
@@ -37,40 +51,51 @@ impl<Data> DataGuard<Data> {
         // Unsoundness only occurs when data that was moved into the runtime is moved out on
         // purpose. This would allow the first reference to outlive the second one, becoming
         // a dangling pointer.
-        let (data, model_data) = unsafe {
+        let (data, runtime_data) = unsafe {
             let raw = Box::into_raw(data);
             let data = Box::from_raw(raw);
             let runtime_data = ManuallyDrop::new(Box::from_raw(raw));
             (data, runtime_data)
         };
+        let (widgets, runtime_widgets) = unsafe {
+            let raw = Box::into_raw(widgets);
+            let widgets = Box::from_raw(raw);
+            let runtime_widgets = ManuallyDrop::new(Box::from_raw(raw));
+            (widgets, runtime_widgets)
+        };
 
-        let future = f(model_data);
-        let rt = Rc::new(Cell::new(Some(crate::spawn_local(future))));
-        let rt_ref = Rc::clone(&rt);
-        (
-            Self {
-                data,
-                rt: RuntimeDropper(rt),
-            },
-            rt_ref,
-        )
+        let future = f(runtime_data, runtime_widgets);
+        let rt_dropper = RuntimeDropper(Some(crate::spawn_local(future)));
+
+        Self {
+            data,
+            widgets,
+            output_tx,
+            shutdown_notifier,
+            rt_dropper,
+        }
     }
 
-    pub(super) const fn get(&self) -> &Data {
+    pub(super) const fn get(&self) -> &C {
         &self.data
     }
 
-    pub(super) fn get_mut(&mut self) -> &mut Data {
+    pub(super) fn get_mut(&mut self) -> &mut C {
         &mut self.data
     }
 
-    pub(super) fn into_inner(self) -> Data {
-        drop(self.rt);
+    pub(super) fn into_inner(mut self) -> C {
+        drop(self.rt_dropper);
+        self.shutdown_notifier.shutdown();
+        self.data
+            .shutdown(&mut self.widgets, self.output_tx.clone());
+        drop(self.widgets);
         *self.data
     }
 }
 
-struct RuntimeDropper(Rc<Cell<Option<glib::SourceId>>>);
+#[derive(Debug)]
+struct RuntimeDropper(Option<glib::SourceId>);
 
 /// A type that will drop a runtime behind a shared reference
 /// when it is dropped.
@@ -82,17 +107,11 @@ impl Drop for RuntimeDropper {
     }
 }
 
-impl<Data: std::fmt::Debug> std::fmt::Debug for DataGuard<Data> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("DataGuard")
-            .field("data", &self.data)
-            .finish()
-    }
-}
-
 #[cfg(test)]
 mod test {
     use gtk::glib::MainContext;
+
+    use crate::{prelude::FactoryComponent, shutdown};
 
     use super::DataGuard;
 
@@ -117,6 +136,42 @@ mod test {
         }
     }
 
+    impl FactoryComponent for DontDropBelow4 {
+        type ParentWidget = gtk::Box;
+        type ParentInput = ();
+        type CommandOutput = ();
+        type Input = ();
+        type Output = ();
+        type Init = ();
+        type Root = gtk::Box;
+        type Widgets = ();
+
+        fn init_model(
+            _: Self::Init,
+            _: &crate::prelude::DynamicIndex,
+            _: crate::prelude::FactoryComponentSender<Self>,
+        ) -> Self {
+            Self(0)
+        }
+
+        fn init_root(&self) -> Self::Root {
+            gtk::Box::default()
+        }
+
+        fn init_widgets(
+            &mut self,
+            _: &crate::prelude::DynamicIndex,
+            _: &Self::Root,
+            _: &<Self::ParentWidget as crate::factory::FactoryView>::ReturnedWidget,
+            _: crate::prelude::FactoryComponentSender<Self>,
+        ) -> Self::Widgets {
+        }
+
+        fn shutdown(&mut self, _: &mut Self::Widgets, _: crate::Sender<Self::Output>) {
+            self.add();
+        }
+    }
+
     #[test]
     #[should_panic]
     fn test_drop_panic() {
@@ -126,76 +181,39 @@ mod test {
     #[gtk::test]
     fn test_data_guard_drop() {
         let data = Box::new(DontDropBelow4(0_u8));
+        let widgets = Box::new(());
+        let (shutdown_notifier, mut shutdown_receiver) = shutdown::channel();
+        let (output_sender, _) = crate::channel();
         let (tx, rx) = flume::unbounded();
 
-        let main_ctx = MainContext::default();
+        let data = DataGuard::new(
+            data,
+            widgets,
+            shutdown_notifier,
+            output_sender,
+            |mut rt_data, _| async move {
+                while (rx.recv_async().await).is_ok() {
+                    rt_data.add();
+                }
+            },
+        );
 
-        let (data, rt) = DataGuard::new(data, |mut rt_data| async move {
-            while (rx.recv_async().await).is_ok() {
-                rt_data.add();
-            }
-        });
+        let main_ctx = MainContext::default();
 
         main_ctx.iteration(false);
         assert_eq!(data.get().value(), 0);
 
         tx.send(()).unwrap();
         tx.send(()).unwrap();
-        tx.send(()).unwrap();
         main_ctx.iteration(false);
 
-        assert_eq!(data.get().value(), 3);
+        assert_eq!(data.get().value(), 2);
 
         let mut data = data.into_inner();
-        // If destructor was called, it should have panicked by now
+        // Make sure the shutdown is called with yet another increment.
         assert_eq!(data.value(), 3);
-        assert!(rt.take().is_none());
-
-        main_ctx.iteration(false);
-
-        // Make sure the destructor doesn't panic
-        data.add();
-        assert_eq!(data.value(), 4);
-
-        tx.send(()).unwrap_err();
-        main_ctx.iteration(false);
-    }
-
-    #[gtk::test]
-    fn test_data_guard_rt_kill() {
-        let data = Box::new(DontDropBelow4(0_u8));
-        let (tx, rx) = flume::unbounded();
-
-        let main_ctx = MainContext::default();
-
-        let (data, rt) = DataGuard::new(data, |mut rt_data| async move {
-            while (rx.recv_async().await).is_ok() {
-                rt_data.add();
-            }
-        });
-
-        main_ctx.iteration(false);
-        assert_eq!(data.get().value(), 0);
-
-        tx.send(()).unwrap();
-        tx.send(()).unwrap();
-        tx.send(()).unwrap();
-        main_ctx.iteration(false);
-
-        assert_eq!(data.get().value(), 3);
-
-        // Manually drop the runtime from outside
-        rt.take().unwrap().remove();
-
-        // Value shouldn't change
-        tx.send(()).unwrap_err();
-        main_ctx.iteration(false);
-        assert_eq!(data.get().value(), 3);
-
-        let mut data = data.into_inner();
-        // If destructor was called, it should have panicked by now
-        assert_eq!(data.value(), 3);
-        assert!(rt.take().is_none());
+        // Make sure the shutdown receiver was notified.
+        shutdown_receiver.try_recv().unwrap();
 
         main_ctx.iteration(false);
 

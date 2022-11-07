@@ -16,6 +16,7 @@
 ### Fixed
 
 + all: Fix doc builds on docs.rs and add a CI job to prevent future doc failures
++ core: `shutdown` on `FactoryComponent` now works as expected
 
 ## 0.5.0-beta.4 - 2022-10-24
 
