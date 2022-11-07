@@ -70,6 +70,8 @@ impl WidgetFunc {
 
         let mut stream = if let Some(args) = args {
             quote! { #path(#args) }
+        } else if method_chain.is_some() {
+            path.to_token_stream()
         } else {
             quote_spanned! {
                 path.span() => #path::default()

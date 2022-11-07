@@ -3,13 +3,14 @@
 // SPDX-License-Identifier: MIT or Apache-2.0
 
 use super::{Component, ComponentController, Controller, StateWatcher};
+use crate::component::stream::ComponentStream;
 use crate::{Receiver, Sender};
 use std::fmt::{self, Debug};
 use std::rc::Rc;
 
 /// Contains the post-launch input sender and output receivers with the root widget.
 ///
-/// The receiver can be separated from the `Fairing` by choosing a method for handling it.
+/// The receiver can be separated from the [`Connector`] by choosing a method for handling it.
 pub struct Connector<C: Component> {
     /// The models and widgets maintained by the component.
     pub(super) state: Rc<StateWatcher<C>>,
@@ -86,6 +87,16 @@ impl<C: Component> Connector<C> {
             state,
             widget,
             sender,
+        }
+    }
+
+    /// Convert his type into a [`Stream`](futures::Stream) that yields output events
+    /// as futures.
+    pub fn into_stream(self) -> ComponentStream<C> {
+        let Self { receiver, .. } = self;
+
+        ComponentStream {
+            stream: receiver.into_stream(),
         }
     }
 }
