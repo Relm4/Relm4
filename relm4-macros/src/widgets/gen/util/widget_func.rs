@@ -15,7 +15,7 @@ impl Widget {
 
         // If type was specified, use it
         let (type_segments, num_of_segments) = if let Some(ty) = &func.ty {
-            (&ty.segments, ty.segments.len())
+            return ty.to_token_stream();
         } else if is_local {
             return Error::new(func.span().unwrap().into(),
                     format!("You need to specify the type of the local variable. Use this instead: {} -> Type {{ ...", 
@@ -25,7 +25,7 @@ impl Widget {
             // and use gtk::Box as type.
             let len = path.segments.len();
             if len == 0 {
-                panic!("Path can't be empty");
+                unreachable!("Path can't be empty");
             } else if len == 1 {
                 return Error::new(func.span().unwrap().into(),
                         format!("You need to specify a type of your function. Use this instead: {}() -> Type {{ ...",
