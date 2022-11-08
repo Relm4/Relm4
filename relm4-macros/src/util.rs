@@ -22,7 +22,8 @@ pub(super) fn generate_widgets_type(
     }
     // Error: No Widget type found or generated.
     else {
-        let msg = "No `Widgets` found. Please use `type Widgets = WidgetsName;` to name the widgets type.";
+        let msg = "no `Widgets` type found and the type if `Self` in not a path. \
+            Please use a path for `Self` or use `type Widgets = WidgetsName;` to name the widgets type.";
         errors.push(syn::Error::new(
             component_impl
                 .items
