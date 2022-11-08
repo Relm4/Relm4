@@ -38,10 +38,3 @@ impl SimpleComponent for App {
 
     fn update(&mut self, _msg: Self::Input, _sender: ComponentSender<Self>) {}
 }
-
-fn assert_impls_debug<T: std::fmt::Debug>() {}
-
-#[test]
-fn assert_widgets_impl_debug() {
-    assert_impls_debug::<AppWidgets>();
-}

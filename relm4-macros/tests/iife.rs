@@ -37,10 +37,3 @@ impl SimpleComponent for App {
         ComponentParts { model, widgets }
     }
 }
-
-fn assert_impls_debug<T: std::fmt::Debug>() {}
-
-#[test]
-fn assert_widgets_impl_debug() {
-    assert_impls_debug::<AppWidgets>();
-}
