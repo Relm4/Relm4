@@ -18,6 +18,7 @@ enum CounterOutput {
     SendFront(DynamicIndex),
     MoveUp(DynamicIndex),
     MoveDown(DynamicIndex),
+    Remove(DynamicIndex),
 }
 
 #[relm4::factory]
@@ -75,6 +76,13 @@ impl FactoryComponent for Counter {
                 connect_clicked[sender, index] => move |_| {
                     sender.output(CounterOutput::SendFront(index.clone()))
                 }
+            },
+
+            gtk::Button {
+                set_label: "Remove",
+                connect_clicked[sender, index] => move |_| {
+                    sender.output(CounterOutput::Remove(index.clone()))
+                }
             }
         }
     }
@@ -84,6 +92,7 @@ impl FactoryComponent for Counter {
             CounterOutput::SendFront(index) => AppMsg::SendFront(index),
             CounterOutput::MoveUp(index) => AppMsg::MoveUp(index),
             CounterOutput::MoveDown(index) => AppMsg::MoveDown(index),
+            CounterOutput::Remove(index) => AppMsg::Remove(index),
         })
     }
 
@@ -105,6 +114,10 @@ impl FactoryComponent for Counter {
             }
         }
     }
+
+    fn shutdown(&mut self, _widgets: &mut Self::Widgets, _output: relm4::Sender<Self::Output>) {
+        println!("Counter with value {} was destroyed", self.value);
+    }
 }
 
 struct App {
@@ -119,6 +132,7 @@ enum AppMsg {
     SendFront(DynamicIndex),
     MoveUp(DynamicIndex),
     MoveDown(DynamicIndex),
+    Remove(DynamicIndex),
 }
 
 #[relm4::component]
@@ -200,6 +214,9 @@ impl SimpleComponent for App {
                 if index != 0 {
                     counters_guard.move_to(index, index - 1);
                 }
+            }
+            AppMsg::Remove(index) => {
+                counters_guard.remove(index.current_index());
             }
         }
     }

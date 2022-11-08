@@ -27,25 +27,26 @@ impl WidgetFunc {
             .add_path(path));
         }
 
-        let mut args = None;
-        let mut ty = None;
-        let mut method_chain = None;
-
-        if input.peek(token::Paren) {
+        let args = if input.peek(token::Paren) {
             let paren_input = parse_util::parens(input)?;
-            args = Some(paren_input.call(Punctuated::parse_terminated)?);
+            Some(paren_input.call(Punctuated::parse_terminated)?)
+        } else {
+            None
+        };
 
-            if input.peek(token::Dot) {
-                let _dot: token::Dot = input.parse()?;
-                method_chain = Some(Punctuated::parse_separated_nonempty(input)?);
-            }
-        }
+        let method_chain = if input.peek(token::Dot) {
+            let _dot: token::Dot = input.parse()?;
+            Some(Punctuated::parse_separated_nonempty(input)?)
+        } else {
+            None
+        };
 
-        if input.peek(Token! [->]) {
+        let ty = if input.peek(Token! [->]) {
             let _token: Token! [->] = input.parse()?;
-            let ty_path = input.parse()?;
-            ty = Some(ty_path);
-        }
+            Some(input.parse()?)
+        } else {
+            None
+        };
 
         Ok(WidgetFunc {
             path: path.clone(),

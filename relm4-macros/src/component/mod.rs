@@ -1,16 +1,23 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote, ToTokens};
+use quote::{quote, quote_spanned, ToTokens};
+use syn::parse_quote;
+use syn::spanned::Spanned;
 use syn::visit_mut::VisitMut;
-use syn::{parse_quote, Visibility};
 
+use crate::attrs::Attrs;
 use crate::token_streams::{TokenStreams, TraitImplDetails};
 use crate::util;
 use crate::visitors::{ComponentVisitor, PreAndPostView, ViewOutputExpander};
 
 pub(crate) fn generate_tokens(
-    vis: &Option<Visibility>,
+    global_attributes: Attrs,
     mut component_impl: syn::ItemImpl,
 ) -> TokenStream2 {
+    let Attrs {
+        visibility,
+        asyncness,
+    } = global_attributes;
+
     let mut errors = vec![];
 
     let mut component_visitor = ComponentVisitor::new(&mut errors);
@@ -45,7 +52,7 @@ pub(crate) fn generate_tokens(
     } = component_visitor
     {
         let trait_impl_details = TraitImplDetails {
-            vis: vis.clone(),
+            vis: visibility.clone(),
             model_name,
             sender_name,
             root_name: Some(root_name),
@@ -117,12 +124,18 @@ pub(crate) fn generate_tokens(
             ..
         } = PreAndPostView::extract(&mut component_impl, errors);
 
+        let sender_ty: syn::Ident = if asyncness.is_some() {
+            parse_quote! { AsyncComponentSender }
+        } else {
+            parse_quote! { ComponentSender }
+        };
+
         component_impl.items.push(parse_quote! {
             /// Update the view to represent the updated model.
             fn update_view(
                 &self,
                 widgets: &mut Self::Widgets,
-                sender: ComponentSender<Self>,
+                sender: #sender_ty<Self>,
             ) {
                 struct __DoNotReturnManually;
 
@@ -160,7 +173,7 @@ pub(crate) fn generate_tokens(
             #[allow(dead_code)]
             #(#outer_attrs)*
             #[derive(Debug)]
-            #vis struct #widgets_name {
+            #visibility struct #widgets_name {
                 #struct_fields
                 #additional_fields
             }
@@ -169,9 +182,14 @@ pub(crate) fn generate_tokens(
 
     let errors = errors.iter().map(syn::Error::to_compile_error);
 
+    let async_trait = asyncness.map(|async_token| {
+        quote_spanned!(async_token.span() => #[relm4::async_trait::async_trait(?Send)])
+    });
+
     quote! {
         #widgets_struct
 
+        #async_trait
         #component_impl
 
         #(#errors)*

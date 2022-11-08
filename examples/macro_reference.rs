@@ -18,7 +18,7 @@ struct AppInit {
     counter: u8,
 }
 
-#[relm4::component(visibility = pub)]
+#[relm4::component(pub)]
 impl SimpleComponent for App {
     type Init = AppInit;
     type Input = Msg;
@@ -116,6 +116,16 @@ impl SimpleComponent for App {
 
                 #[name = "bind_label"]
                 gtk::Label {},
+
+                // You can also use returned widgets
+                gtk::Stack {
+                    add_child = &gtk::Label {
+                        set_label: "placeholder",
+                    } -> {
+                        // Set the title of the stack page
+                        set_title: "page title",
+                    }
+                },
 
                 gtk::ToggleButton {
                     set_label: "Counter is even",
