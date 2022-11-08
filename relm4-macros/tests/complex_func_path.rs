@@ -42,6 +42,5 @@ impl SimpleComponent for App {
         ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, _msg: (), _sender: ComponentSender<Self>) {
-    }
+    fn update(&mut self, _msg: (), _sender: ComponentSender<Self>) {}
 }
