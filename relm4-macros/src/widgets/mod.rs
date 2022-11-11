@@ -106,7 +106,7 @@ struct WidgetFunc {
     path: Path,
     args: Option<Punctuated<Expr, token::Comma>>,
     method_chain: Option<Punctuated<WidgetFuncMethod, token::Dot>>,
-    ty: Option<Type>,
+    ty: Option<Box<Type>>,
 }
 
 #[derive(Debug)]
