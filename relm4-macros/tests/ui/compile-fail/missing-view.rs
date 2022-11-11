@@ -7,8 +7,7 @@ impl SimpleComponent for App {
     type Init = ();
     type Input = ();
     type Output = ();
-    type Widgets = AppWidgets;
-
+    
     fn init(_: (), root: &Self::Root, sender: ComponentSender<Self>) -> ComponentParts<Self> {
         todo!();
     }

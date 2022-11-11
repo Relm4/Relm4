@@ -13,9 +13,9 @@ impl SimpleComponent for TestComponent {
     }
 
     fn init(
-        init: Self::Init,
+        _: Self::Init,
         root: &Self::Root,
-        sender: ComponentSender<Self>,
+        _sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = Self;
 

@@ -3,6 +3,8 @@
 
 use std::fmt;
 
+use flume::r#async::RecvStream;
+
 /// Create an unbounded channel to send messages
 /// between different parts of you application.
 #[must_use]
@@ -52,6 +54,10 @@ impl<T> Receiver<T> {
     #[must_use]
     pub fn recv_sync(&self) -> Option<T> {
         self.0.recv().ok()
+    }
+
+    pub(crate) fn into_stream(self) -> RecvStream<'static, T> {
+        self.0.into_stream()
     }
 
     /// Forwards an event from one channel to another.

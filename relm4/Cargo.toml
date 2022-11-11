@@ -26,6 +26,10 @@ dox = ["gtk/dox", "adw/dox", "panel/dox"]
 libadwaita = ["adw"]
 libpanel = ["panel"]
 macros = ["relm4-macros"]
+
+gnome_43 = ["gtk/gnome_43", "adw/v1_2"]
+gnome_42 = ["gtk/gnome_42"]
+
 # All features except docs. This is also used in the CI
 all = ["macros", "libadwaita", "panel"]
 
@@ -43,6 +47,7 @@ tokio = { version = "1.20", features = ["rt", "rt-multi-thread", "sync"] }
 
 relm4-macros = { version = "0.5.0-beta.4", path = "../relm4-macros", optional = true }
 tracing = "0.1.36"
+async-trait = "0.1.58"
 
 [dev-dependencies]
 relm4-macros = { path = "../relm4-macros" }

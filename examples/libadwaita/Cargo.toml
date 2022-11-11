@@ -4,13 +4,10 @@ version = "0.0.0"
 publish = false
 edition = "2021"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dev-dependencies]
 rand = "0.8.5"
-relm4 = { path = "../../relm4", features = ["libadwaita", "macros"] }
+relm4 = { path = "../../relm4", features = ["libadwaita"] }
 tokio = { version = "1", features = ["time"] }
-#relm4-components = { path = "../../relm4-components" }
 
 [[example]]
 name = "leaflet_sidebar"

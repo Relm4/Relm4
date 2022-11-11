@@ -2,7 +2,7 @@ use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
 use relm4::{
     adw,
     factory::{DynamicIndex, FactoryComponent, FactoryComponentSender, FactoryVecDeque},
-    gtk, ComponentParts, ComponentSender, RelmApp, SimpleComponent,
+    gtk, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent,
 };
 
 #[derive(Debug)]
@@ -23,58 +23,27 @@ enum CounterOutput {
     MoveDown(DynamicIndex),
 }
 
-struct CounterWidgets {
-    label: gtk::Label,
-}
-
+#[relm4::factory]
 impl FactoryComponent for Counter {
     type Init = u8;
     type Input = CounterMsg;
     type Output = CounterOutput;
     type CommandOutput = ();
-    type Widgets = CounterWidgets;
-    type Root = gtk::Box;
     type ParentInput = AppMsg;
     type ParentWidget = adw::TabView;
 
-    fn output_to_parent_input(output: Self::Output) -> Option<AppMsg> {
-        Some(match output {
-            CounterOutput::SendFront(index) => AppMsg::SendFront(index),
-            CounterOutput::MoveUp(index) => AppMsg::MoveUp(index),
-            CounterOutput::MoveDown(index) => AppMsg::MoveDown(index),
-        })
-    }
+    view! {
+        #[root]
+        gtk::Box {
+            set_orientation: gtk::Orientation::Horizontal,
+            set_spacing: 12,
 
-    fn init_root(&self) -> Self::Root {
-        relm4::view! {
-            root = gtk::Box {
-                set_orientation: gtk::Orientation::Horizontal,
-                set_spacing: 10,
-            }
-        }
-        root
-    }
+            gtk::Box {
+                set_spacing: 12,
 
-    fn init_model(
-        value: Self::Init,
-        _index: &DynamicIndex,
-        _sender: FactoryComponentSender<Self>,
-    ) -> Self {
-        Self { value }
-    }
-
-    fn init_widgets(
-        &mut self,
-        index: &DynamicIndex,
-        root: &Self::Root,
-        returned_widget: &adw::TabPage,
-        sender: FactoryComponentSender<Self>,
-    ) -> Self::Widgets {
-        relm4::view! {
-            #[local_ref]
-            root -> gtk::Box {
                 #[name(label)]
                 gtk::Label {
+                    #[watch]
                     set_label: &self.value.to_string(),
                     set_width_chars: 3,
                 },
@@ -110,11 +79,27 @@ impl FactoryComponent for Counter {
                     }
                 }
             }
+        },
+        #[local_ref]
+        returned_widget -> adw::TabPage {
+            set_title: &format!("Page {}", self.value),
         }
+    }
 
-        returned_widget.set_title(&format!("Page {}", self.value));
+    fn output_to_parent_input(output: Self::Output) -> Option<AppMsg> {
+        Some(match output {
+            CounterOutput::SendFront(index) => AppMsg::SendFront(index),
+            CounterOutput::MoveUp(index) => AppMsg::MoveUp(index),
+            CounterOutput::MoveDown(index) => AppMsg::MoveDown(index),
+        })
+    }
 
-        CounterWidgets { label }
+    fn init_model(
+        value: Self::Init,
+        _index: &DynamicIndex,
+        _sender: FactoryComponentSender<Self>,
+    ) -> Self {
+        Self { value }
     }
 
     fn update(&mut self, msg: Self::Input, _sender: FactoryComponentSender<Self>) {
@@ -126,10 +111,6 @@ impl FactoryComponent for Counter {
                 self.value = self.value.wrapping_sub(1);
             }
         }
-    }
-
-    fn update_view(&self, widgets: &mut Self::Widgets, _sender: FactoryComponentSender<Self>) {
-        widgets.label.set_label(&self.value.to_string());
     }
 }
 
@@ -152,7 +133,6 @@ impl SimpleComponent for App {
     type Init = u8;
     type Input = AppMsg;
     type Output = ();
-    type Widgets = AppWidgets;
 
     view! {
         adw::Window {
@@ -161,7 +141,7 @@ impl SimpleComponent for App {
 
             gtk::Box {
                 set_orientation: gtk::Orientation::Vertical,
-                set_spacing: 5,
+                set_spacing: 6,
 
                 adw::HeaderBar {},
 
@@ -181,7 +161,9 @@ impl SimpleComponent for App {
                 },
 
                 #[local_ref]
-                tab_view -> adw::TabView {}
+                tab_view -> adw::TabView {
+                    set_margin_all: 6,
+                }
             }
         }
     }
