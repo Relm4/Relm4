@@ -80,10 +80,59 @@ where
 /// Reducers receive messages, update their state accordingly
 /// and notify their subscribers.
 ///
-/// Unlike [`SharedState`](super::SharedState), this type works with
-/// messages and an update function.
-/// It's not possible to access the internal data directly.
-/// You can only modify by sending messages and read in subscriber functions.
+/// Unlike [`SharedState`](super::SharedState), this type doesn't
+/// allow direct access to the internal data.
+/// Instead, it updates its state after receiving messages, similar to components.
+/// After the message is processed, all subscribers will be notified.
+///
+/// # Example
+///
+/// ```
+/// use relm4::{Reducer, Reducible};
+///
+/// struct CounterReducer(u8);
+///
+/// enum CounterInput {
+///     Increment,
+///     Decrement,
+/// }
+///
+/// impl Reducible for CounterReducer {
+///     type Input = CounterInput;
+///
+///     fn init() -> Self {
+///         Self(0)
+///     }
+///
+///     fn reduce(&mut self, input: Self::Input) -> bool {
+///         match input {
+///             CounterInput::Increment => {
+///                 self.0 += 1;
+///             }
+///             CounterInput::Decrement =>  {
+///                 self.0 -= 1;
+///             }
+///         }
+///         true
+///     }
+/// }
+///
+/// // Create the reducer.
+/// static REDUCER: Reducer<CounterReducer> = Reducer::new();
+///
+/// // Update the reducer.
+/// REDUCER.emit(CounterInput::Increment);
+/// # use std::time::Duration;
+/// # std::thread::sleep(Duration::from_millis(10));
+///
+/// // Create a channel and subscribe to changes.
+/// let (sender, receiver) = relm4::channel();
+/// REDUCER.subscribe(&sender, |data| data.0);
+///
+/// // Count up to 2.
+/// REDUCER.emit(CounterInput::Increment);
+/// assert_eq!(receiver.recv_sync().unwrap(), 2);
+/// ```
 #[derive(Debug)]
 pub struct Reducer<Data: Reducible> {
     inner: Lazy<ReducerInner<Data>>,
@@ -97,43 +146,6 @@ where
     /// Create a new [`Reducer`] variable.
     ///
     /// The data will be initialized lazily on the first access.
-    ///
-    /// # Example
-    ///
-    /// ```
-    /// # #[derive(Default)]
-    /// # struct MyData;
-    /// use relm4::{Reducer, Reducible};
-    ///
-    /// struct CounterReducer(u8);
-    ///
-    /// enum CounterInput {
-    ///     Increment,
-    ///     Decrement,
-    /// }
-    ///
-    /// impl Reducible for CounterReducer {
-    ///     type Input = CounterInput;
-    ///
-    ///     fn init() -> Self {
-    ///         Self(0)
-    ///     }
-    ///
-    ///     fn reduce(&mut self, input: Self::Input) -> bool {
-    ///         match input {
-    ///             CounterInput::Increment => {
-    ///                 self.0 += 1;
-    ///             }
-    ///             CounterInput::Decrement =>  {
-    ///                 self.0 -= 1;
-    ///             }
-    ///         }
-    ///         true
-    ///     }
-    /// }
-    ///
-    /// static REDUCER: Reducer<CounterReducer> = Reducer::new();
-    /// ```
     #[must_use]
     pub const fn new() -> Self {
         Self {
