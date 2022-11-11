@@ -22,7 +22,6 @@ impl SimpleComponent for App {
     type Init = ();
     type Input = AppMsg;
     type Output = ();
-    type Widgets = AppWidgets;
 
     view! {
         gtk::ApplicationWindow {

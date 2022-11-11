@@ -45,7 +45,6 @@ impl FactoryComponent for GamePage {
     type Input = CounterMsg;
     type Output = CounterOutput;
     type CommandOutput = ();
-    type Widgets = CounterWidgets;
     type ParentInput = AppMsg;
     type ParentWidget = adw::TabView;
 
@@ -201,7 +200,6 @@ impl Component for App {
     type Input = AppMsg;
     type Output = ();
     type CommandOutput = bool;
-    type Widgets = AppWidgets;
 
     view! {
         adw::Window {

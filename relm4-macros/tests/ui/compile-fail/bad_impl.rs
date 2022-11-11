@@ -8,8 +8,7 @@ impl SimpleComponent for TestComponent {
     type Init = ();
     type Input = ();
     type Output = ();
-    type Widgets = TestWidgets;
-
+    
     view! {
         gtk::Window {}
     }

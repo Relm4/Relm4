@@ -25,7 +25,6 @@ impl Component for Dialog {
     type Input = DialogMsg;
     type Output = ButtonMsg;
     type CommandOutput = ();
-    type Widgets = DialogWidgets;
 
     view! {
         dialog = gtk::Dialog {
@@ -85,7 +84,6 @@ impl SimpleComponent for Button {
     type Init = ();
     type Input = ButtonMsg;
     type Output = AppMsg;
-    type Widgets = MiddleComponentWidgets;
 
     view! {
         button = &gtk::Button {
@@ -130,7 +128,6 @@ impl SimpleComponent for App {
     type Init = ();
     type Input = AppMsg;
     type Output = ();
-    type Widgets = AppWidgets;
 
     view! {
         main_window = gtk::ApplicationWindow {

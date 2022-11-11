@@ -6,6 +6,7 @@ use syn::visit_mut::VisitMut;
 
 use crate::attrs::Attrs;
 use crate::token_streams::{TokenStreams, TraitImplDetails};
+use crate::util;
 use crate::visitors::{ComponentVisitor, PreAndPostView, ViewOutputExpander};
 
 pub(crate) fn generate_tokens(
@@ -159,13 +160,20 @@ pub(crate) fn generate_tokens(
         });
     }
 
-    let outer_attrs = &component_impl.attrs;
-    let widgets_struct = component_visitor.widgets_ty.map(|ty| {
+    // Use the widget type if used.
+    let widgets_name = util::generate_widgets_type(
+        component_visitor.widgets_ty,
+        &mut component_impl,
+        &mut errors,
+    );
+
+    let widgets_struct = widgets_name.map(|widgets_name| {
+        let outer_attrs = &component_impl.attrs;
         quote! {
             #[allow(dead_code)]
             #(#outer_attrs)*
             #[derive(Debug)]
-            #visibility struct #ty {
+            #visibility struct #widgets_name {
                 #struct_fields
                 #additional_fields
             }

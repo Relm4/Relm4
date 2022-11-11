@@ -7,7 +7,6 @@ impl SimpleComponent for AppModel {
     type Init = ();
     type Input = ();
     type Output = ();
-    type Widgets = AppWidgets;
 
     view! {
         gtk::Window {}
