@@ -3,6 +3,8 @@ use quote::quote_spanned;
 
 use crate::widgets::{PropertyType, ViewWidgets, Widget, WidgetTemplateAttr};
 
+use super::WidgetFieldsScope;
+
 impl ViewWidgets {
     /// Get a mutable reference to the root widget
     pub(crate) fn mark_root_as_used(&mut self) {
@@ -18,11 +20,17 @@ impl ViewWidgets {
 
 impl Widget {
     // Find all template children and get their variables in scope.
-    pub(crate) fn get_template_child_in_scope(&self, stream: &mut TokenStream2, init: bool) {
+    pub(crate) fn get_template_child_in_scope(
+        &self,
+        stream: &mut TokenStream2,
+        scope: WidgetFieldsScope,
+    ) {
         if self.template_attr == WidgetTemplateAttr::Template {
             for prop in &self.properties.properties {
                 if let PropertyType::Widget(widget) = &prop.ty {
-                    if (init || widget.properties.are_properties_updated())
+                    // Only get the child into scope during init or when its properties are updated.
+                    if (scope == WidgetFieldsScope::Init
+                        || widget.properties.are_properties_updated())
                         && widget.template_attr == WidgetTemplateAttr::TemplateChild
                     {
                         let template_name = &self.name;
