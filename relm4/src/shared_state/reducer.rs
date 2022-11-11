@@ -77,8 +77,8 @@ where
 /// A type that allows you to share information across your
 /// application easily.
 ///
-/// Reducers receiver messages, update their state accordingly
-/// and the notify their subscribers.
+/// Reducers receive messages, update their state accordingly
+/// and notify their subscribers.
 ///
 /// Unlike [`SharedState`](super::SharedState), this type works with
 /// messages and an update function.
