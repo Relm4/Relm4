@@ -1,8 +1,16 @@
-use gtk::prelude::GtkWindowExt;
+use gtk::prelude::{GtkWindowExt, OrientableExt};
 use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent};
 
 #[derive(Default)]
 struct App;
+
+trait TestType {
+    type Test;
+}
+
+impl TestType for App {
+    type Test = gtk::Box;
+}
 
 #[relm4_macros::component]
 impl SimpleComponent for App {
@@ -16,17 +24,15 @@ impl SimpleComponent for App {
             set_title: Some("Simple app"),
             set_default_size: (300, 100),
 
-            gtk::Box {
-                gtk::Builder::from_string("<Label id=\"label\"></Label>")
-                    .object::<gtk::Label>("label")
-                    .unwrap() -> gtk::Label {},
+            gtk::Box::default() -> <App as TestType>::Test {
+                set_orientation: gtk::Orientation::Vertical,
             },
         }
     }
 
     fn init(
-        _init: Self::Init,
-        _root: &Self::Root,
+        _: Self::Init,
+        root: &Self::Root,
         _sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = Self;
@@ -36,5 +42,5 @@ impl SimpleComponent for App {
         ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, _msg: Self::Input, _sender: ComponentSender<Self>) {}
+    fn update(&mut self, _msg: (), _sender: ComponentSender<Self>) {}
 }

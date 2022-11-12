@@ -10,7 +10,6 @@ impl SimpleComponent for Header {
     type Init = ();
     type Input = ();
     type Output = AppMsg;
-    type Widgets = HeaderWidgets;
 
     view! {
         gtk::HeaderBar {
@@ -83,7 +82,6 @@ impl SimpleComponent for Dialog {
     type Init = DialogInit;
     type Input = DialogMsg;
     type Output = AppMsg;
-    type Widgets = DialogWidgets;
 
     view! {
         dialog = gtk::MessageDialog {
@@ -154,7 +152,6 @@ impl SimpleComponent for App {
     type Init = ();
     type Input = AppMsg;
     type Output = ();
-    type Widgets = AppWidgets;
 
     view! {
         main_window = gtk::ApplicationWindow {

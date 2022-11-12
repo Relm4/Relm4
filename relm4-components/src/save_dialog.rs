@@ -63,8 +63,6 @@ pub enum SaveDialogResponse {
 /// Widgets of the save dialog component.
 #[relm4::component(pub)]
 impl SimpleComponent for SaveDialog {
-    type Widgets = SaveDialogWidgets;
-
     type Init = SaveDialogSettings;
 
     type Input = SaveDialogMsg;

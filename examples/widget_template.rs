@@ -74,7 +74,6 @@ impl SimpleComponent for AppModel {
     type Init = u8;
     type Input = AppMsg;
     type Output = ();
-    type Widgets = AppWidgets;
 
     view! {
         gtk::Window {

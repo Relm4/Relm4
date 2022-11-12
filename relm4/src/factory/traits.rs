@@ -3,7 +3,7 @@
 use gtk::prelude::IsA;
 
 use super::{DynamicIndex, FactoryComponentSender};
-use crate::{OnDestroy, Sender};
+use crate::Sender;
 
 use std::fmt::Debug;
 
@@ -16,11 +16,11 @@ pub trait FactoryView: IsA<gtk::Widget> {
     /// which might be used to set additional parameters.
     ///
     /// Therefore, this "returned widget" is explicitly handled here.
-    type ReturnedWidget: std::fmt::Debug + std::hash::Hash;
+    type ReturnedWidget: Debug + std::hash::Hash;
 
     /// Widget type that is attached to the container
     /// and also the root of the components.
-    type Children: std::fmt::Debug + AsRef<Self::Children>;
+    type Children: Debug + AsRef<Self::Children>;
 
     /// Position type used by this widget.
     ///
@@ -106,7 +106,7 @@ pub trait FactoryComponent:
     type Init;
 
     /// The widget that was constructed by the factory component.
-    type Root: AsRef<<Self::ParentWidget as FactoryView>::Children> + Debug + OnDestroy + Clone;
+    type Root: AsRef<<Self::ParentWidget as FactoryView>::Children> + Debug + Clone;
 
     /// The type that's used for storing widgets created for this factory component.
     type Widgets: 'static;

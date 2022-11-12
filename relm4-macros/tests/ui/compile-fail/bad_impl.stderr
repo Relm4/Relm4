@@ -1,20 +1,14 @@
 error: expected identifier, found `}`
-  --> tests/ui/compile-fail/bad_impl.rs:31:1
+  --> tests/ui/compile-fail/bad_impl.rs:30:1
    |
 7  | impl SimpleComponent for TestComponent {
    |                                        - while parsing this item list starting here
 ...
-31 | }
+30 | }
    | ^
    | |
    | expected identifier
    | the item list ends here
-
-error[E0412]: cannot find type `TestWidgets` in this scope
-  --> tests/ui/compile-fail/bad_impl.rs:11:20
-   |
-11 |     type Widgets = TestWidgets;
-   |                    ^^^^^^^^^^^ not found in this scope
 
 warning: unused import: `gtk`
  --> tests/ui/compile-fail/bad_impl.rs:1:13
@@ -24,11 +18,12 @@ warning: unused import: `gtk`
   |
   = note: `#[warn(unused_imports)]` on by default
 
-error[E0046]: not all trait items implemented, missing: `Root`, `init_root`
+error[E0046]: not all trait items implemented, missing: `Root`, `Widgets`, `init_root`
  --> tests/ui/compile-fail/bad_impl.rs:7:1
   |
 7 | impl SimpleComponent for TestComponent {
-  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ missing `Root`, `init_root` in implementation
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ missing `Root`, `Widgets`, `init_root` in implementation
   |
   = help: implement the missing item: `type Root = Type;`
+  = help: implement the missing item: `type Widgets = Type;`
   = help: implement the missing item: `fn init_root() -> <Self as SimpleComponent>::Root { todo!() }`

@@ -95,7 +95,6 @@ impl SimpleComponent for App {
     type Init = u8;
     type Input = Msg;
     type Output = ();
-    type Widgets = AppWidgets;
 
     view! {
         gtk::Window {
@@ -109,12 +108,12 @@ impl SimpleComponent for App {
 
                 gtk::Button {
                     set_label: "Increment",
-                    connect_clicked => AppMsg::Increment,
+                    connect_clicked => Msg::Increment,
                 },
 
                 gtk::Button {
                     set_label: "Decrement",
-                    connect_clicked => AppMsg::Decrement,
+                    connect_clicked => Msg::Decrement,
                 },
 
                 gtk::Label {

@@ -66,7 +66,6 @@ impl SimpleComponent for OpenButton {
     type Init = OpenButtonSettings;
     type Input = OpenButtonMsg;
     type Output = PathBuf;
-    type Widgets = OpenButtonWidgets;
 
     view! {
         gtk::Box {
