@@ -83,7 +83,7 @@ mod test {
         }
     }
 
-    #[test]
+    #[gtk::test]
     fn stream_is_send() {
         let stream = Test::builder().launch(()).into_stream();
         assert_send(stream);
