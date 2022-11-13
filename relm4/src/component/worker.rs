@@ -6,11 +6,12 @@ use gtk::glib;
 use tracing::info_span;
 
 use crate::sender::ComponentSender;
-use crate::{Component, ComponentBuilder, ComponentParts, Receiver, Sender, SimpleComponent};
+use crate::{
+    Component, ComponentBuilder, ComponentParts, GuardedReceiver, Receiver, RuntimeSenders, Sender,
+    ShutdownOnDrop, SimpleComponent,
+};
 use std::fmt::Debug;
 use std::{any, thread};
-
-use super::{GuardedReceiver, RuntimeSenders, ShutdownOnDrop};
 
 /// Receives inputs and outputs in the background.
 pub trait Worker: Sized + Send + 'static {

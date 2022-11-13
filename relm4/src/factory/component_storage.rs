@@ -1,5 +1,5 @@
 use crate::factory::{
-    builder::FactoryBuilder, handle::FactoryHandle, DynamicIndex, FactoryComponent, FactoryView,
+    builder::FactoryBuilder, DynamicIndex, FactoryComponent, FactoryHandle, FactoryView,
 };
 use crate::Sender;
 

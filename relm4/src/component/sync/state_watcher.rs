@@ -1,5 +1,4 @@
-use super::{Component, ComponentParts};
-use crate::component::ShutdownOnDrop;
+use crate::{Component, ComponentParts, ShutdownOnDrop};
 
 use std::cell::{Ref, RefCell, RefMut};
 use std::fmt::{self, Debug};

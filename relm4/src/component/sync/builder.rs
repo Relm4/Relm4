@@ -4,10 +4,10 @@
 
 use super::message_broker::MessageBroker;
 use super::{Component, ComponentParts, Connector, StateWatcher};
-use crate::component::{GuardedReceiver, RuntimeSenders};
-use crate::late_initialization;
-use crate::sender::ComponentSender;
-use crate::{Receiver, RelmContainerExt, RelmWidgetExt, Sender};
+use crate::{
+    late_initialization, ComponentSender, GuardedReceiver, Receiver, RelmContainerExt,
+    RelmWidgetExt, RuntimeSenders, Sender,
+};
 use gtk::glib;
 use gtk::prelude::{GtkWindowExt, NativeDialogExt};
 use std::any;

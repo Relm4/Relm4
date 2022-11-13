@@ -5,8 +5,7 @@ use std::task::{Context, Poll};
 use flume::r#async::RecvStream;
 use futures::{pin_mut, Stream};
 
-use crate::component::ShutdownOnDrop;
-use crate::Component;
+use crate::{Component, ShutdownOnDrop};
 
 /// Yields [`Component::Output`] values as a stream and contains the
 /// input sender and the root widget.

@@ -1,4 +1,4 @@
-use super::data_guard::DataGuard;
+use super::DataGuard;
 use super::FactoryComponent;
 
 use std::fmt;

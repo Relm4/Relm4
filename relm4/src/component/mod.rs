@@ -8,12 +8,6 @@ mod r#async;
 /// in the background.
 pub mod worker;
 
-mod runtime_util;
-mod shutdown_on_drop;
-
-use runtime_util::{GuardedReceiver, RuntimeSenders};
-use shutdown_on_drop::ShutdownOnDrop;
-
 pub use sync::{
     CommandFuture, Component, ComponentBuilder, ComponentController, ComponentParts,
     ComponentStream, Connector, Controller, MessageBroker, SimpleComponent, StateWatcher,

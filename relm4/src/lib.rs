@@ -35,6 +35,7 @@ pub mod shutdown;
 pub mod shared_state;
 
 pub(crate) mod late_initialization;
+mod runtime_util;
 
 pub use channel::{channel, Receiver, Sender};
 pub use component::worker::{Worker, WorkerController, WorkerHandle};
@@ -52,6 +53,7 @@ pub use tokio::task::JoinHandle;
 
 use gtk::prelude::{Cast, IsA};
 use once_cell::sync::{Lazy, OnceCell};
+use runtime_util::{GuardedReceiver, RuntimeSenders, ShutdownOnDrop};
 use std::cell::Cell;
 use std::future::Future;
 use tokio::runtime::Runtime;
