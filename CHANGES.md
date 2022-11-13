@@ -27,6 +27,8 @@
 + core: `shutdown` on `Component` now works as expected
 + core: `transient_for` on `ComponentBuilder` now works properly when called after the application has been initialized
 + core: `shutdown` on `FactoryComponent` now works as expected
++ macros: Mark template children of public widget templates as public as well
++ macros: Only get template children in scope when they are actually used
 + macros: Fix type parsing after arrow operator in widget assignments
 
 ## 0.5.0-beta.4 - 2022-10-24
