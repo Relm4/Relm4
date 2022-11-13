@@ -17,7 +17,7 @@ pub(super) struct DataGuard<C: FactoryComponent> {
     data: Box<C>,
     widgets: Box<C::Widgets>,
     rt_dropper: RuntimeDropper,
-    output_tx: Sender<C::Output>,
+    output_sender: Sender<C::Output>,
     shutdown_notifier: ShutdownSender,
 }
 
@@ -28,7 +28,7 @@ impl<C: FactoryComponent> DataGuard<C> {
         data: Box<C>,
         widgets: Box<C::Widgets>,
         shutdown_notifier: ShutdownSender,
-        output_tx: Sender<C::Output>,
+        output_sender: Sender<C::Output>,
         f: F,
     ) -> Self
     where
@@ -70,7 +70,7 @@ impl<C: FactoryComponent> DataGuard<C> {
         Self {
             data,
             widgets,
-            output_tx,
+            output_sender,
             shutdown_notifier,
             rt_dropper,
         }
@@ -88,7 +88,7 @@ impl<C: FactoryComponent> DataGuard<C> {
         drop(self.rt_dropper);
         self.shutdown_notifier.shutdown();
         self.data
-            .shutdown(&mut self.widgets, self.output_tx.clone());
+            .shutdown(&mut self.widgets, self.output_sender.clone());
         drop(self.widgets);
         *self.data
     }

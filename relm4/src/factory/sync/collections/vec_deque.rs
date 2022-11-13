@@ -1,9 +1,8 @@
 use crate::Sender;
 
-use crate::factory::{
-    builder::FactoryBuilder, component_storage::ComponentStorage, DynamicIndex, FactoryComponent,
-    FactoryView,
-};
+use crate::factory::sync::builder::FactoryBuilder;
+use crate::factory::sync::component_storage::ComponentStorage;
+use crate::factory::{DynamicIndex, FactoryComponent, FactoryView};
 
 use super::{ModelStateValue, RenderedState};
 

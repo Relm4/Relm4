@@ -1,25 +1,33 @@
-use crate::factory::{
-    builder::FactoryBuilder, DynamicIndex, FactoryComponent, FactoryHandle, FactoryView,
-};
+use crate::factory::{DynamicIndex, FactoryView};
 use crate::Sender;
 
+use super::traits::AsyncFactoryComponent;
+use super::AsyncFactoryBuilder;
+use super::AsyncFactoryHandle;
+
 #[derive(Debug)]
-pub(super) enum ComponentStorage<C: FactoryComponent> {
-    Builder(FactoryBuilder<C>),
-    Final(FactoryHandle<C>),
+pub(super) enum AsyncComponentStorage<C: AsyncFactoryComponent>
+where
+    <C::ParentWidget as FactoryView>::ReturnedWidget: Clone,
+{
+    Builder(AsyncFactoryBuilder<C>),
+    Final(AsyncFactoryHandle<C>),
 }
 
-impl<C: FactoryComponent> ComponentStorage<C> {
-    pub(super) const fn get(&self) -> &C {
+impl<C: AsyncFactoryComponent> AsyncComponentStorage<C>
+where
+    <C::ParentWidget as FactoryView>::ReturnedWidget: Clone,
+{
+    pub(super) fn get(&self) -> Option<&C> {
         match self {
-            Self::Builder(builder) => &builder.data,
+            Self::Builder(_) => None,
             Self::Final(handle) => handle.data.get(),
         }
     }
 
-    pub(super) fn get_mut(&mut self) -> &mut C {
+    pub(super) fn get_mut(&mut self) -> Option<&mut C> {
         match self {
-            Self::Builder(builder) => &mut builder.data,
+            Self::Builder(_) => None,
             Self::Final(handle) => handle.data.get_mut(),
         }
     }
@@ -44,9 +52,9 @@ impl<C: FactoryComponent> ComponentStorage<C> {
         }
     }
 
-    pub(super) fn extract(self) -> C {
+    pub(super) fn extract(self) -> Option<C> {
         match self {
-            Self::Builder(builder) => *builder.data,
+            Self::Builder(_) => None,
             Self::Final(handle) => handle.data.into_inner(),
         }
     }

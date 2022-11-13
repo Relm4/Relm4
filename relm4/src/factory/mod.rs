@@ -1,21 +1,22 @@
 //! Defines traits and data types to generate widgets from collections efficiently.
 
-mod builder;
-mod component_storage;
-mod data_guard;
 mod dynamic_index;
-mod handle;
-mod widgets;
 
-use data_guard::DataGuard;
-use handle::FactoryHandle;
+/// Traits and implementations used for factories to interact with widgets.
+pub mod widgets;
 
-pub mod collections;
+/// Implementation of asynchronous factories.
+pub mod r#async;
 pub mod positions;
-pub mod traits;
 
-pub use crate::sender::FactoryComponentSender;
-pub use collections::*;
+/// Implementation of regular factories.
+pub mod sync;
+
+pub use crate::sender::{AsyncFactoryComponentSender, FactoryComponentSender};
 pub use dynamic_index::DynamicIndex;
 pub use positions::*;
-pub use traits::*;
+pub use sync::collections::*;
+
+pub use sync::traits::*;
+pub use widgets::traits;
+pub use widgets::traits::*;

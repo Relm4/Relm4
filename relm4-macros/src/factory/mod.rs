@@ -1,16 +1,22 @@
 use proc_macro2::{Span as Span2, TokenStream as TokenStream2};
-use quote::{quote, ToTokens};
+use quote::{quote, quote_spanned, ToTokens};
 use syn::visit_mut::VisitMut;
-use syn::{parse_quote, Ident, Visibility};
+use syn::{parse_quote, Ident};
 
+use crate::attrs::Attrs;
 use crate::token_streams::{TokenStreams, TraitImplDetails};
 use crate::util;
 use crate::visitors::{FactoryComponentVisitor, PreAndPostView, ViewOutputExpander};
 
 pub(crate) fn generate_tokens(
-    vis: &Option<Visibility>,
+    global_attributes: Attrs,
     mut factory_impl: syn::ItemImpl,
 ) -> TokenStream2 {
+    let Attrs {
+        visibility,
+        asyncness,
+    } = global_attributes;
+
     let mut errors = vec![];
 
     let mut factory_visitor = FactoryComponentVisitor::new(&mut errors);
@@ -52,7 +58,7 @@ pub(crate) fn generate_tokens(
             update_view,
         } = view_widgets.generate_streams(
             &TraitImplDetails {
-                vis: vis.clone(),
+                vis: visibility.clone(),
                 model_name: Ident::new("self", Span2::call_site()),
                 root_name: Some(
                     root_name.unwrap_or_else(|| Ident::new("root", Span2::call_site())),
@@ -96,6 +102,12 @@ pub(crate) fn generate_tokens(
             }
         };
 
+        let sender_ty: Ident = if asyncness.is_some() {
+            parse_quote! { AsyncFactoryComponentSender }
+        } else {
+            parse_quote! { FactoryComponentSender }
+        };
+
         if init_widgets.is_some() {
             ViewOutputExpander::expand(&mut factory_impl, view_code, widgets_return_code, errors);
         } else {
@@ -105,7 +117,7 @@ pub(crate) fn generate_tokens(
                     index: &relm4::factory::DynamicIndex,
                     root: &Self::Root,
                     returned_widget: &<Self::ParentWidget as relm4::factory::FactoryView>::ReturnedWidget,
-                    sender: relm4::factory::FactoryComponentSender<Self>,
+                    sender: relm4::factory::#sender_ty<Self>,
                 ) -> Self::Widgets {
                     #view_code
                     #widgets_return_code
@@ -117,9 +129,17 @@ pub(crate) fn generate_tokens(
             type Root = #root_widget_type;
         });
 
-        factory_impl.items.push(parse_quote! {
-            fn init_root(&self) -> Self::Root {
-                #init_root
+        factory_impl.items.push(if asyncness.is_some() {
+            parse_quote! {
+                fn init_root() -> Self::Root {
+                    #init_root
+                }
+            }
+        } else {
+            parse_quote! {
+                fn init_root(&self) -> Self::Root {
+                    #init_root
+                }
             }
         });
 
@@ -134,7 +154,7 @@ pub(crate) fn generate_tokens(
             fn update_view(
                 &self,
                 widgets: &mut Self::Widgets,
-                sender: relm4::factory::FactoryComponentSender<Self>,
+                sender: relm4::factory::#sender_ty<Self>,
             ) {
                 struct __DoNotReturnManually;
 
@@ -166,7 +186,7 @@ pub(crate) fn generate_tokens(
             #[allow(dead_code)]
             #(#outer_attrs)*
             #[derive(Debug)]
-            #vis struct #ty {
+            #visibility struct #ty {
                 #struct_fields
                 #additional_fields
             }
@@ -175,9 +195,14 @@ pub(crate) fn generate_tokens(
 
     let errors = errors.iter().map(syn::Error::to_compile_error);
 
+    let async_trait = asyncness.map(
+        |async_token| quote_spanned!(async_token.span => #[relm4::async_trait::async_trait(?Send)]),
+    );
+
     quote! {
         #widgets_struct
 
+        #async_trait
         #factory_impl
 
         #(#errors)*

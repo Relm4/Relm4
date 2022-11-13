@@ -1,7 +1,7 @@
-use super::{
-    DataGuard, DynamicIndex, FactoryComponent, FactoryComponentSender, FactoryHandle, FactoryView,
-};
+use super::{DataGuard, FactoryComponent, FactoryHandle};
 
+use crate::factory::FactoryView;
+use crate::prelude::{DynamicIndex, FactoryComponentSender};
 use crate::shutdown::ShutdownSender;
 use crate::{shutdown, GuardedReceiver, Receiver, Sender};
 

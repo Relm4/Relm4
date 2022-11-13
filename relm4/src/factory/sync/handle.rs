@@ -1,10 +1,8 @@
-use super::DataGuard;
-use super::FactoryComponent;
+use super::{DataGuard, FactoryComponent};
 
 use std::fmt;
 
-use super::FactoryView;
-use crate::Sender;
+use crate::{factory::FactoryView, Sender};
 
 /// Don't allow public access to a [`FactoryHandle`].
 ///
