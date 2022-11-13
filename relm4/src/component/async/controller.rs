@@ -6,7 +6,8 @@ use std::fmt::{self, Debug};
 
 use crate::Sender;
 
-use super::{destroy_on_drop::DestroyOnDrop, AsyncComponent};
+use super::AsyncComponent;
+use crate::component::ShutdownOnDrop;
 
 /// Shared behavior of component controller types.
 pub trait AsyncComponentController<C: AsyncComponent> {
@@ -20,6 +21,12 @@ pub trait AsyncComponentController<C: AsyncComponent> {
 
     /// Returns the root widget of the component.
     fn widget(&self) -> &C::Root;
+
+    /// Dropping this type will usually stop the runtime of the component.
+    /// With this method you can give the runtime a static lifetime.
+    /// In other words, dropping the controller or connector will not stop
+    /// the runtime anymore, instead it will run until the app is closed.
+    fn detach_runtime(&mut self);
 }
 
 /// Controls the component from afar.
@@ -31,14 +38,7 @@ pub struct AsyncController<C: AsyncComponent> {
     pub(super) sender: Sender<C::Input>,
 
     /// Type used to destroy the async component when it's dropped.
-    pub(super) destroy_sender: DestroyOnDrop,
-}
-
-impl<C: AsyncComponent> AsyncController<C> {
-    /// Remove the controller but keep the runtime alive.
-    pub fn detach_runtime(mut self) {
-        self.destroy_sender.deactivate();
-    }
+    pub(super) shutdown_on_drop: ShutdownOnDrop,
 }
 
 impl<C: AsyncComponent> AsyncComponentController<C> for AsyncController<C> {
@@ -48,6 +48,10 @@ impl<C: AsyncComponent> AsyncComponentController<C> for AsyncController<C> {
 
     fn widget(&self) -> &C::Root {
         &self.widget
+    }
+
+    fn detach_runtime(&mut self) {
+        self.shutdown_on_drop.deactivate();
     }
 }
 

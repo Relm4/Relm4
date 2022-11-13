@@ -4,7 +4,7 @@
 
 use std::fmt::Debug;
 
-use crate::{ComponentBuilder, ComponentParts, ComponentSender, OnDestroy, Sender};
+use crate::{ComponentBuilder, ComponentParts, ComponentSender, Sender};
 
 /// Elm-style variant of a Component with view updates separated from input updates
 pub trait Component: Sized + 'static {
@@ -21,7 +21,7 @@ pub trait Component: Sized + 'static {
     type Init;
 
     /// The widget that was constructed by the component.
-    type Root: Debug + OnDestroy;
+    type Root: Debug;
 
     /// The type that's used for storing widgets created for this component.
     type Widgets: 'static;
@@ -101,7 +101,7 @@ pub trait SimpleComponent: Sized + 'static {
     type Init;
 
     /// The widget that was constructed by the component.
-    type Root: Debug + OnDestroy;
+    type Root: Debug;
 
     /// The type that's used for storing widgets created for this component.
     type Widgets: 'static;
@@ -175,12 +175,10 @@ impl SimpleComponent for () {
     type Input = ();
     type Output = ();
     type Init = ();
-    type Root = super::EmptyRoot;
+    type Root = ();
     type Widgets = ();
 
-    fn init_root() -> Self::Root {
-        super::EmptyRoot::default()
-    }
+    fn init_root() -> Self::Root {}
 
     fn init(
         _init: Self::Init,

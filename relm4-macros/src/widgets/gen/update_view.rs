@@ -8,6 +8,8 @@ use crate::widgets::{
     Properties, Property, PropertyName, PropertyType, ReturnedWidget, Widget,
 };
 
+use super::util::WidgetFieldsScope;
+
 impl Property {
     fn update_view_stream(
         &self,
@@ -60,7 +62,7 @@ impl Widget {
         model_name: &Ident,
         conditional_branch: bool,
     ) {
-        self.get_template_child_in_scope(stream);
+        self.get_template_child_in_scope(stream, WidgetFieldsScope::ViewUpdate);
 
         let w_name = &self.name;
         self.properties

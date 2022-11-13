@@ -6,7 +6,7 @@
 use std::future::Future;
 use std::sync::Arc;
 
-use crate::async_component::AsyncComponent;
+use crate::component::AsyncComponent;
 use crate::factory::FactoryComponent;
 use crate::{Component, Sender, ShutdownReceiver};
 

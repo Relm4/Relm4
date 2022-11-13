@@ -2,18 +2,17 @@
 // Copyright 2022 System76 <info@system76.com>
 // SPDX-License-Identifier: MIT or Apache-2.0
 
+use super::stream::ComponentStream;
 use super::{Component, ComponentController, Controller, StateWatcher};
-use crate::component::stream::ComponentStream;
 use crate::{Receiver, Sender};
 use std::fmt::{self, Debug};
-use std::rc::Rc;
 
 /// Contains the post-launch input sender and output receivers with the root widget.
 ///
 /// The receiver can be separated from the [`Connector`] by choosing a method for handling it.
 pub struct Connector<C: Component> {
     /// The models and widgets maintained by the component.
-    pub(super) state: Rc<StateWatcher<C>>,
+    pub(super) state: StateWatcher<C>,
 
     /// The widget that this component manages.
     pub(super) widget: C::Root,
@@ -93,10 +92,13 @@ impl<C: Component> Connector<C> {
     /// Convert his type into a [`Stream`](futures::Stream) that yields output events
     /// as futures.
     pub fn into_stream(self) -> ComponentStream<C> {
-        let Self { receiver, .. } = self;
+        let Self {
+            receiver, state, ..
+        } = self;
 
         ComponentStream {
             stream: receiver.into_stream(),
+            shutdown_on_drop: state.shutdown_on_drop,
         }
     }
 }
@@ -106,12 +108,16 @@ impl<C: Component> ComponentController<C> for Connector<C> {
         &self.sender
     }
 
-    fn state(&self) -> &Rc<StateWatcher<C>> {
+    fn state(&self) -> &StateWatcher<C> {
         &self.state
     }
 
     fn widget(&self) -> &C::Root {
         &self.widget
+    }
+
+    fn detach_runtime(&mut self) {
+        self.state.detach_runtime();
     }
 }
 
