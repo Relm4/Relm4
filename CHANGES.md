@@ -4,9 +4,10 @@
 
 ### Added
 
++ core: Add `Reducer` as message based alternative to `SharedState`
 + core: Runtimes of `Component`s and `AsyncComponents` can now be detached for a static lifetime
 + core: Add `ComponentStream` as alternative to `Controller` that implements `Stream` for async message handling
-+ core: Added asynchronous components including macro support
++ core: Add asynchronous components including macro support
 + core: Add `gnome_42` and `gnome_43` feature flags
 + core: Implement `RelmContainerExt` for `adw::Squeezer`
 + core: Implement `RelmSetChildExt` for `gtk::WindowHandle`

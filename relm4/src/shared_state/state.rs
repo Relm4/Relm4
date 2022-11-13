@@ -7,7 +7,7 @@ use once_cell::sync::Lazy;
 
 use crate::Sender;
 
-type SubscriberFn<Data> = Box<dyn Fn(&Data) + 'static + Send + Sync>;
+use super::SubscriberFn;
 
 /// A type that allows you to share information across your
 /// application easily.
@@ -27,7 +27,7 @@ impl<Data: std::fmt::Debug> std::fmt::Debug for SharedState<Data> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("SharedState")
             .field("data", &self.data)
-            .field("subscribers", &self.subscribers.read().map(|s| s.len()))
+            .field("subscribers", &self.subscribers.try_read().map(|s| s.len()))
             .finish()
     }
 }
@@ -51,8 +51,8 @@ where
     #[must_use]
     pub const fn new() -> Self {
         Self {
-            data: Lazy::new(|| RwLock::new(Data::default())),
-            subscribers: Lazy::new(|| RwLock::new(Vec::default())),
+            data: Lazy::new(RwLock::default),
+            subscribers: Lazy::new(RwLock::default),
         }
     }
 
