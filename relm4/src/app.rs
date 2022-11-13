@@ -1,11 +1,7 @@
 use gtk::prelude::{ApplicationExt, ApplicationExtManual, Cast, GtkApplicationExt, IsA, WidgetExt};
 
-use crate::async_component::AsyncComponent;
-use crate::async_component::AsyncComponentBuilder;
-use crate::async_component::AsyncComponentController;
-use crate::component::Component;
-use crate::component::ComponentController;
-use crate::ComponentBuilder;
+use crate::component::{AsyncComponent, AsyncComponentBuilder, AsyncComponentController};
+use crate::{Component, ComponentBuilder, ComponentController};
 
 /// An app that runs the main application.
 #[derive(Debug)]
@@ -79,7 +75,10 @@ impl RelmApp {
                 // Run late initialization for transient windows for example.
                 crate::late_initialization::run_late_init();
 
-                let window = connector.detach().widget().clone();
+                let mut controller = connector.detach();
+                let window = controller.widget().clone();
+
+                controller.detach_runtime();
 
                 app.add_window(window.as_ref());
                 window.show();
@@ -131,7 +130,7 @@ impl RelmApp {
                 // Run late initialization for transient windows for example.
                 crate::late_initialization::run_late_init();
 
-                let controller = connector.detach();
+                let mut controller = connector.detach();
                 let window = controller.widget().clone();
 
                 controller.detach_runtime();

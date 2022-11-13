@@ -2,24 +2,24 @@
 // Copyright 2022 System76 <info@system76.com>
 // SPDX-License-Identifier: MIT or Apache-2.0
 
-use super::destroy_on_drop::DestroyOnDrop;
-//use super::message_broker::MessageBroker;
-use super::{AsyncComponent, AsyncConnector};
-use crate::async_component::AsyncComponentParts;
-use crate::sender::AsyncComponentSender;
-use crate::{late_initialization, shutdown};
+use super::message_broker::MessageBroker;
+use super::{Component, ComponentParts, Connector, StateWatcher};
+use crate::component::{GuardedReceiver, RuntimeSenders};
+use crate::late_initialization;
+use crate::sender::ComponentSender;
 use crate::{Receiver, RelmContainerExt, RelmWidgetExt, Sender};
-use futures::FutureExt;
 use gtk::glib;
 use gtk::prelude::{GtkWindowExt, NativeDialogExt};
 use std::any;
+use std::cell::RefCell;
 use std::marker::PhantomData;
+use std::rc::Rc;
 use tokio::sync::oneshot;
 use tracing::info_span;
 
 /// A component that is ready for docking and launch.
 #[derive(Debug)]
-pub struct AsyncComponentBuilder<C: AsyncComponent> {
+pub struct ComponentBuilder<C: Component> {
     /// The root widget of the component.
     pub root: C::Root,
     priority: glib::Priority,
@@ -27,7 +27,7 @@ pub struct AsyncComponentBuilder<C: AsyncComponent> {
     pub(super) component: PhantomData<C>,
 }
 
-impl<C: AsyncComponent> Default for AsyncComponentBuilder<C> {
+impl<C: Component> Default for ComponentBuilder<C> {
     /// Prepares a component for initialization.
     fn default() -> Self {
         Self {
@@ -38,7 +38,7 @@ impl<C: AsyncComponent> Default for AsyncComponentBuilder<C> {
     }
 }
 
-impl<C: AsyncComponent> AsyncComponentBuilder<C> {
+impl<C: Component> ComponentBuilder<C> {
     /// Configure the root widget before launching.
     #[must_use]
     pub fn update_root<F: FnOnce(&mut C::Root)>(mut self, func: F) -> Self {
@@ -64,7 +64,7 @@ impl<C: AsyncComponent> AsyncComponentBuilder<C> {
     }
 }
 
-impl<C: AsyncComponent> AsyncComponentBuilder<C>
+impl<C: Component> ComponentBuilder<C>
 where
     C::Root: AsRef<gtk::Widget>,
 {
@@ -77,7 +77,7 @@ where
     }
 }
 
-impl<C: AsyncComponent> AsyncComponentBuilder<C>
+impl<C: Component> ComponentBuilder<C>
 where
     C::Root: AsRef<gtk::Window> + Clone,
 {
@@ -88,7 +88,7 @@ where
     /// Therefore, you don't have to pass a window to every component.
     ///
     /// If the root widget is a native dialog, such as [`gtk::FileChooserNative`],
-    /// you should use [`transient_for_native`][AsyncComponentBuilder::transient_for_native] instead.
+    /// you should use [`transient_for_native`][ComponentBuilder::transient_for_native] instead.
     #[must_use]
     pub fn transient_for(self, widget: impl AsRef<gtk::Widget>) -> Self {
         let widget = widget.as_ref().clone();
@@ -105,7 +105,7 @@ where
     }
 }
 
-impl<C: AsyncComponent> AsyncComponentBuilder<C>
+impl<C: Component> ComponentBuilder<C>
 where
     C::Root: AsRef<gtk::NativeDialog> + Clone,
 {
@@ -117,7 +117,7 @@ where
     ///
     /// Applicable to native dialogs only, such as [`gtk::FileChooserNative`].
     /// If the root widget is a non-native dialog,
-    /// you should use [`transient_for`][AsyncComponentBuilder::transient_for] instead.
+    /// you should use [`transient_for`][ComponentBuilder::transient_for] instead.
     #[must_use]
     pub fn transient_for_native(self, widget: impl AsRef<gtk::Widget>) -> Self {
         let widget = widget.as_ref().clone();
@@ -134,13 +134,27 @@ where
     }
 }
 
-impl<C: AsyncComponent> AsyncComponentBuilder<C> {
+impl<C: Component> ComponentBuilder<C> {
     /// Starts the component, passing ownership to a future attached to a [gtk::glib::MainContext].
-    pub fn launch(self, payload: C::Init) -> AsyncConnector<C> {
+    pub fn launch(self, payload: C::Init) -> Connector<C> {
         // Used for all events to be processed by this component's internal service.
         let (input_tx, input_rx) = crate::channel::<C::Input>();
 
         self.launch_with_input_channel(payload, input_tx, input_rx)
+    }
+
+    /// Similar to [`launch()`](ComponentBuilder::launch) but also initializes a [`MessageBroker`].
+    ///
+    /// # Panics
+    ///
+    /// This method panics if the message broker was already initialized in another launch.
+    pub fn launch_with_broker(self, payload: C::Init, broker: &MessageBroker<C>) -> Connector<C> {
+        let (input_tx, input_rx) = broker.get_channel();
+        self.launch_with_input_channel(
+            payload,
+            input_tx,
+            input_rx.expect("Message broker launched multiple times"),
+        )
     }
 
     fn launch_with_input_channel(
@@ -148,100 +162,118 @@ impl<C: AsyncComponent> AsyncComponentBuilder<C> {
         payload: C::Init,
         input_tx: Sender<C::Input>,
         input_rx: Receiver<C::Input>,
-    ) -> AsyncConnector<C> {
+    ) -> Connector<C> {
         let Self { root, priority, .. } = self;
 
-        // Used by this component to send events to be handled externally by the caller.
-        let (output_tx, output_rx) = crate::channel::<C::Output>();
+        let RuntimeSenders {
+            output_sender,
+            output_receiver,
+            cmd_sender,
+            cmd_receiver,
+            shutdown_notifier,
+            shutdown_recipient,
+            shutdown_on_drop,
+            mut shutdown_event,
+        } = RuntimeSenders::<C::Output, C::CommandOutput>::new();
 
-        // Sends messages from commands executed from the background.
-        let (cmd_tx, cmd_rx) = crate::channel::<C::CommandOutput>();
-
-        // Notifies the component's child commands that it is now deceased.
-        let (death_notifier, death_recipient) = shutdown::channel();
-
-        // Encapsulates the senders used by component methods.
-        let component_sender =
-            AsyncComponentSender::new(input_tx.clone(), output_tx.clone(), cmd_tx, death_recipient);
+        // Gets notifications when a component's model and view is updated externally.
+        let (notifier, notifier_receiver) = crate::channel();
 
         let (source_id_sender, source_id_receiver) = oneshot::channel::<gtk::glib::SourceId>();
 
-        let (destroy_sender, destroy_receiver) = oneshot::channel::<()>();
+        // Encapsulates the senders used by component methods.
+        let component_sender = ComponentSender::new(
+            input_tx.clone(),
+            output_sender.clone(),
+            cmd_sender,
+            shutdown_recipient,
+        );
 
-        let rt_root = root.clone();
+        // Constructs the initial model and view with the initial payload.
+        let state = Rc::new(RefCell::new(C::init(
+            payload,
+            &root,
+            component_sender.clone(),
+        )));
+        let watcher = StateWatcher {
+            state,
+            notifier,
+            shutdown_on_drop,
+        };
+
+        let rt_state = watcher.state.clone();
 
         // Spawns the component's service. It will receive both `Self::Input` and
         // `Self::CommandOutput` messages. It will spawn commands as requested by
         // updates, and send `Self::Output` messages externally.
         let id = crate::spawn_local_with_priority(priority, async move {
             let id = source_id_receiver.await.unwrap();
-            let mut state = C::init(payload, rt_root, component_sender.clone()).await;
-            let mut destroy = destroy_receiver.fuse();
+            let mut notifier = GuardedReceiver::new(notifier_receiver);
+            let mut cmd = GuardedReceiver::new(cmd_receiver);
+            let mut input = GuardedReceiver::new(input_rx);
             loop {
-                let cmd = cmd_rx.recv().fuse();
-                let input = input_rx.recv().fuse();
-
-                futures::pin_mut!(cmd);
-                futures::pin_mut!(input);
-
                 futures::select!(
                     // Performs the model update, checking if the update requested a command.
                     // Runs that command asynchronously in the background using tokio.
                     message = input => {
-                        if let Some(message) = message {
-                            let AsyncComponentParts {
-                                model,
-                                widgets,
-                            } = &mut state;
+                        let ComponentParts {
+                            model,
+                            widgets,
+                        } = &mut *rt_state.borrow_mut();
 
-                            let span = info_span!(
-                                "update_with_view",
-                                input=?message,
-                                component=any::type_name::<C>(),
-                                id=model.id(),
-                            );
-                            let _enter = span.enter();
+                        let span = info_span!(
+                            "update_with_view",
+                            input=?message,
+                            component=any::type_name::<C>(),
+                            id=model.id(),
+                        );
+                        let _enter = span.enter();
 
-                            model.update_with_view(widgets, message, component_sender.clone()).await;
-                        }
+                        model.update_with_view(widgets, message, component_sender.clone());
                     }
 
                     // Handles responses from a command.
                     message = cmd => {
-                        if let Some(message) = message {
-                            let AsyncComponentParts {
-                                model,
-                                widgets,
-                            } = &mut state;
+                        let ComponentParts {
+                            model,
+                            widgets,
+                        } = &mut *rt_state.borrow_mut();
 
-                            let span = info_span!(
-                                "update_cmd_with_view",
-                                cmd_output=?message,
-                                component=any::type_name::<C>(),
-                                id=model.id(),
-                            );
-                            let _enter = span.enter();
+                        let span = info_span!(
+                            "update_cmd_with_view",
+                            cmd_output=?message,
+                            component=any::type_name::<C>(),
+                            id=model.id(),
+                        );
+                        let _enter = span.enter();
 
-                            model.update_cmd_with_view(widgets, message, component_sender.clone()).await;
-                        }
+                        model.update_cmd_with_view(widgets, message, component_sender.clone());
+                    }
+
+                    // Triggered when the model and view have been updated externally.
+                    _ = notifier => {
+                        let ComponentParts {
+                            model,
+                            widgets,
+                        } = &mut *rt_state.borrow_mut();
+
+                        model.update_view(widgets, component_sender.clone());
                     }
 
                     // Triggered when the component is destroyed
-                    result = destroy => {
-                        if let Ok(()) = result {
-                            let AsyncComponentParts {
-                                model,
-                                widgets,
-                            } = &mut state;
+                    _ = shutdown_event => {
+                        let ComponentParts {
+                            model,
+                            widgets,
+                        } = &mut *rt_state.borrow_mut();
 
-                            model.shutdown(widgets, output_tx);
+                        model.shutdown(widgets, output_sender);
 
-                            death_notifier.shutdown();
+                        shutdown_notifier.shutdown();
 
-                            id.remove();
+                        id.remove();
 
-                            return
-                        }
+                        return;
                     }
                 );
             }
@@ -250,11 +282,11 @@ impl<C: AsyncComponent> AsyncComponentBuilder<C> {
         source_id_sender.send(id).unwrap();
 
         // Give back a type for controlling the component service.
-        AsyncConnector {
+        Connector {
+            state: watcher,
             widget: root,
             sender: input_tx,
-            receiver: output_rx,
-            destroy_sender: DestroyOnDrop::new(destroy_sender),
+            receiver: output_receiver,
         }
     }
 }

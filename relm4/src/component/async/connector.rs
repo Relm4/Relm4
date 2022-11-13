@@ -2,9 +2,8 @@
 // Copyright 2022 System76 <info@system76.com>
 // SPDX-License-Identifier: MIT or Apache-2.0
 
-use super::{
-    destroy_on_drop::DestroyOnDrop, AsyncComponent, AsyncComponentController, AsyncController,
-};
+use super::{AsyncComponent, AsyncComponentController, AsyncController};
+use crate::component::ShutdownOnDrop;
 use crate::{Receiver, Sender};
 use std::fmt::{self, Debug};
 
@@ -22,7 +21,7 @@ pub struct AsyncConnector<C: AsyncComponent> {
     pub(super) receiver: Receiver<C::Output>,
 
     /// Type used to destroy the async component when it's dropped.
-    pub(super) destroy_sender: DestroyOnDrop,
+    pub(super) shutdown_on_drop: ShutdownOnDrop,
 }
 
 impl<C: AsyncComponent> AsyncConnector<C> {
@@ -36,7 +35,7 @@ impl<C: AsyncComponent> AsyncConnector<C> {
             widget,
             sender,
             receiver,
-            destroy_sender,
+            shutdown_on_drop,
         } = self;
 
         crate::spawn_local(receiver.forward(sender_.clone(), transform));
@@ -44,7 +43,7 @@ impl<C: AsyncComponent> AsyncConnector<C> {
         AsyncController {
             widget,
             sender,
-            destroy_sender,
+            shutdown_on_drop,
         }
     }
 
@@ -57,7 +56,7 @@ impl<C: AsyncComponent> AsyncConnector<C> {
             widget,
             sender,
             receiver,
-            destroy_sender,
+            shutdown_on_drop,
         } = self;
 
         let mut sender_ = sender.clone();
@@ -70,7 +69,7 @@ impl<C: AsyncComponent> AsyncConnector<C> {
         AsyncController {
             widget,
             sender,
-            destroy_sender,
+            shutdown_on_drop,
         }
     }
 
@@ -79,14 +78,14 @@ impl<C: AsyncComponent> AsyncConnector<C> {
         let Self {
             widget,
             sender,
-            destroy_sender,
+            shutdown_on_drop,
             ..
         } = self;
 
         AsyncController {
             widget,
             sender,
-            destroy_sender,
+            shutdown_on_drop,
         }
     }
 }
@@ -98,6 +97,10 @@ impl<C: AsyncComponent> AsyncComponentController<C> for AsyncConnector<C> {
 
     fn widget(&self) -> &C::Root {
         &self.widget
+    }
+
+    fn detach_runtime(&mut self) {
+        self.shutdown_on_drop.deactivate();
     }
 }
 
@@ -111,7 +114,7 @@ where
             .field("widget", &self.widget)
             .field("sender", &self.sender)
             .field("receiver", &self.receiver)
-            .field("destroy_sender", &self.destroy_sender)
+            .field("shutdown_on_drop", &self.shutdown_on_drop)
             .finish()
     }
 }

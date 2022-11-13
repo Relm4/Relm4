@@ -4,6 +4,7 @@
 
 ### Added
 
++ core: Runtimes of `Component`s and `AsyncComponents` can now be detached for a static lifetime
 + core: Add `ComponentStream` as alternative to `Controller` that implements `Stream` for async message handling
 + core: Added asynchronous components including macro support
 + core: Add `gnome_42` and `gnome_43` feature flags
@@ -14,12 +15,16 @@
 ### Changed
 
 + core: Add `gnome_42` and `gnome_43` feature flags
++ core: Rename `OnDestroy` to `RelmObjectExt`
++ core: Remove `EmptyRoot` in favor of the unit type
 + macros: Allow using methods calls as widget initializers in the `view` macro
 + macros: Explicitly using `visibility` as attribute name is no longer supported
 
 ### Fixed
 
 + all: Fix doc builds on docs.rs and add a CI job to prevent future doc failures
++ core: Fix various bugs related to component shutdown
++ core: `shutdown` on `Component` now works as expected
 + core: `transient_for` on `ComponentBuilder` now works properly when called after the application has been initialized
 + core: `shutdown` on `FactoryComponent` now works as expected
 + macros: Fix type parsing after arrow operator in widget assignments

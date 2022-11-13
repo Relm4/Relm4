@@ -2,19 +2,15 @@
 // Copyright 2022 System76 <info@system76.com>
 // SPDX-License-Identifier: MIT or Apache-2.0
 
-use futures::FutureExt;
 use gtk::glib;
-use tokio::sync::oneshot;
 use tracing::info_span;
 
-use crate::component::EmptyRoot;
 use crate::sender::ComponentSender;
-use crate::{
-    shutdown, Component, ComponentBuilder, ComponentParts, OnDestroy, Receiver, Sender,
-    SimpleComponent,
-};
+use crate::{Component, ComponentBuilder, ComponentParts, Receiver, Sender, SimpleComponent};
 use std::fmt::Debug;
 use std::{any, thread};
+
+use super::{GuardedReceiver, RuntimeSenders, ShutdownOnDrop};
 
 /// Receives inputs and outputs in the background.
 pub trait Worker: Sized + Send + 'static {
@@ -36,16 +32,14 @@ impl<T> SimpleComponent for T
 where
     T: Worker + 'static,
 {
-    type Root = EmptyRoot;
+    type Root = ();
     type Widgets = ();
 
     type Init = <Self as Worker>::Init;
     type Input = <Self as Worker>::Input;
     type Output = <Self as Worker>::Output;
 
-    fn init_root() -> Self::Root {
-        EmptyRoot::default()
-    }
+    fn init_root() -> Self::Root {}
 
     fn init(
         init: Self::Init,
@@ -63,7 +57,7 @@ where
 
 impl<C> ComponentBuilder<C>
 where
-    C: Component<Root = EmptyRoot, Widgets = ()> + Send,
+    C: Component<Root = (), Widgets = ()> + Send,
     C::Input: Send,
     C::Output: Send,
     C::CommandOutput: Send,
@@ -76,22 +70,24 @@ where
         // Used for all events to be processed by this component's internal service.
         let (input_tx, input_rx) = crate::channel::<C::Input>();
 
-        // Used by this component to send events to be handled externally by the caller.
-        let (output_tx, output_rx) = crate::channel::<C::Output>();
-
-        // Sends messages from commands executed from the background.
-        let (cmd_tx, cmd_rx) = crate::channel::<C::CommandOutput>();
-
-        // Notifies the component's child commands that it is now deceased.
-        let (death_notifier, death_recipient) = shutdown::channel();
+        let RuntimeSenders {
+            output_sender,
+            output_receiver,
+            cmd_sender,
+            cmd_receiver,
+            shutdown_notifier,
+            shutdown_recipient,
+            shutdown_on_drop,
+            mut shutdown_event,
+        } = RuntimeSenders::<C::Output, C::CommandOutput>::new();
 
         // Encapsulates the senders used by component methods.
-        let component_sender =
-            ComponentSender::new(input_tx.clone(), output_tx.clone(), cmd_tx, death_recipient);
-
-        // The source ID of the component's service will be sent through this once the root
-        // widget has been iced, which will give the component one last chance to say goodbye.
-        let (burn_notifier, burn_recipient) = oneshot::channel::<()>();
+        let component_sender = ComponentSender::new(
+            input_tx.clone(),
+            output_sender.clone(),
+            cmd_sender,
+            shutdown_recipient,
+        );
 
         let mut state = C::init(payload, &root, component_sender.clone());
 
@@ -103,84 +99,71 @@ where
             // `Self::CommandOutput` messages. It will spawn commands as requested by
             // updates, and send `Self::Output` messages externally.
             context.block_on(async move {
-                let mut burn_notice = burn_recipient.fuse();
+                let mut cmd = GuardedReceiver::new(cmd_receiver);
+                let mut input = GuardedReceiver::new(input_rx);
+
                 loop {
-                    let cmd = cmd_rx.recv().fuse();
-                    let input = input_rx.recv().fuse();
-
-                    futures::pin_mut!(cmd);
-                    futures::pin_mut!(input);
-
                     futures::select!(
                         // Performs the model update, checking if the update requested a command.
                         // Runs that command asynchronously in the background using tokio.
                         message = input => {
-                            if let Some(message) = message {
-                                let &mut ComponentParts {
-                                    ref mut model,
-                                    ref mut widgets,
-                                } = &mut state;
+                            let ComponentParts {
+                                model,
+                                widgets,
+                            } = &mut state;
 
-                                let span = info_span!(
-                                    "update_with_view",
-                                    input=?message,
-                                    component=any::type_name::<C>(),
-                                    id=model.id(),
-                                );
-                                let _enter = span.enter();
+                            let span = info_span!(
+                                "update_with_view",
+                                input=?message,
+                                component=any::type_name::<C>(),
+                                id=model.id(),
+                            );
+                            let _enter = span.enter();
 
-                                model.update_with_view(widgets, message, component_sender.clone());
-                            }
+                            model.update_with_view(widgets, message, component_sender.clone());
                         }
 
                         // Handles responses from a command.
                         message = cmd => {
-                            if let Some(message) = message {
-                                let &mut ComponentParts {
-                                    ref mut model,
-                                    ref mut widgets,
-                                } = &mut state;
+                            let ComponentParts {
+                                model,
+                                widgets,
+                            } = &mut state;
 
-                                let span = info_span!(
-                                    "update_cmd_with_view",
-                                    cmd_output=?message,
-                                    component=any::type_name::<C>(),
-                                    id=model.id(),
-                                );
-                                let _enter = span.enter();
+                            let span = info_span!(
+                                "update_cmd_with_view",
+                                cmd_output=?message,
+                                component=any::type_name::<C>(),
+                                id=model.id(),
+                            );
+                            let _enter = span.enter();
 
-                                model.update_cmd_with_view(widgets, message, component_sender.clone());
-                            }
+                            model.update_cmd_with_view(widgets, message, component_sender.clone());
                         },
 
                         // Triggered when the component is destroyed
-                        _ = burn_notice => {
+                        _ = shutdown_event => {
                             let ComponentParts {
-                                ref mut model,
-                                ref mut widgets,
+                                model,
+                                widgets,
                             } = &mut state;
 
-                            model.shutdown(widgets, output_tx);
+                            model.shutdown(widgets, output_sender);
 
-                            death_notifier.shutdown();
+                            shutdown_notifier.shutdown();
 
-                            return
+                            return;
                         }
                     );
                 }
             });
         });
 
-        // When the root widget is destroyed, the spawned service will be removed.
-        root.on_destroy(move || {
-            let _ = burn_notifier.send(());
-        });
-
         // Give back a type for controlling the component service.
         WorkerHandle {
             sender: input_tx,
-            receiver: output_rx,
-            root,
+            receiver: output_receiver,
+            shutdown_on_drop,
         }
     }
 }
@@ -192,7 +175,8 @@ pub struct WorkerHandle<W: Component> {
     sender: Sender<W::Input>,
     // Where the worker will send its outputs to.
     receiver: Receiver<W::Output>,
-    root: EmptyRoot,
+    // Shutdown the worker when this is dropped
+    shutdown_on_drop: ShutdownOnDrop,
 }
 
 impl<W: Component> WorkerHandle<W>
@@ -208,7 +192,7 @@ where
         let Self {
             sender,
             receiver,
-            root,
+            shutdown_on_drop,
         } = self;
 
         let mut sender_ = sender.clone();
@@ -218,7 +202,10 @@ where
             }
         });
 
-        WorkerController { sender, root }
+        WorkerController {
+            sender,
+            shutdown_on_drop,
+        }
     }
 
     /// Forwards output events to the designated sender.
@@ -230,21 +217,29 @@ where
         let Self {
             sender: own_sender,
             receiver,
-            root,
+            shutdown_on_drop,
         } = self;
 
         crate::spawn_local(receiver.forward(sender.clone(), transform));
         WorkerController {
             sender: own_sender,
-            root,
+            shutdown_on_drop,
         }
     }
 
     /// Ignore outputs from the component and take the handle.
+    #[must_use]
     pub fn detach(self) -> WorkerController<W> {
-        let Self { sender, root, .. } = self;
+        let Self {
+            sender,
+            shutdown_on_drop,
+            ..
+        } = self;
 
-        WorkerController { sender, root }
+        WorkerController {
+            sender,
+            shutdown_on_drop,
+        }
     }
 }
 
@@ -253,8 +248,8 @@ where
 pub struct WorkerController<W: Component> {
     // Sends inputs to the worker.
     sender: Sender<W::Input>,
-    #[allow(unused)]
-    root: EmptyRoot,
+    // Shutdown the worker when this is dropped
+    shutdown_on_drop: ShutdownOnDrop,
 }
 
 impl<W: Component> WorkerController<W> {
@@ -264,7 +259,16 @@ impl<W: Component> WorkerController<W> {
     }
 
     /// Provides access to the component's sender.
+    #[must_use]
     pub const fn sender(&self) -> &Sender<W::Input> {
         &self.sender
+    }
+
+    /// Dropping this type will usually stop the runtime of the worker.
+    /// With this method you can give the runtime a static lifetime.
+    /// In other words, dropping the [`WorkerController`] will not stop
+    /// the runtime anymore, it will run until the app is closed.
+    pub fn detach_runtime(&mut self) {
+        self.shutdown_on_drop.deactivate();
     }
 }
