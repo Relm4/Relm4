@@ -10,8 +10,7 @@ use crate::{Component, ComponentBuilder, ComponentParts, Receiver, Sender, Simpl
 use std::fmt::Debug;
 use std::{any, thread};
 
-use super::runtime_util::{GuardedReceiver, RuntimeSenders};
-use super::shutdown_on_drop::ShutdownOnDrop;
+use super::{GuardedReceiver, RuntimeSenders, ShutdownOnDrop};
 
 /// Receives inputs and outputs in the background.
 pub trait Worker: Sized + Send + 'static {

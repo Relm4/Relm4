@@ -7,7 +7,7 @@ use std::fmt::{self, Debug};
 use crate::Sender;
 
 use super::AsyncComponent;
-use crate::component::shutdown_on_drop::ShutdownOnDrop;
+use crate::component::ShutdownOnDrop;
 
 /// Shared behavior of component controller types.
 pub trait AsyncComponentController<C: AsyncComponent> {

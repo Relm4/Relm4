@@ -4,7 +4,7 @@
 
 use super::message_broker::MessageBroker;
 use super::{Component, ComponentParts, Connector, StateWatcher};
-use crate::component::runtime_util::{GuardedReceiver, RuntimeSenders};
+use crate::component::{GuardedReceiver, RuntimeSenders};
 use crate::late_initialization;
 use crate::sender::ComponentSender;
 use crate::{Receiver, RelmContainerExt, RelmWidgetExt, Sender};

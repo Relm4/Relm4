@@ -5,7 +5,7 @@ use std::task::{Context, Poll};
 use flume::r#async::RecvStream;
 use futures::{pin_mut, Stream};
 
-use crate::component::shutdown_on_drop::ShutdownOnDrop;
+use crate::component::ShutdownOnDrop;
 use crate::Component;
 
 /// Yields [`Component::Output`] values as a stream and contains the

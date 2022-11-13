@@ -3,7 +3,7 @@ use tokio::sync::oneshot;
 /// A type that destroys an [`AsyncComponent`](crate::async_component::AsyncComponent)
 /// as soon as it is dropped.
 #[derive(Debug)]
-pub(crate) struct ShutdownOnDrop {
+pub(super) struct ShutdownOnDrop {
     /// Sender used to indicate that the async component should shut down.
     shutdown_event_sender: Option<oneshot::Sender<()>>,
 }

@@ -9,7 +9,7 @@ use crate::{
     Receiver, Sender, ShutdownReceiver,
 };
 
-use super::shutdown_on_drop::ShutdownOnDrop;
+use super::ShutdownOnDrop;
 
 pub(super) struct RuntimeSenders<Output, Command> {
     pub(super) output_sender: Sender<Output>,
