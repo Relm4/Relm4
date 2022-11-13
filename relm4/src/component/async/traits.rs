@@ -38,6 +38,13 @@ pub trait AsyncComponent: Sized + 'static {
     /// Initializes the root widget
     fn init_root() -> Self::Root;
 
+    /// Allows you to initialize the root widget with a temporary value
+    /// as a placeholder until the [`init()`](AsyncComponent::init)
+    /// future completes.
+    ///
+    /// This method does nothing by default.
+    fn temporary_init(_root: &mut Self::Root) {}
+
     /// Creates the initial model and view, docking it into the component.
     async fn init(
         init: Self::Init,
@@ -118,6 +125,13 @@ pub trait SimpleAsyncComponent: Sized + 'static {
     /// Initializes the root widget
     fn init_root() -> Self::Root;
 
+    /// Allows you to initialize the root widget with a temporary value
+    /// as a placeholder until the [`init()`](AsyncComponent::init)
+    /// future completes.
+    ///
+    /// This method does nothing by default.
+    fn temporary_init(_root: &mut Self::Root) {}
+
     /// Creates the initial model and view, docking it into the component.
     async fn init(
         init: Self::Init,
@@ -157,6 +171,10 @@ where
 
     fn init_root() -> Self::Root {
         C::init_root()
+    }
+
+    fn temporary_init(root: &mut Self::Root) {
+        C::temporary_init(root)
     }
 
     async fn init(
