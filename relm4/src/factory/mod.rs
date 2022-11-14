@@ -6,17 +6,15 @@ mod dynamic_index;
 pub mod widgets;
 
 /// Implementation of asynchronous factories.
-pub mod r#async;
+mod r#async;
 pub mod positions;
 
 /// Implementation of regular factories.
-pub mod sync;
+mod sync;
+
+pub use r#async::{AsyncFactoryComponent, AsyncFactoryVecDeque, AsyncFactoryVecDequeGuard};
+pub use sync::{FactoryComponent, FactoryVecDeque, FactoryVecDequeGuard};
 
 pub use crate::sender::{AsyncFactoryComponentSender, FactoryComponentSender};
 pub use dynamic_index::DynamicIndex;
-pub use positions::*;
-pub use sync::collections::*;
-
-pub use sync::traits::*;
-pub use widgets::traits;
 pub use widgets::traits::*;

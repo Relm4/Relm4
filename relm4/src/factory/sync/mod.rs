@@ -1,11 +1,12 @@
 mod builder;
-pub mod collections;
+mod collections;
 mod component_storage;
 mod data_guard;
 mod handle;
-pub mod traits;
+mod traits;
 
 use builder::FactoryBuilder;
+pub use collections::{FactoryVecDeque, FactoryVecDequeGuard};
 use data_guard::DataGuard;
 use handle::FactoryHandle;
-use traits::*;
+pub use traits::FactoryComponent;

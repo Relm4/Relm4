@@ -7,8 +7,7 @@ use std::future::Future;
 use std::sync::Arc;
 
 use crate::component::AsyncComponent;
-use crate::factory::r#async::traits::AsyncFactoryComponent;
-use crate::factory::FactoryComponent;
+use crate::factory::{AsyncFactoryComponent, FactoryComponent};
 use crate::{Component, Sender, ShutdownReceiver};
 
 /// Contains senders to send and receive messages from a [`Component`].

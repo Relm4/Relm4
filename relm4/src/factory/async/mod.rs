@@ -1,12 +1,14 @@
 mod builder;
-pub mod collections;
+mod collections;
 mod component_storage;
 mod data_guard;
 mod future_data;
 mod handle;
-pub mod traits;
+mod traits;
 
 use builder::AsyncFactoryBuilder;
 use future_data::AsyncData;
 use handle::AsyncFactoryHandle;
-use traits::*;
+
+pub use collections::{AsyncFactoryVecDeque, AsyncFactoryVecDequeGuard};
+pub use traits::AsyncFactoryComponent;

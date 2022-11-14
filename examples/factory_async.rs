@@ -1,9 +1,9 @@
 use std::time::Duration;
 
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
-use relm4::factory::r#async::collections::AsyncFactoryVecDeque;
-use relm4::factory::r#async::traits::AsyncFactoryComponent;
-use relm4::factory::{AsyncFactoryComponentSender, DynamicIndex};
+use relm4::factory::{
+    AsyncFactoryComponent, AsyncFactoryComponentSender, AsyncFactoryVecDeque, DynamicIndex,
+};
 use relm4::{gtk, view, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent};
 
 #[derive(Debug)]
