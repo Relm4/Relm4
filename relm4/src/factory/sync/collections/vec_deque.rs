@@ -111,7 +111,7 @@ impl<'a, C: FactoryComponent> FactoryVecDequeGuard<'a, C> {
     /// Tries to get a mutable reference to
     /// the model of one element.
     ///
-    /// Returns `None` is `index` is invalid.
+    /// Returns [`None`] if `index` is invalid.
     pub fn get_mut(&mut self, index: usize) -> Option<&mut C> {
         // Mark as modified
         if let Some(state) = self.inner.model_state.get_mut(index) {
@@ -125,14 +125,14 @@ impl<'a, C: FactoryComponent> FactoryVecDequeGuard<'a, C> {
 
     /// Provides a mutable reference to the model of the back element.
     ///
-    /// Returns None if the deque is empty.
+    ///  Returns [`None`] if the deque is empty.
     pub fn back_mut(&mut self) -> Option<&mut C> {
         self.get_mut(self.len().wrapping_sub(1))
     }
 
     /// Provides a mutable reference to the model of the front element.
     ///
-    /// Returns None if the deque is empty.
+    ///  Returns [`None`] if the deque is empty.
     pub fn front_mut(&mut self) -> Option<&mut C> {
         self.get_mut(0)
     }
@@ -531,21 +531,21 @@ impl<C: FactoryComponent> FactoryVecDeque<C> {
     /// Tries to get an immutable reference to
     /// the model of one element.
     ///
-    /// Returns `None` is `index` is invalid.
+    /// Returns [`None`] if `index` is invalid.
     pub fn get(&self, index: usize) -> Option<&C> {
         self.components.get(index).map(ComponentStorage::get)
     }
 
     /// Provides a reference to the model of the back element.
     ///
-    /// Returns None if the deque is empty.
+    ///  Returns [`None`] if the deque is empty.
     pub fn back(&self) -> Option<&C> {
         self.get(self.len().wrapping_sub(1))
     }
 
     /// Provides a reference to the model of the front element.
     ///
-    /// Returns None if the deque is empty.
+    ///  Returns [`None`] if the deque is empty.
     pub fn front(&self) -> Option<&C> {
         self.get(0)
     }

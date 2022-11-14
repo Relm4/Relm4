@@ -19,7 +19,7 @@ use gtk::prelude::Cast;
 #[cfg(feature = "libadwaita")]
 use std::hash::Hasher;
 
-/// Provides methods to edit the underlying [`FactoryVecDeque`].
+/// Provides methods to edit the underlying [`AsyncFactoryVecDeque`].
 ///
 /// The changes will be rendered on the widgets after the guard goes out of scope.
 #[derive(Debug)]
@@ -57,14 +57,14 @@ where
 
     /// Drops the guard and renders all changes.
     ///
-    /// Use this to transfer full ownership back to the [`FactoryVecDeque`].
+    /// Use this to transfer full ownership back to the [`AsyncFactoryVecDeque`].
     pub fn drop(self) {
         drop(self);
     }
 
     /// Apply external updates that happened between the last render.
     ///
-    /// [`FactoryVecDeque`] should not be edited between calling [`Self::render_changes`]
+    /// [`AsyncFactoryVecDeque`] should not be edited between calling [`Self::render_changes`]
     /// and this method, as it might cause undefined behaviour. This shouldn't be possible
     /// because the method is called in [`FactoryVecDequeGuard::new`].
     #[cfg(feature = "libadwaita")]
@@ -121,7 +121,10 @@ where
     /// Tries to get a mutable reference to
     /// the model of one element.
     ///
-    /// Returns `None` is `index` is invalid.
+    /// Returns [`None`] if `index` is invalid or the async [`init_model()`] method
+    /// hasn't returned yet.
+    ///
+    /// [`init_model()`]: AsyncFactoryComponent::init_model
     pub fn get_mut(&mut self, index: usize) -> Option<&mut C> {
         // Mark as modified
         if let Some(state) = self.inner.model_state.get_mut(index) {
@@ -135,20 +138,29 @@ where
 
     /// Provides a mutable reference to the model of the back element.
     ///
-    /// Returns None if the deque is empty.
+    ///  Returns [`None`] if the deque is empty or the async [`init_model()`] method
+    /// of the last element hasn't returned yet.
+    ///
+    /// [`init_model()`]: AsyncFactoryComponent::init_model
     pub fn back_mut(&mut self) -> Option<&mut C> {
         self.get_mut(self.len().wrapping_sub(1))
     }
 
     /// Provides a mutable reference to the model of the front element.
     ///
-    /// Returns None if the deque is empty.
+    ///  Returns [`None`] if the deque is empty or the async [`init_model()`] method
+    /// of the first element hasn't returned yet.
+    ///
+    /// [`init_model()`]: AsyncFactoryComponent::init_model
     pub fn front_mut(&mut self) -> Option<&mut C> {
         self.get_mut(0)
     }
 
-    /// Removes the last element from the [`FactoryVecDeque`] and returns it,
-    /// or [`None`] if it is empty.
+    /// Removes the last element from the [`AsyncFactoryVecDeque`] and returns it,
+    /// or [`None`] if it is empty or the async [`init_model()`] method
+    /// of the element hasn't returned yet.
+    ///
+    /// [`init_model()`]: AsyncFactoryComponent::init_model
     pub fn pop_back(&mut self) -> Option<C> {
         if self.is_empty() {
             None
@@ -157,16 +169,22 @@ where
         }
     }
 
-    /// Removes the first element from the [`FactoryVecDeque`] and returns it,
-    /// or [`None`] if it is empty.
+    /// Removes the first element from the [`AsyncFactoryVecDeque`] and returns it,
+    /// or [`None`] if it is empty or the async [`init_model()`] method
+    /// of the element hasn't returned yet.
+    ///
+    /// [`init_model()`]: AsyncFactoryComponent::init_model
     pub fn pop_front(&mut self) -> Option<C> {
         self.remove(0)
     }
 
-    /// Removes and returns the element at index from the [`FactoryVecDeque`].
-    /// Returns [`None`] if index is out of bounds.
+    /// Removes and returns the element at index from the [`AsyncFactoryVecDeque`].
+    /// or [`None`] if it is empty or the async [`init_model()`] method
+    /// of the element hasn't returned yet.
     ///
     /// Element at index 0 is the front of the queue.
+    ///
+    /// [`init_model()`]: AsyncFactoryComponent::init_model
     pub fn remove(&mut self, index: usize) -> Option<C> {
         self.inner.model_state.remove(index);
         let component = self.inner.components.remove(index);
@@ -185,18 +203,18 @@ where
         component.and_then(AsyncComponentStorage::extract)
     }
 
-    /// Appends an element at the end of the [`FactoryVecDeque`].
+    /// Appends an element at the end of the [`AsyncFactoryVecDeque`].
     pub fn push_back(&mut self, init: C::Init) -> DynamicIndex {
         let index = self.len();
         self.insert(index, init)
     }
 
-    /// Prepends an element to the [`FactoryVecDeque`].
+    /// Prepends an element to the [`AsyncFactoryVecDeque`].
     pub fn push_front(&mut self, init: C::Init) -> DynamicIndex {
         self.insert(0, init)
     }
 
-    /// Inserts an element at index within the [`FactoryVecDeque`],
+    /// Inserts an element at index within the [`AsyncFactoryVecDeque`],
     /// shifting all elements with indices greater than or equal
     /// to index towards the back.
     ///
@@ -204,7 +222,7 @@ where
     ///
     /// # Panics
     ///
-    /// Panics if index is greater than [`FactoryVecDeque`]’s length.
+    /// Panics if index is greater than [`AsyncFactoryVecDeque`]’s length.
     pub fn insert(&mut self, index: usize, init: C::Init) -> DynamicIndex {
         let dyn_index = DynamicIndex::new(index);
 
@@ -320,7 +338,7 @@ where
         self.move_to(current_position, self.len() - 1);
     }
 
-    /// Remove all components from the [`FactoryVecDeque`].
+    /// Remove all components from the [`AsyncFactoryVecDeque`].
     pub fn clear(&mut self) {
         self.inner.model_state.clear();
 
@@ -332,6 +350,11 @@ where
     }
 
     /// Returns an iterator over the components that returns mutable references.
+    ///
+    /// Each item will be [`Some`] if the async [`init_model()`] method
+    /// of the item returned and otherwise [`None`].
+    ///
+    /// [`init_model()`]: AsyncFactoryComponent::init_model
     pub fn iter_mut(
         &mut self,
     ) -> impl Iterator<Item = Option<&mut C>> + DoubleEndedIterator + ExactSizeIterator + FusedIterator
@@ -359,7 +382,7 @@ where
 }
 
 /// A container similar to [`VecDeque`] that can be used to store
-/// data associated with components that implement [`FactoryComponent`].
+/// data associated with components that implement [`AsyncFactoryComponent`].
 ///
 /// To access mutable methods of the factory, create a guard using [`Self::guard`].
 #[derive(Debug)]
@@ -392,7 +415,7 @@ impl<C: AsyncFactoryComponent> AsyncFactoryVecDeque<C>
 where
     <C::ParentWidget as FactoryView>::ReturnedWidget: Clone,
 {
-    /// Creates a new [`FactoryVecDeque`].
+    /// Creates a new [`AsyncFactoryVecDeque`].
     #[must_use]
     pub fn new(widget: C::ParentWidget, parent_sender: &Sender<C::ParentInput>) -> Self {
         Self {
@@ -406,7 +429,7 @@ where
         }
     }
 
-    /// Provides a [`FactoryVecDequeGuard`] that can be used to edit the factory.
+    /// Provides a [`AsyncFactoryVecDequeGuard`] that can be used to edit the factory.
     ///
     /// The changes will be rendered on the widgets after the guard goes out of scope.
     pub fn guard(&mut self) -> AsyncFactoryVecDequeGuard<'_, C> {
@@ -512,12 +535,12 @@ where
         }
     }
 
-    /// Returns the number of elements in the [`FactoryVecDeque`].
+    /// Returns the number of elements in the [`AsyncFactoryVecDeque`].
     pub fn len(&self) -> usize {
         self.components.len()
     }
 
-    /// Returns true if the [`FactoryVecDeque`] is empty.
+    /// Returns true if the [`AsyncFactoryVecDeque`] is empty.
     pub fn is_empty(&self) -> bool {
         self.components.is_empty()
     }
@@ -530,7 +553,10 @@ where
     /// Tries to get an immutable reference to
     /// the model of one element.
     ///
-    /// Returns `None` is `index` is invalid.
+    /// Returns [`None`] if `index` is invalid or the async [`init_model()`] method
+    /// hasn't returned yet.
+    ///
+    /// [`init_model()`]: AsyncFactoryComponent::init_model
     pub fn get(&self, index: usize) -> Option<&C> {
         self.components
             .get(index)
@@ -539,14 +565,20 @@ where
 
     /// Provides a reference to the model of the back element.
     ///
-    /// Returns None if the deque is empty.
+    /// Returns [`None`] if `index` is invalid or the async [`init_model()`] method
+    /// of the last element hasn't returned yet.
+    ///
+    /// [`init_model()`]: AsyncFactoryComponent::init_model
     pub fn back(&self) -> Option<&C> {
         self.get(self.len().wrapping_sub(1))
     }
 
     /// Provides a reference to the model of the front element.
     ///
-    /// Returns None if the deque is empty.
+    /// Returns [`None`] if `index` is invalid or the async [`init_model()`] method
+    /// of the first element hasn't returned yet.
+    ///
+    /// [`init_model()`]: AsyncFactoryComponent::init_model
     pub fn front(&self) -> Option<&C> {
         self.get(0)
     }
@@ -557,6 +589,11 @@ where
     }
 
     /// Returns an iterator over the components.
+    ///
+    /// Each item will be [`Some`] if the async [`init_model()`] method
+    /// of the item returned and otherwise [`None`].
+    ///
+    /// [`init_model()`]: AsyncFactoryComponent::init_model
     pub fn iter(
         &self,
     ) -> impl Iterator<Item = Option<&C>> + DoubleEndedIterator + ExactSizeIterator + FusedIterator

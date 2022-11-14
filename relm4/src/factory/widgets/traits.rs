@@ -18,7 +18,9 @@ pub trait FactoryView: IsA<gtk::Widget> {
 
     /// Position type used by this widget.
     ///
-    /// For example [`GridPosition`](super::positions::GridPosition) for [`gtk::Grid`] or `()` for [`gtk::Box`]
+    /// For example [`GridPosition`] for [`gtk::Grid`] or `()` for [`gtk::Box`]
+    ///
+    /// [`GridPosition`]: crate::factory::positions::GridPosition
     type Position;
 
     /// Removes a widget.

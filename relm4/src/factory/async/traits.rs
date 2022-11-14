@@ -48,10 +48,11 @@ pub trait AsyncFactoryComponent:
     fn init_root() -> Self::Root;
 
     /// Allows you to initialize the root widget with a temporary value
-    /// as a placeholder until the [`init()`](AsyncComponent::init)
-    /// future completes.
+    /// as a placeholder until the [`init_model()`] future completes.
     ///
     /// This method does nothing by default.
+    ///
+    /// [`init_model()`]: AsyncFactoryComponent::init_model
     fn temporary_init(_root: &mut Self::Root) {}
 
     /// Initializes the widgets.
