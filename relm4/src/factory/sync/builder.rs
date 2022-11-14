@@ -1,7 +1,6 @@
-use super::{DataGuard, FactoryComponent, FactoryHandle};
+use super::{FactoryComponent, FactoryHandle};
 
-use crate::factory::FactoryView;
-use crate::prelude::{DynamicIndex, FactoryComponentSender};
+use crate::factory::{DataGuard, DynamicIndex, FactoryComponentSender, FactoryView};
 use crate::shutdown::ShutdownSender;
 use crate::{shutdown, GuardedReceiver, Receiver, Sender};
 
@@ -147,6 +146,7 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
                     }
                 }
             },
+            C::shutdown,
         );
 
         // Give back a type for controlling the component service.

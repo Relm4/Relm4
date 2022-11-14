@@ -1,7 +1,6 @@
 mod builder;
 mod collections;
 mod component_storage;
-mod data_guard;
 mod future_data;
 mod handle;
 mod traits;

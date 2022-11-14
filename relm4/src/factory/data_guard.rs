@@ -5,35 +5,37 @@ use gtk::glib;
 
 use crate::{shutdown::ShutdownSender, Sender};
 
-use super::FactoryComponent;
+type DynShutdownFn<C, Widgets, Output> = dyn Fn(&mut C, &mut Widgets, Sender<Output>);
 
 /// # SAFETY
 ///
 /// This type is a safe wrapper that prevent's misuse,
 /// except if you move the data passed to the runtime outside
 /// of the runtime (through senders for example).
-#[derive(Debug)]
-pub(super) struct DataGuard<C: FactoryComponent> {
+pub(super) struct DataGuard<C, Widgets, Output> {
     data: Box<C>,
-    widgets: Box<C::Widgets>,
+    widgets: Box<Widgets>,
     rt_dropper: RuntimeDropper,
-    output_sender: Sender<C::Output>,
+    output_sender: Sender<Output>,
     shutdown_notifier: ShutdownSender,
+    shutdown_fn: Box<DynShutdownFn<C, Widgets, Output>>,
 }
 
-impl<C: FactoryComponent> DataGuard<C> {
+impl<C, Widgets, Output> DataGuard<C, Widgets, Output> {
     /// DO NOT MOVE THE DATA PASSED TO THE CLOSURE OUTSIDE OF THE RUNTIME!
     /// SAFETY IS ONLY GUARANTEED BECAUSE THE DATA IS BOUND TO THE LIFETIME OF THE RUNTIME!
-    pub(super) fn new<F, Fut>(
+    pub(super) fn new<F, Fut, ShutdownFn>(
         data: Box<C>,
-        widgets: Box<C::Widgets>,
+        widgets: Box<Widgets>,
         shutdown_notifier: ShutdownSender,
-        output_sender: Sender<C::Output>,
+        output_sender: Sender<Output>,
         f: F,
+        shutdown_fn: ShutdownFn,
     ) -> Self
     where
         Fut: Future<Output = ()> + 'static,
-        F: FnOnce(ManuallyDrop<Box<C>>, ManuallyDrop<Box<C::Widgets>>) -> Fut,
+        F: FnOnce(ManuallyDrop<Box<C>>, ManuallyDrop<Box<Widgets>>) -> Fut,
+        ShutdownFn: Fn(&mut C, &mut Widgets, Sender<Output>) + 'static,
     {
         // Duplicate the references to `data`
         //
@@ -66,6 +68,7 @@ impl<C: FactoryComponent> DataGuard<C> {
 
         let future = f(runtime_data, runtime_widgets);
         let rt_dropper = RuntimeDropper(Some(crate::spawn_local(future)));
+        let shutdown_fn = Box::new(shutdown_fn);
 
         Self {
             data,
@@ -73,6 +76,7 @@ impl<C: FactoryComponent> DataGuard<C> {
             output_sender,
             shutdown_notifier,
             rt_dropper,
+            shutdown_fn,
         }
     }
 
@@ -87,10 +91,30 @@ impl<C: FactoryComponent> DataGuard<C> {
     pub(super) fn into_inner(mut self) -> C {
         drop(self.rt_dropper);
         self.shutdown_notifier.shutdown();
-        self.data
-            .shutdown(&mut self.widgets, self.output_sender.clone());
+        (self.shutdown_fn)(
+            &mut self.data,
+            &mut self.widgets,
+            self.output_sender.clone(),
+        );
         drop(self.widgets);
         *self.data
+    }
+}
+
+impl<C, Widgets, Output> std::fmt::Debug for DataGuard<C, Widgets, Output>
+where
+    C: std::fmt::Debug,
+    Widgets: std::fmt::Debug,
+{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("DataGuard")
+            .field("data", &self.data)
+            .field("widgets", &self.widgets)
+            .field("rt_dropper", &self.rt_dropper)
+            .field("output_sender", &self.output_sender)
+            .field("shutdown_notifier", &self.shutdown_notifier)
+            .field("shutdown_fn", &"<shutdown fn>")
+            .finish()
     }
 }
 
@@ -196,6 +220,7 @@ mod test {
                     rt_data.add();
                 }
             },
+            DontDropBelow4::shutdown,
         );
 
         let main_ctx = MainContext::default();

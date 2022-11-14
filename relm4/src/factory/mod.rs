@@ -12,6 +12,9 @@ pub mod positions;
 /// Implementation of regular factories.
 mod sync;
 
+mod data_guard;
+use data_guard::DataGuard;
+
 pub use r#async::{AsyncFactoryComponent, AsyncFactoryVecDeque, AsyncFactoryVecDequeGuard};
 pub use sync::{FactoryComponent, FactoryVecDeque, FactoryVecDequeGuard};
 

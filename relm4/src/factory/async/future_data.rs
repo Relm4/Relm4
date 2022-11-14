@@ -2,16 +2,19 @@ use std::cell::RefCell;
 
 use once_cell::unsync::OnceCell;
 
-use super::{data_guard::AsyncDataGuard, traits::AsyncFactoryComponent};
+use super::AsyncFactoryComponent;
+use crate::factory::data_guard::DataGuard;
 use crate::Receiver;
 
+type DataReceiver<T> = RefCell<Option<Receiver<T>>>;
+
 pub(super) struct AsyncData<C: AsyncFactoryComponent> {
-    future: RefCell<Option<Receiver<AsyncDataGuard<C>>>>,
-    data: OnceCell<AsyncDataGuard<C>>,
+    future: DataReceiver<DataGuard<C, C::Widgets, C::Output>>,
+    data: OnceCell<DataGuard<C, C::Widgets, C::Output>>,
 }
 
 impl<C: AsyncFactoryComponent> AsyncData<C> {
-    pub(super) fn new(data: Receiver<AsyncDataGuard<C>>) -> Self {
+    pub(super) fn new(data: Receiver<DataGuard<C, C::Widgets, C::Output>>) -> Self {
         Self {
             future: RefCell::new(Some(data)),
             data: OnceCell::new(),

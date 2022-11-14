@@ -2,11 +2,10 @@ use std::any;
 
 use tracing::info_span;
 
-use super::data_guard::AsyncDataGuard;
 use super::future_data::AsyncData;
 use super::{AsyncFactoryComponent, AsyncFactoryHandle};
 
-use crate::factory::{DynamicIndex, FactoryView};
+use crate::factory::{DataGuard, DynamicIndex, FactoryView};
 use crate::runtime_util::GuardedReceiver;
 use crate::sender::AsyncFactoryComponentSender;
 use crate::shutdown::ShutdownSender;
@@ -157,7 +156,7 @@ struct FutureData<C: AsyncFactoryComponent> {
 }
 
 impl<C: AsyncFactoryComponent> FutureData<C> {
-    fn start_runtime(self, data: C) -> AsyncDataGuard<C> {
+    fn start_runtime(self, data: C) -> DataGuard<C, C::Widgets, C::Output> {
         let Self {
             shutdown_notifier,
             index,
@@ -178,7 +177,7 @@ impl<C: AsyncFactoryComponent> FutureData<C> {
         // Spawns the component's service. It will receive both `Self::Input` and
         // `Self::CommandOutput` messages. It will spawn commands as requested by
         // updates, and send `Self::Output` messages externally.
-        AsyncDataGuard::new(
+        DataGuard::new(
             data,
             widgets,
             shutdown_notifier,
@@ -223,6 +222,7 @@ impl<C: AsyncFactoryComponent> FutureData<C> {
                     );
                 }
             },
+            C::shutdown,
         )
     }
 }

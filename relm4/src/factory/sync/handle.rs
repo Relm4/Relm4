@@ -1,8 +1,7 @@
-use super::{DataGuard, FactoryComponent};
-
 use std::fmt;
 
-use crate::{factory::FactoryView, Sender};
+use crate::factory::{DataGuard, FactoryComponent, FactoryView};
+use crate::Sender;
 
 /// Don't allow public access to a [`FactoryHandle`].
 ///
@@ -10,7 +9,7 @@ use crate::{factory::FactoryView, Sender};
 /// Inside this type, it is guaranteed that extracting `data` will drop `runtime` before to
 /// comply with all required safety guarantees.
 pub(super) struct FactoryHandle<C: FactoryComponent> {
-    pub(super) data: DataGuard<C>,
+    pub(super) data: DataGuard<C, C::Widgets, C::Output>,
     pub(super) root_widget: C::Root,
     pub(super) returned_widget: <C::ParentWidget as FactoryView>::ReturnedWidget,
     pub(super) input: Sender<C::Input>,
