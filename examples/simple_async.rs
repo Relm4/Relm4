@@ -49,7 +49,7 @@ impl AsyncComponent for App {
         }
     }
 
-    fn temporary_init(root: &mut Self::Root) {
+    fn init_loading_widgets(root: &mut Self::Root) {
         view! {
             #[local_ref]
             root {

@@ -151,7 +151,7 @@ impl<C: AsyncComponent> AsyncComponentBuilder<C> {
         let Self {
             mut root, priority, ..
         } = self;
-        C::temporary_init(&mut root);
+        C::init_loading_widgets(&mut root);
 
         let RuntimeSenders {
             output_sender,

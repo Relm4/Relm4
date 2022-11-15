@@ -43,7 +43,7 @@ pub trait AsyncComponent: Sized + 'static {
     /// future completes.
     ///
     /// This method does nothing by default.
-    fn temporary_init(_root: &mut Self::Root) {}
+    fn init_loading_widgets(_root: &mut Self::Root) {}
 
     /// Creates the initial model and view, docking it into the component.
     async fn init(
@@ -130,7 +130,7 @@ pub trait SimpleAsyncComponent: Sized + 'static {
     /// future completes.
     ///
     /// This method does nothing by default.
-    fn temporary_init(_root: &mut Self::Root) {}
+    fn init_loading_widgets(_root: &mut Self::Root) {}
 
     /// Creates the initial model and view, docking it into the component.
     async fn init(
@@ -173,8 +173,8 @@ where
         C::init_root()
     }
 
-    fn temporary_init(root: &mut Self::Root) {
-        C::temporary_init(root)
+    fn init_loading_widgets(root: &mut Self::Root) {
+        C::init_loading_widgets(root)
     }
 
     async fn init(
