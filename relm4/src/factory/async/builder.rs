@@ -115,7 +115,7 @@ where
             future_receiver
         };
 
-        C::temporary_init(&mut root_widget);
+        C::init_loading_widgets(&mut root_widget);
 
         let data = AsyncData::new(future_receiver);
 

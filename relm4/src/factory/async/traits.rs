@@ -53,7 +53,7 @@ pub trait AsyncFactoryComponent:
     /// This method does nothing by default.
     ///
     /// [`init_model()`]: AsyncFactoryComponent::init_model
-    fn temporary_init(_root: &mut Self::Root) {}
+    fn init_loading_widgets(_root: &mut Self::Root) {}
 
     /// Initializes the widgets.
     fn init_widgets(

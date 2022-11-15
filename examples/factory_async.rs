@@ -90,7 +90,7 @@ impl AsyncFactoryComponent for Counter {
         }
     }
 
-    fn temporary_init(root: &mut Self::Root) {
+    fn init_loading_widgets(root: &mut Self::Root) {
         view! {
             #[local_ref]
             root {
@@ -99,7 +99,10 @@ impl AsyncFactoryComponent for Counter {
 
                 gtk::Spinner {
                     start: (),
-                    set_hexpand: false,
+                    set_hexpand: true,
+                    set_halign: gtk::Align::Center,
+                    // Reserve vertical space
+                    set_height_request: 34,
                 }
             }
         }
