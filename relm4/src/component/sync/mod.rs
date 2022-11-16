@@ -16,8 +16,7 @@ pub use controller::{ComponentController, Controller};
 pub use message_broker::MessageBroker;
 pub use state_watcher::StateWatcher;
 pub use stream::ComponentStream;
-pub use traits::Component;
-pub use traits::SimpleComponent;
+pub use traits::{Component, SimpleComponent};
 
 use std::future::Future;
 use std::pin::Pin;

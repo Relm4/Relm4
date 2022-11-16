@@ -1,9 +1,9 @@
 //! Containers similar to [`std::collections`] that can be used to store factory data.
 
 mod vec_deque;
-pub use vec_deque::{FactoryVecDeque, FactoryVecDequeGuard};
+pub use vec_deque::{AsyncFactoryVecDeque, AsyncFactoryVecDequeGuard};
 
-use super::DynamicIndex;
+use crate::factory::DynamicIndex;
 
 #[derive(Debug)]
 struct RenderedState {

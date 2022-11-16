@@ -1,13 +1,11 @@
-use super::data_guard::DataGuard;
-use super::FactoryComponentSender;
-use super::{handle::FactoryHandle, DynamicIndex, FactoryComponent, FactoryView};
+use super::{FactoryComponent, FactoryHandle};
 
+use crate::factory::{DataGuard, DynamicIndex, FactoryComponentSender, FactoryView};
 use crate::shutdown::ShutdownSender;
-use crate::{shutdown, Receiver, Sender};
+use crate::{shutdown, GuardedReceiver, Receiver, Sender};
 
 use std::any;
 
-use futures::FutureExt;
 use tracing::info_span;
 
 #[derive(Debug)]
@@ -15,9 +13,9 @@ pub(super) struct FactoryBuilder<C: FactoryComponent> {
     pub(super) data: Box<C>,
     pub(super) root_widget: C::Root,
     pub(super) component_sender: FactoryComponentSender<C>,
-    pub(super) input_rx: Receiver<C::Input>,
-    pub(super) output_rx: Receiver<C::Output>,
-    pub(super) cmd_rx: Receiver<C::CommandOutput>,
+    pub(super) input_receiver: Receiver<C::Input>,
+    pub(super) output_receiver: Receiver<C::Output>,
+    pub(super) cmd_receiver: Receiver<C::CommandOutput>,
     pub(super) shutdown_notifier: ShutdownSender,
 }
 
@@ -46,9 +44,9 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
             data,
             root_widget,
             component_sender,
-            input_rx,
-            output_rx,
-            cmd_rx,
+            input_receiver: input_rx,
+            output_receiver: output_rx,
+            cmd_receiver: cmd_rx,
             shutdown_notifier,
         }
     }
@@ -68,15 +66,15 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
             mut data,
             root_widget,
             component_sender,
-            input_rx,
-            output_rx,
-            cmd_rx,
+            input_receiver,
+            output_receiver,
+            cmd_receiver,
             shutdown_notifier,
         } = self;
 
         let forward_sender = parent_sender.0.clone();
         crate::spawn_local(async move {
-            while let Some(msg) = output_rx.recv().await {
+            while let Some(msg) = output_receiver.recv().await {
                 if let Some(new_msg) = transform(msg) {
                     if forward_sender.send(new_msg).is_err() {
                         break;
@@ -86,7 +84,7 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
         });
 
         // Gets notifications when a component's model and view is updated externally.
-        let (notifier, notifier_rx) = flume::bounded(0);
+        let (notifier, notifier_receiver) = crate::channel();
 
         let widgets = Box::new(data.init_widgets(
             index,
@@ -108,45 +106,36 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
             output_tx,
             |mut model, mut widgets| {
                 async move {
+                    let mut notifier = GuardedReceiver::new(notifier_receiver);
+                    let mut cmd = GuardedReceiver::new(cmd_receiver);
+                    let mut input = GuardedReceiver::new(input_receiver);
                     loop {
-                        let notifier = notifier_rx.recv_async().fuse();
-                        let cmd = cmd_rx.recv().fuse();
-                        let input = input_rx.recv().fuse();
-
-                        futures::pin_mut!(cmd);
-                        futures::pin_mut!(input);
-                        futures::pin_mut!(notifier);
-
                         futures::select!(
                             // Performs the model update, checking if the update requested a command.
                             // Runs that command asynchronously in the background using tokio.
                             message = input => {
-                                if let Some(message) = message {
-                                    let span = info_span!(
-                                        "update_with_view",
-                                        input=?message,
-                                        component=any::type_name::<C>(),
-                                        id=model.id(),
-                                    );
-                                    let _enter = span.enter();
+                                let span = info_span!(
+                                    "update_with_view",
+                                    input=?message,
+                                    component=any::type_name::<C>(),
+                                    id=model.id(),
+                                );
+                                let _enter = span.enter();
 
-                                    model.update_with_view(&mut widgets, message, component_sender.clone());
-                                }
+                                model.update_with_view(&mut widgets, message, component_sender.clone());
                             }
 
                             // Handles responses from a command.
                             message = cmd => {
-                                if let Some(message) = message {
-                                    let span = info_span!(
-                                        "update_cmd_with_view",
-                                        cmd_output=?message,
-                                        component=any::type_name::<C>(),
-                                        id=model.id(),
-                                    );
-                                    let _enter = span.enter();
+                                let span = info_span!(
+                                    "update_cmd_with_view",
+                                    cmd_output=?message,
+                                    component=any::type_name::<C>(),
+                                    id=model.id(),
+                                );
+                                let _enter = span.enter();
 
-                                    model.update_cmd_with_view(&mut widgets, message, component_sender.clone());
-                                }
+                                model.update_cmd_with_view(&mut widgets, message, component_sender.clone());
                             }
 
                             // Triggered when the model and view have been updated externally.
@@ -157,6 +146,7 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
                     }
                 }
             },
+            C::shutdown,
         );
 
         // Give back a type for controlling the component service.
@@ -165,7 +155,7 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
             root_widget,
             returned_widget,
             input: input_tx,
-            notifier: Sender(notifier),
+            notifier,
         }
     }
 }

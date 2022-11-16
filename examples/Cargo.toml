@@ -34,6 +34,10 @@ name = "factory"
 path = "factory.rs"
 
 [[example]]
+name = "factory_async"
+path = "factory_async.rs"
+
+[[example]]
 name = "grid_factory"
 path = "grid_factory.rs"
 

@@ -1,7 +1,6 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned, ToTokens};
 use syn::parse_quote;
-use syn::spanned::Spanned;
 use syn::visit_mut::VisitMut;
 
 use crate::attrs::Attrs;
@@ -182,9 +181,9 @@ pub(crate) fn generate_tokens(
 
     let errors = errors.iter().map(syn::Error::to_compile_error);
 
-    let async_trait = asyncness.map(|async_token| {
-        quote_spanned!(async_token.span() => #[relm4::async_trait::async_trait(?Send)])
-    });
+    let async_trait = asyncness.map(
+        |async_token| quote_spanned!(async_token.span => #[relm4::async_trait::async_trait(?Send)]),
+    );
 
     quote! {
         #widgets_struct
