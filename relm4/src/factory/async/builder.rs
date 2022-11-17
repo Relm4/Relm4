@@ -92,6 +92,8 @@ where
 
         let input_tx = component_sender.input_sender().clone();
 
+        let loading_widgets = C::init_loading_widgets(&mut root_widget);
+
         let future_receiver = {
             let index = index.clone();
             let (future_sender, future_receiver) = crate::channel();
@@ -109,13 +111,14 @@ where
 
             crate::spawn_local(async move {
                 let data = C::init_model(init, &index, component_sender).await;
+                if let Some(loading_widgets) = loading_widgets {
+                    loading_widgets.remove();
+                }
                 let data_guard = future_data.start_runtime(data);
                 future_sender.send(data_guard);
             });
             future_receiver
         };
-
-        C::init_loading_widgets(&mut root_widget);
 
         let data = AsyncData::new(future_receiver);
 

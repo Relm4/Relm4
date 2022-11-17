@@ -36,6 +36,7 @@ pub mod shared_state;
 
 pub(crate) mod late_initialization;
 mod runtime_util;
+pub mod temp_widgets;
 
 pub use channel::{channel, Receiver, Sender};
 pub use component::worker::{Worker, WorkerController, WorkerHandle};

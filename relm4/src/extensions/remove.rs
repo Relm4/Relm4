@@ -5,12 +5,17 @@ use gtk::prelude::*;
 pub trait RelmRemoveExt: ContainerChild {
     /// Removes the widget from the container
     /// if it is a child of the container.
-    fn container_remove(&self, widget: &impl AsRef<Self::Child>);
+    fn container_remove(&self, child: &impl AsRef<Self::Child>);
 }
 
 impl<T: RelmSetChildExt> RelmRemoveExt for T {
-    fn container_remove(&self, _widget: &impl AsRef<Self::Child>) {
-        self.container_set_child(None::<&gtk::Widget>);
+    fn container_remove(&self, child: &impl AsRef<Self::Child>) {
+        if let Some(current_child) = self.container_get_child() {
+            let remove_child = child.as_ref().upcast_ref();
+            if remove_child == &current_child {
+                self.container_set_child(None::<&gtk::Widget>);
+            }
+        }
     }
 }
 

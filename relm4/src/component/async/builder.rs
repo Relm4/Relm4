@@ -151,7 +151,7 @@ impl<C: AsyncComponent> AsyncComponentBuilder<C> {
         let Self {
             mut root, priority, ..
         } = self;
-        C::init_loading_widgets(&mut root);
+        let temp_widgets = C::init_loading_widgets(&mut root);
 
         let RuntimeSenders {
             output_sender,
@@ -182,6 +182,9 @@ impl<C: AsyncComponent> AsyncComponentBuilder<C> {
         let id = crate::spawn_local_with_priority(priority, async move {
             let id = source_id_receiver.await.unwrap();
             let mut state = C::init(payload, rt_root, component_sender.clone()).await;
+            if let Some(temp_widgets) = temp_widgets {
+                temp_widgets.remove();
+            }
             let mut cmd = GuardedReceiver::new(cmd_receiver);
             let mut input = GuardedReceiver::new(input_rx);
 

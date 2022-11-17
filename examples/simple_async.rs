@@ -3,7 +3,9 @@ use std::time::Duration;
 use gtk::prelude::*;
 use relm4::{
     component::{AsyncComponent, AsyncComponentParts, AsyncComponentSender},
-    gtk, view, RelmApp, RelmWidgetExt,
+    gtk,
+    temp_widgets::TempWidgets,
+    view, RelmApp, RelmWidgetExt,
 };
 
 struct App {
@@ -49,7 +51,7 @@ impl AsyncComponent for App {
         }
     }
 
-    fn init_loading_widgets(root: &mut Self::Root) {
+    fn init_loading_widgets(root: &mut Self::Root) -> Option<TempWidgets> {
         view! {
             #[local_ref]
             root {
@@ -60,12 +62,14 @@ impl AsyncComponent for App {
                 // initialized view because Window can only have one child.
                 // If the root of the component was a Box which can have
                 // several children, you'd need to remove this again in init().
+                #[name(spinner)]
                 gtk::Spinner {
                     start: (),
                     set_halign: gtk::Align::Center,
                 }
             }
         }
+        Some(TempWidgets::new(root, spinner))
     }
 
     // Initialize the component.
