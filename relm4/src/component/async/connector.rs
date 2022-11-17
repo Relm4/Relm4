@@ -3,8 +3,7 @@
 // SPDX-License-Identifier: MIT or Apache-2.0
 
 use super::{AsyncComponent, AsyncComponentController, AsyncController};
-use crate::component::ShutdownOnDrop;
-use crate::{Receiver, Sender};
+use crate::{Receiver, Sender, ShutdownOnDrop};
 use std::fmt::{self, Debug};
 
 /// Contains the post-launch input sender and output receivers with the root widget.

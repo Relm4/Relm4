@@ -3,12 +3,12 @@
 // SPDX-License-Identifier: MIT or Apache-2.0
 
 //use super::message_broker::MessageBroker;
-use super::AsyncComponentParts;
-use super::{AsyncComponent, AsyncConnector};
-use crate::component::{GuardedReceiver, RuntimeSenders};
-use crate::late_initialization;
+use super::{AsyncComponent, AsyncComponentParts, AsyncConnector};
 use crate::sender::AsyncComponentSender;
-use crate::{Receiver, RelmContainerExt, RelmWidgetExt, Sender};
+use crate::{
+    late_initialization, GuardedReceiver, Receiver, RelmContainerExt, RelmWidgetExt,
+    RuntimeSenders, Sender,
+};
 use gtk::glib;
 use gtk::prelude::{GtkWindowExt, NativeDialogExt};
 use std::any;

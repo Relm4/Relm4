@@ -8,7 +8,10 @@ use crate::{sender::AsyncComponentSender, Sender};
 
 use super::{AsyncComponentBuilder, AsyncComponentParts};
 
-/// Elm-style variant of a Component with view updates separated from input updates
+/// Asynchronous variant of [`Component`](crate::Component).
+///
+/// `AsyncComponent` is powerful and flexible, but for many use-cases the [`SimpleAsyncComponent`]
+/// convenience trait will suffice.
 #[async_trait::async_trait(?Send)]
 pub trait AsyncComponent: Sized + 'static {
     /// Messages which are received from commands executing in the background.
@@ -65,7 +68,19 @@ pub trait AsyncComponent: Sized + 'static {
     ) {
     }
 
-    /// Handles updates from a command.
+    /// Updates the model and view upon completion of a command.
+    ///
+    /// Overriding this method is helpful if you need access to the widgets while processing a
+    /// command output.
+    ///
+    /// The default implementation of this method calls [`update_cmd`] followed by [`update_view`].
+    /// If you override this method while using the [`component`] macro, you must remember to call
+    /// [`update_view`] in your implementation. Otherwise, the view will not reflect the updated
+    /// model.
+    ///
+    /// [`update_cmd`]: Self::update_cmd
+    /// [`update_view`]: Self::update_view
+    /// [`component`]: relm4_macros::component
     async fn update_cmd_with_view(
         &mut self,
         widgets: &mut Self::Widgets,
@@ -80,7 +95,19 @@ pub trait AsyncComponent: Sized + 'static {
     #[allow(unused)]
     fn update_view(&self, widgets: &mut Self::Widgets, sender: AsyncComponentSender<Self>) {}
 
-    /// Updates the model and view. Optionally returns a command to run.
+    /// Updates the model and view when a new input is received.
+    ///
+    /// Overriding this method is helpful if you need access to the widgets while processing an
+    /// input.
+    ///
+    /// The default implementation of this method calls [`update`] followed by [`update_view`]. If
+    /// you override this method while using the [`component`] macro, you must remember to
+    /// call [`update_view`] in your implementation. Otherwise, the view will not reflect the
+    /// updated model.
+    ///
+    /// [`update`]: Self::update
+    /// [`update_view`]: Self::update_view
+    /// [`component`]: relm4_macros::component
     async fn update_with_view(
         &mut self,
         widgets: &mut Self::Widgets,
@@ -104,7 +131,7 @@ pub trait AsyncComponent: Sized + 'static {
     }
 }
 
-/// Elm-style variant of a Component with view updates separated from input updates
+/// Asynchronous variant of [`SimpleComponent`](crate::SimpleComponent).
 #[async_trait::async_trait(?Send)]
 pub trait SimpleAsyncComponent: Sized + 'static {
     /// The message type that the component accepts as inputs.

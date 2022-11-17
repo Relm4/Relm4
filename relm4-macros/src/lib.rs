@@ -283,12 +283,12 @@ pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
 /// ```
 #[proc_macro_attribute]
 pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
-    let SyncOnlyAttrs { visibility } = parse_macro_input!(attributes);
+    let attrs = parse_macro_input!(attributes);
     let backup_input = input.clone();
     let factory_impl_res = syn::parse_macro_input::parse::<ItemImpl>(input);
 
     match factory_impl_res {
-        Ok(factory_impl) => factory::generate_tokens(&visibility, factory_impl).into(),
+        Ok(factory_impl) => factory::generate_tokens(attrs, factory_impl).into(),
         Err(_) => util::item_impl_error(backup_input),
     }
 }
