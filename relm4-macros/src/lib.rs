@@ -172,7 +172,7 @@ pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
 
     match component_impl_res {
         Ok(component_impl) => component::generate_tokens(global_attributes, component_impl).into(),
-        Err(_) => util::item_impl_error(backup_input),
+        Err(_) => util::item_impl_error(backup_input, &["Widgets", "Root"], &["init_root"]),
     }
 }
 
@@ -289,7 +289,7 @@ pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
 
     match factory_impl_res {
         Ok(factory_impl) => factory::generate_tokens(attrs, factory_impl).into(),
-        Err(_) => util::item_impl_error(backup_input),
+        Err(_) => util::item_impl_error(backup_input, &["Widgets", "Root"], &["init_root"]),
     }
 }
 
@@ -616,5 +616,5 @@ pub fn widget_template(attributes: TokenStream, input: TokenStream) -> TokenStre
 #[test]
 fn ui() {
     let t = trybuild::TestCases::new();
-    t.compile_fail("tests/ui/compile-fail/**/*.rs");
+    t.compile_fail("tests/compile-fail/**/*.rs");
 }

@@ -1,5 +1,5 @@
 error: expected `view!` macro invocation
- --> tests/ui/compile-fail/component-empty.rs:6:1
+ --> tests/compile-fail/component-empty.rs:6:1
   |
 6 | / impl SimpleComponent for TestComponent {
 7 | |
@@ -7,7 +7,7 @@ error: expected `view!` macro invocation
   | |_^
 
 error[E0046]: not all trait items implemented, missing: `Input`, `Output`, `Init`, `Root`, `init_root`, `init`
- --> tests/ui/compile-fail/component-empty.rs:6:1
+ --> tests/compile-fail/component-empty.rs:6:1
   |
 6 | impl SimpleComponent for TestComponent {
   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ missing `Input`, `Output`, `Init`, `Root`, `init_root`, `init` in implementation

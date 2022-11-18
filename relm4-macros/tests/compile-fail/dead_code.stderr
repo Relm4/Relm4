@@ -1,5 +1,5 @@
 error[E0609]: no field `_gtk_window_0` on type `TestComponentWidgets`
-  --> tests/ui/compile-fail/dead_code.rs:28:32
+  --> tests/compile-fail/dead_code.rs:28:32
    |
 28 |         let _window = &widgets._gtk_window_0;
    |                                ^^^^^^^^^^^^^ unknown field

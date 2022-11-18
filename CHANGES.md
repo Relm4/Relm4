@@ -14,6 +14,7 @@
 + core: Implement `RelmContainerExt` for `adw::Squeezer`
 + core: Implement `RelmSetChildExt` for `gtk::WindowHandle`
 + macros: Auto-generate the name of the `Widgets` type if possible
++ macros: Insert types and functions even into broken item impls
 
 ### Changed
 
