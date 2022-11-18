@@ -6,6 +6,7 @@
 
 + core: Add asynchronous components including macro support
 + core: Add asynchronous factories including macro support
++ core: Temporary widget initialization for `AsyncComponent`s
 + core: Add `Reducer` as message based alternative to `SharedState`
 + core: Runtimes of `Component`s and `AsyncComponents` can now be detached for a static lifetime
 + core: Add `ComponentStream` as alternative to `Controller` that implements `Stream` for async message handling

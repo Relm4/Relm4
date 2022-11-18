@@ -3,7 +3,7 @@ use std::time::Duration;
 use gtk::prelude::*;
 use relm4::{
     component::{AsyncComponent, AsyncComponentParts, AsyncComponentSender},
-    gtk, RelmApp, RelmWidgetExt, Sender,
+    gtk, view, RelmApp, RelmWidgetExt,
 };
 
 struct App {
@@ -25,9 +25,6 @@ impl AsyncComponent for App {
 
     view! {
         gtk::Window {
-            set_title: Some("Simple app"),
-            set_default_size: (300, 100),
-
             gtk::Box {
                 set_orientation: gtk::Orientation::Vertical,
                 set_spacing: 5,
@@ -47,6 +44,25 @@ impl AsyncComponent for App {
                     #[watch]
                     set_label: &format!("Counter: {}", model.counter),
                     set_margin_all: 5,
+                }
+            }
+        }
+    }
+
+    fn init_loading_widgets(root: &mut Self::Root) {
+        view! {
+            #[local_ref]
+            root {
+                set_title: Some("Simple app"),
+                set_default_size: (300, 100),
+
+                // This will replaced by the Box of the fully
+                // initialized view because Window can only have one child.
+                // If the root of the component was a Box which can have
+                // several children, you'd need to remove this again in init().
+                gtk::Spinner {
+                    start: (),
+                    set_halign: gtk::Align::Center,
                 }
             }
         }
@@ -78,10 +94,6 @@ impl AsyncComponent for App {
                 self.counter = self.counter.wrapping_sub(1);
             }
         }
-    }
-
-    fn shutdown(&mut self, _widgets: &mut Self::Widgets, _output: Sender<Self::Output>) {
-        println!("SHUTDOWN");
     }
 }
 
