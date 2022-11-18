@@ -1,0 +1,31 @@
+error: expected identifier, found `}`
+  --> tests/compile-fail/bad_impl.rs:30:1
+   |
+7  | impl SimpleComponent for TestComponent {
+   |                                        - while parsing this item list starting here
+...
+30 | }
+   | ^
+   | |
+   | expected identifier
+   | the item list ends here
+
+error: expected identifier, found `}`
+ --> tests/compile-fail/bad_impl.rs:6:1
+  |
+6 | #[relm4_macros::component]
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  | |
+  | expected identifier
+  | while parsing this item list starting here
+  | the item list ends here
+  |
+  = note: this error originates in the attribute macro `relm4_macros::component` (in Nightly builds, run with -Z macro-backtrace for more info)
+
+warning: unused import: `gtk`
+ --> tests/compile-fail/bad_impl.rs:1:13
+  |
+1 | use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent};
+  |             ^^^
+  |
+  = note: `#[warn(unused_imports)]` on by default
