@@ -72,6 +72,7 @@ where
         widgets: &mut Self::Widgets,
         input: Self::Input,
         sender: ComponentSender<Self>,
+        _root: &Self::Root,
     ) {
         match input {
             SimpleComboBoxMsg::UpdateIndex(idx) => {

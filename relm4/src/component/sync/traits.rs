@@ -29,7 +29,7 @@ pub trait Component: Sized + 'static {
     type Init;
 
     /// The widget that was constructed by the component.
-    type Root: Debug;
+    type Root: Debug + Clone;
 
     /// The type that's used for storing widgets created for this component.
     type Widgets: 'static;
@@ -52,11 +52,17 @@ pub trait Component: Sized + 'static {
 
     /// Processes inputs received by the component.
     #[allow(unused)]
-    fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>) {}
+    fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>, root: &Self::Root) {}
 
     /// Defines how the component should respond to command updates.
     #[allow(unused)]
-    fn update_cmd(&mut self, message: Self::CommandOutput, sender: ComponentSender<Self>) {}
+    fn update_cmd(
+        &mut self,
+        message: Self::CommandOutput,
+        sender: ComponentSender<Self>,
+        root: &Self::Root,
+    ) {
+    }
 
     /// Updates the model and view upon completion of a command.
     ///
@@ -76,8 +82,9 @@ pub trait Component: Sized + 'static {
         widgets: &mut Self::Widgets,
         message: Self::CommandOutput,
         sender: ComponentSender<Self>,
+        root: &Self::Root,
     ) {
-        self.update_cmd(message, sender.clone());
+        self.update_cmd(message, sender.clone(), root);
         self.update_view(widgets, sender);
     }
 
@@ -103,8 +110,9 @@ pub trait Component: Sized + 'static {
         widgets: &mut Self::Widgets,
         message: Self::Input,
         sender: ComponentSender<Self>,
+        root: &Self::Root,
     ) {
-        self.update(message, sender.clone());
+        self.update(message, sender.clone(), root);
         self.update_view(widgets, sender);
     }
 
@@ -133,7 +141,7 @@ pub trait SimpleComponent: Sized + 'static {
     type Init;
 
     /// The widget that was constructed by the component.
-    type Root: Debug;
+    type Root: Debug + Clone;
 
     /// The type that's used for storing widgets created for this component.
     type Widgets: 'static;
@@ -189,7 +197,7 @@ where
         C::init(init, root, sender)
     }
 
-    fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>) {
+    fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>, _root: &Self::Root) {
         C::update(self, message, sender);
     }
 

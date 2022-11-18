@@ -1,4 +1,3 @@
-use futures::StreamExt;
 use gtk::prelude::*;
 use relm4::{prelude::*, Sender};
 
@@ -135,24 +134,18 @@ impl Component for App {
         ComponentParts { model, widgets }
     }
 
-    fn update_with_view(
-        &mut self,
-        widgets: &mut Self::Widgets,
-        msg: Self::Input,
-        sender: ComponentSender<Self>,
-    ) {
-        let root = widgets.main_window.clone();
+    fn update(&mut self, msg: Self::Input, sender: ComponentSender<Self>, root: &Self::Root) {
         match msg {
             AppMsg::StartSearch => {
                 self.searching = true;
 
-                let mut stream = Dialog::builder()
-                    .transient_for(&root)
+                let stream = Dialog::builder()
+                    .transient_for(root)
                     .launch(())
                     .into_stream();
                 sender.oneshot_command(async move {
                     // Use the component as stream
-                    let result = stream.next().await;
+                    let result = stream.recv_one().await;
 
                     if let Some(search) = result {
                         let response =
@@ -175,10 +168,14 @@ impl Component for App {
                 });
             }
         }
-        self.update_view(widgets, sender);
     }
 
-    fn update_cmd(&mut self, message: Self::CommandOutput, _sender: ComponentSender<Self>) {
+    fn update_cmd(
+        &mut self,
+        message: Self::CommandOutput,
+        _sender: ComponentSender<Self>,
+        _root: &Self::Root,
+    ) {
         self.searching = false;
         self.result = message;
     }

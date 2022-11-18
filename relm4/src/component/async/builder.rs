@@ -181,7 +181,7 @@ impl<C: AsyncComponent> AsyncComponentBuilder<C> {
         // updates, and send `Self::Output` messages externally.
         let id = crate::spawn_local_with_priority(priority, async move {
             let id = source_id_receiver.await.unwrap();
-            let mut state = C::init(payload, rt_root, component_sender.clone()).await;
+            let mut state = C::init(payload, rt_root.clone(), component_sender.clone()).await;
             let mut cmd = GuardedReceiver::new(cmd_receiver);
             let mut input = GuardedReceiver::new(input_rx);
 
@@ -203,7 +203,7 @@ impl<C: AsyncComponent> AsyncComponentBuilder<C> {
                         );
                         let _enter = span.enter();
 
-                        model.update_with_view(widgets, message, component_sender.clone()).await;
+                        model.update_with_view(widgets, message, component_sender.clone(), &rt_root).await;
                     }
 
                     // Handles responses from a command.
@@ -221,7 +221,7 @@ impl<C: AsyncComponent> AsyncComponentBuilder<C> {
                         );
                         let _enter = span.enter();
 
-                        model.update_cmd_with_view(widgets, message, component_sender.clone()).await;
+                        model.update_cmd_with_view(widgets, message, component_sender.clone(), &rt_root).await;
                     }
 
                     // Triggered when the component is destroyed

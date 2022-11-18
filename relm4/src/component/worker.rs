@@ -121,7 +121,7 @@ where
                             );
                             let _enter = span.enter();
 
-                            model.update_with_view(widgets, message, component_sender.clone());
+                            model.update_with_view(widgets, message, component_sender.clone(), &root);
                         }
 
                         // Handles responses from a command.
@@ -139,7 +139,7 @@ where
                             );
                             let _enter = span.enter();
 
-                            model.update_cmd_with_view(widgets, message, component_sender.clone());
+                            model.update_cmd_with_view(widgets, message, component_sender.clone(), &root);
                         },
 
                         // Triggered when the component is destroyed

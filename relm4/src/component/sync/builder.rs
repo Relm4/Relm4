@@ -202,6 +202,7 @@ impl<C: Component> ComponentBuilder<C> {
         };
 
         let rt_state = watcher.state.clone();
+        let rt_root = root.clone();
 
         // Spawns the component's service. It will receive both `Self::Input` and
         // `Self::CommandOutput` messages. It will spawn commands as requested by
@@ -229,7 +230,7 @@ impl<C: Component> ComponentBuilder<C> {
                         );
                         let _enter = span.enter();
 
-                        model.update_with_view(widgets, message, component_sender.clone());
+                        model.update_with_view(widgets, message, component_sender.clone(), &rt_root);
                     }
 
                     // Handles responses from a command.
@@ -247,7 +248,7 @@ impl<C: Component> ComponentBuilder<C> {
                         );
                         let _enter = span.enter();
 
-                        model.update_cmd_with_view(widgets, message, component_sender.clone());
+                        model.update_cmd_with_view(widgets, message, component_sender.clone(), &rt_root);
                     }
 
                     // Triggered when the model and view have been updated externally.

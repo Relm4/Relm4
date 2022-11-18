@@ -57,7 +57,13 @@ pub trait AsyncComponent: Sized + 'static {
 
     /// Processes inputs received by the component.
     #[allow(unused)]
-    async fn update(&mut self, message: Self::Input, sender: AsyncComponentSender<Self>) {}
+    async fn update(
+        &mut self,
+        message: Self::Input,
+        sender: AsyncComponentSender<Self>,
+        root: &Self::Root,
+    ) {
+    }
 
     /// Defines how the component should respond to command updates.
     #[allow(unused)]
@@ -65,6 +71,7 @@ pub trait AsyncComponent: Sized + 'static {
         &mut self,
         message: Self::CommandOutput,
         sender: AsyncComponentSender<Self>,
+        root: &Self::Root,
     ) {
     }
 
@@ -86,8 +93,9 @@ pub trait AsyncComponent: Sized + 'static {
         widgets: &mut Self::Widgets,
         message: Self::CommandOutput,
         sender: AsyncComponentSender<Self>,
+        root: &Self::Root,
     ) {
-        self.update_cmd(message, sender.clone()).await;
+        self.update_cmd(message, sender.clone(), root).await;
         self.update_view(widgets, sender);
     }
 
@@ -113,8 +121,9 @@ pub trait AsyncComponent: Sized + 'static {
         widgets: &mut Self::Widgets,
         message: Self::Input,
         sender: AsyncComponentSender<Self>,
+        root: &Self::Root,
     ) {
-        self.update(message, sender.clone()).await;
+        self.update(message, sender.clone(), root).await;
         self.update_view(widgets, sender);
     }
 
@@ -212,7 +221,12 @@ where
         C::init(init, root, sender).await
     }
 
-    async fn update(&mut self, message: Self::Input, sender: AsyncComponentSender<Self>) {
+    async fn update(
+        &mut self,
+        message: Self::Input,
+        sender: AsyncComponentSender<Self>,
+        _root: &Self::Root,
+    ) {
         C::update(self, message, sender).await;
     }
 
