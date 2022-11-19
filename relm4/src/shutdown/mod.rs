@@ -10,22 +10,17 @@ pub use receiver::ShutdownReceiver;
 pub use sender::ShutdownSender;
 use tokio::sync::broadcast;
 
-use std::sync::atomic::AtomicBool;
-use std::sync::Arc;
-
 /// Creates a broadcasting shutdown channel.
 ///
 /// The sending side is responsible for initiating a shutdown.
 /// The receiving side is responsible for responding to shutdowns.
 #[must_use]
 pub fn channel() -> (ShutdownSender, ShutdownReceiver) {
-    let alive = Arc::new(AtomicBool::new(true));
     let (sender, receiver) = broadcast::channel(1);
     (
         ShutdownSender {
-            alive: alive.clone(),
             sender,
         },
-        ShutdownReceiver { alive, receiver },
+        ShutdownReceiver { receiver },
     )
 }

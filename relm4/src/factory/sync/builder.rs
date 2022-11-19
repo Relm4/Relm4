@@ -1,14 +1,11 @@
-use super::data_guard::DataGuard;
-use super::FactoryComponentSender;
-use super::{handle::FactoryHandle, DynamicIndex, FactoryComponent, FactoryView};
+use super::{FactoryComponent, FactoryHandle};
 
+use crate::factory::{DataGuard, DynamicIndex, FactoryComponentSender, FactoryView};
 use crate::shutdown::ShutdownSender;
-use crate::{shutdown, OnDestroy, Receiver, Sender};
+use crate::{shutdown, GuardedReceiver, Receiver, Sender};
 
 use std::any;
 
-use futures::FutureExt;
-use tokio::sync::oneshot;
 use tracing::info_span;
 
 #[derive(Debug)]
@@ -16,10 +13,10 @@ pub(super) struct FactoryBuilder<C: FactoryComponent> {
     pub(super) data: Box<C>,
     pub(super) root_widget: C::Root,
     pub(super) component_sender: FactoryComponentSender<C>,
-    pub(super) input_rx: Receiver<C::Input>,
-    pub(super) output_rx: Receiver<C::Output>,
-    pub(super) cmd_rx: Receiver<C::CommandOutput>,
-    pub(super) death_notifier: ShutdownSender,
+    pub(super) input_receiver: Receiver<C::Input>,
+    pub(super) output_receiver: Receiver<C::Output>,
+    pub(super) cmd_receiver: Receiver<C::CommandOutput>,
+    pub(super) shutdown_notifier: ShutdownSender,
 }
 
 impl<C: FactoryComponent> FactoryBuilder<C> {
@@ -34,11 +31,11 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
         let (cmd_tx, cmd_rx) = crate::channel::<C::CommandOutput>();
 
         // Notifies the component's child commands that it is now deceased.
-        let (death_notifier, death_recipient) = shutdown::channel();
+        let (shutdown_notifier, shutdown_receiver) = shutdown::channel();
 
         // Encapsulates the senders used by component methods.
         let component_sender =
-            FactoryComponentSender::new(input_tx, output_tx, cmd_tx, death_recipient);
+            FactoryComponentSender::new(input_tx, output_tx, cmd_tx, shutdown_receiver);
 
         let data = Box::new(C::init_model(init, index, component_sender.clone()));
         let root_widget = data.init_root();
@@ -47,10 +44,10 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
             data,
             root_widget,
             component_sender,
-            input_rx,
-            output_rx,
-            cmd_rx,
-            death_notifier,
+            input_receiver: input_rx,
+            output_receiver: output_rx,
+            cmd_receiver: cmd_rx,
+            shutdown_notifier,
         }
     }
 
@@ -69,15 +66,15 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
             mut data,
             root_widget,
             component_sender,
-            input_rx,
-            output_rx,
-            cmd_rx,
-            death_notifier,
+            input_receiver,
+            output_receiver,
+            cmd_receiver,
+            shutdown_notifier,
         } = self;
 
         let forward_sender = parent_sender.0.clone();
         crate::spawn_local(async move {
-            while let Some(msg) = output_rx.recv().await {
+            while let Some(msg) = output_receiver.recv().await {
                 if let Some(new_msg) = transform(msg) {
                     if forward_sender.send(new_msg).is_err() {
                         break;
@@ -87,18 +84,14 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
         });
 
         // Gets notifications when a component's model and view is updated externally.
-        let (notifier, notifier_rx) = flume::bounded(0);
+        let (notifier, notifier_receiver) = crate::channel();
 
-        // The source ID of the component's service will be sent through this once the root
-        // widget has been iced, which will give the component one last chance to say goodbye.
-        let (burn_notifier, burn_recipient) = oneshot::channel::<gtk::glib::SourceId>();
-
-        let mut widgets = data.init_widgets(
+        let widgets = Box::new(data.init_widgets(
             index,
             &root_widget,
             &returned_widget,
             component_sender.clone(),
-        );
+        ));
 
         let input_tx = component_sender.input_sender().clone();
         let output_tx = component_sender.output_sender().clone();
@@ -106,23 +99,21 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
         // Spawns the component's service. It will receive both `Self::Input` and
         // `Self::CommandOutput` messages. It will spawn commands as requested by
         // updates, and send `Self::Output` messages externally.
-        let (data, on_destroy_id) = DataGuard::new(data, |mut model| {
-            async move {
-                let mut burn_notice = burn_recipient.fuse();
-                loop {
-                    let notifier = notifier_rx.recv_async().fuse();
-                    let cmd = cmd_rx.recv().fuse();
-                    let input = input_rx.recv().fuse();
-
-                    futures::pin_mut!(cmd);
-                    futures::pin_mut!(input);
-                    futures::pin_mut!(notifier);
-
-                    futures::select!(
-                        // Performs the model update, checking if the update requested a command.
-                        // Runs that command asynchronously in the background using tokio.
-                        message = input => {
-                            if let Some(message) = message {
+        let data = DataGuard::new(
+            data,
+            widgets,
+            shutdown_notifier,
+            output_tx,
+            |mut model, mut widgets| {
+                async move {
+                    let mut notifier = GuardedReceiver::new(notifier_receiver);
+                    let mut cmd = GuardedReceiver::new(cmd_receiver);
+                    let mut input = GuardedReceiver::new(input_receiver);
+                    loop {
+                        futures::select!(
+                            // Performs the model update, checking if the update requested a command.
+                            // Runs that command asynchronously in the background using tokio.
+                            message = input => {
                                 let span = info_span!(
                                     "update_with_view",
                                     input=?message,
@@ -133,11 +124,9 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
 
                                 model.update_with_view(&mut widgets, message, component_sender.clone());
                             }
-                        }
 
-                        // Handles responses from a command.
-                        message = cmd => {
-                            if let Some(message) = message {
+                            // Handles responses from a command.
+                            message = cmd => {
                                 let span = info_span!(
                                     "update_cmd_with_view",
                                     cmd_output=?message,
@@ -148,37 +137,17 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
 
                                 model.update_cmd_with_view(&mut widgets, message, component_sender.clone());
                             }
-                        }
 
-                        // Triggered when the model and view have been updated externally.
-                        _ = notifier => {
-                            model.update_view(&mut widgets, component_sender.clone());
-                        }
-
-                        // Triggered when the component is destroyed
-                        id = burn_notice => {
-                            model.shutdown(&mut widgets, output_tx);
-
-                            death_notifier.shutdown();
-
-                            if let Ok(id) = id {
-                                id.remove();
+                            // Triggered when the model and view have been updated externally.
+                            _ = notifier => {
+                                model.update_view(&mut widgets, component_sender.clone());
                             }
-
-                            return
-                        }
-                    );
+                        );
+                    }
                 }
-            }
-        });
-
-        // When the root widget is destroyed, the spawned service will be removed.
-        let root_widget_ = root_widget.clone();
-        root_widget_.on_destroy(move || {
-            if let Some(id) = on_destroy_id.take() {
-                let _ = burn_notifier.send(id);
-            }
-        });
+            },
+            C::shutdown,
+        );
 
         // Give back a type for controlling the component service.
         FactoryHandle {
@@ -186,7 +155,7 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
             root_widget,
             returned_widget,
             input: input_tx,
-            notifier: Sender(notifier),
+            notifier,
         }
     }
 }

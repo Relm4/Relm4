@@ -4,9 +4,17 @@
 
 use std::fmt::Debug;
 
-use crate::{ComponentBuilder, ComponentParts, ComponentSender, OnDestroy, Sender};
+use crate::{ComponentBuilder, ComponentParts, ComponentSender, Sender};
 
-/// Elm-style variant of a Component with view updates separated from input updates
+/// The fundamental building block of a Relm4 application.
+///
+/// A `Component` is an element of an application that defines initialization, state, behavior and
+/// communication as a modular unit.
+///
+/// `Component` is powerful and flexible, but for many use-cases the [`SimpleComponent`]
+/// convenience trait will suffice. [`SimpleComponent`] enforces separation between model and view
+/// updates, and provides no-op implementations for advanced features that are not relevant for most
+/// use-cases.
 pub trait Component: Sized + 'static {
     /// Messages which are received from commands executing in the background.
     type CommandOutput: Debug + Send + 'static;
@@ -21,7 +29,7 @@ pub trait Component: Sized + 'static {
     type Init;
 
     /// The widget that was constructed by the component.
-    type Root: Debug + OnDestroy;
+    type Root: Debug;
 
     /// The type that's used for storing widgets created for this component.
     type Widgets: 'static;
@@ -32,7 +40,7 @@ pub trait Component: Sized + 'static {
         ComponentBuilder::<Self>::default()
     }
 
-    /// Initializes the root widget
+    /// Initializes the root widget.
     fn init_root() -> Self::Root;
 
     /// Creates the initial model and view, docking it into the component.
@@ -50,7 +58,19 @@ pub trait Component: Sized + 'static {
     #[allow(unused)]
     fn update_cmd(&mut self, message: Self::CommandOutput, sender: ComponentSender<Self>) {}
 
-    /// Handles updates from a command.
+    /// Updates the model and view upon completion of a command.
+    ///
+    /// Overriding this method is helpful if you need access to the widgets while processing a
+    /// command output.
+    ///
+    /// The default implementation of this method calls [`update_cmd`] followed by [`update_view`].
+    /// If you override this method while using the [`component`] macro, you must remember to call
+    /// [`update_view`] in your implementation. Otherwise, the view will not reflect the updated
+    /// model.
+    ///
+    /// [`update_cmd`]: Self::update_cmd
+    /// [`update_view`]: Self::update_view
+    /// [`component`]: relm4_macros::component
     fn update_cmd_with_view(
         &mut self,
         widgets: &mut Self::Widgets,
@@ -65,7 +85,19 @@ pub trait Component: Sized + 'static {
     #[allow(unused)]
     fn update_view(&self, widgets: &mut Self::Widgets, sender: ComponentSender<Self>) {}
 
-    /// Updates the model and view. Optionally returns a command to run.
+    /// Updates the model and view when a new input is received.
+    ///
+    /// Overriding this method is helpful if you need access to the widgets while processing an
+    /// input.
+    ///
+    /// The default implementation of this method calls [`update`] followed by [`update_view`]. If
+    /// you override this method while using the [`component`] macro, you must remember to
+    /// call [`update_view`] in your implementation. Otherwise, the view will not reflect the
+    /// updated model.
+    ///
+    /// [`update`]: Self::update
+    /// [`update_view`]: Self::update_view
+    /// [`component`]: relm4_macros::component
     fn update_with_view(
         &mut self,
         widgets: &mut Self::Widgets,
@@ -89,7 +121,7 @@ pub trait Component: Sized + 'static {
     }
 }
 
-/// Elm-style variant of a Component with view updates separated from input updates
+/// Elm-style variant of a [`Component`] with view updates separated from input updates.
 pub trait SimpleComponent: Sized + 'static {
     /// The message type that the component accepts as inputs.
     type Input: Debug + 'static;
@@ -101,7 +133,7 @@ pub trait SimpleComponent: Sized + 'static {
     type Init;
 
     /// The widget that was constructed by the component.
-    type Root: Debug + OnDestroy;
+    type Root: Debug;
 
     /// The type that's used for storing widgets created for this component.
     type Widgets: 'static;
@@ -175,12 +207,10 @@ impl SimpleComponent for () {
     type Input = ();
     type Output = ();
     type Init = ();
-    type Root = super::EmptyRoot;
+    type Root = ();
     type Widgets = ();
 
-    fn init_root() -> Self::Root {
-        super::EmptyRoot::default()
-    }
+    fn init_root() -> Self::Root {}
 
     fn init(
         _init: Self::Init,

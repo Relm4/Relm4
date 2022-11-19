@@ -7,6 +7,7 @@
     missing_docs,
     rust_2018_idioms,
     unreachable_pub,
+    unused_qualifications,
     clippy::cargo,
     clippy::must_use_candidate
 )]
@@ -34,26 +35,25 @@ pub mod shutdown;
 pub mod shared_state;
 
 pub(crate) mod late_initialization;
-/// A simpler version of components that does work
-/// in the background.
-pub mod worker;
+mod runtime_util;
 
 pub use channel::{channel, Receiver, Sender};
+pub use component::worker::{Worker, WorkerController, WorkerHandle};
 pub use component::{
     Component, ComponentBuilder, ComponentController, ComponentParts, Controller, MessageBroker,
-    OnDestroy, SimpleComponent,
+    SimpleComponent,
 };
 pub use extensions::*;
 pub use sender::ComponentSender;
-pub use shared_state::SharedState;
+pub use shared_state::{Reducer, Reducible, SharedState};
 pub use shutdown::ShutdownReceiver;
-pub use worker::{Worker, WorkerController, WorkerHandle};
 
 pub use app::RelmApp;
 pub use tokio::task::JoinHandle;
 
-use gtk::prelude::*;
-use once_cell::sync::OnceCell;
+use gtk::prelude::{Cast, IsA};
+use once_cell::sync::{Lazy, OnceCell};
+use runtime_util::{GuardedReceiver, RuntimeSenders, ShutdownOnDrop};
 use std::cell::Cell;
 use std::future::Future;
 use tokio::runtime::Runtime;
@@ -85,6 +85,7 @@ pub use adw;
 /// Re-export of libpanel
 pub use panel;
 
+pub use async_trait;
 pub use once_cell;
 pub use tokio;
 
@@ -172,18 +173,14 @@ pub fn spawn_local_with_priority<F: Future<Output = ()> + 'static>(
     gtk::glib::MainContext::ref_thread_default().spawn_local_with_priority(priority, func)
 }
 
-static RUNTIME: OnceCell<Runtime> = OnceCell::new();
-
-fn runtime() -> &'static Runtime {
-    RUNTIME.get_or_init(|| {
-        tokio::runtime::Builder::new_multi_thread()
-            .enable_all()
-            .worker_threads(*RELM_THREADS.get_or_init(|| 1))
-            .max_blocking_threads(*RELM_BLOCKING_THREADS.get_or_init(|| 512))
-            .build()
-            .unwrap()
-    })
-}
+static RUNTIME: Lazy<Runtime> = Lazy::new(|| {
+    tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .worker_threads(*RELM_THREADS.get_or_init(|| 1))
+        .max_blocking_threads(*RELM_BLOCKING_THREADS.get_or_init(|| 512))
+        .build()
+        .unwrap()
+});
 
 /// Spawns a [`Send`]-able future to the shared component runtime.
 pub fn spawn<F>(future: F) -> JoinHandle<F::Output>
@@ -191,7 +188,7 @@ where
     F: Future + Send + 'static,
     F::Output: Send + 'static,
 {
-    runtime().spawn(future)
+    RUNTIME.spawn(future)
 }
 
 /// Spawns a blocking task in a background thread pool.
@@ -200,7 +197,7 @@ where
     F: FnOnce() -> R + Send + 'static,
     R: Send + 'static,
 {
-    runtime().spawn_blocking(func)
+    RUNTIME.spawn_blocking(func)
 }
 
 /// A short macro for conveniently sending messages.

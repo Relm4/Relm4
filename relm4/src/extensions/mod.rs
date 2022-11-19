@@ -1,5 +1,6 @@
 mod container;
 mod iter_children;
+mod object_ext;
 mod remove;
 mod set_child;
 
@@ -9,6 +10,7 @@ mod widget_ext;
 
 pub use container::RelmContainerExt;
 pub use iter_children::RelmIterChildrenExt;
+pub use object_ext::RelmObjectExt;
 pub use remove::{RelmRemoveAllExt, RelmRemoveExt};
 pub use set_child::RelmSetChildExt;
 pub use widget_ext::RelmWidgetExt;
@@ -166,6 +168,7 @@ container_child_impl! {
     gtk::ToggleButton
     gtk::Overlay
     gtk::Revealer
+    gtk::WindowHandle
 }
 
 container_child_impl! {

@@ -1,13 +1,12 @@
 use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent};
 
-struct AppModel;
+struct App;
 
 #[relm4_macros::component]
-impl SimpleComponent for AppModel {
+impl SimpleComponent for App {
     type Init = ();
     type Input = ();
     type Output = ();
-    type Widgets = AppWidgets;
 
     view! {
         gtk::Window {
@@ -37,11 +36,4 @@ impl SimpleComponent for AppModel {
 
         ComponentParts { model, widgets }
     }
-}
-
-fn assert_impls_debug<T: std::fmt::Debug>() {}
-
-#[test]
-fn assert_widgets_impl_debug() {
-    assert_impls_debug::<AppWidgets>();
 }

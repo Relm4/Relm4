@@ -2,10 +2,10 @@ use gtk::prelude::GtkWindowExt;
 use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent};
 
 #[derive(Default)]
-struct AppModel;
+struct App;
 
 #[relm4_macros::component]
-impl SimpleComponent for AppModel {
+impl SimpleComponent for App {
     type Init = ();
     type Input = ();
     type Output = ();
@@ -37,11 +37,4 @@ impl SimpleComponent for AppModel {
     }
 
     fn update(&mut self, _msg: Self::Input, _sender: ComponentSender<Self>) {}
-}
-
-fn assert_impls_debug<T: std::fmt::Debug>() {}
-
-#[test]
-fn assert_widgets_impl_debug() {
-    assert_impls_debug::<AppWidgets>();
 }

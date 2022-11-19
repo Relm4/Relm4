@@ -16,7 +16,6 @@ impl SimpleComponent for App {
     type Input = u32;
     type Output = ();
     type Init = ();
-    type Widgets = AppWidgets;
 
     view! {
         adw::Window {

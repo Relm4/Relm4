@@ -2,18 +2,14 @@
 // Copyright 2022 System76 <info@system76.com>
 // SPDX-License-Identifier: MIT or Apache-2.0
 
-use super::{Component, ComponentController, Controller, StateWatcher};
-use crate::{Receiver, Sender};
+use super::{AsyncComponent, AsyncComponentController, AsyncController};
+use crate::{Receiver, Sender, ShutdownOnDrop};
 use std::fmt::{self, Debug};
-use std::rc::Rc;
 
 /// Contains the post-launch input sender and output receivers with the root widget.
 ///
 /// The receiver can be separated from the `Fairing` by choosing a method for handling it.
-pub struct Connector<C: Component> {
-    /// The models and widgets maintained by the component.
-    pub(super) state: Rc<StateWatcher<C>>,
-
+pub struct AsyncConnector<C: AsyncComponent> {
     /// The widget that this component manages.
     pub(super) widget: C::Root,
 
@@ -22,28 +18,31 @@ pub struct Connector<C: Component> {
 
     /// The outputs being received by the component.
     pub(super) receiver: Receiver<C::Output>,
+
+    /// Type used to destroy the async component when it's dropped.
+    pub(super) shutdown_on_drop: ShutdownOnDrop,
 }
 
-impl<C: Component> Connector<C> {
+impl<C: AsyncComponent> AsyncConnector<C> {
     /// Forwards output events to the designated sender.
     pub fn forward<X: 'static, F: (Fn(C::Output) -> X) + 'static>(
         self,
         sender_: &Sender<X>,
         transform: F,
-    ) -> Controller<C> {
+    ) -> AsyncController<C> {
         let Self {
-            state,
             widget,
             sender,
             receiver,
+            shutdown_on_drop,
         } = self;
 
         crate::spawn_local(receiver.forward(sender_.clone(), transform));
 
-        Controller {
-            state,
+        AsyncController {
             widget,
             sender,
+            shutdown_on_drop,
         }
     }
 
@@ -51,12 +50,12 @@ impl<C: Component> Connector<C> {
     pub fn connect_receiver<F: FnMut(&mut Sender<C::Input>, C::Output) + 'static>(
         self,
         mut func: F,
-    ) -> Controller<C> {
+    ) -> AsyncController<C> {
         let Self {
-            state,
             widget,
             sender,
             receiver,
+            shutdown_on_drop,
         } = self;
 
         let mut sender_ = sender.clone();
@@ -66,55 +65,55 @@ impl<C: Component> Connector<C> {
             }
         });
 
-        Controller {
-            state,
+        AsyncController {
             widget,
             sender,
+            shutdown_on_drop,
         }
     }
 
     /// Ignore outputs from the component and take the handle.
-    pub fn detach(self) -> Controller<C> {
+    pub fn detach(self) -> AsyncController<C> {
         let Self {
-            state,
             widget,
             sender,
+            shutdown_on_drop,
             ..
         } = self;
 
-        Controller {
-            state,
+        AsyncController {
             widget,
             sender,
+            shutdown_on_drop,
         }
     }
 }
 
-impl<C: Component> ComponentController<C> for Connector<C> {
+impl<C: AsyncComponent> AsyncComponentController<C> for AsyncConnector<C> {
     fn sender(&self) -> &Sender<C::Input> {
         &self.sender
-    }
-
-    fn state(&self) -> &Rc<StateWatcher<C>> {
-        &self.state
     }
 
     fn widget(&self) -> &C::Root {
         &self.widget
     }
+
+    fn detach_runtime(&mut self) {
+        self.shutdown_on_drop.deactivate();
+    }
 }
 
-impl<C> Debug for Connector<C>
+impl<C> Debug for AsyncConnector<C>
 where
-    C: Component + Debug,
+    C: AsyncComponent + Debug,
     C::Widgets: Debug,
 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Connector")
-            .field("state", &self.state)
             .field("widget", &self.widget)
             .field("sender", &self.sender)
             .field("receiver", &self.receiver)
+            .field("shutdown_on_drop", &self.shutdown_on_drop)
             .finish()
     }
 }

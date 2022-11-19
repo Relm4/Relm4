@@ -1,8 +1,7 @@
 use gtk::prelude::{ApplicationExt, ApplicationExtManual, Cast, GtkApplicationExt, IsA, WidgetExt};
 
-use crate::component::Component;
-use crate::component::ComponentController;
-use crate::ComponentBuilder;
+use crate::component::{AsyncComponent, AsyncComponentBuilder, AsyncComponentController};
+use crate::{Component, ComponentBuilder, ComponentController};
 
 /// An app that runs the main application.
 #[derive(Debug)]
@@ -76,7 +75,65 @@ impl RelmApp {
                 // Run late initialization for transient windows for example.
                 crate::late_initialization::run_late_init();
 
-                let window = connector.detach().widget().clone();
+                let mut controller = connector.detach();
+                let window = controller.widget().clone();
+
+                controller.detach_runtime();
+
+                app.add_window(window.as_ref());
+                window.show();
+            } else {
+                panic!("Can't start Relm4 applications twice");
+            }
+        });
+
+        app.run_with_args(args);
+    }
+
+    /// Runs the application, returns once the application is closed.
+    ///
+    /// Unlike [`gtk::prelude::ApplicationExtManual::run`], this function
+    /// does not handle command-line arguments. To pass arguments to GTK, use
+    /// [`RelmApp::run_with_args`].
+    pub fn run_async<C>(self, payload: C::Init)
+    where
+        C: AsyncComponent,
+        C::Root: IsA<gtk::Window> + WidgetExt,
+    {
+        self.run_async_with_args::<C, &str>(payload, &[]);
+    }
+
+    /// Runs the application with the provided command-line arguments, returns once the application
+    /// is closed.
+    pub fn run_async_with_args<C, S>(self, payload: C::Init, args: &[S])
+    where
+        C: AsyncComponent,
+        C::Root: IsA<gtk::Window> + WidgetExt,
+        S: AsRef<str>,
+    {
+        use std::cell::Cell;
+
+        let Self { app } = self;
+
+        let payload = Cell::new(Some(payload));
+
+        app.connect_activate(move |app| {
+            if let Some(payload) = payload.take() {
+                assert!(
+                    app.is_registered(),
+                    "App should be already registered when activated"
+                );
+
+                let builder = AsyncComponentBuilder::<C>::default();
+                let connector = builder.launch(payload);
+
+                // Run late initialization for transient windows for example.
+                crate::late_initialization::run_late_init();
+
+                let mut controller = connector.detach();
+                let window = controller.widget().clone();
+
+                controller.detach_runtime();
 
                 app.add_window(window.as_ref());
                 window.show();

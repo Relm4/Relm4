@@ -31,7 +31,8 @@ set_child_impl!(
     gtk::ScrolledWindow,
     gtk::ApplicationWindow,
     gtk::Overlay,
-    gtk::Revealer
+    gtk::Revealer,
+    gtk::WindowHandle
 );
 
 #[cfg(feature = "libadwaita")]

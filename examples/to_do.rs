@@ -24,7 +24,6 @@ impl FactoryComponent for Task {
     type Input = TaskInput;
     type Output = TaskOutput;
     type CommandOutput = ();
-    type Widgets = TaskWidgets;
     type ParentInput = AppMsg;
     type ParentWidget = gtk::ListBox;
 
@@ -98,7 +97,6 @@ impl SimpleComponent for App {
     type Init = ();
     type Input = AppMsg;
     type Output = ();
-    type Widgets = AppWidgets;
 
     view! {
         main_window = gtk::ApplicationWindow {

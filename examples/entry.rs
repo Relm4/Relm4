@@ -25,7 +25,6 @@ impl FactoryComponent for Counter {
     type Input = ();
     type Output = AppMsg;
     type CommandOutput = ();
-    type Widgets = FactoryWidgets;
     type ParentInput = AppMsg;
     type ParentWidget = gtk::Box;
 
@@ -60,7 +59,6 @@ impl SimpleComponent for App {
     type Init = ();
     type Input = AppMsg;
     type Output = ();
-    type Widgets = AppWidgets;
 
     view! {
         gtk::ApplicationWindow {
