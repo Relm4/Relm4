@@ -20,6 +20,7 @@
 
 ### Changed
 
++ core: The sender API now supports proper error handling
 + core: Add `gnome_42` and `gnome_43` feature flags
 + core: Rename `OnDestroy` to `RelmObjectExt`
 + core: Remove `EmptyRoot` in favor of the unit type

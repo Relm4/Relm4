@@ -75,7 +75,9 @@ where
     ) {
         match input {
             SimpleComboBoxMsg::UpdateIndex(idx) => {
-                sender.output(idx);
+                // Ignore send errors because the component might
+                // be detached.
+                sender.output(idx).ok();
                 self.active_index = Some(idx);
             }
             SimpleComboBoxMsg::SetActiveIdx(idx) => {

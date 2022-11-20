@@ -4,7 +4,7 @@
 
 //use super::message_broker::MessageBroker;
 use super::{AsyncComponent, AsyncComponentParts, AsyncConnector};
-use crate::sender::AsyncComponentSender;
+use crate::channel::AsyncComponentSender;
 use crate::{
     late_initialization, GuardedReceiver, Receiver, RelmContainerExt, RelmWidgetExt,
     RuntimeSenders, Sender,

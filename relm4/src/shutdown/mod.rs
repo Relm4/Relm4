@@ -17,10 +17,5 @@ use tokio::sync::broadcast;
 #[must_use]
 pub fn channel() -> (ShutdownSender, ShutdownReceiver) {
     let (sender, receiver) = broadcast::channel(1);
-    (
-        ShutdownSender {
-            sender,
-        },
-        ShutdownReceiver { receiver },
-    )
+    (ShutdownSender { sender }, ShutdownReceiver { receiver })
 }

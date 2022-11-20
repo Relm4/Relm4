@@ -1,6 +1,6 @@
 use super::{FactoryComponent, FactoryHandle};
 
-use crate::factory::{DataGuard, DynamicIndex, FactoryComponentSender, FactoryView};
+use crate::factory::{DataGuard, DynamicIndex, FactorySender, FactoryView};
 use crate::shutdown::ShutdownSender;
 use crate::{shutdown, GuardedReceiver, Receiver, Sender};
 
@@ -12,7 +12,7 @@ use tracing::info_span;
 pub(super) struct FactoryBuilder<C: FactoryComponent> {
     pub(super) data: Box<C>,
     pub(super) root_widget: C::Root,
-    pub(super) component_sender: FactoryComponentSender<C>,
+    pub(super) component_sender: FactorySender<C>,
     pub(super) input_receiver: Receiver<C::Input>,
     pub(super) output_receiver: Receiver<C::Output>,
     pub(super) cmd_receiver: Receiver<C::CommandOutput>,
@@ -34,8 +34,7 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
         let (shutdown_notifier, shutdown_receiver) = shutdown::channel();
 
         // Encapsulates the senders used by component methods.
-        let component_sender =
-            FactoryComponentSender::new(input_tx, output_tx, cmd_tx, shutdown_receiver);
+        let component_sender = FactorySender::new(input_tx, output_tx, cmd_tx, shutdown_receiver);
 
         let data = Box::new(C::init_model(init, index, component_sender.clone()));
         let root_widget = data.init_root();

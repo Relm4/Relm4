@@ -5,10 +5,9 @@
 use gtk::glib;
 use tracing::info_span;
 
-use crate::sender::ComponentSender;
 use crate::{
-    Component, ComponentBuilder, ComponentParts, GuardedReceiver, Receiver, RuntimeSenders, Sender,
-    ShutdownOnDrop, SimpleComponent,
+    Component, ComponentBuilder, ComponentParts, ComponentSender, GuardedReceiver, Receiver,
+    RuntimeSenders, Sender, ShutdownOnDrop, SimpleComponent,
 };
 use std::fmt::Debug;
 use std::{any, thread};
@@ -256,7 +255,7 @@ pub struct WorkerController<W: Component> {
 impl<W: Component> WorkerController<W> {
     /// Emits an input to the component.
     pub fn emit(&self, event: W::Input) {
-        self.sender.send(event);
+        self.sender.send(event).unwrap();
     }
 
     /// Provides access to the component's sender.

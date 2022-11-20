@@ -101,15 +101,11 @@ impl<C, Widgets, Output> DataGuard<C, Widgets, Output> {
     }
 }
 
-impl<C, Widgets, Output> std::fmt::Debug for DataGuard<C, Widgets, Output>
-where
-    C: std::fmt::Debug,
-    Widgets: std::fmt::Debug,
-{
+impl<C, Widgets, Output> std::fmt::Debug for DataGuard<C, Widgets, Output> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("DataGuard")
-            .field("data", &self.data)
-            .field("widgets", &self.widgets)
+            .field("data", &"<Data>")
+            .field("widgets", &"<Widgets>")
             .field("rt_dropper", &self.rt_dropper)
             .field("output_sender", &self.output_sender)
             .field("shutdown_notifier", &self.shutdown_notifier)
@@ -173,7 +169,7 @@ mod test {
         fn init_model(
             _: Self::Init,
             _: &crate::prelude::DynamicIndex,
-            _: crate::prelude::FactoryComponentSender<Self>,
+            _: crate::prelude::FactorySender<Self>,
         ) -> Self {
             Self(0)
         }
@@ -187,7 +183,7 @@ mod test {
             _: &crate::prelude::DynamicIndex,
             _: &Self::Root,
             _: &<Self::ParentWidget as crate::factory::FactoryView>::ReturnedWidget,
-            _: crate::prelude::FactoryComponentSender<Self>,
+            _: crate::prelude::FactorySender<Self>,
         ) -> Self::Widgets {
         }
 

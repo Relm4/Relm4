@@ -1,3 +1,7 @@
+mod component;
+
+pub use component::{AsyncComponentSender, AsyncFactorySender, ComponentSender, FactorySender};
+
 // Copyright 2022 System76 <info@system76.com>
 // SPDX-License-Identifier: MIT or Apache-2.0
 
@@ -23,16 +27,22 @@ impl<T> From<flume::Sender<T>> for Sender<T> {
 }
 
 impl<T> Sender<T> {
-    /// Sends a message to a component or worker.
-    pub fn send(&self, message: T) {
-        assert!(self.0.send(message).is_ok(), "Receiver was dropped");
+    /// Sends a message through the channel.
+    ///
+    /// **This method ignores errors.**
+    /// Only a log message will appear when sending fails.
+    pub fn emit(&self, message: T) {
+        if self.send(message).is_err() {
+            tracing::warn!("Receiver was dropped");
+        }
     }
 
-    /// Tries to send a message to a component or worker.
+    /// Sends a message through the channel.
     ///
-    /// If all receivers where dropped, [`None`] is returned.
-    pub fn try_send(&self, message: T) -> Option<()> {
-        self.0.send(message).ok()
+    /// If all receivers where dropped, [`Err`] is returned
+    /// with the content of the message.
+    pub fn send(&self, message: T) -> Result<(), T> {
+        self.0.send(message).map_err(|e| e.into_inner())
     }
 }
 
@@ -53,16 +63,21 @@ pub struct Receiver<T>(pub(crate) flume::Receiver<T>);
 
 impl<T> Receiver<T> {
     /// Receives a message from a component or worker.
+    ///
+    /// Returns [`None`] if all senders have been disconnected.
     pub async fn recv(&self) -> Option<T> {
         self.0.recv_async().await.ok()
     }
 
     /// Receives a message synchronously from a component or worker.
+    ///
+    /// Returns [`None`] if all senders have been disconnected.
     #[must_use]
     pub fn recv_sync(&self) -> Option<T> {
         self.0.recv().ok()
     }
 
+    #[must_use]
     pub(crate) fn into_stream(self) -> RecvStream<'static, T> {
         self.0.into_stream()
     }
@@ -78,8 +93,8 @@ impl<T> Receiver<T> {
     {
         let sender = sender.into();
         while let Some(event) = self.recv().await {
-            if sender.0.send(transformer(event)).is_err() {
-                break;
+            if sender.send(transformer(event)).is_err() {
+                return;
             }
         }
     }

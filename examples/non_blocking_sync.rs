@@ -35,7 +35,7 @@ impl Component for App {
                     set_label: "Increment",
                     // Messages are fully async, no blocking!
                     connect_clicked[sender] => move |_| {
-                        sender.sync_oneshot_command(|| {
+                        sender.spawn_oneshot_command(|| {
                             std::thread::sleep(Duration::from_secs(1));
                             Msg::Increment
                         })
@@ -44,7 +44,7 @@ impl Component for App {
 
                 gtk::Button::with_label("Decrement") {
                     connect_clicked[sender] => move |_| {
-                        sender.sync_oneshot_command(|| {
+                        sender.spawn_oneshot_command(|| {
                             std::thread::sleep(Duration::from_secs(1));
                             Msg::Decrement
                         })

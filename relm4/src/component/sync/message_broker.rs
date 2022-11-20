@@ -53,7 +53,7 @@ impl<C: Component> MessageBroker<C> {
 
     /// Send an input message to the component.
     pub fn send(&self, input: C::Input) {
-        self.inner.sender.send(input);
+        self.inner.sender.send(input).unwrap();
     }
 
     pub(super) fn get_channel(&self) -> (Sender<C::Input>, Option<Receiver<C::Input>>) {

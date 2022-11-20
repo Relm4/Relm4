@@ -264,12 +264,12 @@ pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
 ///     fn init_model(
 ///         value: Self::Init,
 ///         _index: &DynamicIndex,
-///         _sender: FactoryComponentSender<Self>,
+///         _sender: FactorySender<Self>,
 ///     ) -> Self {
 ///         Self { value }
 ///     }
 ///
-///     fn update(&mut self, msg: Self::Input, _sender: FactoryComponentSender<Self>) {
+///     fn update(&mut self, msg: Self::Input, _sender: FactorySender<Self>) {
 ///         match msg {
 ///             CounterMsg::Increment => {
 ///                 self.value = self.value.wrapping_add(1);

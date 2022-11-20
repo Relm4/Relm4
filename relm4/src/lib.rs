@@ -26,8 +26,6 @@ pub mod drawing;
 mod extensions;
 pub mod factory;
 
-mod sender;
-
 /// Cancellation mechanism used by Relm4.
 pub mod shutdown;
 
@@ -37,14 +35,14 @@ pub mod shared_state;
 pub(crate) mod late_initialization;
 mod runtime_util;
 
-pub use channel::{channel, Receiver, Sender};
+pub use channel::ComponentSender;
+pub use channel::*;
 pub use component::worker::{Worker, WorkerController, WorkerHandle};
 pub use component::{
     Component, ComponentBuilder, ComponentController, ComponentParts, Controller, MessageBroker,
     SimpleComponent,
 };
 pub use extensions::*;
-pub use sender::ComponentSender;
 pub use shared_state::{Reducer, Reducible, SharedState};
 pub use shutdown::ShutdownReceiver;
 

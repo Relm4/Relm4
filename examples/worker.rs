@@ -43,8 +43,8 @@ impl Worker for AsyncHandler {
         std::thread::sleep(Duration::from_secs(1));
 
         match msg {
-            AsyncHandlerMsg::DelayedIncrement => sender.output(AppMsg::Increment),
-            AsyncHandlerMsg::DelayedDecrement => sender.output(AppMsg::Decrement),
+            AsyncHandlerMsg::DelayedIncrement => sender.output(AppMsg::Increment).unwrap(),
+            AsyncHandlerMsg::DelayedDecrement => sender.output(AppMsg::Decrement).unwrap(),
         }
     }
 }
@@ -68,12 +68,12 @@ impl SimpleComponent for App {
                 gtk::Button {
                     set_label: "Increment",
                     connect_clicked[sender = model.worker.sender().clone()] => move |_| {
-                        sender.send(AsyncHandlerMsg::DelayedIncrement);
+                        sender.send(AsyncHandlerMsg::DelayedIncrement).unwrap();
                     },
                 },
                 gtk::Button::with_label("Decrement") {
                     connect_clicked[sender = model.worker.sender().clone()] => move |_| {
-                        sender.send(AsyncHandlerMsg::DelayedDecrement);
+                        sender.send(AsyncHandlerMsg::DelayedDecrement).unwrap();
                     },
                 },
                 gtk::Label {

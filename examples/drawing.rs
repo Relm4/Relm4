@@ -131,7 +131,7 @@ impl Component for App {
                 .register(async move {
                     loop {
                         tokio::time::sleep(Duration::from_millis(20)).await;
-                        out.send(UpdatePointsMsg);
+                        out.send(UpdatePointsMsg).unwrap();
                     }
                 })
                 .drop_on_shutdown()

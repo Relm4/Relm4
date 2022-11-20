@@ -103,9 +103,9 @@ pub(crate) fn generate_tokens(
         };
 
         let sender_ty: Ident = if asyncness.is_some() {
-            parse_quote! { AsyncFactoryComponentSender }
+            parse_quote! { AsyncFactorySender }
         } else {
-            parse_quote! { FactoryComponentSender }
+            parse_quote! { FactorySender }
         };
 
         if init_widgets.is_some() {
