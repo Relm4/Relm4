@@ -58,22 +58,25 @@ impl<C: Component> MessageBroker<C> {
 
     pub(super) fn get_channel(&self) -> (Sender<C::Input>, Option<Receiver<C::Input>>) {
         let inner = &self.inner;
-        (inner.sender.clone(), inner.input_rx.lock().unwrap().take())
+        (
+            inner.sender.clone(),
+            inner.input_receiver.lock().unwrap().take(),
+        )
     }
 }
 
 struct MessageBrokerInner<C: Component> {
     sender: Sender<C::Input>,
-    input_rx: Mutex<Option<Receiver<C::Input>>>,
+    input_receiver: Mutex<Option<Receiver<C::Input>>>,
 }
 
 impl<C: Component> MessageBrokerInner<C> {
     fn new() -> Self {
         // Used for all events to be processed by this component's internal service.
-        let (sender, input_rx) = crate::channel::<C::Input>();
+        let (sender, input_receiver) = crate::channel::<C::Input>();
         Self {
             sender,
-            input_rx: Mutex::new(Some(input_rx)),
+            input_receiver: Mutex::new(Some(input_receiver)),
         }
     }
 }

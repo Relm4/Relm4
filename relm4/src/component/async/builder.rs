@@ -137,16 +137,16 @@ impl<C: AsyncComponent> AsyncComponentBuilder<C> {
     /// Starts the component, passing ownership to a future attached to a [gtk::glib::MainContext].
     pub fn launch(self, payload: C::Init) -> AsyncConnector<C> {
         // Used for all events to be processed by this component's internal service.
-        let (input_tx, input_rx) = crate::channel::<C::Input>();
+        let (input_sender, input_receiver) = crate::channel::<C::Input>();
 
-        self.launch_with_input_channel(payload, input_tx, input_rx)
+        self.launch_with_input_channel(payload, input_sender, input_receiver)
     }
 
     fn launch_with_input_channel(
         self,
         payload: C::Init,
-        input_tx: Sender<C::Input>,
-        input_rx: Receiver<C::Input>,
+        input_sender: Sender<C::Input>,
+        input_receiver: Receiver<C::Input>,
     ) -> AsyncConnector<C> {
         let Self {
             mut root, priority, ..
@@ -166,7 +166,7 @@ impl<C: AsyncComponent> AsyncComponentBuilder<C> {
 
         // Encapsulates the senders used by component methods.
         let component_sender = AsyncComponentSender::new(
-            input_tx.clone(),
+            input_sender.clone(),
             output_sender.clone(),
             cmd_sender,
             shutdown_recipient,
@@ -183,7 +183,7 @@ impl<C: AsyncComponent> AsyncComponentBuilder<C> {
             let id = source_id_receiver.await.unwrap();
             let mut state = C::init(payload, rt_root, component_sender.clone()).await;
             let mut cmd = GuardedReceiver::new(cmd_receiver);
-            let mut input = GuardedReceiver::new(input_rx);
+            let mut input = GuardedReceiver::new(input_receiver);
 
             loop {
                 futures::select!(
@@ -248,7 +248,7 @@ impl<C: AsyncComponent> AsyncComponentBuilder<C> {
         // Give back a type for controlling the component service.
         AsyncConnector {
             widget: root,
-            sender: input_tx,
+            sender: input_sender,
             receiver: output_receiver,
             shutdown_on_drop: destroy_on_drop,
         }

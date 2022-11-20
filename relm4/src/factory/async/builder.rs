@@ -90,7 +90,7 @@ where
         // Gets notifications when a component's model and view is updated externally.
         let (notifier, notifier_receiver) = crate::channel();
 
-        let input_tx = component_sender.input_sender().clone();
+        let input_sender = component_sender.input_sender().clone();
 
         let future_receiver = {
             let index = index.clone();
@@ -124,7 +124,7 @@ where
             data,
             root_widget,
             returned_widget,
-            input: input_tx,
+            input: input_sender,
             notifier,
         }
     }

@@ -68,7 +68,7 @@ where
         let Self { root, .. } = self;
 
         // Used for all events to be processed by this component's internal service.
-        let (input_tx, input_rx) = crate::channel::<C::Input>();
+        let (input_sender, input_receiver) = crate::channel::<C::Input>();
 
         let RuntimeSenders {
             output_sender,
@@ -83,7 +83,7 @@ where
 
         // Encapsulates the senders used by component methods.
         let component_sender = ComponentSender::new(
-            input_tx.clone(),
+            input_sender.clone(),
             output_sender.clone(),
             cmd_sender,
             shutdown_recipient,
@@ -100,7 +100,7 @@ where
             // updates, and send `Self::Output` messages externally.
             context.block_on(async move {
                 let mut cmd = GuardedReceiver::new(cmd_receiver);
-                let mut input = GuardedReceiver::new(input_rx);
+                let mut input = GuardedReceiver::new(input_receiver);
 
                 loop {
                     futures::select!(
@@ -161,7 +161,7 @@ where
 
         // Give back a type for controlling the component service.
         WorkerHandle {
-            sender: input_tx,
+            sender: input_sender,
             receiver: output_receiver,
             shutdown_on_drop,
         }
