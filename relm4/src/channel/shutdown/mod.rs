@@ -5,10 +5,11 @@ mod attached;
 mod receiver;
 mod sender;
 
+use tokio::sync::broadcast;
+
 pub use attached::AttachedShutdown;
 pub use receiver::ShutdownReceiver;
 pub use sender::ShutdownSender;
-use tokio::sync::broadcast;
 
 /// Creates a broadcasting shutdown channel.
 ///

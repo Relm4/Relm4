@@ -1,4 +1,6 @@
 mod component;
+/// Cancellation mechanism used by Relm4.
+pub mod shutdown;
 
 pub use component::{AsyncComponentSender, AsyncFactorySender, ComponentSender, FactorySender};
 

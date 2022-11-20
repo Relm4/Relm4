@@ -1,7 +1,7 @@
 // Copyright 2022 System76 <info@system76.com>
 // SPDX-License-Identifier: MIT or Apache-2.0
 
-use tokio::sync::broadcast;
+use super::broadcast;
 
 /// Sends shutdown signals to receivers.
 #[derive(Debug)]
@@ -11,13 +11,13 @@ pub struct ShutdownSender {
 
 impl ShutdownSender {
     /// Broadcasts a shutdown signal to listening receivers.
-    pub fn shutdown(&self) {
-        let _ = self.sender.send(());
+    pub(crate) fn shutdown(self) {
+        drop(self);
     }
 }
 
 impl Drop for ShutdownSender {
     fn drop(&mut self) {
-        self.shutdown();
+        let _ = self.sender.send(());
     }
 }

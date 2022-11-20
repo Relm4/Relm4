@@ -26,9 +26,6 @@ pub mod drawing;
 mod extensions;
 pub mod factory;
 
-/// Cancellation mechanism used by Relm4.
-pub mod shutdown;
-
 /// Shared state that can be accessed by many components.
 pub mod shared_state;
 

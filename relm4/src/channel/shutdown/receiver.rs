@@ -1,8 +1,11 @@
 // Copyright 2022 System76 <info@system76.com>
 // SPDX-License-Identifier: MIT or Apache-2.0
 
+use super::broadcast::Receiver;
 use super::AttachedShutdown;
-use tokio::sync::broadcast::Receiver;
+
+#[cfg(test)]
+use super::broadcast::error::TryRecvError;
 
 /// Listens to shutdown signals and constructs shutdown futures.
 #[derive(Debug)]
@@ -25,8 +28,8 @@ impl ShutdownReceiver {
     }
 
     #[cfg(test)]
-    pub(crate) fn try_recv(&mut self) -> Option<()> {
-        self.receiver.try_recv().ok()
+    pub(crate) fn try_recv(&mut self) -> Result<(), TryRecvError> {
+        self.receiver.try_recv()
     }
 }
 
