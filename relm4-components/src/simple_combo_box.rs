@@ -56,13 +56,13 @@ where
     ) -> ComponentParts<Self> {
         let widgets = root.clone();
 
+        model.render(&widgets);
+
         widgets.connect_changed(move |combo_box| {
             if let Some(active_idx) = combo_box.active() {
                 sender.input(Self::Input::UpdateIndex(active_idx as usize));
             }
         });
-
-        model.render(&widgets);
 
         ComponentParts { model, widgets }
     }
