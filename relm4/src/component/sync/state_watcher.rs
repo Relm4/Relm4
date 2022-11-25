@@ -24,7 +24,7 @@ impl<C: Component> StateWatcher<C> {
     /// Borrows the model and view of a component, and notifies the component to check for updates.
     #[must_use]
     pub fn get_mut(&self) -> RefMut<'_, ComponentParts<C>> {
-        self.notifier.send(());
+        self.notifier.send(()).unwrap();
         self.state.borrow_mut()
     }
 

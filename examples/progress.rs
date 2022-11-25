@@ -128,12 +128,12 @@ impl Component for App {
                             let mut progress = 0.0;
 
                             while progress < 1.0 {
-                                out.send(CmdOut::Progress(progress));
+                                out.send(CmdOut::Progress(progress)).unwrap();
                                 progress += 0.1;
                                 tokio::time::sleep(std::time::Duration::from_millis(333)).await;
                             }
 
-                            out.send(CmdOut::Finished(Ok("42".into())));
+                            out.send(CmdOut::Finished(Ok("42".into()))).unwrap();
                         })
                         // Perform task until a shutdown interrupts it
                         .drop_on_shutdown()

@@ -36,7 +36,6 @@ all = ["macros", "libadwaita", "panel"]
 [dependencies]
 adw = { version = "0.2", optional = true, package = "libadwaita" }
 
-async-broadcast = "0.4"
 flume = "0.10.14"
 futures = "0.3.21"
 fragile = "2.0.0"

@@ -18,4 +18,4 @@ pub use r#async::{
     AsyncConnector, AsyncController, SimpleAsyncComponent,
 };
 
-pub use crate::sender::AsyncComponentSender;
+pub use crate::channel::AsyncComponentSender;

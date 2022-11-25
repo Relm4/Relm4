@@ -5,6 +5,8 @@ mod attached;
 mod receiver;
 mod sender;
 
+use tokio::sync::broadcast;
+
 pub use attached::AttachedShutdown;
 pub use receiver::ShutdownReceiver;
 pub use sender::ShutdownSender;
@@ -15,6 +17,6 @@ pub use sender::ShutdownSender;
 /// The receiving side is responsible for responding to shutdowns.
 #[must_use]
 pub fn channel() -> (ShutdownSender, ShutdownReceiver) {
-    let (sender, receiver) = async_broadcast::broadcast(1);
+    let (sender, receiver) = broadcast::channel(1);
     (ShutdownSender { sender }, ShutdownReceiver { receiver })
 }

@@ -70,11 +70,7 @@ impl FactoryComponent for Task {
         })
     }
 
-    fn init_model(
-        name: Self::Init,
-        _index: &DynamicIndex,
-        _sender: FactoryComponentSender<Self>,
-    ) -> Self {
+    fn init_model(name: Self::Init, _index: &DynamicIndex, _sender: FactorySender<Self>) -> Self {
         Self {
             name,
             completed: false,

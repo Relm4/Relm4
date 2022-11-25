@@ -143,9 +143,9 @@ impl<S: Select + 'static> SimpleComponent for OpenDialogInner<S> {
                 match res_ty {
                     gtk::ResponseType::Accept => {
                         let selection = S::select(dialog);
-                        sender.output(OpenDialogResponse::Accept(selection));
+                        sender.output(OpenDialogResponse::Accept(selection)).unwrap();
                     }
-                    _ => sender.output(OpenDialogResponse::Cancel),
+                    _ => sender.output(OpenDialogResponse::Cancel).unwrap(),
                 }
 
                 sender.input(OpenDialogMsg::Hide);

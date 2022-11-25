@@ -29,7 +29,7 @@ impl SimpleComponent for Header {
                     set_has_frame: model.0,
                     connect_toggled[sender] => move |btn| {
                         if btn.is_active() {
-                            sender.output(AppMsg::SetMode(AppMode::View));
+                            sender.output(AppMsg::SetMode(AppMode::View)).unwrap();
                         }
                     },
                 },
@@ -40,7 +40,7 @@ impl SimpleComponent for Header {
                     set_has_frame: model.0,
                     connect_toggled[sender] => move |btn| {
                         if btn.is_active() {
-                            sender.output(AppMsg::SetMode(AppMode::Edit));
+                            sender.output(AppMsg::SetMode(AppMode::Edit)).unwrap();
                         }
                     },
                 },
@@ -51,7 +51,7 @@ impl SimpleComponent for Header {
                     set_has_frame: model.0,
                     connect_toggled[sender] => move |btn| {
                         if btn.is_active() {
-                            sender.output(AppMsg::SetMode(AppMode::Export));
+                            sender.output(AppMsg::SetMode(AppMode::Export)).unwrap();
                         }
                     },
                 },

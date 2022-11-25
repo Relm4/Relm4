@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
 use relm4::factory::{
-    AsyncFactoryComponent, AsyncFactoryComponentSender, AsyncFactoryVecDeque, DynamicIndex,
+    AsyncFactoryComponent, AsyncFactorySender, AsyncFactoryVecDeque, DynamicIndex,
 };
 use relm4::{gtk, view, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent};
 
@@ -120,13 +120,13 @@ impl AsyncFactoryComponent for Counter {
     async fn init_model(
         value: Self::Init,
         _index: &DynamicIndex,
-        _sender: AsyncFactoryComponentSender<Self>,
+        _sender: AsyncFactorySender<Self>,
     ) -> Self {
         async_std::task::sleep(Duration::from_secs(1)).await;
         Self { value }
     }
 
-    async fn update(&mut self, msg: Self::Input, _sender: AsyncFactoryComponentSender<Self>) {
+    async fn update(&mut self, msg: Self::Input, _sender: AsyncFactorySender<Self>) {
         async_std::task::sleep(Duration::from_secs(1)).await;
         match msg {
             CounterMsg::Increment => {

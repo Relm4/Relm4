@@ -106,7 +106,7 @@ impl SimpleComponent for OpenButton {
                 self.dialog.emit(OpenDialogMsg::Open);
             }
             OpenButtonMsg::Open(path) => {
-                sender.output(path.clone());
+                sender.output(path.clone()).unwrap();
                 self.reset_popover = true;
 
                 if let Some(recent_files) = &mut self.recent_files {

@@ -56,13 +56,13 @@ where
     ) -> ComponentParts<Self> {
         let widgets = root.clone();
 
+        model.render(&widgets);
+
         widgets.connect_changed(move |combo_box| {
             if let Some(active_idx) = combo_box.active() {
                 sender.input(Self::Input::UpdateIndex(active_idx as usize));
             }
         });
-
-        model.render(&widgets);
 
         ComponentParts { model, widgets }
     }
@@ -75,7 +75,9 @@ where
     ) {
         match input {
             SimpleComboBoxMsg::UpdateIndex(idx) => {
-                sender.output(idx);
+                // Ignore send errors because the component might
+                // be detached.
+                sender.output(idx).ok();
                 self.active_index = Some(idx);
             }
             SimpleComboBoxMsg::SetActiveIdx(idx) => {

@@ -7,6 +7,9 @@
 + core: Temporary widget initialization for `AsyncComponent`s
 + core: Add asynchronous factories including macro support
 + core: Add `Reducer` as message based alternative to `SharedState`
++ core: Synchronous API for commands
++ core: Add `try_send` method for fallible sending of messages
++ core: Remove async-broadcast dependency
 + core: Runtimes of `Component`s and `AsyncComponents` can now be detached for a static lifetime
 + core: Add `ComponentStream` as alternative to `Controller` that implements `Stream` for async message handling
 + core: Add asynchronous components including macro support
@@ -17,6 +20,8 @@
 
 ### Changed
 
++ core: Rename `FactoryComponentSender` to `FactorySender` and `AsyncFactoryComponentSender` to `AsyncFactorySender`
++ core: The sender API now supports proper error handling
 + core: Add `gnome_42` and `gnome_43` feature flags
 + core: Rename `OnDestroy` to `RelmObjectExt`
 + core: Remove `EmptyRoot` in favor of the unit type
