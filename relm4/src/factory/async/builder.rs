@@ -5,16 +5,16 @@ use tracing::info_span;
 use super::future_data::AsyncData;
 use super::{AsyncFactoryComponent, AsyncFactoryHandle};
 
+use crate::channel::AsyncFactorySender;
 use crate::factory::{DataGuard, DynamicIndex, FactoryView};
 use crate::runtime_util::GuardedReceiver;
-use crate::sender::AsyncFactoryComponentSender;
 use crate::shutdown::ShutdownSender;
 use crate::{shutdown, Receiver, Sender};
 
 pub(super) struct AsyncFactoryBuilder<C: AsyncFactoryComponent> {
     init: C::Init,
     pub(super) root_widget: C::Root,
-    pub(super) component_sender: AsyncFactoryComponentSender<C>,
+    pub(super) component_sender: AsyncFactorySender<C>,
     input_receiver: Receiver<C::Input>,
     output_receiver: Receiver<C::Output>,
     cmd_receiver: Receiver<C::CommandOutput>,
@@ -27,20 +27,20 @@ where
 {
     pub(super) fn new(init: C::Init) -> Self {
         // Used for all events to be processed by this component's internal service.
-        let (input_tx, input_rx) = crate::channel::<C::Input>();
+        let (input_sender, input_receiver) = crate::channel::<C::Input>();
 
         // Used by this component to send events to be handled externally by the caller.
-        let (output_tx, output_rx) = crate::channel::<C::Output>();
+        let (output_sender, output_receiver) = crate::channel::<C::Output>();
 
         // Sends messages from commands executed from the background.
-        let (cmd_tx, cmd_rx) = crate::channel::<C::CommandOutput>();
+        let (cmd_sender, cmd_receiver) = crate::channel::<C::CommandOutput>();
 
         // Notifies the component's child commands that it is now deceased.
         let (shutdown_notifier, shutdown_receiver) = shutdown::channel();
 
         // Encapsulates the senders used by component methods.
         let component_sender =
-            AsyncFactoryComponentSender::new(input_tx, output_tx, cmd_tx, shutdown_receiver);
+            AsyncFactorySender::new(input_sender, output_sender, cmd_sender, shutdown_receiver);
 
         let root_widget = C::init_root();
 
@@ -48,9 +48,9 @@ where
             init,
             root_widget,
             component_sender,
-            input_receiver: input_rx,
-            output_receiver: output_rx,
-            cmd_receiver: cmd_rx,
+            input_receiver,
+            output_receiver,
+            cmd_receiver,
             shutdown_notifier,
         }
     }
@@ -90,7 +90,7 @@ where
         // Gets notifications when a component's model and view is updated externally.
         let (notifier, notifier_receiver) = crate::channel();
 
-        let input_tx = component_sender.input_sender().clone();
+        let input_sender = component_sender.input_sender().clone();
 
         let loading_widgets = C::init_loading_widgets(&mut root_widget);
 
@@ -115,7 +115,7 @@ where
                     loading_widgets.remove();
                 }
                 let data_guard = future_data.start_runtime(data);
-                future_sender.send(data_guard);
+                future_sender.send(data_guard).unwrap();
             });
             future_receiver
         };
@@ -127,7 +127,7 @@ where
             data,
             root_widget,
             returned_widget,
-            input: input_tx,
+            input: input_sender,
             notifier,
         }
     }
@@ -150,7 +150,7 @@ impl<C: AsyncFactoryComponent> std::fmt::Debug for AsyncFactoryBuilder<C> {
 struct FutureData<C: AsyncFactoryComponent> {
     shutdown_notifier: ShutdownSender,
     index: DynamicIndex,
-    component_sender: AsyncFactoryComponentSender<C>,
+    component_sender: AsyncFactorySender<C>,
     root: C::Root,
     returned_widget: <C::ParentWidget as FactoryView>::ReturnedWidget,
     input_receiver: Receiver<C::Input>,

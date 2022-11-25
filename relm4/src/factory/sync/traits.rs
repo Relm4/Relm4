@@ -1,6 +1,6 @@
 //! Traits for for managing and updating factories.
 
-use crate::factory::{DynamicIndex, FactoryComponentSender, FactoryView, Position};
+use crate::factory::{DynamicIndex, FactorySender, FactoryView, Position};
 use crate::Sender;
 
 use std::fmt::Debug;
@@ -36,11 +36,7 @@ pub trait FactoryComponent:
     type Widgets: 'static;
 
     /// Initializes the model.
-    fn init_model(
-        init: Self::Init,
-        index: &DynamicIndex,
-        sender: FactoryComponentSender<Self>,
-    ) -> Self;
+    fn init_model(init: Self::Init, index: &DynamicIndex, sender: FactorySender<Self>) -> Self;
 
     /// Initializes the root widget
     fn init_root(&self) -> Self::Root;
@@ -51,7 +47,7 @@ pub trait FactoryComponent:
         index: &DynamicIndex,
         root: &Self::Root,
         returned_widget: &<Self::ParentWidget as FactoryView>::ReturnedWidget,
-        sender: FactoryComponentSender<Self>,
+        sender: FactorySender<Self>,
     ) -> Self::Widgets;
 
     /// Optionally convert an output message from this component to an input message for the
@@ -64,18 +60,18 @@ pub trait FactoryComponent:
 
     /// Processes inputs received by the component.
     #[allow(unused)]
-    fn update(&mut self, message: Self::Input, sender: FactoryComponentSender<Self>) {}
+    fn update(&mut self, message: Self::Input, sender: FactorySender<Self>) {}
 
     /// Defines how the component should respond to command updates.
     #[allow(unused)]
-    fn update_cmd(&mut self, message: Self::CommandOutput, sender: FactoryComponentSender<Self>) {}
+    fn update_cmd(&mut self, message: Self::CommandOutput, sender: FactorySender<Self>) {}
 
     /// Handles updates from a command.
     fn update_cmd_with_view(
         &mut self,
         widgets: &mut Self::Widgets,
         message: Self::CommandOutput,
-        sender: FactoryComponentSender<Self>,
+        sender: FactorySender<Self>,
     ) {
         self.update_cmd(message, sender.clone());
         self.update_view(widgets, sender);
@@ -83,14 +79,14 @@ pub trait FactoryComponent:
 
     /// Updates the view after the model has been updated.
     #[allow(unused)]
-    fn update_view(&self, widgets: &mut Self::Widgets, sender: FactoryComponentSender<Self>) {}
+    fn update_view(&self, widgets: &mut Self::Widgets, sender: FactorySender<Self>) {}
 
     /// Updates the model and view. Optionally returns a command to run.
     fn update_with_view(
         &mut self,
         widgets: &mut Self::Widgets,
         message: Self::Input,
-        sender: FactoryComponentSender<Self>,
+        sender: FactorySender<Self>,
     ) {
         self.update(message, sender.clone());
         self.update_view(widgets, sender);

@@ -3,7 +3,7 @@ use std::time::Duration;
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
 use relm4::{
     adw,
-    factory::{DynamicIndex, FactoryComponent, FactoryComponentSender, FactoryVecDeque},
+    factory::{DynamicIndex, FactoryComponent, FactorySender, FactoryVecDeque},
     gtk, Component, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SharedState,
 };
 
@@ -150,11 +150,7 @@ impl FactoryComponent for GamePage {
         }
     }
 
-    fn init_model(
-        value: Self::Init,
-        _index: &DynamicIndex,
-        sender: FactoryComponentSender<Self>,
-    ) -> Self {
+    fn init_model(value: Self::Init, _index: &DynamicIndex, sender: FactorySender<Self>) -> Self {
         GAME_STATE.subscribe(sender.input_sender(), |_| CounterMsg::Update);
         Self { id: value }
     }
@@ -164,7 +160,7 @@ impl FactoryComponent for GamePage {
         index: &DynamicIndex,
         root: &Self::Root,
         returned_widget: &adw::TabPage,
-        sender: FactoryComponentSender<Self>,
+        sender: FactorySender<Self>,
     ) -> Self::Widgets {
         let state = GAME_STATE.read();
         let widgets = view_output!();
@@ -175,7 +171,7 @@ impl FactoryComponent for GamePage {
         let state = GAME_STATE.read();
     }
 
-    fn update(&mut self, msg: Self::Input, _sender: FactoryComponentSender<Self>) {
+    fn update(&mut self, msg: Self::Input, _sender: FactorySender<Self>) {
         match msg {
             CounterMsg::Update => (),
         }
@@ -266,10 +262,10 @@ impl Component for App {
                     *GAME_STATE.write() = GameState::Running;
                     for _ in 0..20 {
                         relm4::tokio::time::sleep(Duration::from_millis(500)).await;
-                        sender.send(false);
+                        sender.send(false).unwrap();
                     }
                     relm4::tokio::time::sleep(Duration::from_millis(1000)).await;
-                    sender.send(true);
+                    sender.send(true).unwrap();
                 });
             }
             AppMsg::StopGame => {

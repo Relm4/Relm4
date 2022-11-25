@@ -45,11 +45,7 @@ impl FactoryComponent for Counter {
         Some(output)
     }
 
-    fn init_model(
-        value: Self::Init,
-        _index: &DynamicIndex,
-        _sender: FactoryComponentSender<Self>,
-    ) -> Self {
+    fn init_model(value: Self::Init, _index: &DynamicIndex, _sender: FactorySender<Self>) -> Self {
         Self { value }
     }
 }

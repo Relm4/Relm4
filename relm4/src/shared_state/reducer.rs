@@ -46,11 +46,11 @@ where
             let mut data = Data::init();
             while let Some(input) = receiver.recv().await {
                 if data.reduce(input) {
+                    // Remove all elements which had their senders dropped.
                     rt_subscribers
-                        .read()
+                        .write()
                         .unwrap()
-                        .iter()
-                        .for_each(|subscriber| subscriber(&data));
+                        .retain(|subscriber| subscriber(&data));
                 }
             }
         });
@@ -168,7 +168,7 @@ where
             .unwrap()
             .push(Box::new(move |data: &Data| {
                 let msg = f(data);
-                sender.send(msg);
+                sender.send(msg).is_ok()
             }));
     }
 
@@ -186,7 +186,9 @@ where
             .unwrap()
             .push(Box::new(move |data: &Data| {
                 if let Some(msg) = f(data) {
-                    sender.send(msg);
+                    sender.send(msg).is_ok()
+                } else {
+                    true
                 }
             }));
     }
@@ -196,7 +198,10 @@ where
     /// If the [`Reducible::reduce()`] method returns [`true`],
     /// all subscribers will be notified.
     pub fn emit(&self, input: Data::Input) {
-        self.inner.sender.send(input);
+        assert!(
+            self.inner.sender.send(input).is_ok(),
+            "Reducer runtime was dropped. Maybe a subscriber or the update function panicked?"
+        );
     }
 }
 

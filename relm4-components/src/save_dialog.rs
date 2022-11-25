@@ -89,14 +89,14 @@ impl SimpleComponent for SaveDialog {
                     gtk::ResponseType::Accept => {
                         if let Some(file) = dialog.file() {
                             if let Some(path) = file.path() {
-                                sender.output(SaveDialogResponse::Accept(path));
+                                sender.output(SaveDialogResponse::Accept(path)).unwrap();
                                 sender.input(SaveDialogMsg::Hide);
                                 return;
                             }
                         }
-                        sender.output(SaveDialogResponse::Cancel);
+                        sender.output(SaveDialogResponse::Cancel).unwrap();
                     }
-                    _ => sender.output(SaveDialogResponse::Cancel),
+                    _ => sender.output(SaveDialogResponse::Cancel).unwrap(),
                 }
                 sender.input(SaveDialogMsg::Hide);
             }

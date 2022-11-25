@@ -60,10 +60,10 @@ impl SimpleComponent for Dialog {
     fn update(&mut self, msg: Self::Input, sender: ComponentSender<Self>) {
         match msg {
             DialogMsg::Accept => {
-                sender.output(self.buffer.text());
+                sender.output(self.buffer.text()).unwrap();
             }
             DialogMsg::Cancel => {
-                sender.output(String::default());
+                sender.output(String::default()).unwrap();
             }
         }
     }

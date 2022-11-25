@@ -4,7 +4,8 @@
 
 use std::fmt::Debug;
 
-use crate::{sender::AsyncComponentSender, temp_widgets::TempWidgets, Sender};
+use crate::temp_widgets::TempWidgets;
+use crate::channel::{AsyncComponentSender, Sender};
 
 use super::{AsyncComponentBuilder, AsyncComponentParts};
 

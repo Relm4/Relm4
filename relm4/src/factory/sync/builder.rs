@@ -1,6 +1,6 @@
 use super::{FactoryComponent, FactoryHandle};
 
-use crate::factory::{DataGuard, DynamicIndex, FactoryComponentSender, FactoryView};
+use crate::factory::{DataGuard, DynamicIndex, FactorySender, FactoryView};
 use crate::shutdown::ShutdownSender;
 use crate::{shutdown, GuardedReceiver, Receiver, Sender};
 
@@ -12,7 +12,7 @@ use tracing::info_span;
 pub(super) struct FactoryBuilder<C: FactoryComponent> {
     pub(super) data: Box<C>,
     pub(super) root_widget: C::Root,
-    pub(super) component_sender: FactoryComponentSender<C>,
+    pub(super) component_sender: FactorySender<C>,
     pub(super) input_receiver: Receiver<C::Input>,
     pub(super) output_receiver: Receiver<C::Output>,
     pub(super) cmd_receiver: Receiver<C::CommandOutput>,
@@ -22,20 +22,20 @@ pub(super) struct FactoryBuilder<C: FactoryComponent> {
 impl<C: FactoryComponent> FactoryBuilder<C> {
     pub(super) fn new(index: &DynamicIndex, init: C::Init) -> Self {
         // Used for all events to be processed by this component's internal service.
-        let (input_tx, input_rx) = crate::channel::<C::Input>();
+        let (input_sender, input_receiver) = crate::channel::<C::Input>();
 
         // Used by this component to send events to be handled externally by the caller.
-        let (output_tx, output_rx) = crate::channel::<C::Output>();
+        let (output_sender, output_receiver) = crate::channel::<C::Output>();
 
         // Sends messages from commands executed from the background.
-        let (cmd_tx, cmd_rx) = crate::channel::<C::CommandOutput>();
+        let (cmd_sender, cmd_receiver) = crate::channel::<C::CommandOutput>();
 
         // Notifies the component's child commands that it is now deceased.
         let (shutdown_notifier, shutdown_receiver) = shutdown::channel();
 
         // Encapsulates the senders used by component methods.
         let component_sender =
-            FactoryComponentSender::new(input_tx, output_tx, cmd_tx, shutdown_receiver);
+            FactorySender::new(input_sender, output_sender, cmd_sender, shutdown_receiver);
 
         let data = Box::new(C::init_model(init, index, component_sender.clone()));
         let root_widget = data.init_root();
@@ -44,9 +44,9 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
             data,
             root_widget,
             component_sender,
-            input_receiver: input_rx,
-            output_receiver: output_rx,
-            cmd_receiver: cmd_rx,
+            input_receiver,
+            output_receiver,
+            cmd_receiver,
             shutdown_notifier,
         }
     }
@@ -93,8 +93,8 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
             component_sender.clone(),
         ));
 
-        let input_tx = component_sender.input_sender().clone();
-        let output_tx = component_sender.output_sender().clone();
+        let input_sender = component_sender.input_sender().clone();
+        let output_sender = component_sender.output_sender().clone();
 
         // Spawns the component's service. It will receive both `Self::Input` and
         // `Self::CommandOutput` messages. It will spawn commands as requested by
@@ -103,7 +103,7 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
             data,
             widgets,
             shutdown_notifier,
-            output_tx,
+            output_sender,
             |mut model, mut widgets| {
                 async move {
                     let mut notifier = GuardedReceiver::new(notifier_receiver);
@@ -154,7 +154,7 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
             data,
             root_widget,
             returned_widget,
-            input: input_tx,
+            input: input_sender,
             notifier,
         }
     }
