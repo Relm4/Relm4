@@ -4,7 +4,7 @@ use gtk::prelude::*;
 use relm4::{
     component::{AsyncComponent, AsyncComponentParts, AsyncComponentSender},
     gtk,
-    temp_widgets::TempWidgets,
+    loading_widgets::LoadingWidgets,
     view, RelmApp, RelmWidgetExt,
 };
 
@@ -51,7 +51,7 @@ impl AsyncComponent for App {
         }
     }
 
-    fn init_loading_widgets(root: &mut Self::Root) -> Option<TempWidgets> {
+    fn init_loading_widgets(root: &mut Self::Root) -> Option<LoadingWidgets> {
         view! {
             #[local_ref]
             root {
@@ -69,7 +69,7 @@ impl AsyncComponent for App {
                 }
             }
         }
-        Some(TempWidgets::new(root, spinner))
+        Some(LoadingWidgets::new(root, spinner))
     }
 
     // Initialize the component.

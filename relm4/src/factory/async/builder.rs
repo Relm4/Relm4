@@ -111,9 +111,7 @@ where
 
             crate::spawn_local(async move {
                 let data = C::init_model(init, &index, component_sender).await;
-                if let Some(loading_widgets) = loading_widgets {
-                    loading_widgets.remove();
-                }
+                drop(loading_widgets);
                 let data_guard = future_data.start_runtime(data);
                 future_sender.send(data_guard).unwrap();
             });

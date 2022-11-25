@@ -4,8 +4,8 @@
 
 use std::fmt::Debug;
 
-use crate::temp_widgets::TempWidgets;
 use crate::channel::{AsyncComponentSender, Sender};
+use crate::loading_widgets::LoadingWidgets;
 
 use super::{AsyncComponentBuilder, AsyncComponentParts};
 
@@ -49,7 +49,7 @@ pub trait AsyncComponent: Sized + 'static {
     ///
     /// This method does nothing by default.
     #[must_use]
-    fn init_loading_widgets(_root: &mut Self::Root) -> Option<TempWidgets> {
+    fn init_loading_widgets(_root: &mut Self::Root) -> Option<LoadingWidgets> {
         None
     }
 
@@ -165,7 +165,7 @@ pub trait SimpleAsyncComponent: Sized + 'static {
     ///
     /// This method does nothing by default.
     #[must_use]
-    fn init_loading_widgets(_root: &mut Self::Root) -> Option<TempWidgets> {
+    fn init_loading_widgets(_root: &mut Self::Root) -> Option<LoadingWidgets> {
         None
     }
 
@@ -210,7 +210,7 @@ where
         C::init_root()
     }
 
-    fn init_loading_widgets(root: &mut Self::Root) -> Option<TempWidgets> {
+    fn init_loading_widgets(root: &mut Self::Root) -> Option<LoadingWidgets> {
         C::init_loading_widgets(root)
     }
 

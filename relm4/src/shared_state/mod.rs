@@ -1,3 +1,5 @@
+//! Shared state that can be accessed by many components.
+
 mod reducer;
 mod state;
 

@@ -6,6 +6,8 @@ pub trait RelmSetChildExt: ContainerChild {
     /// Set a child for the container or remove it using [`None`].
     fn container_set_child(&self, widget: Option<&impl AsRef<gtk::Widget>>);
 
+    /// Get the child of a container.
+    /// Returns [`None`] if the container has no child.
     fn container_get_child(&self) -> Option<gtk::Widget>;
 }
 

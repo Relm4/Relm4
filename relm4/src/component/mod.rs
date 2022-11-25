@@ -1,3 +1,6 @@
+//! Components are smaller mostly independent parts of
+//! your application.
+
 /// Types and traits used for regular (synchronous) components.
 mod sync;
 

@@ -182,9 +182,7 @@ impl<C: AsyncComponent> AsyncComponentBuilder<C> {
         let id = crate::spawn_local_with_priority(priority, async move {
             let id = source_id_receiver.await.unwrap();
             let mut state = C::init(payload, rt_root, component_sender.clone()).await;
-            if let Some(temp_widgets) = temp_widgets {
-                temp_widgets.remove();
-            }
+            drop(temp_widgets);
             let mut cmd = GuardedReceiver::new(cmd_receiver);
             let mut input = GuardedReceiver::new(input_receiver);
 

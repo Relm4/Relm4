@@ -4,7 +4,7 @@ use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
 use relm4::factory::{
     AsyncFactoryComponent, AsyncFactorySender, AsyncFactoryVecDeque, DynamicIndex,
 };
-use relm4::temp_widgets::TempWidgets;
+use relm4::loading_widgets::LoadingWidgets;
 use relm4::{gtk, view, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent};
 
 #[derive(Debug)]
@@ -89,7 +89,7 @@ impl AsyncFactoryComponent for Counter {
         }
     }
 
-    fn init_loading_widgets(root: &mut Self::Root) -> Option<TempWidgets> {
+    fn init_loading_widgets(root: &mut Self::Root) -> Option<LoadingWidgets> {
         view! {
             #[local_ref]
             root {
@@ -106,7 +106,7 @@ impl AsyncFactoryComponent for Counter {
                 }
             }
         }
-        Some(TempWidgets::new(root, spinner))
+        Some(LoadingWidgets::new(root, spinner))
     }
 
     fn output_to_parent_input(output: Self::Output) -> Option<AppMsg> {
