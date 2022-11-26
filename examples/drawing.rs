@@ -66,7 +66,7 @@ impl Component for App {
       }
     }
 
-    fn update(&mut self, msg: Msg, _sender: ComponentSender<Self>) {
+    fn update(&mut self, msg: Msg, _sender: ComponentSender<Self>, _root: &Self::Root) {
         let cx = self.handler.get_context();
 
         match msg {
@@ -87,7 +87,7 @@ impl Component for App {
         draw(&cx, &self.points);
     }
 
-    fn update_cmd(&mut self, _: UpdatePointsMsg, _: ComponentSender<Self>) {
+    fn update_cmd(&mut self, _: UpdatePointsMsg, _: ComponentSender<Self>, _root: &Self::Root) {
         for point in &mut self.points {
             let Point { x, y, .. } = point;
             if *x < 0.0 {

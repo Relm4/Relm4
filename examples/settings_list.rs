@@ -153,7 +153,7 @@ impl Component for App {
         }
     }
 
-    fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>) {
+    fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>, _root: &Self::Root) {
         match message {
             Input::AddSetting {
                 description,
@@ -179,7 +179,12 @@ impl Component for App {
         }
     }
 
-    fn update_cmd(&mut self, message: Self::CommandOutput, sender: ComponentSender<Self>) {
+    fn update_cmd(
+        &mut self,
+        message: Self::CommandOutput,
+        sender: ComponentSender<Self>,
+        _root: &Self::Root,
+    ) {
         match message {
             CmdOut::Reload => {
                 sender.output(Output::Reload).unwrap();
