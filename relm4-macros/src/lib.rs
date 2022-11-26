@@ -1,4 +1,22 @@
 //! A collection of macros for gtk-rs, Relm4 and Rust in general.
+//!
+//! The docs are available in two versions.
+//! Use the [stable docs](https://relm4.org/docs/stable/relm4_macros/) if you want get information about a version that was already published.
+//! Visit the [nightly docs](https://relm4.org/docs/next/relm4_macros/) if are trying out the newest but possibly unstable version of the crate.
+//!
+//! Docs of related crates:
+//! [relm4](../relm4/index.html)
+//! | [relm4-macros](../relm4_macros/index.html)
+//! | [relm4-components](../relm4_components/index.html)
+//! | [gtk4-rs](https://gtk-rs.org/gtk4-rs/git/docs)
+//! | [gtk-rs-core](https://gtk-rs.org/gtk-rs-core/git/docs)
+//! | [libadwaita-rs](https://world.pages.gitlab.gnome.org/Rust/libadwaita-rs/git/docs/libadwaita)
+//! | [libpanel-rs](https://world.pages.gitlab.gnome.org/Rust/libpanel-rs/git/docs/libpanel)
+//!
+//! [GitHub](https://github.com/Relm4/Relm4)
+//! | [Website](https://relm4.org)
+//! | [Book](https://relm4.org/book/stable/)
+//! | [Blog](https://relm4.org/blog)
 
 #![doc(html_logo_url = "https://relm4.org/icons/relm4_logo.svg")]
 #![doc(html_favicon_url = "https://relm4.org/icons/relm4_org.svg")]
