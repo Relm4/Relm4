@@ -183,7 +183,7 @@ impl<C: AsyncComponent> AsyncComponentBuilder<C> {
             let id = source_id_receiver.await.unwrap();
             let mut state = C::init(payload, rt_root.clone(), component_sender.clone()).await;
             drop(temp_widgets);
-            
+
             let mut cmd = GuardedReceiver::new(cmd_receiver);
             let mut input = GuardedReceiver::new(input_receiver);
 
