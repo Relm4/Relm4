@@ -10,7 +10,6 @@
 + core: Add `LoadingWidgets` to help with temporary loading widgets in async factories and components
 + core: Add `Reducer` as message based alternative to `SharedState`
 + core: Synchronous API for commands
-+ core: Add `try_send` method for fallible sending of messages
 + core: Remove async-broadcast dependency
 + core: Runtimes of `Component`s and `AsyncComponents` can now be detached for a static lifetime
 + core: Add `ComponentStream` as alternative to `Controller` that implements `Stream` for async message handling
