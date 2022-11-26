@@ -4,6 +4,7 @@
 
 ### Added
 
++ core: Add `LoadingWidgets` to help with temporary loading widgets in async factories and components.
 + core: Temporary widget initialization for `AsyncComponent`s
 + core: Add asynchronous factories including macro support
 + core: Add `Reducer` as message based alternative to `SharedState`

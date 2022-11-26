@@ -5,6 +5,7 @@
 use std::fmt::Debug;
 
 use crate::channel::{AsyncComponentSender, Sender};
+use crate::loading_widgets::LoadingWidgets;
 
 use super::{AsyncComponentBuilder, AsyncComponentParts};
 
@@ -39,6 +40,7 @@ pub trait AsyncComponent: Sized + 'static {
     }
 
     /// Initializes the root widget
+    #[must_use]
     fn init_root() -> Self::Root;
 
     /// Allows you to initialize the root widget with a temporary value
@@ -46,7 +48,10 @@ pub trait AsyncComponent: Sized + 'static {
     /// future completes.
     ///
     /// This method does nothing by default.
-    fn init_loading_widgets(_root: &mut Self::Root) {}
+    #[must_use]
+    fn init_loading_widgets(_root: &mut Self::Root) -> Option<LoadingWidgets> {
+        None
+    }
 
     /// Creates the initial model and view, docking it into the component.
     async fn init(
@@ -135,6 +140,7 @@ pub trait AsyncComponent: Sized + 'static {
     ///
     /// The default implementation of this method uses the address of the component, but
     /// implementations are free to provide more meaningful identifiers.
+    #[must_use]
     fn id(&self) -> String {
         format!("{:p}", &self)
     }
@@ -159,6 +165,7 @@ pub trait SimpleAsyncComponent: Sized + 'static {
     type Widgets: 'static;
 
     /// Initializes the root widget
+    #[must_use]
     fn init_root() -> Self::Root;
 
     /// Allows you to initialize the root widget with a temporary value
@@ -166,7 +173,10 @@ pub trait SimpleAsyncComponent: Sized + 'static {
     /// future completes.
     ///
     /// This method does nothing by default.
-    fn init_loading_widgets(_root: &mut Self::Root) {}
+    #[must_use]
+    fn init_loading_widgets(_root: &mut Self::Root) -> Option<LoadingWidgets> {
+        None
+    }
 
     /// Creates the initial model and view, docking it into the component.
     async fn init(
@@ -209,7 +219,7 @@ where
         C::init_root()
     }
 
-    fn init_loading_widgets(root: &mut Self::Root) {
+    fn init_loading_widgets(root: &mut Self::Root) -> Option<LoadingWidgets> {
         C::init_loading_widgets(root)
     }
 

@@ -2,6 +2,7 @@
 
 use crate::channel::AsyncFactorySender;
 use crate::factory::{DynamicIndex, FactoryView, Position};
+use crate::loading_widgets::LoadingWidgets;
 use crate::Sender;
 
 use std::fmt::Debug;
@@ -53,7 +54,10 @@ pub trait AsyncFactoryComponent:
     /// This method does nothing by default.
     ///
     /// [`init_model()`]: AsyncFactoryComponent::init_model
-    fn init_loading_widgets(_root: &mut Self::Root) {}
+    #[must_use]
+    fn init_loading_widgets(_root: &mut Self::Root) -> Option<LoadingWidgets> {
+        None
+    }
 
     /// Initializes the widgets.
     fn init_widgets(

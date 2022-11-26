@@ -14,23 +14,18 @@
 // Configuration for doc builds on the nightly toolchain.
 #![cfg_attr(dox, feature(doc_cfg))]
 
-pub mod actions;
 mod app;
 mod channel;
-
-/// Components are smaller mostly independent parts of
-/// your application.
-pub mod component;
-
-pub mod drawing;
 mod extensions;
-pub mod factory;
-
-/// Shared state that can be accessed by many components.
-pub mod shared_state;
-
 pub(crate) mod late_initialization;
 mod runtime_util;
+
+pub mod actions;
+pub mod component;
+pub mod drawing;
+pub mod factory;
+pub mod loading_widgets;
+pub mod shared_state;
 
 pub use channel::ComponentSender;
 pub use channel::*;
