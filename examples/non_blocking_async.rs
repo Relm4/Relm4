@@ -71,7 +71,12 @@ impl Component for App {
         ComponentParts { model, widgets }
     }
 
-    fn update_cmd(&mut self, msg: Self::CommandOutput, _sender: ComponentSender<Self>) {
+    fn update_cmd(
+        &mut self,
+        msg: Self::CommandOutput,
+        _sender: ComponentSender<Self>,
+        _root: &Self::Root,
+    ) {
         match msg {
             Msg::Increment => {
                 self.counter = self.counter.wrapping_add(1);

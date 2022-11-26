@@ -23,6 +23,7 @@
 + core: Rename `FactoryComponentSender` to `FactorySender` and `AsyncFactoryComponentSender` to `AsyncFactorySender`
 + core: The sender API now supports proper error handling
 + core: Add `gnome_42` and `gnome_43` feature flags
++ core: Pass `Root` during `update` and `update_cmd` for `Component` and `AsyncComponent`
 + core: Rename `OnDestroy` to `RelmObjectExt`
 + core: Remove `EmptyRoot` in favor of the unit type
 + macros: Allow using methods calls as widget initializers in the `view` macro

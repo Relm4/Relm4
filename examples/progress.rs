@@ -117,7 +117,7 @@ impl Component for App {
         }
     }
 
-    fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>) {
+    fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>, _root: &Self::Root) {
         match message {
             Input::Compute => {
                 self.computing = true;
@@ -144,7 +144,12 @@ impl Component for App {
         }
     }
 
-    fn update_cmd(&mut self, message: Self::CommandOutput, _sender: ComponentSender<Self>) {
+    fn update_cmd(
+        &mut self,
+        message: Self::CommandOutput,
+        _sender: ComponentSender<Self>,
+        _root: &Self::Root,
+    ) {
         if let CmdOut::Finished(_) = message {
             self.computing = false;
         }
