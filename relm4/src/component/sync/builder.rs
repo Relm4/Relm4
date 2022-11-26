@@ -138,9 +138,9 @@ impl<C: Component> ComponentBuilder<C> {
     /// Starts the component, passing ownership to a future attached to a [gtk::glib::MainContext].
     pub fn launch(self, payload: C::Init) -> Connector<C> {
         // Used for all events to be processed by this component's internal service.
-        let (input_tx, input_rx) = crate::channel::<C::Input>();
+        let (input_sender, input_receiver) = crate::channel::<C::Input>();
 
-        self.launch_with_input_channel(payload, input_tx, input_rx)
+        self.launch_with_input_channel(payload, input_sender, input_receiver)
     }
 
     /// Similar to [`launch()`](ComponentBuilder::launch) but also initializes a [`MessageBroker`].
@@ -149,19 +149,19 @@ impl<C: Component> ComponentBuilder<C> {
     ///
     /// This method panics if the message broker was already initialized in another launch.
     pub fn launch_with_broker(self, payload: C::Init, broker: &MessageBroker<C>) -> Connector<C> {
-        let (input_tx, input_rx) = broker.get_channel();
+        let (input_sender, input_receiver) = broker.get_channel();
         self.launch_with_input_channel(
             payload,
-            input_tx,
-            input_rx.expect("Message broker launched multiple times"),
+            input_sender,
+            input_receiver.expect("Message broker launched multiple times"),
         )
     }
 
     fn launch_with_input_channel(
         self,
         payload: C::Init,
-        input_tx: Sender<C::Input>,
-        input_rx: Receiver<C::Input>,
+        input_sender: Sender<C::Input>,
+        input_receiver: Receiver<C::Input>,
     ) -> Connector<C> {
         let Self { root, priority, .. } = self;
 
@@ -183,7 +183,7 @@ impl<C: Component> ComponentBuilder<C> {
 
         // Encapsulates the senders used by component methods.
         let component_sender = ComponentSender::new(
-            input_tx.clone(),
+            input_sender.clone(),
             output_sender.clone(),
             cmd_sender,
             shutdown_recipient,
@@ -202,6 +202,7 @@ impl<C: Component> ComponentBuilder<C> {
         };
 
         let rt_state = watcher.state.clone();
+        let rt_root = root.clone();
 
         // Spawns the component's service. It will receive both `Self::Input` and
         // `Self::CommandOutput` messages. It will spawn commands as requested by
@@ -210,7 +211,7 @@ impl<C: Component> ComponentBuilder<C> {
             let id = source_id_receiver.await.unwrap();
             let mut notifier = GuardedReceiver::new(notifier_receiver);
             let mut cmd = GuardedReceiver::new(cmd_receiver);
-            let mut input = GuardedReceiver::new(input_rx);
+            let mut input = GuardedReceiver::new(input_receiver);
             loop {
                 futures::select!(
                     // Performs the model update, checking if the update requested a command.
@@ -229,7 +230,7 @@ impl<C: Component> ComponentBuilder<C> {
                         );
                         let _enter = span.enter();
 
-                        model.update_with_view(widgets, message, component_sender.clone());
+                        model.update_with_view(widgets, message, component_sender.clone(), &rt_root);
                     }
 
                     // Handles responses from a command.
@@ -247,7 +248,7 @@ impl<C: Component> ComponentBuilder<C> {
                         );
                         let _enter = span.enter();
 
-                        model.update_cmd_with_view(widgets, message, component_sender.clone());
+                        model.update_cmd_with_view(widgets, message, component_sender.clone(), &rt_root);
                     }
 
                     // Triggered when the model and view have been updated externally.
@@ -285,7 +286,7 @@ impl<C: Component> ComponentBuilder<C> {
         Connector {
             state: watcher,
             widget: root,
-            sender: input_tx,
+            sender: input_sender,
             receiver: output_receiver,
         }
     }

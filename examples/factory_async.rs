@@ -2,8 +2,9 @@ use std::time::Duration;
 
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
 use relm4::factory::{
-    AsyncFactoryComponent, AsyncFactoryComponentSender, AsyncFactoryVecDeque, DynamicIndex,
+    AsyncFactoryComponent, AsyncFactorySender, AsyncFactoryVecDeque, DynamicIndex,
 };
+use relm4::loading_widgets::LoadingWidgets;
 use relm4::{gtk, view, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent};
 
 #[derive(Debug)]
@@ -36,8 +37,6 @@ impl AsyncFactoryComponent for Counter {
 
     view! {
         root = gtk::Box {
-            remove: &root.first_child().unwrap(),
-
             #[name(label)]
             gtk::Label {
                 #[watch]
@@ -90,13 +89,14 @@ impl AsyncFactoryComponent for Counter {
         }
     }
 
-    fn init_loading_widgets(root: &mut Self::Root) {
+    fn init_loading_widgets(root: &mut Self::Root) -> Option<LoadingWidgets> {
         view! {
             #[local_ref]
             root {
                 set_orientation: gtk::Orientation::Horizontal,
                 set_spacing: 10,
 
+                #[name(spinner)]
                 gtk::Spinner {
                     start: (),
                     set_hexpand: true,
@@ -106,6 +106,7 @@ impl AsyncFactoryComponent for Counter {
                 }
             }
         }
+        Some(LoadingWidgets::new(root, spinner))
     }
 
     fn output_to_parent_input(output: Self::Output) -> Option<AppMsg> {
@@ -120,13 +121,13 @@ impl AsyncFactoryComponent for Counter {
     async fn init_model(
         value: Self::Init,
         _index: &DynamicIndex,
-        _sender: AsyncFactoryComponentSender<Self>,
+        _sender: AsyncFactorySender<Self>,
     ) -> Self {
         async_std::task::sleep(Duration::from_secs(1)).await;
         Self { value }
     }
 
-    async fn update(&mut self, msg: Self::Input, _sender: AsyncFactoryComponentSender<Self>) {
+    async fn update(&mut self, msg: Self::Input, _sender: AsyncFactorySender<Self>) {
         async_std::task::sleep(Duration::from_secs(1)).await;
         match msg {
             CounterMsg::Increment => {

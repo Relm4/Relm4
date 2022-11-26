@@ -12,7 +12,7 @@ use super::AsyncComponent;
 pub trait AsyncComponentController<C: AsyncComponent> {
     /// Emits an input to the component.
     fn emit(&self, event: C::Input) {
-        self.sender().send(event);
+        self.sender().send(event).unwrap();
     }
 
     /// Provides access to the component's sender.

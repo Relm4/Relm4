@@ -117,7 +117,7 @@ impl Component for App {
         }
     }
 
-    fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>) {
+    fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>, _root: &Self::Root) {
         match message {
             Input::Compute => {
                 self.computing = true;
@@ -128,12 +128,12 @@ impl Component for App {
                             let mut progress = 0.0;
 
                             while progress < 1.0 {
-                                out.send(CmdOut::Progress(progress));
+                                out.send(CmdOut::Progress(progress)).unwrap();
                                 progress += 0.1;
                                 tokio::time::sleep(std::time::Duration::from_millis(333)).await;
                             }
 
-                            out.send(CmdOut::Finished(Ok("42".into())));
+                            out.send(CmdOut::Finished(Ok("42".into()))).unwrap();
                         })
                         // Perform task until a shutdown interrupts it
                         .drop_on_shutdown()
@@ -144,7 +144,12 @@ impl Component for App {
         }
     }
 
-    fn update_cmd(&mut self, message: Self::CommandOutput, _sender: ComponentSender<Self>) {
+    fn update_cmd(
+        &mut self,
+        message: Self::CommandOutput,
+        _sender: ComponentSender<Self>,
+        _root: &Self::Root,
+    ) {
         if let CmdOut::Finished(_) = message {
             self.computing = false;
         }

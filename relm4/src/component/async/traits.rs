@@ -4,7 +4,8 @@
 
 use std::fmt::Debug;
 
-use crate::{sender::AsyncComponentSender, Sender};
+use crate::channel::{AsyncComponentSender, Sender};
+use crate::loading_widgets::LoadingWidgets;
 
 use super::{AsyncComponentBuilder, AsyncComponentParts};
 
@@ -39,6 +40,7 @@ pub trait AsyncComponent: Sized + 'static {
     }
 
     /// Initializes the root widget
+    #[must_use]
     fn init_root() -> Self::Root;
 
     /// Allows you to initialize the root widget with a temporary value
@@ -46,7 +48,10 @@ pub trait AsyncComponent: Sized + 'static {
     /// future completes.
     ///
     /// This method does nothing by default.
-    fn init_loading_widgets(_root: &mut Self::Root) {}
+    #[must_use]
+    fn init_loading_widgets(_root: &mut Self::Root) -> Option<LoadingWidgets> {
+        None
+    }
 
     /// Creates the initial model and view, docking it into the component.
     async fn init(
@@ -57,7 +62,13 @@ pub trait AsyncComponent: Sized + 'static {
 
     /// Processes inputs received by the component.
     #[allow(unused)]
-    async fn update(&mut self, message: Self::Input, sender: AsyncComponentSender<Self>) {}
+    async fn update(
+        &mut self,
+        message: Self::Input,
+        sender: AsyncComponentSender<Self>,
+        root: &Self::Root,
+    ) {
+    }
 
     /// Defines how the component should respond to command updates.
     #[allow(unused)]
@@ -65,6 +76,7 @@ pub trait AsyncComponent: Sized + 'static {
         &mut self,
         message: Self::CommandOutput,
         sender: AsyncComponentSender<Self>,
+        root: &Self::Root,
     ) {
     }
 
@@ -86,8 +98,9 @@ pub trait AsyncComponent: Sized + 'static {
         widgets: &mut Self::Widgets,
         message: Self::CommandOutput,
         sender: AsyncComponentSender<Self>,
+        root: &Self::Root,
     ) {
-        self.update_cmd(message, sender.clone()).await;
+        self.update_cmd(message, sender.clone(), root).await;
         self.update_view(widgets, sender);
     }
 
@@ -113,8 +126,9 @@ pub trait AsyncComponent: Sized + 'static {
         widgets: &mut Self::Widgets,
         message: Self::Input,
         sender: AsyncComponentSender<Self>,
+        root: &Self::Root,
     ) {
-        self.update(message, sender.clone()).await;
+        self.update(message, sender.clone(), root).await;
         self.update_view(widgets, sender);
     }
 
@@ -126,6 +140,7 @@ pub trait AsyncComponent: Sized + 'static {
     ///
     /// The default implementation of this method uses the address of the component, but
     /// implementations are free to provide more meaningful identifiers.
+    #[must_use]
     fn id(&self) -> String {
         format!("{:p}", &self)
     }
@@ -150,6 +165,7 @@ pub trait SimpleAsyncComponent: Sized + 'static {
     type Widgets: 'static;
 
     /// Initializes the root widget
+    #[must_use]
     fn init_root() -> Self::Root;
 
     /// Allows you to initialize the root widget with a temporary value
@@ -157,7 +173,10 @@ pub trait SimpleAsyncComponent: Sized + 'static {
     /// future completes.
     ///
     /// This method does nothing by default.
-    fn init_loading_widgets(_root: &mut Self::Root) {}
+    #[must_use]
+    fn init_loading_widgets(_root: &mut Self::Root) -> Option<LoadingWidgets> {
+        None
+    }
 
     /// Creates the initial model and view, docking it into the component.
     async fn init(
@@ -200,7 +219,7 @@ where
         C::init_root()
     }
 
-    fn init_loading_widgets(root: &mut Self::Root) {
+    fn init_loading_widgets(root: &mut Self::Root) -> Option<LoadingWidgets> {
         C::init_loading_widgets(root)
     }
 
@@ -212,7 +231,12 @@ where
         C::init(init, root, sender).await
     }
 
-    async fn update(&mut self, message: Self::Input, sender: AsyncComponentSender<Self>) {
+    async fn update(
+        &mut self,
+        message: Self::Input,
+        sender: AsyncComponentSender<Self>,
+        _root: &Self::Root,
+    ) {
         C::update(self, message, sender).await;
     }
 

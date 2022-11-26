@@ -21,7 +21,7 @@ impl SimpleComponent for Header {
                     set_active: true,
                     connect_toggled[sender] => move |btn| {
                         if btn.is_active() {
-                            sender.output(AppMsg::SetMode(AppMode::View));
+                            sender.output(AppMsg::SetMode(AppMode::View)).unwrap();
                         }
                     },
                 },
@@ -30,7 +30,7 @@ impl SimpleComponent for Header {
                     set_group: Some(&group),
                     connect_toggled[sender] => move |btn| {
                         if btn.is_active() {
-                            sender.output(AppMsg::SetMode(AppMode::Edit));
+                            sender.output(AppMsg::SetMode(AppMode::Edit)).unwrap();
                         }
                     },
                 },
@@ -39,7 +39,7 @@ impl SimpleComponent for Header {
                     set_group: Some(&group),
                     connect_toggled[sender] => move |btn| {
                         if btn.is_active() {
-                            sender.output(AppMsg::SetMode(AppMode::Export));
+                            sender.output(AppMsg::SetMode(AppMode::Export)).unwrap();
                         }
                     },
                 },
@@ -120,7 +120,7 @@ impl SimpleComponent for Dialog {
             DialogMsg::Show => self.hidden = false,
             DialogMsg::Accept => {
                 self.hidden = true;
-                sender.output(AppMsg::Close);
+                sender.output(AppMsg::Close).unwrap();
             }
             DialogMsg::Cancel => self.hidden = true,
         }

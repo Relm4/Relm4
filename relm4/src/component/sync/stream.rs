@@ -3,7 +3,7 @@ use std::pin::Pin;
 use std::task::{Context, Poll};
 
 use flume::r#async::RecvStream;
-use futures::{pin_mut, Stream};
+use futures::{pin_mut, Stream, StreamExt};
 
 use crate::{Component, ShutdownOnDrop};
 
@@ -28,6 +28,14 @@ impl<C: Component> Stream for ComponentStream<C> {
         let stream = &mut self.stream;
         pin_mut!(stream);
         stream.poll_next(cx)
+    }
+}
+
+impl<C: Component> ComponentStream<C> {
+    /// Receive one message and drop the component afterwards.
+    /// This can be used for dialogs.
+    pub async fn recv_one(mut self) -> Option<C::Output> {
+        self.stream.next().await
     }
 }
 

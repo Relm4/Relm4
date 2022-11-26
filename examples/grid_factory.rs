@@ -1,8 +1,6 @@
 use gtk::prelude::{BoxExt, ButtonExt, GridExt, GtkWindowExt, OrientableExt};
 use relm4::factory::positions::GridPosition;
-use relm4::factory::{
-    DynamicIndex, FactoryComponent, FactoryComponentSender, FactoryVecDeque, Position,
-};
+use relm4::factory::{DynamicIndex, FactoryComponent, FactorySender, FactoryVecDeque, Position};
 use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent};
 
 #[derive(Debug)]
@@ -68,11 +66,7 @@ impl FactoryComponent for Counter {
         root
     }
 
-    fn init_model(
-        value: Self::Init,
-        _index: &DynamicIndex,
-        _sender: FactoryComponentSender<Self>,
-    ) -> Self {
+    fn init_model(value: Self::Init, _index: &DynamicIndex, _sender: FactorySender<Self>) -> Self {
         Self { value }
     }
 
@@ -81,7 +75,7 @@ impl FactoryComponent for Counter {
         index: &DynamicIndex,
         root: &Self::Root,
         _returned_widget: &gtk::Widget,
-        sender: FactoryComponentSender<Self>,
+        sender: FactorySender<Self>,
     ) -> Self::Widgets {
         relm4::view! {
             #[local_ref]
@@ -128,7 +122,7 @@ impl FactoryComponent for Counter {
         CounterWidgets { label }
     }
 
-    fn update(&mut self, msg: Self::Input, _sender: FactoryComponentSender<Self>) {
+    fn update(&mut self, msg: Self::Input, _sender: FactorySender<Self>) {
         match msg {
             CounterMsg::Increment => {
                 self.value = self.value.wrapping_add(1);
@@ -139,7 +133,7 @@ impl FactoryComponent for Counter {
         }
     }
 
-    fn update_view(&self, widgets: &mut Self::Widgets, _sender: FactoryComponentSender<Self>) {
+    fn update_view(&self, widgets: &mut Self::Widgets, _sender: FactorySender<Self>) {
         widgets.label.set_label(&self.value.to_string());
     }
 }

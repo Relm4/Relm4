@@ -116,11 +116,13 @@ impl SimpleComponent for Alert {
             }
             AlertMsg::Response(ty) => {
                 self.is_active = false;
-                sender.output(match ty {
-                    gtk::ResponseType::Accept => AlertResponse::Confirm,
-                    gtk::ResponseType::Other(_) => AlertResponse::Option,
-                    _ => AlertResponse::Cancel,
-                });
+                sender
+                    .output(match ty {
+                        gtk::ResponseType::Accept => AlertResponse::Confirm,
+                        gtk::ResponseType::Other(_) => AlertResponse::Option,
+                        _ => AlertResponse::Cancel,
+                    })
+                    .unwrap();
             }
         }
     }
