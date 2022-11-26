@@ -4,7 +4,7 @@
 
 //use super::message_broker::MessageBroker;
 use super::{AsyncComponent, AsyncComponentParts, AsyncConnector};
-use crate::sender::AsyncComponentSender;
+use crate::channel::AsyncComponentSender;
 use crate::{
     late_initialization, GuardedReceiver, Receiver, RelmContainerExt, RelmWidgetExt,
     RuntimeSenders, Sender,
@@ -137,21 +137,21 @@ impl<C: AsyncComponent> AsyncComponentBuilder<C> {
     /// Starts the component, passing ownership to a future attached to a [gtk::glib::MainContext].
     pub fn launch(self, payload: C::Init) -> AsyncConnector<C> {
         // Used for all events to be processed by this component's internal service.
-        let (input_tx, input_rx) = crate::channel::<C::Input>();
+        let (input_sender, input_receiver) = crate::channel::<C::Input>();
 
-        self.launch_with_input_channel(payload, input_tx, input_rx)
+        self.launch_with_input_channel(payload, input_sender, input_receiver)
     }
 
     fn launch_with_input_channel(
         self,
         payload: C::Init,
-        input_tx: Sender<C::Input>,
-        input_rx: Receiver<C::Input>,
+        input_sender: Sender<C::Input>,
+        input_receiver: Receiver<C::Input>,
     ) -> AsyncConnector<C> {
         let Self {
             mut root, priority, ..
         } = self;
-        C::init_loading_widgets(&mut root);
+        let temp_widgets = C::init_loading_widgets(&mut root);
 
         let RuntimeSenders {
             output_sender,
@@ -166,7 +166,7 @@ impl<C: AsyncComponent> AsyncComponentBuilder<C> {
 
         // Encapsulates the senders used by component methods.
         let component_sender = AsyncComponentSender::new(
-            input_tx.clone(),
+            input_sender.clone(),
             output_sender.clone(),
             cmd_sender,
             shutdown_recipient,
@@ -181,9 +181,11 @@ impl<C: AsyncComponent> AsyncComponentBuilder<C> {
         // updates, and send `Self::Output` messages externally.
         let id = crate::spawn_local_with_priority(priority, async move {
             let id = source_id_receiver.await.unwrap();
-            let mut state = C::init(payload, rt_root, component_sender.clone()).await;
+            let mut state = C::init(payload, rt_root.clone(), component_sender.clone()).await;
+            drop(temp_widgets);
+
             let mut cmd = GuardedReceiver::new(cmd_receiver);
-            let mut input = GuardedReceiver::new(input_rx);
+            let mut input = GuardedReceiver::new(input_receiver);
 
             loop {
                 futures::select!(
@@ -203,7 +205,7 @@ impl<C: AsyncComponent> AsyncComponentBuilder<C> {
                         );
                         let _enter = span.enter();
 
-                        model.update_with_view(widgets, message, component_sender.clone()).await;
+                        model.update_with_view(widgets, message, component_sender.clone(), &rt_root).await;
                     }
 
                     // Handles responses from a command.
@@ -221,7 +223,7 @@ impl<C: AsyncComponent> AsyncComponentBuilder<C> {
                         );
                         let _enter = span.enter();
 
-                        model.update_cmd_with_view(widgets, message, component_sender.clone()).await;
+                        model.update_cmd_with_view(widgets, message, component_sender.clone(), &rt_root).await;
                     }
 
                     // Triggered when the component is destroyed
@@ -248,7 +250,7 @@ impl<C: AsyncComponent> AsyncComponentBuilder<C> {
         // Give back a type for controlling the component service.
         AsyncConnector {
             widget: root,
-            sender: input_tx,
+            sender: input_sender,
             receiver: output_receiver,
             shutdown_on_drop: destroy_on_drop,
         }

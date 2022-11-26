@@ -1,5 +1,5 @@
 use gtk::prelude::*;
-use relm4::factory::{DynamicIndex, FactoryComponent, FactoryComponentSender};
+use relm4::factory::{DynamicIndex, FactoryComponent, FactorySender};
 use relm4::{gtk, RelmWidgetExt};
 
 use super::OpenButtonMsg;
@@ -36,7 +36,7 @@ impl FactoryComponent for FileListItem {
         Some(output)
     }
 
-    fn init_model(init: Self::Init, _: &DynamicIndex, _: FactoryComponentSender<Self>) -> Self {
+    fn init_model(init: Self::Init, _: &DynamicIndex, _: FactorySender<Self>) -> Self {
         Self { path: init }
     }
 }

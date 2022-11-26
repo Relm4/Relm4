@@ -19,6 +19,7 @@ impl Component for App {
     type Input = ();
     type Output = ();
     type CommandOutput = Msg;
+    type Widgets = AppWidgets;
 
     view! {
         gtk::Window {
@@ -34,8 +35,8 @@ impl Component for App {
                     set_label: "Increment",
                     // Messages are fully async, no blocking!
                     connect_clicked[sender] => move |_| {
-                        sender.oneshot_command(async move {
-                            tokio::time::sleep(Duration::from_secs(1)).await;
+                        sender.spawn_oneshot_command(|| {
+                            std::thread::sleep(Duration::from_secs(1));
                             Msg::Increment
                         })
                     },
@@ -43,8 +44,8 @@ impl Component for App {
 
                 gtk::Button::with_label("Decrement") {
                     connect_clicked[sender] => move |_| {
-                        sender.oneshot_command(async move {
-                            tokio::time::sleep(Duration::from_secs(1)).await;
+                        sender.spawn_oneshot_command(|| {
+                            std::thread::sleep(Duration::from_secs(1));
                             Msg::Decrement
                         })
                     },

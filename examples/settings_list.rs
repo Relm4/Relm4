@@ -34,30 +34,36 @@ fn main() {
                             0 => xdg_open("https://github.com/Relm4/Relm4".into()),
                             1 => xdg_open("https://relm4.org/docs/stable/relm4/".into()),
                             2 => {
-                                sender.send(Input::Clear);
+                                sender.send(Input::Clear).unwrap();
                             }
                             _ => (),
                         }
                     }
 
                     Output::Reload => {
-                        sender.send(Input::AddSetting {
-                            description: "Browse GitHub Repository".into(),
-                            button: "GitHub".into(),
-                            id: 0,
-                        });
+                        sender
+                            .send(Input::AddSetting {
+                                description: "Browse GitHub Repository".into(),
+                                button: "GitHub".into(),
+                                id: 0,
+                            })
+                            .unwrap();
 
-                        sender.send(Input::AddSetting {
-                            description: "Browse Documentation".into(),
-                            button: "Docs".into(),
-                            id: 1,
-                        });
+                        sender
+                            .send(Input::AddSetting {
+                                description: "Browse Documentation".into(),
+                                button: "Docs".into(),
+                                id: 1,
+                            })
+                            .unwrap();
 
-                        sender.send(Input::AddSetting {
-                            description: "Clear List".into(),
-                            button: "Clear".into(),
-                            id: 2,
-                        });
+                        sender
+                            .send(Input::AddSetting {
+                                description: "Clear List".into(),
+                                button: "Clear".into(),
+                                id: 2,
+                            })
+                            .unwrap();
                     }
                 });
 
@@ -120,7 +126,7 @@ impl Component for App {
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         // Request the caller to reload its options.
-        sender.output(Output::Reload);
+        sender.output(Output::Reload).unwrap();
 
         let label = gtk::builders::LabelBuilder::new()
             .label(&title)
@@ -147,7 +153,7 @@ impl Component for App {
         }
     }
 
-    fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>) {
+    fn update(&mut self, message: Self::Input, sender: ComponentSender<Self>, _root: &Self::Root) {
         match message {
             Input::AddSetting {
                 description,
@@ -168,15 +174,20 @@ impl Component for App {
             }
 
             Input::Reload => {
-                sender.output(Output::Reload);
+                sender.output(Output::Reload).unwrap();
             }
         }
     }
 
-    fn update_cmd(&mut self, message: Self::CommandOutput, sender: ComponentSender<Self>) {
+    fn update_cmd(
+        &mut self,
+        message: Self::CommandOutput,
+        sender: ComponentSender<Self>,
+        _root: &Self::Root,
+    ) {
         match message {
             CmdOut::Reload => {
-                sender.output(Output::Reload);
+                sender.output(Output::Reload).unwrap();
             }
         }
     }
@@ -209,7 +220,7 @@ impl Component for App {
                             set_size_group: &widgets.button_sg,
 
                             connect_clicked[sender] => move |_| {
-                                sender.output(Output::Clicked(id));
+                                sender.output(Output::Clicked(id)).unwrap();
                             }
                         }
                     }

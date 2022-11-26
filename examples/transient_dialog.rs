@@ -20,11 +20,10 @@ enum DialogMsg {
 }
 
 #[relm4::component]
-impl Component for Dialog {
+impl SimpleComponent for Dialog {
     type Init = ();
     type Input = DialogMsg;
     type Output = ButtonMsg;
-    type CommandOutput = ();
 
     view! {
         dialog = gtk::Dialog {

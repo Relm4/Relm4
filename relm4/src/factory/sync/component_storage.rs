@@ -34,13 +34,13 @@ impl<C: FactoryComponent> ComponentStorage<C> {
     pub(super) fn send(&self, msg: C::Input) {
         match self {
             Self::Builder(builder) => builder.component_sender.input(msg),
-            Self::Final(handle) => handle.input.send(msg),
+            Self::Final(handle) => handle.input.send(msg).unwrap(),
         }
     }
 
     pub(super) fn state_change_notify(&self) {
         if let Self::Final(handle) = self {
-            handle.notifier.send(());
+            handle.notifier.send(()).unwrap();
         }
     }
 

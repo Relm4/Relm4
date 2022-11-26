@@ -88,7 +88,7 @@ where
             .unwrap()
             .push(Box::new(move |data: &Data| {
                 let msg = f(data);
-                sender.send(msg);
+                sender.send(msg).is_ok()
             }));
     }
 
@@ -105,7 +105,9 @@ where
             .unwrap()
             .push(Box::new(move |data: &Data| {
                 if let Some(msg) = f(data) {
-                    sender.send(msg);
+                    sender.send(msg).is_ok()
+                } else {
+                    true
                 }
             }));
     }
@@ -279,9 +281,8 @@ impl<'a, Data> Drop for SharedStateWriteGuard<'a, Data> {
     // Notify subscribers
     fn drop(&mut self) {
         let data = &*self.data;
-        self.subscribers
-            .iter()
-            .for_each(|subscriber| subscriber(data));
+        // Remove all elements which had their senders dropped.
+        self.subscribers.retain(|subscriber| subscriber(data));
     }
 }
 
