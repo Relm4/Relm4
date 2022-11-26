@@ -1,19 +1,19 @@
 # Changelog
 
-## Unreleased
+## 0.5.0-beta.5 - 2022-11-26
 
 ### Added
 
-+ core: Add `LoadingWidgets` to help with temporary loading widgets in async factories and components.
-+ core: Temporary widget initialization for `AsyncComponent`s
++ core: Add asynchronous components including macro support
 + core: Add asynchronous factories including macro support
++ core: Temporary widget initialization for async components and factories
++ core: Add `LoadingWidgets` to help with temporary loading widgets in async factories and components
 + core: Add `Reducer` as message based alternative to `SharedState`
 + core: Synchronous API for commands
 + core: Add `try_send` method for fallible sending of messages
 + core: Remove async-broadcast dependency
 + core: Runtimes of `Component`s and `AsyncComponents` can now be detached for a static lifetime
 + core: Add `ComponentStream` as alternative to `Controller` that implements `Stream` for async message handling
-+ core: Add asynchronous components including macro support
 + core: Add `gnome_42` and `gnome_43` feature flags
 + core: Implement `RelmContainerExt` for `adw::Squeezer`
 + core: Implement `RelmSetChildExt` for `gtk::WindowHandle`
@@ -35,8 +35,8 @@
 + all: Fix doc builds on docs.rs and add a CI job to prevent future doc failures
 + core: Fix various bugs related to component shutdown
 + core: `shutdown` on `Component` now works as expected
-+ core: `transient_for` on `ComponentBuilder` now works properly when called after the application has been initialized
 + core: `shutdown` on `FactoryComponent` now works as expected
++ core: `transient_for` on `ComponentBuilder` now works properly when called after the application has been initialized
 + macros: Mark template children of public widget templates as public as well
 + macros: Only get template children in scope when they are actually used
 + macros: Fix type parsing after arrow operator in widget assignments
