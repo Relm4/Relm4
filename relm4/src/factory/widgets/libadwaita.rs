@@ -174,8 +174,7 @@ impl FactoryView for adw::Carousel {
         widget: impl AsRef<Self::Children>,
         _position: &(),
     ) -> Self::ReturnedWidget {
-        self.prepend(widget.as_ref());
-        widget.as_ref().clone()
+        self.factory_append(widget, _position)
     }
 
     fn factory_insert_after(
