@@ -89,8 +89,7 @@ impl FactoryView for adw::PreferencesPage {
         _position: &(),
         _other: &Self::ReturnedWidget,
     ) -> Self::ReturnedWidget {
-        self.add(widget.as_ref());
-        widget.as_ref().clone()
+        self.factory_append(widget, _position)
     }
 
     fn returned_widget_to_child(root_child: &Self::ReturnedWidget) -> Self::Children {
