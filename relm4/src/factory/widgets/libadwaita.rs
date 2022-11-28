@@ -72,7 +72,7 @@ impl FactoryView for adw::PreferencesPage {
         _position: &Self::Position,
     ) -> Self::ReturnedWidget {
         self.add(widget.as_ref());
-        *(&widget).as_ref()
+        (&widget).as_ref().clone()
     }
 
     fn factory_prepend(
@@ -80,22 +80,21 @@ impl FactoryView for adw::PreferencesPage {
         widget: impl AsRef<Self::Children>,
         _position: &(),
     ) -> Self::ReturnedWidget {
-        self.add(widget.as_ref());
-        *(&widget).as_ref()
+        self.factory_append(widget, _position)
     }
 
     fn factory_insert_after(
         &self,
         widget: impl AsRef<Self::Children>,
         _position: &(),
-        other: &Self::ReturnedWidget,
+        _other: &Self::ReturnedWidget,
     ) -> Self::ReturnedWidget {
         self.add(widget.as_ref());
-        *(&widget).as_ref()
+        (&widget).as_ref().clone()
     }
 
     fn returned_widget_to_child(root_child: &Self::ReturnedWidget) -> Self::Children {
-        *root_child
+        *(&root_child).clone()
     }
 
     fn factory_move_after(&self, widget: &Self::ReturnedWidget, other: &Self::ReturnedWidget) {}
