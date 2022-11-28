@@ -94,7 +94,7 @@ impl FactoryView for adw::PreferencesPage {
     }
 
     fn returned_widget_to_child(root_child: &Self::ReturnedWidget) -> Self::Children {
-        *(&root_child).clone()
+        root_child.clone()
     }
 
     fn factory_move_after(&self, widget: &Self::ReturnedWidget, other: &Self::ReturnedWidget) {}
