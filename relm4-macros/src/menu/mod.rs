@@ -25,7 +25,7 @@ enum MenuItem {
 
 #[derive(Debug)]
 struct MenuEntry {
-    string: LitStr,
+    string: Expr,
     action_ty: Path,
     value: Option<Expr>,
 }
