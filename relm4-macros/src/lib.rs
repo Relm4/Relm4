@@ -323,6 +323,10 @@ pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
 /// # Example
 ///
 /// ```
+/// # fn gettext(string: &str) -> String {
+/// #     string.to_owned()
+/// # }
+/// #
 /// // Define some actions
 /// relm4::new_action_group!(WindowActionGroup, "win");
 /// relm4::new_stateless_action!(TestAction, WindowActionGroup, "test");
@@ -332,7 +336,8 @@ pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
 /// relm4_macros::menu! {
 ///     main_menu: {
 ///         custom: "my_widget",
-///         "Test" => TestAction,
+///         // Translate with gettext-rs, for example.
+///         &gettext("Test") => TestAction,
 ///         "Test2" => TestAction,
 ///         "Test toggle" => TestU8Action(1_u8),
 ///         section! {
@@ -353,6 +358,10 @@ pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
 /// The code generation for the example above looks like this (plus comments):
 ///
 /// ```
+/// # fn gettext(string: &str) -> String {
+/// #     string.to_owned()
+/// # }
+/// #
 /// struct WindowActionGroup;
 /// impl relm4::actions::ActionGroupName for WindowActionGroup {
 ///     const NAME: &'static str = "win";
@@ -385,7 +394,7 @@ pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
 /// new_entry.set_attribute_value("custom", Some(&variant));
 /// main_menu.append_item(&new_entry);
 ///
-/// let new_entry = relm4::actions::RelmAction::<TestAction>::to_menu_item("Test");
+/// let new_entry = relm4::actions::RelmAction::<TestAction>::to_menu_item(&gettext("Test"));
 /// main_menu.append_item(&new_entry);
 /// let new_entry = relm4::actions::RelmAction::<TestAction>::to_menu_item("Test2");
 /// main_menu.append_item(&new_entry);
