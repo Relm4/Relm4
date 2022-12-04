@@ -15,7 +15,7 @@ categories = ["gui"]
 
 [package.metadata.docs.rs]
 features = ["dox"]
-cargo-args = ["-Zunstable-options", "-Zrustdoc-scrape-examples=examples"]
+cargo-args = ["-Zunstable-options", "-Zrustdoc-scrape-examples"]
 
 [dependencies]
 log = "0.4.17"
