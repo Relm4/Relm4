@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Changed
+
++ macros: Allow expressions for names of menu entries
+
 ## 0.5.0-beta.5 - 2022-11-26
 
 ### Added

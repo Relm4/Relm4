@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned};
-use syn::{Ident, LitStr};
+use syn::{spanned::Spanned, Ident, LitStr};
 
 use super::{Menu, MenuEntry, MenuItem, MenuSection, Menus};
 
