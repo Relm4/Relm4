@@ -1,5 +1,5 @@
 use crate::factory::FactoryView;
-use adw::{prelude::ExpanderRowExt, traits::PreferencesGroupExt};
+use adw::{prelude::ExpanderRowExt, traits::PreferencesGroupExt, traits::PreferencesPageExt};
 
 impl FactoryView for adw::TabView {
     type Children = gtk::Widget;
@@ -54,6 +54,51 @@ impl FactoryView for adw::TabView {
     fn factory_move_start(&self, widget: &Self::ReturnedWidget) {
         self.reorder_first(widget);
     }
+}
+
+impl FactoryView for adw::PreferencesPage {
+    type Children = adw::PreferencesGroup;
+    type ReturnedWidget = adw::PreferencesGroup;
+
+    type Position = ();
+
+    fn factory_remove(&self, widget: &Self::ReturnedWidget) {
+        self.remove(widget);
+    }
+
+    fn factory_append(
+        &self,
+        widget: impl AsRef<Self::Children>,
+        _position: &Self::Position,
+    ) -> Self::ReturnedWidget {
+        self.add(widget.as_ref());
+        widget.as_ref().clone()
+    }
+
+    fn factory_prepend(
+        &self,
+        widget: impl AsRef<Self::Children>,
+        _position: &(),
+    ) -> Self::ReturnedWidget {
+        self.factory_append(widget, _position)
+    }
+
+    fn factory_insert_after(
+        &self,
+        widget: impl AsRef<Self::Children>,
+        _position: &(),
+        _other: &Self::ReturnedWidget,
+    ) -> Self::ReturnedWidget {
+        self.factory_append(widget, _position)
+    }
+
+    fn returned_widget_to_child(root_child: &Self::ReturnedWidget) -> Self::Children {
+        root_child.clone()
+    }
+
+    fn factory_move_after(&self, _widget: &Self::ReturnedWidget, _other: &Self::ReturnedWidget) {}
+
+    fn factory_move_start(&self, _widget: &Self::ReturnedWidget) {}
 }
 
 impl FactoryView for adw::ExpanderRow {
