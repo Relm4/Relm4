@@ -281,7 +281,6 @@
 + core: Pass model in connect_components function of the Widgets trait
 + core: Mini rework of factories
 + core: Removed DefaultWidgets trait in favor of Default implementations in gkt4-rs
-+ core. Support factories with adw::PreferencePage
 + book: Many book improvements by [tronta](https://github.com/tronta)
 
 ### Added
