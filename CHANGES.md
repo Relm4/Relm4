@@ -1,7 +1,7 @@
 # Changelog
 
 ## Unreleased
-+ core. Support factories with adw::PreferencePage
++ core: Support factories with adw::PreferencePage
 
 ### Changed
 
