@@ -21,6 +21,7 @@ impl RelmApp {
     /// object to [`RelmApp::with_app`].
     #[must_use]
     pub fn new(app_id: &str) -> Self {
+        crate::init();
         let app = crate::main_application();
         app.set_application_id(Some(app_id));
 

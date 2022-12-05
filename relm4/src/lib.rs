@@ -105,14 +105,10 @@ fn set_main_application(app: impl IsA<gtk::Application>) {
     MAIN_APPLICATION.with(move |cell| cell.set(Some(app.upcast())));
 }
 
-#[cfg(feature = "libadwaita")]
-fn new_application() -> gtk::Application {
-    adw::Application::default().upcast()
-}
-
-#[cfg(not(feature = "libadwaita"))]
-fn new_application() -> gtk::Application {
-    gtk::Application::default()
+fn init() {
+    gtk::init().unwrap();
+    #[cfg(feature = "libadwaita")]
+    adw::init().unwrap();
 }
 
 /// Returns the global [`gtk::Application`] that's used internally
@@ -125,6 +121,16 @@ fn new_application() -> gtk::Application {
 /// [`RelmApp::with_app()`].
 #[must_use]
 pub fn main_application() -> gtk::Application {
+    #[cfg(feature = "libadwaita")]
+    fn new_application() -> gtk::Application {
+        adw::Application::default().upcast()
+    }
+
+    #[cfg(not(feature = "libadwaita"))]
+    fn new_application() -> gtk::Application {
+        gtk::Application::default()
+    }
+
     MAIN_APPLICATION.with(|cell| {
         let app = cell.take().unwrap_or_else(new_application);
         cell.set(Some(app.clone()));

@@ -1,11 +1,18 @@
 # Changelog
 
 ## Unreleased
-+ core: Support factories with adw::PreferencePage
+
+### Added
+
++ core: Support factories with `adw::PreferencePage`
 
 ### Changed
 
 + macros: Allow expressions for names of menu entries
+
+### Fixed
+
++ core: Initialize GTK when calling `RelmApp::new()`
 
 ## 0.5.0-beta.5 - 2022-11-26
 
