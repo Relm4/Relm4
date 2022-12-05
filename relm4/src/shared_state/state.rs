@@ -1,6 +1,6 @@
 use std::{
     ops::{Deref, DerefMut},
-    sync::{RwLock, RwLockReadGuard, RwLockWriteGuard},
+    sync::{RwLock, RwLockReadGuard, RwLockWriteGuard, TryLockError},
 };
 
 use once_cell::sync::Lazy;
@@ -114,7 +114,7 @@ where
 
     /// Get immutable access to the shared data.
     ///
-    /// Returns an RAII guard which will release this thread’s shared access
+    /// Returns a RAII guard which will release this thread’s shared access
     /// once it is dropped.
     ///
     /// The calling thread will be blocked until there are no more writers
@@ -123,7 +123,7 @@ where
     /// # Panics
     ///
     /// This function will panic if the internal [`RwLock`] is poisoned.
-    /// An [`RwLock`] is poisoned whenever a writer panics while holding an exclusive lock.
+    /// A [`RwLock`] is poisoned whenever a writer panics while holding an exclusive lock.
     /// The failure will occur immediately after the lock has been acquired.
     ///
     /// Also, this function might panic when called if the lock is already
@@ -134,9 +134,21 @@ where
         }
     }
 
+    /// Get immutable access to the shared data.
+    ///
+    /// Similar to [`read`](Self::read), but doesn't block so this function simply
+    /// returns an [`Err`] if the data is already locked (or poisoned).
+    pub fn try_read(
+        &self,
+    ) -> Result<SharedStateReadGuard<'_, Data>, TryLockError<RwLockReadGuard<'_, Data>>> {
+        Ok(SharedStateReadGuard {
+            inner: self.data.try_read()?,
+        })
+    }
+
     /// Get mutable access to the shared data.
     ///
-    /// Returns an RAII guard which will **notify all subscribers** and
+    /// Returns a RAII guard which will **notify all subscribers** and
     /// release this thread’s shared access once it is dropped.
     ///
     /// This function will not return while other writers or other readers
@@ -145,7 +157,7 @@ where
     /// # Panics
     ///
     /// This function will panic if the internal [`RwLock`] is poisoned.
-    /// An [`RwLock`] is poisoned whenever a writer panics while holding an exclusive lock.
+    /// A [`RwLock`] is poisoned whenever a writer panics while holding an exclusive lock.
     /// The failure will occur immediately after the lock has been acquired.
     ///
     /// Also, this function might panic when called if the lock is already
@@ -185,6 +197,19 @@ where
     }
 
     /// Get mutable access to the shared data.
+    ///
+    /// Similar to [`write`](Self::write), but doesn't block so this function simply
+    /// returns an [`Err`] if the data is already locked (or poisoned).
+    pub fn try_write(
+        &self,
+    ) -> Result<SharedStateWriteGuard<'_, Data>, TryLockError<RwLockWriteGuard<'_, Data>>> {
+        let data = self.data.try_write()?;
+        let subscribers = self.subscribers.write().unwrap();
+
+        Ok(SharedStateWriteGuard { data, subscribers })
+    }
+
+    /// Get mutable access to the shared data.
     /// Since this call borrows the [`SharedState`] mutably,
     /// no actual locking needs to take place, but the mutable
     /// borrow statically guarantees no locks exist.
@@ -194,7 +219,7 @@ where
     /// # Panics
     ///
     /// This function will panic if the internal [`RwLock`] is poisoned.
-    /// An [`RwLock`] is poisoned whenever a writer panics while holding an exclusive lock.
+    /// A [`RwLock`] is poisoned whenever a writer panics while holding an exclusive lock.
     /// The failure will occur immediately after the lock has been acquired.
     pub fn get_mut(&mut self) -> &mut Data {
         self.data.get_mut().unwrap()
@@ -207,7 +232,7 @@ where
     /// # Panics
     ///
     /// This function will panic if the internal [`RwLock`] is poisoned.
-    /// An [`RwLock`] is poisoned whenever a writer panics while holding an exclusive lock.
+    /// A [`RwLock`] is poisoned whenever a writer panics while holding an exclusive lock.
     /// The failure will occur immediately after the lock has been acquired.
     ///
     /// Also, this function might panic when called if the lock is already
@@ -223,7 +248,7 @@ where
     /// # Panics
     ///
     /// This function will panic if the internal [`RwLock`] is poisoned.
-    /// An [`RwLock`] is poisoned whenever a writer panics while holding an exclusive lock.
+    /// A [`RwLock`] is poisoned whenever a writer panics while holding an exclusive lock.
     /// The failure will occur immediately after the lock has been acquired.
     ///
     /// Also, this function might panic when called if the lock is already

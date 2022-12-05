@@ -3,6 +3,10 @@
 ## Unreleased
 + core: Support factories with adw::PreferencePage
 
+### Added
+
++ core: Add `try_read` and `try_read` methods to `SharedState`
+
 ### Changed
 
 + macros: Allow expressions for names of menu entries
