@@ -144,10 +144,10 @@ pub fn main_application() -> gtk::Application {
 ///
 /// This function panics if [`RelmApp::new`] wasn't called before
 /// or this function is not called on the thread that also called [`RelmApp::new`].
-pub fn set_global_css(style_data: &[u8]) {
+pub fn set_global_css(style_data: &str) {
     let display = gtk::gdk::Display::default().unwrap();
     let provider = gtk::CssProvider::new();
-    provider.load_from_data(style_data);
+    provider.load_from_data(style_data.as_bytes());
     gtk::StyleContext::add_provider_for_display(
         &display,
         &provider,
@@ -164,7 +164,7 @@ pub fn set_global_css(style_data: &[u8]) {
 /// This function panics if [`RelmApp::new`] wasn't called before
 /// or this function is not called on the thread that also called [`RelmApp::new`].
 pub fn set_global_css_from_file<P: AsRef<std::path::Path>>(path: P) {
-    match std::fs::read(path) {
+    match std::fs::read_to_string(path) {
         Ok(bytes) => {
             set_global_css(&bytes);
         }

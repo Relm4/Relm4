@@ -8,6 +8,7 @@
 
 ### Changed
 
++ core: Take `&str` instead of `&[u8]` in `set_global_css()`
 + macros: Allow expressions for names of menu entries
 
 ### Fixed
