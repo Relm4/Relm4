@@ -569,11 +569,11 @@ impl<C: FactoryComponent> FactoryVecDeque<C> {
         parent_sender: &Sender<C::ParentInput>,
     ) -> Self {
         let mut output = Self::new(widget, parent_sender).guard();
-
         for component in component_vec {
             output.push_back(component);
-        };
+        }
         output
     }
+
 
 }
