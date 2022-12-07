@@ -571,7 +571,7 @@ impl<C: FactoryComponent> FactoryVecDeque<C> {
         let mut output = Self::new(widget, parent_sender).guard();
 
         for component in component_vec {
-            output.push_back(component)
+            output.push_back(component);
         }
         output
     }
