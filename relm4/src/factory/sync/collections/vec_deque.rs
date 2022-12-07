@@ -572,8 +572,10 @@ impl<C: FactoryComponent> FactoryVecDeque<C> {
         for component in component_vec {
             output.push_back(component);
         }
+        output.drop();
         output
     }
+
 
 
 }
