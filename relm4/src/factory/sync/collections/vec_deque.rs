@@ -568,13 +568,17 @@ impl<C: FactoryComponent> FactoryVecDeque<C> {
         widget: C::ParentWidget,
         parent_sender: &Sender<C::ParentInput>,
     ) -> Self {
-        let mut output = Self::new(widget, parent_sender).guard();
-        for component in component_vec {
-            output.push_back(component);
+        let mut output = Self::new(widget, parent_sender);
+        {
+            let mut edit = output.guard();
+            for component in component_vec {
+                edit.push_back(component);
+            }
+            edit.drop();
         }
-        output.drop();
         output
     }
+}  
 
 
 
