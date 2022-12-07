@@ -564,7 +564,7 @@ impl<C: FactoryComponent> FactoryVecDeque<C> {
 
     // Creates a FactoryVecDeque from a Vec
     pub fn from_vec(
-        component_vec: Vec<C>,
+        component_vec: Vec<C::Init>,
         widget: C::ParentWidget,
         parent_sender: &Sender<C::ParentInput>,
     ) -> Self {
@@ -578,7 +578,4 @@ impl<C: FactoryComponent> FactoryVecDeque<C> {
         }
         output
     }
-
-
-
 }
