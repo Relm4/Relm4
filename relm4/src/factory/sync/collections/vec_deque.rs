@@ -578,7 +578,6 @@ impl<C: FactoryComponent> FactoryVecDeque<C> {
         }
         output
     }
-}  
 
 
 
