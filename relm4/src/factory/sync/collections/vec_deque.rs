@@ -561,4 +561,19 @@ impl<C: FactoryComponent> FactoryVecDeque<C> {
     ) -> impl Iterator<Item = &C> + DoubleEndedIterator + ExactSizeIterator + FusedIterator {
         self.components.iter().map(ComponentStorage::get)
     }
+
+    // Creates a FactoryVecDeque from a Vec
+    pub fn from_vec(
+        component_vec: Vec<C>,
+        widget: C::ParentWidget,
+        parent_sender: &Sender<C::ParentInput>,
+    ) -> Self {
+        let mut output = Self::new(widget, parent_sender).guard();
+
+        for component in component_vec {
+            output.push_back(component)
+        }
+        output
+    }
+
 }
