@@ -562,7 +562,7 @@ impl<C: FactoryComponent> FactoryVecDeque<C> {
         self.components.iter().map(ComponentStorage::get)
     }
 
-    // Creates a FactoryVecDeque from a Vec
+    /// Creates a FactoryVecDeque from a Vec
     pub fn from_vec(
         component_vec: Vec<C::Init>,
         widget: C::ParentWidget,
