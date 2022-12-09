@@ -5,7 +5,7 @@
 
 ### Added
 
-+ core: Add `try_read` and `try_read` methods to `SharedState`
++ core: Add `try_read` and `try_write` methods to `SharedState`
 
 ### Changed
 
