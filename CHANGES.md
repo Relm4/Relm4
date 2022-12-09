@@ -6,6 +6,10 @@
 
 + core: Support factories with `adw::PreferencePage`
 
+### Added
+
++ core: Add `try_read` and `try_write` methods to `SharedState`
+
 ### Changed
 
 + core: Take `&str` instead of `&[u8]` in `set_global_css()`
