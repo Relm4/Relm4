@@ -1,11 +1,19 @@
 # Changelog
 
 ## Unreleased
-+ core: Support factories with adw::PreferencePage
+
+### Added
+
++ core: Support factories with `adw::PreferencePage`
 
 ### Changed
 
++ core: Take `&str` instead of `&[u8]` in `set_global_css()`
 + macros: Allow expressions for names of menu entries
+
+### Fixed
+
++ core: Initialize GTK when calling `RelmApp::new()`
 
 ## 0.5.0-beta.5 - 2022-11-26
 

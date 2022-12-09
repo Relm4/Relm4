@@ -105,14 +105,10 @@ fn set_main_application(app: impl IsA<gtk::Application>) {
     MAIN_APPLICATION.with(move |cell| cell.set(Some(app.upcast())));
 }
 
-#[cfg(feature = "libadwaita")]
-fn new_application() -> gtk::Application {
-    adw::Application::default().upcast()
-}
-
-#[cfg(not(feature = "libadwaita"))]
-fn new_application() -> gtk::Application {
-    gtk::Application::default()
+fn init() {
+    gtk::init().unwrap();
+    #[cfg(feature = "libadwaita")]
+    adw::init().unwrap();
 }
 
 /// Returns the global [`gtk::Application`] that's used internally
@@ -125,6 +121,16 @@ fn new_application() -> gtk::Application {
 /// [`RelmApp::with_app()`].
 #[must_use]
 pub fn main_application() -> gtk::Application {
+    #[cfg(feature = "libadwaita")]
+    fn new_application() -> gtk::Application {
+        adw::Application::default().upcast()
+    }
+
+    #[cfg(not(feature = "libadwaita"))]
+    fn new_application() -> gtk::Application {
+        gtk::Application::default()
+    }
+
     MAIN_APPLICATION.with(|cell| {
         let app = cell.take().unwrap_or_else(new_application);
         cell.set(Some(app.clone()));
@@ -138,10 +144,10 @@ pub fn main_application() -> gtk::Application {
 ///
 /// This function panics if [`RelmApp::new`] wasn't called before
 /// or this function is not called on the thread that also called [`RelmApp::new`].
-pub fn set_global_css(style_data: &[u8]) {
+pub fn set_global_css(style_data: &str) {
     let display = gtk::gdk::Display::default().unwrap();
     let provider = gtk::CssProvider::new();
-    provider.load_from_data(style_data);
+    provider.load_from_data(style_data.as_bytes());
     gtk::StyleContext::add_provider_for_display(
         &display,
         &provider,
@@ -158,7 +164,7 @@ pub fn set_global_css(style_data: &[u8]) {
 /// This function panics if [`RelmApp::new`] wasn't called before
 /// or this function is not called on the thread that also called [`RelmApp::new`].
 pub fn set_global_css_from_file<P: AsRef<std::path::Path>>(path: P) {
-    match std::fs::read(path) {
+    match std::fs::read_to_string(path) {
         Ok(bytes) => {
             set_global_css(&bytes);
         }
