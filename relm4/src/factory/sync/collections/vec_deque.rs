@@ -580,9 +580,13 @@ impl<C: FactoryComponent> FactoryVecDeque<C> {
     }
 }
 
-impl<T: Clone + FactoryComponent> Clone for FactoryVecDeque<T>
+trait CloneableFactoryComponent: FactoryComponent {
+    fn get_init(&self) -> Self::Init;
+}
+
+impl<C: FactoryComponent> Clone for FactoryVecDeque<C>
 where
-    T::Init: From<T>,
+    C: CloneableFactoryComponent,
 {
     fn clone(&self) -> Self {
         // Create a new, empty FactoryVecDeque.
@@ -590,10 +594,11 @@ where
         // Iterate over the items in the original FactoryVecDeque.
         for item in self.iter() {
             // Clone each item and push it onto the new FactoryVecDeque.
-            let init = T::Init::from(item.clone());
+            let init = C::get_init(item);
             clone.guard().push_back(init);
         }
         // Return the new, cloned FactoryVecDeque.
         clone
     }
 }
+
