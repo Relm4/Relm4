@@ -8,4 +8,4 @@ use builder::FactoryBuilder;
 use handle::FactoryHandle;
 
 pub use collections::{FactoryVecDeque, FactoryVecDequeGuard};
-pub use traits::FactoryComponent;
+pub use traits::{CloneableFactoryComponent, FactoryComponent};

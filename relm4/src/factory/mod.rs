@@ -16,7 +16,9 @@ mod data_guard;
 use data_guard::DataGuard;
 
 pub use r#async::{AsyncFactoryComponent, AsyncFactoryVecDeque, AsyncFactoryVecDequeGuard};
-pub use sync::{FactoryComponent, FactoryVecDeque, FactoryVecDequeGuard};
+pub use sync::{
+    CloneableFactoryComponent, FactoryComponent, FactoryVecDeque, FactoryVecDequeGuard,
+};
 
 pub use crate::channel::{AsyncFactorySender, FactorySender};
 pub use dynamic_index::DynamicIndex;
