@@ -2,6 +2,7 @@ use crate::Sender;
 
 use crate::factory::sync::builder::FactoryBuilder;
 use crate::factory::sync::component_storage::ComponentStorage;
+use crate::factory::sync::traits::CloneableFactoryComponent;
 use crate::factory::{DynamicIndex, FactoryComponent, FactoryView};
 
 use super::{ModelStateValue, RenderedState};
@@ -577,5 +578,24 @@ impl<C: FactoryComponent> FactoryVecDeque<C> {
             edit.drop();
         }
         output
+    }
+}
+
+///Implements the Clone Trait for `FactoryVecDeque<C>` where C is Cloneable
+impl<C: FactoryComponent> Clone for FactoryVecDeque<C>
+where
+    C: CloneableFactoryComponent,
+{
+    fn clone(&self) -> Self {
+        // Create a new, empty FactoryVecDeque.
+        let mut clone = FactoryVecDeque::new(self.widget.clone(), &self.parent_sender.clone());
+        // Iterate over the items in the original FactoryVecDeque.
+        for item in self.iter() {
+            // Clone each item and push it onto the new FactoryVecDeque.
+            let init = C::get_init(item);
+            clone.guard().push_back(init);
+        }
+        // Return the new, cloned FactoryVecDeque.
+        clone
     }
 }

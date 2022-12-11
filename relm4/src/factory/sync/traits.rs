@@ -104,3 +104,8 @@ pub trait FactoryComponent:
         format!("{:p}", &self)
     }
 }
+
+/// Adds a get_init function to FactoryComponents that are clonable
+pub trait CloneableFactoryComponent: FactoryComponent {
+    fn get_init(&self) -> Self::Init;
+}
