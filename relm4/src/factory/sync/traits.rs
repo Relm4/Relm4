@@ -105,7 +105,9 @@ pub trait FactoryComponent:
     }
 }
 
-/// Adds a get_init function to FactoryComponents that are clonable
+/// Extension for [`FactoryComponent`] that makes elements cloneable.
 pub trait CloneableFactoryComponent: FactoryComponent {
+    /// Retrieve the initialization data from an initialized factory component.
+    /// This is necessary for cloning the factory.
     fn get_init(&self) -> Self::Init;
 }
