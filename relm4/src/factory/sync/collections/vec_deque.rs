@@ -580,11 +580,6 @@ impl<C: FactoryComponent> FactoryVecDeque<C> {
     }
 }
 
-/// Adds a get_init function to FactoryComponents that are clonable
-trait CloneableFactoryComponent: FactoryComponent {
-    fn get_init(&self) -> Self::Init;
-}
-
 ///Implements the Clone Trait for `FactoryVecDeque<C>` where C is Cloneable
 impl<C: FactoryComponent> Clone for FactoryVecDeque<C>
 where
