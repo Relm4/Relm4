@@ -20,6 +20,7 @@ tracing-subscriber = "0.3.15"
 [[example]]
 name = "simple"
 path = "simple.rs"
+doc-scrape-examples = true
 
 [[example]]
 name = "simple_manual"
