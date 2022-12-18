@@ -171,7 +171,7 @@ impl Component for App {
                     widgets.progress.hide();
                     widgets
                         .label
-                        .set_label(&format!("The answer to life is: {:?}", result));
+                        .set_label(&format!("The answer to life is: {result:?}"));
                 }
             }
         }

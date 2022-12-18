@@ -37,7 +37,7 @@ impl SimpleComponent for App {
     fn update(&mut self, msg: Self::Input, _: ComponentSender<Self>) {
         match msg {
             AppMsg::Open(path) => {
-                println!("* Opened file {:?} *", path);
+                println!("* Opened file {path:?} *");
             }
         }
     }

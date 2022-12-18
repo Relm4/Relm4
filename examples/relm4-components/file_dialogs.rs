@@ -152,8 +152,7 @@ impl SimpleComponent for App {
             ) {
                 Ok(_) => {
                     sender.input(Input::ShowMessage(format!(
-                        "File saved successfully at {:?}",
-                        path
+                        "File saved successfully at {path:?}"
                     )));
                     self.buffer.set_text("");
                     self.file_name = None;

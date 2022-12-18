@@ -76,7 +76,7 @@ impl SimpleComponent for App {
 
         let action2: RelmAction<ExampleU8Action> =
             RelmAction::new_stateful_with_target_value(&0, |_, state, value| {
-                println!("Stateful action -> state: {}, value: {}", state, value);
+                println!("Stateful action -> state: {state}, value: {value}");
                 *state += value;
             });
 
