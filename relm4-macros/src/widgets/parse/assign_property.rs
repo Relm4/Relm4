@@ -143,7 +143,7 @@ fn generate_tracker_from_expression(expression: &Expr) -> Result<TokenStream2> {
         let error_msg =
                     "Unable to generate tracker function. Please pass a condition as string value of the `track` attribute.\n\
                     Usage: #[track = \"TRACK_CONDITION\"]";
-        Err(Error::new(span, format!("{}\nHint:  {}", error_msg, msg)))
+        Err(Error::new(span, format!("{error_msg}\nHint: {msg}")))
     };
 
     let unref_expr: &Expr = if let Expr::Reference(expr_ref) = expression {

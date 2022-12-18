@@ -117,7 +117,7 @@ impl Parse for Attrs {
 fn unexpected_attr_name(ident: &Ident) -> Error {
     Error::new(
         ident.span(),
-        format!("Unexpected attribute name `{}`.", ident),
+        format!("Unexpected attribute name `{ident}`."),
     )
 }
 

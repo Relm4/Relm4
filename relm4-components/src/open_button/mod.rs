@@ -123,7 +123,7 @@ impl SimpleComponent for OpenButton {
                     let contents = recent_files
                         .iter()
                         .filter_map(|recent_path| {
-                            recent_path.path.to_str().map(|s| format!("{}\n", s))
+                            recent_path.path.to_str().map(|s| format!("{s}\n"))
                         })
                         .collect::<String>();
 
