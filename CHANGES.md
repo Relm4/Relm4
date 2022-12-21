@@ -4,14 +4,13 @@
 
 ### Added
 
-+ core: Support factories with `adw::PreferencePage`
-
-### Added
-
 + core: Add `try_read` and `try_write` methods to `SharedState`
++ core: Allow initializing `FactoryVecDeque` from a `Vec` and make it cloneable
++ core: Support factories with `adw::PreferencePage`
 
 ### Changed
 
++ core: Pass `&self` to the `Position::position()` function for positioning widgets
 + core: Take `&str` instead of `&[u8]` in `set_global_css()`
 + macros: Allow expressions for names of menu entries
 

@@ -26,7 +26,7 @@ struct CounterWidgets {
 }
 
 impl Position<GridPosition> for Counter {
-    fn position(index: usize) -> GridPosition {
+    fn position(&self, index: usize) -> GridPosition {
         let x = index % 5;
         let y = index / 5;
         GridPosition {

@@ -70,9 +70,29 @@ pub trait Position<Pos> {
     /// This function can be called very often
     /// if widgets are moved a lot, so it should
     /// be cheap to call.
-    fn position(index: usize) -> Pos;
+    fn position(&self, index: usize) -> Pos;
 }
 
 impl<C> Position<()> for C {
+    fn position(&self, _index: usize) {}
+}
+
+/// Returns the position of an element inside a
+/// container like [`gtk::Grid`] where the position isn't
+/// clearly defined by the index.
+///
+/// Unlike [`Position`], this trait doesn't get access to self,
+/// because the model might not be initialized when the widgets
+/// are updated in the factory.
+pub trait AsyncPosition<Pos> {
+    /// Returns the position.
+    ///
+    /// This function can be called very often
+    /// if widgets are moved a lot, so it should
+    /// be cheap to call.
+    fn position(index: usize) -> Pos;
+}
+
+impl<C> AsyncPosition<()> for C {
     fn position(_index: usize) {}
 }

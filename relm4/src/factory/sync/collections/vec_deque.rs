@@ -466,8 +466,9 @@ impl<C: FactoryComponent> FactoryVecDeque<C> {
                 }
 
                 // The element doesn't exist yet
-                let insert_widget = components[index].widget();
-                let position = C::position(index);
+                let comp = &components[index];
+                let insert_widget = comp.widget();
+                let position = C::position(comp.get(), index);
                 let returned_widget = if index == 0 {
                     self.widget.factory_prepend(insert_widget, &position)
                 } else {
@@ -507,7 +508,7 @@ impl<C: FactoryComponent> FactoryVecDeque<C> {
 
         if let Some(change_index) = first_position_change_idx {
             for (index, comp) in components.iter().enumerate().skip(change_index) {
-                let position = C::position(index);
+                let position = C::position(comp.get(), index);
                 self.widget
                     .factory_update_position(comp.returned_widget().unwrap(), &position);
             }
