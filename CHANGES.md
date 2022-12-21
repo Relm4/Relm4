@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.5.0-rc.1
+
 ### Added
 
 + core: Add `try_read` and `try_write` methods to `SharedState`
