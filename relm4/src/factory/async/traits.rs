@@ -1,7 +1,7 @@
 //! Traits for for managing and updating factories.
 
 use crate::channel::AsyncFactorySender;
-use crate::factory::{DynamicIndex, FactoryView, Position};
+use crate::factory::{AsyncPosition, DynamicIndex, FactoryView};
 use crate::loading_widgets::LoadingWidgets;
 use crate::Sender;
 
@@ -12,7 +12,7 @@ use std::fmt::Debug;
 /// of factories.
 #[async_trait::async_trait(?Send)]
 pub trait AsyncFactoryComponent:
-    Position<<Self::ParentWidget as FactoryView>::Position> + Sized + 'static
+    AsyncPosition<<Self::ParentWidget as FactoryView>::Position> + Sized + 'static
 {
     /// Container widget to which all widgets of the factory will be added.
     type ParentWidget: FactoryView + 'static;
