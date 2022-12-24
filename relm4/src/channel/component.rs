@@ -5,7 +5,6 @@
 
 use std::fmt::Debug;
 use std::future::Future;
-use std::ops::Deref;
 use std::sync::Arc;
 
 use crate::component::AsyncComponent;
@@ -14,7 +13,7 @@ use crate::{Component, Sender, ShutdownReceiver};
 
 // Contains senders used by components and factories internally.
 #[derive(Debug)]
-pub struct ComponentSenderInner<Input, Output, CommandOutput>
+struct ComponentSenderInner<Input, Output, CommandOutput>
 where
     Input: Debug,
     CommandOutput: Send + 'static,
@@ -38,7 +37,7 @@ where
     /// Useful to forward inputs from another component. If you just need to send input messages,
     /// [`input()`][Self::input] is more concise.
     #[must_use]
-    pub fn input_sender(&self) -> &Sender<Input> {
+    fn input_sender(&self) -> &Sender<Input> {
         &self.input
     }
 
@@ -47,7 +46,7 @@ where
     /// Useful to forward outputs from another component. If you just need to send output messages,
     /// [`output()`][Self::output] is more concise.
     #[must_use]
-    pub fn output_sender(&self) -> &Sender<Output> {
+    fn output_sender(&self) -> &Sender<Output> {
         &self.output
     }
 
@@ -56,12 +55,12 @@ where
     /// Useful to forward outputs from another component. If you just need to send output messages,
     /// [`command()`][Self::command] is more concise.
     #[must_use]
-    pub fn command_sender(&self) -> &Sender<CommandOutput> {
+    fn command_sender(&self) -> &Sender<CommandOutput> {
         &self.command
     }
 
     /// Emit an input to the component.
-    pub fn input(&self, message: Input) {
+    fn input(&self, message: Input) {
         // Input messages should always be safe to send
         // because the runtime keeps the receiver alive.
         self.input.send(message).unwrap();
@@ -76,7 +75,7 @@ where
     /// Spawns an asynchronous command.
     /// You can bind the the command to the lifetime of the component
     /// by using a [`ShutdownReceiver`].
-    pub fn command<Cmd, Fut>(&self, cmd: Cmd)
+    fn command<Cmd, Fut>(&self, cmd: Cmd)
     where
         Cmd: FnOnce(Sender<CommandOutput>, ShutdownReceiver) -> Fut + Send + 'static,
         Fut: Future<Output = ()> + Send,
@@ -95,7 +94,7 @@ where
     ///
     /// If you expect the component to be dropped while
     /// the command is running take care while sending messages!
-    pub fn spawn_command<Cmd>(&self, cmd: Cmd)
+    fn spawn_command<Cmd>(&self, cmd: Cmd)
     where
         Cmd: FnOnce(Sender<CommandOutput>) + Send + 'static,
     {
@@ -106,7 +105,7 @@ where
     /// Spawns a future that will be dropped as soon as the factory component is shut down.
     ///
     /// Essentially, this is a simpler version of [`Self::command()`].
-    pub fn oneshot_command<Fut>(&self, future: Fut)
+    fn oneshot_command<Fut>(&self, future: Fut)
     where
         Fut: Future<Output = CommandOutput> + Send + 'static,
     {
@@ -121,7 +120,7 @@ where
     /// Spawns a synchronous command that will be dropped as soon as the factory component is shut down.
     ///
     /// Essentially, this is a simpler version of [`Self::spawn_command()`].
-    pub fn spawn_oneshot_command<Cmd>(&self, cmd: Cmd)
+    fn spawn_oneshot_command<Cmd>(&self, cmd: Cmd)
     where
         Cmd: FnOnce() -> CommandOutput + Send + 'static,
     {
@@ -136,14 +135,6 @@ macro_rules! sender_impl {
         #[derive(Debug)]
         pub struct $name<C: $trait> {
             shared: Arc<ComponentSenderInner<C::Input, C::Output, C::CommandOutput>>,
-        }
-
-        impl<C: $trait> Deref for $name<C> {
-            type Target = ComponentSenderInner<C::Input, C::Output, C::CommandOutput>;
-
-            fn deref(&self) -> &Self::Target {
-                &*self.shared
-            }
         }
 
         impl<C: $trait> $name<C> {
@@ -161,6 +152,83 @@ macro_rules! sender_impl {
                         shutdown,
                     }),
                 }
+            }
+
+            /// Retrieve the sender for input messages.
+            ///
+            /// Useful to forward inputs from another component. If you just need to send input messages,
+            /// [`input()`][Self::input] is more concise.
+            #[must_use]
+            pub fn input_sender(&self) -> &Sender<C::Input> {
+                self.shared.input_sender()
+            }
+
+            /// Retrieve the sender for output messages.
+            ///
+            /// Useful to forward outputs from another component. If you just need to send output messages,
+            /// [`output()`][Self::output] is more concise.
+            #[must_use]
+            pub fn output_sender(&self) -> &Sender<C::Output> {
+                self.shared.output_sender()
+            }
+
+            /// Retrieve the sender for command output messages.
+            ///
+            /// Useful to forward outputs from another component. If you just need to send output messages,
+            /// [`command()`][Self::command] is more concise.
+            #[must_use]
+            pub fn command_sender(&self) -> &Sender<C::CommandOutput> {
+                self.shared.command_sender()
+            }
+
+            /// Emit an input to the component.
+            pub fn input(&self, message: C::Input) {
+                self.shared.input(message);
+            }
+
+            /// Spawns an asynchronous command.
+            /// You can bind the the command to the lifetime of the component
+            /// by using a [`ShutdownReceiver`].
+            pub fn command<Cmd, Fut>(&self, cmd: Cmd)
+            where
+                Cmd: FnOnce(Sender<C::CommandOutput>, ShutdownReceiver) -> Fut + Send + 'static,
+                Fut: Future<Output = ()> + Send,
+            {
+                self.shared.command(cmd)
+            }
+
+            /// Spawns a synchronous command.
+            ///
+            /// This is particularly useful for CPU-intensive background jobs that
+            /// need to run on a thread-pool in the background.
+            ///
+            /// If you expect the component to be dropped while
+            /// the command is running take care while sending messages!
+            pub fn spawn_command<Cmd>(&self, cmd: Cmd)
+            where
+                Cmd: FnOnce(Sender<C::CommandOutput>) + Send + 'static,
+            {
+                self.shared.spawn_command(cmd)
+            }
+
+            /// Spawns a future that will be dropped as soon as the factory component is shut down.
+            ///
+            /// Essentially, this is a simpler version of [`Self::command()`].
+            pub fn oneshot_command<Fut>(&self, future: Fut)
+            where
+                Fut: Future<Output = C::CommandOutput> + Send + 'static,
+            {
+                self.shared.oneshot_command(future)
+            }
+
+            /// Spawns a synchronous command that will be dropped as soon as the factory component is shut down.
+            ///
+            /// Essentially, this is a simpler version of [`Self::spawn_command()`].
+            pub fn spawn_oneshot_command<Cmd>(&self, cmd: Cmd)
+            where
+                Cmd: FnOnce() -> C::CommandOutput + Send + 'static,
+            {
+                self.shared.spawn_oneshot_command(cmd)
             }
         }
 
