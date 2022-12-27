@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixed
+
++ core: Prevent leaking `CommandSenderInner` struct
+
 ## 0.5.0-rc.1
 
 ### Added
