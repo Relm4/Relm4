@@ -6,7 +6,7 @@ A collection of example apps built with Relm4.
 
 ```bash
 git clone https://github.com/Relm4/Relm4.git
-cd relm4
+cd Relm4
 ```
 
 ## Run examples
