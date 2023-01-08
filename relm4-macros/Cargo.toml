@@ -2,7 +2,7 @@
 name = "relm4-macros"
 readme = "README.md"
 keywords = ["gui", "gtk", "gtk4", "elm", "view"]
-documentation = "https://relm4.org/docs/stable/relm4/"
+documentation = "https://docs.rs/relm4_macros/"
 
 version.workspace = true
 authors.workspace = true
@@ -30,7 +30,12 @@ relm4 = []
 [dependencies]
 proc-macro2 = "1.0"
 quote = "1.0"
-syn = { version = "1.0", features = ["full", "extra-traits", "visit", "visit-mut"] }
+syn = { version = "1.0", features = [
+    "full",
+    "extra-traits",
+    "visit",
+    "visit-mut",
+] }
 
 [dev-dependencies]
 relm4 = { path = "../relm4" }

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
++ All crates now use docs.rs to host the documentation. The documentation on the website will be deprecated.
+
 ### Fixed
 
 + components: Fix doc links to examples on GitHub
