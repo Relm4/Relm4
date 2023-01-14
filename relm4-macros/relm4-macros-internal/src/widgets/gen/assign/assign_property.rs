@@ -21,7 +21,7 @@ impl AssignProperty {
         if !info.is_conditional
             || !matches!(
                 self.attr,
-                AssignPropertyAttr::Track(_) | AssignPropertyAttr::Watch
+                AssignPropertyAttr::Track { .. } | AssignPropertyAttr::Watch
             )
         {
             self.assign_stream(info, p_name, init);

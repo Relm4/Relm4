@@ -165,7 +165,10 @@ impl AssignProperty {
                 };
                 self.assign_stream(&mut info, p_name, false);
             }
-            AssignPropertyAttr::Track((track_stream, paste_model)) => {
+            AssignPropertyAttr::Track {
+                expr,
+                macro_generated,
+            } => {
                 let mut assign_stream = TokenStream2::new();
                 let mut info = AssignInfo {
                     stream: &mut assign_stream,
@@ -173,7 +176,7 @@ impl AssignProperty {
                     is_conditional: false,
                 };
                 self.assign_stream(&mut info, p_name, false);
-                let model = paste_model.then(|| model_name);
+                let model = macro_generated.then(|| quote_spanned! { expr.span() => #model_name. });
                 let page_switch = conditional_branch.then(|| {
                     quote_spanned! {
                         p_name.span() =>
@@ -182,7 +185,7 @@ impl AssignProperty {
                 });
 
                 stream.extend(quote! {
-                    if #page_switch (#model #track_stream) {
+                    if #page_switch (#model #expr) {
                         #assign_stream
                     }
                 });

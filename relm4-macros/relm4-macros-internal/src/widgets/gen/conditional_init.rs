@@ -174,7 +174,10 @@ impl AssignProperty {
                     };
                     self.assign_stream(&mut info, p_name, true);
                 }
-                AssignPropertyAttr::Track((track_stream, paste_model)) => {
+                AssignPropertyAttr::Track {
+                    expr,
+                    macro_generated,
+                } => {
                     let mut assign_stream = TokenStream2::new();
                     let mut info = AssignInfo {
                         stream: &mut assign_stream,
@@ -183,10 +186,10 @@ impl AssignProperty {
                     };
 
                     self.assign_stream(&mut info, p_name, true);
-                    let model = paste_model.then(|| model_name);
+                    let model = macro_generated.then(|| model_name);
 
                     stream.extend(quote_spanned! {
-                        track_stream.span() => if #model #track_stream {
+                        expr.span() => if #model #expr {
                             #assign_stream
                         }
                     });

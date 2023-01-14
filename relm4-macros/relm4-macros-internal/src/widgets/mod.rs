@@ -45,9 +45,10 @@ enum ParseError {
 enum AssignPropertyAttr {
     None,
     Watch,
-    /// The bool indicated whether the model type needs to
-    /// be pasted in front of the track expression.
-    Track((TokenStream2, bool)),
+    Track {
+        expr: Box<Expr>,
+        macro_generated: bool,
+    },
 }
 
 #[derive(Debug)]

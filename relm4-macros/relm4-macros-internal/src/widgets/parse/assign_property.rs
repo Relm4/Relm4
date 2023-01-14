@@ -1,8 +1,7 @@
-use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote_spanned, ToTokens};
+use quote::quote_spanned;
 use syn::parse::ParseStream;
 use syn::spanned::Spanned;
-use syn::{Error, Expr, ExprCall, ExprField, Ident, Member, Result, Token};
+use syn::{parse_quote, Error, Expr, ExprCall, ExprField, Ident, Member, Result, Token};
 
 use crate::args::Args;
 use crate::widgets::parse_util::attr_twice_error;
@@ -78,12 +77,15 @@ impl AssignProperty {
                     Attr::Track(_, expr) => {
                         if watch == AssignPropertyAttr::None {
                             watch = if let Some(expr) = expr {
-                                AssignPropertyAttr::Track((expr.to_token_stream(), false))
+                                AssignPropertyAttr::Track {
+                                    expr,
+                                    macro_generated: false,
+                                }
                             } else {
-                                AssignPropertyAttr::Track((
-                                    generate_tracker_from_expression(assign_expr)?,
-                                    true,
-                                ))
+                                AssignPropertyAttr::Track {
+                                    expr: Box::new(generate_tracker_from_expression(assign_expr)?),
+                                    macro_generated: true,
+                                }
                             };
                         } else {
                             return Err(attr_twice_error(span));
@@ -138,7 +140,7 @@ fn expr_field_from_expr_call(call_expr: &ExprCall) -> Option<&ExprField> {
     }
 }
 
-fn generate_tracker_from_expression(expression: &Expr) -> Result<TokenStream2> {
+fn generate_tracker_from_expression(expression: &Expr) -> Result<Expr> {
     let error_fn = move |span, msg: &str| {
         let error_msg =
                     "Unable to generate tracker function. Please pass a condition as string value of the `track` attribute.\n\
@@ -180,6 +182,6 @@ fn generate_tracker_from_expression(expression: &Expr) -> Result<TokenStream2> {
         return error_fn(expr_field.member.span(), "Expected a named member");
     };
 
-    let bool_stream = quote_spanned! { expr_field.span() => .changed(Self::#ident()) };
-    Ok(bool_stream)
+    let bool_stream = quote_spanned! { expr_field.span() => changed(Self::#ident()) };
+    Ok(parse_quote! { #bool_stream })
 }
