@@ -46,7 +46,7 @@ fn format_files(list: &[PathBuf]) {
     for path in list {
         eprintln!("INFO: Formatting {}", path.to_str().unwrap_or_default());
         let contents =
-            std::fs::read_to_string(path).unwrap_or_else(|_| panic!("Couldn't open {:?}", path));
+            std::fs::read_to_string(path).unwrap_or_else(|_| panic!("Couldn't open {path:?}"));
         let contents = format_code(&contents);
         std::fs::write(path, contents).unwrap();
     }
@@ -85,6 +85,7 @@ fn format_code(code: &str) -> String {
             formatted_code.push('\n');
             formatted_code.push_str(&output);
             formatted_code.push_str(last_line);
+            formatted_code.push('\n');
         } else {
             formatted_code.push_str(line);
             formatted_code.push('\n');
