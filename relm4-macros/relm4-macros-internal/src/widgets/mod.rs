@@ -10,6 +10,9 @@ mod parse;
 mod parse_util;
 mod span;
 
+#[cfg(feature = "format")]
+pub mod format;
+
 #[derive(Debug)]
 pub struct ViewWidgets {
     pub(super) span: Span2,
