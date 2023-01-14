@@ -30,34 +30,19 @@
     clippy::must_use_candidate
 )]
 
+use internal::{
+    attrs::{Attrs, SyncOnlyAttrs},
+    menu::Menus,
+};
 use proc_macro::TokenStream;
 use syn::{parse_macro_input, ItemImpl};
 
-mod additional_fields;
-mod args;
-mod attrs;
 mod component;
-mod menu;
-mod view;
-mod visitors;
-mod widgets;
-
-#[macro_use]
-mod util;
 mod factory;
-mod token_streams;
+mod view;
+
+mod util;
 mod widget_template;
-
-use attrs::{Attrs, SyncOnlyAttrs};
-use menu::Menus;
-
-fn gtk_import() -> syn::Path {
-    if cfg!(feature = "relm4") {
-        util::strings_to_path(&["relm4", "gtk"])
-    } else {
-        util::strings_to_path(&["gtk"])
-    }
-}
 
 /// Macro that implements `relm4::Component` or `relm4::SimpleComponent`
 /// and generates the corresponding widgets struct.

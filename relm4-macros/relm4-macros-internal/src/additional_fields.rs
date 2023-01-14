@@ -5,8 +5,8 @@ use syn::punctuated::Punctuated;
 use syn::{Field, Result, Token};
 
 #[derive(Debug)]
-pub(super) struct AdditionalFields {
-    pub(super) inner: Punctuated<Field, Token![,]>,
+pub struct AdditionalFields {
+    pub inner: Punctuated<Field, Token![,]>,
 }
 
 impl Parse for AdditionalFields {

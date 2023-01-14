@@ -6,7 +6,7 @@ mod gen;
 mod parse;
 
 #[derive(Debug)]
-pub(crate) struct Menus {
+pub struct Menus {
     items: Punctuated<Menu, Comma>,
 }
 

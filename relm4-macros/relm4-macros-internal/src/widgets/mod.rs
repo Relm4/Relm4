@@ -11,7 +11,7 @@ mod parse_util;
 mod span;
 
 #[derive(Debug)]
-pub(super) struct ViewWidgets {
+pub struct ViewWidgets {
     pub(super) span: Span2,
     pub(super) top_level_widgets: Vec<TopLevelWidget>,
 }

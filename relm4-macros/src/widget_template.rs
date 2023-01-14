@@ -2,7 +2,7 @@ use proc_macro2::{Span as Span2, TokenStream as TokenStream2};
 use quote::quote;
 use syn::{spanned::Spanned, Error, Ident, ImplItem, ItemImpl, Visibility};
 
-use crate::{
+use internal::{
     token_streams::{TokenStreams, TraitImplDetails},
     widgets::ViewWidgets,
 };

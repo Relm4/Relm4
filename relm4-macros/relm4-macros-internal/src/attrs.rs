@@ -3,16 +3,16 @@ use syn::spanned::Spanned;
 use syn::token::Async;
 use syn::{Error, Result, Token, Visibility};
 
-pub(super) struct Attrs {
+pub struct Attrs {
     /// Keeps information about visibility of the widget
-    pub(super) visibility: Option<Visibility>,
+    pub visibility: Option<Visibility>,
     /// Whether an async trait is used or not
-    pub(super) asyncness: Option<Async>,
+    pub asyncness: Option<Async>,
 }
 
-pub(super) struct SyncOnlyAttrs {
+pub struct SyncOnlyAttrs {
     /// Keeps information about visibility of the widget
-    pub(super) visibility: Option<Visibility>,
+    pub visibility: Option<Visibility>,
 }
 
 impl Parse for SyncOnlyAttrs {

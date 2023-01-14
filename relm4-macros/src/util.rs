@@ -1,9 +1,7 @@
 use proc_macro::TokenStream;
-use proc_macro2::{Span as Span2, TokenStream as TokenStream2};
-use syn::punctuated::Punctuated;
 
 use syn::spanned::Spanned;
-use syn::{FnArg, Ident, ImplItem, ItemImpl, Path, PathArguments, PathSegment, Type, TypePath};
+use syn::{Ident, ImplItem, ItemImpl, Type, TypePath};
 
 pub(super) fn generate_widgets_type(
     widgets_ty: Option<Type>,
@@ -49,22 +47,6 @@ pub(super) fn self_ty_to_widgets_ty(self_ty: &TypePath) -> (Type, ImplItem) {
     };
 
     (Type::Path(self_path), impl_item)
-}
-
-pub(super) fn strings_to_path(strings: &[&str]) -> Path {
-    let path_segments: Vec<PathSegment> = strings
-        .iter()
-        .map(|string| -> PathSegment {
-            PathSegment {
-                ident: Ident::new(string, Span2::call_site()),
-                arguments: PathArguments::None,
-            }
-        })
-        .collect();
-    Path {
-        leading_colon: None,
-        segments: Punctuated::from_iter(path_segments),
-    }
 }
 
 pub(super) fn item_impl_error(original_input: TokenStream) -> TokenStream {

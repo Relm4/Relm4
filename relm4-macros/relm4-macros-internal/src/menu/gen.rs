@@ -5,7 +5,7 @@ use syn::{spanned::Spanned, Ident, LitStr};
 use super::{Menu, MenuElement, MenuEntry, MenuItem, MenuSection, Menus, SubMenu};
 
 impl Menus {
-    pub(crate) fn menus_stream(&self) -> TokenStream2 {
+    pub fn menus_stream(&self) -> TokenStream2 {
         let mut menu_stream = TokenStream2::new();
 
         for item in &self.items {
