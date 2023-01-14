@@ -1,6 +1,6 @@
 use crate::widgets::{Widget, WidgetAttr, WidgetFunc, WidgetTemplateAttr};
 
-use super::{Format, FormatLine, InlineFormat};
+use super::{Format, FormatAttributes, FormatLine, InlineFormat};
 
 impl Format for WidgetAttr {
     fn format(&self, ident_level: usize) -> Vec<FormatLine> {
@@ -45,8 +45,8 @@ impl InlineFormat for WidgetFunc {
     }
 }
 
-impl Format for Widget {
-    fn format(&self, ident_level: usize) -> Vec<FormatLine> {
+impl FormatAttributes for Widget {
+    fn format_attrs(&self, ident_level: usize) -> Vec<FormatLine> {
         let mut output = Vec::new();
 
         output.extend(self.doc_attr.as_ref().map(|tokens| FormatLine {
@@ -63,6 +63,14 @@ impl Format for Widget {
 
         output.extend(self.attr.format(ident_level));
         output.extend(self.template_attr.format(ident_level));
+
+        output
+    }
+}
+
+impl Format for Widget {
+    fn format(&self, ident_level: usize) -> Vec<FormatLine> {
+        let mut output = Vec::new();
 
         let mut line = String::new();
         line.push_str(&self.func.inline_format());

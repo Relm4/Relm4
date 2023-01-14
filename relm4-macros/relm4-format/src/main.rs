@@ -1,4 +1,4 @@
-use std::{fs::ReadDir, path::PathBuf};
+use std::{fs::ReadDir, path::PathBuf, str::FromStr};
 
 use internal::widgets::{
     format::{Format, FormatLine},
@@ -8,11 +8,22 @@ use internal::widgets::{
 const FILE_ENDINGS: &[&str] = &["rs"];
 
 fn main() {
-    let dir = std::fs::read_dir(".").unwrap();
-    let mut list = Vec::new();
-    walk_dir(&mut list, dir);
+    let args: Vec<PathBuf> = std::env::args()
+        .into_iter()
+        .skip(1)
+        .map(|s| PathBuf::from_str(&s).unwrap())
+        .collect();
 
-    format_files(&list);
+    // Use specified files or otherwise all Rust files in the working directory
+    if args.is_empty() {
+        let dir = std::fs::read_dir(".").unwrap();
+        let mut list = Vec::new();
+        walk_dir(&mut list, dir);
+
+        format_files(&list);
+    } else {
+        format_files(&args);
+    }
 }
 
 fn walk_dir(list: &mut Vec<PathBuf>, dir: ReadDir) {
@@ -33,7 +44,9 @@ fn walk_dir(list: &mut Vec<PathBuf>, dir: ReadDir) {
 
 fn format_files(list: &[PathBuf]) {
     for path in list {
-        let contents = std::fs::read_to_string(path).unwrap();
+        eprintln!("INFO: Formatting {}", path.to_str().unwrap_or_default());
+        let contents =
+            std::fs::read_to_string(path).unwrap_or_else(|_| panic!("Couldn't open {:?}", path));
         let contents = format_code(&contents);
         std::fs::write(path, contents).unwrap();
     }
@@ -52,22 +65,26 @@ fn format_code(code: &str) -> String {
             let mut macro_code = String::new();
             let mut bracket_level = line.matches('{').count();
 
-            loop {
+            let last_line = loop {
                 let line = lines.next().unwrap();
                 bracket_level += line.matches('{').count();
                 bracket_level = bracket_level.saturating_sub(line.matches('}').count());
                 if bracket_level == 0 {
-                    break;
+                    break line;
                 } else {
                     macro_code.push_str(line);
                     macro_code.push('\n');
                 }
-            }
+            };
 
             let widgets: ViewWidgets = syn::parse_str(&macro_code).unwrap();
             let lines = widgets.format(initial_ident / 4 + 1);
             let output = concat_format_lines(lines);
+
+            formatted_code.push_str(line);
+            formatted_code.push('\n');
             formatted_code.push_str(&output);
+            formatted_code.push_str(last_line);
         } else {
             formatted_code.push_str(line);
             formatted_code.push('\n');
