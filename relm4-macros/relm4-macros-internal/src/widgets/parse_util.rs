@@ -5,7 +5,7 @@ use syn::parse::ParseBuffer;
 use syn::spanned::Spanned;
 use syn::{braced, bracketed, parenthesized, Error, Ident, Path};
 
-use super::{ParseError, PropertyName};
+use super::{ParseError, Property, PropertyName, PropertyType};
 use crate::widgets::{AssignPropertyAttr, WidgetAttr, WidgetFunc};
 
 pub(super) fn attr_twice_error(span: Span2) -> Error {
@@ -28,6 +28,15 @@ impl ParseError {
             }
         } else {
             self
+        }
+    }
+
+    pub(super) fn into_property(self, name: Ident) -> Property {
+        Property {
+            #[cfg(feature = "format")]
+            blank_lines: 0,
+            name: PropertyName::Ident(name),
+            ty: PropertyType::ParseError(self),
         }
     }
 }

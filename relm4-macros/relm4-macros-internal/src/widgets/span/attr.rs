@@ -20,6 +20,7 @@ impl Spanned for Attr {
             | Self::Template(ident)
             | Self::TemplateChild(ident)
             | Self::Wrap(ident, _) => ident.span(),
+            Self::BlankLine => unreachable!(),
         }
     }
 }

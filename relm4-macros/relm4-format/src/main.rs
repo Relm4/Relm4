@@ -72,7 +72,11 @@ fn format_code(code: &str) -> String {
                 if bracket_level == 0 {
                     break line;
                 } else {
-                    macro_code.push_str(line);
+                    macro_code.push_str(if line.trim().is_empty() {
+                        "#[BLANK]"
+                    } else {
+                        line
+                    });
                     macro_code.push('\n');
                 }
             };

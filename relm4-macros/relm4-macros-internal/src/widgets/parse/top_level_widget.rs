@@ -2,8 +2,8 @@ use syn::parse::ParseStream;
 
 use crate::util;
 use crate::widgets::{
-    parse_util, Attr, Attrs, Properties, Property, PropertyName, PropertyType, TopLevelWidget,
-    Widget, WidgetAttr, WidgetFunc, WidgetTemplateAttr,
+    parse_util, Attr, Attrs, Properties, TopLevelWidget, Widget, WidgetAttr, WidgetFunc,
+    WidgetTemplateAttr,
 };
 
 impl TopLevelWidget {
@@ -47,12 +47,9 @@ impl TopLevelWidget {
                 },
                 args: None,
                 properties: Properties {
-                    properties: vec![Property {
-                        name: PropertyName::Ident(parse_util::string_to_snake_case(
-                            "invalid_property",
-                        )),
-                        ty: PropertyType::ParseError(err),
-                    }],
+                    properties: vec![
+                        err.into_property(parse_util::string_to_snake_case("invalid_property"))
+                    ],
                 },
                 assign_wrapper: None,
                 ref_token: None,

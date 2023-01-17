@@ -92,6 +92,7 @@ enum PropertyName {
 
 #[derive(Debug)]
 struct Property {
+    blank_lines: usize,
     /// Either a path or just an ident
     name: PropertyName,
     ty: PropertyType,
@@ -211,6 +212,8 @@ enum Attr {
     Chain(Ident, Box<Expr>),
     Template(Ident),
     TemplateChild(Ident),
+    #[cfg(feature = "format")]
+    BlankLine,
 }
 
 struct Attrs {

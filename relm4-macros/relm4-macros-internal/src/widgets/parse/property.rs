@@ -3,7 +3,7 @@ use syn::spanned::Spanned;
 use syn::{token, Error, Ident, Token};
 
 use crate::widgets::{
-    parse_util, AssignProperty, Attrs, ConditionalWidget, ParseError, Property, PropertyName,
+    parse_util, AssignProperty, Attr, Attrs, ConditionalWidget, ParseError, Property, PropertyName,
     PropertyType, SignalHandler, Widget, WidgetFunc,
 };
 
@@ -12,10 +12,7 @@ impl Property {
         match Self::parse_failing(input) {
             Ok(prop) => (prop, false),
             Err(err) => (
-                Self {
-                    name: PropertyName::Ident(parse_util::string_to_snake_case("invalid_property")),
-                    ty: PropertyType::ParseError(err),
-                },
+                err.into_property(parse_util::string_to_snake_case("invalid_property")),
                 true,
             ),
         }
@@ -29,9 +26,22 @@ impl Property {
             None
         };
 
+        let blank_lines = if let Some(attrs) = &mut attributes {
+            let blank_lines = attrs
+                .inner
+                .iter()
+                .take_while(|attr| matches!(attr, &Attr::BlankLine))
+                .count();
+            attrs.inner.retain(|attr| !matches!(attr, &Attr::BlankLine));
+            blank_lines
+        } else {
+            0
+        };
+
         // parse `if something { WIDGET } else { WIDGET}` or a similar match expression.
         if input.peek(Token![if]) || input.peek(Token![match]) {
             return Ok(Property {
+                blank_lines,
                 name: PropertyName::RelmContainerExtAssign(input.span()),
                 ty: PropertyType::ConditionalWidget(ConditionalWidget::parse_with_name(
                     input,
@@ -52,6 +62,8 @@ impl Property {
                 PropertyType::Widget(Widget::parse_for_container_ext(input, func, attributes)?);
 
             Ok(Property {
+                #[cfg(feature = "format")]
+                blank_lines,
                 name: PropertyName::RelmContainerExtAssign(span),
                 ty,
             })
@@ -135,7 +147,12 @@ impl Property {
                     .error("expected `,`. Did you confuse `=` with`:`?")
                     .into())
             } else {
-                Ok(Property { name, ty })
+                Ok(Property {
+                    #[cfg(feature = "format")]
+                    blank_lines,
+                    name,
+                    ty,
+                })
             }
         }
     }

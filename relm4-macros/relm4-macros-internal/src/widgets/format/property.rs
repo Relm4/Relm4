@@ -1,4 +1,6 @@
-use crate::widgets::{AssignProperty, AssignPropertyAttr, Property, PropertyName, PropertyType};
+use crate::widgets::{
+    AssignProperty, AssignPropertyAttr, ParseError, Property, PropertyName, PropertyType,
+};
 
 use super::{Format, FormatAttributes, FormatLine, InlineFormat};
 
@@ -14,6 +16,13 @@ impl InlineFormat for PropertyName {
 
 impl Format for Property {
     fn format(&self, ident_level: usize) -> Vec<FormatLine> {
+        let empty_lines = (0..self.blank_lines)
+            .map(|_| FormatLine {
+                ident_level: 0,
+                line: "".to_owned(),
+            })
+            .collect();
+
         let mut prefix = self.name.inline_format();
 
         let (attrs, mut output) = match &self.ty {
@@ -35,7 +44,13 @@ impl Format for Property {
                 (widget.format_attrs(ident_level), widget.format(ident_level))
             }
             PropertyType::ConditionalWidget(_) => todo!(),
-            PropertyType::ParseError(_) => todo!(),
+            PropertyType::ParseError(error) => match error {
+                ParseError::Ident((_ident, tokens)) => {
+                    panic!("{tokens}");
+                }
+                ParseError::Path((_path, tokens)) => panic!("{tokens}"),
+                ParseError::Generic(tokens) => panic!("{tokens}"),
+            },
         };
 
         prefix.push_str(&output[0].line);
@@ -43,7 +58,7 @@ impl Format for Property {
 
         output.last_mut().unwrap().line.push(',');
 
-        [attrs, output].into_iter().flatten().collect()
+        [empty_lines, attrs, output].into_iter().flatten().collect()
     }
 }
 

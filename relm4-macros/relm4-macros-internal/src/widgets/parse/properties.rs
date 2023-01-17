@@ -6,7 +6,7 @@ use syn::punctuated::{Pair, Punctuated};
 use syn::token::{And, At, Caret, Colon, Div, Dot, Gt, Lt, Or, Question, Tilde, Underscore};
 use syn::{braced, bracketed, parenthesized, token, Ident, Lifetime, Token};
 
-use crate::widgets::{parse_util, ParseError, Properties, Property, PropertyName, PropertyType};
+use crate::widgets::{parse_util, ParseError, Properties, Property};
 
 impl Properties {
     pub(super) fn parse(input: ParseStream<'_>) -> Self {
@@ -65,10 +65,8 @@ fn parse_comma_error(input: ParseStream<'_>) -> Result<(), Property> {
         Ok(())
     } else {
         let err = lookahead.error();
-        Err(Property {
-            name: PropertyName::Ident(parse_util::string_to_snake_case("comma_error")),
-            ty: PropertyType::ParseError(ParseError::Generic(err.to_compile_error())),
-        })
+        Err(ParseError::Generic(err.to_compile_error())
+            .into_property(parse_util::string_to_snake_case("comma_error")))
     }
 }
 
