@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
++ core: Add `broadcast` to `FactoryVecDeque`
+
 ### Fixed
 
 + core: Prevent leaking `CommandSenderInner` struct
