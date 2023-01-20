@@ -12,7 +12,7 @@ impl SimpleComponent for App {
         gtk::Window {
             gtk::Label {
                 #[watch]
-                set_label: &format!("Counter: {}", counter),
+                set_label: &format!("Counter: {counter}"),
             }
         }
     }

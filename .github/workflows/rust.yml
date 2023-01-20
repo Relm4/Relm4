@@ -29,8 +29,8 @@ jobs:
           toolchain: ${{ matrix.rust }}
           components: clippy
 
-      - name: "clippy"
-        run: cargo clippy -- --deny warnings
+      - name: "clippy all targets"
+        run: cargo clippy --all-targets -- --deny warnings
 
       - name: "clippy all features"
         run: cargo clippy --features "all" -- --deny warnings

@@ -9,6 +9,7 @@
 ### Fixed
 
 + core: Prevent leaking `CommandSenderInner` struct
++ macros: Fix clippy warning triggered by the view macro in some edge cases
 
 ## 0.5.0-rc.1
 
