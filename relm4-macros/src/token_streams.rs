@@ -144,7 +144,7 @@ impl Widget {
         if generate_init_root_stream {
             if let Some(root_name) = root_name {
                 streams.rename_root.extend(quote_spanned! {
-                    name_span => 
+                    name_span =>
                         #[allow(clippy::redundant_clone)]
                         let #name = #root_name.clone();
                 });
