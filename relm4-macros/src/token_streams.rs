@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote_spanned, ToTokens};
+use quote::{quote, ToTokens};
 use syn::{Error, Ident, Visibility};
 
 use crate::widgets::{TopLevelWidget, ViewWidgets, Widget};
@@ -115,7 +115,6 @@ impl Widget {
         } = trait_impl_details;
 
         let name = &self.name;
-        let name_span = name.span();
 
         // Initialize the root
         if generate_init_root_stream {
@@ -143,10 +142,8 @@ impl Widget {
         // Rename the `root` to the actual widget name
         if generate_init_root_stream {
             if let Some(root_name) = root_name {
-                streams.rename_root.extend(quote_spanned! {
-                    name_span =>
-                        #[allow(clippy::redundant_clone)]
-                        let #name = #root_name.clone();
+                streams.rename_root.extend(quote! {
+                    let #name = #root_name.clone();
                 });
             }
         }
