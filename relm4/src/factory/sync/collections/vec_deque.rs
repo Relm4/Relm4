@@ -530,6 +530,14 @@ impl<C: FactoryComponent> FactoryVecDeque<C> {
         self.components[index].send(msg);
     }
 
+    /// Send clone of a message to all of the elements.
+    pub fn broadcast(&self, msg: C::Input)
+    where
+        C::Input: Clone,
+    {
+        self.components.iter().for_each(|c| c.send(msg.clone()));
+    }
+
     /// Tries to get an immutable reference to
     /// the model of one element.
     ///
