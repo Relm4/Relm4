@@ -7,7 +7,7 @@ edition = "2021"
 [dev-dependencies]
 rand = "0.8.5"
 relm4 = { path = "../../relm4", features = ["libadwaita"] }
-tokio = { version = "1", features = ["time"] }
+tokio = { version = "1.25", features = ["time"] }
 
 [[example]]
 name = "leaflet_sidebar"
