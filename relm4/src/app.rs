@@ -1,7 +1,7 @@
 use gtk::prelude::{ApplicationExt, ApplicationExtManual, Cast, GtkApplicationExt, IsA, WidgetExt};
 
 use crate::component::{AsyncComponent, AsyncComponentBuilder, AsyncComponentController};
-use crate::{Component, ComponentBuilder, ComponentController};
+use crate::{Component, ComponentBuilder, ComponentController, RUNTIME};
 
 /// An app that runs the main application.
 #[derive(Debug)]
@@ -88,6 +88,7 @@ impl RelmApp {
             }
         });
 
+        let _guard = RUNTIME.enter();
         app.run_with_args(args);
     }
 
@@ -143,6 +144,7 @@ impl RelmApp {
             }
         });
 
+        let _guard = RUNTIME.enter();
         app.run_with_args(args);
     }
 }

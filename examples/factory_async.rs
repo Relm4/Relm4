@@ -123,12 +123,12 @@ impl AsyncFactoryComponent for Counter {
         _index: &DynamicIndex,
         _sender: AsyncFactorySender<Self>,
     ) -> Self {
-        async_std::task::sleep(Duration::from_secs(1)).await;
+        tokio::time::sleep(Duration::from_secs(1)).await;
         Self { value }
     }
 
     async fn update(&mut self, msg: Self::Input, _sender: AsyncFactorySender<Self>) {
-        async_std::task::sleep(Duration::from_secs(1)).await;
+        tokio::time::sleep(Duration::from_secs(1)).await;
         match msg {
             CounterMsg::Increment => {
                 self.value = self.value.wrapping_add(1);

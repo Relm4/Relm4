@@ -78,7 +78,7 @@ impl AsyncComponent for App {
         root: Self::Root,
         sender: AsyncComponentSender<Self>,
     ) -> AsyncComponentParts<Self> {
-        async_std::task::sleep(Duration::from_secs(1)).await;
+        tokio::time::sleep(Duration::from_secs(1)).await;
 
         let model = App { counter };
 
@@ -94,7 +94,7 @@ impl AsyncComponent for App {
         _sender: AsyncComponentSender<Self>,
         _root: &Self::Root,
     ) {
-        async_std::task::sleep(Duration::from_secs(1)).await;
+        tokio::time::sleep(Duration::from_secs(1)).await;
         match msg {
             Msg::Increment => {
                 self.counter = self.counter.wrapping_add(1);
