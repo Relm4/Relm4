@@ -10,6 +10,7 @@
 
 + core: Support tokio also on local futures
 + core: Prevent leaking `CommandSenderInner` struct
++ core: Improve error message when sending input messages to dropped components
 + macros: Fix clippy warning triggered by the view macro in some edge cases
 
 ## 0.5.0-rc.1

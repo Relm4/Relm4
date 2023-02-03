@@ -63,7 +63,7 @@ where
     fn input(&self, message: Input) {
         // Input messages should always be safe to send
         // because the runtime keeps the receiver alive.
-        self.input.send(message).unwrap();
+        self.input.send(message).expect("The runtime of the component was shutdown. Maybe you accidentally dropped a controller?");
     }
 
     /// This is not public because factories can unwrap the result
