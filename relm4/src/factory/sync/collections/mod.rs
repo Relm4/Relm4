@@ -7,7 +7,7 @@ use crate::factory::DynamicIndex;
 
 #[derive(Debug)]
 struct RenderedState {
-    uid: u16,
+    uid: usize,
     #[cfg(feature = "libadwaita")]
     widget_hash: u64,
 }
@@ -15,6 +15,6 @@ struct RenderedState {
 #[derive(Debug)]
 struct ModelStateValue {
     index: DynamicIndex,
-    uid: u16,
+    uid: usize,
     changed: bool,
 }
