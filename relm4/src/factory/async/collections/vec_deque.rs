@@ -347,6 +347,10 @@ where
                 self.inner.widget.factory_remove(widget);
             }
         }
+
+        self.inner.rendered_state.clear();
+
+        self.inner.uid_counter = 1;
     }
 
     /// Returns an iterator over the components that returns mutable references.
@@ -395,7 +399,7 @@ where
     components: VecDeque<AsyncComponentStorage<C>>,
     model_state: VecDeque<ModelStateValue>,
     rendered_state: VecDeque<RenderedState>,
-    uid_counter: u16,
+    uid_counter: usize,
 }
 
 impl<C: AsyncFactoryComponent> Drop for AsyncFactoryVecDeque<C>
