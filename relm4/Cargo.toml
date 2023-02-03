@@ -1,19 +1,20 @@
 [package]
 name = "relm4"
-authors = ["Aaron Erhardt <aaron.erhardt@t-online.de>"]
-edition = "2021"
-version = "0.5.0-rc.1"
-rust-version = "1.63"
-readme = "../README.md"
-license = "Apache-2.0 OR MIT"
-description = "An idiomatic GUI library inspired by Elm and based on gtk4-rs"
-
-homepage = "https://relm4.org"
-repository = "https://github.com/Relm4/Relm4"
 documentation = "https://relm4.org/docs/stable/relm4/"
 
-keywords = ["gui", "gtk", "gtk4", "elm"]
-categories = ["gui"]
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+readme.workspace = true
+license.workspace = true
+description.workspace = true
+
+homepage.workspace = true
+repository.workspace = true
+
+keywords.workspace = true
+categories.workspace = true
 
 [package.metadata.docs.rs]
 all-features = true
@@ -50,8 +51,24 @@ async-trait = "0.1.64"
 
 [dev-dependencies]
 relm4-macros = { path = "../relm4-macros" }
+
+# For the benchmarks
 criterion = { version = "0.4", default-features = false }
+
+# For the examples
+tokio = { version = "1.25", features = ["rt", "macros", "time", "rt-multi-thread"] }
+futures = "0.3.26"
+rand = "0.8.5"
+tracker = "0.2"
+reqwest = "0.11.14"
+tracing-subscriber = "0.3.16"
 
 [[bench]]
 name = "stress_test"
 harness = false
+
+# Make sure that the examples are scraped
+[[example]]
+name = "simple"
+path = "examples/simple.rs"
+doc-scrape-examples = true
