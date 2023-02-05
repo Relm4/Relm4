@@ -3,6 +3,8 @@ use gtk::prelude::{ApplicationExt, ApplicationExtManual, Cast, GtkApplicationExt
 use crate::component::{AsyncComponent, AsyncComponentBuilder, AsyncComponentController};
 use crate::{Component, ComponentBuilder, ComponentController, RUNTIME};
 
+use std::cell::Cell;
+
 /// An app that runs the main application.
 #[derive(Debug)]
 pub struct RelmApp {
@@ -57,8 +59,6 @@ impl RelmApp {
         C::Root: IsA<gtk::Window> + WidgetExt,
         S: AsRef<str>,
     {
-        use std::cell::Cell;
-
         let Self { app } = self;
 
         let payload = Cell::new(Some(payload));
@@ -83,8 +83,6 @@ impl RelmApp {
 
                 app.add_window(window.as_ref());
                 window.show();
-            } else {
-                panic!("Can't start Relm4 applications twice");
             }
         });
 
@@ -113,8 +111,6 @@ impl RelmApp {
         C::Root: IsA<gtk::Window> + WidgetExt,
         S: AsRef<str>,
     {
-        use std::cell::Cell;
-
         let Self { app } = self;
 
         let payload = Cell::new(Some(payload));
@@ -139,8 +135,6 @@ impl RelmApp {
 
                 app.add_window(window.as_ref());
                 window.show();
-            } else {
-                panic!("Can't start Relm4 applications twice");
             }
         });
 
