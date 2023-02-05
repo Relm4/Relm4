@@ -3,7 +3,23 @@ members = [
     "relm4",
     "relm4-components",
     "relm4-macros",
+]
+exclude = [
     "examples",
     "examples/libadwaita",
-    "examples/relm4-components"
 ]
+
+[workspace.package]
+version = "0.5.0-rc.1"
+authors = ["Aaron Erhardt <aaron.erhardt@t-online.de>"]
+edition = "2021"
+rust-version = "1.64"
+readme = "README.md"
+license = "Apache-2.0 OR MIT"
+description = "An idiomatic GUI library inspired by Elm and based on gtk4-rs"
+
+homepage = "https://relm4.org"
+repository = "https://github.com/Relm4/Relm4"
+
+keywords = ["gui", "gtk", "gtk4", "elm"]
+categories = ["gui"]

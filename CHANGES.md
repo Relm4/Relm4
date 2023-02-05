@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Changed
+
++ core: Increase MSRV to 1.63 to match the gtk4 crate
++ all: Move examples into the corresponding crates
+
 ### Added
 
 + core: Add `broadcast` to `FactoryVecDeque`
@@ -11,6 +16,7 @@
 + core: Support tokio also on local futures
 + core: Prevent leaking `CommandSenderInner` struct
 + core: Improve error message when sending input messages to dropped components
++ core: Fix scaping of examples on docs.rs
 + core: Fix crash caused by UID overflow with very large or frequently changing factories
 + macros: Fix clippy warning triggered by the view macro in some edge cases
 

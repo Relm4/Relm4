@@ -1,17 +1,20 @@
 [package]
 name = "relm4-components"
-authors = ["Aaron Erhardt <aaron.erhardt@t-online.de>"]
-edition = "2021"
-version = "0.5.0-rc.1"
-description = "An idiomatic GUI library inspired by Elm and based on gtk4-rs"
-repository = "https://github.com/Relm4/Relm4"
 readme = "README.md"
-license = "Apache-2.0 OR MIT"
 documentation = "https://relm4.org/docs/stable/relm4_components/"
 
-keywords = ["gui", "gtk", "gtk4"]
-categories = ["gui"]
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description.workspace = true
+
+homepage.workspace = true
+repository.workspace = true
+
+keywords.workspace = true
+categories.workspace = true
 
 [package.metadata.docs.rs]
 features = ["dox"]
