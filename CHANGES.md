@@ -13,6 +13,7 @@
 
 ### Fixed
 
++ core: Don't crash when the application is started multiple times
 + core: Support tokio also on local futures
 + core: Prevent leaking `CommandSenderInner` struct
 + core: Improve error message when sending input messages to dropped components
