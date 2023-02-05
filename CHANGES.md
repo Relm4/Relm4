@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.5.0-rc.2 - 2023-2-5
+
 ### Changed
 
 + core: Increase MSRV to 1.63 to match the gtk4 crate
@@ -21,7 +23,7 @@
 + core: Fix crash caused by UID overflow with very large or frequently changing factories
 + macros: Fix clippy warning triggered by the view macro in some edge cases
 
-## 0.5.0-rc.1
+## 0.5.0-rc.1 - 2022-12-21
 
 ### Added
 
