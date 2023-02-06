@@ -23,9 +23,9 @@ fi
 mv examples/Cargo.toml examples/_Cargo.toml
 
 # Publish and pass all arguments to cargo
-cargo publish -p relm4-macros "$@"
-cargo publish -p relm4 "$@"
-cargo publish -p relm4-components "$@"
+cargo publish -p relm4-macros "$@" --allow-dirty
+cargo publish -p relm4 "$@" --allow-dirty
+cargo publish -p relm4-components "$@" --allow-dirty
 
 # Move Cargo.toml from examples into original position
 mv examples/_Cargo.toml examples/Cargo.toml
