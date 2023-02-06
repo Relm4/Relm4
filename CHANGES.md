@@ -2,11 +2,15 @@
 
 ## Unreleased
 
+### Fixed
+
++ components: Fix doc links to examples on GitHub
+
 ## 0.5.0-rc.2 - 2023-2-5
 
 ### Changed
 
-+ core: Increase MSRV to 1.63 to match the gtk4 crate
++ core: Increase MSRV to 1.64 to match the gtk4 crate
 + all: Move examples into the corresponding crates
 
 ### Added
