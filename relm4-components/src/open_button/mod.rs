@@ -1,6 +1,6 @@
 //! Reusable and easily configurable open button dialog component.
 //!
-//! **[Example implementation](https://github.com/relm4/relm4/blob/main/examples/relm4-components/open_button.rs)**
+//! **[Example implementation](https://github.com/Relm4/Relm4/blob/main/relm4-components/examples/open_button.rs)**
 use relm4::factory::{DynamicIndex, FactoryVecDeque};
 use relm4::gtk::prelude::*;
 use relm4::{

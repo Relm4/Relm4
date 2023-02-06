@@ -1,6 +1,6 @@
 //! Reusable and easily configurable open dialog component.
 //!
-//! **[Example implementation](https://github.com/AaronErhardt/relm4/blob/next/examples/file_dialogs.rs)**
+//! **[Example implementation](https://github.com/Relm4/Relm4/blob/main/relm4-components/examples/file_dialogs.rs)**
 use gtk::prelude::{Cast, FileChooserExt, FileExt, ListModelExt, NativeDialogExt};
 use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent};
 
