@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+### Added
+
++ macros: Support widget templates as root widgets of components and factories
++ macros: Implement `Clone` for widget templates
+
 ### Fixed
 
 + components: Fix doc links to examples on GitHub

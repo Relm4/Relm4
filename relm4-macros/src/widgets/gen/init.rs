@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::quote_spanned;
+use quote::{quote, quote_spanned};
 
 use crate::widgets::{
     ConditionalBranches, ConditionalWidget, Properties, Property, PropertyType, Widget, WidgetAttr,
@@ -42,7 +42,17 @@ impl Widget {
         init_stream: &mut TokenStream2,
     ) {
         // Init function as return value
-        init_root_stream.extend(self.func.func_token_stream());
+        init_root_stream.extend(match self.template_attr {
+            WidgetTemplateAttr::None | WidgetTemplateAttr::TemplateChild => {
+                self.func.func_token_stream()
+            }
+            WidgetTemplateAttr::Template => {
+                let widget_ty = &self.func.path;
+                quote! {
+                    <#widget_ty as relm4::WidgetTemplate>::init()
+                }
+            }
+        });
 
         self.other_init_stream(init_stream);
     }
@@ -50,25 +60,20 @@ impl Widget {
     fn self_init_stream(&self, stream: &mut TokenStream2) {
         let mutability = &self.mutable;
         let name = &self.name;
-        let span = self.name.span();
 
-        let ty = self
-            .func
-            .ty
-            .as_ref()
-            .map(|ty| quote_spanned!(span => : #ty));
+        let ty = self.func.ty.as_ref().map(|ty| quote! {: #ty});
         if self.attr == WidgetAttr::None {
             match self.template_attr {
                 WidgetTemplateAttr::None => {
                     let func = self.func.func_token_stream();
-                    stream.extend(quote_spanned! {
-                        span => let #mutability #name #ty = #func;
+                    stream.extend(quote! {
+                        let #mutability #name #ty = #func;
                     });
                 }
                 WidgetTemplateAttr::Template => {
                     let widget_ty = &self.func.path;
-                    stream.extend(quote_spanned! {
-                        span => let #mutability #name #ty = <#widget_ty as relm4::WidgetTemplate>::init();
+                    stream.extend(quote! {
+                        let #mutability #name #ty = <#widget_ty as relm4::WidgetTemplate>::init();
                     });
                 }
                 // Template children are already initialized by their template.
