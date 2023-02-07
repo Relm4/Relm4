@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
++ macros: Support submenus in menu! macro
+
 ### Fixed
 
 + components: Fix doc links to examples on GitHub

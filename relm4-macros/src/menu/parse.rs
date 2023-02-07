@@ -3,7 +3,9 @@ use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
 use syn::{braced, parenthesized, token, Ident, Path, Result, Token};
 
-use super::{Menu, MenuEntry, MenuItem, MenuSection, Menus};
+use crate::menu::SubMenu;
+
+use super::{Menu, MenuElement, MenuItem, MenuSection, Menus, MenuEntry};
 
 syn::custom_keyword!(custom);
 
@@ -29,38 +31,51 @@ impl Parse for Menu {
     }
 }
 
-impl Parse for MenuEntry {
+impl Parse for MenuItem {
     fn parse(input: ParseStream<'_>) -> Result<Self> {
-        let string = input.parse()?;
-        let _arrow: Token![=>] = input.parse()?;
-        let action_ty = input.call(Path::parse_mod_style)?;
+        let expr = input.parse()?;
 
-        let value = if input.peek(token::Paren) {
-            let paren_input;
-            parenthesized!(paren_input in input);
-            Some(paren_input.parse()?)
+        Ok(if input.peek(Token![=>]) {
+            let _arrow: Token![=>] = input.parse()?;
+            let action_ty = input.call(Path::parse_mod_style)?;
+
+            let value = if input.peek(token::Paren) {
+                let paren_input;
+                parenthesized!(paren_input in input);
+                Some(paren_input.parse()?)
+            } else {
+                None
+            };
+
+            Self::Entry(MenuEntry {
+                expr,
+                action_ty,
+                value,
+            })
         } else {
-            None
-        };
+            let braced_input;
+            braced!(braced_input in input);
 
-        Ok(MenuEntry {
-            string,
-            action_ty,
-            value,
+            let items = braced_input.call(Punctuated::parse_terminated)?;
+
+            Self::SubMenu(SubMenu {
+                expr,
+                items,
+            })
         })
     }
 }
 
-impl Parse for MenuItem {
+impl Parse for MenuElement {
     fn parse(input: ParseStream<'_>) -> Result<Self> {
         Ok(if input.peek(custom) {
             let _custom: custom = input.parse()?;
             let _colon: Token![:] = input.parse()?;
-            input.parse().map(MenuItem::Custom)?
+            input.parse().map(MenuElement::Custom)?
         } else if input.peek2(Token![!]) {
-            input.parse().map(MenuItem::Section)?
+            input.parse().map(MenuElement::Section)?
         } else {
-            input.parse().map(MenuItem::Entry)?
+            input.parse().map(MenuElement::Item)?
         })
     }
 }
