@@ -25,8 +25,8 @@ enum MenuElement {
 
 #[derive(Debug)]
 enum MenuItem {
-    Entry(MenuEntry),
-    SubMenu(SubMenu),
+    Entry(Box<MenuEntry>),
+    SubMenu(Box<SubMenu>),
 }
 
 #[derive(Debug)]

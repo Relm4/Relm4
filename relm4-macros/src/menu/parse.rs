@@ -47,18 +47,18 @@ impl Parse for MenuItem {
                 None
             };
 
-            Self::Entry(MenuEntry {
+            Self::Entry(Box::new(MenuEntry {
                 expr,
                 action_ty,
                 value,
-            })
+            }))
         } else {
             let braced_input;
             braced!(braced_input in input);
 
             let items = braced_input.call(Punctuated::parse_terminated)?;
 
-            Self::SubMenu(SubMenu { expr, items })
+            Self::SubMenu(Box::new(SubMenu { expr, items }))
         })
     }
 }
