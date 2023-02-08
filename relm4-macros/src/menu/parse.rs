@@ -5,7 +5,7 @@ use syn::{braced, parenthesized, token, Ident, Path, Result, Token};
 
 use crate::menu::SubMenu;
 
-use super::{Menu, MenuElement, MenuItem, MenuSection, Menus, MenuEntry};
+use super::{Menu, MenuElement, MenuEntry, MenuItem, MenuSection, Menus};
 
 syn::custom_keyword!(custom);
 
@@ -58,10 +58,7 @@ impl Parse for MenuItem {
 
             let items = braced_input.call(Punctuated::parse_terminated)?;
 
-            Self::SubMenu(SubMenu {
-                expr,
-                items,
-            })
+            Self::SubMenu(SubMenu { expr, items })
         })
     }
 }
