@@ -26,6 +26,7 @@
 + core: Fix scaping of examples on docs.rs
 + core: Fix crash caused by UID overflow with very large or frequently changing factories
 + macros: Fix clippy warning triggered by the view macro in some edge cases
++ macros: Import `relm4::ComponentSender` isn’t longer required
 
 ## 0.5.0-rc.1 - 2022-12-21
 
