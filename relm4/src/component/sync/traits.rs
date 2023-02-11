@@ -117,6 +117,8 @@ pub trait Component: Sized + 'static {
     }
 
     /// Last method called before a component is shut down.
+    ///
+    /// This method is guaranteed to be called even when the entire application is shut down.
     #[allow(unused)]
     fn shutdown(&mut self, widgets: &mut Self::Widgets, output: Sender<Self::Output>) {}
 
@@ -169,6 +171,8 @@ pub trait SimpleComponent: Sized + 'static {
     fn update_view(&self, widgets: &mut Self::Widgets, sender: ComponentSender<Self>) {}
 
     /// Last method called before a component is shut down.
+    ///
+    /// This method is guaranteed to be called even when the entire application is shut down.
     #[allow(unused)]
     fn shutdown(&mut self, widgets: &mut Self::Widgets, output: Sender<Self::Output>) {}
 }

@@ -4,6 +4,8 @@
 
 ### Fixed
 
++ core: Call shutdown on components even on application shutdown
++ core: Clearing a factory properly calls the shutdown method of its elements
 + components: Fix doc links to examples on GitHub
 
 ## 0.5.0-rc.2 - 2023-2-5
