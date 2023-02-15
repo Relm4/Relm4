@@ -58,10 +58,8 @@ impl AsyncComponent for App {
                 set_title: Some("Simple app"),
                 set_default_size: (300, 100),
 
-                // This will replaced by the Box of the fully
-                // initialized view because Window can only have one child.
-                // If the root of the component was a Box which can have
-                // several children, you'd need to remove this again in init().
+                // This will be removed automatically by
+                // LoadingWidgets when the full view has loaded
                 #[name(spinner)]
                 gtk::Spinner {
                     start: (),
