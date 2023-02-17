@@ -79,7 +79,9 @@ impl<Output, Command> RuntimeSenders<Output, Command> {
         let (shutdown_notifier, shutdown_recipient) = shutdown::channel();
 
         // Cannel to tell the component to shutdown.
-        let (shutdown_event_sender, shutdown_event_receiver) = mpsc::channel(1);
+        // Use a capacity of 2 to prevent blocking when the runtime is dropped while app shutdown is running as well.
+        // This rare case will emit 2 messages (but certainly not more).
+        let (shutdown_event_sender, shutdown_event_receiver) = mpsc::channel(2);
 
         SHUTDOWN_SENDERS
             .lock()
