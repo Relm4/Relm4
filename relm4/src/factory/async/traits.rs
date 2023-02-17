@@ -69,7 +69,8 @@ pub trait AsyncFactoryComponent:
     ) -> Self::Widgets;
 
     /// Optionally convert an output message from this component to an input message for the
-    /// parent component.
+    /// parent component. By default this method does nothing, you must overwrite it to
+    /// forward messages.
     ///
     /// If [`None`] is returned, nothing is forwarded.
     fn output_to_parent_input(_output: Self::Output) -> Option<Self::ParentInput> {
@@ -111,7 +112,11 @@ pub trait AsyncFactoryComponent:
         self.update_view(widgets, sender);
     }
 
-    /// Last method called before a component is shut down.
+    /// Last method called before a factory component is shut down.
+    ///
+    /// This method will **not** be called automatically when the application is shut down.
+    /// Instead, you need to clear the factory in the shutdown method of the parent component
+    /// to make sure the shutdown is invoked.
     #[allow(unused)]
     fn shutdown(&mut self, widgets: &mut Self::Widgets, output: Sender<Self::Output>) {}
 

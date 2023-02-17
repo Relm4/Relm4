@@ -13,25 +13,37 @@ pub(crate) struct Menus {
 #[derive(Debug)]
 struct Menu {
     name: Ident,
-    items: Punctuated<MenuItem, Comma>,
+    items: Punctuated<MenuElement, Comma>,
 }
 
 #[derive(Debug)]
-enum MenuItem {
-    Entry(Box<MenuEntry>),
+enum MenuElement {
+    Item(Box<MenuItem>),
     Custom(LitStr),
     Section(MenuSection),
 }
 
 #[derive(Debug)]
+enum MenuItem {
+    Entry(Box<MenuEntry>),
+    SubMenu(Box<SubMenu>),
+}
+
+#[derive(Debug)]
 struct MenuEntry {
-    string: Expr,
+    expr: Expr,
     action_ty: Path,
     value: Option<Expr>,
 }
 
 #[derive(Debug)]
+struct SubMenu {
+    expr: Expr,
+    items: Punctuated<MenuElement, Comma>,
+}
+
+#[derive(Debug)]
 struct MenuSection {
     name: Ident,
-    items: Punctuated<MenuItem, Comma>,
+    items: Punctuated<MenuElement, Comma>,
 }

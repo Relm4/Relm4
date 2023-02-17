@@ -123,10 +123,10 @@ pub(crate) fn generate_tokens(
             ..
         } = PreAndPostView::extract(&mut component_impl, errors);
 
-        let sender_ty: syn::Ident = if asyncness.is_some() {
-            parse_quote! { AsyncComponentSender }
+        let sender_ty: syn::TypePath = if asyncness.is_some() {
+            parse_quote! { relm4::AsyncComponentSender }
         } else {
-            parse_quote! { ComponentSender }
+            parse_quote! { relm4::ComponentSender }
         };
 
         component_impl.items.push(parse_quote! {
