@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixed
+
+macros: Support template children of templates that are root widgets
+
 ## 0.5.0 - 2023-2-17
 
 ### Added
