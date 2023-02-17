@@ -244,12 +244,6 @@ impl SimpleComponent for App {
             }
         }
     }
-
-    fn shutdown(&mut self, _widgets: &mut Self::Widgets, _output: relm4::Sender<Self::Output>) {
-        // Make sure every element of the factory has its shutdown method called when
-        // the app closes.
-        self.counters.guard().clear();
-    }
 }
 
 fn main() {

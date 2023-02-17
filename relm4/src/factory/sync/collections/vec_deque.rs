@@ -384,11 +384,7 @@ pub struct FactoryVecDeque<C: FactoryComponent> {
 
 impl<C: FactoryComponent> Drop for FactoryVecDeque<C> {
     fn drop(&mut self) {
-        for component in &mut self.components {
-            if let Some(widget) = component.returned_widget() {
-                self.widget.factory_remove(widget);
-            }
-        }
+        self.guard().clear();
     }
 }
 

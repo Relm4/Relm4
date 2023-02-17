@@ -94,10 +94,6 @@ pub trait FactoryComponent:
     }
 
     /// Last method called before a component is shut down.
-    ///
-    /// This method will **not** be called automatically when the application is shut down.
-    /// Instead, you need to clear the factory in the shutdown method of the parent component
-    /// to make sure the shutdown is invoked.
     #[allow(unused)]
     fn shutdown(&mut self, widgets: &mut Self::Widgets, output: Sender<Self::Output>) {}
 
