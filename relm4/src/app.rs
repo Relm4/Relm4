@@ -1,6 +1,8 @@
+use gtk::glib;
 use gtk::prelude::{ApplicationExt, ApplicationExtManual, Cast, GtkApplicationExt, IsA, WidgetExt};
 
 use crate::component::{AsyncComponent, AsyncComponentBuilder, AsyncComponentController};
+use crate::runtime_util::shutdown_all;
 use crate::{Component, ComponentBuilder, ComponentController, RUNTIME};
 
 use std::cell::Cell;
@@ -88,6 +90,10 @@ impl RelmApp {
 
         let _guard = RUNTIME.enter();
         app.run_with_args(args);
+
+        // Make sure everything is shut down
+        shutdown_all();
+        glib::MainContext::ref_thread_default().iteration(true);
     }
 
     /// Runs the application, returns once the application is closed.
@@ -140,5 +146,9 @@ impl RelmApp {
 
         let _guard = RUNTIME.enter();
         app.run_with_args(args);
+
+        // Make sure everything is shut down
+        shutdown_all();
+        glib::MainContext::ref_thread_default().iteration(true);
     }
 }

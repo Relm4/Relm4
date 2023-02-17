@@ -2,26 +2,42 @@ use std::task::Poll;
 
 use flume::r#async::RecvStream;
 use futures::{future::FusedFuture, pin_mut, Future, Stream};
-use tokio::sync::oneshot;
+use once_cell::sync::Lazy;
+use std::sync::Mutex;
+use tokio::sync::mpsc;
 
 use crate::{
     shutdown::{self, ShutdownSender},
     Receiver, Sender, ShutdownReceiver,
 };
 
+/// Stores the shutdown senders of all components ever created during
+/// the runtime of the application.
+static SHUTDOWN_SENDERS: Lazy<Mutex<Vec<mpsc::Sender<()>>>> = Lazy::new(Mutex::default);
+
+/// On application shutdown, components won't trigger their shutdown
+/// method automatically, so we make sure they are shutdown by sending
+/// a shutdown message to all components.
+pub(crate) fn shutdown_all() {
+    let mut guard = SHUTDOWN_SENDERS.lock().unwrap();
+    for sender in guard.drain(..) {
+        sender.blocking_send(()).ok();
+    }
+}
+
 /// A type that destroys an [`AsyncComponent`](crate::async_component::AsyncComponent)
 /// as soon as it is dropped.
 #[derive(Debug)]
 pub(super) struct ShutdownOnDrop {
     /// Sender used to indicate that the async component should shut down.
-    shutdown_event_sender: Option<oneshot::Sender<()>>,
+    shutdown_event_sender: Option<mpsc::Sender<()>>,
 }
 
 impl ShutdownOnDrop {
     /// Creates a new [`DestroyOnDrop`] type.
     ///
     /// When this type is dropped, a message will be sent through the channel.
-    pub(crate) fn new(shutdown_event_sender: oneshot::Sender<()>) -> Self {
+    pub(crate) fn new(shutdown_event_sender: mpsc::Sender<()>) -> Self {
         Self {
             shutdown_event_sender: Some(shutdown_event_sender),
         }
@@ -35,7 +51,7 @@ impl ShutdownOnDrop {
 impl Drop for ShutdownOnDrop {
     fn drop(&mut self) {
         if let Some(sender) = self.shutdown_event_sender.take() {
-            sender.send(()).ok();
+            sender.blocking_send(()).ok();
         }
     }
 }
@@ -63,7 +79,12 @@ impl<Output, Command> RuntimeSenders<Output, Command> {
         let (shutdown_notifier, shutdown_recipient) = shutdown::channel();
 
         // Cannel to tell the component to shutdown.
-        let (shutdown_event_sender, shutdown_event_receiver) = oneshot::channel::<()>();
+        let (shutdown_event_sender, shutdown_event_receiver) = mpsc::channel(1);
+
+        SHUTDOWN_SENDERS
+            .lock()
+            .unwrap()
+            .push(shutdown_event_sender.clone());
 
         let shutdown_on_drop = ShutdownOnDrop::new(shutdown_event_sender);
         let shutdown_event = ShutdownEvent::new(shutdown_event_receiver);
@@ -89,12 +110,12 @@ impl<Output, Command> RuntimeSenders<Output, Command> {
 /// with an error, but this catches the error and returns
 /// [`Poll::Pending`] instead so the shutdown isn't triggered.
 pub(super) struct ShutdownEvent {
-    shutdown_receiver: oneshot::Receiver<()>,
+    shutdown_receiver: mpsc::Receiver<()>,
     detached: bool,
 }
 
 impl ShutdownEvent {
-    fn new(shutdown_receiver: oneshot::Receiver<()>) -> Self {
+    fn new(shutdown_receiver: mpsc::Receiver<()>) -> Self {
         Self {
             shutdown_receiver,
             detached: false,
@@ -115,9 +136,9 @@ impl Future for ShutdownEvent {
             let receiver = &mut self.shutdown_receiver;
             pin_mut!(receiver);
 
-            match receiver.poll(cx) {
+            match receiver.poll_recv(cx) {
                 Poll::Ready(result) => {
-                    if result.is_ok() {
+                    if result.is_some() {
                         Poll::Ready(())
                     } else {
                         self.detached = true;
