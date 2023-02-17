@@ -71,6 +71,21 @@ impl SimpleComponent for App {
                 "Example" => ExampleAction,
                 "Example2" => ExampleAction,
                 "Example Value" => ExampleU8Action(1_u8),
+            },
+            "submenu1" {
+                "Example" => ExampleAction,
+                "Example2" => ExampleAction,
+                "Example toggle" => ExampleU8Action(1_u8),
+                "submenu2" {
+                    "Example" => ExampleAction,
+                    "Example2" => ExampleAction,
+                    "Example toggle" => ExampleU8Action(1_u8),
+                    "submenu3" {
+                        "Example" => ExampleAction,
+                        "Example2" => ExampleAction,
+                        "Example toggle" => ExampleU8Action(1_u8),
+                    }
+                }
             }
         }
     }

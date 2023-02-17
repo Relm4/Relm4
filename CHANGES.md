@@ -4,6 +4,7 @@
 
 ### Added
 
++ macros: Support submenus in menu! macro
 + macros: Support widget templates as root widgets of components and factories
 + macros: Implement `Clone` for widget templates
 
