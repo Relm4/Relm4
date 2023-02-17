@@ -130,14 +130,14 @@ pub trait ContainerChild {
 }
 
 macro_rules! container_child_impl {
-    ($($type:ty: $child:ty)+) => {
+    ($($type:ty: $child:ty), +) => {
         $(
             impl ContainerChild for $type {
                 type Child = $child;
             }
         )+
     };
-    ($($type:ty)+) => {
+    ($($type:ty), +) => {
         $(
             impl ContainerChild for $type {
                 type Child = gtk::Widget;
@@ -147,32 +147,33 @@ macro_rules! container_child_impl {
 }
 
 container_child_impl! {
-    gtk::Box
-    gtk::Fixed
-    gtk::Grid
-    gtk::ActionBar
-    gtk::Stack
-    gtk::HeaderBar
-    gtk::InfoBar
-    gtk::Button
-    gtk::ComboBox
-    gtk::FlowBoxChild
-    gtk::Frame
-    gtk::Popover
-    gtk::Window
-    gtk::ApplicationWindow
-    gtk::ListBoxRow
-    gtk::ScrolledWindow
-    gtk::Dialog
-    gtk::LinkButton
-    gtk::ToggleButton
-    gtk::Overlay
-    gtk::Revealer
-    gtk::WindowHandle
+    gtk::Box,
+    gtk::Fixed,
+    gtk::Grid,
+    gtk::ActionBar,
+    gtk::Stack,
+    gtk::HeaderBar,
+    gtk::InfoBar,
+    gtk::Button,
+    gtk::ComboBox,
+    gtk::FlowBoxChild,
+    gtk::Frame,
+    gtk::Popover,
+    gtk::Window,
+    gtk::ApplicationWindow,
+    gtk::ListBoxRow,
+    gtk::ScrolledWindow,
+    gtk::Dialog,
+    gtk::LinkButton,
+    gtk::ToggleButton,
+    gtk::Overlay,
+    gtk::Revealer,
+    gtk::WindowHandle,
+    gtk::Expander
 }
 
 container_child_impl! {
-    gtk::ListBox: gtk::ListBoxRow
+    gtk::ListBox: gtk::ListBoxRow,
     gtk::FlowBox: gtk::FlowBoxChild
 }
 
@@ -181,15 +182,15 @@ mod libadwaita {
     use super::ContainerChild;
 
     container_child_impl! {
-        adw::TabView
-        adw::Window
-        adw::Bin
-        adw::ApplicationWindow
-        adw::Clamp
-        adw::ClampScrollable
-        adw::SplitButton
-        adw::StatusPage
-        adw::PreferencesGroup
+        adw::TabView,
+        adw::Window,
+        adw::Bin,
+        adw::ApplicationWindow,
+        adw::Clamp,
+        adw::ClampScrollable,
+        adw::SplitButton,
+        adw::StatusPage,
+        adw::PreferencesGroup,
         adw::ToastOverlay
     }
 }

@@ -29,6 +29,7 @@
     clippy::cargo,
     clippy::must_use_candidate
 )]
+#![allow(clippy::multiple_crate_versions)]
 // Configuration for doc builds on the nightly toolchain.
 #![cfg_attr(dox, feature(doc_cfg))]
 

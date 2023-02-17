@@ -12,7 +12,7 @@ pub trait RelmSetChildExt: ContainerChild {
 }
 
 macro_rules! set_child_impl {
-    ($($type:ty),+) => {
+    ($($type:ty), +) => {
         $(
             impl RelmSetChildExt for $type {
                 fn container_set_child(&self, widget: Option<&impl AsRef<gtk::Widget>>) {
@@ -40,7 +40,8 @@ set_child_impl!(
     gtk::ApplicationWindow,
     gtk::Overlay,
     gtk::Revealer,
-    gtk::WindowHandle
+    gtk::WindowHandle,
+    gtk::Expander
 );
 
 #[cfg(feature = "libadwaita")]
