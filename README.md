@@ -7,7 +7,7 @@
 [![CI](https://github.com/Relm4/Relm4/actions/workflows/rust.yml/badge.svg)](https://github.com/Relm4/Relm4/actions/workflows/rust.yml)
 [![Matrix](https://img.shields.io/matrix/relm4:matrix.org?label=matrix%20chat)](https://matrix.to/#/#relm4:matrix.org)
 [![Relm4 on crates.io](https://img.shields.io/crates/v/relm4.svg)](https://crates.io/crates/relm4)
-[![Relm4 docs](https://img.shields.io/badge/rust-documentation-blue)](https://relm4.org/docs/stable/relm4/)
+[![Relm4 docs](https://img.shields.io/badge/rust-documentation-blue)](https://docs.rs/relm4/)
 [![Relm4 book](https://img.shields.io/badge/rust-book-fc0060)](https://relm4.org/book/stable/)
 ![Minimum Rust version 1.64](https://img.shields.io/badge/rustc-1.64+-06a096.svg)
 [![dependency status](https://deps.rs/repo/github/Relm4/Relm4/status.svg)](https://deps.rs/repo/github/Relm4/Relm4)
@@ -31,7 +31,7 @@ Built on top of this foundation, Relm4 makes developing more idiomatic, simpler 
 ## Documentation
 
 + 📖 **[The Relm4 book](https://relm4.org/book/stable/)**
-+ 📜 **[Rust documentation](https://relm4.org/docs/stable/relm4/)**
++ 📜 **[Rust documentation](https://docs.rs/relm4/)**
 
 ## Dependencies
 

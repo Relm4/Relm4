@@ -1,7 +1,7 @@
 [package]
 name = "relm4-components"
 readme = "README.md"
-documentation = "https://relm4.org/docs/stable/relm4_components/"
+documentation = "https://docs.rs/relm4_components/"
 
 version.workspace = true
 authors.workspace = true
