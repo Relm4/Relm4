@@ -70,7 +70,7 @@ pub(crate) fn generate_tokens(vis: Option<Visibility>, mut item_impl: ItemImpl) 
                     let type_name = &item_impl.self_ty;
 
                     quote! {
-                        #[derive(Debug)]
+                        #[derive(Debug, Clone)]
                         #vis struct #type_name {
                             #struct_fields
                         }

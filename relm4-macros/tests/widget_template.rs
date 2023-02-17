@@ -17,6 +17,17 @@ impl WidgetTemplate for CustomBox {
     }
 }
 
+#[relm4_macros::widget_template]
+impl WidgetTemplate for CustomWindow {
+    view! {
+        gtk::Window {
+            set_title: Some("Simple app"),
+            set_default_width: 300,
+            set_default_height: 100,
+        }
+    }
+}
+
 #[derive(Default)]
 struct App {
     counter: u8,
@@ -35,7 +46,8 @@ impl SimpleComponent for App {
     type Output = ();
 
     view! {
-        gtk::Window {
+        #[template]
+        CustomWindow {
             set_title: Some("Simple app"),
             set_default_width: 300,
             set_default_height: 100,

@@ -5,9 +5,13 @@
 ### Added
 
 + macros: Support submenus in menu! macro
++ macros: Support widget templates as root widgets of components and factories
++ macros: Implement `Clone` for widget templates
 
 ### Fixed
 
++ core: Call shutdown on components even on application shutdown
++ core: Clearing a factory properly calls the shutdown method of its elements
 + components: Fix doc links to examples on GitHub
 
 ## 0.5.0-rc.2 - 2023-2-5
@@ -30,6 +34,7 @@
 + core: Fix scaping of examples on docs.rs
 + core: Fix crash caused by UID overflow with very large or frequently changing factories
 + macros: Fix clippy warning triggered by the view macro in some edge cases
++ macros: Import `relm4::ComponentSender` isn’t longer required
 
 ## 0.5.0-rc.1 - 2022-12-21
 

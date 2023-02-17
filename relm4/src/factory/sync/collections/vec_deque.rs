@@ -316,9 +316,13 @@ impl<'a, C: FactoryComponent> FactoryVecDequeGuard<'a, C> {
         self.inner.model_state.clear();
 
         for component in self.inner.components.drain(..) {
+            // Remove all widgets
             if let Some(widget) = component.returned_widget() {
                 self.inner.widget.factory_remove(widget);
             }
+
+            // Make sure the component is shutdown properly
+            component.extract();
         }
 
         self.inner.rendered_state.clear();
