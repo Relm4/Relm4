@@ -112,7 +112,7 @@ fn benchmark(c: &mut Criterion) {
         );
 
         b.iter(move || {
-            let app = RelmApp::with_app(application.clone());
+            let app = RelmApp::from_app(application.clone());
             let application = application.clone();
             app.run::<AppModel>(application);
         })
