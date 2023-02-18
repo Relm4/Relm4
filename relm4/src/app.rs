@@ -52,22 +52,20 @@ impl<M: Debug + 'static> RelmApp<M> {
     }
 
     /// Add [`MessageBroker`] to the top-level component.
+    #[must_use]
     pub fn with_broker(mut self, broker: &'static MessageBroker<M>) -> Self {
         self.broker = Some(broker);
         self
     }
 
     /// Add command line arguments to run with.
-    pub fn with_args(mut self, args: &[impl AsRef<str>]) -> Self {
-        self.args = Some(args.iter().map(|a| a.as_ref().to_string()).collect());
+    #[must_use]
+    pub fn with_args(mut self, args: Vec<String>) -> Self {
+        self.args = Some(args);
         self
     }
 
     /// Runs the application, returns once the application is closed.
-    ///
-    /// Unlike [`gtk::prelude::ApplicationExtManual::run`], this function
-    /// does not handle command-line arguments. To pass arguments to GTK, use
-    /// [`RelmApp::run_with_args`].
     pub fn run<C>(self, payload: C::Init)
     where
         C: Component<Input = M>,
@@ -120,14 +118,11 @@ impl<M: Debug + 'static> RelmApp<M> {
         C::Root: IsA<gtk::Window> + WidgetExt,
         S: AsRef<str>,
     {
+        let args = args.iter().map(|a| a.as_ref().to_string()).collect();
         self.with_args(args).run::<C>(payload);
     }
 
     /// Runs the application, returns once the application is closed.
-    ///
-    /// Unlike [`gtk::prelude::ApplicationExtManual::run`], this function
-    /// does not handle command-line arguments. To pass arguments to GTK, use
-    /// [`RelmApp::run_with_args`].
     pub fn run_async<C>(self, payload: C::Init)
     where
         C: AsyncComponent<Input = M>,
@@ -181,6 +176,7 @@ impl<M: Debug + 'static> RelmApp<M> {
         C::Root: IsA<gtk::Window> + WidgetExt,
         S: AsRef<str>,
     {
+        let args = args.iter().map(|a| a.as_ref().to_string()).collect();
         self.with_args(args).run_async::<C>(payload)
     }
 }
