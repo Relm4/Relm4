@@ -1,10 +1,10 @@
-use std::fmt::Debug;
 use gtk::glib;
 use gtk::prelude::{ApplicationExt, ApplicationExtManual, Cast, GtkApplicationExt, IsA, WidgetExt};
+use std::fmt::Debug;
 
 use crate::component::{AsyncComponent, AsyncComponentBuilder, AsyncComponentController};
 use crate::runtime_util::shutdown_all;
-use crate::{Component, ComponentBuilder, ComponentController, RUNTIME, MessageBroker};
+use crate::{Component, ComponentBuilder, ComponentController, MessageBroker, RUNTIME};
 
 use std::cell::Cell;
 
@@ -32,7 +32,11 @@ impl<'args, M: Debug + 'static> RelmApp<M> {
         let app = crate::main_application();
         app.set_application_id(Some(app_id));
 
-        Self { app, broker: None, args: None }
+        Self {
+            app,
+            broker: None,
+            args: None,
+        }
     }
 
     /// Create a Relm4 application with a provided [`gtk::Application`].
@@ -40,7 +44,11 @@ impl<'args, M: Debug + 'static> RelmApp<M> {
         let app = app.upcast();
         crate::set_main_application(app.clone());
 
-        Self { app, broker: None, args: None }
+        Self {
+            app,
+            broker: None,
+            args: None,
+        }
     }
 
     pub fn with_broker(mut self, broker: &'static MessageBroker<M>) -> Self {

@@ -148,7 +148,11 @@ impl<C: Component> ComponentBuilder<C> {
     /// # Panics
     ///
     /// This method panics if the message broker was already initialized in another launch.
-    pub fn launch_with_broker(self, payload: C::Init, broker: &MessageBroker<C::Input>) -> Connector<C> {
+    pub fn launch_with_broker(
+        self,
+        payload: C::Init,
+        broker: &MessageBroker<C::Input>,
+    ) -> Connector<C> {
         let (input_sender, input_receiver) = broker.get_channel();
         self.launch_with_input_channel(
             payload,
