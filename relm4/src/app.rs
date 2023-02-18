@@ -18,7 +18,7 @@ pub struct RelmApp<M: Debug + 'static> {
     args: Option<Vec<String>>,
 }
 
-impl<'args, M: Debug + 'static> RelmApp<M> {
+impl<M: Debug + 'static> RelmApp<M> {
     /// Create a new Relm4 application.
     ///
     /// This function will create a new [`gtk::Application`] object if necessary.
@@ -51,11 +51,13 @@ impl<'args, M: Debug + 'static> RelmApp<M> {
         }
     }
 
+    /// Add [`MessageBroker`] to the top-level component.
     pub fn with_broker(mut self, broker: &'static MessageBroker<M>) -> Self {
         self.broker = Some(broker);
         self
     }
 
+    /// Add command line arguments to run with.
     pub fn with_args(mut self, args: &[impl AsRef<str>]) -> Self {
         self.args = Some(args.iter().map(|a| a.as_ref().to_string()).collect());
         self
@@ -102,8 +104,7 @@ impl<'args, M: Debug + 'static> RelmApp<M> {
         });
 
         let _guard = RUNTIME.enter();
-        let args = args.as_ref().map(Vec::as_slice).unwrap_or(&[]);
-        app.run_with_args(args);
+        app.run_with_args(args.as_deref().unwrap_or(&[]));
 
         // Make sure everything is shut down
         shutdown_all();
@@ -163,8 +164,7 @@ impl<'args, M: Debug + 'static> RelmApp<M> {
         });
 
         let _guard = RUNTIME.enter();
-        let args = args.as_ref().map(Vec::as_slice).unwrap_or(&[]);
-        app.run_with_args(args);
+        app.run_with_args(args.as_deref().unwrap_or(&[]));
 
         // Make sure everything is shut down
         shutdown_all();
