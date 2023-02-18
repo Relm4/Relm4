@@ -27,7 +27,7 @@ use std::fmt::Debug;
 /// use relm4::{MessageBroker, Component};
 /// # type MyComponent = ();
 ///
-/// static MY_COMPONENT: MessageBroker<MyComponent::Input> = MessageBroker::new();
+/// static MY_COMPONENT: MessageBroker<()> = MessageBroker::new();
 ///
 /// // Initialize the component and the message broker with `launch_with_broker`.
 /// let controller = MyComponent::builder().launch_with_broker((), &MY_COMPONENT).detach();
