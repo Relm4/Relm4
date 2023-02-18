@@ -1,6 +1,6 @@
 use std::sync::Mutex;
 
-use crate::{Component, Receiver, Sender};
+use crate::{Receiver, Sender};
 use once_cell::sync::Lazy;
 use std::fmt::Debug;
 
@@ -27,36 +27,36 @@ use std::fmt::Debug;
 /// use relm4::{MessageBroker, Component};
 /// # type MyComponent = ();
 ///
-/// static MY_COMPONENT: MessageBroker<MyComponent> = MessageBroker::new();
+/// static MY_COMPONENT: MessageBroker<MyComponent::Input> = MessageBroker::new();
 ///
 /// // Initialize the component and the message broker with `launch_with_broker`.
 /// let controller = MyComponent::builder().launch_with_broker((), &MY_COMPONENT).detach();
 /// ```
-pub struct MessageBroker<C: Component> {
-    inner: Lazy<MessageBrokerInner<C>>,
+pub struct MessageBroker<M: Debug> {
+    inner: Lazy<MessageBrokerInner<M>>,
 }
 
-impl<C: Component> MessageBroker<C> {
+impl<M: Debug> MessageBroker<M> {
     /// Creates a new [`MessageBroker`].
     ///
     /// The returned message broker will not forward messages until it's initialized.
     #[must_use]
     pub const fn new() -> Self {
-        let inner: Lazy<MessageBrokerInner<C>> = Lazy::new(|| MessageBrokerInner::<C>::new());
+        let inner: Lazy<MessageBrokerInner<M>> = Lazy::new(|| MessageBrokerInner::<M>::new());
         Self { inner }
     }
 
     /// Get the input sender of the component.
-    pub fn sender(&self) -> &Sender<C::Input> {
+    pub fn sender(&self) -> &Sender<M> {
         &self.inner.sender
     }
 
     /// Send an input message to the component.
-    pub fn send(&self, input: C::Input) {
+    pub fn send(&self, input: M) {
         self.inner.sender.send(input).unwrap();
     }
 
-    pub(super) fn get_channel(&self) -> (Sender<C::Input>, Option<Receiver<C::Input>>) {
+    pub(super) fn get_channel(&self) -> (Sender<M>, Option<Receiver<M>>) {
         let inner = &self.inner;
         (
             inner.sender.clone(),
@@ -65,15 +65,15 @@ impl<C: Component> MessageBroker<C> {
     }
 }
 
-struct MessageBrokerInner<C: Component> {
-    sender: Sender<C::Input>,
-    input_receiver: Mutex<Option<Receiver<C::Input>>>,
+struct MessageBrokerInner<M> {
+    sender: Sender<M>,
+    input_receiver: Mutex<Option<Receiver<M>>>,
 }
 
-impl<C: Component> MessageBrokerInner<C> {
+impl<M> MessageBrokerInner<M> {
     fn new() -> Self {
         // Used for all events to be processed by this component's internal service.
-        let (sender, input_receiver) = crate::channel::<C::Input>();
+        let (sender, input_receiver) = crate::channel::<M>();
         Self {
             sender,
             input_receiver: Mutex::new(Some(input_receiver)),
@@ -81,7 +81,7 @@ impl<C: Component> MessageBrokerInner<C> {
     }
 }
 
-impl<C: Component> Debug for MessageBrokerInner<C> {
+impl<M> Debug for MessageBrokerInner<M> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("MessageBrokerInner")
             .field("sender", &self.sender)

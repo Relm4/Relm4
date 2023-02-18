@@ -7,7 +7,7 @@ use relm4::{
     MessageBroker, RelmApp, SimpleComponent,
 };
 
-static HEADER_BROKER: MessageBroker<Header> = MessageBroker::new();
+static HEADER_BROKER: MessageBroker<bool> = MessageBroker::new();
 
 struct Header(bool);
 

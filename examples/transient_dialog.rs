@@ -7,7 +7,7 @@ use relm4::{
     SimpleComponent,
 };
 
-static DIALOG_BROKER: MessageBroker<Dialog> = MessageBroker::new();
+static DIALOG_BROKER: MessageBroker<DialogMsg> = MessageBroker::new();
 
 struct Dialog {
     visible: bool,
