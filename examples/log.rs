@@ -80,6 +80,6 @@ fn main() {
 
     tracing::info!("Starting application!");
 
-    let app: RelmApp = RelmApp::new("relm4.example.log");
+    let app = RelmApp::new("relm4.example.log");
     app.run::<App>(0);
 }

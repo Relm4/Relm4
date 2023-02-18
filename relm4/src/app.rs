@@ -1,43 +1,56 @@
+use std::fmt::Debug;
 use gtk::glib;
 use gtk::prelude::{ApplicationExt, ApplicationExtManual, Cast, GtkApplicationExt, IsA, WidgetExt};
 
 use crate::component::{AsyncComponent, AsyncComponentBuilder, AsyncComponentController};
 use crate::runtime_util::shutdown_all;
-use crate::{Component, ComponentBuilder, ComponentController, RUNTIME};
+use crate::{Component, ComponentBuilder, ComponentController, RUNTIME, MessageBroker};
 
 use std::cell::Cell;
 
 /// An app that runs the main application.
 #[derive(Debug)]
-pub struct RelmApp {
+pub struct RelmApp<M: Debug + 'static> {
     /// The [`gtk::Application`] that's used internally to setup
     /// and run your application.
     app: gtk::Application,
+    broker: Option<&'static MessageBroker<M>>,
+    args: Option<Vec<String>>,
 }
 
-impl RelmApp {
+impl<'args, M: Debug + 'static> RelmApp<M> {
     /// Create a new Relm4 application.
     ///
     /// This function will create a new [`gtk::Application`] object if necessary.
     ///
     /// If the `libadwaita` feature is enabled, then the created [`gtk::Application`] will be an
     /// instance of [`adw::Application`]. This can be overridden by passing your own application
-    /// object to [`RelmApp::with_app`].
+    /// object to [`RelmApp::from_app`].
     #[must_use]
     pub fn new(app_id: &str) -> Self {
         crate::init();
         let app = crate::main_application();
         app.set_application_id(Some(app_id));
 
-        Self { app }
+        Self { app, broker: None, args: None }
     }
 
     /// Create a Relm4 application with a provided [`gtk::Application`].
-    pub fn with_app(app: impl IsA<gtk::Application>) -> Self {
+    pub fn from_app(app: impl IsA<gtk::Application>) -> Self {
         let app = app.upcast();
         crate::set_main_application(app.clone());
 
-        Self { app }
+        Self { app, broker: None, args: None }
+    }
+
+    pub fn with_broker(mut self, broker: &'static MessageBroker<M>) -> Self {
+        self.broker = Some(broker);
+        self
+    }
+
+    pub fn with_args(mut self, args: &[impl AsRef<str>]) -> Self {
+        self.args = Some(args.iter().map(|a| a.as_ref().to_string()).collect());
+        self
     }
 
     /// Runs the application, returns once the application is closed.
@@ -47,21 +60,10 @@ impl RelmApp {
     /// [`RelmApp::run_with_args`].
     pub fn run<C>(self, payload: C::Init)
     where
-        C: Component,
+        C: Component<Input = M>,
         C::Root: IsA<gtk::Window> + WidgetExt,
     {
-        self.run_with_args::<C, &str>(payload, &[]);
-    }
-
-    /// Runs the application with the provided command-line arguments, returns once the application
-    /// is closed.
-    pub fn run_with_args<C, S>(self, payload: C::Init, args: &[S])
-    where
-        C: Component,
-        C::Root: IsA<gtk::Window> + WidgetExt,
-        S: AsRef<str>,
-    {
-        let Self { app } = self;
+        let Self { app, broker, args } = self;
 
         let payload = Cell::new(Some(payload));
 
@@ -73,7 +75,10 @@ impl RelmApp {
                 );
 
                 let builder = ComponentBuilder::<C>::default();
-                let connector = builder.launch(payload);
+                let connector = match broker {
+                    Some(broker) => builder.launch_with_broker(payload, broker),
+                    None => builder.launch(payload),
+                };
 
                 // Run late initialization for transient windows for example.
                 crate::late_initialization::run_late_init();
@@ -89,11 +94,23 @@ impl RelmApp {
         });
 
         let _guard = RUNTIME.enter();
+        let args = args.as_ref().map(Vec::as_slice).unwrap_or(&[]);
         app.run_with_args(args);
 
         // Make sure everything is shut down
         shutdown_all();
         glib::MainContext::ref_thread_default().iteration(true);
+    }
+
+    /// Runs the application with the provided command-line arguments, returns once the application
+    /// is closed.
+    pub fn run_with_args<C, S>(self, payload: C::Init, args: &[S])
+    where
+        C: Component<Input = M>,
+        C::Root: IsA<gtk::Window> + WidgetExt,
+        S: AsRef<str>,
+    {
+        self.with_args(args).run::<C>(payload);
     }
 
     /// Runs the application, returns once the application is closed.
@@ -103,21 +120,14 @@ impl RelmApp {
     /// [`RelmApp::run_with_args`].
     pub fn run_async<C>(self, payload: C::Init)
     where
-        C: AsyncComponent,
+        C: AsyncComponent<Input = M>,
         C::Root: IsA<gtk::Window> + WidgetExt,
     {
-        self.run_async_with_args::<C, &str>(payload, &[]);
-    }
+        let Self { app, broker, args } = self;
 
-    /// Runs the application with the provided command-line arguments, returns once the application
-    /// is closed.
-    pub fn run_async_with_args<C, S>(self, payload: C::Init, args: &[S])
-    where
-        C: AsyncComponent,
-        C::Root: IsA<gtk::Window> + WidgetExt,
-        S: AsRef<str>,
-    {
-        let Self { app } = self;
+        if broker.is_some() {
+            panic!("MessageBroker is not implemented for AsyncComponent yet");
+        }
 
         let payload = Cell::new(Some(payload));
 
@@ -145,10 +155,22 @@ impl RelmApp {
         });
 
         let _guard = RUNTIME.enter();
+        let args = args.as_ref().map(Vec::as_slice).unwrap_or(&[]);
         app.run_with_args(args);
 
         // Make sure everything is shut down
         shutdown_all();
         glib::MainContext::ref_thread_default().iteration(true);
+    }
+
+    /// Runs the application with the provided command-line arguments, returns once the application
+    /// is closed.
+    pub fn run_async_with_args<C, S>(self, payload: C::Init, args: &[S])
+    where
+        C: AsyncComponent<Input = M>,
+        C::Root: IsA<gtk::Window> + WidgetExt,
+        S: AsRef<str>,
+    {
+        self.with_args(args).run_async::<C>(payload)
     }
 }
