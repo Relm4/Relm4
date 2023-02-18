@@ -113,6 +113,7 @@ impl<M: Debug + 'static> RelmApp<M> {
 
     /// Runs the application with the provided command-line arguments, returns once the application
     /// is closed.
+    #[deprecated]
     pub fn run_with_args<C, S>(self, payload: C::Init, args: &[S])
     where
         C: Component<Input = M>,
@@ -173,6 +174,7 @@ impl<M: Debug + 'static> RelmApp<M> {
 
     /// Runs the application with the provided command-line arguments, returns once the application
     /// is closed.
+    #[deprecated]
     pub fn run_async_with_args<C, S>(self, payload: C::Init, args: &[S])
     where
         C: AsyncComponent<Input = M>,
