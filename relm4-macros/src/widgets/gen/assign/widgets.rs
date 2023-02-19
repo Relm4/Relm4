@@ -34,6 +34,13 @@ impl Widget {
         w_name: &Ident,
         is_conditional: bool,
     ) {
+        // Recursively generate code for properties
+        {
+            let w_name = &self.name;
+            self.properties
+                .assign_stream(stream, w_name, is_conditional);
+        }
+
         // Template children are already assigned by the template.
         if self.template_attr != WidgetTemplateAttr::TemplateChild {
             let assign_fn = p_name.assign_fn_stream(w_name);
@@ -59,11 +66,6 @@ impl Widget {
                 }
             });
         }
-
-        // Recursively generate code for properties
-        let w_name = &self.name;
-        self.properties
-            .assign_stream(stream, w_name, is_conditional);
 
         if let Some(returned_widget) = &self.returned_widget {
             let w_name = &returned_widget.name;
