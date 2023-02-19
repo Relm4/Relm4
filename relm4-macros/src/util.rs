@@ -1,9 +1,9 @@
 use proc_macro::TokenStream;
-use proc_macro2::Span as Span2;
+use proc_macro2::{Span as Span2, TokenStream as TokenStream2};
 use syn::punctuated::Punctuated;
 
 use syn::spanned::Spanned;
-use syn::{Ident, ImplItem, ItemImpl, Path, PathArguments, PathSegment, Type, TypePath};
+use syn::{FnArg, Ident, ImplItem, ItemImpl, Path, PathArguments, PathSegment, Type, TypePath};
 
 pub(super) fn generate_widgets_type(
     widgets_ty: Option<Type>,
@@ -80,4 +80,39 @@ pub(super) fn item_impl_error(original_input: TokenStream) -> TokenStream {
     }
     .into();
     vec![macro_impls, original_input].into_iter().collect()
+}
+
+pub(super) fn verbatim_impl_item_method(
+    name: &str,
+    args: Vec<FnArg>,
+    ty: Type,
+    tokens: TokenStream2,
+) -> ImplItem {
+    ImplItem::Method(syn::ImplItemMethod {
+        attrs: Vec::new(),
+        vis: syn::Visibility::Inherited,
+        defaultness: None,
+        sig: syn::Signature {
+            constness: None,
+            asyncness: None,
+            unsafety: None,
+            abi: None,
+            fn_token: syn::token::Fn::default(),
+            ident: Ident::new(name, Span2::call_site()),
+            generics: syn::Generics {
+                lt_token: None,
+                params: Punctuated::default(),
+                gt_token: None,
+                where_clause: None,
+            },
+            paren_token: syn::token::Paren::default(),
+            inputs: Punctuated::from_iter(args.into_iter()),
+            variadic: None,
+            output: syn::ReturnType::Type(syn::token::RArrow::default(), Box::new(ty)),
+        },
+        block: syn::Block {
+            brace_token: syn::token::Brace::default(),
+            stmts: vec![syn::Stmt::Expr(syn::Expr::Verbatim(tokens))],
+        },
+    })
 }

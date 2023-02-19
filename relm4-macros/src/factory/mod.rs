@@ -129,18 +129,12 @@ pub(crate) fn generate_tokens(
             type Root = #root_widget_type;
         });
 
+        let ty: syn::Type = parse_quote!(Self::Root);
         factory_impl.items.push(if asyncness.is_some() {
-            parse_quote! {
-                fn init_root() -> Self::Root {
-                    #init_root
-                }
-            }
+            util::verbatim_impl_item_method("init_root", Vec::new(), ty, init_root)
         } else {
-            parse_quote! {
-                fn init_root(&self) -> Self::Root {
-                    #init_root
-                }
-            }
+            let args = vec![parse_quote! { &self}];
+            util::verbatim_impl_item_method("init_root", args, ty, init_root)
         });
 
         let PreAndPostView {

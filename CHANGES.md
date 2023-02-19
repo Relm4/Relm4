@@ -4,6 +4,12 @@
 
 ## 0.5.0 - 2023-2-17
 
+### Fixed
+
++ macros: Fix panic on incorrect root type syntax
++ macros: Fix incorrect type generation for generics
++ macros: Allow mutably root widgets
+
 ### Added
 
 + core: Implement `RelmSetChildExt` for `gtk::Expander`
