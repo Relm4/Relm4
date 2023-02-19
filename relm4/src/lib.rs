@@ -148,7 +148,7 @@ pub fn main_application() -> gtk::Application {
 pub fn set_global_css(style_data: &str) {
     let display = gtk::gdk::Display::default().unwrap();
     let provider = gtk::CssProvider::new();
-    provider.load_from_data(style_data.as_bytes());
+    provider.load_from_data(style_data);
     gtk::StyleContext::add_provider_for_display(
         &display,
         &provider,
@@ -176,15 +176,23 @@ pub fn set_global_css_from_file<P: AsRef<std::path::Path>>(path: P) {
 }
 
 /// Spawns a thread-local future on GLib's executor, for non-[`Send`] futures.
-pub fn spawn_local<F: Future<Output = ()> + 'static>(func: F) -> gtk::glib::SourceId {
+pub fn spawn_local<F, Out>(func: F) -> gtk::glib::JoinHandle<Out>
+where
+    F: Future<Output = Out> + 'static,
+    Out: 'static,
+{
     gtk::glib::MainContext::ref_thread_default().spawn_local(func)
 }
 
 /// Spawns a thread-local future on GLib's executor, for non-[`Send`] futures.
-pub fn spawn_local_with_priority<F: Future<Output = ()> + 'static>(
+pub fn spawn_local_with_priority<F, Out>(
     priority: gtk::glib::Priority,
     func: F,
-) -> gtk::glib::SourceId {
+) -> gtk::glib::JoinHandle<Out>
+where
+    F: Future<Output = Out> + 'static,
+    Out: 'static,
+{
     gtk::glib::MainContext::ref_thread_default().spawn_local_with_priority(priority, func)
 }
 

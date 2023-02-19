@@ -78,14 +78,14 @@ where
         let ty = Name::Target::static_variant_type();
 
         let action =
-            gio::SimpleAction::new_stateful(Name::NAME, Some(&ty), &start_value.to_variant());
+            gio::SimpleAction::new_stateful(Name::NAME, Some(&ty), start_value.to_variant());
 
         action.connect_activate(move |action, variant| {
             let value = variant.unwrap().get().unwrap();
             let mut state = action.state().unwrap().get().unwrap();
 
             callback(action, &mut state, value);
-            action.set_state(&state.to_variant());
+            action.set_state(state.to_variant());
         });
 
         Self {
@@ -105,12 +105,12 @@ where
         start_value: &Name::State,
         callback: Callback,
     ) -> Self {
-        let action = gio::SimpleAction::new_stateful(Name::NAME, None, &start_value.to_variant());
+        let action = gio::SimpleAction::new_stateful(Name::NAME, None, start_value.to_variant());
 
         action.connect_activate(move |action, _variant| {
             let mut state = action.state().unwrap().get().unwrap();
             callback(action, &mut state);
-            action.set_state(&state.to_variant());
+            action.set_state(state.to_variant());
         });
 
         Self {

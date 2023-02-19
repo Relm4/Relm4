@@ -49,7 +49,7 @@ impl SimpleComponent for Dialog {
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = Dialog {
-            buffer: gtk::EntryBuffer::new(None),
+            buffer: gtk::EntryBuffer::default(),
         };
         let widgets = view_output!();
 
@@ -59,7 +59,7 @@ impl SimpleComponent for Dialog {
     fn update(&mut self, msg: Self::Input, sender: ComponentSender<Self>) {
         match msg {
             DialogMsg::Accept => {
-                sender.output(self.buffer.text()).unwrap();
+                sender.output(self.buffer.text().into()).unwrap();
             }
             DialogMsg::Cancel => {
                 sender.output(String::default()).unwrap();

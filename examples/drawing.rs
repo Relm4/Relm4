@@ -48,7 +48,7 @@ impl Component for App {
             set_vexpand: true,
             set_hexpand: true,
 
-            add_controller = &gtk::GestureClick::new() {
+            add_controller = gtk::GestureClick {
               set_button: 0,
               connect_pressed[sender] => move |controller, _, x, y| {
                 if controller.current_button() == gtk::gdk::BUTTON_SECONDARY {

@@ -128,12 +128,12 @@ impl Component for App {
         // Request the caller to reload its options.
         sender.output(Output::Reload).unwrap();
 
-        let label = gtk::builders::LabelBuilder::new()
-            .label(&title)
+        let label = gtk::Label::builder()
+            .label(title)
             .margin_top(24)
             .build();
 
-        let list = gtk::builders::ListBoxBuilder::new()
+        let list = gtk::ListBox::builder()
             .halign(gtk::Align::Center)
             .margin_bottom(24)
             .margin_top(24)

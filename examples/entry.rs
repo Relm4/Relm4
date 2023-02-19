@@ -92,7 +92,7 @@ impl SimpleComponent for App {
         let model = App {
             counters: FactoryVecDeque::new(factory_box.clone(), sender.input_sender()),
             created_counters: 0,
-            entry: gtk::EntryBuffer::new(None),
+            entry: gtk::EntryBuffer::default(),
         };
 
         let widgets = view_output!();
