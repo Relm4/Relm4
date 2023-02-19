@@ -63,9 +63,9 @@ impl<T: gtk::glib::IsA<gtk::Widget>> RelmWidgetExt for T {
         let provider = gtk::CssProvider::new();
 
         let data = if style.ends_with(';') {
-            [b"*{", style.as_bytes(), b"}"].concat()
+            ["*{", style, "}"].concat()
         } else {
-            [b"*{", style.as_bytes(), b";}"].concat()
+            ["*{", style, ";}"].concat()
         };
 
         provider.load_from_data(&data);

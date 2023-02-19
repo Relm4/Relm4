@@ -107,7 +107,7 @@ impl SimpleComponent for App {
                 gtk::Entry {
                     connect_activate[sender] => move |entry| {
                         let buffer = entry.buffer();
-                        sender.input(AppMsg::AddEntry(buffer.text()));
+                        sender.input(AppMsg::AddEntry(buffer.text().into()));
                         buffer.delete_text(0, None);
                     }
                 },
