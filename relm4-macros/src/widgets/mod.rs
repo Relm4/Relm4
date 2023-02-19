@@ -121,7 +121,7 @@ pub(super) struct Widget {
     doc_attr: Option<TokenStream2>,
     attr: WidgetAttr,
     template_attr: WidgetTemplateAttr,
-    mutable: Option<Mut>,
+    pub(super) mutable: Option<Mut>,
     pub(super) name: Ident,
     name_assigned_by_user: bool,
     func: WidgetFunc,

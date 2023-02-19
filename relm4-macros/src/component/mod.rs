@@ -111,11 +111,9 @@ pub(crate) fn generate_tokens(
             type Root = #root_widget_type;
         });
 
-        component_impl.items.push(parse_quote! {
-            fn init_root() -> Self::Root {
-                #init_root
-            }
-        });
+        let ty: syn::Type = parse_quote!(Self::Root);
+        let init_root = util::verbatim_impl_item_method("init_root", Vec::new(), ty, init_root);
+        component_impl.items.push(init_root);
 
         let PreAndPostView {
             pre_view,

@@ -92,11 +92,9 @@ impl TopLevelWidget {
         trait_impl_details: &TraitImplDetails,
         standalone_view: bool,
     ) {
-        self.inner.init_token_generation(
-            streams,
-            trait_impl_details,
-            !standalone_view && self.root_attr.is_some(),
-        );
+        let generate_init_root_stream = !standalone_view && self.root_attr.is_some();
+        self.inner
+            .init_token_generation(streams, trait_impl_details, generate_init_root_stream);
     }
 }
 
@@ -105,7 +103,7 @@ impl Widget {
         &self,
         streams: &mut TokenStreams,
         trait_impl_details: &TraitImplDetails,
-        generate_init_root_stream: bool,
+        generate_root_init_stream: bool,
     ) {
         let TraitImplDetails {
             vis,
@@ -117,7 +115,7 @@ impl Widget {
         let name = &self.name;
 
         // Initialize the root
-        if generate_init_root_stream {
+        if generate_root_init_stream {
             // For the `component` macro
             self.init_root_init_streams(&mut streams.init_root, &mut streams.init);
         } else {
@@ -140,10 +138,11 @@ impl Widget {
         self.connect_signals_stream(&mut streams.connect, sender_name);
 
         // Rename the `root` to the actual widget name
-        if generate_init_root_stream {
+        if generate_root_init_stream {
+            let mut_token = self.mutable.as_ref();
             if let Some(root_name) = root_name {
                 streams.rename_root.extend(quote! {
-                    let #name = #root_name.clone();
+                    let #mut_token #name = #root_name.clone();
                 });
             }
         }
