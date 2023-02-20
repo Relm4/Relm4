@@ -1,5 +1,9 @@
+use std::sync::atomic::{AtomicBool, Ordering};
+
 use gtk::prelude::*;
 use relm4::{main_application, prelude::*};
+
+static SHUTDOWN_CALLED: AtomicBool = AtomicBool::new(false);
 
 struct App;
 
@@ -31,13 +35,13 @@ impl SimpleComponent for App {
     }
 
     fn shutdown(&mut self, _widgets: &mut Self::Widgets, _output: relm4::Sender<Self::Output>) {
-        panic!("Shutdown called");
+        SHUTDOWN_CALLED.store(true, Ordering::SeqCst);
     }
 }
 
 #[test]
-#[should_panic = "Shutdown called"]
 fn shutdown_after_quit() {
     let app = RelmApp::new("relm4.test.shutdownAfterQuit");
     app.run::<App>(());
+    assert!(SHUTDOWN_CALLED.load(Ordering::SeqCst));
 }

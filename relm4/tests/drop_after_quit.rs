@@ -1,11 +1,15 @@
+use std::sync::atomic::{AtomicBool, Ordering};
+
 use gtk::prelude::*;
 use relm4::{main_application, prelude::*};
+
+static APP_DROPPED: AtomicBool = AtomicBool::new(false);
 
 struct App;
 
 impl Drop for App {
     fn drop(&mut self) {
-        panic!("App dropped");
+        APP_DROPPED.store(true, Ordering::SeqCst);
     }
 }
 
@@ -38,8 +42,8 @@ impl SimpleComponent for App {
 }
 
 #[test]
-#[should_panic = "App dropped"]
 fn drop_after_quit() {
     let app = RelmApp::new("relm4.test.dropAfterQuit");
     app.run::<App>(());
+    assert!(APP_DROPPED.load(Ordering::SeqCst));
 }
