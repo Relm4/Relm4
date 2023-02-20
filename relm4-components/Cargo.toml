@@ -21,7 +21,6 @@ features = ["dox"]
 cargo-args = ["-Zunstable-options", "-Zrustdoc-scrape-examples"]
 
 [dependencies]
-log = "0.4.17"
 once_cell = "1.17"
 relm4 = { version = "0.5.0", path = "../relm4", features = ["macros"] }
 tracker = "0.2.0"
