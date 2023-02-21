@@ -12,6 +12,19 @@
 + macros: Support template children of templates that are root widgets
 + macros: Fix order of assignment and connect statements
 
+## 0.6.0-alpha.1 - 2023-2-29
+
+### Added
+
++ core: Add `RelmApp` builder methods `with_args` and `with_broker`
++ core: Add `MessageBroker` support for `AsyncComponent`
+
+### Changed
+
++ core: Change `MessageBroker` generic type parameter to message type
++ core: Rename `RelmApp` method `with_app` to `from_app`
++ core: Deprecate `RelmApp` methods `run_with_args` and `run_async_with_args`
+
 ## 0.5.0 - 2023-2-17
 
 ### Added
