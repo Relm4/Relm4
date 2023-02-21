@@ -7,13 +7,18 @@ mod sync;
 /// Types and traits used for async components.
 mod r#async;
 
+/// Message broker
+mod message_broker;
+
 /// A simpler version of components that does work
 /// in the background.
 pub mod worker;
 
+pub use message_broker::MessageBroker;
+
 pub use sync::{
     CommandFuture, Component, ComponentBuilder, ComponentController, ComponentParts,
-    ComponentStream, Connector, Controller, MessageBroker, SimpleComponent, StateWatcher,
+    ComponentStream, Connector, Controller, SimpleComponent, StateWatcher,
 };
 
 pub use r#async::{

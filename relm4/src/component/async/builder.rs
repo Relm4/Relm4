@@ -2,7 +2,7 @@
 // Copyright 2022 System76 <info@system76.com>
 // SPDX-License-Identifier: MIT or Apache-2.0
 
-//use super::message_broker::MessageBroker;
+use super::super::MessageBroker;
 use super::{AsyncComponent, AsyncComponentParts, AsyncConnector};
 use crate::channel::AsyncComponentSender;
 use crate::{
@@ -140,6 +140,24 @@ impl<C: AsyncComponent> AsyncComponentBuilder<C> {
         let (input_sender, input_receiver) = crate::channel::<C::Input>();
 
         self.launch_with_input_channel(payload, input_sender, input_receiver)
+    }
+
+    /// Similar to [`launch()`](AsyncComponentBuilder::launch) but also initializes a [`MessageBroker`].
+    ///
+    /// # Panics
+    ///
+    /// This method panics if the message broker was already initialized in another launch.
+    pub fn launch_with_broker(
+        self,
+        payload: C::Init,
+        broker: &MessageBroker<C::Input>,
+    ) -> AsyncConnector<C> {
+        let (input_sender, input_receiver) = broker.get_channel();
+        self.launch_with_input_channel(
+            payload,
+            input_sender,
+            input_receiver.expect("Message broker launched multiple times"),
+        )
     }
 
     fn launch_with_input_channel(
