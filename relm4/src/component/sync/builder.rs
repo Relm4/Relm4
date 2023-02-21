@@ -2,7 +2,7 @@
 // Copyright 2022 System76 <info@system76.com>
 // SPDX-License-Identifier: MIT or Apache-2.0
 
-use super::message_broker::MessageBroker;
+use super::super::MessageBroker;
 use super::{Component, ComponentParts, Connector, StateWatcher};
 use crate::{
     late_initialization, ComponentSender, GuardedReceiver, Receiver, RelmContainerExt,

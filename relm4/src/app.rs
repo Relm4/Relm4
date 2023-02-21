@@ -130,10 +130,6 @@ impl<M: Debug + 'static> RelmApp<M> {
     {
         let Self { app, broker, args } = self;
 
-        if broker.is_some() {
-            panic!("MessageBroker is not implemented for AsyncComponent yet");
-        }
-
         let payload = Cell::new(Some(payload));
 
         app.connect_activate(move |app| {
@@ -144,7 +140,10 @@ impl<M: Debug + 'static> RelmApp<M> {
                 );
 
                 let builder = AsyncComponentBuilder::<C>::default();
-                let connector = builder.launch(payload);
+                let connector = match broker {
+                    Some(broker) => builder.launch_with_broker(payload, broker),
+                    None => builder.launch(payload),
+                };
 
                 // Run late initialization for transient windows for example.
                 crate::late_initialization::run_late_init();
