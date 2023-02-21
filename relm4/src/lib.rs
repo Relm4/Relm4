@@ -119,7 +119,7 @@ fn init() {
 /// by calling [`ApplicationExt::quit()`][gtk::prelude::ApplicationExt::quit] on it.
 ///
 /// Note: The global application can be overwritten by calling
-/// [`RelmApp::with_app()`].
+/// [`RelmApp::from_app()`].
 #[must_use]
 pub fn main_application() -> gtk::Application {
     #[cfg(feature = "libadwaita")]
