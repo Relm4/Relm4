@@ -1,7 +1,7 @@
 #![allow(missing_docs)]
 
-mod widgets;
 mod bindings;
+mod widgets;
 
 pub use bindings::*;
 
@@ -59,7 +59,6 @@ impl<B: Binding> Drop for BindingGuard<B> {
     }
 }
 
-    
 pub trait Binding: Clone + IsA<glib::Object> {
     type Target;
 

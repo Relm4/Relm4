@@ -22,6 +22,9 @@ impl<T: glib::IsA<glib::Object>> RelmObjectExt for T {
     }
 
     fn add_binding<B: Binding>(&self, binding: &B, property_name: &str) {
-        binding.bind_property(B::property_name(), self, property_name).bidirectional().build();
+        binding
+            .bind_property(B::property_name(), self, property_name)
+            .bidirectional()
+            .build();
     }
 }

@@ -1,5 +1,9 @@
 use gtk::prelude::*;
-use relm4::{prelude::*, binding::{ConnectBindingExt, BoolBinding, Binding, IntBinding}, RelmObjectExt};
+use relm4::{
+    binding::{Binding, BoolBinding, ConnectBindingExt, IntBinding},
+    prelude::*,
+    RelmObjectExt,
+};
 
 struct App {
     counter: u8,
@@ -45,7 +49,7 @@ impl SimpleComponent for App {
                     set_label: &format!("Counter: {}", model.counter),
                     set_margin_all: 5,
                 },
-                
+
                 gtk::ToggleButton::with_binding(&model.value) { }
             }
         }
@@ -59,7 +63,11 @@ impl SimpleComponent for App {
     ) -> ComponentParts<Self> {
         let value = BoolBinding::default();
         let left_margin = IntBinding::default();
-        let model = App { counter, value, left_margin };
+        let model = App {
+            counter,
+            value,
+            left_margin,
+        };
 
         // Insert the code generation of the view! macro here
         let widgets = view_output!();
