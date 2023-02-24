@@ -41,7 +41,7 @@ jobs:
       - name: "check examples"
         run: cargo clippy --examples -- --deny warnings
 
-      - uses: bcomnes/cleanup-xvfb@v1.0.8
+      - uses: bcomnes/cleanup-xvfb@v1.0.9
 
   fmt:
     name: rustfmt
