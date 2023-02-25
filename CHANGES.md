@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixed
+
++ macros: Fix order of assignment and connect statements
+
 ## 0.5.0 - 2023-2-17
 
 ### Fixed
