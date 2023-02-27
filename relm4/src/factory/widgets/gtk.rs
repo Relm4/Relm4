@@ -1,6 +1,9 @@
 use gtk::prelude::{BoxExt, Cast, FlowBoxChildExt, GridExt, ListBoxRowExt, WidgetExt};
 
-use crate::factory::{positions, FactoryView};
+use crate::factory::{
+    positions::{self, StackPageInfo},
+    FactoryView,
+};
 
 impl FactoryView for gtk::Box {
     type Children = gtk::Widget;
@@ -110,7 +113,7 @@ impl FactoryView for gtk::Grid {
 impl FactoryView for gtk::Stack {
     type Children = gtk::Widget;
     type ReturnedWidget = gtk::StackPage;
-    type Position = ();
+    type Position = StackPageInfo;
 
     fn factory_remove(&self, widget: &Self::ReturnedWidget) {
         self.remove(&widget.child());
@@ -119,26 +122,38 @@ impl FactoryView for gtk::Stack {
     fn factory_append(
         &self,
         widget: impl AsRef<Self::Children>,
-        _position: &Self::Position,
+        position: &Self::Position,
     ) -> Self::ReturnedWidget {
-        self.add_child(widget.as_ref())
+        if let Some(title) = &position.title {
+            self.add_titled(widget.as_ref(), position.name.as_deref(), title)
+        } else {
+            self.add_named(widget.as_ref(), position.name.as_deref())
+        }
     }
 
     fn factory_prepend(
         &self,
         widget: impl AsRef<Self::Children>,
-        _position: &(),
+        position: &Self::Position,
     ) -> Self::ReturnedWidget {
-        self.add_child(widget.as_ref())
+        if let Some(title) = &position.title {
+            self.add_titled(widget.as_ref(), position.name.as_deref(), title)
+        } else {
+            self.add_named(widget.as_ref(), position.name.as_deref())
+        }
     }
 
     fn factory_insert_after(
         &self,
         widget: impl AsRef<Self::Children>,
-        _position: &(),
+        position: &Self::Position,
         _other: &Self::ReturnedWidget,
     ) -> Self::ReturnedWidget {
-        self.add_child(widget.as_ref())
+        if let Some(title) = &position.title {
+            self.add_titled(widget.as_ref(), position.name.as_deref(), title)
+        } else {
+            self.add_named(widget.as_ref(), position.name.as_deref())
+        }
     }
 
     fn factory_move_after(&self, _widget: &Self::ReturnedWidget, _other: &Self::ReturnedWidget) {}
@@ -307,27 +322,6 @@ impl FactoryView for gtk::FlowBox {
 
 //     fn remove(&self, widget: &gtk::TreeViewColumn) {
 //         self.remove_column(widget);
-//     }
-// }
-
-// impl<Widget> FactoryView<Widget> for gtk::Stack
-// where
-//     Widget: glib::IsA<gtk::Widget>,
-// {
-//     type Position = StackPageInfo;
-//     type Root = Widget;
-
-//     fn add(&self, widget: &Widget, position: &StackPageInfo) -> Widget {
-//         if let Some(title) = &position.title {
-//             self.add_titled(widget, position.name.as_deref(), title);
-//         } else {
-//             self.add_named(widget, position.name.as_deref());
-//         }
-//         widget.clone()
-//     }
-
-//     fn remove(&self, widget: &Widget) {
-//         self.remove(widget);
 //     }
 // }
 

@@ -1,5 +1,8 @@
 use crate::{
-    factory::{positions::GridPosition, FactoryView},
+    factory::{
+        positions::{GridPosition, StackPageInfo},
+        FactoryView,
+    },
     gtk, RelmIterChildrenExt, WidgetRef,
 };
 use gtk::prelude::{FlowBoxChildExt, ListBoxRowExt};
@@ -135,9 +138,9 @@ fn stack_factory_view() {
     let widget2 = gtk::Switch::default();
     let widget3 = gtk::Entry::default();
 
-    let page1 = stack.factory_append(&widget1, &());
-    let page2 = stack.factory_append(&widget2, &());
-    let page3 = stack.factory_append(&widget3, &());
+    let page1 = stack.factory_append(&widget1, &StackPageInfo::default());
+    let page2 = stack.factory_append(&widget2, &StackPageInfo::default());
+    let page3 = stack.factory_append(&widget3, &StackPageInfo::default());
 
     assert_eq!(page1.child(), widget1);
     assert_eq!(page2.child(), widget2);

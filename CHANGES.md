@@ -2,6 +2,8 @@
 
 ## Unreleased
 
++ core: Fix to use `StackPageInfo` in the implementation of `Stack`'s `FactoryView`
+
 ## 0.5.0 - 2023-2-17
 
 ### Fixed

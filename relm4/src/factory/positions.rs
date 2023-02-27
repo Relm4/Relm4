@@ -22,3 +22,13 @@ pub struct FixedPosition {
     /// Position on the y-axis.
     pub y: f64,
 }
+
+#[derive(Debug, Default)]
+/// Position (or rather information) for a stack page
+/// inside a factory.
+pub struct StackPageInfo {
+    /// The name of the [`gtk::StackPage`].
+    pub name: Option<String>,
+    /// The title of the [`gtk::StackPage`].
+    pub title: Option<String>,
+}
