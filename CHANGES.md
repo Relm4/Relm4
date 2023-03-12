@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
++ components: WebImage as component for easily loading images from the web
+
 ## 0.5.0 - 2023-2-17
 
 ### Added
