@@ -34,18 +34,22 @@ impl ConditionalWidget {
             span => #assign_fn(#self_assign_args #assign_args #args);
         });
 
-        info.is_conditional = true;
+        let mut info = AssignInfo {
+            stream: info.stream,
+            widget_name: &self.name,
+            is_conditional: true,
+        };
         match &self.branches {
             ConditionalBranches::If(if_branches) => {
                 for branch in if_branches {
                     let p_name = PropertyName::Ident(Ident::new("add_named", p_name.span()));
-                    branch.widget.assign_stream(info, &p_name, sender_name);
+                    branch.widget.assign_stream(&mut info, &p_name, sender_name);
                 }
             }
             ConditionalBranches::Match((_, _, match_arms)) => {
                 for arm in match_arms {
                     let p_name = PropertyName::Ident(Ident::new("add_named", p_name.span()));
-                    arm.widget.assign_stream(info, &p_name, sender_name);
+                    arm.widget.assign_stream(&mut info, &p_name, sender_name);
                 }
             }
         }
