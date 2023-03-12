@@ -12,6 +12,7 @@ impl AssignProperty {
         p_name: &PropertyName,
         w_name: &Ident,
         is_conditional: bool,
+        init: bool,
     ) {
         // If the code gen path is behind a conditional widgets, handle `watch` and `track` later.
         // Normally, those would be initialized right away, but they might need access to
@@ -23,7 +24,7 @@ impl AssignProperty {
                 AssignPropertyAttr::Track(_) | AssignPropertyAttr::Watch
             )
         {
-            self.assign_stream(stream, p_name, w_name);
+            self.assign_stream(stream, p_name, w_name, init);
         }
     }
 
@@ -32,6 +33,7 @@ impl AssignProperty {
         stream: &mut TokenStream2,
         p_name: &PropertyName,
         w_name: &Ident,
+        init: bool,
     ) {
         let assign_fn = p_name.assign_fn_stream(w_name);
         let self_assign_args = p_name.assign_args_stream(w_name);
@@ -56,12 +58,13 @@ impl AssignProperty {
             }
         });
 
-        let (block_stream, unblock_stream) = if self.block_signals.is_empty() {
+        let (block_stream, unblock_stream) = if init || self.block_signals.is_empty() {
             (None, None)
         } else {
             let mut block_stream = TokenStream2::default();
             let mut unblock_stream = TokenStream2::default();
             let gtk_import = crate::gtk_import();
+
             for signal_handler in &self.block_signals {
                 block_stream.extend(quote_spanned! {
                     signal_handler.span() =>

@@ -12,7 +12,7 @@ impl Property {
     fn assign_stream(&self, stream: &mut TokenStream2, w_name: &Ident, is_conditional: bool) {
         match &self.ty {
             PropertyType::Assign(assign) => {
-                assign.conditional_assign_stream(stream, &self.name, w_name, is_conditional);
+                assign.conditional_assign_stream(stream, &self.name, w_name, is_conditional, true);
             }
             PropertyType::Widget(widget) => {
                 widget.assign_stream(stream, &self.name, w_name, is_conditional);

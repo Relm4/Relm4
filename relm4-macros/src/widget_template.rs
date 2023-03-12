@@ -44,8 +44,8 @@ pub(crate) fn generate_tokens(vis: Option<Visibility>, mut item_impl: ItemImpl) 
 
                     let view_output = quote! {
                         #init
-                        #connect
                         #assign
+                        #connect
                         {
                             #error
                         }

@@ -9,7 +9,8 @@
 
 ### Fixed
 
-macros: Support template children of templates that are root widgets
++ macros: Support template children of templates that are root widgets
++ macros: Fix order of assignment and connect statements
 
 ## 0.5.0 - 2023-2-17
 
