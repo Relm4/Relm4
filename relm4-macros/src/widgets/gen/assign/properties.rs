@@ -1,17 +1,13 @@
-use proc_macro2::TokenStream as TokenStream2;
 use syn::Ident;
 
 use crate::widgets::Properties;
 
+use super::AssignInfo;
+
 impl Properties {
-    pub(super) fn assign_stream(
-        &self,
-        stream: &mut TokenStream2,
-        w_name: &Ident,
-        is_conditional: bool,
-    ) {
+    pub(super) fn assign_stream<'a>(&'a self, info: &mut AssignInfo<'a>, sender_name: &'a Ident) {
         for prop in &self.properties {
-            prop.assign_stream(stream, w_name, is_conditional);
+            prop.assign_stream(info, sender_name);
         }
     }
 }

@@ -18,8 +18,6 @@ pub(super) struct TokenStreams {
     pub(super) init: TokenStream2,
     /// The tokens initializing the properties.
     pub(super) assign: TokenStream2,
-    /// The tokens for connecting events.
-    pub(super) connect: TokenStream2,
     /// The tokens for the returned struct fields -> name,
     pub(super) return_fields: TokenStream2,
     /// For destructuring the widget struct field
@@ -129,13 +127,12 @@ impl Widget {
         });
 
         self.error_stream(&mut streams.error);
-        self.start_assign_stream(&mut streams.assign);
+        self.start_assign_stream(&mut streams.assign, sender_name);
         self.init_conditional_init_stream(&mut streams.assign, model_name);
         self.struct_fields_stream(&mut streams.struct_fields, vis);
         self.return_stream(&mut streams.return_fields);
         self.destructure_stream(&mut streams.destructure_fields);
         self.init_update_view_stream(&mut streams.update_view, model_name);
-        self.connect_signals_stream(&mut streams.connect, sender_name);
 
         // Rename the `root` to the actual widget name
         if generate_root_init_stream {
