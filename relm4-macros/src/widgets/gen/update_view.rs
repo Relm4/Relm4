@@ -8,7 +8,7 @@ use crate::widgets::{
     Properties, Property, PropertyName, PropertyType, ReturnedWidget, Widget,
 };
 
-use super::util::WidgetFieldsScope;
+use super::{assign::AssignInfo, util::WidgetFieldsScope};
 
 impl Property {
     fn update_view_stream(
@@ -158,11 +158,21 @@ impl AssignProperty {
         match &self.attr {
             AssignPropertyAttr::None => (),
             AssignPropertyAttr::Watch => {
-                self.assign_stream(stream, p_name, w_name, false);
+                let mut info = AssignInfo {
+                    stream,
+                    widget_name: w_name,
+                    is_conditional: false,
+                };
+                self.assign_stream(&mut info, p_name, false);
             }
             AssignPropertyAttr::Track((track_stream, paste_model)) => {
                 let mut assign_stream = TokenStream2::new();
-                self.assign_stream(&mut assign_stream, p_name, w_name, false);
+                let mut info = AssignInfo {
+                    stream: &mut assign_stream,
+                    widget_name: w_name,
+                    is_conditional: false,
+                };
+                self.assign_stream(&mut info, p_name, false);
                 let model = paste_model.then(|| model_name);
                 let page_switch = conditional_branch.then(|| {
                     quote_spanned! {

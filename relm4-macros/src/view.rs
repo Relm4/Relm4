@@ -13,7 +13,6 @@ pub(super) fn generate_tokens(input: TokenStream) -> TokenStream {
         error,
         init,
         assign,
-        connect,
         ..
     } = view_widgets.generate_streams(
         &TraitImplDetails {
@@ -28,7 +27,6 @@ pub(super) fn generate_tokens(input: TokenStream) -> TokenStream {
     let output = quote! {
         #init
         #assign
-        #connect
         {
             #error
         }

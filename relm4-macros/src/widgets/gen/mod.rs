@@ -15,7 +15,6 @@ mod return_fields;
 
 mod assign;
 mod conditional_init;
-mod connect_signals;
 mod destructure_fields;
 mod error;
 mod init;

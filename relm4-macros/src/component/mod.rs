@@ -64,7 +64,6 @@ pub(crate) fn generate_tokens(
             struct_fields: struct_fields_stream,
             init: init_widgets,
             assign,
-            connect,
             return_fields,
             destructure_fields,
             update_view,
@@ -92,7 +91,6 @@ pub(crate) fn generate_tokens(
             #menus_stream
             #init_widgets
             #assign
-            #connect
             {
                 #error
             }
