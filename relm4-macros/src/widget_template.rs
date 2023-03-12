@@ -28,7 +28,6 @@ pub(crate) fn generate_tokens(vis: Option<Visibility>, mut item_impl: ItemImpl) 
                         error,
                         init,
                         assign,
-                        connect,
                         struct_fields,
                         return_fields,
                         ..
@@ -45,7 +44,6 @@ pub(crate) fn generate_tokens(vis: Option<Visibility>, mut item_impl: ItemImpl) 
                     let view_output = quote! {
                         #init
                         #assign
-                        #connect
                         {
                             #error
                         }

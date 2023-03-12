@@ -8,6 +8,8 @@ use crate::widgets::{
     Properties, Property, PropertyName, PropertyType, ReturnedWidget, Widget,
 };
 
+use super::assign::AssignInfo;
+
 impl Property {
     fn conditional_init_stream(
         &self,
@@ -165,11 +167,22 @@ impl AssignProperty {
             match &self.attr {
                 AssignPropertyAttr::None => (),
                 AssignPropertyAttr::Watch => {
-                    self.assign_stream(stream, p_name, w_name, true);
+                    let mut info = AssignInfo {
+                        stream,
+                        widget_name: w_name,
+                        is_conditional,
+                    };
+                    self.assign_stream(&mut info, p_name, true);
                 }
                 AssignPropertyAttr::Track((track_stream, paste_model)) => {
                     let mut assign_stream = TokenStream2::new();
-                    self.assign_stream(&mut assign_stream, p_name, w_name, true);
+                    let mut info = AssignInfo {
+                        stream: &mut assign_stream,
+                        widget_name: w_name,
+                        is_conditional,
+                    };
+
+                    self.assign_stream(&mut info, p_name, true);
                     let model = paste_model.then(|| model_name);
 
                     stream.extend(quote_spanned! {

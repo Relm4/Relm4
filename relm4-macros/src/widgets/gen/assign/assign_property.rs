@@ -1,42 +1,41 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned, ToTokens};
 use syn::spanned::Spanned;
-use syn::{Expr, Ident};
+use syn::Expr;
 
 use crate::widgets::{AssignProperty, AssignPropertyAttr, PropertyName};
+
+use super::AssignInfo;
 
 impl AssignProperty {
     pub(crate) fn conditional_assign_stream(
         &self,
-        stream: &mut TokenStream2,
+        info: &mut AssignInfo<'_>,
         p_name: &PropertyName,
-        w_name: &Ident,
-        is_conditional: bool,
         init: bool,
     ) {
         // If the code gen path is behind a conditional widgets, handle `watch` and `track` later.
         // Normally, those would be initialized right away, but they might need access to
         // variables from a pattern, for example `Some(variable)` so they are moved inside the
         // match arm or if expression.
-        if !is_conditional
+        if !info.is_conditional
             || !matches!(
                 self.attr,
                 AssignPropertyAttr::Track(_) | AssignPropertyAttr::Watch
             )
         {
-            self.assign_stream(stream, p_name, w_name, init);
+            self.assign_stream(info, p_name, init);
         }
     }
 
     pub(crate) fn assign_stream(
         &self,
-        stream: &mut TokenStream2,
+        info: &mut AssignInfo<'_>,
         p_name: &PropertyName,
-        w_name: &Ident,
         init: bool,
     ) {
-        let assign_fn = p_name.assign_fn_stream(w_name);
-        let self_assign_args = p_name.assign_args_stream(w_name);
+        let assign_fn = p_name.assign_fn_stream(info.widget_name);
+        let self_assign_args = p_name.assign_args_stream(info.widget_name);
         let span = p_name.span();
 
         let args = self.args.as_ref().map(|args| {
@@ -65,6 +64,7 @@ impl AssignProperty {
             let mut unblock_stream = TokenStream2::default();
             let gtk_import = crate::gtk_import();
 
+            let w_name = info.widget_name;
             for signal_handler in &self.block_signals {
                 block_stream.extend(quote_spanned! {
                     signal_handler.span() =>
@@ -86,45 +86,46 @@ impl AssignProperty {
             (Some(block_stream), Some(unblock_stream))
         };
 
-        stream.extend(match (self.optional_assign, self.iterative) {
-            (false, false) => {
-                quote_spanned! { span =>
-                    #block_stream
-                    #assign_fn(#self_assign_args #assign #args) #chain;
-                    #unblock_stream
-                }
-            }
-            (true, false) => {
-                quote_spanned! {
-                    span => if let Some(__p_assign) = #assign {
+        info.stream
+            .extend(match (self.optional_assign, self.iterative) {
+                (false, false) => {
+                    quote_spanned! { span =>
                         #block_stream
-                        #assign_fn(#self_assign_args __p_assign #args) #chain;
+                        #assign_fn(#self_assign_args #assign #args) #chain;
                         #unblock_stream
                     }
                 }
-            }
-            (false, true) => {
-                quote_spanned! {
-                    span =>
-                        #block_stream
-                        for __elem in #assign {
-                            #assign_fn(#self_assign_args __elem #args) #chain;
+                (true, false) => {
+                    quote_spanned! {
+                        span => if let Some(__p_assign) = #assign {
+                            #block_stream
+                            #assign_fn(#self_assign_args __p_assign #args) #chain;
+                            #unblock_stream
                         }
-                        #unblock_stream
+                    }
                 }
-            }
-            (true, true) => {
-                quote_spanned! {
-                    span =>
-                        #block_stream
-                        for __elem in #assign {
-                            if let Some(__p_assign) = __elem {
-                                #assign_fn(#self_assign_args __p_assign #args) #chain;
+                (false, true) => {
+                    quote_spanned! {
+                        span =>
+                            #block_stream
+                            for __elem in #assign {
+                                #assign_fn(#self_assign_args __elem #args) #chain;
                             }
-                        }
-                        #unblock_stream
+                            #unblock_stream
+                    }
                 }
-            }
-        });
+                (true, true) => {
+                    quote_spanned! {
+                        span =>
+                            #block_stream
+                            for __elem in #assign {
+                                if let Some(__p_assign) = __elem {
+                                    #assign_fn(#self_assign_args __p_assign #args) #chain;
+                                }
+                            }
+                            #unblock_stream
+                    }
+                }
+            });
     }
 }

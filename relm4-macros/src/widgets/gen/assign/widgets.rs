@@ -5,6 +5,8 @@ use syn::Ident;
 
 use crate::widgets::{PropertyName, ReturnedWidget, Widget, WidgetTemplateAttr};
 
+use super::AssignInfo;
+
 impl ReturnedWidget {
     fn return_assign_tokens(&self) -> TokenStream2 {
         let name = &self.name;
@@ -22,29 +24,40 @@ impl ReturnedWidget {
 }
 
 impl Widget {
-    pub(crate) fn start_assign_stream(&self, stream: &mut TokenStream2) {
+    pub(crate) fn start_assign_stream<'a>(
+        &'a self,
+        stream: &'a mut TokenStream2,
+        sender_name: &'a Ident,
+    ) {
         let w_name = &self.name;
-        self.properties.assign_stream(stream, w_name, false);
+        let mut info = AssignInfo {
+            stream,
+            widget_name: w_name,
+            is_conditional: false,
+        };
+        self.properties.assign_stream(&mut info, sender_name);
     }
 
-    pub(super) fn assign_stream(
-        &self,
-        stream: &mut TokenStream2,
+    pub(super) fn assign_stream<'a>(
+        &'a self,
+        info: &mut AssignInfo<'a>,
         p_name: &PropertyName,
-        w_name: &Ident,
-        is_conditional: bool,
+        sender_name: &'a Ident,
     ) {
         // Recursively generate code for properties
         {
-            let w_name = &self.name;
-            self.properties
-                .assign_stream(stream, w_name, is_conditional);
+            let mut info = AssignInfo {
+                stream: info.stream,
+                widget_name: &self.name,
+                is_conditional: info.is_conditional,
+            };
+            self.properties.assign_stream(&mut info, sender_name);
         }
 
         // Template children are already assigned by the template.
         if self.template_attr != WidgetTemplateAttr::TemplateChild {
-            let assign_fn = p_name.assign_fn_stream(w_name);
-            let self_assign_args = p_name.assign_args_stream(w_name);
+            let assign_fn = p_name.assign_fn_stream(info.widget_name);
+            let self_assign_args = p_name.assign_args_stream(info.widget_name);
             let assign = self.widget_assignment();
             let span = p_name.span();
 
@@ -54,7 +67,7 @@ impl Widget {
                 }
             });
 
-            stream.extend(if let Some(ret_widget) = &self.returned_widget {
+            info.stream.extend(if let Some(ret_widget) = &self.returned_widget {
                 let return_assign_stream = ret_widget.return_assign_tokens();
                 let unwrap = ret_widget.is_optional.then(|| quote! { .unwrap() });
                 quote_spanned! {
@@ -68,10 +81,14 @@ impl Widget {
         }
 
         if let Some(returned_widget) = &self.returned_widget {
-            let w_name = &returned_widget.name;
+            let mut info = AssignInfo {
+                stream: info.stream,
+                widget_name: &returned_widget.name,
+                is_conditional: info.is_conditional,
+            };
             returned_widget
                 .properties
-                .assign_stream(stream, w_name, is_conditional);
+                .assign_stream(&mut info, sender_name);
         }
     }
 }
