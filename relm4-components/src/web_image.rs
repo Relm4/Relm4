@@ -1,3 +1,5 @@
+//! Reusable and easily configurable component for loading images from the web.
+
 use std::collections::VecDeque;
 use std::fmt::Debug;
 
@@ -7,14 +9,19 @@ use relm4::{gtk, ComponentSender};
 use relm4::{Component, ComponentParts};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+/// Reusable component for loading images from the web.
 pub struct WebImage {
     current_id: usize,
     current_widget: gtk::Widget,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
+/// Load or unload a web image.
 pub enum WebImageMsg {
+    /// Load an image from an url.
     LoadImage(String),
+    /// Unload the current image.
+    Unload,
 }
 
 impl Component for WebImage {
@@ -48,18 +55,15 @@ impl Component for WebImage {
         ComponentParts { model, widgets: () }
     }
 
-    fn update(
-        &mut self,
-        input: Self::Input,
-        sender: ComponentSender<Self>,
-        root: &Self::Root,
-    ) {
+    fn update(&mut self, input: Self::Input, sender: ComponentSender<Self>, root: &Self::Root) {
+        self.current_widget = Self::set_spinner(root, &self.current_widget);
+        self.current_id = self.current_id.wrapping_add(1);
+
         match input {
             WebImageMsg::LoadImage(url) => {
-                self.current_widget = Self::set_spinner(root, &self.current_widget);
-                self.current_id = self.current_id.wrapping_add(1);
                 self.load_image(&sender, url);
             }
+            WebImageMsg::Unload => (),
         }
     }
 

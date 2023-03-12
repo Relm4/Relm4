@@ -28,6 +28,6 @@ reqwest = { version = "0.11.14", optional = true }
 tracker = "0.2.0"
 
 [features]
-default = ["web"]
-dox = ["relm4/dox"]
+default = []
+dox = ["relm4/dox", "web"]
 web = ["reqwest"]

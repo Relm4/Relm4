@@ -15,6 +15,7 @@ const IMAGES: &[&str] = &[
 #[derive(Debug)]
 enum AppMsg {
     Next,
+    Unload,
 }
 
 struct App {
@@ -37,6 +38,10 @@ impl SimpleComponent for App {
                 pack_start = &gtk::Button {
                     set_label: "Next image",
                     connect_clicked => AppMsg::Next,
+                },
+                pack_start = &gtk::Button {
+                    set_label: "Unload image",
+                    connect_clicked => AppMsg::Unload,
                 }
             },
 
@@ -54,6 +59,7 @@ impl SimpleComponent for App {
                 self.image
                     .emit(WebImageMsg::LoadImage(IMAGES[self.idx].to_owned()));
             }
+            AppMsg::Unload => self.image.emit(WebImageMsg::Unload),
         }
     }
 
