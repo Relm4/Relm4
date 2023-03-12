@@ -8,6 +8,10 @@ pub trait RelmObjectExt {
     /// Runs the given function when the object is destroyed.
     fn on_destroy<F: FnOnce() + 'static>(&self, func: F);
 
+    /// Bind a data bindings to a property of an object.
+    ///
+    /// This is similar to [`glib::ObjectExt::bind_property`] and 
+    /// always bidirectional.
     fn add_binding<B: Binding>(&self, binding: &B, property_name: &str);
 }
 

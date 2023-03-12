@@ -62,6 +62,7 @@ impl<B: Binding> Drop for BindingGuard<B> {
 pub trait Binding: Clone + IsA<glib::Object> {
     type Target;
 
+    #[must_use]
     fn property_name() -> &'static str {
         "value"
     }

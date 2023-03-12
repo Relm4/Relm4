@@ -1,6 +1,6 @@
 use gtk::prelude::*;
 use relm4::{
-    binding::{Binding, BoolBinding, ConnectBindingExt, IntBinding},
+    binding::{Binding, BoolBinding, ConnectBindingExt, F64Binding},
     prelude::*,
     RelmObjectExt,
 };
@@ -8,7 +8,7 @@ use relm4::{
 struct App {
     counter: u8,
     value: BoolBinding,
-    left_margin: IntBinding,
+    left_margin: F64Binding,
 }
 
 #[derive(Debug)]
@@ -62,7 +62,7 @@ impl SimpleComponent for App {
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let value = BoolBinding::default();
-        let left_margin = IntBinding::default();
+        let left_margin = F64Binding::default();
         let model = App {
             counter,
             value,
@@ -84,7 +84,7 @@ impl SimpleComponent for App {
         match msg {
             Msg::Increment => {
                 *value = false;
-                *margin_left += 1;
+                *margin_left += 1.7;
                 self.counter = self.counter.wrapping_add(1);
             }
             Msg::Decrement => {
