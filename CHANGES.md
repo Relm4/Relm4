@@ -4,6 +4,7 @@
 
 ### Added
 
++ core: Implement `FactoryView` for `adw::Leaflet`
 + components: WebImage as component for easily loading images from the web
 
 ### Fixed
