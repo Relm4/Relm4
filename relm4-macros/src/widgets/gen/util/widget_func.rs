@@ -47,11 +47,11 @@ impl Widget {
             )
             .into_compile_error();
         };
-        tokens.extend(first.ident.to_token_stream());
+        tokens.extend(first.to_token_stream());
 
         for segment in seg_iter {
             tokens.extend(quote! {::});
-            tokens.extend(segment.ident.to_token_stream());
+            tokens.extend(segment.to_token_stream());
         }
 
         tokens
