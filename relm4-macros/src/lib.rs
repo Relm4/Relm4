@@ -640,8 +640,12 @@ pub fn widget_template(attributes: TokenStream, input: TokenStream) -> TokenStre
     widget_template::generate_tokens(visibility, item_impl).into()
 }
 
-#[test]
-fn ui() {
-    let t = trybuild::TestCases::new();
-    t.compile_fail("tests/ui/compile-fail/**/*.rs");
+#[cfg(test)]
+#[rustversion::stable]
+mod test {
+    #[test]
+    fn ui() {
+        let t = trybuild::TestCases::new();
+        t.compile_fail("tests/ui/compile-fail/**/*.rs");
+    }
 }

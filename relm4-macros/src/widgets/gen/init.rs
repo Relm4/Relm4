@@ -54,6 +54,7 @@ impl Widget {
             }
         });
 
+        self.get_template_child_in_scope(init_stream, WidgetFieldsScope::Init);
         self.other_init_stream(init_stream);
     }
 
