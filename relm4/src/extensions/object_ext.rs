@@ -10,7 +10,7 @@ pub trait RelmObjectExt {
 
     /// Bind a data bindings to a property of an object.
     ///
-    /// This is similar to [`glib::ObjectExt::bind_property`] and 
+    /// This is similar to [`glib::ObjectExt::bind_property`] and
     /// always bidirectional.
     fn add_binding<B: Binding>(&self, binding: &B, property_name: &str);
 }
