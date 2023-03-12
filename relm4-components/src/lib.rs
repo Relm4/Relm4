@@ -35,3 +35,6 @@ pub mod open_button;
 pub mod open_dialog;
 pub mod save_dialog;
 pub mod simple_combo_box;
+
+#[cfg(feature = "web")]
+pub mod web_image;
