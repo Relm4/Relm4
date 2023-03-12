@@ -24,6 +24,9 @@ impl WidgetTemplate for CustomWindow {
             set_title: Some("Simple app"),
             set_default_width: 300,
             set_default_height: 100,
+
+            #[name = "test_label"]
+            gtk::Label {}
         }
     }
 }
@@ -51,6 +54,12 @@ impl SimpleComponent for App {
             set_title: Some("Simple app"),
             set_default_width: 300,
             set_default_height: 100,
+
+            // Make sure that using template children works
+            #[template_child]
+            test_label {
+                set_label: "It works",
+            },
 
             #[template]
             CustomBox {

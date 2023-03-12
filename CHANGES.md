@@ -2,17 +2,17 @@
 
 ## Unreleased
 
+### Added
+
++ core: Implement `FactoryView` for `adw::Leaflet`
++ components: WebImage as component for easily loading images from the web
+
 ### Fixed
 
++ macros: Support template children of templates that are root widgets
 + macros: Fix order of assignment and connect statements
 
 ## 0.5.0 - 2023-2-17
-
-### Fixed
-
-+ macros: Fix panic on incorrect root type syntax
-+ macros: Fix incorrect type generation for generics
-+ macros: Allow mutably root widgets
 
 ### Added
 
@@ -30,6 +30,9 @@
 + core: Call shutdown on components even on application shutdown
 + core: Clearing and dropping a factory properly calls the shutdown method of its elements
 + components: Fix doc links to examples on GitHub
++ macros: Fix panic on incorrect root type syntax
++ macros: Fix incorrect type generation for generics
++ macros: Allow mutably root widgets
 
 ## 0.5.0-rc.2 - 2023-2-5
 

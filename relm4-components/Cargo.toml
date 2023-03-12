@@ -23,7 +23,14 @@ cargo-args = ["-Zunstable-options", "-Zrustdoc-scrape-examples"]
 [dependencies]
 once_cell = "1.17"
 relm4 = { version = "0.5.0", path = "../relm4", features = ["macros"] }
+reqwest = { version = "0.11.14", optional = true }
 tracker = "0.2.0"
 
 [features]
-dox = ["relm4/dox"]
+default = []
+dox = ["relm4/dox", "web"]
+web = ["reqwest"]
+
+[[example]]
+name = "web_image"
+required-features = ["web"]

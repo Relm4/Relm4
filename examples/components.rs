@@ -179,7 +179,7 @@ impl SimpleComponent for App {
             .launch(())
             .forward(sender.input_sender(), identity);
         let dialog = Dialog::builder()
-            .transient_for(&root)
+            .transient_for(root)
             .launch(DialogInit {
                 text: "Do you want to close before saving?".to_string(),
                 secondary_text: Some("All unsaved changes will be lost".to_string()),
