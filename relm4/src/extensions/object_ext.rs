@@ -1,10 +1,18 @@
 use glib::prelude::ObjectExt;
 use gtk::glib;
 
+use crate::binding::Binding;
+
 /// Trait that extends [`gtk::prelude::ObjectExt`].
 pub trait RelmObjectExt {
     /// Runs the given function when the object is destroyed.
     fn on_destroy<F: FnOnce() + 'static>(&self, func: F);
+
+    /// Bind a data bindings to a property of an object.
+    ///
+    /// This is similar to [`glib::ObjectExt::bind_property`] and
+    /// always bidirectional.
+    fn add_binding<B: Binding>(&self, binding: &B, property_name: &str);
 }
 
 impl<T: glib::IsA<glib::Object>> RelmObjectExt for T {
@@ -15,5 +23,12 @@ impl<T: glib::IsA<glib::Object>> RelmObjectExt for T {
                 func();
             }
         });
+    }
+
+    fn add_binding<B: Binding>(&self, binding: &B, property_name: &str) {
+        binding
+            .bind_property(B::property_name(), self, property_name)
+            .bidirectional()
+            .build();
     }
 }

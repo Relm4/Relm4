@@ -40,6 +40,7 @@ pub(crate) mod late_initialization;
 mod runtime_util;
 
 pub mod actions;
+pub mod binding;
 pub mod component;
 pub mod drawing;
 pub mod factory;

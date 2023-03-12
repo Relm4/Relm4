@@ -117,3 +117,7 @@ path = "widget_template.rs"
 [[example]]
 name = "message_stream"
 path = "message_stream.rs"
+
+[[example]]
+name = "data_binding"
+path = "data_binding.rs"
