@@ -31,3 +31,7 @@ tracker = "0.2.0"
 default = []
 dox = ["relm4/dox", "web"]
 web = ["reqwest"]
+
+[[example]]
+name = "web_image"
+required-features = ["web"]
