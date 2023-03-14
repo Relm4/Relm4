@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.5.1 - 2023-3-14
+
 ### Added
 
 + core: Implement `FactoryView` for `adw::Leaflet`

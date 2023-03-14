@@ -46,8 +46,8 @@ Relm4 depends on GTK4: [How to install GTK4](https://www.gtk.org/docs/installati
 To use all features, just add this to your `Cargo.toml`:
 
 ```toml
-relm4 = "0.5.0"
-relm4-components = "0.5.0"
+relm4 = "0.5.1"
+relm4-components = "0.5.1"
 ```
 
 ### Features
