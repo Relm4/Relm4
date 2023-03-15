@@ -11,6 +11,7 @@
 ### Changed
 
 + core: Improved `RelmActionGroup` API
++ all: Increase MSRV to 1.65 to match the dependencies
 
 ## 0.6.0-alpha.2 - 2023-3-13
 

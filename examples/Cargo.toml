@@ -6,9 +6,9 @@ edition = "2021"
 
 [dev-dependencies]
 relm4 = { path = "../relm4" }
-relm4-icons = { version = "0.6.0-alpha.1", features = ["plus", "minus"]}
-tokio = { version = "1.25", features = ["rt", "macros", "time", "rt-multi-thread"] }
-futures = "0.3.26"
+relm4-icons = { version = "0.6.0-beta.1", features = ["plus", "minus"]}
+tokio = { version = "1.26", features = ["rt", "macros", "time", "rt-multi-thread"] }
+futures = "0.3.27"
 rand = "0.8.5"
 tracker = "0.2"
 reqwest = "0.11.14"

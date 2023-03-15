@@ -40,4 +40,4 @@ syn = { version = "1.0", features = [
 [dev-dependencies]
 relm4 = { path = "../relm4" }
 rustversion = "1"
-trybuild = "1.0.77"
+trybuild = "1.0.79"

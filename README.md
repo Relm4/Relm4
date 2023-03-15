@@ -9,7 +9,7 @@
 [![Relm4 on crates.io](https://img.shields.io/crates/v/relm4.svg)](https://crates.io/crates/relm4)
 [![Relm4 docs](https://img.shields.io/badge/rust-documentation-blue)](https://docs.rs/relm4/)
 [![Relm4 book](https://img.shields.io/badge/rust-book-fc0060)](https://relm4.org/book/stable/)
-![Minimum Rust version 1.64](https://img.shields.io/badge/rustc-1.64+-06a096.svg)
+![Minimum Rust version 1.65](https://img.shields.io/badge/rustc-1.65+-06a096.svg)
 [![dependency status](https://deps.rs/repo/github/Relm4/Relm4/status.svg)](https://deps.rs/repo/github/Relm4/Relm4)
 
 An idiomatic GUI library inspired by [Elm](https://elm-lang.org/) and based on [gtk4-rs](https://crates.io/crates/gtk4). 
