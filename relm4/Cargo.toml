@@ -56,6 +56,7 @@ relm4-macros = { path = "../relm4-macros" }
 criterion = { version = "0.4", default-features = false }
 
 # For the examples
+relm4-icons = { version = "0.6.0-alpha.1", features = ["plus", "minus"]}
 tokio = { version = "1.25", features = [
     "rt",
     "macros",

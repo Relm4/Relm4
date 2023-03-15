@@ -6,6 +6,7 @@
 
 + core: Documentation and better support for data bindings
 + core: Add `set_tooltip` method to `RelmWidgetExt`
++ examples: Example for using relm4-icons 
 
 ### Changed
 

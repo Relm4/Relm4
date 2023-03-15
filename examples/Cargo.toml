@@ -6,6 +6,7 @@ edition = "2021"
 
 [dev-dependencies]
 relm4 = { path = "../relm4" }
+relm4-icons = { version = "0.6.0-alpha.1", features = ["plus", "minus"]}
 tokio = { version = "1.25", features = ["rt", "macros", "time", "rt-multi-thread"] }
 futures = "0.3.26"
 rand = "0.8.5"
@@ -121,3 +122,7 @@ path = "message_stream.rs"
 [[example]]
 name = "data_binding"
 path = "data_binding.rs"
+
+[[example]]
+name = "icons"
+path = "icons.rs"
