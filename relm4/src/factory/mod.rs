@@ -6,11 +6,11 @@ mod dynamic_index;
 pub mod widgets;
 
 /// Implementation of asynchronous factories.
-mod r#async;
+pub mod r#async;
 pub mod positions;
 
 /// Implementation of regular factories.
-mod sync;
+pub mod sync;
 
 mod data_guard;
 use data_guard::DataGuard;

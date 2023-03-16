@@ -67,7 +67,7 @@ impl DynamicIndex {
         self.inner.store(new_value, Ordering::Relaxed);
     }
 
-    pub(super) fn new(index: usize) -> Self {
+    pub fn new(index: usize) -> Self {
         Self {
             inner: Arc::new(AtomicUsize::new(index)),
         }

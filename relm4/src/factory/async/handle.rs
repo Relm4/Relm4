@@ -11,12 +11,12 @@ use crate::Sender;
 /// It might be unsafe to extract `data` or `runtime`.
 /// Inside this type, it is guaranteed that extracting `data` will drop `runtime` before to
 /// comply with all required safety guarantees.
-pub(super) struct AsyncFactoryHandle<C: AsyncFactoryComponent> {
+pub struct AsyncFactoryHandle<C: AsyncFactoryComponent> {
     pub(super) data: AsyncData<C>,
-    pub(super) root_widget: C::Root,
-    pub(super) returned_widget: <C::ParentWidget as FactoryView>::ReturnedWidget,
-    pub(super) input: Sender<C::Input>,
-    pub(super) notifier: Sender<()>,
+    pub root_widget: C::Root,
+    pub returned_widget: <C::ParentWidget as FactoryView>::ReturnedWidget,
+    pub input: Sender<C::Input>,
+    pub notifier: Sender<()>,
 }
 
 impl<C: AsyncFactoryComponent> fmt::Debug for AsyncFactoryHandle<C> {

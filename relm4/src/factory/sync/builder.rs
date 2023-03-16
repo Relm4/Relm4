@@ -9,18 +9,18 @@ use std::any;
 use tracing::info_span;
 
 #[derive(Debug)]
-pub(super) struct FactoryBuilder<C: FactoryComponent> {
-    pub(super) data: Box<C>,
-    pub(super) root_widget: C::Root,
-    pub(super) component_sender: FactorySender<C>,
-    pub(super) input_receiver: Receiver<C::Input>,
-    pub(super) output_receiver: Receiver<C::Output>,
-    pub(super) cmd_receiver: Receiver<C::CommandOutput>,
-    pub(super) shutdown_notifier: ShutdownSender,
+pub struct FactoryBuilder<C: FactoryComponent> {
+    pub data: Box<C>,
+    pub root_widget: C::Root,
+    pub component_sender: FactorySender<C>,
+    pub input_receiver: Receiver<C::Input>,
+    pub output_receiver: Receiver<C::Output>,
+    pub cmd_receiver: Receiver<C::CommandOutput>,
+    pub shutdown_notifier: ShutdownSender,
 }
 
 impl<C: FactoryComponent> FactoryBuilder<C> {
-    pub(super) fn new(index: &DynamicIndex, init: C::Init) -> Self {
+    pub fn new(index: &DynamicIndex, init: C::Init) -> Self {
         // Used for all events to be processed by this component's internal service.
         let (input_sender, input_receiver) = crate::channel::<C::Input>();
 
@@ -52,7 +52,7 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
     }
 
     /// Starts the component, passing ownership to a future attached to a [gtk::glib::MainContext].
-    pub(super) fn launch<Transform>(
+    pub fn launch<Transform>(
         self,
         index: &DynamicIndex,
         returned_widget: <C::ParentWidget as FactoryView>::ReturnedWidget,

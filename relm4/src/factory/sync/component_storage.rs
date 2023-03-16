@@ -4,54 +4,54 @@ use crate::Sender;
 use super::{FactoryBuilder, FactoryHandle};
 
 #[derive(Debug)]
-pub(super) enum ComponentStorage<C: FactoryComponent> {
+pub enum ComponentStorage<C: FactoryComponent> {
     Builder(FactoryBuilder<C>),
     Final(FactoryHandle<C>),
 }
 
 impl<C: FactoryComponent> ComponentStorage<C> {
-    pub(super) const fn get(&self) -> &C {
+    pub const fn get(&self) -> &C {
         match self {
             Self::Builder(builder) => &builder.data,
             Self::Final(handle) => handle.data.get(),
         }
     }
 
-    pub(super) fn get_mut(&mut self) -> &mut C {
+    pub fn get_mut(&mut self) -> &mut C {
         match self {
             Self::Builder(builder) => &mut builder.data,
             Self::Final(handle) => handle.data.get_mut(),
         }
     }
 
-    pub(super) const fn widget(&self) -> &C::Root {
+    pub const fn widget(&self) -> &C::Root {
         match self {
             Self::Builder(builder) => &builder.root_widget,
             Self::Final(handle) => &handle.root_widget,
         }
     }
 
-    pub(super) fn send(&self, msg: C::Input) {
+    pub fn send(&self, msg: C::Input) {
         match self {
             Self::Builder(builder) => builder.component_sender.input(msg),
             Self::Final(handle) => handle.input.send(msg).unwrap(),
         }
     }
 
-    pub(super) fn state_change_notify(&self) {
+    pub fn state_change_notify(&self) {
         if let Self::Final(handle) = self {
             handle.notifier.send(()).unwrap();
         }
     }
 
-    pub(super) fn extract(self) -> C {
+    pub fn extract(self) -> C {
         match self {
             Self::Builder(builder) => *builder.data,
             Self::Final(handle) => handle.data.into_inner(),
         }
     }
 
-    pub(super) fn launch(
+    pub fn launch(
         self,
         index: &DynamicIndex,
         returned_widget: <C::ParentWidget as FactoryView>::ReturnedWidget,
@@ -69,7 +69,7 @@ impl<C: FactoryComponent> ComponentStorage<C> {
         }
     }
 
-    pub(super) const fn returned_widget(
+    pub const fn returned_widget(
         &self,
     ) -> Option<&<C::ParentWidget as FactoryView>::ReturnedWidget> {
         if let Self::Final(handle) = self {

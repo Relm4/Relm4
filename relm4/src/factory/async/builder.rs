@@ -11,7 +11,7 @@ use crate::runtime_util::GuardedReceiver;
 use crate::shutdown::ShutdownSender;
 use crate::{shutdown, Receiver, Sender};
 
-pub(super) struct AsyncFactoryBuilder<C: AsyncFactoryComponent> {
+pub struct AsyncFactoryBuilder<C: AsyncFactoryComponent> {
     init: C::Init,
     pub(super) root_widget: C::Root,
     pub(super) component_sender: AsyncFactorySender<C>,
@@ -25,7 +25,7 @@ impl<C: AsyncFactoryComponent> AsyncFactoryBuilder<C>
 where
     <C::ParentWidget as FactoryView>::ReturnedWidget: Clone,
 {
-    pub(super) fn new(init: C::Init) -> Self {
+    pub fn new(init: C::Init) -> Self {
         // Used for all events to be processed by this component's internal service.
         let (input_sender, input_receiver) = crate::channel::<C::Input>();
 
@@ -56,7 +56,7 @@ where
     }
 
     /// Starts the component, passing ownership to a future attached to a [gtk::glib::MainContext].
-    pub(super) fn launch<Transform>(
+    pub fn launch<Transform>(
         self,
         index: &DynamicIndex,
         returned_widget: <C::ParentWidget as FactoryView>::ReturnedWidget,

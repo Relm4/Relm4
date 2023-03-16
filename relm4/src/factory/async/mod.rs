@@ -5,9 +5,10 @@ mod future_data;
 mod handle;
 mod traits;
 
-use builder::AsyncFactoryBuilder;
+pub use builder::AsyncFactoryBuilder;
 use future_data::AsyncData;
-use handle::AsyncFactoryHandle;
+pub use handle::AsyncFactoryHandle;
 
 pub use collections::{AsyncFactoryVecDeque, AsyncFactoryVecDequeGuard};
+pub use component_storage::AsyncComponentStorage;
 pub use traits::AsyncFactoryComponent;
