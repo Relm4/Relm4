@@ -29,6 +29,7 @@ impl<T: glib::IsA<glib::Object>> RelmObjectExt for T {
         binding
             .bind_property(B::property_name(), self, property_name)
             .bidirectional()
+            .sync_create()
             .build();
     }
 }
