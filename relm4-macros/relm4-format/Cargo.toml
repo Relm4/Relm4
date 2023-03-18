@@ -1,19 +1,18 @@
 [package]
 name = "relm4-format"
-authors = ["Aaron Erhardt <aaron.erhardt@t-online.de>"]
-edition = "2021"
-version = "0.5.0-rc.1"
-rust-version = "1.63"
-readme = "../README.md"
-license = "Apache-2.0 OR MIT"
-description = "An idiomatic GUI library inspired by Elm and based on gtk4-rs"
-
-homepage = "https://relm4.org"
-repository = "https://github.com/Relm4/Relm4"
-documentation = "https://relm4.org/docs/stable/relm4/"
-
 keywords = ["gui", "gtk", "gtk4", "elm", "view"]
-categories = ["gui"]
+
+version.workspace = true
+authors.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description.workspace = true
+
+homepage.workspace = true
+repository.workspace = true
+
+categories.workspace = true
 
 [dependencies]
 internal = { path = "../relm4-macros-internal", package = "relm4-macros-internal", features = ["format"] }
