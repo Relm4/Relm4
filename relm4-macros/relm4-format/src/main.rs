@@ -9,7 +9,6 @@ const FILE_ENDINGS: &[&str] = &["rs"];
 
 fn main() {
     let args: Vec<PathBuf> = std::env::args()
-        .into_iter()
         .skip(1)
         .map(|s| PathBuf::from_str(&s).unwrap())
         .collect();

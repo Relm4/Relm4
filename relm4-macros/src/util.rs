@@ -1,7 +1,9 @@
 use proc_macro::TokenStream;
+use proc_macro2::{Span as Span2, TokenStream as TokenStream2};
 
+use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
-use syn::{Ident, ImplItem, ItemImpl, Type, TypePath};
+use syn::{FnArg, Ident, ImplItem, ItemImpl, Type, TypePath};
 
 pub(super) fn generate_widgets_type(
     widgets_ty: Option<Type>,
@@ -70,7 +72,7 @@ pub(super) fn verbatim_impl_item_method(
     ty: Type,
     tokens: TokenStream2,
 ) -> ImplItem {
-    ImplItem::Method(syn::ImplItemMethod {
+    ImplItem::Fn(syn::ImplItemFn {
         attrs: Vec::new(),
         vis: syn::Visibility::Inherited,
         defaultness: None,
@@ -94,7 +96,7 @@ pub(super) fn verbatim_impl_item_method(
         },
         block: syn::Block {
             brace_token: syn::token::Brace::default(),
-            stmts: vec![syn::Stmt::Expr(syn::Expr::Verbatim(tokens))],
+            stmts: vec![syn::Stmt::Expr(syn::Expr::Verbatim(tokens), None)],
         },
     })
 }

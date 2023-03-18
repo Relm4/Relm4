@@ -1,5 +1,4 @@
 use quote::{quote, quote_spanned};
-use syn::spanned::Spanned;
 use syn::Ident;
 
 use crate::widgets::{ConditionalBranches, ConditionalWidget, PropertyName};

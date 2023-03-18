@@ -3,9 +3,12 @@ use syn::spanned::Spanned;
 use syn::{token, Error, Ident, Token};
 
 use crate::widgets::{
-    parse_util, AssignProperty, Attr, Attrs, ConditionalWidget, ParseError, Property, PropertyName,
+    parse_util, AssignProperty, Attrs, ConditionalWidget, ParseError, Property, PropertyName,
     PropertyType, SignalHandler, Widget, WidgetFunc,
 };
+
+#[cfg(feature = "format")]
+use crate::widgets::Attr;
 
 impl Property {
     pub(super) fn parse(input: ParseStream<'_>) -> (Self, bool) {
@@ -26,6 +29,7 @@ impl Property {
             None
         };
 
+        #[cfg(feature = "format")]
         let blank_lines = if let Some(attrs) = &mut attributes {
             let blank_lines = attrs
                 .inner
@@ -41,6 +45,7 @@ impl Property {
         // parse `if something { WIDGET } else { WIDGET}` or a similar match expression.
         if input.peek(Token![if]) || input.peek(Token![match]) {
             return Ok(Property {
+                #[cfg(feature = "format")]
                 blank_lines,
                 name: PropertyName::RelmContainerExtAssign(input.span()),
                 ty: PropertyType::ConditionalWidget(ConditionalWidget::parse_with_name(

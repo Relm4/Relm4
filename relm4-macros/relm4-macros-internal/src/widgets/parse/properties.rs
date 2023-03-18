@@ -3,7 +3,7 @@ use syn::ext::IdentExt;
 use syn::parse::discouraged::Speculative;
 use syn::parse::ParseStream;
 use syn::punctuated::{Pair, Punctuated};
-use syn::token::{And, At, Caret, Colon, Div, Dot, Gt, Lt, Or, Question, Tilde, Underscore};
+use syn::token::{And, At, Caret, Colon, Dot, Gt, Lt, Or, Question, Slash, Tilde, Underscore};
 use syn::{braced, bracketed, parenthesized, token, Ident, Lifetime, Token};
 
 use crate::widgets::{parse_util, ParseError, Properties, Property};
@@ -111,8 +111,8 @@ fn parse_next_token(input: ParseStream<'_>) -> Result<bool, syn::Error> {
         parse_type!(input, At);
     } else if input.peek(Colon) {
         parse_type!(input, Colon);
-    } else if input.peek(Div) {
-        parse_type!(input, Div);
+    } else if input.peek(Slash) {
+        parse_type!(input, Slash);
     } else if input.peek(syn::token::Eq) {
         parse_type!(input, syn::token::Eq);
     } else if input.peek(Gt) {

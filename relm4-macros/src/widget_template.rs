@@ -20,7 +20,7 @@ pub(crate) fn generate_tokens(vis: Option<Visibility>, mut item_impl: ItemImpl) 
 
     if let ImplItem::Macro(mac) = item {
         if Some("view") == mac.mac.path.get_ident().map(|i| i.to_string()).as_deref() {
-            match syn::parse_macro_input::parse::<ViewWidgets>(mac.mac.tokens.into()) {
+            match syn::parse::<ViewWidgets>(mac.mac.tokens.into()) {
                 Ok(mut view_widgets) => {
                     view_widgets.mark_root_as_used();
 

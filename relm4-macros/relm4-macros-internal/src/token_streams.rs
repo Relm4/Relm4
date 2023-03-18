@@ -18,8 +18,6 @@ pub struct TokenStreams {
     pub init: TokenStream2,
     /// The tokens initializing the properties.
     pub assign: TokenStream2,
-    /// The tokens for connecting events.
-    pub connect: TokenStream2,
     /// The tokens for the returned struct fields -> name,
     pub return_fields: TokenStream2,
     /// For destructuring the widget struct field
