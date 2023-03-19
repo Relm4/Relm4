@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
++ core: Documentation and better support for data bindings
+
 ## 0.6.0-alpha.2 - 2023-3-13
 
 ### Added

@@ -1,6 +1,6 @@
 use gtk::prelude::*;
 use relm4::{
-    binding::{Binding, BoolBinding, ConnectBindingExt, F64Binding},
+    binding::{Binding, BoolBinding, ConnectBindingExt, F64Binding, StringBinding},
     prelude::*,
     RelmObjectExt,
 };
@@ -9,6 +9,7 @@ struct App {
     counter: u8,
     value: BoolBinding,
     left_margin: F64Binding,
+    text: StringBinding,
 }
 
 #[derive(Debug)]
@@ -44,9 +45,7 @@ impl SimpleComponent for App {
                     connect_clicked => Msg::Decrement,
                 },
 
-                gtk::Label {
-                    #[watch]
-                    set_label: &format!("Counter: {}", model.counter),
+                gtk::Label::with_binding(&model.text) {
                     set_margin_all: 5,
                 },
 
@@ -63,10 +62,12 @@ impl SimpleComponent for App {
     ) -> ComponentParts<Self> {
         let value = BoolBinding::default();
         let left_margin = F64Binding::default();
+        let text = StringBinding::new("Counter: 0");
         let model = App {
             counter,
             value,
             left_margin,
+            text,
         };
 
         // Insert the code generation of the view! macro here
@@ -92,6 +93,8 @@ impl SimpleComponent for App {
                 self.counter = self.counter.wrapping_sub(1);
             }
         }
+
+        *self.text.guard() = format!("Counter: {}", self.counter);
     }
 }
 

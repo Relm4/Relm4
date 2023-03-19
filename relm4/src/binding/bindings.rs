@@ -5,7 +5,21 @@ use crate::binding::Binding;
 macro_rules! binding {
     ($name:ident, $obj_name:literal, $ty:ty, $mod:ident) => {
         glib::wrapper! {
+            #[doc = "A data binding storing a value of type [`"]
+            #[doc = stringify!($ty)]
+            #[doc = "`]"]
             pub struct $name(ObjectSubclass<$mod::$name>);
+        }
+
+        impl $name {
+            #[doc = "Create a new [`"]
+            #[doc = stringify!($name)]
+            #[doc = "`]."]
+            pub fn new<T: Into<$ty>>(value: T) -> Self {
+                let this: Self = glib::Object::new();
+                this.set_value(value.into());
+                this
+            }
         }
 
         impl Default for $name {
@@ -26,6 +40,7 @@ macro_rules! binding {
             }
         }
 
+        #[allow(missing_docs)]
         mod $mod {
             use std::cell::RefCell;
 
@@ -39,8 +54,10 @@ macro_rules! binding {
 
             #[derive(Default, Properties, Debug)]
             #[properties(wrapper_type = super::$name)]
+            /// Inner type of the data binding.
             pub struct $name {
                 #[property(get, set)]
+                /// The primary value.
                 value: RefCell<$ty>,
             }
 
