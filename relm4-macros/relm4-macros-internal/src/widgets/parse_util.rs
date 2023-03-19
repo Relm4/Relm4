@@ -1,11 +1,12 @@
 use std::sync::atomic::{AtomicU16, Ordering};
 
-use proc_macro2::Span as Span2;
+use proc_macro2::{Span as Span2, TokenStream as TokenStream2};
+use quote::ToTokens;
 use syn::parse::ParseBuffer;
 use syn::spanned::Spanned;
-use syn::{braced, bracketed, parenthesized, Error, Ident, Path};
+use syn::{braced, bracketed, parenthesized, token, Error, Ident, Path};
 
-use super::{ParseError, Property, PropertyName, PropertyType};
+use super::{ParseError, Property, PropertyName, PropertyType, RefToken};
 use crate::widgets::{AssignPropertyAttr, WidgetAttr, WidgetFunc};
 
 pub(super) fn attr_twice_error(span: Span2) -> Error {
@@ -159,4 +160,22 @@ pub(super) fn brackets<'a>(input: &'a ParseBuffer<'_>) -> Result<ParseBuffer<'a>
         Ok(content)
     })();
     Ok(content?)
+}
+
+impl ToTokens for RefToken {
+    fn to_tokens(&self, tokens: &mut TokenStream2) {
+        match self {
+            Self::None => (),
+            Self::Some(token) | Self::Internal(token) => token.to_tokens(tokens),
+        }
+    }
+}
+
+impl From<Option<token::And>> for RefToken {
+    fn from(value: Option<token::And>) -> Self {
+        match value {
+            Some(value) => RefToken::Some(value),
+            None => RefToken::None,
+        }
+    }
 }

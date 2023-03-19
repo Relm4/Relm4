@@ -3,7 +3,7 @@ use syn::token::And;
 use syn::{token, Token};
 
 use crate::widgets::parse::if_branch::args_from_index;
-use crate::widgets::{parse_util, MatchArm, ParseError, Widget};
+use crate::widgets::{parse_util, MatchArm, ParseError, RefToken, Widget};
 
 impl MatchArm {
     pub(super) fn parse(input: ParseStream<'_>, index: usize) -> Result<Self, ParseError> {
@@ -33,7 +33,7 @@ impl MatchArm {
 
         let ref_span = input.span();
         let mut widget = Widget::parse(inner_tokens, attributes, Some(args))?;
-        widget.ref_token = Some(And { spans: [ref_span] });
+        widget.ref_token = RefToken::Internal(And { spans: [ref_span] });
 
         Ok(Self {
             pattern,

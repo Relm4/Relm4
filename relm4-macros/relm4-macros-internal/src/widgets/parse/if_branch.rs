@@ -5,7 +5,7 @@ use syn::token::{And, Paren};
 use syn::{Expr, ExprCall, ExprLit, ExprPath, Ident, Lit, LitStr};
 
 use crate::args::Args;
-use crate::widgets::{parse_util, IfBranch, ParseError, Widget};
+use crate::widgets::{parse_util, IfBranch, ParseError, RefToken, Widget};
 
 impl IfBranch {
     pub(super) fn parse(input: ParseStream<'_>, index: usize) -> Result<Self, ParseError> {
@@ -16,7 +16,7 @@ impl IfBranch {
         let attributes = braced.parse().ok();
         let args = args_from_index(index, input.span());
         let mut widget = Widget::parse(&braced, attributes, Some(args))?;
-        widget.ref_token = Some(And {
+        widget.ref_token = RefToken::Internal(And {
             spans: [Span2::call_site()],
         });
 

@@ -2,7 +2,7 @@ use crate::widgets::{
     AssignProperty, AssignPropertyAttr, ParseError, Property, PropertyName, PropertyType,
 };
 
-use super::{Format, FormatAttributes, FormatLine, InlineFormat};
+use super::{Format, FormatArgs, FormatAttributes, FormatLine, InlineFormat};
 
 impl InlineFormat for PropertyName {
     fn inline_format(&self) -> String {
@@ -15,33 +15,47 @@ impl InlineFormat for PropertyName {
 }
 
 impl Format for Property {
-    fn format(&self, ident_level: usize) -> Vec<FormatLine> {
-        let empty_lines = (0..self.blank_lines)
+    fn format(&self, indent_level: usize) -> Vec<FormatLine> {
+        let Property {
+            blank_lines,
+            name,
+            ty,
+        } = self;
+
+        let empty_lines = (0..*blank_lines)
             .map(|_| FormatLine {
-                ident_level: 0,
+                indent_level: 0,
                 line: "".to_owned(),
             })
             .collect();
 
-        let mut prefix = self.name.inline_format();
+        let mut prefix = name.inline_format();
 
-        let (attrs, mut output) = match &self.ty {
+        let (attrs, mut output) = match ty {
             PropertyType::Assign(assign) => {
                 prefix += ": ";
-                (assign.format_attrs(ident_level), assign.format(ident_level))
+                (
+                    assign.format_attrs(indent_level),
+                    assign.format(indent_level),
+                )
             }
             PropertyType::SignalHandler(signal_handler) => {
+                prefix += &signal_handler.format_args();
                 prefix += " => ";
                 (
-                    signal_handler.format_attrs(ident_level),
-                    signal_handler.format(ident_level),
+                    signal_handler.format_attrs(indent_level),
+                    signal_handler.format(indent_level),
                 )
             }
             PropertyType::Widget(widget) => {
-                if !matches!(&self.name, PropertyName::RelmContainerExtAssign(_)) {
-                    prefix += "= ";
+                if !matches!(name, PropertyName::RelmContainerExtAssign(_)) {
+                    prefix += &widget.format_args();
+                    prefix += " = ";
                 }
-                (widget.format_attrs(ident_level), widget.format(ident_level))
+                (
+                    widget.format_attrs(indent_level),
+                    widget.format(indent_level),
+                )
             }
             PropertyType::ConditionalWidget(_) => todo!(),
             PropertyType::ParseError(error) => match error {
@@ -63,11 +77,11 @@ impl Format for Property {
 }
 
 impl Format for AssignPropertyAttr {
-    fn format(&self, ident_level: usize) -> Vec<FormatLine> {
+    fn format(&self, indent_level: usize) -> Vec<FormatLine> {
         match &self {
             AssignPropertyAttr::None => Vec::new(),
             AssignPropertyAttr::Watch => vec![FormatLine {
-                ident_level,
+                indent_level,
                 line: "#[watch]".into(),
             }],
             AssignPropertyAttr::Track {
@@ -76,12 +90,12 @@ impl Format for AssignPropertyAttr {
             } => {
                 if *macro_generated {
                     vec![FormatLine {
-                        ident_level,
+                        indent_level,
                         line: "#[track]".into(),
                     }]
                 } else {
                     vec![FormatLine {
-                        ident_level,
+                        indent_level,
                         line: format!("#[track = \"{}\"]", expr.inline_format()),
                     }]
                 }
@@ -91,13 +105,13 @@ impl Format for AssignPropertyAttr {
 }
 
 impl Format for AssignProperty {
-    fn format(&self, ident_level: usize) -> Vec<FormatLine> {
-        self.expr.format(ident_level)
+    fn format(&self, indent_level: usize) -> Vec<FormatLine> {
+        self.expr.format(indent_level)
     }
 }
 
 impl FormatAttributes for AssignProperty {
-    fn format_attrs(&self, ident_level: usize) -> Vec<FormatLine> {
-        self.attr.format(ident_level)
+    fn format_attrs(&self, indent_level: usize) -> Vec<FormatLine> {
+        self.attr.format(indent_level)
     }
 }

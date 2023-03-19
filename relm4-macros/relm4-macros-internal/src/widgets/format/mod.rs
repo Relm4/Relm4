@@ -1,20 +1,26 @@
+mod args;
 mod property;
+mod returned_widget;
 mod signal_handler;
 mod syn;
 mod view_widgets;
 mod widget;
 
 pub struct FormatLine {
-    pub ident_level: usize,
+    pub indent_level: usize,
     pub line: String,
 }
 
 pub trait Format {
-    fn format(&self, ident_level: usize) -> Vec<FormatLine>;
+    fn format(&self, indent_level: usize) -> Vec<FormatLine>;
 }
 
 pub trait FormatAttributes {
-    fn format_attrs(&self, ident_level: usize) -> Vec<FormatLine>;
+    fn format_attrs(&self, indent_level: usize) -> Vec<FormatLine>;
+}
+
+pub trait FormatArgs {
+    fn format_args(&self) -> String;
 }
 
 pub trait InlineFormat {

@@ -37,7 +37,7 @@ impl Parse for Attrs {
                         Attr::TemplateChild(ident.clone())
                     } else {
                         #[cfg(feature = "format")]
-                        if ident == "blank" {
+                        if ident == "BLANK" {
                             Attr::BlankLine
                         } else {
                             return Err(unexpected_attr_name(ident));

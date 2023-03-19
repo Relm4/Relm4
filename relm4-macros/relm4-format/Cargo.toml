@@ -1,5 +1,6 @@
 [package]
 name = "relm4-format"
+readme = "README.md"
 keywords = ["gui", "gtk", "gtk4", "elm", "view"]
 
 version.workspace = true

@@ -4,7 +4,7 @@ use quote::ToTokens;
 
 use super::{Format, FormatLine, InlineFormat};
 
-fn call_rustfmt(value: String, pre: &str, post: &str) -> String {
+pub(super) fn call_rustfmt(value: String, pre: &str, post: &str) -> String {
     let input = format!("{pre}{value}{post}");
 
     let mut rustfmt = Command::new("rustfmt")
@@ -39,14 +39,14 @@ impl InlineFormat for syn::Path {
 }
 
 impl Format for syn::Expr {
-    fn format(&self, ident_level: usize) -> Vec<FormatLine> {
+    fn format(&self, indent_level: usize) -> Vec<FormatLine> {
         let input = self.to_token_stream().to_string();
 
         let result = call_rustfmt(input, "const T: X = ", ";");
         result
             .lines()
             .map(|line| FormatLine {
-                ident_level,
+                indent_level,
                 line: line.to_string(),
             })
             .collect()
@@ -54,14 +54,14 @@ impl Format for syn::Expr {
 }
 
 impl Format for syn::ExprClosure {
-    fn format(&self, ident_level: usize) -> Vec<FormatLine> {
+    fn format(&self, indent_level: usize) -> Vec<FormatLine> {
         let input = self.to_token_stream().to_string();
 
         let result = call_rustfmt(input, "const T: X = ", ";");
         result
             .lines()
             .map(|line| FormatLine {
-                ident_level,
+                indent_level,
                 line: line.to_string(),
             })
             .collect()

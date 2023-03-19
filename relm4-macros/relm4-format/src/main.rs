@@ -101,7 +101,7 @@ fn format_code(code: &str) -> String {
 fn concat_format_lines(lines: Vec<FormatLine>) -> String {
     let mut output = String::new();
     for line in lines {
-        output.push_str(&" ".repeat(line.ident_level * 4));
+        output.push_str(&" ".repeat(line.indent_level * 4));
         output.push_str(&line.line);
         output.push('\n');
     }

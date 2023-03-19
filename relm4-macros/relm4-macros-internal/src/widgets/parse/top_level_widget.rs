@@ -2,7 +2,7 @@ use syn::parse::ParseStream;
 
 use crate::util;
 use crate::widgets::{
-    parse_util, Attr, Attrs, Properties, TopLevelWidget, Widget, WidgetAttr, WidgetFunc,
+    parse_util, Attr, Attrs, Properties, RefToken, TopLevelWidget, Widget, WidgetAttr, WidgetFunc,
     WidgetTemplateAttr,
 };
 
@@ -52,7 +52,7 @@ impl TopLevelWidget {
                     ],
                 },
                 assign_wrapper: None,
-                ref_token: None,
+                ref_token: RefToken::None,
                 deref_token: None,
                 returned_widget: None,
             },

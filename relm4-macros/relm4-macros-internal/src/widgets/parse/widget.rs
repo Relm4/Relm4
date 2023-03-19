@@ -7,11 +7,11 @@ use syn::{Error, Expr, Ident, Path, Token};
 use crate::args::Args;
 use crate::widgets::parse_util::{self, attr_twice_error};
 use crate::widgets::{
-    Attr, Attrs, ParseError, Properties, PropertyType, Widget, WidgetAttr, WidgetFunc,
+    Attr, Attrs, ParseError, Properties, PropertyType, RefToken, Widget, WidgetAttr, WidgetFunc,
     WidgetTemplateAttr,
 };
 
-type WidgetFuncInfo = (Option<And>, Option<Star>, WidgetFunc, Properties);
+type WidgetFuncInfo = (RefToken, Option<Star>, WidgetFunc, Properties);
 
 type AttributeInfo = (
     WidgetAttr,
@@ -134,7 +134,7 @@ impl Widget {
             (func.snake_case_name(), false)
         };
 
-        let ref_token = Some(And::default());
+        let ref_token = RefToken::Internal(And::default());
 
         Self::check_props(&properties, &template_attr)?;
 
@@ -266,7 +266,7 @@ impl Widget {
     /// Parse information related to the widget function.
     fn parse_widget_func(input: ParseStream<'_>) -> Result<WidgetFuncInfo, ParseError> {
         // Look for &
-        let ref_token = input.parse().ok();
+        let ref_token = input.parse().ok().into();
 
         // Look for *
         let deref_token = input.parse().ok();

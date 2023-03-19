@@ -12,11 +12,13 @@ impl SimpleComponent for Header {
     type Output = AppMsg;
 
     view! {
+        #[root]
         gtk::HeaderBar {
             #[wrap(Some)]
             set_title_widget = &gtk::Box {
                 add_css_class: "linked",
-                append: group = &gtk::ToggleButton {
+                #[name = "group"]
+                append = &gtk::ToggleButton {
                     set_label: "View",
                     set_active: true,
                     connect_toggled[sender] => move |btn| {
@@ -43,7 +45,7 @@ impl SimpleComponent for Header {
                         }
                     },
                 },
-            }
+            },
         }
     }
 
@@ -84,7 +86,9 @@ impl SimpleComponent for Dialog {
     type Output = AppMsg;
 
     view! {
-        dialog = gtk::MessageDialog {
+        #[root]
+        #[name = "dialog"]
+        gtk::MessageDialog {
             set_modal: true,
             set_text: Some(&init.text),
             set_secondary_text: init.secondary_text.as_deref(),
@@ -100,7 +104,7 @@ impl SimpleComponent for Dialog {
                 } else {
                     DialogMsg::Cancel
                 });
-            }
+            },
         }
     }
 
@@ -154,7 +158,9 @@ impl SimpleComponent for App {
     type Output = ();
 
     view! {
-        main_window = gtk::ApplicationWindow {
+        #[root]
+        #[name = "main_window"]
+        gtk::ApplicationWindow {
             set_default_size: (500, 250),
             set_titlebar: Some(model.header.widget()),
 
@@ -166,7 +172,7 @@ impl SimpleComponent for App {
             connect_close_request[sender] => move |_| {
                 sender.input(AppMsg::CloseRequest);
                 gtk::Inhibit(true)
-            }
+            },
         }
     }
 

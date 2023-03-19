@@ -123,6 +123,13 @@ struct WidgetFuncMethod {
 }
 
 #[derive(Debug)]
+enum RefToken {
+    None,
+    Some(token::And),
+    Internal(token::And),
+}
+
+#[derive(Debug)]
 pub(super) struct Widget {
     doc_attr: Option<TokenStream2>,
     attr: WidgetAttr,
@@ -134,7 +141,7 @@ pub(super) struct Widget {
     args: Option<Args<Expr>>,
     properties: Properties,
     assign_wrapper: Option<Path>,
-    ref_token: Option<token::And>,
+    ref_token: RefToken,
     deref_token: Option<token::Star>,
     returned_widget: Option<ReturnedWidget>,
 }
