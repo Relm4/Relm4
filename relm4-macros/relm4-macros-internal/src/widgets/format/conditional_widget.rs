@@ -45,7 +45,7 @@ impl FormatAttributes for ConditionalWidget {
         if let Some(transition) = transition {
             output.push(FormatLine {
                 indent_level,
-                line: format!("#[transition({})]", transition.to_string()),
+                line: format!("#[transition({})]", transition),
             });
         }
 
