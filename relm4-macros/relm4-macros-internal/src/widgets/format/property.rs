@@ -23,12 +23,13 @@ impl Format for Property {
             ty,
         } = self;
 
-        let comments = comments.iter().map(|c| {
-            FormatLine {
+        let comments = comments
+            .iter()
+            .map(|c| FormatLine {
                 indent_level,
                 line: format!("{c}"),
-            }
-        }).collect();
+            })
+            .collect();
 
         let empty_lines = (0..*blank_lines)
             .map(|_| FormatLine {
@@ -51,10 +52,7 @@ impl Format for Property {
             PropertyType::SignalHandler(signal_handler) => {
                 prefix += &signal_handler.format_args();
                 prefix += " => ";
-                (
-                    Vec::new(),
-                    signal_handler.format(indent_level),
-                )
+                (Vec::new(), signal_handler.format(indent_level))
             }
             PropertyType::Widget(widget) => {
                 if !matches!(name, PropertyName::RelmContainerExtAssign(_)) {
@@ -90,7 +88,10 @@ impl Format for Property {
 
         output.last_mut().unwrap().line.push(',');
 
-        [empty_lines, attrs, comments, output].into_iter().flatten().collect()
+        [empty_lines, attrs, comments, output]
+            .into_iter()
+            .flatten()
+            .collect()
     }
 }
 

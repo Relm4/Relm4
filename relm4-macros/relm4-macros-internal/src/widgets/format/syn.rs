@@ -94,10 +94,6 @@ impl Format for (&syn::Pat, &Option<(syn::token::If, Box<syn::Expr>)>) {
 
 impl InlineFormat for syn::Type {
     fn inline_format(&self) -> String {
-        call_rustfmt(
-            self.to_token_stream().to_string(),
-            "const T: ",
-            " = ();",
-        )
+        call_rustfmt(self.to_token_stream().to_string(), "const T: ", " = ();")
     }
 }

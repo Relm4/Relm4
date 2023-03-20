@@ -55,10 +55,10 @@ impl ConditionalWidget {
         } else if let Some(name) = attr_name {
             name
         } else {
-                parse_util::idents_to_snake_case(
-                    [Ident::new("conditional_widget", input.span())].iter(),
-                    input.span(),
-                )
+            parse_util::idents_to_snake_case(
+                [Ident::new("conditional_widget", input.span())].iter(),
+                input.span(),
+            )
         };
 
         if input.peek(Token![if]) {

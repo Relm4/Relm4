@@ -16,7 +16,7 @@ impl Parse for ViewWidgets {
 
             // Allow ending with a comma after the last widget
             if input.is_empty() {
-                break;    
+                break;
             }
 
             let widget = TopLevelWidget::parse(input);
