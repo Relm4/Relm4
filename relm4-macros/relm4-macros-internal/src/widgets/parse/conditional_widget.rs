@@ -47,15 +47,18 @@ impl ConditionalWidget {
             }
         }
 
+        #[cfg(feature = "format")]
+        let name_assigned_by_user = name.is_some() || attr_name.is_some();
+
         let name = if let Some(name) = name {
             name
         } else if let Some(name) = attr_name {
             name
         } else {
-            parse_util::idents_to_snake_case(
-                [Ident::new("conditional_widget", input.span())].iter(),
-                input.span(),
-            )
+                parse_util::idents_to_snake_case(
+                    [Ident::new("conditional_widget", input.span())].iter(),
+                    input.span(),
+                )
         };
 
         if input.peek(Token![if]) {
@@ -64,6 +67,8 @@ impl ConditionalWidget {
                 doc_attr,
                 transition,
                 assign_wrapper,
+                #[cfg(feature = "format")]
+                name_assigned_by_user,
                 name,
                 args,
                 branches,
@@ -74,6 +79,8 @@ impl ConditionalWidget {
                 doc_attr,
                 transition,
                 assign_wrapper,
+                #[cfg(feature = "format")]
+                name_assigned_by_user,
                 name,
                 args,
                 branches,

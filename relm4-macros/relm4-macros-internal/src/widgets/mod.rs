@@ -94,6 +94,8 @@ enum PropertyName {
 struct Property {
     #[cfg(feature = "format")]
     blank_lines: usize,
+    #[cfg(feature = "format")]
+    comments: Vec<String>,
     /// Either a path or just an ident
     name: PropertyName,
     ty: PropertyType,
@@ -162,6 +164,8 @@ enum WidgetTemplateAttr {
 
 #[derive(Debug)]
 struct ReturnedWidget {
+    #[cfg(feature = "format")]
+    name_assigned_by_user: bool,
     name: Ident,
     ty: Option<Path>,
     properties: Properties,
@@ -173,6 +177,8 @@ struct ConditionalWidget {
     doc_attr: Option<TokenStream2>,
     transition: Option<Ident>,
     assign_wrapper: Option<Path>,
+    #[cfg(feature = "format")]
+    name_assigned_by_user: bool,
     name: Ident,
     args: Option<Args<Expr>>,
     branches: ConditionalBranches,
@@ -222,6 +228,8 @@ enum Attr {
     TemplateChild(Ident),
     #[cfg(feature = "format")]
     BlankLine,
+    #[cfg(feature = "format")]
+    Comment(String),
 }
 
 struct Attrs {

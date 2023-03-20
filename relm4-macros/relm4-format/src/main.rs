@@ -1,5 +1,6 @@
 use std::{fs::ReadDir, path::PathBuf, str::FromStr};
 
+use base64::Engine;
 use internal::widgets::{
     format::{Format, FormatLine},
     ViewWidgets,
@@ -71,8 +72,15 @@ fn format_code(code: &str) -> String {
                 if bracket_level == 0 {
                     break line;
                 } else {
-                    macro_code.push_str(if line.trim().is_empty() {
+                    let trimmed = line.trim();
+                    let comment_line;
+                    macro_code.push_str(if trimmed.is_empty() {
                         "#[BLANK]"
+                    } else if trimmed.starts_with("//") && !trimmed.starts_with("///") {
+                        let encoder = base64::engine::general_purpose::STANDARD;
+                        let encoded = encoder.encode(trimmed);
+                        comment_line = format!("#[COMMENT = \"{}\"]", encoded);
+                        &comment_line
                     } else {
                         line
                     });

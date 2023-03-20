@@ -1,4 +1,5 @@
 mod args;
+mod conditional_widget;
 mod property;
 mod returned_widget;
 mod signal_handler;
@@ -6,6 +7,7 @@ mod syn;
 mod view_widgets;
 mod widget;
 
+#[derive(Debug)]
 pub struct FormatLine {
     pub indent_level: usize,
     pub line: String,

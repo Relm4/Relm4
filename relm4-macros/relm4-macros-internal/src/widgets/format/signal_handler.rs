@@ -1,26 +1,20 @@
 use crate::widgets::{SignalHandler, SignalHandlerVariant};
 
-use super::{Format, FormatArgs, FormatAttributes, FormatLine, InlineFormat};
-
-impl FormatAttributes for SignalHandler {
-    fn format_attrs(&self, indent_level: usize) -> Vec<FormatLine> {
-        if let Some(id) = &self.handler_id {
-            vec![FormatLine {
-                indent_level,
-                line: format!("#[handler_id = \"{id}\"]"),
-            }]
-        } else {
-            Vec::new()
-        }
-    }
-}
+use super::{Format, FormatArgs, FormatLine, InlineFormat};
 
 impl Format for SignalHandler {
     fn format(&self, indent_level: usize) -> Vec<FormatLine> {
-        match &self.inner {
+        let mut output = match &self.inner {
             SignalHandlerVariant::Expr(expr) => expr.format(indent_level),
             SignalHandlerVariant::Closure(closure) => closure.closure.format(indent_level),
+        };
+
+        if let Some(id) = &self.handler_id {
+            let last = output.last_mut().unwrap();
+            last.line += &format!(" @{id}");
         }
+
+        output
     }
 }
 

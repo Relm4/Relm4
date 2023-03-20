@@ -24,6 +24,10 @@ impl Format for TopLevelWidget {
 
         output.extend(self.inner.format_attrs(indent_level));
         output.extend(self.inner.format(indent_level));
+
+        let last = output.last_mut().unwrap();
+        last.line += ",";
+
         output
     }
 }

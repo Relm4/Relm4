@@ -13,6 +13,12 @@ impl Parse for ViewWidgets {
 
         while input.peek(Token![,]) {
             let _colon: Token![,] = input.parse()?;
+
+            // Allow ending with a comma after the last widget
+            if input.is_empty() {
+                break;    
+            }
+
             let widget = TopLevelWidget::parse(input);
             if let Some(root_attr) = &widget.root_attr {
                 if root_exists {

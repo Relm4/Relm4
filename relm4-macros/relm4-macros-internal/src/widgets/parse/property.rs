@@ -42,11 +42,38 @@ impl Property {
             0
         };
 
+        #[cfg(feature = "format")]
+        let comments = if let Some(attrs) = &mut attributes {
+            let mut idx = 0;
+            let mut comments = Vec::new();
+
+            while idx < attrs.inner.len() {
+                if let Attr::Comment(_) = &attrs.inner[idx] {
+                    if let Attr::Comment(comment) = attrs.inner.remove(idx) {
+                        use base64::Engine;
+                        let engine = base64::engine::general_purpose::STANDARD;
+                        let comment = String::from_utf8(engine.decode(comment).unwrap()).unwrap();
+                        comments.push(comment);
+                    } else {
+                        unreachable!()
+                    }
+                } else {
+                    idx += 1;
+                }
+            }
+
+            comments
+        } else {
+            Vec::new()
+        };
+
         // parse `if something { WIDGET } else { WIDGET}` or a similar match expression.
         if input.peek(Token![if]) || input.peek(Token![match]) {
             return Ok(Property {
                 #[cfg(feature = "format")]
                 blank_lines,
+                #[cfg(feature = "format")]
+                comments,
                 name: PropertyName::RelmContainerExtAssign(input.span()),
                 ty: PropertyType::ConditionalWidget(ConditionalWidget::parse_with_name(
                     input,
@@ -69,6 +96,8 @@ impl Property {
             Ok(Property {
                 #[cfg(feature = "format")]
                 blank_lines,
+                #[cfg(feature = "format")]
+                comments,
                 name: PropertyName::RelmContainerExtAssign(span),
                 ty,
             })
@@ -155,6 +184,8 @@ impl Property {
                 Ok(Property {
                     #[cfg(feature = "format")]
                     blank_lines,
+                    #[cfg(feature = "format")]
+                    comments,
                     name,
                     ty,
                 })

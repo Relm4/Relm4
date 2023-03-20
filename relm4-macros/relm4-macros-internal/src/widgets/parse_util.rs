@@ -36,6 +36,8 @@ impl ParseError {
         Property {
             #[cfg(feature = "format")]
             blank_lines: 0,
+            #[cfg(feature = "format")]
+            comments: Vec::new(),
             name: PropertyName::Ident(name),
             ty: PropertyType::ParseError(self),
         }

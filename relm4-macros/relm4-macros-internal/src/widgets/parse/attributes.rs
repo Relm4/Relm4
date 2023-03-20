@@ -108,6 +108,15 @@ impl Parse for Attrs {
                         let string = expect_string_lit(&lit)?;
                         Attr::Name(ident.clone(), string.parse()?)
                     } else {
+                        #[cfg(feature = "format")]
+                        if ident == "COMMENT" {
+                            let string = expect_string_lit(&lit)?;
+                            Attr::Comment(string.value())
+                        } else {
+                            return Err(unexpected_attr_name(ident));
+                        }
+
+                        #[cfg(not(feature = "format"))]
                         return Err(unexpected_attr_name(ident));
                     }
                 } else {

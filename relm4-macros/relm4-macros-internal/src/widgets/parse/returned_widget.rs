@@ -29,6 +29,8 @@ impl Parse for ReturnedWidget {
             (None, None)
         };
 
+        #[cfg(feature = "format")]
+        let name_assigned_by_user = name.is_some();
         let name = name.unwrap_or_else(|| {
             parse_util::idents_to_snake_case(
                 [Ident::new("_returned_widget", input.span())].iter(),
@@ -41,6 +43,8 @@ impl Parse for ReturnedWidget {
         let properties = Properties::parse(&inner);
 
         Ok(ReturnedWidget {
+            #[cfg(feature = "format")]
+            name_assigned_by_user,
             name,
             ty,
             properties,

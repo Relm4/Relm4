@@ -21,6 +21,8 @@ impl Attr {
             | Self::TemplateChild(ident)
             | Self::Wrap(ident, _) => ident.span(),
             #[cfg(feature = "format")]
+            Self::Comment(_) => Span2::call_site(),
+            #[cfg(feature = "format")]
             Self::BlankLine => unreachable!(),
         }
     }

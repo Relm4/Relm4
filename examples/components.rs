@@ -46,7 +46,7 @@ impl SimpleComponent for Header {
                     },
                 },
             },
-        }
+        },
     }
 
     fn init(
@@ -105,7 +105,7 @@ impl SimpleComponent for Dialog {
                     DialogMsg::Cancel
                 });
             },
-        }
+        },
     }
 
     fn init(
@@ -173,7 +173,7 @@ impl SimpleComponent for App {
                 sender.input(AppMsg::CloseRequest);
                 gtk::Inhibit(true)
             },
-        }
+        },
     }
 
     fn init(

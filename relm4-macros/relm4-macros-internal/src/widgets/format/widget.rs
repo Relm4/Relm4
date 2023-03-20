@@ -2,7 +2,9 @@ use quote::ToTokens;
 
 use crate::widgets::{RefToken, Widget, WidgetAttr, WidgetFunc, WidgetTemplateAttr};
 
-use super::{syn::call_rustfmt, Format, FormatArgs, FormatAttributes, FormatLine, InlineFormat};
+use super::{
+    syn::call_rustfmt_to_lines, Format, FormatArgs, FormatAttributes, FormatLine, InlineFormat,
+};
 
 impl Format for WidgetAttr {
     fn format(&self, indent_level: usize) -> Vec<FormatLine> {
@@ -36,8 +38,8 @@ impl Format for WidgetTemplateAttr {
     }
 }
 
-impl InlineFormat for WidgetFunc {
-    fn inline_format(&self) -> String {
+impl Format for WidgetFunc {
+    fn format(&self, indent_level: usize) -> Vec<FormatLine> {
         let WidgetFunc {
             path,
             args,
@@ -45,24 +47,28 @@ impl InlineFormat for WidgetFunc {
             ty,
         } = self;
 
-        let mut line = String::new();
+        let mut input = String::new();
 
-        line.push_str(&path.inline_format());
+        input.push_str(&path.inline_format());
         if let Some(args) = args {
-            line.push_str(&args.into_token_stream().to_string());
+            input.push('(');
+            input.push_str(&args.into_token_stream().to_string());
+            input.push(')');
         }
+
         if let Some(methods) = method_chain {
-            line.push_str(&methods.into_token_stream().to_string());
+            input.push('.');
+            input.push_str(&methods.into_token_stream().to_string());
         }
 
-        let mut line = call_rustfmt(line, "const T: X = ", ";");
+        let mut lines = call_rustfmt_to_lines(input, "const T: X = ", ";", indent_level);
+        let last = &mut lines.last_mut().unwrap();
         if let Some(ty) = ty {
-            line.push_str(" -> ");
-            line.push_str(&ty.to_token_stream().to_string());
+            last.line.push_str(" -> ");
+            last.line.push_str(&ty.inline_format());
         }
-        line.push_str(" {");
 
-        line
+        lines
     }
 }
 
@@ -81,10 +87,10 @@ impl FormatAttributes for Widget {
 
         output.extend(doc_attr.as_ref().map(|tokens| FormatLine {
             indent_level,
-            line: tokens.to_string(),
+            line: format!("///{}", tokens.to_string().trim_matches('"')),
         }));
 
-        if *name_assigned_by_user {
+        if *name_assigned_by_user && !attr.is_local_attr() {
             output.push(FormatLine {
                 indent_level,
                 line: format!("#[name = \"{}\"]", name),
@@ -125,42 +131,45 @@ impl Format for Widget {
             returned_widget,
             ..
         } = self;
-        let mut output = Vec::new();
 
-        let mut line = String::new();
-        if mutable.is_some() {
-            line.push_str("mut ");
-        }
+        let is_empty = properties.properties.is_empty();
 
-        if deref_token.is_some() {
-            line.push('*');
-        }
-        if let RefToken::Some(_) = ref_token {
-            line.push('&');
-        }
+        let mut output = {
+            let mut line = String::new();
+            if mutable.is_some() {
+                line.push_str("mut ");
+            }
 
-        line.push_str(&func.inline_format());
+            if deref_token.is_some() {
+                line.push('*');
+            }
+            if let RefToken::Some(_) = ref_token {
+                line.push('&');
+            }
 
-        output.push(FormatLine { indent_level, line });
+            let mut output = func.format(indent_level);
+            let first = output.first_mut().unwrap();
+            first.line = line + &first.line;
+
+            if !is_empty {
+                first.line += " {";
+            }
+
+            output
+        };
 
         for props in &properties.properties {
             output.extend(props.format(indent_level + 1));
         }
 
         if let Some(returned_widget) = returned_widget {
-            output.push(FormatLine {
-                indent_level,
-                line: "} -> {".to_string(),
-            });
             output.extend(returned_widget.format(indent_level + 1));
+        }
+
+        if !is_empty {
             output.push(FormatLine {
                 indent_level,
-                line: "}".to_string(),
-            });
-        } else {
-            output.push(FormatLine {
-                indent_level,
-                line: "}".to_string(),
+                line: "}".to_owned(),
             });
         }
 

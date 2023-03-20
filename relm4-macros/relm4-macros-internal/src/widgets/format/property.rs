@@ -18,9 +18,17 @@ impl Format for Property {
     fn format(&self, indent_level: usize) -> Vec<FormatLine> {
         let Property {
             blank_lines,
+            comments,
             name,
             ty,
         } = self;
+
+        let comments = comments.iter().map(|c| {
+            FormatLine {
+                indent_level,
+                line: format!("{c}"),
+            }
+        }).collect();
 
         let empty_lines = (0..*blank_lines)
             .map(|_| FormatLine {
@@ -33,6 +41,7 @@ impl Format for Property {
 
         let (attrs, mut output) = match ty {
             PropertyType::Assign(assign) => {
+                prefix += &assign.format_args();
                 prefix += ": ";
                 (
                     assign.format_attrs(indent_level),
@@ -43,7 +52,7 @@ impl Format for Property {
                 prefix += &signal_handler.format_args();
                 prefix += " => ";
                 (
-                    signal_handler.format_attrs(indent_level),
+                    Vec::new(),
                     signal_handler.format(indent_level),
                 )
             }
@@ -57,7 +66,16 @@ impl Format for Property {
                     widget.format(indent_level),
                 )
             }
-            PropertyType::ConditionalWidget(_) => todo!(),
+            PropertyType::ConditionalWidget(conditional_widget) => {
+                if !matches!(name, PropertyName::RelmContainerExtAssign(_)) {
+                    prefix += &conditional_widget.format_args();
+                    prefix += " = ";
+                }
+                (
+                    conditional_widget.format_attrs(indent_level),
+                    conditional_widget.format(indent_level),
+                )
+            }
             PropertyType::ParseError(error) => match error {
                 ParseError::Ident((_ident, tokens)) => {
                     panic!("{tokens}");
@@ -72,7 +90,7 @@ impl Format for Property {
 
         output.last_mut().unwrap().line.push(',');
 
-        [empty_lines, attrs, output].into_iter().flatten().collect()
+        [empty_lines, attrs, comments, output].into_iter().flatten().collect()
     }
 }
 
@@ -96,11 +114,27 @@ impl Format for AssignPropertyAttr {
                 } else {
                     vec![FormatLine {
                         indent_level,
-                        line: format!("#[track = \"{}\"]", expr.inline_format()),
+                        line: format!("#[track({})]", expr.inline_format()),
                     }]
                 }
             }
         }
+    }
+}
+
+impl FormatArgs for AssignProperty {
+    fn format_args(&self) -> String {
+        let mut output = self
+            .args
+            .as_ref()
+            .map(|args| format!("[{}]", args.inline_format()))
+            .unwrap_or_default();
+
+        if self.optional_assign {
+            output += "?";
+        }
+
+        output
     }
 }
 
@@ -112,6 +146,31 @@ impl Format for AssignProperty {
 
 impl FormatAttributes for AssignProperty {
     fn format_attrs(&self, indent_level: usize) -> Vec<FormatLine> {
-        self.attr.format(indent_level)
+        let AssignProperty {
+            attr,
+            iterative,
+            block_signals,
+            chain,
+            ..
+        } = self;
+        let mut output = attr.format(indent_level);
+
+        if !block_signals.is_empty() {
+            let line: String = block_signals.iter().map(|i| format!("{i}, ")).collect();
+            let line = format!("#[block_signal({})]", line.trim_end_matches(", "));
+            output.push(FormatLine { indent_level, line });
+        }
+
+        if *iterative {
+            let line = "#[iterate]".into();
+            output.push(FormatLine { indent_level, line });
+        }
+
+        if let Some(chain) = chain {
+            let line = format!("#[chain({})]", chain.inline_format());
+            output.push(FormatLine { indent_level, line });
+        }
+
+        output
     }
 }
