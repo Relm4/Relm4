@@ -27,7 +27,7 @@ impl Format for Property {
             .iter()
             .map(|c| FormatLine {
                 indent_level,
-                line: format!("{c}"),
+                line: c.to_string(),
             })
             .collect();
 
