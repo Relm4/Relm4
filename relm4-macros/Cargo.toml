@@ -36,4 +36,4 @@ internal = { path = "./relm4-macros-internal", package = "relm4-macros-internal"
 [dev-dependencies]
 relm4 = { path = "../relm4" }
 rustversion = "1"
-trybuild = "1.0.77"
+trybuild = "1.0.80"

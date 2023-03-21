@@ -6,11 +6,11 @@ edition = "2021"
 
 [dev-dependencies]
 relm4 = { path = "../relm4" }
-tokio = { version = "1.25", features = ["rt", "macros", "time", "rt-multi-thread"] }
-futures = "0.3.26"
+tokio = { version = "1.26", features = ["rt", "macros", "time", "rt-multi-thread"] }
+futures = "0.3.27"
 rand = "0.8.5"
 tracker = "0.2"
-reqwest = "0.11.14"
+reqwest = "0.11.15"
 
 # log example
 tracing = "0.1.37"
