@@ -30,34 +30,19 @@
     clippy::must_use_candidate
 )]
 
+use internal::{
+    attrs::{Attrs, SyncOnlyAttrs},
+    menu::Menus,
+};
 use proc_macro::TokenStream;
 use syn::{parse_macro_input, ItemImpl};
 
-mod additional_fields;
-mod args;
-mod attrs;
 mod component;
-mod menu;
-mod view;
-mod visitors;
-mod widgets;
-
-#[macro_use]
-mod util;
 mod factory;
-mod token_streams;
+mod view;
+
+mod util;
 mod widget_template;
-
-use attrs::{Attrs, SyncOnlyAttrs};
-use menu::Menus;
-
-fn gtk_import() -> syn::Path {
-    if cfg!(feature = "relm4") {
-        util::strings_to_path(&["relm4", "gtk"])
-    } else {
-        util::strings_to_path(&["gtk"])
-    }
-}
 
 /// Macro that implements `relm4::Component` or `relm4::SimpleComponent`
 /// and generates the corresponding widgets struct.
@@ -186,7 +171,7 @@ fn gtk_import() -> syn::Path {
 pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let global_attributes: Attrs = parse_macro_input!(attributes);
     let backup_input = input.clone();
-    let component_impl_res = syn::parse_macro_input::parse::<ItemImpl>(input);
+    let component_impl_res = syn::parse::<ItemImpl>(input);
 
     match component_impl_res {
         Ok(component_impl) => component::generate_tokens(global_attributes, component_impl).into(),
@@ -303,7 +288,7 @@ pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
 pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let attrs = parse_macro_input!(attributes);
     let backup_input = input.clone();
-    let factory_impl_res = syn::parse_macro_input::parse::<ItemImpl>(input);
+    let factory_impl_res = syn::parse::<ItemImpl>(input);
 
     match factory_impl_res {
         Ok(factory_impl) => factory::generate_tokens(attrs, factory_impl).into(),

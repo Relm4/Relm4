@@ -23,6 +23,8 @@ fi
 mv examples/Cargo.toml examples/_Cargo.toml
 
 # Publish and pass all arguments to cargo
+cargo publish -p relm4-macros-internal "$@" --allow-dirty
+cargo publish -p relm4-format "$@" --allow-dirty
 cargo publish -p relm4-macros "$@" --allow-dirty
 cargo publish -p relm4 "$@" --allow-dirty
 cargo publish -p relm4-components "$@" --allow-dirty

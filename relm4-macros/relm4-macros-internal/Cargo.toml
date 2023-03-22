@@ -1,8 +1,10 @@
 [package]
-name = "relm4-macros"
-readme = "README.md"
+name = "relm4-macros-internal"
+readme = "../README.md"
+
+documentation = "https://relm4.org/docs/stable/relm4/"
+
 keywords = ["gui", "gtk", "gtk4", "elm", "view"]
-documentation = "https://docs.rs/relm4_macros/"
 
 version.workspace = true
 authors.workspace = true
@@ -16,24 +18,20 @@ repository.workspace = true
 
 categories.workspace = true
 
-[lib]
-proc-macro = true
-
 [features]
 default = ["relm4"]
+
+# Generate code for generating formatted output of the 
+# widget macro syntax.
+format = ["base64"]
 
 # Without the default "relm4" feature, all imports of gtk will
 # be `use gtk;` instead of `use relm4::gtk;` thus making it 
 # easier to use this crate without Relm4.
-relm4 = ["internal/relm4"]
+relm4 = []
 
 [dependencies]
 proc-macro2 = "1.0"
 quote = "1.0"
 syn = { version = "2.0", features = ["full", "extra-traits", "visit", "visit-mut"] }
-internal = { path = "./relm4-macros-internal", package = "relm4-macros-internal", default-features = false }
-
-[dev-dependencies]
-relm4 = { path = "../relm4" }
-rustversion = "1"
-trybuild = "1.0.80"
+base64 = { version = "0.21", optional = true }
