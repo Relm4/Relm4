@@ -146,6 +146,7 @@ pub fn main_application() -> gtk::Application {
 ///
 /// Note: The global application can be overwritten by calling
 /// [`RelmApp::from_app()`].
+#[must_use]
 pub fn main_adw_application() -> adw::Application {
     main_application().downcast().unwrap()
 }
