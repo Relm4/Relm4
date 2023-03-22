@@ -9,7 +9,7 @@
 [![Relm4 on crates.io](https://img.shields.io/crates/v/relm4.svg)](https://crates.io/crates/relm4)
 [![Relm4 docs](https://img.shields.io/badge/rust-documentation-blue)](https://docs.rs/relm4/)
 [![Relm4 book](https://img.shields.io/badge/rust-book-fc0060)](https://relm4.org/book/stable/)
-![Minimum Rust version 1.64](https://img.shields.io/badge/rustc-1.64+-06a096.svg)
+![Minimum Rust version 1.65](https://img.shields.io/badge/rustc-1.65+-06a096.svg)
 [![dependency status](https://deps.rs/repo/github/Relm4/Relm4/status.svg)](https://deps.rs/repo/github/Relm4/Relm4)
 
 An idiomatic GUI library inspired by [Elm](https://elm-lang.org/) and based on [gtk4-rs](https://crates.io/crates/gtk4). 
@@ -39,29 +39,35 @@ Relm4 depends on GTK4: [How to install GTK4](https://www.gtk.org/docs/installati
 
 ## Ecosystem
 
-+ [relm4-macros](https://crates.io/crates/relm4-macros) several macros for declarative UI definitions.
-+ [relm4-components](https://crates.io/crates/relm4-components) is a collections of reusable components you can easily integrate into your application.
-+ [relm4-template](https://github.com/Relm4/relm4-template) is a starter template for creating Relm4 applications in the Flatpak package format.
++ [relm4-macros](https://crates.io/crates/relm4-macros) - several macros for declarative UI definitions.
++ [relm4-components](https://crates.io/crates/relm4-components) - a collections of reusable components.
++ [relm4-icons](https://crates.io/crates/relm4-icons) - icons for your application.
++ [relm4-template](https://github.com/Relm4/relm4-template) - a starter template for creating Relm4 applications in the Flatpak package format.
++ [relm4-snippets](https://github.com/Relm4/vscode-relm4-snippets) - code snippets to speed up your development.
 
-To use all features, just add this to your `Cargo.toml`:
+Use this in to your `Cargo.toml`:
 
 ```toml
+# Core library
 relm4 = "0.6.0-alpha.2"
+# Optional: reusable components
 relm4-components = "0.6.0-alpha.2"
+# Optional: icons
+relm4-icons = { version = "0.6.0-beta.1", features = ["plus"] }
 ```
 
 ### Features
 
 The `relm4` crate has four feature flags:
 
-| Flag | Purpose |
-| :--- | :------ |
-| `macros` | Enable macros by re-exporting [`relm4-macros`](https://crates.io/crates/relm4-macros) |
-| `libadwaita` | Improved support for [libadwaita](https://gitlab.gnome.org/World/Rust/libadwaita-rs) |
-| `libpanel` | Improved support for [libpanel](https://gitlab.gnome.org/World/Rust/libpanel-rs) |
-| `dox` | Linking to the underlying C libraries is skipped to allow building the docs without the dependencies |
-| `gnome_43` | Enable all version feature flags of all dependencies to match the GNOME 43 SDK |
-| `gnome_42` | Enable all version feature flags of all dependencies to match the GNOME 42 SDK |
+| Flag | Purpose | Default |
+| :--- | :------ | :-----: |
+| `macros` | Enable macros by re-exporting [`relm4-macros`](https://crates.io/crates/relm4-macros) | ✅ |
+| `libadwaita` | Improved support for [libadwaita](https://gitlab.gnome.org/World/Rust/libadwaita-rs) | - |
+| `libpanel` | Improved support for [libpanel](https://gitlab.gnome.org/World/Rust/libpanel-rs) | - |
+| `dox` | Linking to the underlying C libraries is skipped to allow building the docs without dependencies | - |
+| `gnome_43` | Enable all version feature flags of all dependencies to match the GNOME 43 SDK | - |
+| `gnome_42` | Enable all version feature flags of all dependencies to match the GNOME 42 SDK | - |
 
 The `macros` feature is a default feature.
 
