@@ -3,6 +3,7 @@
 use gtk::gio;
 use gtk::glib::FromVariant;
 use gtk::prelude::{ActionExt, ActionMapExt, StaticVariantType, ToVariant};
+use gtk::traits::WidgetExt;
 
 use std::marker::PhantomData;
 
@@ -57,10 +58,16 @@ macro_rules! new_stateful_action {
 }
 
 /// A type safe action that wraps around [`gio::SimpleAction`].
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct RelmAction<Name: ActionName> {
     name: PhantomData<Name>,
     action: gio::SimpleAction,
+}
+
+impl<Name: ActionName> From<RelmAction<Name>> for gio::SimpleAction {
+    fn from(value: RelmAction<Name>) -> Self {
+        value.action
+    }
 }
 
 impl<Name: ActionName> RelmAction<Name>
@@ -196,36 +203,75 @@ where
 }
 
 #[derive(Debug)]
-/// A type save action group that wraps around [`gio::SimpleActionGroup`].
+/// A type-safe action group that wraps around [`gio::SimpleActionGroup`].
 pub struct RelmActionGroup<GroupName: ActionGroupName> {
     group_name: PhantomData<GroupName>,
-    group: gio::SimpleActionGroup,
+    actions: Vec<gio::SimpleAction>,
 }
 
 impl<GroupName: ActionGroupName> RelmActionGroup<GroupName> {
+    /// Create a new [`RelmActionGroup`].
+    #[must_use]
+    pub fn new() -> Self {
+        Self::default()
+    }
+
     /// Add an action to the group.
-    pub fn add_action<Name: ActionName>(&self, action: &RelmAction<Name>) {
-        self.group.add_action(&action.action);
+    pub fn add_action<Name: ActionName>(&mut self, action: RelmAction<Name>) {
+        self.actions.push(action.action);
+    }
+
+    /// Register the added actions at application level.
+    pub fn register_for_main_application(self) {
+        let app = crate::main_application();
+        for action in self.actions {
+            app.add_action(&action);
+        }
+    }
+
+    /// Register the added actions for a certain widget.
+    pub fn register_for_widget<W>(self, widget: W)
+    where
+        W: AsRef<gtk::Widget>,
+    {
+        let group = self.into_action_group();
+        widget
+            .as_ref()
+            .insert_action_group(GroupName::NAME, Some(&group));
     }
 
     /// Convert [`RelmActionGroup`] into a [`gio::SimpleActionGroup`].
     #[must_use]
     pub fn into_action_group(self) -> gio::SimpleActionGroup {
-        self.group
+        let group = gio::SimpleActionGroup::new();
+        for action in self.actions {
+            group.add_action(&action);
+        }
+        group
     }
+}
 
-    /// Create a new [`SimpleActionGroup`](gio::SimpleActionGroup).
-    #[must_use]
-    pub fn new() -> Self {
+impl<GroupName, A> FromIterator<A> for RelmActionGroup<GroupName>
+where
+    A: Into<gio::SimpleAction>,
+    GroupName: ActionGroupName,
+{
+    fn from_iter<I>(iter: I) -> Self
+    where
+        I: IntoIterator<Item = A>,
+    {
         Self {
             group_name: PhantomData,
-            group: gio::SimpleActionGroup::new(),
+            actions: iter.into_iter().map(Into::into).collect(),
         }
     }
 }
 
 impl<GroupName: ActionGroupName> Default for RelmActionGroup<GroupName> {
     fn default() -> Self {
-        Self::new()
+        Self {
+            group_name: PhantomData,
+            actions: Vec::new(),
+        }
     }
 }

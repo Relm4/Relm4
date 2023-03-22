@@ -67,8 +67,6 @@ impl SimpleComponent for App {
         let app = relm4::main_application();
         app.set_accelerators_for_action::<ExampleAction>(&["<primary>W"]);
 
-        let group = RelmActionGroup::<WindowActionGroup>::new();
-
         let action: RelmAction<ExampleAction> = RelmAction::new_stateless(move |_| {
             println!("Statelesss action!");
             sender.input(Msg::Increment);
@@ -80,13 +78,10 @@ impl SimpleComponent for App {
                 *state += value;
             });
 
-        group.add_action(&action);
-        group.add_action(&action2);
-
-        let actions = group.into_action_group();
-        widgets
-            .main_window
-            .insert_action_group(WindowActionGroup::NAME, Some(&actions));
+        let mut group = RelmActionGroup::<WindowActionGroup>::new();
+        group.add_action(action);
+        group.add_action(action2);
+        group.register_for_widget(&widgets.main_window);
 
         ComponentParts { model, widgets }
     }
