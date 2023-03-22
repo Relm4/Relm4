@@ -31,6 +31,12 @@ pub trait RelmWidgetExt {
     /// widget.inline_css("border: 1px solid red");
     /// ```
     fn inline_css(&self, style: &str);
+
+    /// Sets the tooltip text of a widget and enables is.
+    ///
+    /// This is basically, the same as using [`WidgetExt::set_has_tooltip()`]
+    /// and [`WidgetExt::set_tooltip_text()`], but with fewer steps.
+    fn set_tooltip(&self, test: &str);
 }
 
 impl<T: gtk::glib::IsA<gtk::Widget>> RelmWidgetExt for T {
@@ -70,5 +76,10 @@ impl<T: gtk::glib::IsA<gtk::Widget>> RelmWidgetExt for T {
 
         provider.load_from_data(&data);
         context.add_provider(&provider, gtk::STYLE_PROVIDER_PRIORITY_APPLICATION + 1);
+    }
+
+    fn set_tooltip(&self, text: &str) {
+        self.set_has_tooltip(true);
+        self.set_tooltip_text(Some(text));
     }
 }
