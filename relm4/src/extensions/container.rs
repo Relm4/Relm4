@@ -20,21 +20,6 @@ impl RelmContainerExt for gtk::Dialog {
     }
 }
 
-#[cfg(feature = "libadwaita")]
-impl RelmContainerExt for adw::PreferencesGroup {
-    fn container_add(&self, widget: &impl AsRef<gtk::Widget>) {
-        use adw::prelude::PreferencesGroupExt;
-        self.add(widget.as_ref());
-    }
-}
-
-#[cfg(feature = "libadwaita")]
-impl RelmContainerExt for adw::Squeezer {
-    fn container_add(&self, widget: &impl AsRef<gtk::Widget>) {
-        self.add(widget.as_ref());
-    }
-}
-
 macro_rules! append_impl {
     ($($type:ty),+) => {
         $(
@@ -63,4 +48,21 @@ append_impl!(gtk::Box, gtk::ListBox);
 add_child_impl!(gtk::InfoBar, gtk::Stack);
 
 #[cfg(feature = "libadwaita")]
-append_impl!(adw::Leaflet, adw::Carousel, adw::TabView);
+#[cfg_attr(docsrs, doc(cfg(feature = "libadwaita")))]
+mod libadwaita {
+    use super::RelmContainerExt;
+    append_impl!(adw::Leaflet, adw::Carousel, adw::TabView);
+
+    impl RelmContainerExt for adw::PreferencesGroup {
+        fn container_add(&self, widget: &impl AsRef<gtk::Widget>) {
+            use adw::prelude::PreferencesGroupExt;
+            self.add(widget.as_ref());
+        }
+    }
+
+    impl RelmContainerExt for adw::Squeezer {
+        fn container_add(&self, widget: &impl AsRef<gtk::Widget>) {
+            self.add(widget.as_ref());
+        }
+    }
+}

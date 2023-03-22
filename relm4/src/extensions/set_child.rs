@@ -45,6 +45,7 @@ set_child_impl!(
 );
 
 #[cfg(feature = "libadwaita")]
+#[cfg_attr(docsrs, doc(cfg(feature = "libadwaita")))]
 mod libadwaita {
     use super::RelmSetChildExt;
     use adw::prelude::{AdwApplicationWindowExt, AdwWindowExt, BinExt};

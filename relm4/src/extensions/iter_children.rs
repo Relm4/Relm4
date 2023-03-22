@@ -124,6 +124,7 @@ impl RelmIterChildrenExt for gtk::Grid {
 impl RelmIterChildrenExt for gtk::Stack {}
 
 #[cfg(feature = "libadwaita")]
+#[cfg_attr(docsrs, doc(cfg(feature = "libadwaita")))]
 mod libadwaita {
     use super::RelmIterChildrenExt;
     use crate::gtk;
