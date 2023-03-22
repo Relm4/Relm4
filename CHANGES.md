@@ -5,6 +5,7 @@
 ### Added
 
 + core: Documentation and better support for data bindings
++ core: Add `set_tooltip` method to `RelmWidgetExt`
 
 ### Changed
 
