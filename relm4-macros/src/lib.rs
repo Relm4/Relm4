@@ -1,13 +1,9 @@
 //! A collection of macros for gtk-rs, Relm4 and Rust in general.
 //!
-//! The docs are available in two versions.
-//! Use the [stable docs](https://docs.rs/relm4_macros/) if you want get information about a version that was already published.
-//! Visit the [nightly docs](https://relm4.org/docs/next/relm4_macros/) if are trying out the newest but possibly unstable version of the crate.
-//!
 //! Docs of related crates:
-//! [relm4](../relm4/index.html)
-//! | [relm4-macros](../relm4_macros/index.html)
-//! | [relm4-components](../relm4_components/index.html)
+//! [relm4](https://docs.rs/relm4)
+//! | [relm4-macros](https://docs.rs/relm4_macros)
+//! | [relm4-components](https://docs.rs/relm4_components)
 //! | [gtk4-rs](https://gtk-rs.org/gtk4-rs/git/docs)
 //! | [gtk-rs-core](https://gtk-rs.org/gtk-rs-core/git/docs)
 //! | [libadwaita-rs](https://world.pages.gitlab.gnome.org/Rust/libadwaita-rs/git/docs/libadwaita)

@@ -1,13 +1,9 @@
 //! Collection of reusable and easily configurable components for Relm4.
 //!
-//! The docs are available in two versions.
-//! Use the [stable docs](https://docs.rs/relm4_components/) if you want get information about a version that was already published.
-//! Visit the [nightly docs](https://relm4.org/docs/next/relm4_components/) if are trying out the newest but possibly unstable version of the crate.
-//!
 //! Docs of related crates:
-//! [relm4](../relm4/index.html)
-//! | [relm4-macros](../relm4_macros/index.html)
-//! | [relm4-components](../relm4_components/index.html)
+//! [relm4](https://docs.rs/relm4)
+//! | [relm4-macros](https://docs.rs/relm4_macros)
+//! | [relm4-components](https://docs.rs/relm4_components)
 //! | [gtk4-rs](https://gtk-rs.org/gtk4-rs/git/docs)
 //! | [gtk-rs-core](https://gtk-rs.org/gtk-rs-core/git/docs)
 //! | [libadwaita-rs](https://world.pages.gitlab.gnome.org/Rust/libadwaita-rs/git/docs/libadwaita)
@@ -29,6 +25,8 @@
     clippy::cargo,
     clippy::must_use_candidate
 )]
+// Configuration for doc builds on the nightly toolchain.
+#![cfg_attr(docsrs, feature(doc_cfg))]
 
 pub mod alert;
 pub mod open_button;
@@ -37,4 +35,5 @@ pub mod save_dialog;
 pub mod simple_combo_box;
 
 #[cfg(feature = "web")]
+#[cfg_attr(docsrs, doc(cfg(feature = "web")))]
 pub mod web_image;

@@ -6,12 +6,21 @@
 
 + core: Documentation and better support for data bindings
 + core: Add `set_tooltip` method to `RelmWidgetExt`
++ core: Add `main_adw_application` method to retrieve the `adw::Application` when the libadwaita feature is enabled
 + examples: Example for using relm4-icons 
 
 ### Changed
 
 + core: Improved `RelmActionGroup` API
 + all: Increase MSRV to 1.65 to match the dependencies
+
+### Fixed
+
++ all: Fix doc links
+
+### Removed
+
++ core: Remove the deprecated `send!` macro
 
 ## 0.6.0-alpha.2 - 2023-3-13
 

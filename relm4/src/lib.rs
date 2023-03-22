@@ -1,13 +1,9 @@
 //! An idiomatic GUI library inspired by Elm and based on gtk4-rs.
 //!
-//! The docs are available in two versions.
-//! Use the [stable docs](https://docs.rs/relm4/) if you want get information about a version that was already published.
-//! Visit the [nightly docs](https://relm4.org/docs/next/relm4/) if are trying out the newest but possibly unstable version of the crate.
-//!
 //! Docs of related crates:
-//! [relm4](../relm4/index.html)
-//! | [relm4-macros](../relm4_macros/index.html)
-//! | [relm4-components](../relm4_components/index.html)
+//! [relm4](https://docs.rs/relm4)
+//! | [relm4-macros](https://docs.rs/relm4_macros)
+//! | [relm4-components](https://docs.rs/relm4_components)
 //! | [gtk4-rs](https://gtk-rs.org/gtk4-rs/git/docs)
 //! | [gtk-rs-core](https://gtk-rs.org/gtk-rs-core/git/docs)
 //! | [libadwaita-rs](https://world.pages.gitlab.gnome.org/Rust/libadwaita-rs/git/docs/libadwaita)
@@ -31,7 +27,7 @@
 )]
 #![allow(clippy::multiple_crate_versions)]
 // Configuration for doc builds on the nightly toolchain.
-#![cfg_attr(dox, feature(doc_cfg))]
+#![cfg_attr(docsrs, feature(doc_cfg))]
 
 mod app;
 mod channel;
@@ -85,13 +81,16 @@ pub use gtk;
 
 // Re-exports
 #[cfg(feature = "macros")]
+#[cfg_attr(docsrs, doc(cfg(feature = "macros")))]
 pub use relm4_macros::*;
 
 #[cfg(feature = "libadwaita")]
+#[cfg_attr(docsrs, doc(cfg(feature = "libadwaita")))]
 /// Re-export of libadwaita
 pub use adw;
 
 #[cfg(feature = "libpanel")]
+#[cfg_attr(docsrs, doc(cfg(feature = "libpanel")))]
 /// Re-export of libpanel
 pub use panel;
 
@@ -138,6 +137,17 @@ pub fn main_application() -> gtk::Application {
         cell.set(Some(app.clone()));
         app
     })
+}
+
+#[cfg(feature = "libadwaita")]
+#[cfg_attr(docsrs, doc(cfg(feature = "libadwaita")))]
+/// Returns the global [`adw::Application`] that's used internally
+/// by [`RelmApp`] if the `libadwaita` feature is enabled.
+///
+/// Note: The global application can be overwritten by calling
+/// [`RelmApp::from_app()`].
+pub fn main_adw_application() -> adw::Application {
+    main_application().downcast().unwrap()
 }
 
 /// Sets a custom global stylesheet.
@@ -222,15 +232,4 @@ where
     R: Send + 'static,
 {
     RUNTIME.spawn_blocking(func)
-}
-
-/// A short macro for conveniently sending messages.
-///
-/// The message is sent using the sender and the [`Result`] is unwrapped automatically.
-#[macro_export]
-#[deprecated(since = "0.5.0-beta.1", note = "Use `sender.input(msg)` instead.")]
-macro_rules! send {
-    ($sender:expr, $msg:expr) => {
-        $sender.input($msg)
-    };
 }

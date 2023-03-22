@@ -8,8 +8,12 @@ pub use crate::{
     Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,
     RelmWidgetExt, SimpleComponent, WidgetRef, WidgetTemplate,
 };
+
 #[cfg(feature = "libadwaita")]
+#[cfg_attr(docsrs, doc(cfg(feature = "libadwaita")))]
 pub use adw;
 pub use gtk;
+
 #[cfg(feature = "libpanel")]
+#[cfg_attr(docsrs, doc(cfg(feature = "libpanel")))]
 pub use panel;

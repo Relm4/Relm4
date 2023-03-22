@@ -19,6 +19,8 @@ categories.workspace = true
 [package.metadata.docs.rs]
 all-features = true
 cargo-args = ["-Zunstable-options", "-Zrustdoc-scrape-examples"]
+# enable unstable features in the documentation
+rustdoc-args = ["--cfg", "docsrs"]
 
 [features]
 default = ["macros"]
