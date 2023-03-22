@@ -210,18 +210,6 @@ impl<GroupName: ActionGroupName> RelmActionGroup<GroupName> {
         Self::default()
     }
 
-    /// Create a new [`RelmActionGroup`] from an iterator.
-    pub fn from_iter<I, A>(iter: I) -> Self
-    where
-        I: Iterator<Item = A>,
-        A: Into<gio::SimpleAction>,
-    {
-        Self {
-            group_name: PhantomData,
-            actions: iter.map(Into::into).collect(),
-        }
-    }
-
     /// Add an action to the group.
     pub fn add_action<Name: ActionName>(&mut self, action: RelmAction<Name>) {
         self.actions.push(action.action);
@@ -254,6 +242,22 @@ impl<GroupName: ActionGroupName> RelmActionGroup<GroupName> {
             group.add_action(&action);
         }
         group
+    }
+}
+
+impl<GroupName, A> FromIterator<A> for RelmActionGroup<GroupName>
+where
+    A: Into<gio::SimpleAction>,
+    GroupName: ActionGroupName,
+{
+    fn from_iter<I>(iter: I) -> Self
+    where
+        I: IntoIterator<Item = A>,
+    {
+        Self {
+            group_name: PhantomData,
+            actions: iter.into_iter().map(Into::into).collect(),
+        }
     }
 }
 
