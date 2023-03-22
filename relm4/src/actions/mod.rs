@@ -64,6 +64,12 @@ pub struct RelmAction<Name: ActionName> {
     action: gio::SimpleAction,
 }
 
+impl<Name: ActionName> From<RelmAction<Name>> for gio::SimpleAction {
+    fn from(value: RelmAction<Name>) -> Self {
+        value.action
+    }
+}
+
 impl<Name: ActionName> RelmAction<Name>
 where
     Name::State: ToVariant + FromVariant,
