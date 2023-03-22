@@ -6,6 +6,10 @@
 
 + core: Documentation and better support for data bindings
 
+### Changed
+
++ core: Improved `RelmActionGroup` API
+
 ## 0.6.0-alpha.2 - 2023-3-13
 
 ### Added
