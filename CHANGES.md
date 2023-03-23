@@ -17,6 +17,7 @@
 ### Fixed
 
 + all: Fix doc links
++ core: Improve worker docs
 
 ### Removed
 

@@ -13,6 +13,15 @@ use std::fmt::Debug;
 use std::{any, thread};
 
 /// Receives inputs and outputs in the background.
+///
+/// All types that implement [`Worker`] will also implement
+/// [`Component`] automatically.
+///
+/// If you need more flexibility when using workers, you can
+/// simply implement [`Component`] instead and set the [`Component::Widgets`]
+/// and [`Component::Root`] types both to `()`.
+/// This will still allow you to use all worker related methods because internally
+/// a worker is just seen as a [`Component`] without widgets.
 pub trait Worker: Sized + Send + 'static {
     /// The initial parameters that will be used to build the worker state.
     type Init: 'static + Send;
