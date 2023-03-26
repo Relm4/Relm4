@@ -26,6 +26,7 @@ impl FactoryComponent for Task {
     type CommandOutput = ();
     type ParentInput = AppMsg;
     type ParentWidget = gtk::ListBox;
+    type Index = DynamicIndex;
 
     view! {
         gtk::Box {

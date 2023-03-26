@@ -6,11 +6,11 @@ error: expected `view!` macro invocation
 9 | | }
   | |_^
 
-error[E0046]: not all trait items implemented, missing: `ParentWidget`, `ParentInput`, `CommandOutput`, `Input`, `Output`, `Init`, `Root`, `init_model`, `init_root`, `init_widgets`
+error[E0046]: not all trait items implemented, missing: `ParentWidget`, `ParentInput`, `CommandOutput`, `Input`, `Output`, `Init`, `Root`, `Index`, `init_model`, `init_root`, `init_widgets`
  --> tests/ui/compile-fail/factory-component-empty.rs:7:1
   |
 7 | impl FactoryComponent for TestFactoryComponent {
-  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ missing `ParentWidget`, `ParentInput`, `CommandOutput`, `Input`, `Output`, `Init`, `Root`, `init_model`, `init_root`, `init_widgets` in implementation
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ missing `ParentWidget`, `ParentInput`, `CommandOutput`, `Input`, `Output`, `Init`, `Root`, `Index`, `init_model`, `init_root`, `init_widgets` in implementation
   |
   = help: implement the missing item: `type ParentWidget = Type;`
   = help: implement the missing item: `type ParentInput = Type;`
@@ -19,6 +19,7 @@ error[E0046]: not all trait items implemented, missing: `ParentWidget`, `ParentI
   = help: implement the missing item: `type Output = Type;`
   = help: implement the missing item: `type Init = Type;`
   = help: implement the missing item: `type Root = Type;`
-  = help: implement the missing item: `fn init_model(_: <Self as FactoryComponent>::Init, _: &DynamicIndex, _: FactorySender<Self>) -> Self { todo!() }`
+  = help: implement the missing item: `type Index = Type;`
+  = help: implement the missing item: `fn init_model(_: <Self as FactoryComponent>::Init, _: &<Self as FactoryComponent>::Index, _: FactorySender<Self>) -> Self { todo!() }`
   = help: implement the missing item: `fn init_root(&self) -> <Self as FactoryComponent>::Root { todo!() }`
-  = help: implement the missing item: `fn init_widgets(&mut self, _: &DynamicIndex, _: &<Self as FactoryComponent>::Root, _: &<<Self as FactoryComponent>::ParentWidget as FactoryView>::ReturnedWidget, _: FactorySender<Self>) -> <Self as FactoryComponent>::Widgets { todo!() }`
+  = help: implement the missing item: `fn init_widgets(&mut self, _: &<Self as FactoryComponent>::Index, _: &<Self as FactoryComponent>::Root, _: &<<Self as FactoryComponent>::ParentWidget as FactoryView>::ReturnedWidget, _: FactorySender<Self>) -> <Self as FactoryComponent>::Widgets { todo!() }`

@@ -105,6 +105,11 @@ pub(crate) fn generate_tokens(
         } else {
             parse_quote! { FactorySender }
         };
+        let index_ty: syn::TypePath = if asyncness.is_some() {
+            parse_quote! { relm4::factory::DynamicIndex }
+        } else {
+            parse_quote! { Self::Index }
+        };
 
         if init_widgets.is_some() {
             ViewOutputExpander::expand(&mut factory_impl, view_code, widgets_return_code, errors);
@@ -112,7 +117,7 @@ pub(crate) fn generate_tokens(
             factory_impl.items.push(parse_quote! {
                 fn init_widgets(
                     &mut self,
-                    index: &relm4::factory::DynamicIndex,
+                    index: & #index_ty,
                     root: &Self::Root,
                     returned_widget: &<Self::ParentWidget as relm4::factory::FactoryView>::ReturnedWidget,
                     sender: relm4::factory::#sender_ty<Self>,

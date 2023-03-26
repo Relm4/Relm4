@@ -24,17 +24,26 @@ use std::hash::Hasher;
 /// The changes will be rendered on the widgets after the guard goes out of scope.
 #[derive(Debug)]
 #[must_use]
-pub struct FactoryVecDequeGuard<'a, C: FactoryComponent> {
+pub struct FactoryVecDequeGuard<'a, C>
+where
+    C: FactoryComponent<Index = DynamicIndex>,
+{
     inner: &'a mut FactoryVecDeque<C>,
 }
 
-impl<'a, C: FactoryComponent> Drop for FactoryVecDequeGuard<'a, C> {
+impl<'a, C> Drop for FactoryVecDequeGuard<'a, C>
+where
+    C: FactoryComponent<Index = DynamicIndex>,
+{
     fn drop(&mut self) {
         self.inner.render_changes();
     }
 }
 
-impl<'a, C: FactoryComponent> FactoryVecDequeGuard<'a, C> {
+impl<'a, C> FactoryVecDequeGuard<'a, C>
+where
+    C: FactoryComponent<Index = DynamicIndex>,
+{
     fn new(inner: &'a mut FactoryVecDeque<C>) -> Self {
         #[allow(unused_mut)]
         #[allow(clippy::let_and_return)]
@@ -345,7 +354,10 @@ impl<'a, C: FactoryComponent> FactoryVecDequeGuard<'a, C> {
     }
 }
 
-impl<'a, C: FactoryComponent> Deref for FactoryVecDequeGuard<'a, C> {
+impl<'a, C> Deref for FactoryVecDequeGuard<'a, C>
+where
+    C: FactoryComponent<Index = DynamicIndex>,
+{
     type Target = FactoryVecDeque<C>;
 
     fn deref(&self) -> &Self::Target {
@@ -353,7 +365,10 @@ impl<'a, C: FactoryComponent> Deref for FactoryVecDequeGuard<'a, C> {
     }
 }
 
-impl<'a, C: FactoryComponent> Index<usize> for FactoryVecDequeGuard<'a, C> {
+impl<'a, C> Index<usize> for FactoryVecDequeGuard<'a, C>
+where
+    C: FactoryComponent<Index = DynamicIndex>,
+{
     type Output = C;
 
     fn index(&self, index: usize) -> &Self::Output {
@@ -361,7 +376,10 @@ impl<'a, C: FactoryComponent> Index<usize> for FactoryVecDequeGuard<'a, C> {
     }
 }
 
-impl<'a, C: FactoryComponent> IndexMut<usize> for FactoryVecDequeGuard<'a, C> {
+impl<'a, C> IndexMut<usize> for FactoryVecDequeGuard<'a, C>
+where
+    C: FactoryComponent<Index = DynamicIndex>,
+{
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         self.get_mut(index)
             .expect("Called `get_mut` on an invalid index")
@@ -373,7 +391,10 @@ impl<'a, C: FactoryComponent> IndexMut<usize> for FactoryVecDequeGuard<'a, C> {
 ///
 /// To access mutable methods of the factory, create a guard using [`Self::guard`].
 #[derive(Debug)]
-pub struct FactoryVecDeque<C: FactoryComponent> {
+pub struct FactoryVecDeque<C>
+where
+    C: FactoryComponent<Index = DynamicIndex>,
+{
     widget: C::ParentWidget,
     parent_sender: Sender<C::ParentInput>,
     components: VecDeque<ComponentStorage<C>>,
@@ -382,13 +403,19 @@ pub struct FactoryVecDeque<C: FactoryComponent> {
     uid_counter: usize,
 }
 
-impl<C: FactoryComponent> Drop for FactoryVecDeque<C> {
+impl<C> Drop for FactoryVecDeque<C>
+where
+    C: FactoryComponent<Index = DynamicIndex>,
+{
     fn drop(&mut self) {
         self.guard().clear();
     }
 }
 
-impl<C: FactoryComponent> Index<usize> for FactoryVecDeque<C> {
+impl<C> Index<usize> for FactoryVecDeque<C>
+where
+    C: FactoryComponent<Index = DynamicIndex>,
+{
     type Output = C;
 
     fn index(&self, index: usize) -> &Self::Output {
@@ -396,7 +423,10 @@ impl<C: FactoryComponent> Index<usize> for FactoryVecDeque<C> {
     }
 }
 
-impl<C: FactoryComponent> FactoryVecDeque<C> {
+impl<C> FactoryVecDeque<C>
+where
+    C: FactoryComponent<Index = DynamicIndex>,
+{
     /// Creates a new [`FactoryVecDeque`].
     #[must_use]
     pub fn new(widget: C::ParentWidget, parent_sender: &Sender<C::ParentInput>) -> Self {
@@ -471,7 +501,7 @@ impl<C: FactoryComponent> FactoryVecDeque<C> {
                 // The element doesn't exist yet
                 let comp = &components[index];
                 let insert_widget = comp.widget();
-                let position = C::position(comp.get(), index);
+                let position = C::position(comp.get(), &state.index);
                 let returned_widget = if index == 0 {
                     self.widget.factory_prepend(insert_widget, &position)
                 } else {
@@ -511,7 +541,7 @@ impl<C: FactoryComponent> FactoryVecDeque<C> {
 
         if let Some(change_index) = first_position_change_idx {
             for (index, comp) in components.iter().enumerate().skip(change_index) {
-                let position = C::position(comp.get(), index);
+                let position = C::position(comp.get(), &self.model_state[index].index);
                 self.widget
                     .factory_update_position(comp.returned_widget().unwrap(), &position);
             }
@@ -594,9 +624,9 @@ impl<C: FactoryComponent> FactoryVecDeque<C> {
 }
 
 ///Implements the Clone Trait for `FactoryVecDeque<C>` where C is Cloneable
-impl<C: FactoryComponent> Clone for FactoryVecDeque<C>
+impl<C> Clone for FactoryVecDeque<C>
 where
-    C: CloneableFactoryComponent,
+    C: CloneableFactoryComponent + FactoryComponent<Index = DynamicIndex>,
 {
     fn clone(&self) -> Self {
         // Create a new, empty FactoryVecDeque.

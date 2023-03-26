@@ -64,17 +64,17 @@ pub trait FactoryView: IsA<gtk::Widget> {
 /// Returns the position of an element inside a
 /// container like [`gtk::Grid`] where the position isn't
 /// clearly defined by the index.
-pub trait Position<Pos> {
+pub trait Position<Pos, Index> {
     /// Returns the position.
     ///
     /// This function can be called very often
     /// if widgets are moved a lot, so it should
     /// be cheap to call.
-    fn position(&self, index: usize) -> Pos;
+    fn position(&self, index: &Index) -> Pos;
 }
 
-impl<C> Position<()> for C {
-    fn position(&self, _index: usize) {}
+impl<C, I> Position<(), I> for C {
+    fn position(&self, _index: &I) {}
 }
 
 /// Returns the position of an element inside a

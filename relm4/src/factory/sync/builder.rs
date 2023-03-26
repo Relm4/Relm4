@@ -1,6 +1,6 @@
 use super::{FactoryComponent, FactoryHandle};
 
-use crate::factory::{DataGuard, DynamicIndex, FactorySender, FactoryView};
+use crate::factory::{DataGuard, FactorySender, FactoryView};
 use crate::shutdown::ShutdownSender;
 use crate::{shutdown, GuardedReceiver, Receiver, Sender};
 
@@ -20,7 +20,7 @@ pub(super) struct FactoryBuilder<C: FactoryComponent> {
 }
 
 impl<C: FactoryComponent> FactoryBuilder<C> {
-    pub(super) fn new(index: &DynamicIndex, init: C::Init) -> Self {
+    pub(super) fn new(index: &C::Index, init: C::Init) -> Self {
         // Used for all events to be processed by this component's internal service.
         let (input_sender, input_receiver) = crate::channel::<C::Input>();
 
@@ -54,7 +54,7 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
     /// Starts the component, passing ownership to a future attached to a [gtk::glib::MainContext].
     pub(super) fn launch<Transform>(
         self,
-        index: &DynamicIndex,
+        index: &C::Index,
         returned_widget: <C::ParentWidget as FactoryView>::ReturnedWidget,
         parent_sender: &Sender<C::ParentInput>,
         transform: Transform,

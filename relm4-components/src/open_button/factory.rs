@@ -19,6 +19,7 @@ impl FactoryComponent for FileListItem {
     type Init = PathBuf;
     type ParentWidget = gtk::Box;
     type Output = OpenButtonMsg;
+    type Index = DynamicIndex;
 
     view! {
         gtk::ListBoxRow {
