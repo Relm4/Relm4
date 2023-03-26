@@ -47,10 +47,8 @@ where
     }
 }
 
-/// A container similar to [`VecDeque`] that can be used to store
-/// data associated with components that implement [`FactoryComponent`].
-///
-/// To access mutable methods of the factory, create a guard using [`Self::guard`].
+/// A container similar to [`HashMap`] that can be used to store
+/// values of type [`FactoryComponent`].
 #[derive(Debug)]
 pub struct FactoryHashMap<K, C: FactoryComponent> {
     widget: C::ParentWidget,

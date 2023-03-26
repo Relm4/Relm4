@@ -90,7 +90,7 @@ impl SimpleComponent for App {
                 set_margin_all: 5,
 
                 gtk::StackSwitcher {
-                    set_stack: Some(&counter_stack),
+                    set_stack: Some(counter_stack),
                 },
 
                 gtk::Entry {
