@@ -30,6 +30,7 @@ libadwaita = ["adw"]
 libpanel = ["panel"]
 macros = ["relm4-macros"]
 
+gnome_44 = ["gtk/gnome_44", "adw/v1_3"]
 gnome_43 = ["gtk/gnome_43", "adw/v1_2"]
 gnome_42 = ["gtk/gnome_42"]
 
