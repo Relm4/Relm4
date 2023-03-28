@@ -157,7 +157,7 @@ impl AssignProperty {
     ) {
         match &self.attr {
             AssignPropertyAttr::None => (),
-            AssignPropertyAttr::Watch => {
+            AssignPropertyAttr::Watch { .. } => {
                 let mut info = AssignInfo {
                     stream,
                     widget_name: w_name,
@@ -165,7 +165,11 @@ impl AssignProperty {
                 };
                 self.assign_stream(&mut info, p_name, false);
             }
-            AssignPropertyAttr::Track((track_stream, paste_model)) => {
+            AssignPropertyAttr::Track {
+                track_expr,
+                paste_model,
+                ..
+            } => {
                 let mut assign_stream = TokenStream2::new();
                 let mut info = AssignInfo {
                     stream: &mut assign_stream,
@@ -182,7 +186,7 @@ impl AssignProperty {
                 });
 
                 stream.extend(quote! {
-                    if #page_switch (#model #track_stream) {
+                    if #page_switch (#model #track_expr) {
                         #assign_stream
                     }
                 });

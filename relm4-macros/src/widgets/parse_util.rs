@@ -69,6 +69,15 @@ impl WidgetAttr {
     }
 }
 
+impl AssignPropertyAttr {
+    pub(super) fn should_skip_init(&self) -> bool {
+        match self {
+            Self::None => false,
+            Self::Watch { skip_init } | Self::Track { skip_init, .. } => skip_init.is_some(),
+        }
+    }
+}
+
 impl PartialEq for AssignPropertyAttr {
     fn eq(&self, other: &Self) -> bool {
         core::mem::discriminant(self) == core::mem::discriminant(other)

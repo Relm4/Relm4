@@ -21,7 +21,7 @@ impl AssignProperty {
         if !info.is_conditional
             || !matches!(
                 self.attr,
-                AssignPropertyAttr::Track(_) | AssignPropertyAttr::Watch
+                AssignPropertyAttr::Track { .. } | AssignPropertyAttr::Watch { .. }
             )
         {
             self.assign_stream(info, p_name, init);
@@ -34,6 +34,10 @@ impl AssignProperty {
         p_name: &PropertyName,
         init: bool,
     ) {
+        if init && self.attr.should_skip_init() {
+            return;
+        }
+
         let assign_fn = p_name.assign_fn_stream(info.widget_name);
         let self_assign_args = p_name.assign_args_stream(info.widget_name);
         let span = p_name.span();

@@ -166,30 +166,38 @@ impl AssignProperty {
         if is_conditional {
             match &self.attr {
                 AssignPropertyAttr::None => (),
-                AssignPropertyAttr::Watch => {
-                    let mut info = AssignInfo {
-                        stream,
-                        widget_name: w_name,
-                        is_conditional,
-                    };
-                    self.assign_stream(&mut info, p_name, true);
+                AssignPropertyAttr::Watch { skip_init } => {
+                    if skip_init.is_none() {
+                        let mut info = AssignInfo {
+                            stream,
+                            widget_name: w_name,
+                            is_conditional,
+                        };
+                        self.assign_stream(&mut info, p_name, true);
+                    }
                 }
-                AssignPropertyAttr::Track((track_stream, paste_model)) => {
-                    let mut assign_stream = TokenStream2::new();
-                    let mut info = AssignInfo {
-                        stream: &mut assign_stream,
-                        widget_name: w_name,
-                        is_conditional,
-                    };
+                AssignPropertyAttr::Track {
+                    track_expr,
+                    paste_model,
+                    skip_init,
+                } => {
+                    if skip_init.is_none() {
+                        let mut assign_stream = TokenStream2::new();
+                        let mut info = AssignInfo {
+                            stream: &mut assign_stream,
+                            widget_name: w_name,
+                            is_conditional,
+                        };
 
-                    self.assign_stream(&mut info, p_name, true);
-                    let model = paste_model.then(|| model_name);
+                        self.assign_stream(&mut info, p_name, true);
+                        let model = paste_model.then(|| model_name);
 
-                    stream.extend(quote_spanned! {
-                        track_stream.span() => if #model #track_stream {
-                            #assign_stream
-                        }
-                    });
+                        stream.extend(quote_spanned! {
+                            track_expr.span() => if #model #track_expr {
+                                #assign_stream
+                            }
+                        });
+                    }
                 }
             }
         }

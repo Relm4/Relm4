@@ -41,10 +41,14 @@ enum ParseError {
 #[derive(Debug)]
 enum AssignPropertyAttr {
     None,
-    Watch,
-    /// The bool indicated whether the model type needs to
-    /// be pasted in front of the track expression.
-    Track((TokenStream2, bool)),
+    Watch {
+        skip_init: Option<Ident>,
+    },
+    Track {
+        track_expr: TokenStream2,
+        skip_init: Option<Ident>,
+        paste_model: bool,
+    },
 }
 
 #[derive(Debug)]
@@ -198,8 +202,8 @@ enum Attr {
     LocalRef(Ident),
     Root(Ident),
     Iterate(Ident),
-    Watch(Ident),
-    Track(Ident, Option<Box<Expr>>),
+    Watch(Ident, Option<Ident>),
+    Track(Ident, Option<Ident>, Option<Box<Expr>>),
     BlockSignal(Ident, Vec<Ident>),
     Name(Ident, Ident),
     Transition(Ident, Ident),

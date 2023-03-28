@@ -20,7 +20,7 @@ impl Properties {
         self.properties.iter().any(|prop| match &prop.ty {
             PropertyType::Assign(assign_prop) => matches!(
                 &assign_prop.attr,
-                AssignPropertyAttr::Track(_) | AssignPropertyAttr::Watch
+                AssignPropertyAttr::Track { .. } | AssignPropertyAttr::Watch { .. }
             ),
             _ => false,
         })
