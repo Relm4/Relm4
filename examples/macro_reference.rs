@@ -55,8 +55,9 @@ impl SimpleComponent for App {
 
                 gtk::Grid {
                     attach[1, 1, 1, 1] = &gtk::Label {
+                        set_label: "Count to 10 to see if the tracker works!",
                         // Alternative: #[track = "counter.value % 10 == 0"]
-                        #[track(counter.value % 10 == 0)]
+                        #[track(skip_init, counter.value % 10 == 0)]
                         set_label: &format!("Grid works! ({})", counter.value),
                     }
                 },
@@ -107,8 +108,9 @@ impl SimpleComponent for App {
                     // Mirror property "label" for widget "bind_label"
                     #[chain(build())]
                     bind_property: ("label", &bind_label, "label"),
+                    set_label: "Click the counter so see the value!",
 
-                    #[watch]
+                    #[watch(skip_init)]
                     set_label: &format!("Counter: {}", counter.value),
                     #[track]
                     set_margin_all: counter.value.into(),

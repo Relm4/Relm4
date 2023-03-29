@@ -26,9 +26,9 @@ impl Parse for Attrs {
                     } else if ident == "root" {
                         Attr::Root(ident.clone())
                     } else if ident == "watch" {
-                        Attr::Watch(ident.clone())
+                        Attr::Watch(ident.clone(), None)
                     } else if ident == "track" {
-                        Attr::Track(ident.clone(), None)
+                        Attr::Track(ident.clone(), None, None)
                     } else if ident == "iterate" {
                         Attr::Iterate(ident.clone())
                     } else if ident == "template" {
@@ -57,9 +57,16 @@ impl Parse for Attrs {
                             signal_idents.push(ident);
                         }
                         Attr::BlockSignal(ident.clone(), signal_idents)
-                    } else if ident == "track" {
+                    } else if ident == "watch" {
                         let expr = expect_one_nested_expr(&nested)?;
-                        Attr::Track(ident.clone(), Some(Box::new(expr.clone())))
+                        if let Some(skip_init) = expr_to_skip_init_ident(expr) {
+                            Attr::Watch(ident.clone(), Some(skip_init))
+                        } else {
+                            return Err(Error::new(nested.span(), "Expected `skip_init`."));
+                        }
+                    } else if ident == "track" {
+                        let (skip_init, expr) = parse_track(&nested)?;
+                        Attr::Track(ident.clone(), skip_init, expr.map(Box::new))
                     } else if ident == "transition" {
                         let expr = expect_one_nested_expr(&nested)?;
                         let ident = expect_ident_from_expr(expr)?;
@@ -90,7 +97,7 @@ impl Parse for Attrs {
                 if let Some(ident) = path.get_ident() {
                     if ident == "track" {
                         let string = expect_string_lit(&lit)?;
-                        Attr::Track(ident.clone(), Some(string.parse()?))
+                        Attr::Track(ident.clone(), None, Some(string.parse()?))
                     } else if ident == "doc" {
                         Attr::Doc(lit.into_token_stream())
                     } else if ident == "transition" {
@@ -168,4 +175,40 @@ fn expect_one_nested_expr(nested: &Punctuated<Expr, token::Comma>) -> Result<&Ex
     } else {
         Err(Error::new(nested.span(), "Expected only one expression."))
     }
+}
+
+fn parse_track(nested: &Punctuated<Expr, token::Comma>) -> Result<(Option<Ident>, Option<Expr>)> {
+    let len = nested.len();
+    if len == 1 {
+        if let Some(skip_ident) = expr_to_skip_init_ident(&nested[0]) {
+            Ok((Some(skip_ident), None))
+        } else {
+            Ok((None, Some(nested[0].clone())))
+        }
+    } else if len == 2 {
+        if let Some(skip_ident) = expr_to_skip_init_ident(&nested[0]) {
+            Ok((Some(skip_ident), Some(nested.last().unwrap().clone())))
+        } else {
+            Err(Error::new(
+                nested.span(),
+                "Expected `skip_init` and an expression.",
+            ))
+        }
+    } else {
+        Err(Error::new(
+            nested.span(),
+            "Expected exactly one or two expressions.",
+        ))
+    }
+}
+
+fn expr_to_skip_init_ident(expr: &Expr) -> Option<Ident> {
+    if let Expr::Path(path) = &expr {
+        if let Some(ident) = path.path.get_ident() {
+            if ident == "skip_init" {
+                return Some(ident.clone());
+            }
+        }
+    }
+    None
 }
