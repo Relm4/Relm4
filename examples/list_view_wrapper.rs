@@ -1,8 +1,13 @@
 use gtk::prelude::*;
-use relm4::{prelude::*, list_item_wrapper::{ListViewWrapper, RelmListItem}, binding::U8Binding, RelmObjectExt};
+use relm4::{
+    binding::U8Binding,
+    list_item_wrapper::{ListViewWrapper, RelmListItem},
+    prelude::*,
+    RelmObjectExt,
+};
 
 struct MyListItem {
-    value: u8, 
+    value: u8,
 }
 
 impl RelmListItem for MyListItem {
@@ -10,9 +15,7 @@ impl RelmListItem for MyListItem {
     type Widget = gtk::Label;
 
     fn init(value: Self::Init) -> Self {
-        Self {
-            value,
-        }
+        Self { value }
     }
 
     fn setup() -> gtk::Label {
@@ -26,7 +29,6 @@ impl RelmListItem for MyListItem {
     fn unbind(&self, widget: Self::Widget) {}
 
     fn teardown(&self, widget: Self::Widget) {}
-
 }
 struct App {
     counter: u8,
@@ -70,7 +72,7 @@ impl SimpleComponent for App {
                     set_label: &format!("Counter: {}", model.counter),
                     set_margin_all: 5,
                 },
-                
+
                 gtk::ScrolledWindow {
                     #[local_ref]
                     my_view -> gtk::ListView {}
@@ -90,7 +92,10 @@ impl SimpleComponent for App {
         list_view_wrapper.append(2);
         list_view_wrapper.append(3);
 
-        let model = App { counter, list_view_wrapper };
+        let model = App {
+            counter,
+            list_view_wrapper,
+        };
 
         let my_view = model.list_view_wrapper.view();
 

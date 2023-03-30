@@ -7,7 +7,7 @@ use std::{
 use gtk::{
     gio,
     glib::{self, Bytes},
-    prelude::{Cast, CastNone, ObjectExt, StaticType, IsA},
+    prelude::{Cast, CastNone, IsA, ObjectExt, StaticType},
     SignalListItemFactory,
 };
 
@@ -39,8 +39,7 @@ impl<T: RelmListItem> ListViewWrapper<T> {
                 .expect("Needs to be ListItem");
 
             let widget = T::setup();
-            list_item
-                .set_child(Some(&widget));
+            list_item.set_child(Some(&widget));
         });
 
         factory.connect_bind(move |_, list_item| {
