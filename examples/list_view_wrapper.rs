@@ -1,11 +1,10 @@
 use gtk::prelude::*;
 use relm4::{
-    binding::U8Binding,
     list_item_wrapper::{ListViewWrapper, RelmListItem},
     prelude::*,
-    RelmObjectExt,
 };
 
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 struct MyListItem {
     value: u8,
 }
@@ -25,11 +24,8 @@ impl RelmListItem for MyListItem {
     fn bind(&self, widget: Self::Widget) {
         widget.set_label(&format!("Value: {}", self.value));
     }
-
-    fn unbind(&self, widget: Self::Widget) {}
-
-    fn teardown(&self, widget: Self::Widget) {}
 }
+
 struct App {
     counter: u8,
     list_view_wrapper: ListViewWrapper<MyListItem>,
@@ -37,8 +33,8 @@ struct App {
 
 #[derive(Debug)]
 enum Msg {
-    Increment,
-    Decrement,
+    Append,
+    Remove,
 }
 
 #[relm4::component]
@@ -49,7 +45,7 @@ impl SimpleComponent for App {
 
     view! {
         gtk::Window {
-            set_title: Some("Simple app"),
+            set_title: Some("Actually idiomatic list view possible?"),
             set_default_size: (300, 100),
 
             gtk::Box {
@@ -58,22 +54,18 @@ impl SimpleComponent for App {
                 set_margin_all: 5,
 
                 gtk::Button {
-                    set_label: "Increment",
-                    connect_clicked => Msg::Increment,
+                    set_label: "Append 10 items",
+                    connect_clicked => Msg::Append,
                 },
 
                 gtk::Button {
-                    set_label: "Decrement",
-                    connect_clicked => Msg::Decrement,
-                },
-
-                gtk::Label {
-                    #[watch]
-                    set_label: &format!("Counter: {}", model.counter),
-                    set_margin_all: 5,
+                    set_label: "Remove second item",
+                    connect_clicked => Msg::Remove,
                 },
 
                 gtk::ScrolledWindow {
+                    set_vexpand: true,
+
                     #[local_ref]
                     my_view -> gtk::ListView {}
                 }
@@ -87,10 +79,7 @@ impl SimpleComponent for App {
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let list_view_wrapper: ListViewWrapper<MyListItem> = ListViewWrapper::new();
-        list_view_wrapper.append(1);
-        list_view_wrapper.append(2);
-        list_view_wrapper.append(3);
+        let list_view_wrapper: ListViewWrapper<MyListItem> = ListViewWrapper::with_sorting();
 
         let model = App {
             counter,
@@ -107,11 +96,14 @@ impl SimpleComponent for App {
 
     fn update(&mut self, msg: Self::Input, _sender: ComponentSender<Self>) {
         match msg {
-            Msg::Increment => {
-                self.counter = self.counter.wrapping_add(1);
+            Msg::Append => {
+                for _ in 0..10 {
+                    self.counter = self.counter.wrapping_add(1);
+                    self.list_view_wrapper.append(self.counter);
+                }
             }
-            Msg::Decrement => {
-                self.counter = self.counter.wrapping_sub(1);
+            Msg::Remove => {
+                self.list_view_wrapper.remove(1);
             }
         }
     }
