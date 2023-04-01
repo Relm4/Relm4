@@ -40,7 +40,7 @@ pub mod binding;
 pub mod component;
 pub mod drawing;
 pub mod factory;
-pub mod list_item_wrapper;
+pub mod list_view_wrapper;
 pub mod loading_widgets;
 pub mod shared_state;
 

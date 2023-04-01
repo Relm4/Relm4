@@ -23,15 +23,15 @@ cargo-args = ["-Zunstable-options", "-Zrustdoc-scrape-examples"]
 rustdoc-args = ["--cfg", "docsrs"]
 
 [features]
-default = ["macros"]
+default = ["macros", "gnome_43"]
 # The dox feature can be used for building the docs without the dependencies and requires Rust Nightly
 dox = ["gtk/dox", "adw/dox", "panel/dox"]
 libadwaita = ["adw"]
 libpanel = ["panel"]
 macros = ["relm4-macros"]
 
-gnome_44 = ["gtk/gnome_44", "adw/v1_3"]
-gnome_43 = ["gtk/gnome_43", "adw/v1_2"]
+gnome_44 = ["gnome_43", "gtk/gnome_44", "adw/v1_3"]
+gnome_43 = ["gnome_42", "gtk/gnome_43", "adw/v1_2"]
 gnome_42 = ["gtk/gnome_42"]
 
 # All features except docs. This is also used in the CI

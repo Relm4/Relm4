@@ -1,6 +1,6 @@
 use gtk::prelude::*;
 use relm4::{
-    list_item_wrapper::{ListViewWrapper, RelmListItem},
+    list_view_wrapper::{ListViewWrapper, RelmListItem},
     prelude::*,
 };
 
@@ -9,20 +9,44 @@ struct MyListItem {
     value: u8,
 }
 
+struct Widgets {
+    label: gtk::Label,
+    button: gtk::CheckButton,
+}
+
+impl Drop for Widgets {
+    fn drop(&mut self) {
+        dbg!(self.label.label());
+    }
+}
+
 impl RelmListItem for MyListItem {
     type Init = u8;
-    type Widget = gtk::Label;
+    type Root = gtk::Box;
+    type Widgets = Widgets;
 
     fn init(value: Self::Init) -> Self {
         Self { value }
     }
 
-    fn setup() -> gtk::Label {
-        gtk::Label::new(None)
+    fn setup() -> (gtk::Box, Widgets) {
+        let b = gtk::Box::default();
+
+        let label = gtk::Label::new(None);
+        b.append(&label);
+
+        let button = gtk::CheckButton::new();
+        b.append(&button);
+
+        (b, Widgets {
+            label,
+            button,
+        })
     }
 
-    fn bind(&self, widget: Self::Widget) {
-        widget.set_label(&format!("Value: {}", self.value));
+    fn bind(&mut self, root: &Self::Root, widgets: &mut Self::Widgets) {
+        widgets.label.set_label(&format!("Value: {} ", self.value));
+        widgets.button.set_active(self.value % 2 == 0);
     }
 }
 
@@ -35,6 +59,7 @@ struct App {
 enum Msg {
     Append,
     Remove,
+    OnlyShowEven(bool)
 }
 
 #[relm4::component]
@@ -63,6 +88,13 @@ impl SimpleComponent for App {
                     connect_clicked => Msg::Remove,
                 },
 
+                gtk::ToggleButton {
+                    set_label: "Only show even numbers",
+                    connect_clicked[sender] => move |btn| {
+                        sender.input(Msg::OnlyShowEven(btn.is_active()));
+                    }
+                },
+
                 gtk::ScrolledWindow {
                     set_vexpand: true,
 
@@ -79,7 +111,9 @@ impl SimpleComponent for App {
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let list_view_wrapper: ListViewWrapper<MyListItem> = ListViewWrapper::with_sorting();
+        let mut list_view_wrapper: ListViewWrapper<MyListItem> = ListViewWrapper::with_sorting();
+        list_view_wrapper.add_filter(|item| item.value % 2 == 0);
+        list_view_wrapper.set_filter_status(0, false);
 
         let model = App {
             counter,
@@ -104,6 +138,9 @@ impl SimpleComponent for App {
             }
             Msg::Remove => {
                 self.list_view_wrapper.remove(1);
+            }
+            Msg::OnlyShowEven(show_only_even) => {
+                self.list_view_wrapper.set_filter_status(0, show_only_even);
             }
         }
     }
