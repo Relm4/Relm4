@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use gtk::{prelude::*, glib};
+use gtk::{glib, prelude::*};
 use relm4::{
     binding::{Binding, U8Binding},
     prelude::*,
@@ -11,7 +11,7 @@ use relm4::{
 struct MyListItem {
     value: u8,
     binding: U8Binding,
-    handle: Option<glib::JoinHandle<()>>
+    handle: Option<glib::JoinHandle<()>>,
 }
 
 impl PartialEq for MyListItem {
@@ -104,7 +104,12 @@ impl RelmListItem for MyListItem {
     }
 
     fn unbind(&mut self, _widgets: &mut Self::Widgets, _root: &mut Self::Root) {
-        self.handle.take().unwrap().into_source_id().unwrap().remove();
+        self.handle
+            .take()
+            .unwrap()
+            .into_source_id()
+            .unwrap()
+            .remove();
         *self.binding.guard() = 0;
     }
 }

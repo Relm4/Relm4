@@ -4,6 +4,7 @@
 
 ### Added
 
++ core: Add `TypedListView` as idiomatic wrapper over `gtk::ListView`
 + core: Add gnome_44 feature flag for GNOME 44
 + core: Documentation and better support for data bindings
 + core: Add `set_tooltip` method to `RelmWidgetExt`
