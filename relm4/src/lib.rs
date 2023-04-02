@@ -40,9 +40,9 @@ pub mod binding;
 pub mod component;
 pub mod drawing;
 pub mod factory;
-pub mod list_view_wrapper;
 pub mod loading_widgets;
 pub mod shared_state;
+pub mod typed_list_view;
 
 pub use channel::ComponentSender;
 pub use channel::*;

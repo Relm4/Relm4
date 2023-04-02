@@ -1,16 +1,29 @@
 use gtk::prelude::*;
 use relm4::{
-    list_view_wrapper::{ListViewWrapper, RelmListItem},
+    binding::{Binding, U8Binding},
     prelude::*,
+    typed_list_view::{RelmListItem, TypedListView},
+    RelmObjectExt,
 };
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 struct MyListItem {
     value: u8,
+    binding: U8Binding,
+}
+
+impl MyListItem {
+    fn new(value: u8) -> Self {
+        Self {
+            value,
+            binding: U8Binding::new(0),
+        }
+    }
 }
 
 struct Widgets {
     label: gtk::Label,
+    label2: gtk::Label,
     button: gtk::CheckButton,
 }
 
@@ -21,45 +34,55 @@ impl Drop for Widgets {
 }
 
 impl RelmListItem for MyListItem {
-    type Init = u8;
     type Root = gtk::Box;
     type Widgets = Widgets;
 
-    fn init(value: Self::Init) -> Self {
-        Self { value }
-    }
+    fn setup(_item: &gtk::ListItem) -> (gtk::Box, Widgets) {
+        relm4::view! {
+            my_box = gtk::Box {
+                #[name = "label"]
+                gtk::Label,
 
-    fn setup() -> (gtk::Box, Widgets) {
-        let b = gtk::Box::default();
+                #[name = "label2"]
+                gtk::Label,
 
-        let label = gtk::Label::new(None);
-        b.append(&label);
+                #[name = "button"]
+                gtk::CheckButton,
+            }
+        }
 
-        let button = gtk::CheckButton::new();
-        b.append(&button);
-
-        (b, Widgets {
+        let widgets = Widgets {
             label,
+            label2,
             button,
-        })
+        };
+
+        (my_box, widgets)
     }
 
-    fn bind(&mut self, root: &Self::Root, widgets: &mut Self::Widgets) {
-        widgets.label.set_label(&format!("Value: {} ", self.value));
-        widgets.button.set_active(self.value % 2 == 0);
+    fn bind(&mut self, widgets: &mut Self::Widgets, _root: &mut Self::Root) {
+        let Widgets {
+            label,
+            label2,
+            button,
+        } = widgets;
+
+        label.set_label(&format!("Value: {} ", self.value));
+        label2.add_write_only_binding(&self.binding, "label");
+        button.set_active(self.value % 2 == 0);
     }
 }
 
 struct App {
     counter: u8,
-    list_view_wrapper: ListViewWrapper<MyListItem>,
+    list_view_wrapper: TypedListView<MyListItem, gtk::SingleSelection>,
 }
 
 #[derive(Debug)]
 enum Msg {
     Append,
     Remove,
-    OnlyShowEven(bool)
+    OnlyShowEven(bool),
 }
 
 #[relm4::component]
@@ -105,13 +128,16 @@ impl SimpleComponent for App {
         }
     }
 
-    // Initialize the component.
     fn init(
         counter: Self::Init,
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let mut list_view_wrapper: ListViewWrapper<MyListItem> = ListViewWrapper::with_sorting();
+        // Initialize the ListView wrapper
+        let mut list_view_wrapper: TypedListView<MyListItem, gtk::SingleSelection> =
+            TypedListView::with_sorting();
+
+        // Add a filter and disable it
         list_view_wrapper.add_filter(|item| item.value % 2 == 0);
         list_view_wrapper.set_filter_status(0, false);
 
@@ -120,9 +146,8 @@ impl SimpleComponent for App {
             list_view_wrapper,
         };
 
-        let my_view = model.list_view_wrapper.view();
+        let my_view = &model.list_view_wrapper.view;
 
-        // Insert the code generation of the view! macro here
         let widgets = view_output!();
 
         ComponentParts { model, widgets }
@@ -131,15 +156,24 @@ impl SimpleComponent for App {
     fn update(&mut self, msg: Self::Input, _sender: ComponentSender<Self>) {
         match msg {
             Msg::Append => {
+                // Add 10 items
                 for _ in 0..10 {
                     self.counter = self.counter.wrapping_add(1);
-                    self.list_view_wrapper.append(self.counter);
+                    self.list_view_wrapper.append(MyListItem::new(self.counter));
                 }
+
+                // Count up the first item
+                let first_item = self.list_view_wrapper.get(0).unwrap();
+                let first_binding = &mut first_item.borrow_mut().binding;
+                let mut guard = first_binding.guard();
+                *guard += 1;
             }
             Msg::Remove => {
+                // Remove the second item
                 self.list_view_wrapper.remove(1);
             }
             Msg::OnlyShowEven(show_only_even) => {
+                // Disable or enable the first filter
                 self.list_view_wrapper.set_filter_status(0, show_only_even);
             }
         }
