@@ -4,8 +4,9 @@ use crate::factory::sync::builder::FactoryBuilder;
 use crate::factory::sync::handle::FactoryHandle;
 use crate::factory::{CloneableFactoryComponent, FactoryComponent, FactoryView};
 
+use std::collections::hash_map::RandomState;
 use std::collections::HashMap;
-use std::hash::Hash;
+use std::hash::{BuildHasher, Hash};
 use std::iter::FusedIterator;
 use std::ops;
 
@@ -50,13 +51,13 @@ where
 /// A container similar to [`HashMap`] that can be used to store
 /// values of type [`FactoryComponent`].
 #[derive(Debug)]
-pub struct FactoryHashMap<K, C: FactoryComponent> {
+pub struct FactoryHashMap<K, C: FactoryComponent, S = RandomState> {
     widget: C::ParentWidget,
     parent_sender: Sender<C::ParentInput>,
-    inner: HashMap<K, FactoryHandle<C>>,
+    inner: HashMap<K, FactoryHandle<C>, S>,
 }
 
-impl<K, C> Drop for FactoryHashMap<K, C>
+impl<K, C, S> Drop for FactoryHashMap<K, C, S>
 where
     C: FactoryComponent,
 {
@@ -65,10 +66,11 @@ where
     }
 }
 
-impl<K, C> ops::Index<&K> for FactoryHashMap<K, C>
+impl<K, C, S> ops::Index<&K> for FactoryHashMap<K, C, S>
 where
     C: FactoryComponent<Index = K>,
     K: Hash + Eq,
+    S: BuildHasher,
 {
     type Output = C;
 
@@ -77,7 +79,7 @@ where
     }
 }
 
-impl<K, C> FactoryHashMap<K, C>
+impl<K, C> FactoryHashMap<K, C, RandomState>
 where
     C: FactoryComponent,
 {
@@ -88,6 +90,25 @@ where
             widget,
             parent_sender: parent_sender.clone(),
             inner: HashMap::new(),
+        }
+    }
+}
+
+impl<K, C, S> FactoryHashMap<K, C, S>
+where
+    C: FactoryComponent,
+{
+    /// Creates a new [`FactoryHashMap`].
+    #[must_use]
+    pub fn width_hasher(
+        widget: C::ParentWidget,
+        parent_sender: &Sender<C::ParentInput>,
+        hash_builder: S,
+    ) -> Self {
+        Self {
+            widget,
+            parent_sender: parent_sender.clone(),
+            inner: HashMap::with_hasher(hash_builder),
         }
     }
 
@@ -137,10 +158,30 @@ where
     }
 }
 
-impl<K, C> FactoryHashMap<K, C>
+impl<K, C> FactoryHashMap<K, C, RandomState>
 where
     C: FactoryComponent<Index = K>,
     K: Hash + Eq,
+{
+    /// Creates a [`FactoryHashMap`] from a [`Vec`].
+    pub fn from_vec(
+        component_vec: Vec<(K, C::Init)>,
+        widget: C::ParentWidget,
+        parent_sender: &Sender<C::ParentInput>,
+    ) -> Self {
+        let mut output = Self::new(widget, parent_sender);
+        for (key, init) in component_vec {
+            output.insert(key, init);
+        }
+        output
+    }
+}
+
+impl<K, C, S> FactoryHashMap<K, C, S>
+where
+    C: FactoryComponent<Index = K>,
+    K: Hash + Eq,
+    S: BuildHasher,
 {
     /// Send a mage to one of the elements.
     pub fn send(&self, key: &K, msg: C::Input) {
@@ -202,23 +243,10 @@ where
             None
         }
     }
-
-    /// Creates a [`FactoryHashMap`] from a [`Vec`].
-    pub fn from_vec(
-        component_vec: Vec<(K, C::Init)>,
-        widget: C::ParentWidget,
-        parent_sender: &Sender<C::ParentInput>,
-    ) -> Self {
-        let mut output = Self::new(widget, parent_sender);
-        for (key, init) in component_vec {
-            output.insert(key, init);
-        }
-        output
-    }
 }
 
 /// Implements the Clone Trait for [`FactoryHashMap`] if the component implements [`CloneableFactoryComponent`].
-impl<K, C> Clone for FactoryHashMap<K, C>
+impl<K, C> Clone for FactoryHashMap<K, C, RandomState>
 where
     C: CloneableFactoryComponent,
     K: Clone + Hash + Eq,
