@@ -27,7 +27,6 @@ impl FactoryComponent for Counter {
     type CommandOutput = ();
     type ParentInput = AppMsg;
     type ParentWidget = gtk::Box;
-    type Index = DynamicIndex;
 
     view! {
         gtk::Button {

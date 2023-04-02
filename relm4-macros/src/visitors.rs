@@ -123,6 +123,7 @@ impl VisitMut for ComponentVisitor<'_> {
 pub(super) struct FactoryComponentVisitor<'errors> {
     pub(super) view_widgets: Option<syn::Result<ViewWidgets>>,
     pub(super) widgets_ty: Option<syn::Type>,
+    pub(super) index_ty: Option<syn::Type>,
     pub(super) init_widgets: Option<syn::ImplItemMethod>,
     pub(super) root_name: Option<syn::Ident>,
     pub(super) additional_fields: Option<AdditionalFields>,
@@ -135,6 +136,7 @@ impl<'errors> FactoryComponentVisitor<'errors> {
         FactoryComponentVisitor {
             view_widgets: None,
             widgets_ty: None,
+            index_ty: None,
             init_widgets: None,
             root_name: None,
             additional_fields: None,
@@ -234,6 +236,8 @@ impl VisitMut for FactoryComponentVisitor<'_> {
                 ty,
                 "`Root` type is defined by `view!` macro",
             ));
+        } else if ty.ident == "Index" {
+            self.index_ty = Some(ty.ty.clone());
         }
     }
 }

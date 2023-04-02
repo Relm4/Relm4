@@ -37,6 +37,14 @@ pub(crate) fn generate_tokens(
         _ => (),
     }
 
+    // Insert default index type for sync variants
+    // if it wasn't specified by the user.
+    if factory_visitor.index_ty.is_none() && asyncness.is_none() {
+        factory_impl.items.push(parse_quote! {
+            type Index = relm4::factory::DynamicIndex;
+        });
+    }
+
     if let FactoryComponentVisitor {
         view_widgets: Some(Ok(view_widgets)),
         root_name,
@@ -105,6 +113,7 @@ pub(crate) fn generate_tokens(
         } else {
             parse_quote! { FactorySender }
         };
+
         let index_ty: syn::TypePath = if asyncness.is_some() {
             parse_quote! { relm4::factory::DynamicIndex }
         } else {
