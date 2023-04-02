@@ -1,4 +1,6 @@
-use gtk::prelude::*;
+use std::time::Duration;
+
+use gtk::{prelude::*, glib};
 use relm4::{
     binding::{Binding, U8Binding},
     prelude::*,
@@ -6,10 +8,30 @@ use relm4::{
     RelmObjectExt,
 };
 
-#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 struct MyListItem {
     value: u8,
     binding: U8Binding,
+    handle: Option<glib::JoinHandle<()>>
+}
+
+impl PartialEq for MyListItem {
+    fn eq(&self, other: &Self) -> bool {
+        self.value == other.value
+    }
+}
+
+impl Eq for MyListItem {}
+
+impl PartialOrd for MyListItem {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        self.value.partial_cmp(&other.value)
+    }
+}
+
+impl Ord for MyListItem {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.value.cmp(&other.value)
+    }
 }
 
 impl MyListItem {
@@ -17,6 +39,7 @@ impl MyListItem {
         Self {
             value,
             binding: U8Binding::new(0),
+            handle: None,
         }
     }
 }
@@ -27,12 +50,6 @@ struct Widgets {
     button: gtk::CheckButton,
 }
 
-impl Drop for Widgets {
-    fn drop(&mut self) {
-        dbg!(self.label.label());
-    }
-}
-
 impl RelmListItem for MyListItem {
     type Root = gtk::Box;
     type Widgets = Widgets;
@@ -41,10 +58,14 @@ impl RelmListItem for MyListItem {
         relm4::view! {
             my_box = gtk::Box {
                 #[name = "label"]
-                gtk::Label,
+                gtk::Label {
+                    set_margin_end: 10,
+                },
 
                 #[name = "label2"]
-                gtk::Label,
+                gtk::Label {
+                    set_margin_end: 10,
+                },
 
                 #[name = "button"]
                 gtk::CheckButton,
@@ -61,15 +82,30 @@ impl RelmListItem for MyListItem {
     }
 
     fn bind(&mut self, widgets: &mut Self::Widgets, _root: &mut Self::Root) {
+        println!("Unbind {}", self.value);
         let Widgets {
             label,
             label2,
             button,
         } = widgets;
 
+        let future_binding = self.binding.clone();
+        self.handle = Some(relm4::spawn_local(async move {
+            loop {
+                tokio::time::sleep(Duration::from_secs(1)).await;
+                let mut guard = future_binding.guard();
+                *guard = guard.wrapping_add(1);
+            }
+        }));
+
         label.set_label(&format!("Value: {} ", self.value));
         label2.add_write_only_binding(&self.binding, "label");
         button.set_active(self.value % 2 == 0);
+    }
+
+    fn unbind(&mut self, _widgets: &mut Self::Widgets, _root: &mut Self::Root) {
+        self.handle.take().unwrap().into_source_id().unwrap().remove();
+        *self.binding.guard() = 0;
     }
 }
 
@@ -93,7 +129,7 @@ impl SimpleComponent for App {
 
     view! {
         gtk::Window {
-            set_title: Some("Actually idiomatic list view possible?"),
+            set_title: Some("Async + idiomatic list view"),
             set_default_size: (300, 100),
 
             gtk::Box {
@@ -161,12 +197,6 @@ impl SimpleComponent for App {
                     self.counter = self.counter.wrapping_add(1);
                     self.list_view_wrapper.append(MyListItem::new(self.counter));
                 }
-
-                // Count up the first item
-                let first_item = self.list_view_wrapper.get(0).unwrap();
-                let first_binding = &mut first_item.borrow_mut().binding;
-                let mut guard = first_binding.guard();
-                *guard += 1;
             }
             Msg::Remove => {
                 // Remove the second item
@@ -181,6 +211,6 @@ impl SimpleComponent for App {
 }
 
 fn main() {
-    let app = RelmApp::new("relm4.example.typed-list-view");
+    let app = RelmApp::new("relm4.example.typed-list-view-async");
     app.run::<App>(0);
 }

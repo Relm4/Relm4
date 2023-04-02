@@ -165,7 +165,7 @@ where
             let mut root = widget.and_downcast::<T::Root>().unwrap();
 
             let mut widgets = unsafe { root.steal_data("widgets") }.unwrap();
-            obj.bind(&mut widgets, &mut root);
+            obj.unbind(&mut widgets, &mut root);
             unsafe { root.set_data("widgets", widgets) };
         });
 
