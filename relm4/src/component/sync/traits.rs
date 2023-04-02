@@ -28,7 +28,7 @@ pub trait Component: Sized + 'static {
     /// The parameter used to initialize the component.
     type Init;
 
-    /// The widget that was constructed by the component.
+    /// The top-level widget of the component.
     type Root: Debug + Clone;
 
     /// The type that's used for storing widgets created for this component.
@@ -142,7 +142,7 @@ pub trait SimpleComponent: Sized + 'static {
     /// The parameter used to initialize the component.
     type Init;
 
-    /// The widget that was constructed by the component.
+    /// The top-level widget of the component.
     type Root: Debug + Clone;
 
     /// The type that's used for storing widgets created for this component.

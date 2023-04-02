@@ -29,7 +29,7 @@ pub trait FactoryComponent:
     /// The parameter used to initialize the factory component.
     type Init;
 
-    /// The widget that was constructed by the factory component.
+    /// The top-level widget of the factory component.
     type Root: AsRef<<Self::ParentWidget as FactoryView>::Children> + Debug + Clone;
 
     /// The type that's used for storing widgets created for this factory component.
