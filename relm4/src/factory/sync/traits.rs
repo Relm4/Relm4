@@ -55,7 +55,7 @@ pub trait FactoryComponent:
     /// forward messages.
     ///
     /// If [`None`] is returned, nothing is forwarded.
-    fn output_to_parent_input(_output: Self::Output) -> Option<Self::ParentInput> {
+    fn forward_to_parent(_output: Self::Output) -> Option<Self::ParentInput> {
         None
     }
 
