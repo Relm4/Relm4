@@ -13,6 +13,7 @@
 
 ### Changed
 
++ core: Rename factory component traits `output_to_parent_input` method to `forward_to_parent`
 + core: Improved `RelmActionGroup` API
 + all: Increase MSRV to 1.65 to match the dependencies
 

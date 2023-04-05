@@ -32,7 +32,7 @@ impl FactoryComponent for FileListItem {
         }
     }
 
-    fn output_to_parent_input(output: Self::Output) -> Option<Self::ParentInput> {
+    fn forward_to_parent(output: Self::Output) -> Option<Self::ParentInput> {
         Some(output)
     }
 

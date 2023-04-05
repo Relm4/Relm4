@@ -48,7 +48,7 @@ impl FactoryComponent for Counter {
     type ParentInput = AppMsg;
     type ParentWidget = gtk::Grid;
 
-    fn output_to_parent_input(output: Self::Output) -> Option<AppMsg> {
+    fn forward_to_parent(output: Self::Output) -> Option<AppMsg> {
         Some(match output {
             CounterOutput::SendFront(index) => AppMsg::SendFront(index),
             CounterOutput::MoveUp(index) => AppMsg::MoveUp(index),
