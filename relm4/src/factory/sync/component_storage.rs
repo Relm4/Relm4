@@ -1,4 +1,4 @@
-use crate::factory::{DynamicIndex, FactoryComponent, FactoryView};
+use crate::factory::{FactoryComponent, FactoryView};
 use crate::Sender;
 
 use super::{FactoryBuilder, FactoryHandle};
@@ -53,7 +53,7 @@ impl<C: FactoryComponent> ComponentStorage<C> {
 
     pub(super) fn launch(
         self,
-        index: &DynamicIndex,
+        index: &C::Index,
         returned_widget: <C::ParentWidget as FactoryView>::ReturnedWidget,
         parent_sender: &Sender<C::ParentInput>,
     ) -> Option<Self> {

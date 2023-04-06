@@ -1,6 +1,8 @@
 //! Containers similar to [`std::collections`] that can be used to store factory data.
 
+mod hashmap;
 mod vec_deque;
+pub use hashmap::FactoryHashMap;
 pub use vec_deque::{FactoryVecDeque, FactoryVecDequeGuard};
 
 use crate::factory::DynamicIndex;

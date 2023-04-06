@@ -4,6 +4,7 @@
 
 ### Added
 
++ core: Add `FactoryHashMap` as alternative to `FactoryVecDeque`
 + core: Add gnome_44 feature flag for GNOME 44
 + core: Documentation and better support for data bindings
 + core: Add `set_tooltip` method to `RelmWidgetExt`
@@ -13,6 +14,7 @@
 
 ### Changed
 
++ core: Added `Index` type to the `FactoryComponent` trait
 + core: Rename factory component traits `output_to_parent_input` method to `forward_to_parent`
 + core: Improved `RelmActionGroup` API
 + all: Increase MSRV to 1.65 to match the dependencies

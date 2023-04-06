@@ -234,6 +234,7 @@ pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
 ///     type Output = CounterOutput;
 ///     type ParentInput = AppMsg;
 ///     type ParentWidget = gtk::Box;
+///     
 ///
 ///     view! {
 ///         root = gtk::Box {
