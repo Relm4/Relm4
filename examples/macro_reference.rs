@@ -156,8 +156,9 @@ impl SimpleComponent for App {
             set_title: Some("Another window"),
             set_default_size: (300, 100),
             set_transient_for: Some(&main_window),
+            set_visible: false,
             // Empty args
-            hide: (),
+            grab_focus: (),
 
             #[watch]
             set_visible: counter.value == 42,

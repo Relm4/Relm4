@@ -226,7 +226,7 @@ where
             &key,
             returned_widget,
             &self.parent_sender,
-            C::output_to_parent_input,
+            C::forward_to_parent,
         );
 
         assert!(self.inner.insert(key, component).is_none());

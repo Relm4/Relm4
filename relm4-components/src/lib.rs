@@ -27,6 +27,10 @@
 )]
 // Configuration for doc builds on the nightly toolchain.
 #![cfg_attr(docsrs, feature(doc_cfg))]
+// Ignore GTK 4.10 deprecations.
+// Most deprecated features can only be replaced with new 4.10 APIs and
+// we don't want to lift the minimum requirement GTK4 version for Relm4 yet.
+#![allow(deprecated)]
 
 pub mod alert;
 pub mod open_button;

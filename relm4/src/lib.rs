@@ -161,6 +161,8 @@ pub fn set_global_css(style_data: &str) {
     let display = gtk::gdk::Display::default().unwrap();
     let provider = gtk::CssProvider::new();
     provider.load_from_data(style_data);
+
+    #[allow(deprecated)]
     gtk::StyleContext::add_provider_for_display(
         &display,
         &provider,
