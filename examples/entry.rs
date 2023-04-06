@@ -41,7 +41,7 @@ impl FactoryComponent for Counter {
     // You usually wouldn't do this but rather process the click in the factory
     // element itself. However, this demonstrates how easy it is to forward messages
     // to the parent component of the factory.
-    fn output_to_parent_input(output: Self::Output) -> Option<Self::ParentInput> {
+    fn forward_to_parent(output: Self::Output) -> Option<Self::ParentInput> {
         Some(output)
     }
 

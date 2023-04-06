@@ -68,22 +68,27 @@ impl AssignProperty {
                         }
                         iterative = true;
                     }
-                    Attr::Watch(_) => {
+                    Attr::Watch(_, skip_init) => {
                         if watch == AssignPropertyAttr::None {
-                            watch = AssignPropertyAttr::Watch;
+                            watch = AssignPropertyAttr::Watch { skip_init }
                         } else {
                             return Err(attr_twice_error(span));
                         }
                     }
-                    Attr::Track(_, expr) => {
+                    Attr::Track(_, skip_init, expr) => {
                         if watch == AssignPropertyAttr::None {
                             watch = if let Some(expr) = expr {
-                                AssignPropertyAttr::Track((expr.to_token_stream(), false))
+                                AssignPropertyAttr::Track {
+                                    track_expr: expr.to_token_stream(),
+                                    skip_init,
+                                    paste_model: false,
+                                }
                             } else {
-                                AssignPropertyAttr::Track((
-                                    generate_tracker_from_expression(assign_expr)?,
-                                    true,
-                                ))
+                                AssignPropertyAttr::Track {
+                                    track_expr: generate_tracker_from_expression(assign_expr)?,
+                                    skip_init,
+                                    paste_model: true,
+                                }
                             };
                         } else {
                             return Err(attr_twice_error(span));

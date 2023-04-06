@@ -62,7 +62,7 @@ impl<C: FactoryComponent> ComponentStorage<C> {
                 index,
                 returned_widget,
                 parent_sender,
-                C::output_to_parent_input,
+                C::forward_to_parent,
             )))
         } else {
             None

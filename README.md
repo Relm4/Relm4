@@ -35,7 +35,7 @@ Built on top of this foundation, Relm4 makes developing more idiomatic, simpler 
 
 ## Dependencies
 
-Relm4 depends on GTK4: [How to install GTK4](https://www.gtk.org/docs/installations/).
+Relm4 depends on GTK4: [How to install GTK4 and Rust](https://gtk-rs.org/gtk4-rs/git/book/installation.html)
 
 ## Ecosystem
 
