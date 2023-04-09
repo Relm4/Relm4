@@ -605,16 +605,16 @@ where
         self.components.iter().map(ComponentStorage::get)
     }
 
-    /// Creates a FactoryVecDeque from a Vec
-    pub fn from_vec(
-        component_vec: Vec<C::Init>,
+    /// Creates a FactoryVecDeque from any IntoIterator
+    pub fn from_iter(
+        component_iter: impl IntoIterator<Item = C::Init>,
         widget: C::ParentWidget,
         parent_sender: &Sender<C::ParentInput>,
     ) -> Self {
         let mut output = Self::new(widget, parent_sender);
         {
             let mut edit = output.guard();
-            for component in component_vec {
+            for component in component_iter {
                 edit.push_back(component);
             }
             edit.drop();
