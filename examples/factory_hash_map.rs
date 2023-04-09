@@ -1,5 +1,6 @@
-use gtk::prelude::{BoxExt, ButtonExt, EntryBufferExtManual, GtkWindowExt, OrientableExt};
-use gtk::traits::{EntryExt, WidgetExt};
+use gtk::prelude::{
+    BoxExt, ButtonExt, EntryBufferExtManual, EntryExt, GtkWindowExt, OrientableExt, WidgetExt,
+};
 use relm4::factory::{FactoryComponent, FactoryHashMap, FactorySender};
 use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent};
 

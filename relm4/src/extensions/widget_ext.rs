@@ -1,7 +1,4 @@
-use gtk::{
-    prelude::{Cast, StaticType, WidgetExt},
-    traits::StyleContextExt,
-};
+use gtk::prelude::{Cast, StaticType, WidgetExt};
 
 /// Trait that extends [`gtk::prelude::WidgetExt`].
 ///
@@ -64,7 +61,10 @@ impl<T: gtk::glib::IsA<gtk::Widget>> RelmWidgetExt for T {
         }
     }
 
+    #[allow(deprecated)]
     fn inline_css(&self, style: &str) {
+        use gtk::prelude::StyleContextExt;
+
         let context = self.style_context();
         let provider = gtk::CssProvider::new();
 

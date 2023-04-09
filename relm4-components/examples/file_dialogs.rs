@@ -83,7 +83,7 @@ impl SimpleComponent for App {
                 .buttons(gtk::ButtonsType::Ok)
                 .build();
             dialog.connect_response(|dialog, _| dialog.destroy());
-            dialog.show();
+            dialog.set_visible(true);
             sender.input(Input::ResetMessage);
         }
     }
