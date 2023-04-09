@@ -4,6 +4,7 @@
 
 ### Added
 
++ core: Implement `RelmSetChildExt` for `gtk::AspectFrame`
 + core: Add `FactoryHashMap` as alternative to `FactoryVecDeque`
 + core: Add gnome_44 feature flag for GNOME 44
 + core: Documentation and better support for data bindings
