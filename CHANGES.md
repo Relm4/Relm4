@@ -14,6 +14,7 @@
 
 ### Changed
 
++ core: Replace `FactoryVecDeque`'s associated function `from_vec` with `from_iter`
 + core: Added `Index` type to the `FactoryComponent` trait
 + core: Rename factory component traits `output_to_parent_input` method to `forward_to_parent`
 + core: Improved `RelmActionGroup` API
