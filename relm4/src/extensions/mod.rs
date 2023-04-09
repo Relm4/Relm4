@@ -170,7 +170,8 @@ container_child_impl! {
     gtk::Overlay,
     gtk::Revealer,
     gtk::WindowHandle,
-    gtk::Expander
+    gtk::Expander,
+    gtk::AspectFrame
 }
 
 container_child_impl! {
