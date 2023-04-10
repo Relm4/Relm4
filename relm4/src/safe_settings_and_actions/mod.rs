@@ -14,7 +14,7 @@ use gtk::glib;
 pub trait SettingSafety {
     /// The name of the setting or action.
     ///
-    /// The macro [`safe_settings_or_actions!`](crate::safe_settings_or_actions)
+    /// The macro [`safe_settings_and_actions!`](crate::safe_settings_and_actions)
     /// automatically implements [`Display`](std::fmt::Display) using this value,
     /// so it is not necessary to use it directly for logging and similar cases.
     const NAME: &'static str;
@@ -89,7 +89,7 @@ pub trait NotDetailable: SettingSafety {}
 /// ~~~
 /// use relm4::gtk::prelude::{StaticVariantType, ToVariant};
 ///
-/// relm4::safe_settings_or_actions! {
+/// relm4::safe_settings_and_actions! {
 ///     // Implements DetailableSetting:
 ///     @state(param: bool)
 ///     MySetting(name: "my-setting");
@@ -107,7 +107,7 @@ pub trait NotDetailable: SettingSafety {}
 ///     NotDetailable(name: "not-detailable");
 /// }
 /// ~~~
-/// See also: [`safe_settings_or_actions!`](crate::safe_settings_or_actions), [`NotDetailable`].
+/// See also: [`safe_settings_and_actions!`](crate::safe_settings_and_actions), [`NotDetailable`].
 pub trait DetailableSetting: SettingSafety {
     /// Function to convert [`struct@glib::Variant`] to `Self`, especially when `Self` is an `enum`.
     fn from_variant(variant: &glib::Variant) -> Self
@@ -128,7 +128,7 @@ pub trait DetailableSetting: SettingSafety {
 /// ~~~
 /// use relm4::gtk::prelude::{StaticVariantType, ToVariant};
 ///
-/// relm4::safe_settings_or_actions! {
+/// relm4::safe_settings_and_actions! {
 ///     // Implements DetailableAction:
 ///     MyAction(group: "win", name: "my-action");
 ///
@@ -149,7 +149,7 @@ pub trait DetailableSetting: SettingSafety {
 ///     NotDetailable(group: "win", name: "not-detailable");
 /// }
 /// ~~~
-/// See also: [`safe_settings_or_actions!`](crate::safe_settings_or_actions), [`NotDetailable`].
+/// See also: [`safe_settings_and_actions!`](crate::safe_settings_and_actions), [`NotDetailable`].
 pub trait DetailableAction: ActionSafety + DetailableSetting {
     /// Gets the [detailed action name](https://docs.gtk.org/gio/type_func.Action.parse_detailed_name.html).
     fn detailed_action_name(&self) -> &'static str;
@@ -179,7 +179,7 @@ pub trait DetailableAction: ActionSafety + DetailableSetting {
 /// ~~~
 /// use relm4::gtk::prelude::{StaticVariantType, ToVariant};
 ///
-/// relm4::safe_settings_or_actions! {
+/// relm4::safe_settings_and_actions! {
 ///     // Action safeties must specify the group parameter.
 ///     UnitStruct(group: "action-group", name: "action-or-setting-name");
 ///
@@ -193,18 +193,18 @@ pub trait DetailableAction: ActionSafety + DetailableSetting {
 ///     }
 /// }
 /// ~~~
-macro_rules! safe_settings_or_actions {
+macro_rules! safe_settings_and_actions {
     (fallback! @($($foo:tt)+)            ) => { $($foo)+ };
     (fallback! @($($foo:tt)+) $($bar:tt)+) => { $($bar)+ };
 
     ( value:     $value:literal      ) => { $value };
     ( value: (   $value:literal     )) => { $value };
-    ( value: [ $($value:tt),+ $(,)? ]) => { &[$($crate::safe_settings_or_actions!(value: $value)),+] };
-    ( value: ( $($value:tt),+ $(,)? )) => {  ($($crate::safe_settings_or_actions!(value: $value)),+) };
+    ( value: [ $($value:tt),+ $(,)? ]) => { &[$($crate::safe_settings_and_actions!(value: $value)),+] };
+    ( value: ( $($value:tt),+ $(,)? )) => {  ($($crate::safe_settings_and_actions!(value: $value)),+) };
     (detail:     $value:literal      ) => { $value };
     (detail: (   $value:literal     )) => { concat!("'", $value, "'") };
-    (detail: [ $($value:tt),+ $(,)? ]) => { concat!("[" $(,$crate::safe_settings_or_actions!(detail: $value),)','+ "]") };
-    (detail: ( $($value:tt),+ $(,)? )) => { concat!("(" $(,$crate::safe_settings_or_actions!(detail: $value),)','+ ")") };
+    (detail: [ $($value:tt),+ $(,)? ]) => { concat!("[" $(,$crate::safe_settings_and_actions!(detail: $value),)','+ "]") };
+    (detail: ( $($value:tt),+ $(,)? )) => { concat!("(" $(,$crate::safe_settings_and_actions!(detail: $value),)','+ ")") };
 
     (setting: $name:literal;) => {
         fn from_variant(_: &$crate::gtk::glib::Variant) -> Self { Self }
@@ -218,20 +218,20 @@ macro_rules! safe_settings_or_actions {
     (setting: $name:literal { $($variant:ident = $value:tt),+ $(,)? }) => {
         fn from_variant(variant: &$crate::gtk::glib::Variant) -> Self {
             match <Self as $crate::safe_settings_and_actions::WithValue>::map(&variant) {
-                $($crate::safe_settings_or_actions!(value: $value) => Self::$variant,)+
+                $($crate::safe_settings_and_actions!(value: $value) => Self::$variant,)+
                 _ => unreachable!()
             }
         }
         fn to_variant(&self) -> Option<$crate::gtk::glib::Variant> {
             Some(match self {
-                $(Self::$variant => $crate::safe_settings_or_actions!(value: $value).to_variant()),+
+                $(Self::$variant => $crate::safe_settings_and_actions!(value: $value).to_variant()),+
             })
         }
     };
     (action: $group:literal $name:literal { $($variant:ident = $value:tt),+ $(,)? }) => {
         fn detailed_action_name(&self) -> &'static str {
             match self {
-                $(Self::$variant => concat!($group, '.', $name, '(', $crate::safe_settings_or_actions!(detail: $value), ')')),+
+                $(Self::$variant => concat!($group, '.', $name, '(', $crate::safe_settings_and_actions!(detail: $value), ')')),+
             }
         }
     };
@@ -250,12 +250,12 @@ macro_rules! safe_settings_or_actions {
         ))?
         $vis:vis $type:ident($(group: $group:literal,)? name: $name:literal $(,)?) $variants:tt
     ) => {
-        $crate::safe_settings_or_actions!(self_type! $(#[$attr])* $vis $type $variants);
+        $crate::safe_settings_and_actions!(self_type! $(#[$attr])* $vis $type $variants);
 
         impl $crate::safe_settings_and_actions::SettingSafety for $type {
             const NAME: &'static str = $name;
             fn variant_type<'a>() -> Option<std::borrow::Cow<'static, $crate::gtk::glib::VariantTy>> {
-                $crate::safe_settings_or_actions!(fallback! @(None) $(Some(<$target_param>::static_variant_type()))?)
+                $crate::safe_settings_and_actions!(fallback! @(None) $(Some(<$target_param>::static_variant_type()))?)
             }
         }
 
@@ -267,19 +267,19 @@ macro_rules! safe_settings_or_actions {
 
         $(impl $crate::safe_settings_and_actions::ActionSafety for $type {
             const FULL_NAME: &'static str = concat!($group, '.', $name);
-            const SELF: Self = $crate::safe_settings_or_actions!(self_constant! $type $variants);
+            const SELF: Self = $crate::safe_settings_and_actions!(self_constant! $type $variants);
         })?
 
-        $crate::safe_settings_or_actions! { fallback!
+        $crate::safe_settings_and_actions! { fallback!
             @(impl $crate::safe_settings_and_actions::WithoutValue for $type { })
             $(impl<'a> $crate::safe_settings_and_actions::WithValue<'a> for $type {
                 type Value = $target_param;
-                type Mapping = $crate::safe_settings_or_actions!(fallback! @(
-                    $crate::safe_settings_or_actions!(fallback! @($target_param) $($target_owned)?)
+                type Mapping = $crate::safe_settings_and_actions!(fallback! @(
+                    $crate::safe_settings_and_actions!(fallback! @($target_param) $($target_owned)?)
                 ) $($($target_mapping)?)?);
 
-                $crate::safe_settings_or_actions! { fallback!
-                    @(fn map(variant: &'a $crate::gtk::glib::Variant) -> $crate::safe_settings_or_actions! {
+                $crate::safe_settings_and_actions! { fallback!
+                    @(fn map(variant: &'a $crate::gtk::glib::Variant) -> $crate::safe_settings_and_actions! {
                         fallback! @($target_param) $($target_owned)?
                     } { variant.get().unwrap() })
 
@@ -290,15 +290,15 @@ macro_rules! safe_settings_or_actions {
             })?
         }
 
-        $crate::safe_settings_or_actions! { fallback!
+        $crate::safe_settings_and_actions! { fallback!
             @(impl $crate::safe_settings_and_actions::Stateless for $type { })
             $(impl<'a> $crate::safe_settings_and_actions::Stateful<'a> for $type {
                 type State   = $state_param;
-                type Owned   = $crate::safe_settings_or_actions!(fallback! @($state_param) $($state_owned)?);
-                type Mapping = $crate::safe_settings_or_actions!(fallback! @(Self::Owned) $($state_mapping)?);
+                type Owned   = $crate::safe_settings_and_actions!(fallback! @($state_param) $($state_owned)?);
+                type Mapping = $crate::safe_settings_and_actions!(fallback! @(Self::Owned) $($state_mapping)?);
 
-                $crate::safe_settings_or_actions! { fallback!
-                    @(fn map(variant: &'a $crate::gtk::glib::Variant) -> $crate::safe_settings_or_actions! {
+                $crate::safe_settings_and_actions! { fallback!
+                    @(fn map(variant: &'a $crate::gtk::glib::Variant) -> $crate::safe_settings_and_actions! {
                         fallback! @($state_param) $($state_owned)?
                     } { variant.get().unwrap() })
 
@@ -309,18 +309,18 @@ macro_rules! safe_settings_or_actions {
             })?
         }
 
-        $crate::safe_settings_or_actions! { detailable_or_not!
+        $crate::safe_settings_and_actions! { detailable_or_not!
             $type [$($target_param)?] [$variants]
             impl $crate::safe_settings_and_actions::DetailableSetting for $type {
-                $crate::safe_settings_or_actions!(setting: $name $variants);
+                $crate::safe_settings_and_actions!(setting: $name $variants);
             }
             $(impl $crate::safe_settings_and_actions::DetailableAction for $type {
-                $crate::safe_settings_or_actions!(action: $group $name $variants);
+                $crate::safe_settings_and_actions!(action: $group $name $variants);
             })?
             #[allow(dead_code)]
             impl $type {
-                $crate::safe_settings_or_actions!(value! $(
-                    $crate::safe_settings_or_actions!(fallback! @($target_param) $($($target_mapping)?)?)
+                $crate::safe_settings_and_actions!(value! $(
+                    $crate::safe_settings_and_actions!(fallback! @($target_param) $($($target_mapping)?)?)
                 )? $variants);
             }
         }
@@ -341,14 +341,14 @@ macro_rules! safe_settings_or_actions {
     (value! ;) => { };
     (value! $target:ty { $($variant:ident = $value:tt),+ $(,)? }) => {
         const fn value<'a>(&self) -> $target {
-            match self { $(Self::$variant => $crate::safe_settings_or_actions!(value: $value)),+ }
+            match self { $(Self::$variant => $crate::safe_settings_and_actions!(value: $value)),+ }
         }
         const fn some<'a>(&self) -> Option<$target> {
-            Some(match self { $(Self::$variant => $crate::safe_settings_or_actions!(value: $value)),+ })
+            Some(match self { $(Self::$variant => $crate::safe_settings_and_actions!(value: $value)),+ })
         }
     };
 
     ($($(#[$attr:meta])* $(@$keyword:tt $params:tt)* $vis:vis $type:ident $naming:tt $variants:tt)*) => {
-        $($crate::safe_settings_or_actions!(safety! $(#[$attr])* $(@$keyword $params)* $vis $type $naming $variants);)*
+        $($crate::safe_settings_and_actions!(safety! $(#[$attr])* $(@$keyword $params)* $vis $type $naming $variants);)*
     };
 }

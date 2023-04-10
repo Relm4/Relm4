@@ -1,12 +1,12 @@
 use gtk::{gio, glib, prelude::*};
 use relm4::{gtk, safe_settings_and_actions::extensions::*, RelmWidgetExt};
 
-// This example includes the file: relm4.example.safeties.gschema.xml
+// This example includes the file: relm4.example.gschema.xml
 // More info: https://docs.gtk.org/gio/class.Settings.html
 
 // This macro only ensures settings and actions, but not action groups.
 // For custom groups you can define constant strings and place them near it.
-relm4::safe_settings_or_actions! {
+relm4::safe_settings_and_actions! {
     // This action safety can be keyboard accelerated because it has no @value and no variants.
     Greeting(group: "app", name: "greeting");
 
@@ -78,17 +78,17 @@ relm4::safe_settings_or_actions! {
         Second = (1, (2, 3), 4),
     }
 
-    // Setting safeties for saving widget states:
+    // Settings for saving widget states:
 
     @state(param: i32)
-    // Pure setting safeties do not require a group, only action safeties:
+    // For settings it is not required to specify the group parameter.
     WindowWidth(name: "window-width");
 
     @state(param: i32)
     // Visibility modifiers supported:
     pub(crate) WindowHeight(name: "window-height");
 
-    @state(param: bool) // Pure setting safeties without variants work with @state.
+    @state(param: bool) // For settings without variants, @state is used.
     Toggle(group: "win", name: "toggle");
 
     #[derive(Debug)]
