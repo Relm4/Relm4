@@ -1,0 +1,34 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<schemalist>
+    <schema id='relm4.example.safeties' path='/relm4/example/safeties/'>
+        <key name='window-width' type='i'>
+            <default>200</default>
+        </key>
+
+        <key name='window-height' type='i'>
+            <default>100</default>
+        </key>
+
+        <key name='my-setting' type='s'>
+            <choices>
+                <choice value='Option A'/>
+                <choice value='Option B'/>
+                <choice value='Option C'/>
+            </choices>
+            <default>'Option B'</default>
+        </key>
+
+        <key name='toggle' type='b'>
+            <default>true</default>
+        </key>
+
+        <key name='last-view' type='s'>
+            <choices>
+                <choice value='first'/>
+                <choice value='second'/>
+                <choice value='third'/>
+            </choices>
+            <default>'second'</default>
+        </key>
+    </schema>
+</schemalist>
