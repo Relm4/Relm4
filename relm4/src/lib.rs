@@ -41,6 +41,7 @@ pub mod component;
 pub mod drawing;
 pub mod factory;
 pub mod loading_widgets;
+pub mod safeties;
 pub mod shared_state;
 
 pub use channel::ComponentSender;
