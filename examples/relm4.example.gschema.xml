@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <schemalist>
-    <schema id='relm4.example.safeties' path='/relm4/example/safeties/'>
+    <schema id='relm4.example' path='/relm4/example/'>
         <key name='window-width' type='i'>
             <default>200</default>
         </key>

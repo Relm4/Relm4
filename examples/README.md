@@ -13,7 +13,7 @@ The example `menu_actions_and_settings` requires:
 
 ```bash
 mkdir -p ~/.local/share/glib-2.0/schemas/
-ln -s $(pwd)/examples/relm4.example.safeties.gschema.xml ~/.local/share/glib-2.0/schemas/
+ln -s $(pwd)/examples/relm4.example.gschema.xml ~/.local/share/glib-2.0/schemas/
 glib-compile-schemas ~/.local/share/glib-2.0/schemas/
 ```
 
