@@ -362,7 +362,7 @@ impl relm4::SimpleComponent for Model {
         root: &Self::Root,
         sender: relm4::ComponentSender<Self>,
     ) -> relm4::ComponentParts<Self> {
-        let settings = gio::Settings::new("relm4.example.safeties");
+        let settings = gio::Settings::new("relm4.example");
         let model = Model { counter: 0 };
         let widgets = view_output!();
 
