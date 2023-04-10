@@ -4,6 +4,8 @@
 
 ### Added
 
++ core: Introduce setting and action safeties
++ examples: Introduce setting and action safeties
 + core: Implement `RelmSetChildExt` for `gtk::AspectFrame`
 + core: Add `FactoryHashMap` as alternative to `FactoryVecDeque`
 + core: Add gnome_44 feature flag for GNOME 44
