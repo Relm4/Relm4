@@ -98,7 +98,9 @@ pub trait NotDetailable: SettingSafety {}
 ///
 /// ### Example:
 /// ~~~
-/// safeties! {
+/// use relm4::gtk::prelude::{StaticVariantType, ToVariant};
+///
+/// relm4::safeties! {
 ///     // Implements DetailableSetting:
 ///     @state(param: bool)
 ///     MySetting(name: "my-setting");
@@ -135,7 +137,9 @@ pub trait DetailableSetting: SettingSafety {
 ///
 /// ### Example:
 /// ~~~
-/// safeties! {
+/// use relm4::gtk::prelude::{StaticVariantType, ToVariant};
+///
+/// relm4::safeties! {
 ///     // Implements DetailableAction:
 ///     MyAction(group: "win", name: "my-action");
 ///
@@ -184,18 +188,21 @@ pub trait DetailableAction: ActionSafety + DetailableSetting {
 ///
 /// ### Syntax
 /// ~~~
-///     safeties! {
-///         // Action safeties must specify the group parameter.
-///         UnitStruct(group: "action-group", name: "action-or-setting-name");
+/// use relm4::gtk::prelude::{StaticVariantType, ToVariant};
 ///
-///         @value(param: ParamType, owned: OwnedType, map: <method> ReturnType)
-///         @state(param: ParamType, owned: OwnedType, map: <method> ReturnType)
-///         Enum(name: "setting-name") {
-///             Variant = ("literal-value"), ... // Variants require @value.
-///             // In the case of string literals, they must always be enclosed
-///             // in parens for keyboard accelerators and settings to work.
-///         }
+/// relm4::safeties! {
+///     // Action safeties must specify the group parameter.
+///     UnitStruct(group: "action-group", name: "action-or-setting-name");
+///
+///     // If a lifetime is necessary, use 'a.
+///     @value(param: &'a str, owned: String, map: <str> &'a str)
+///     @state(param: &'a str, owned: String, map: <str> &'a str)
+///     Enum(name: "setting-name") {
+///         Variant = ("literal-value"), // ... Variants require @value.
+///         // In the case of string literals, they must always be enclosed
+///         // in parens for keyboard accelerators and settings to work.
 ///     }
+/// }
 /// ~~~
 macro_rules! safeties {
     (fallback! @($($foo:tt)+)            ) => { $($foo)+ };
@@ -521,7 +528,7 @@ impl RelmMenu for gio::Menu {
 pub trait SafeSettings: IsA<gio::Settings> {
     /// Safe version of [`create_action`](gio::prelude::SettingsExt::create_action)
     /// for action safeties with variants or without value nor variants.
-    fn create_action_safe<'a, T: DetailableAction>(&self) -> gio::Action {
+    fn create_action_safe<T: DetailableAction>(&self) -> gio::Action {
         self.create_action(T::NAME)
     }
 
