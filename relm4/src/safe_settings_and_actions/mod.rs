@@ -14,7 +14,7 @@ use gtk::glib;
 pub trait SettingSafety {
     /// The name of the setting or action.
     ///
-    /// The macro [`safe_settings_and_actions!`](crate::safe_settings_and_actions)
+    /// The macro [`safe_settings_and_actions!`](crate::safe_settings_and_actions!)
     /// automatically implements [`Display`](std::fmt::Display) using this value,
     /// so it is not necessary to use it directly for logging and similar cases.
     const NAME: &'static str;
@@ -107,7 +107,7 @@ pub trait NotDetailable: SettingSafety {}
 ///     NotDetailable(name: "not-detailable");
 /// }
 /// ~~~
-/// See also: [`safe_settings_and_actions!`](crate::safe_settings_and_actions), [`NotDetailable`].
+/// See also: [`safe_settings_and_actions!`](crate::safe_settings_and_actions!), [`NotDetailable`].
 pub trait DetailableSetting: SettingSafety {
     /// Function to convert [`struct@glib::Variant`] to `Self`, especially when `Self` is an `enum`.
     fn from_variant(variant: &glib::Variant) -> Self
@@ -149,7 +149,7 @@ pub trait DetailableSetting: SettingSafety {
 ///     NotDetailable(group: "win", name: "not-detailable");
 /// }
 /// ~~~
-/// See also: [`safe_settings_and_actions!`](crate::safe_settings_and_actions), [`NotDetailable`].
+/// See also: [`safe_settings_and_actions!`](crate::safe_settings_and_actions!), [`NotDetailable`].
 pub trait DetailableAction: ActionSafety + DetailableSetting {
     /// Gets the [detailed action name](https://docs.gtk.org/gio/type_func.Action.parse_detailed_name.html).
     fn detailed_action_name(&self) -> &'static str;
