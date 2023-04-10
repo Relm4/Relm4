@@ -1,12 +1,12 @@
 use gtk::{gio, glib, prelude::*};
-use relm4::{gtk, safeties::prelude::*, RelmWidgetExt};
+use relm4::{gtk, safe_settings_and_actions::extensions::*, RelmWidgetExt};
 
 // This example includes the file: relm4.example.safeties.gschema.xml
 // More info: https://docs.gtk.org/gio/class.Settings.html
 
 // This macro only ensures settings and actions, but not action groups.
 // For custom groups you can define constant strings and place them near it.
-relm4::safeties! {
+relm4::safe_settings_or_actions! {
     // This action safety can be keyboard accelerated because it has no @value and no variants.
     Greeting(group: "app", name: "greeting");
 
@@ -132,10 +132,10 @@ impl relm4::SimpleComponent for Model {
 
             add_action = &gio::SimpleAction::new_safe::<ManuallySet>() {
                 connect_activate_safe_enum[settings] => move |_, target| match target {
-                    ManuallySet::A => settings.set_safe_enum(MySetting::A).unwrap(),
-                    ManuallySet::B => settings.set_safe_enum(MySetting::B).unwrap(),
-                    ManuallySet::C => settings.set_safe_enum(MySetting::C).unwrap(),
-                },
+                    ManuallySet::A => settings.set_safe_enum(MySetting::A),
+                    ManuallySet::B => settings.set_safe_enum(MySetting::B),
+                    ManuallySet::C => settings.set_safe_enum(MySetting::C),
+                }.unwrap_or_else(move |error| println!("Failed to save {target} setting: {error}")),
             },
 
             set_accels_for_action_safe[&["<Ctrl>G"]]: Greeting,
