@@ -1,5 +1,5 @@
 use gtk::{gio, glib, prelude::*};
-use relm4::{gtk, safeties::prelude::*, ComponentParts, ComponentSender, RelmWidgetExt};
+use relm4::{gtk, safeties::prelude::*, RelmWidgetExt};
 
 // This example includes the file: relm4.example.safeties.gschema.xml
 // More info: https://docs.gtk.org/gio/class.Settings.html
@@ -360,8 +360,8 @@ impl relm4::SimpleComponent for Model {
     fn init(
         app: gtk::Application,
         root: &Self::Root,
-        sender: ComponentSender<Self>,
-    ) -> ComponentParts<Self> {
+        sender: relm4::ComponentSender<Self>,
+    ) -> relm4::ComponentParts<Self> {
         let settings = gio::Settings::new("relm4.example.safeties");
         let model = Model { counter: 0 };
         let widgets = view_output!();
@@ -373,10 +373,10 @@ impl relm4::SimpleComponent for Model {
             .bind_safe::<Toggle>(&widgets.toggle, "active")
             .build();
 
-        ComponentParts { model, widgets }
+        relm4::ComponentParts { model, widgets }
     }
 
-    fn update(&mut self, msg: Msg, _sender: ComponentSender<Self>) {
+    fn update(&mut self, msg: Msg, _sender: relm4::ComponentSender<Self>) {
         match msg {
             Msg::Increment(target) => {
                 self.counter = self.counter.wrapping_add(target);
