@@ -252,13 +252,11 @@ macro_rules! safeties {
         $(@value(
             param:  $target_param:ty $(,
             owned:  $target_owned:ty)? $(,
-            //map:  $target_map:tt)? $(,)?
               map: <$target_map:ident> $($target_mapping:ty)?)? $(,)?
         ))?
         $(@state(
             param:  $state_param:ty $(,
             owned:  $state_owned:ty)? $(,
-            //map:  $state_map:tt)? $(,)?
               map: <$state_map:ident> $state_mapping:ty)? $(,)?
         ))?
         $vis:vis $type:ident($(group: $group:literal,)? name: $name:literal $(,)?) $variants:tt
