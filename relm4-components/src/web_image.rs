@@ -3,10 +3,8 @@
 use std::collections::VecDeque;
 use std::fmt::Debug;
 
-use relm4::gtk::prelude::Cast;
-use relm4::gtk::traits::{BoxExt, WidgetExt};
-use relm4::{gtk, ComponentSender};
-use relm4::{Component, ComponentParts};
+use relm4::gtk::prelude::{BoxExt, Cast, WidgetExt};
+use relm4::{gtk, Component, ComponentParts, ComponentSender};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 /// Reusable component for loading images from the web.

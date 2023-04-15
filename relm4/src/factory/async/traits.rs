@@ -32,7 +32,7 @@ pub trait AsyncFactoryComponent:
     /// The parameter used to initialize the factory component.
     type Init;
 
-    /// The widget that was constructed by the factory component.
+    /// The top-level widget of the factory component.
     type Root: AsRef<<Self::ParentWidget as FactoryView>::Children> + Debug + Clone;
 
     /// The type that's used for storing widgets created for this factory component.
@@ -73,7 +73,7 @@ pub trait AsyncFactoryComponent:
     /// forward messages.
     ///
     /// If [`None`] is returned, nothing is forwarded.
-    fn output_to_parent_input(_output: Self::Output) -> Option<Self::ParentInput> {
+    fn forward_to_parent(_output: Self::Output) -> Option<Self::ParentInput> {
         None
     }
 

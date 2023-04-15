@@ -25,8 +25,9 @@ struct CounterWidgets {
     label: gtk::Label,
 }
 
-impl Position<GridPosition> for Counter {
-    fn position(&self, index: usize) -> GridPosition {
+impl Position<GridPosition, DynamicIndex> for Counter {
+    fn position(&self, index: &DynamicIndex) -> GridPosition {
+        let index = index.current_index();
         let x = index % 5;
         let y = index / 5;
         GridPosition {
@@ -47,8 +48,9 @@ impl FactoryComponent for Counter {
     type Widgets = CounterWidgets;
     type ParentInput = AppMsg;
     type ParentWidget = gtk::Grid;
+    type Index = DynamicIndex;
 
-    fn output_to_parent_input(output: Self::Output) -> Option<AppMsg> {
+    fn forward_to_parent(output: Self::Output) -> Option<AppMsg> {
         Some(match output {
             CounterOutput::SendFront(index) => AppMsg::SendFront(index),
             CounterOutput::MoveUp(index) => AppMsg::MoveUp(index),

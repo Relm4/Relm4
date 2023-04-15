@@ -164,11 +164,11 @@ impl Component for App {
             match progress {
                 CmdOut::Progress(p) => {
                     widgets.label.set_label("Searching for the answer...");
-                    widgets.progress.show();
+                    widgets.progress.set_visible(true);
                     widgets.progress.set_fraction(*p as f64);
                 }
                 CmdOut::Finished(result) => {
-                    widgets.progress.hide();
+                    widgets.progress.set_visible(false);
                     widgets
                         .label
                         .set_label(&format!("The answer to life is: {result:?}"));

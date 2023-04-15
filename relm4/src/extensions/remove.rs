@@ -59,6 +59,7 @@ macro_rules! remove_impl {
 macro_rules! remove_child_impl {
     ($($type:ty),+) => {
         $(
+            #[allow(deprecated)]
             impl RelmRemoveExt for $type {
                 fn container_remove(&self, widget: &impl AsRef<Self::Child>) {
                     self.remove_child(widget.as_ref());

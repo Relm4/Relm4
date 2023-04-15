@@ -1,3 +1,7 @@
+// Don't show GTK 4.10 deprecations.
+// We can't replace them without raising the GTK requirement to 4.10.
+#![allow(deprecated)]
+
 use gtk::prelude::*;
 use relm4::{prelude::*, Sender};
 
@@ -28,7 +32,7 @@ impl SimpleComponent for Dialog {
             present: (),
 
             connect_response[sender] => move |dialog, resp| {
-                dialog.hide();
+                dialog.set_visible(false);
                 sender.input(if resp == gtk::ResponseType::Accept {
                     DialogMsg::Accept
                 } else {

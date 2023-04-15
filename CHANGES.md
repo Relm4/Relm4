@@ -5,6 +5,10 @@
 ### Added
 
 + core: Add `TypedListView` as idiomatic wrapper over `gtk::ListView`
++ core: Introduce setting and action safeties
++ examples: Introduce setting and action safeties
++ core: Implement `RelmSetChildExt` for `gtk::AspectFrame`
++ core: Add `FactoryHashMap` as alternative to `FactoryVecDeque`
 + core: Add gnome_44 feature flag for GNOME 44
 + core: Documentation and better support for data bindings
 + core: Add `set_tooltip` method to `RelmWidgetExt`
@@ -14,6 +18,9 @@
 
 ### Changed
 
++ core: Replace `FactoryVecDeque`'s associated function `from_vec` with `from_iter`
++ core: Added `Index` type to the `FactoryComponent` trait
++ core: Rename factory component traits `output_to_parent_input` method to `forward_to_parent`
 + core: Improved `RelmActionGroup` API
 + all: Increase MSRV to 1.65 to match the dependencies
 

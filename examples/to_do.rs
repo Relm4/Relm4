@@ -64,7 +64,7 @@ impl FactoryComponent for Task {
         widgets.label.set_attributes(Some(&attrs));
     }
 
-    fn output_to_parent_input(output: Self::Output) -> Option<AppMsg> {
+    fn forward_to_parent(output: Self::Output) -> Option<AppMsg> {
         Some(match output {
             TaskOutput::Delete(index) => AppMsg::DeleteEntry(index),
         })
