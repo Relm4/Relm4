@@ -49,11 +49,11 @@ Use this in to your `Cargo.toml`:
 
 ```toml
 # Core library
-relm4 = "0.6.0-alpha.2"
+relm4 = "0.6.0-beta.1"
 # Optional: reusable components
-relm4-components = "0.6.0-alpha.2"
+relm4-components = "0.6.0-beta.1"
 # Optional: icons
-relm4-icons = { version = "0.6.0-beta.1", features = ["plus"] }
+relm4-icons = { version = "0.6.0-beta.6", features = ["plus"] }
 ```
 
 ### Features

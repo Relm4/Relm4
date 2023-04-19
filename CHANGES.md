@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.6.0-beta.1 - 2023-4-19
+
 ### Added
 
 + core: Introduce setting and action safeties
