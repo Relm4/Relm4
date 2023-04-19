@@ -11,7 +11,7 @@ impl MatchArm {
             let _comma: Token![,] = input.parse()?;
         }
 
-        let pattern = input.parse()?;
+        let pattern = syn::Pat::parse_multi_with_leading_vert(input)?;
         let guard = if input.peek(token::FatArrow) {
             None
         } else {

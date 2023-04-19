@@ -33,7 +33,7 @@ pub(super) fn args_from_index(index: usize, span: Span2) -> Args<Expr> {
                 qself: None,
                 path: Ident::new("Some", span).into(),
             })),
-            paren_token: Paren { span },
+            paren_token: Paren(span),
             args: Punctuated::from_iter(vec![Expr::Lit(ExprLit {
                 attrs: Vec::new(),
                 lit: Lit::Str(LitStr::new(&format!("{index}"), span)),

@@ -3,8 +3,8 @@ use syn::spanned::Spanned;
 
 use crate::widgets::WidgetFunc;
 
-impl Spanned for WidgetFunc {
-    fn span(&self) -> Span2 {
+impl WidgetFunc {
+    pub(crate) fn span(&self) -> Span2 {
         self.path.span()
     }
 }
