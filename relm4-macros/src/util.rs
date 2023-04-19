@@ -116,3 +116,20 @@ pub(super) fn verbatim_impl_item_method(
         },
     })
 }
+
+/// Returns the identifier for a parameter if it is a binding with an identifier pattern.
+pub(super) fn extract_arg_ident(arg: &FnArg) -> syn::Result<&Ident> {
+    match arg {
+        syn::FnArg::Typed(pat_type) => match &*pat_type.pat {
+            syn::Pat::Ident(ident) => Ok(&ident.ident),
+            pat => Err(syn::Error::new_spanned(
+                pat,
+                "parameter binding must be an identifier",
+            )),
+        },
+        syn::FnArg::Receiver(_) => Err(syn::Error::new_spanned(
+            arg,
+            "parameter binding must be an identifier",
+        )),
+    }
+}

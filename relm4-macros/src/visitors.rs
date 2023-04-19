@@ -7,6 +7,7 @@ use syn::visit_mut::{self, VisitMut};
 
 use crate::additional_fields::AdditionalFields;
 use crate::menu::Menus;
+use crate::util;
 use crate::widgets::ViewWidgets;
 
 #[derive(Debug)]
@@ -252,49 +253,19 @@ struct InitFnVisitor {
 
 impl<'ast> Visit<'ast> for InitFnVisitor {
     fn visit_impl_item_method(&mut self, func: &'ast syn::ImplItemMethod) {
-        let root_name = match func.sig.inputs.iter().nth(1) {
-            Some(syn::FnArg::Typed(pat_type)) => match &*pat_type.pat {
-                syn::Pat::Ident(ident) => Ok(ident.ident.clone()),
-                _ => Err(syn::Error::new_spanned(
-                    pat_type,
-                    "unable to determine root name",
-                )),
-            },
-            Some(arg) => Err(syn::Error::new_spanned(
-                arg,
-                "unable to determine root name",
-            )),
-            None => Err(syn::Error::new_spanned(
-                &func.sig,
-                "unable to determine root name",
-            )),
-        };
+        let Some(root_arg) = func.sig.inputs.iter().nth(1) else { return };
+        let root_name = util::extract_arg_ident(root_arg);
 
         match root_name {
-            Ok(root_name) => self.root_name = Some(root_name),
+            Ok(root_name) => self.root_name = Some(root_name.clone()),
             Err(e) => self.errors.push(e),
         }
 
-        let sender_name = match func.sig.inputs.iter().nth(2) {
-            Some(syn::FnArg::Typed(pat_type)) => match &*pat_type.pat {
-                syn::Pat::Ident(ident) => Ok(ident.ident.clone()),
-                _ => Err(syn::Error::new_spanned(
-                    pat_type,
-                    "unable to determine sender name",
-                )),
-            },
-            Some(arg) => Err(syn::Error::new_spanned(
-                arg,
-                "unable to determine sender name",
-            )),
-            None => Err(syn::Error::new_spanned(
-                &func.sig,
-                "unable to determine sender name",
-            )),
-        };
+        let Some(sender_arg) = func.sig.inputs.iter().nth(2) else { return };
+        let sender_name = util::extract_arg_ident(sender_arg);
 
         match sender_name {
-            Ok(sender_name) => self.sender_name = Some(sender_name),
+            Ok(sender_name) => self.sender_name = Some(sender_name.clone()),
             Err(e) => self.errors.push(e),
         }
 
@@ -348,26 +319,12 @@ struct InitWidgetsFnVisitor {
 
 impl<'ast> Visit<'ast> for InitWidgetsFnVisitor {
     fn visit_impl_item_method(&mut self, func: &'ast syn::ImplItemMethod) {
-        let root_name = match func.sig.inputs.iter().nth(2) {
-            Some(syn::FnArg::Typed(pat_type)) => match &*pat_type.pat {
-                syn::Pat::Ident(ident) => Ok(ident.ident.clone()),
-                _ => Err(syn::Error::new_spanned(
-                    pat_type,
-                    "unable to determine root name",
-                )),
-            },
-            Some(arg) => Err(syn::Error::new_spanned(
-                arg,
-                "unable to determine root name",
-            )),
-            None => Err(syn::Error::new_spanned(
-                &func.sig,
-                "unable to determine root name",
-            )),
-        };
+        let Some(root_arg) = func.sig.inputs.iter().nth(2) else { return };
+
+        let root_name = util::extract_arg_ident(root_arg);
 
         match root_name {
-            Ok(root_name) => self.root_name = Some(root_name),
+            Ok(root_name) => self.root_name = Some(root_name.clone()),
             Err(e) => self.errors.push(e),
         }
 
