@@ -4,6 +4,7 @@ use proc_macro2::TokenStream;
 use quote::quote;
 use syn::visit::{self, Visit};
 use syn::visit_mut::{self, VisitMut};
+use syn::LocalInit;
 
 use crate::additional_fields::AdditionalFields;
 use crate::menu::Menus;
@@ -91,10 +92,10 @@ impl VisitMut for ComponentVisitor<'_> {
                     _ => (),
                 }
             }
-            syn::ImplItem::Method(func) => {
+            syn::ImplItem::Fn(func) => {
                 if &*func.sig.ident.to_string() == "init" {
                     let mut init_fn_visitor = InitFnVisitor::default();
-                    init_fn_visitor.visit_impl_item_method(func);
+                    init_fn_visitor.visit_impl_item_fn(func);
 
                     self.model_name = init_fn_visitor.model_name;
                     self.sender_name = init_fn_visitor.sender_name;
@@ -124,7 +125,7 @@ pub(super) struct FactoryComponentVisitor<'errors> {
     pub(super) view_widgets: Option<syn::Result<ViewWidgets>>,
     pub(super) widgets_ty: Option<syn::Type>,
     pub(super) index_ty: Option<syn::Type>,
-    pub(super) init_widgets: Option<syn::ImplItemMethod>,
+    pub(super) init_widgets: Option<syn::ImplItemFn>,
     pub(super) root_name: Option<syn::Ident>,
     pub(super) additional_fields: Option<AdditionalFields>,
     pub(super) menus: Option<Menus>,
@@ -201,10 +202,10 @@ impl VisitMut for FactoryComponentVisitor<'_> {
                     _ => (),
                 }
             }
-            syn::ImplItem::Method(func) => {
+            syn::ImplItem::Fn(func) => {
                 if &*func.sig.ident.to_string() == "init_widgets" {
                     let mut init_fn_visitor = InitWidgetsFnVisitor::default();
-                    init_fn_visitor.visit_impl_item_method(func);
+                    init_fn_visitor.visit_impl_item_fn(func);
 
                     self.root_name = init_fn_visitor.root_name;
                     self.errors.append(&mut init_fn_visitor.errors);
@@ -251,7 +252,7 @@ struct InitFnVisitor {
 }
 
 impl<'ast> Visit<'ast> for InitFnVisitor {
-    fn visit_impl_item_method(&mut self, func: &'ast syn::ImplItemMethod) {
+    fn visit_impl_item_fn(&mut self, func: &'ast syn::ImplItemFn) {
         let root_name = match func.sig.inputs.iter().nth(1) {
             Some(syn::FnArg::Typed(pat_type)) => match &*pat_type.pat {
                 syn::Pat::Ident(ident) => Ok(ident.ident.clone()),
@@ -298,7 +299,7 @@ impl<'ast> Visit<'ast> for InitFnVisitor {
             Err(e) => self.errors.push(e),
         }
 
-        visit::visit_impl_item_method(self, func);
+        visit::visit_impl_item_fn(self, func);
     }
 
     fn visit_expr_struct(&mut self, expr_struct: &'ast syn::ExprStruct) {
@@ -347,7 +348,7 @@ struct InitWidgetsFnVisitor {
 }
 
 impl<'ast> Visit<'ast> for InitWidgetsFnVisitor {
-    fn visit_impl_item_method(&mut self, func: &'ast syn::ImplItemMethod) {
+    fn visit_impl_item_fn(&mut self, func: &'ast syn::ImplItemFn) {
         let root_name = match func.sig.inputs.iter().nth(2) {
             Some(syn::FnArg::Typed(pat_type)) => match &*pat_type.pat {
                 syn::Pat::Ident(ident) => Ok(ident.ident.clone()),
@@ -371,7 +372,7 @@ impl<'ast> Visit<'ast> for InitWidgetsFnVisitor {
             Err(e) => self.errors.push(e),
         }
 
-        visit::visit_impl_item_method(self, func);
+        visit::visit_impl_item_fn(self, func);
     }
 }
 
@@ -398,7 +399,7 @@ impl<'errors> PreAndPostView<'errors> {
 
 impl VisitMut for PreAndPostView<'_> {
     fn visit_impl_item_mut(&mut self, item: &mut syn::ImplItem) {
-        if let syn::ImplItem::Method(func) = item {
+        if let syn::ImplItem::Fn(func) = item {
             match &*func.sig.ident.to_string() {
                 "pre_view" => {
                     if !self.pre_view.is_empty() {
@@ -463,9 +464,9 @@ impl ViewOutputExpander<'_> {
 }
 
 impl VisitMut for ViewOutputExpander<'_> {
-    fn visit_impl_item_method_mut(&mut self, method: &mut syn::ImplItemMethod) {
+    fn visit_impl_item_fn_mut(&mut self, method: &mut syn::ImplItemFn) {
         if method.sig.ident == "init" || method.sig.ident == "init_widgets" {
-            visit_mut::visit_impl_item_method_mut(self, method);
+            visit_mut::visit_impl_item_fn_mut(self, method);
 
             if !self.expanded {
                 self.errors.push(syn::Error::new_spanned(method, "expected an injection point for the view macro. Try using `let widgets = view_output!();`"));
@@ -477,7 +478,7 @@ impl VisitMut for ViewOutputExpander<'_> {
         let mut expand = false;
 
         if let syn::Stmt::Local(syn::Local {
-            init: Some((_, expr)),
+            init: Some(LocalInit { expr, .. }),
             ..
         }) = stmt
         {
@@ -497,10 +498,13 @@ impl VisitMut for ViewOutputExpander<'_> {
         if expand {
             let view_code = &self.view_code;
 
-            *stmt = syn::Stmt::Expr(syn::Expr::Verbatim(quote! {
-                #view_code
-                #stmt
-            }));
+            *stmt = syn::Stmt::Expr(
+                syn::Expr::Verbatim(quote! {
+                    #view_code
+                    #stmt
+                }),
+                None,
+            );
 
             self.expanded = true;
         }

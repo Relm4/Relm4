@@ -3,8 +3,8 @@ use syn::spanned::Spanned;
 
 use crate::widgets::PropertyName;
 
-impl Spanned for PropertyName {
-    fn span(&self) -> Span2 {
+impl PropertyName {
+    pub(crate) fn span(&self) -> Span2 {
         match self {
             PropertyName::Ident(ident) => ident.span(),
             PropertyName::Path(path) => path.span(),

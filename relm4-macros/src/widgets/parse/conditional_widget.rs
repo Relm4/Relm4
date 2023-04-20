@@ -1,6 +1,5 @@
 use proc_macro2::TokenStream as TokenStream2;
 use syn::parse::ParseStream;
-use syn::spanned::Spanned;
 use syn::{Error, Expr, Ident, Path, Token};
 
 use crate::args::Args;

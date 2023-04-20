@@ -110,7 +110,7 @@ pub(crate) fn generate_tokens(
         });
 
         let ty: syn::Type = parse_quote!(Self::Root);
-        let init_root = util::verbatim_impl_item_method("init_root", Vec::new(), ty, init_root);
+        let init_root = util::verbatim_impl_item_fn("init_root", Vec::new(), ty, init_root);
         component_impl.items.push(init_root);
 
         let PreAndPostView {
