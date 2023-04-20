@@ -17,16 +17,16 @@ keywords.workspace = true
 categories.workspace = true
 
 [package.metadata.docs.rs]
-features = ["dox"]
-cargo-args = ["-Zunstable-options", "-Zrustdoc-scrape-examples"]
+all-features = true
 # enable unstable features in the documentation
-rustdoc-args = ["--cfg", "docsrs"]
+rustc-args = ["--cfg", "docsrs"]
+cargo-args = ["-Zunstable-options", "-Zrustdoc-scrape-examples"]
 
 [dependencies]
 once_cell = "1.17"
 relm4 = { version = "0.6.0-beta.1", path = "../relm4", features = ["macros"] }
 reqwest = { version = "0.11.14", optional = true }
-tracker = "0.2.0"
+tracker = "0.2.1"
 
 [features]
 default = []

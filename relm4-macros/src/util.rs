@@ -82,13 +82,13 @@ pub(super) fn item_impl_error(original_input: TokenStream) -> TokenStream {
     vec![macro_impls, original_input].into_iter().collect()
 }
 
-pub(super) fn verbatim_impl_item_method(
+pub(super) fn verbatim_impl_item_fn(
     name: &str,
     args: Vec<FnArg>,
     ty: Type,
     tokens: TokenStream2,
 ) -> ImplItem {
-    ImplItem::Method(syn::ImplItemMethod {
+    ImplItem::Fn(syn::ImplItemFn {
         attrs: Vec::new(),
         vis: syn::Visibility::Inherited,
         defaultness: None,
@@ -112,7 +112,7 @@ pub(super) fn verbatim_impl_item_method(
         },
         block: syn::Block {
             brace_token: syn::token::Brace::default(),
-            stmts: vec![syn::Stmt::Expr(syn::Expr::Verbatim(tokens))],
+            stmts: vec![syn::Stmt::Expr(syn::Expr::Verbatim(tokens), None)],
         },
     })
 }

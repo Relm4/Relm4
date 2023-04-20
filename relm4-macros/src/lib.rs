@@ -182,7 +182,7 @@ fn gtk_import() -> syn::Path {
 pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let global_attributes: Attrs = parse_macro_input!(attributes);
     let backup_input = input.clone();
-    let component_impl_res = syn::parse_macro_input::parse::<ItemImpl>(input);
+    let component_impl_res = syn::parse::<ItemImpl>(input);
 
     match component_impl_res {
         Ok(component_impl) => component::generate_tokens(global_attributes, component_impl).into(),
@@ -300,7 +300,7 @@ pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
 pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let attrs = parse_macro_input!(attributes);
     let backup_input = input.clone();
-    let factory_impl_res = syn::parse_macro_input::parse::<ItemImpl>(input);
+    let factory_impl_res = syn::parse::<ItemImpl>(input);
 
     match factory_impl_res {
         Ok(factory_impl) => factory::generate_tokens(attrs, factory_impl).into(),
