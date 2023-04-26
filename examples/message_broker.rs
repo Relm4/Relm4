@@ -1,3 +1,7 @@
+// Don't show GTK 4.10 deprecations.
+// We can't replace them without raising the GTK requirement to 4.10.
+#![allow(deprecated)]
+
 use std::convert::identity;
 
 use gtk::prelude::{BoxExt, ButtonExt, DialogExt, GtkWindowExt, ToggleButtonExt, WidgetExt};

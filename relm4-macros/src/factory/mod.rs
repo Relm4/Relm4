@@ -37,6 +37,14 @@ pub(crate) fn generate_tokens(
         _ => (),
     }
 
+    // Insert default index type for sync variants
+    // if it wasn't specified by the user.
+    if factory_visitor.index_ty.is_none() && asyncness.is_none() {
+        factory_impl.items.push(parse_quote! {
+            type Index = relm4::factory::DynamicIndex;
+        });
+    }
+
     if let FactoryComponentVisitor {
         view_widgets: Some(Ok(view_widgets)),
         root_name,
@@ -106,13 +114,19 @@ pub(crate) fn generate_tokens(
             parse_quote! { FactorySender }
         };
 
+        let index_ty: syn::TypePath = if asyncness.is_some() {
+            parse_quote! { relm4::factory::DynamicIndex }
+        } else {
+            parse_quote! { Self::Index }
+        };
+
         if init_widgets.is_some() {
             ViewOutputExpander::expand(&mut factory_impl, view_code, widgets_return_code, errors);
         } else {
             factory_impl.items.push(parse_quote! {
                 fn init_widgets(
                     &mut self,
-                    index: &relm4::factory::DynamicIndex,
+                    index: & #index_ty,
                     root: &Self::Root,
                     returned_widget: &<Self::ParentWidget as relm4::factory::FactoryView>::ReturnedWidget,
                     sender: relm4::factory::#sender_ty<Self>,
@@ -129,10 +143,10 @@ pub(crate) fn generate_tokens(
 
         let ty: syn::Type = parse_quote!(Self::Root);
         factory_impl.items.push(if asyncness.is_some() {
-            util::verbatim_impl_item_method("init_root", Vec::new(), ty, init_root)
+            util::verbatim_impl_item_fn("init_root", Vec::new(), ty, init_root)
         } else {
             let args = vec![parse_quote! { &self}];
-            util::verbatim_impl_item_method("init_root", args, ty, init_root)
+            util::verbatim_impl_item_fn("init_root", args, ty, init_root)
         });
 
         let PreAndPostView {

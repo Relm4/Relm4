@@ -12,7 +12,7 @@ pub(super) struct AdditionalFields {
 impl Parse for AdditionalFields {
     fn parse(input: ParseStream<'_>) -> Result<Self> {
         Ok(AdditionalFields {
-            inner: input.parse_terminated(Field::parse_named)?,
+            inner: input.parse_terminated(Field::parse_named, Token![,])?,
         })
     }
 }

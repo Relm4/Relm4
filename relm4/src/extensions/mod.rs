@@ -68,7 +68,7 @@ impl ApplicationBuilderExt for gtk::builders::ApplicationBuilder {
 
             init(app.clone(), window.clone());
 
-            window.show();
+            window.set_visible(true);
         });
 
         app.run();
@@ -139,6 +139,7 @@ macro_rules! container_child_impl {
     };
     ($($type:ty), +) => {
         $(
+            #[allow(deprecated)]
             impl ContainerChild for $type {
                 type Child = gtk::Widget;
             }
@@ -169,7 +170,8 @@ container_child_impl! {
     gtk::Overlay,
     gtk::Revealer,
     gtk::WindowHandle,
-    gtk::Expander
+    gtk::Expander,
+    gtk::AspectFrame
 }
 
 container_child_impl! {

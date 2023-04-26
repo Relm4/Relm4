@@ -49,11 +49,11 @@ Use this in to your `Cargo.toml`:
 
 ```toml
 # Core library
-relm4 = "0.6.0-alpha.2"
+relm4 = "0.6.0-beta.1"
 # Optional: reusable components
-relm4-components = "0.6.0-alpha.2"
+relm4-components = "0.6.0-beta.1"
 # Optional: icons
-relm4-icons = { version = "0.6.0-beta.1", features = ["plus"] }
+relm4-icons = { version = "0.6.0-beta.6", features = ["plus"] }
 ```
 
 ### Features
@@ -170,6 +170,7 @@ fn main() {
 - [Done](https://github.com/edfloreshz/done) - A simple and versatile to do app.
 - [Reovim](https://github.com/songww/reovim) - GUI frontend for neovim.
 - [NixOS Configuration Editor](https://github.com/vlinkz/nixos-conf-editor) - A graphical configuration editor for [NixOS](https://nixos.org).
+- [Rhino Setup](https://github.com/rhino-linux/rhino-setup) - Setup wizard for [Rolling Rhino](https://rhinolinux.org/)
 
 ## License
 

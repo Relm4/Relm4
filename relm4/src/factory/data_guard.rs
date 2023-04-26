@@ -165,6 +165,7 @@ mod test {
         type Init = ();
         type Root = gtk::Box;
         type Widgets = ();
+        type Index = crate::prelude::DynamicIndex;
 
         fn init_model(
             _: Self::Init,

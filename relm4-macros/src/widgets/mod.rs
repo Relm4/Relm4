@@ -1,7 +1,7 @@
 use proc_macro2::{Span as Span2, TokenStream as TokenStream2};
 use syn::punctuated::Punctuated;
 use syn::token::{Else, FatArrow, If, Match, Mut};
-use syn::{token, Expr, ExprClosure, Ident, MethodTurbofish, Pat, Path, Type};
+use syn::{token, AngleBracketedGenericArguments, Expr, ExprClosure, Ident, Pat, Path, Type};
 
 use crate::args::Args;
 
@@ -116,7 +116,7 @@ struct WidgetFunc {
 #[derive(Debug)]
 struct WidgetFuncMethod {
     ident: Ident,
-    turbofish: Option<MethodTurbofish>,
+    turbofish: Option<AngleBracketedGenericArguments>,
     args: Option<Punctuated<Expr, token::Comma>>,
 }
 

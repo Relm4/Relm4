@@ -17,7 +17,8 @@ use data_guard::DataGuard;
 
 pub use r#async::{AsyncFactoryComponent, AsyncFactoryVecDeque, AsyncFactoryVecDequeGuard};
 pub use sync::{
-    CloneableFactoryComponent, FactoryComponent, FactoryVecDeque, FactoryVecDequeGuard,
+    CloneableFactoryComponent, FactoryComponent, FactoryHashMap, FactoryVecDeque,
+    FactoryVecDequeGuard,
 };
 
 pub use crate::channel::{AsyncFactorySender, FactorySender};

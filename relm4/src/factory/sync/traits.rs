@@ -1,6 +1,6 @@
 //! Traits for for managing and updating factories.
 
-use crate::factory::{DynamicIndex, FactorySender, FactoryView, Position};
+use crate::factory::{FactorySender, FactoryView, Position};
 use crate::Sender;
 
 use std::fmt::Debug;
@@ -9,7 +9,7 @@ use std::fmt::Debug;
 /// Similar to [`Component`](crate::Component) but adjusted to fit the life cycle
 /// of factories.
 pub trait FactoryComponent:
-    Position<<Self::ParentWidget as FactoryView>::Position> + Sized + 'static
+    Position<<Self::ParentWidget as FactoryView>::Position, Self::Index> + Sized + 'static
 {
     /// Container widget to which all widgets of the factory will be added.
     type ParentWidget: FactoryView + 'static;
@@ -29,14 +29,22 @@ pub trait FactoryComponent:
     /// The parameter used to initialize the factory component.
     type Init;
 
-    /// The widget that was constructed by the factory component.
+    /// The top-level widget of the factory component.
     type Root: AsRef<<Self::ParentWidget as FactoryView>::Children> + Debug + Clone;
 
     /// The type that's used for storing widgets created for this factory component.
     type Widgets: 'static;
 
+    /// The type that's used by a factory collection as index.
+    ///
+    /// For example, for [`FactoryVecDeque`](crate::factory::FactoryVecDeque), this type
+    /// is [`DynamicIndex`](crate::factory::DynamicIndex).
+    /// For [`FactoryHashMap`](crate::factory::FactoryHashMap), this type is equal to the key
+    /// you use for inserting values.
+    type Index;
+
     /// Initializes the model.
-    fn init_model(init: Self::Init, index: &DynamicIndex, sender: FactorySender<Self>) -> Self;
+    fn init_model(init: Self::Init, index: &Self::Index, sender: FactorySender<Self>) -> Self;
 
     /// Initializes the root widget
     fn init_root(&self) -> Self::Root;
@@ -44,7 +52,7 @@ pub trait FactoryComponent:
     /// Initializes the widgets.
     fn init_widgets(
         &mut self,
-        index: &DynamicIndex,
+        index: &Self::Index,
         root: &Self::Root,
         returned_widget: &<Self::ParentWidget as FactoryView>::ReturnedWidget,
         sender: FactorySender<Self>,
@@ -55,7 +63,7 @@ pub trait FactoryComponent:
     /// forward messages.
     ///
     /// If [`None`] is returned, nothing is forwarded.
-    fn output_to_parent_input(_output: Self::Output) -> Option<Self::ParentInput> {
+    fn forward_to_parent(_output: Self::Output) -> Option<Self::ParentInput> {
         None
     }
 

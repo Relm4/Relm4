@@ -14,6 +14,7 @@ impl<T: RelmSetChildExt> RelmContainerExt for T {
     }
 }
 
+#[allow(deprecated)]
 impl RelmContainerExt for gtk::Dialog {
     fn container_add(&self, widget: &impl AsRef<gtk::Widget>) {
         self.content_area().append(widget.as_ref());
@@ -35,6 +36,7 @@ macro_rules! append_impl {
 macro_rules! add_child_impl {
     ($($type:ty),+) => {
         $(
+            #[allow(deprecated)]
             impl RelmContainerExt for $type {
                 fn container_add(&self, widget: &impl AsRef<gtk::Widget>) {
                     self.add_child(widget.as_ref());

@@ -3,8 +3,8 @@ use syn::spanned::Spanned;
 
 use crate::widgets::Attr;
 
-impl Spanned for Attr {
-    fn span(&self) -> Span2 {
+impl Attr {
+    pub(crate) fn span(&self) -> Span2 {
         match self {
             Self::Doc(tokens) => tokens.span(),
             Self::Local(ident)

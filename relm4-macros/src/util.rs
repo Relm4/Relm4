@@ -82,13 +82,13 @@ pub(super) fn item_impl_error(original_input: TokenStream) -> TokenStream {
     vec![macro_impls, original_input].into_iter().collect()
 }
 
-pub(super) fn verbatim_impl_item_method(
+pub(super) fn verbatim_impl_item_fn(
     name: &str,
     args: Vec<FnArg>,
     ty: Type,
     tokens: TokenStream2,
 ) -> ImplItem {
-    ImplItem::Method(syn::ImplItemMethod {
+    ImplItem::Fn(syn::ImplItemFn {
         attrs: Vec::new(),
         vis: syn::Visibility::Inherited,
         defaultness: None,
@@ -112,7 +112,24 @@ pub(super) fn verbatim_impl_item_method(
         },
         block: syn::Block {
             brace_token: syn::token::Brace::default(),
-            stmts: vec![syn::Stmt::Expr(syn::Expr::Verbatim(tokens))],
+            stmts: vec![syn::Stmt::Expr(syn::Expr::Verbatim(tokens), None)],
         },
     })
+}
+
+/// Returns the identifier for a parameter if it is a binding with an identifier pattern.
+pub(super) fn extract_arg_ident(arg: &FnArg) -> syn::Result<&Ident> {
+    match arg {
+        syn::FnArg::Typed(pat_type) => match &*pat_type.pat {
+            syn::Pat::Ident(ident) => Ok(&ident.ident),
+            pat => Err(syn::Error::new_spanned(
+                pat,
+                "parameter binding must be an identifier",
+            )),
+        },
+        syn::FnArg::Receiver(_) => Err(syn::Error::new_spanned(
+            arg,
+            "parameter binding must be an identifier",
+        )),
+    }
 }
