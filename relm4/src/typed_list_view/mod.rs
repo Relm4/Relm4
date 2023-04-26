@@ -307,6 +307,19 @@ where
         }
     }
 
+    /// Get the visible [`TypedListItem`] at the specified position,
+    /// (the item at the given position after filtering and sorting).
+    ///
+    /// Returns [`None`] if the position is invalid.
+    pub fn get_visible(&self, position: u32) -> Option<TypedListItem<T>> {
+        if let Some(obj) = self.active_model.item(position) {
+            let wrapper = obj.downcast::<glib::BoxedAnyObject>().unwrap();
+            Some(TypedListItem::new(wrapper))
+        } else {
+            None
+        }
+    }
+
     /// Insert an item at a specific position.
     pub fn insert(&mut self, position: u32, value: T) {
         self.store
