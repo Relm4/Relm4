@@ -8,11 +8,16 @@ pub trait RelmObjectExt {
     /// Runs the given function when the object is destroyed.
     fn on_destroy<F: FnOnce() + 'static>(&self, func: F);
 
-    /// Bind a data bindings to a property of an object.
+    /// Bind a data binding to a property of an object.
     ///
     /// This is similar to [`glib::ObjectExt::bind_property`] and
     /// always bidirectional.
     fn add_binding<B: Binding>(&self, binding: &B, property_name: &str);
+
+    /// Bind a data binding to a property of an object with
+    /// uni-directional access, so values can only be written but are not synced
+    /// in the other direction.
+    fn add_write_only_binding<B: Binding>(&self, binding: &B, property_name: &str);
 }
 
 impl<T: glib::IsA<glib::Object>> RelmObjectExt for T {
@@ -29,6 +34,13 @@ impl<T: glib::IsA<glib::Object>> RelmObjectExt for T {
         binding
             .bind_property(B::property_name(), self, property_name)
             .bidirectional()
+            .sync_create()
+            .build();
+    }
+
+    fn add_write_only_binding<B: Binding>(&self, binding: &B, property_name: &str) {
+        binding
+            .bind_property(B::property_name(), self, property_name)
             .sync_create()
             .build();
     }

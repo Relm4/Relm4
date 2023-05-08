@@ -43,6 +43,7 @@ pub mod factory;
 pub mod loading_widgets;
 pub mod safe_settings_and_actions;
 pub mod shared_state;
+pub mod typed_list_view;
 
 pub use channel::ComponentSender;
 pub use channel::*;

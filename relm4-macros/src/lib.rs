@@ -638,7 +638,7 @@ pub fn widget_template(attributes: TokenStream, input: TokenStream) -> TokenStre
 }
 
 #[cfg(test)]
-#[rustversion::stable]
+#[rustversion::all(stable, since(1.69))]
 mod test {
     #[test]
     fn ui() {
