@@ -20,7 +20,7 @@ fn main() {
         .application_id("org.relm4.SettingsListExample")
         .launch(|_app, window| {
             // Initialize a component's root widget
-            let component = App::builder()
+            let mut component = App::builder()
                 // Attach the root widget to the given window.
                 .attach_to(&window)
                 // Start the component service with an initial parameter
@@ -66,6 +66,9 @@ fn main() {
                             .unwrap();
                     }
                 });
+
+            // Keep runtime alive after the component is dropped
+            component.detach_runtime();
 
             println!("parent is {:?}", component.widget().toplevel_window());
         });
