@@ -58,7 +58,7 @@ async-trait = "0.1.68"
 relm4-macros = { path = "../relm4-macros" }
 
 # For the benchmarks
-criterion = { version = "0.4", default-features = false }
+criterion = { version = "0.5", default-features = false }
 
 # For the examples
 relm4-icons = { version = "0.6.0-beta.6", features = ["plus", "minus"]}
