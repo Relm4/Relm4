@@ -194,6 +194,7 @@ mod libadwaita {
         adw::SplitButton,
         adw::StatusPage,
         adw::PreferencesGroup,
-        adw::ToastOverlay
+        adw::ToastOverlay,
+        adw::ExpanderRow
     }
 }
