@@ -44,6 +44,15 @@ impl RelmRemoveExt for adw::PreferencesGroup {
     }
 }
 
+#[cfg(feature = "libadwaita")]
+#[cfg_attr(docsrs, doc(cfg(feature = "libadwaita")))]
+impl RelmRemoveExt for adw::ExpanderRow {
+    fn container_remove(&self, widget: &impl AsRef<Self::Child>) {
+        let child = widget.as_ref();
+        self.remove(child);
+    }
+}
+
 macro_rules! remove_impl {
     ($($type:ty),+) => {
         $(
@@ -113,6 +122,24 @@ impl RelmRemoveAllExt for gtk::ListBox {
             let row = child
                 .downcast::<gtk::ListBoxRow>()
                 .expect("The child of `ListBox` is not a `ListBoxRow`.");
+            row.set_child(None::<&gtk::Widget>);
+            self.remove(&row);
+        }
+    }
+}
+
+#[cfg(feature = "libadwaita")]
+#[cfg_attr(docsrs, doc(cfg(feature = "libadwaita")))]
+use adw::traits::ExpanderRowExt;
+
+#[cfg(feature = "libadwaita")]
+#[cfg_attr(docsrs, doc(cfg(feature = "libadwaita")))]
+impl RelmRemoveAllExt for adw::ExpanderRow {
+    fn remove_all(&self) {
+        while let Some(child) = self.last_child() {
+            let row = child
+                .downcast::<gtk::ListBoxRow>()
+                .expect("The child of `ExpanderRow` is not a `ListBoxRow`.");
             row.set_child(None::<&gtk::Widget>);
             self.remove(&row);
         }

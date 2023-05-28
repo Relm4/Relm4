@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+- Implemented `RelmRemoveExt` for `adw::ExpanderRow`. 
+- Implemented `ContainerChild` for `adw::ExpanderRow`.
+- `adw::ExpanderRow` can now be loaded asynchronously.
 
 ### Added
 
