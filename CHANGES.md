@@ -1,12 +1,11 @@
 # Changelog
 
-## Unreleased
-- Implemented `RelmRemoveExt` for `adw::ExpanderRow`. 
-- Implemented `ContainerChild` for `adw::ExpanderRow`.
-- `adw::ExpanderRow` can now be loaded asynchronously.
+## 0.6.0 - 2023-5-31
 
 ### Added
 
++ core: Implemented `RelmRemoveExt` for `adw::ExpanderRow`. 
++ core: Implemented `ContainerChild` for `adw::ExpanderRow`.
 + core: Add `TypedListView` as idiomatic wrapper over `gtk::ListView`
 
 ### Fixed
