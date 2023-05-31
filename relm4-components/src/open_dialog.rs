@@ -160,7 +160,7 @@ impl<S: Select + 'static> SimpleComponent for OpenDialogInner<S> {
     ) -> ComponentParts<Self> {
         let model = OpenDialogInner {
             visible: false,
-            _phantom: PhantomData::default(),
+            _phantom: PhantomData,
         };
 
         let widgets = view_output!();
