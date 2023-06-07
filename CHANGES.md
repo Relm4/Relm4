@@ -14,6 +14,8 @@
 
 ## 0.6.0-beta.1 - 2023-4-19
 
+### Added
+
 + core: Introduce setting and action safeties
 + core: Implement `RelmSetChildExt` for `gtk::AspectFrame`
 + core: Add `FactoryHashMap` as alternative to `FactoryVecDeque`
@@ -21,7 +23,7 @@
 + core: Documentation and better support for data bindings
 + core: Add `set_tooltip` method to `RelmWidgetExt`
 + core: Add `main_adw_application` method to retrieve the `adw::Application` when the libadwaita feature is enabled
-+ macros: Add `skip_macro` option for watch and track attributes to skip their initialization 
++ macros: Add `skip_init` option for watch and track attributes to skip their initialization 
 + examples: Introduce setting and action safeties
 + examples: Example for using relm4-icons 
 
