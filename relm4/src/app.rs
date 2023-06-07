@@ -102,7 +102,11 @@ impl<M: Debug + 'static> RelmApp<M> {
         });
 
         let _guard = RUNTIME.enter();
-        app.run_with_args(args.as_deref().unwrap_or(&[]));
+        if let Some(args) = args {
+            app.run_with_args(&args);
+        } else {
+            app.run();
+        }
 
         // Make sure everything is shut down
         shutdown_all();
@@ -159,7 +163,11 @@ impl<M: Debug + 'static> RelmApp<M> {
         });
 
         let _guard = RUNTIME.enter();
-        app.run_with_args(args.as_deref().unwrap_or(&[]));
+        if let Some(args) = args {
+            app.run_with_args(&args);
+        } else {
+            app.run();
+        }
 
         // Make sure everything is shut down
         shutdown_all();

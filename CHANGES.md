@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Fixed
+
++ core: Fix an issue with using `connect_open` on `gtk::Application`
+
 ## 0.6.0 - 2023-5-31
 
 ### Added

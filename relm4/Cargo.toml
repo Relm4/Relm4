@@ -45,7 +45,7 @@ flume = "0.10.14"
 futures = "0.3.28"
 fragile = "2.0.0"
 gtk = { version = "0.6", package = "gtk4" }
-once_cell = "1.17"
+once_cell = "1.18"
 # Wait for libpanel 0.3 release
 # panel = { version = "0.3", optional = true, package = "libpanel" }
 tokio = { version = "1.28", features = ["rt", "rt-multi-thread", "sync"] }
