@@ -8,14 +8,30 @@ use crate::{Component, ComponentBuilder, ComponentController, MessageBroker, RUN
 
 use std::cell::Cell;
 
+type OnActivateFn = dyn Fn(&gtk::Application) + 'static;
+
 /// An app that runs the main application.
-#[derive(Debug)]
 pub struct RelmApp<M: Debug + 'static> {
     /// The [`gtk::Application`] that's used internally to setup
     /// and run your application.
     app: gtk::Application,
     broker: Option<&'static MessageBroker<M>>,
     args: Option<Vec<String>>,
+    on_activate: Option<Box<OnActivateFn>>,
+}
+
+impl<M: Debug + 'static> Debug for RelmApp<M> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("RelmApp")
+            .field("app", &self.app)
+            .field("broker", &self.broker)
+            .field("args", &self.args)
+            .field(
+                "on_activate",
+                &self.on_activate.as_ref().map(|f| format!("{f:p}")),
+            )
+            .finish()
+    }
 }
 
 impl<M: Debug + 'static> RelmApp<M> {
@@ -36,6 +52,7 @@ impl<M: Debug + 'static> RelmApp<M> {
             app,
             broker: None,
             args: None,
+            on_activate: None,
         }
     }
 
@@ -48,6 +65,7 @@ impl<M: Debug + 'static> RelmApp<M> {
             app,
             broker: None,
             args: None,
+            on_activate: None,
         }
     }
 
@@ -65,17 +83,32 @@ impl<M: Debug + 'static> RelmApp<M> {
         self
     }
 
+    pub fn on_activate<F: Fn(&gtk::Application) + 'static>(mut self, f: F) -> Self {
+        self.on_activate = Some(Box::new(f));
+        self
+    }
+
     /// Runs the application, returns once the application is closed.
     pub fn run<C>(self, payload: C::Init)
     where
         C: Component<Input = M>,
         C::Root: IsA<gtk::Window> + WidgetExt,
     {
-        let Self { app, broker, args } = self;
+        let Self {
+            app,
+            broker,
+            args,
+            on_activate,
+        } = self;
 
         let payload = Cell::new(Some(payload));
+        let on_activate = Cell::new(on_activate);
 
         app.connect_activate(move |app| {
+            if let Some(f) = on_activate.take() {
+                f(app);
+            }
+
             if let Some(payload) = payload.take() {
                 assert!(
                     app.is_registered(),
@@ -128,11 +161,21 @@ impl<M: Debug + 'static> RelmApp<M> {
         C: AsyncComponent<Input = M>,
         C::Root: IsA<gtk::Window> + WidgetExt,
     {
-        let Self { app, broker, args } = self;
+        let Self {
+            app,
+            broker,
+            args,
+            on_activate,
+        } = self;
 
         let payload = Cell::new(Some(payload));
+        let on_activate = Cell::new(on_activate);
 
         app.connect_activate(move |app| {
+            if let Some(f) = on_activate.take() {
+                f(app);
+            }
+
             if let Some(payload) = payload.take() {
                 assert!(
                     app.is_registered(),
