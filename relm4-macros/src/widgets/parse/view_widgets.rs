@@ -11,8 +11,8 @@ impl Parse for ViewWidgets {
         let mut root_exists = first_widget.root_attr.is_some();
         let mut top_level_widgets = vec![first_widget];
 
-        while input.peek(Token![,]) {
-            let _colon: Token![,] = input.parse()?;
+        // Parse colon between widgets and look for more
+        while input.parse::<Token![,]>().is_ok() && !input.is_empty() {
             let widget = TopLevelWidget::parse(input);
             if let Some(root_attr) = &widget.root_attr {
                 if root_exists {
@@ -33,7 +33,7 @@ impl Parse for ViewWidgets {
                 top_level_widgets,
             })
         } else {
-            Err(input.error("Expected end of input. Maybe a missing colon?"))
+            Err(input.error("Unexpected end of input. Maybe a missing comma `,`?"))
         }
     }
 }
