@@ -7,6 +7,10 @@
 + core: Fix an issue with using `connect_open` on `gtk::Application`
 + macros: Allow trailing commas in view!
 
+### Changed
+
++ examples: Add a separator to the libadwaita leaflet example.
+
 ## 0.6.0 - 2023-5-31
 
 ### Added

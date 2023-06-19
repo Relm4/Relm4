@@ -58,6 +58,11 @@ impl SimpleComponent for App {
                     }
                 },
 
+                #[name = "separator"]
+                gtk::Separator {
+                    set_orientation: gtk::Orientation::Vertical,
+                },
+
                 gtk::Box {
                     set_orientation: gtk::Orientation::Vertical,
                     set_hexpand: true,
@@ -118,6 +123,10 @@ impl SimpleComponent for App {
             .bind_property("folded", &widgets.back_button, "visible")
             .flags(glib::BindingFlags::SYNC_CREATE)
             .build();
+        widgets
+            .leaflet
+            .page(&widgets.separator)
+            .set_navigatable(false);
 
         ComponentParts { model, widgets }
     }
