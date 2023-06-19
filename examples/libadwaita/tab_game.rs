@@ -48,7 +48,7 @@ impl FactoryComponent for GamePage {
     type ParentInput = AppMsg;
     type ParentWidget = adw::TabView;
 
-    fn output_to_parent_input(output: Self::Output) -> Option<AppMsg> {
+    fn forward_to_parent(output: Self::Output) -> Option<AppMsg> {
         Some(match output {
             CounterOutput::StartGame(index) => AppMsg::StartGame(index),
             CounterOutput::SelectedGuess(guess) => AppMsg::SelectedGuess(guess),
