@@ -8,6 +8,10 @@
 + macros: Allow trailing commas in view!
 + examples: Fix libadwaita tab examples
 
+### Changed
+
++ examples: Add a separator to the libadwaita leaflet example.
+
 ## 0.6.0 - 2023-5-31
 
 ### Added
