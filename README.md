@@ -171,6 +171,7 @@ fn main() {
 - [Reovim](https://github.com/songww/reovim) - GUI frontend for neovim.
 - [NixOS Configuration Editor](https://github.com/vlinkz/nixos-conf-editor) - A graphical configuration editor for [NixOS](https://nixos.org).
 - [Rhino Setup](https://github.com/rhino-linux/rhino-setup) - Setup wizard for [Rolling Rhino](https://rhinolinux.org/)
+- [Lemoa](https://github.com/lemmy-gtk/lemoa) - Desktop client for Lemmy
 
 ## License
 
