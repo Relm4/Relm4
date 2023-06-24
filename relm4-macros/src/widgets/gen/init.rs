@@ -6,8 +6,6 @@ use crate::widgets::{
     WidgetTemplateAttr,
 };
 
-use super::util::WidgetFieldsScope;
-
 impl Property {
     fn init_stream(&self, stream: &mut TokenStream2) {
         match &self.ty {
@@ -54,7 +52,6 @@ impl Widget {
             }
         });
 
-        self.get_template_child_in_scope(init_stream, WidgetFieldsScope::Init);
         self.other_init_stream(init_stream);
     }
 
@@ -81,8 +78,6 @@ impl Widget {
                 WidgetTemplateAttr::TemplateChild => (),
             }
         }
-
-        self.get_template_child_in_scope(stream, WidgetFieldsScope::Init);
     }
 
     fn other_init_stream(&self, stream: &mut TokenStream2) {

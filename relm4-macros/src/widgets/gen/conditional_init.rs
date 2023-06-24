@@ -158,7 +158,7 @@ impl AssignProperty {
         &self,
         stream: &mut TokenStream2,
         p_name: &PropertyName,
-        w_name: &Ident,
+        widget_name: &Ident,
         model_name: &Ident,
         is_conditional: bool,
     ) {
@@ -170,7 +170,8 @@ impl AssignProperty {
                     if skip_init.is_none() {
                         let mut info = AssignInfo {
                             stream,
-                            widget_name: w_name,
+                            widget_name,
+                            template_name: None,
                             is_conditional,
                         };
                         self.assign_stream(&mut info, p_name, true);
@@ -185,7 +186,8 @@ impl AssignProperty {
                         let mut assign_stream = TokenStream2::new();
                         let mut info = AssignInfo {
                             stream: &mut assign_stream,
-                            widget_name: w_name,
+                            widget_name,
+                            template_name: None,
                             is_conditional,
                         };
 

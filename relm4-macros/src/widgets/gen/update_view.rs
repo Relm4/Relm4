@@ -4,16 +4,17 @@ use syn::Ident;
 
 use crate::widgets::{
     AssignProperty, AssignPropertyAttr, ConditionalBranches, ConditionalWidget, MatchArm,
-    Properties, Property, PropertyName, PropertyType, ReturnedWidget, Widget,
+    Properties, Property, PropertyName, PropertyType, ReturnedWidget, Widget, WidgetTemplateAttr,
 };
 
-use super::{assign::AssignInfo, util::WidgetFieldsScope};
+use super::assign::AssignInfo;
 
 impl Property {
     fn update_view_stream(
         &self,
         stream: &mut TokenStream2,
-        w_name: &Ident,
+        widget_name: &Ident,
+        template_name: Option<&Ident>,
         model_name: &Ident,
         conditional_branch: bool,
     ) {
@@ -21,12 +22,18 @@ impl Property {
             PropertyType::Assign(assign) => assign.update_view_stream(
                 stream,
                 &self.name,
-                w_name,
+                widget_name,
+                template_name,
                 model_name,
                 conditional_branch,
             ),
             PropertyType::Widget(widget) => {
-                widget.update_view_stream(stream, model_name, conditional_branch);
+                widget.update_view_stream(
+                    stream,
+                    Some(widget_name),
+                    model_name,
+                    conditional_branch,
+                );
             }
             PropertyType::ConditionalWidget(cond_widget) => {
                 cond_widget.update_view_stream(stream, model_name);
@@ -40,32 +47,46 @@ impl Properties {
     fn update_view_stream(
         &self,
         stream: &mut TokenStream2,
-        w_name: &Ident,
+        widget_name: &Ident,
+        template_name: Option<&Ident>,
         model_name: &Ident,
         conditional_branch: bool,
     ) {
         for prop in &self.properties {
-            prop.update_view_stream(stream, w_name, model_name, conditional_branch);
+            prop.update_view_stream(
+                stream,
+                widget_name,
+                template_name,
+                model_name,
+                conditional_branch,
+            );
         }
     }
 }
 
 impl Widget {
     pub(crate) fn init_update_view_stream(&self, stream: &mut TokenStream2, model_name: &Ident) {
-        self.update_view_stream(stream, model_name, false);
+        self.update_view_stream(stream, None, model_name, false);
     }
 
     fn update_view_stream(
         &self,
         stream: &mut TokenStream2,
+        template_name: Option<&Ident>,
         model_name: &Ident,
         conditional_branch: bool,
     ) {
-        self.get_template_child_in_scope(stream, WidgetFieldsScope::ViewUpdate);
-
-        let w_name = &self.name;
-        self.properties
-            .update_view_stream(stream, w_name, model_name, conditional_branch);
+        let widget_name = &self.name;
+        let template_name = (self.template_attr == WidgetTemplateAttr::TemplateChild)
+            .then_some(template_name)
+            .flatten();
+        self.properties.update_view_stream(
+            stream,
+            widget_name,
+            template_name,
+            model_name,
+            conditional_branch,
+        );
         if let Some(returned_widget) = &self.returned_widget {
             returned_widget.update_view_stream(stream, model_name, conditional_branch);
         }
@@ -80,9 +101,12 @@ impl ConditionalWidget {
 
                 for (index, branch) in if_branches.iter().enumerate() {
                     let mut inner_update_stream = TokenStream2::new();
-                    branch
-                        .widget
-                        .update_view_stream(&mut inner_update_stream, model_name, true);
+                    branch.widget.update_view_stream(
+                        &mut inner_update_stream,
+                        None,
+                        model_name,
+                        true,
+                    );
                     branch.update_stream(&mut stream, &inner_update_stream, index);
                 }
                 stream
@@ -91,9 +115,12 @@ impl ConditionalWidget {
                 let mut inner_tokens = TokenStream2::new();
                 for (index, match_arm) in match_arms.iter().enumerate() {
                     let mut inner_update_stream = TokenStream2::new();
-                    match_arm
-                        .widget
-                        .update_view_stream(&mut inner_update_stream, model_name, true);
+                    match_arm.widget.update_view_stream(
+                        &mut inner_update_stream,
+                        None,
+                        model_name,
+                        true,
+                    );
                     let MatchArm {
                         pattern,
                         guard,
@@ -141,7 +168,7 @@ impl ReturnedWidget {
     ) {
         let w_name = &self.name;
         self.properties
-            .update_view_stream(stream, w_name, model_name, conditional_branch);
+            .update_view_stream(stream, w_name, None, model_name, conditional_branch);
     }
 }
 
@@ -150,7 +177,8 @@ impl AssignProperty {
         &self,
         stream: &mut TokenStream2,
         p_name: &PropertyName,
-        w_name: &Ident,
+        widget_name: &Ident,
+        template_name: Option<&Ident>,
         model_name: &Ident,
         conditional_branch: bool,
     ) {
@@ -159,7 +187,8 @@ impl AssignProperty {
             AssignPropertyAttr::Watch { .. } => {
                 let mut info = AssignInfo {
                     stream,
-                    widget_name: w_name,
+                    widget_name,
+                    template_name,
                     is_conditional: false,
                 };
                 self.assign_stream(&mut info, p_name, false);
@@ -172,7 +201,8 @@ impl AssignProperty {
                 let mut assign_stream = TokenStream2::new();
                 let mut info = AssignInfo {
                     stream: &mut assign_stream,
-                    widget_name: w_name,
+                    widget_name,
+                    template_name: None,
                     is_conditional: false,
                 };
                 self.assign_stream(&mut info, p_name, false);

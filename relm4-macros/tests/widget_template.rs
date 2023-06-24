@@ -80,7 +80,16 @@ impl SimpleComponent for App {
                     set_margin_all: 5,
                     #[watch]
                     set_label: &format!("Counter: {}", model.counter),
-                }
+                },
+                #[template]
+                CustomBox {
+                    #[template_child]
+                    child_label {
+                        set_margin_all: 5,
+                        #[watch]
+                        set_label: &format!("Alternative counter : {}", model.counter),
+                    }
+                },
             },
         }
     }

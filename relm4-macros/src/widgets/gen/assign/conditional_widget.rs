@@ -12,7 +12,7 @@ impl ConditionalWidget {
         p_name: &PropertyName,
         sender_name: &'a Ident,
     ) {
-        let assign_fn = p_name.assign_fn_stream(info.widget_name);
+        let assign_fn = p_name.assign_fn_stream(info);
         let self_assign_args = p_name.assign_args_stream(info.widget_name);
         let span = p_name.span();
 
@@ -36,6 +36,7 @@ impl ConditionalWidget {
         let mut info = AssignInfo {
             stream: info.stream,
             widget_name: &self.name,
+            template_name: None,
             is_conditional: true,
         };
         match &self.branches {
