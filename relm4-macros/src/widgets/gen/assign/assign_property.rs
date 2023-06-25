@@ -38,7 +38,7 @@ impl AssignProperty {
             return;
         }
 
-        let assign_fn = p_name.assign_fn_stream(info.widget_name);
+        let assign_fn = p_name.assign_fn_stream(info);
         let self_assign_args = p_name.assign_args_stream(info.widget_name);
         let span = p_name.span();
 

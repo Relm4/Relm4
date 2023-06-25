@@ -12,6 +12,7 @@ mod widgets;
 pub(crate) struct AssignInfo<'a> {
     pub(crate) stream: &'a mut TokenStream2,
     pub(crate) widget_name: &'a Ident,
+    pub(crate) template_name: Option<&'a Ident>,
     pub(crate) is_conditional: bool,
 }
 

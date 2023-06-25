@@ -33,6 +33,7 @@ impl Widget {
         let mut info = AssignInfo {
             stream,
             widget_name: w_name,
+            template_name: None,
             is_conditional: false,
         };
         self.properties.assign_stream(&mut info, sender_name);
@@ -46,9 +47,12 @@ impl Widget {
     ) {
         // Recursively generate code for properties
         {
+            let template_name = (self.template_attr == WidgetTemplateAttr::TemplateChild)
+                .then_some(info.widget_name);
             let mut info = AssignInfo {
                 stream: info.stream,
                 widget_name: &self.name,
+                template_name,
                 is_conditional: info.is_conditional,
             };
             self.properties.assign_stream(&mut info, sender_name);
@@ -56,7 +60,7 @@ impl Widget {
 
         // Template children are already assigned by the template.
         if self.template_attr != WidgetTemplateAttr::TemplateChild {
-            let assign_fn = p_name.assign_fn_stream(info.widget_name);
+            let assign_fn = p_name.assign_fn_stream(info);
             let self_assign_args = p_name.assign_args_stream(info.widget_name);
             let assign = self.widget_assignment();
             let span = p_name.span();
@@ -84,6 +88,7 @@ impl Widget {
             let mut info = AssignInfo {
                 stream: info.stream,
                 widget_name: &returned_widget.name,
+                template_name: None,
                 is_conditional: info.is_conditional,
             };
             returned_widget
