@@ -51,7 +51,7 @@ impl ShutdownOnDrop {
 impl Drop for ShutdownOnDrop {
     fn drop(&mut self) {
         if let Some(sender) = self.shutdown_event_sender.take() {
-            sender.blocking_send(()).ok();
+            sender.try_send(()).ok();
         }
     }
 }

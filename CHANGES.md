@@ -4,6 +4,7 @@
 
 ### Fixed
 
++ core: Don't panic when dropping components from asynchronous contexts
 + core: Fix an issue with using `connect_open` on `gtk::Application`
 + macros: Allow trailing commas in view!
 + macros: Allow multiple instances of the same template children
