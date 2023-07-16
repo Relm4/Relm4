@@ -24,6 +24,6 @@ error[E0046]: not all trait items implemented, missing: `Root`, `Widgets`, `init
 7 | impl SimpleComponent for TestComponent {
   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ missing `Root`, `Widgets`, `init_root` in implementation
   |
-  = help: implement the missing item: `type Root = Type;`
-  = help: implement the missing item: `type Widgets = Type;`
+  = help: implement the missing item: `type Root = /* Type */;`
+  = help: implement the missing item: `type Widgets = /* Type */;`
   = help: implement the missing item: `fn init_root() -> <Self as SimpleComponent>::Root { todo!() }`
