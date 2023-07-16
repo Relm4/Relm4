@@ -145,7 +145,7 @@ macro_rules! sender_impl {
                 shutdown: ShutdownReceiver,
             ) -> Self {
                 Self {
-                    #[allow(clippy::arc_with_non_send_sync)]
+                    #[allow(clippy::all)]
                     shared: Arc::new(ComponentSenderInner {
                         input,
                         output,
