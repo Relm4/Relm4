@@ -16,6 +16,12 @@ pub trait RelmWidgetExt {
     /// Set margin at start, end, top and bottom all at once.
     fn set_margin_all(&self, margin: i32);
 
+    /// Set margin at top and bottom at once.
+    fn set_margin_vertical(&self, margin: i32);
+
+    /// Set margin at start and end at once.
+    fn set_margin_horizontal(&self, margin: i32);
+
     /// Add class name if active is [`true`] and
     /// remove class name if active is [`false`]
     fn set_class_active(&self, class: &str, active: bool);
@@ -51,6 +57,16 @@ impl<T: gtk::glib::IsA<gtk::Widget>> RelmWidgetExt for T {
         self.set_margin_end(margin);
         self.set_margin_top(margin);
         self.set_margin_bottom(margin);
+    }
+
+    fn set_margin_vertical(&self, margin: i32) {
+        self.set_margin_top(margin);
+        self.set_margin_bottom(margin);
+    }
+
+    fn set_margin_horizontal(&self, margin: i32) {
+        self.set_margin_start(margin);
+        self.set_margin_end(margin);
     }
 
     fn set_class_active(&self, class: &str, active: bool) {
