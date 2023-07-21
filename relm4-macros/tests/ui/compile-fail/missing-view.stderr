@@ -16,5 +16,5 @@ error[E0046]: not all trait items implemented, missing: `Root`, `init_root`
 6 | impl SimpleComponent for App {
   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^ missing `Root`, `init_root` in implementation
   |
-  = help: implement the missing item: `type Root = Type;`
+  = help: implement the missing item: `type Root = /* Type */;`
   = help: implement the missing item: `fn init_root() -> <Self as relm4::SimpleComponent>::Root { todo!() }`

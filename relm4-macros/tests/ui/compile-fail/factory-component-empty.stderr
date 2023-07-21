@@ -12,13 +12,13 @@ error[E0046]: not all trait items implemented, missing: `ParentWidget`, `ParentI
 7 | impl FactoryComponent for TestFactoryComponent {
   | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ missing `ParentWidget`, `ParentInput`, `CommandOutput`, `Input`, `Output`, `Init`, `Root`, `init_model`, `init_root`, `init_widgets` in implementation
   |
-  = help: implement the missing item: `type ParentWidget = Type;`
-  = help: implement the missing item: `type ParentInput = Type;`
-  = help: implement the missing item: `type CommandOutput = Type;`
-  = help: implement the missing item: `type Input = Type;`
-  = help: implement the missing item: `type Output = Type;`
-  = help: implement the missing item: `type Init = Type;`
-  = help: implement the missing item: `type Root = Type;`
+  = help: implement the missing item: `type ParentWidget = /* Type */;`
+  = help: implement the missing item: `type ParentInput = /* Type */;`
+  = help: implement the missing item: `type CommandOutput = /* Type */;`
+  = help: implement the missing item: `type Input = /* Type */;`
+  = help: implement the missing item: `type Output = /* Type */;`
+  = help: implement the missing item: `type Init = /* Type */;`
+  = help: implement the missing item: `type Root = /* Type */;`
   = help: implement the missing item: `fn init_model(_: <Self as FactoryComponent>::Init, _: &<Self as FactoryComponent>::Index, _: FactorySender<Self>) -> Self { todo!() }`
   = help: implement the missing item: `fn init_root(&self) -> <Self as FactoryComponent>::Root { todo!() }`
   = help: implement the missing item: `fn init_widgets(&mut self, _: &<Self as FactoryComponent>::Index, _: &<Self as FactoryComponent>::Root, _: &<<Self as FactoryComponent>::ParentWidget as FactoryView>::ReturnedWidget, _: FactorySender<Self>) -> <Self as FactoryComponent>::Widgets { todo!() }`
