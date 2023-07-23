@@ -106,7 +106,7 @@ pub(super) fn verbatim_impl_item_fn(
                 where_clause: None,
             },
             paren_token: syn::token::Paren::default(),
-            inputs: Punctuated::from_iter(args.into_iter()),
+            inputs: Punctuated::from_iter(args),
             variadic: None,
             output: syn::ReturnType::Type(syn::token::RArrow::default(), Box::new(ty)),
         },
