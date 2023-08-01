@@ -71,21 +71,17 @@ impl<C> RelmColumn for C
 where
     C: LabelColumn,
 {
-    type Root = gtk::Box;
-    type Widgets = gtk::Label;
+    type Root = gtk::Label;
+    type Widgets = ();
     type Item = C::Item;
 
     const COLUMN_NAME: &'static str = C::COLUMN_NAME;
 
     fn setup(_: &gtk::ListItem) -> (Self::Root, Self::Widgets) {
-        let root = gtk::Box::new(gtk::Orientation::Horizontal, 0);
-        let widget = gtk::Label::new(None);
-        crate::RelmContainerExt::container_add(&root, &widget);
-
-        (root, widget)
+        (gtk::Label::new(None), ())
     }
 
-    fn bind(item: &mut Self::Item, label: &mut Self::Widgets, _: &mut Self::Root) {
+    fn bind(item: &mut Self::Item, _: &mut Self::Widgets, label: &mut Self::Root) {
         label.set_label(&C::format_cell_value(&C::get_cell_value(item)));
     }
 
