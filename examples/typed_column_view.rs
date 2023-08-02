@@ -43,25 +43,18 @@ impl LabelColumn for Label1Column {
 struct Label2Column;
 
 impl RelmColumn for Label2Column {
-    type Root = gtk::Box;
-    type Widgets = gtk::Label;
+    type Root = gtk::Label;
+    type Widgets = ();
     type Item = MyListItem;
 
     const COLUMN_NAME: &'static str = "label2";
 
-    fn setup(_item: &gtk::ListItem) -> (gtk::Box, gtk::Label) {
-        relm4::view! {
-            root = gtk::Box {
-                #[name = "widget"]
-                gtk::Label,
-            }
-        }
-
-        (root, widget)
+    fn setup(_item: &gtk::ListItem) -> (Self::Root, Self::Widgets) {
+        (gtk::Label::new(None), ())
     }
 
-    fn bind(item: &mut Self::Item, widget: &mut Self::Widgets, _root: &mut Self::Root) {
-        widget.add_write_only_binding(&item.binding, "label");
+    fn bind(item: &mut Self::Item, _: &mut Self::Widgets, label: &mut Self::Root) {
+        label.add_write_only_binding(&item.binding, "label");
     }
 
     fn sort_fn() -> Option<ColumnSortFn<Self::Item>> {
@@ -72,25 +65,18 @@ impl RelmColumn for Label2Column {
 struct ButtonColumn;
 
 impl RelmColumn for ButtonColumn {
-    type Root = gtk::Box;
-    type Widgets = gtk::CheckButton;
+    type Root = gtk::CheckButton;
+    type Widgets = ();
     type Item = MyListItem;
 
     const COLUMN_NAME: &'static str = "button";
 
-    fn setup(_item: &gtk::ListItem) -> (gtk::Box, gtk::CheckButton) {
-        relm4::view! {
-            root = gtk::Box {
-                #[name = "widget"]
-                gtk::CheckButton,
-            }
-        }
-
-        (root, widget)
+    fn setup(_item: &gtk::ListItem) -> (Self::Root, Self::Widgets) {
+        (gtk::CheckButton::new(), ())
     }
 
-    fn bind(item: &mut Self::Item, widget: &mut Self::Widgets, _root: &mut Self::Root) {
-        widget.set_active(item.value % 2 == 0);
+    fn bind(item: &mut Self::Item, _: &mut Self::Widgets, button: &mut Self::Root) {
+        button.set_active(item.value % 2 == 0);
     }
 }
 
