@@ -2,7 +2,7 @@ use gtk::prelude::*;
 use relm4::{
     binding::{Binding, U8Binding},
     prelude::*,
-    typed_list_view::{RelmListItem, TypedListView},
+    typed_view::list::{RelmListItem, TypedListView},
     RelmObjectExt,
 };
 
