@@ -14,7 +14,10 @@ pub trait RelmWidgetExt {
     fn toplevel_window(&self) -> Option<gtk::Window>;
 
     /// Set margin at start, end, top and bottom all at once.
-    fn set_margin_all(&self, margin: i32);
+    fn set_margin_all(&self, margin: i32) {
+        self.set_margin_horizontal(margin);
+        self.set_margin_vertical(margin);
+    }
 
     /// Set margin at top and bottom at once.
     fn set_margin_vertical(&self, margin: i32);
@@ -50,13 +53,6 @@ impl<T: gtk::glib::IsA<gtk::Widget>> RelmWidgetExt for T {
     fn toplevel_window(&self) -> Option<gtk::Window> {
         self.ancestor(gtk::Window::static_type())
             .and_then(|widget| widget.dynamic_cast::<gtk::Window>().ok())
-    }
-
-    fn set_margin_all(&self, margin: i32) {
-        self.set_margin_start(margin);
-        self.set_margin_end(margin);
-        self.set_margin_top(margin);
-        self.set_margin_bottom(margin);
     }
 
     fn set_margin_vertical(&self, margin: i32) {
