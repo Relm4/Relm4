@@ -194,16 +194,17 @@ where
 
         #[inline]
         fn modify_widgets<T, C>(
-            list_item: &gtk::ListItem,
+            list_item: &glib::Object,
             f: impl FnOnce(&mut T, &mut C::Widgets, &mut C::Root),
         ) where
             T: Any,
             C: RelmColumn<Item = T>,
         {
-            let widget = list_item
+            let list_item = list_item
                 .downcast_ref::<gtk::ListItem>()
-                .expect("Needs to be ListItem")
-                .child();
+                .expect("Needs to be ListItem");
+
+            let widget = list_item.child();
 
             let obj = list_item.item().unwrap();
             let mut obj = get_mut_value::<T>(&obj);
@@ -216,13 +217,13 @@ where
         }
 
         factory.connect_bind(move |_, list_item| {
-            modify_widgets::<T, C>(list_item, |obj, widgets, root| {
+            modify_widgets::<T, C>(list_item.upcast_ref(), |obj, widgets, root| {
                 C::bind(obj, widgets, root);
             });
         });
 
         factory.connect_unbind(move |_, list_item| {
-            modify_widgets::<T, C>(list_item, |obj, widgets, root| {
+            modify_widgets::<T, C>(list_item.upcast_ref(), |obj, widgets, root| {
                 C::unbind(obj, widgets, root);
             });
         });
