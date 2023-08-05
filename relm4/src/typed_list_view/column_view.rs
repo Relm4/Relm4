@@ -194,16 +194,12 @@ where
 
         #[inline]
         fn modify_widgets<T, C>(
-            list_item: &glib::Object,
+            list_item: &gtk::ListItem,
             f: impl FnOnce(&mut T, &mut C::Widgets, &mut C::Root),
         ) where
             T: Any,
             C: RelmColumn<Item = T>,
         {
-            let list_item = list_item
-                .downcast_ref::<gtk::ListItem>()
-                .expect("Needs to be ListItem");
-
             let widget = list_item
                 .downcast_ref::<gtk::ListItem>()
                 .expect("Needs to be ListItem")
