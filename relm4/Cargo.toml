@@ -24,7 +24,7 @@ cargo-args = ["-Zunstable-options", "-Zrustdoc-scrape-examples"]
 rustdoc-args = ["--cfg", "docsrs"]
 
 [features]
-default = ["macros", "gnome_43"]
+default = ["macros", "gnome_42"]
 # The dox feature can be used for building the docs without the dependencies and requires Rust Nightly
 dox = ["gtk/dox", "adw/dox"]
 libadwaita = ["adw"]
