@@ -254,7 +254,9 @@ struct InitFnVisitor {
 
 impl<'ast> Visit<'ast> for InitFnVisitor {
     fn visit_impl_item_fn(&mut self, func: &'ast syn::ImplItemFn) {
-        let Some(root_arg) = func.sig.inputs.iter().nth(1) else { return };
+        let Some(root_arg) = func.sig.inputs.iter().nth(1) else {
+            return;
+        };
         let root_name = util::extract_arg_ident(root_arg);
 
         match root_name {
@@ -262,7 +264,9 @@ impl<'ast> Visit<'ast> for InitFnVisitor {
             Err(e) => self.errors.push(e),
         }
 
-        let Some(sender_arg) = func.sig.inputs.iter().nth(2) else { return };
+        let Some(sender_arg) = func.sig.inputs.iter().nth(2) else {
+            return;
+        };
         let sender_name = util::extract_arg_ident(sender_arg);
 
         match sender_name {
@@ -320,7 +324,9 @@ struct InitWidgetsFnVisitor {
 
 impl<'ast> Visit<'ast> for InitWidgetsFnVisitor {
     fn visit_impl_item_fn(&mut self, func: &'ast syn::ImplItemFn) {
-        let Some(root_arg) = func.sig.inputs.iter().nth(2) else { return };
+        let Some(root_arg) = func.sig.inputs.iter().nth(2) else {
+            return;
+        };
         let root_name = util::extract_arg_ident(root_arg);
 
         match root_name {
