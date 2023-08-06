@@ -101,8 +101,7 @@ where
         let mut state = C::init(payload, &root, component_sender.clone());
 
         thread::spawn(move || {
-            let context =
-                glib::MainContext::thread_default().unwrap_or_default();
+            let context = glib::MainContext::thread_default().unwrap_or_default();
 
             // Spawns the component's service. It will receive both `Self::Input` and
             // `Self::CommandOutput` messages. It will spawn commands as requested by
