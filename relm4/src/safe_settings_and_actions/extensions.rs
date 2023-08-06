@@ -134,6 +134,7 @@ pub trait RelmMenu: IsA<gio::Menu> {
     fn widget(&self, label: &str);
 }
 
+#[cfg(feature = "macros")]
 impl RelmMenu for gio::Menu {
     fn action<T: DetailableAction>(&self, safety: T, label: &str) {
         // self.append(Some(label), Some(safety.detailed_action_name()));

@@ -12,6 +12,7 @@
 + core: Don't panic when dropping components from asynchronous contexts
 + core: Fix an issue with using `connect_open` on `gtk::Application`
 + core: Use GNOME 42 as baseline feature to help with Ubuntu 22.04
++ core: Fix compiler error when not using the "macros" feature
 + macros: Allow trailing commas in view!
 + macros: Allow multiple instances of the same template children
 + components: Disable default features of relm4
