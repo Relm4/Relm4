@@ -8,11 +8,11 @@ impl PropertyName {
     pub(crate) fn assign_fn_stream(&self, info: &mut AssignInfo<'_>) -> TokenStream2 {
         let AssignInfo {
             widget_name,
-            template_name,
+            template_path,
             ..
         } = info;
-        let widget_name = if let Some(template_name) = template_name {
-            quote! { #template_name.#widget_name }
+        let widget_name = if let Some(template_path) = template_path {
+            quote! { #template_path }
         } else {
             quote! { #widget_name }
         };

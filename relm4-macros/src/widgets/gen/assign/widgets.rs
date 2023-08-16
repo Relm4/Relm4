@@ -33,7 +33,7 @@ impl Widget {
         let mut info = AssignInfo {
             stream,
             widget_name: w_name,
-            template_name: None,
+            template_path: None,
             is_conditional: false,
         };
         self.properties.assign_stream(&mut info, sender_name);
@@ -47,12 +47,13 @@ impl Widget {
     ) {
         // Recursively generate code for properties
         {
-            let template_name = (self.template_attr == WidgetTemplateAttr::TemplateChild)
-                .then_some(info.widget_name);
+            let template_path = (self.template_attr == WidgetTemplateAttr::TemplateChild)
+                .then_some(self.func.widget_template_path(info.widget_name, &self.name));
+
             let mut info = AssignInfo {
                 stream: info.stream,
                 widget_name: &self.name,
-                template_name,
+                template_path,
                 is_conditional: info.is_conditional,
             };
             self.properties.assign_stream(&mut info, sender_name);
@@ -88,7 +89,7 @@ impl Widget {
             let mut info = AssignInfo {
                 stream: info.stream,
                 widget_name: &returned_widget.name,
-                template_name: None,
+                template_path: None,
                 is_conditional: info.is_conditional,
             };
             returned_widget

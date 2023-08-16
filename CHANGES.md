@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+### Fixed
+
++ macros: Add support for accessing nested template children
+
+## 0.6.1 - 2023-8-9
+
 ### Added
 
 + core: Add `TypedColumnView` as a typed wrapper for `gtk::ColumnView`

@@ -36,7 +36,7 @@ impl ConditionalWidget {
         let mut info = AssignInfo {
             stream: info.stream,
             widget_name: &self.name,
-            template_name: None,
+            template_path: None,
             is_conditional: true,
         };
         match &self.branches {
