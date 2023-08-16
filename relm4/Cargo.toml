@@ -41,7 +41,7 @@ all = ["macros", "libadwaita"] #, "panel"]
 [dependencies]
 adw = { version = "0.4", optional = true, package = "libadwaita" }
 
-flume = "0.10.14"
+flume = "0.11.0"
 futures = "0.3.28"
 fragile = "2.0.0"
 gtk = { version = "0.6", package = "gtk4" }
