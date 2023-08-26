@@ -288,7 +288,7 @@ impl SafeSimpleAction for gio::SimpleAction {
     }
 
     fn new_stateful_safe<'a, T: Stateful<'a>>(state: T::State) -> Self {
-        gio::SimpleAction::new_stateful(T::NAME, T::variant_type().as_deref(), state.to_variant())
+        gio::SimpleAction::new_stateful(T::NAME, T::variant_type().as_deref(), &state.to_variant())
     }
 
     fn connect_activate_safe<T, F>(&self, callback: F) -> glib::SignalHandlerId
@@ -327,7 +327,7 @@ impl SafeSimpleAction for gio::SimpleAction {
         self.connect_activate(move |this, _| {
             let mut state = this.state().unwrap().get().unwrap();
             callback(T::SELF, this, &mut state);
-            this.set_state(state.to_variant());
+            this.set_state(&state.to_variant());
         })
     }
 
@@ -365,7 +365,7 @@ impl SafeSimpleAction for gio::SimpleAction {
                 <T as WithValue>::map(variant.unwrap()),
                 &mut state,
             );
-            this.set_state(state.to_variant());
+            this.set_state(&state.to_variant());
         })
     }
 

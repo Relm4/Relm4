@@ -96,7 +96,7 @@ impl<M: Debug + 'static> RelmApp<M> {
 
                 controller.detach_runtime();
 
-                app.add_window(window.as_ref());
+                app.add_window(&window);
                 window.set_visible(true);
             }
         });
@@ -157,7 +157,7 @@ impl<M: Debug + 'static> RelmApp<M> {
 
                 controller.detach_runtime();
 
-                app.add_window(window.as_ref());
+                app.add_window(&window);
                 window.set_visible(true);
             }
         });

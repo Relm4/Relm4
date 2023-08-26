@@ -1,7 +1,7 @@
 use super::*;
 use gtk::{
     gio, glib,
-    prelude::{Cast, CastNone, IsA, ListModelExt, ObjectExt, StaticType},
+    prelude::{Cast, CastNone, IsA, ListModelExt, ObjectExt},
 };
 use std::{
     any::Any,
@@ -152,7 +152,7 @@ where
     /// Create a new, empty [`TypedColumnView`].
     #[must_use]
     pub fn new() -> Self {
-        let store = gio::ListStore::new(glib::BoxedAnyObject::static_type());
+        let store = gio::ListStore::new::<glib::BoxedAnyObject>();
 
         let model: gio::ListModel = store.clone().upcast();
 
