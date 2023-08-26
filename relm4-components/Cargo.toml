@@ -30,7 +30,7 @@ tracker = "0.2.1"
 
 [features]
 default = []
-dox = ["relm4/dox", "web"]
+dox = ["web"]
 web = ["reqwest"]
 
 [[example]]

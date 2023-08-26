@@ -3,7 +3,7 @@
 use super::{get_mut_value, get_value, Filter, OrdFn, RelmSelectionExt, TypedListItem};
 use gtk::{
     gio, glib,
-    prelude::{Cast, CastNone, IsA, ListModelExt, ObjectExt, StaticType},
+    prelude::{Cast, CastNone, IsA, ListItemExt, ListModelExt, ObjectExt},
 };
 use std::{any::Any, cmp::Ordering, marker::PhantomData};
 
@@ -94,7 +94,7 @@ where
     }
 
     fn init(sort_fn: OrdFn<T>) -> Self {
-        let store = gio::ListStore::new(glib::BoxedAnyObject::static_type());
+        let store = gio::ListStore::new::<glib::BoxedAnyObject>();
 
         let factory = gtk::SignalListItemFactory::new();
         factory.connect_setup(move |_, list_item| {
