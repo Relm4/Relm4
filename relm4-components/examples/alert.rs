@@ -1,6 +1,6 @@
 use gtk::prelude::*;
 use relm4::{
-    gtk, Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,
+    gtk::{self, glib}, Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,
     RelmWidgetExt, SimpleComponent,
 };
 use relm4_components::alert::{Alert, AlertMsg, AlertResponse, AlertSettings};
@@ -35,7 +35,7 @@ impl SimpleComponent for App {
 
             connect_close_request[sender] => move |_| {
                 sender.input(AppMsg::CloseRequest);
-                gtk::Inhibit(true)
+                glib::Propagation::Proceed
             },
 
             gtk::Box {
