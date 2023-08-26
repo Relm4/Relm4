@@ -4,6 +4,7 @@
 
 use std::convert::identity;
 
+use gtk::glib;
 use gtk::prelude::{ButtonExt, GtkWindowExt, WidgetExt};
 use relm4::{gtk, MessageBroker};
 use relm4::{
@@ -51,7 +52,7 @@ impl SimpleComponent for Dialog {
 
             connect_close_request[sender] => move |_| {
                 sender.input(DialogMsg::Hide);
-                gtk::Inhibit(false)
+                glib::Propagation::Stop
             }
         }
     }

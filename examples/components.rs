@@ -4,7 +4,7 @@
 
 use std::convert::identity;
 
-use gtk::prelude::*;
+use gtk::{prelude::*, glib};
 use relm4::prelude::*;
 
 struct Header;
@@ -169,7 +169,7 @@ impl SimpleComponent for App {
             },
             connect_close_request[sender] => move |_| {
                 sender.input(AppMsg::CloseRequest);
-                gtk::Inhibit(true)
+                glib::Propagation::Proceed
             }
         }
     }

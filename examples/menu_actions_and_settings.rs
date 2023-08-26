@@ -173,7 +173,7 @@ impl relm4::SimpleComponent for Model {
                 settings.set_safe(WindowHeight, this.default_height()).unwrap_or_else(
                     move |error| println!("Failed to save {WindowHeight} setting: {error}")
                 );
-                glib::signal::Inhibit(false)
+                glib::Propagation::Stop
             },
 
             gtk::Box {
