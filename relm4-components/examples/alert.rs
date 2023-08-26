@@ -1,6 +1,7 @@
 use gtk::prelude::*;
 use relm4::{
-    gtk::{self, glib}, Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,
+    gtk::{self, glib},
+    Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,
     RelmWidgetExt, SimpleComponent,
 };
 use relm4_components::alert::{Alert, AlertMsg, AlertResponse, AlertSettings};

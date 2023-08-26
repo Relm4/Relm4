@@ -4,7 +4,7 @@
 
 use std::convert::identity;
 
-use gtk::{prelude::*, glib};
+use gtk::{glib, prelude::*};
 use relm4::prelude::*;
 
 struct Header;
