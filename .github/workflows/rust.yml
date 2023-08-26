@@ -19,7 +19,7 @@ jobs:
         rust:
           - stable
           - nightly
-          - "1.65.0"
+          - "1.70.0"
     env:
         DISPLAY: ":99.0"
     steps:
