@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+### Added
+
++ core: Add gnome_45 feature flag for GNOME 45
+
+### Changed
+
++ core: Bump version of gtk4 dependency to 0.7
++ core: Bump version of libadwaita dependency to 0.5
+
 ## 0.6.2 - 2023-9-27
 
 ### Fixed
@@ -29,9 +38,6 @@
 ### Changed
 
 + examples: Add a separator to the libadwaita leaflet example.
-+ core: Add gnome_45 feature flag for GNOME 45
-+ core: Bump version of gtk4 dependency to 0.7
-+ core: Bump version of libadwaita dependency to 0.5
 
 ## 0.6.0 - 2023-5-31
 
