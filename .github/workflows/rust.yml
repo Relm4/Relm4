@@ -62,6 +62,7 @@ jobs:
     runs-on: ubuntu-latest
     env: 
       RUSTDOCFLAGS: "-D warnings"
+      RUSTFLAGS: --cfg docsrs
     steps:
       - uses: actions/checkout@v3
       - uses: dtolnay/rust-toolchain@stable

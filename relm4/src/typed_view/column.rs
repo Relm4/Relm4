@@ -3,7 +3,7 @@
 use super::{get_mut_value, get_value, Filter, OrdFn, RelmSelectionExt, TypedListItem};
 use gtk::{
     gio, glib,
-    prelude::{Cast, CastNone, IsA, ListModelExt, ObjectExt},
+    prelude::{Cast, CastNone, IsA, ListItemExt, ListModelExt, ObjectExt},
 };
 use std::{
     any::Any,
