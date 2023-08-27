@@ -53,10 +53,10 @@ impl<C: AsyncComponent> AsyncComponentBuilder<C> {
     /// Change the priority at which the messages of this component
     /// are handled.
     ///
-    /// + Use [`glib::PRIORITY_HIGH`] for high priority event sources.
-    /// + Use [`glib::PRIORITY_LOW`] for very low priority background tasks.
-    /// + Use [`glib::PRIORITY_DEFAULT_IDLE`] for default priority idle functions.
-    /// + Use [`glib::PRIORITY_HIGH_IDLE`] for high priority idle functions.
+    /// + Use [`glib::Priority::HIGH`] for high priority event sources.
+    /// + Use [`glib::Priority::LOW`] for very low priority background tasks.
+    /// + Use [`glib::Priority::DEFAULT_IDLE`] for default priority idle functions.
+    /// + Use [`glib::Priority::HIGH_IDLE`] for high priority idle functions.
     pub fn priority(mut self, priority: glib::Priority) -> Self {
         self.priority = priority;
         self
