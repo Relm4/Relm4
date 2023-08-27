@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.7.0-alpha.1 - 2023-9-28
+
 ### Added
 
 + core: Add gnome_45 feature flag for GNOME 45
