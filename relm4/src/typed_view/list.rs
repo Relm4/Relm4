@@ -1,115 +1,44 @@
-use super::*;
+//! Idiomatic and high-level abstraction over [`gtk::ListView`].
+
+use super::{get_mut_value, get_value, Filter, OrdFn, RelmSelectionExt, TypedListItem};
 use gtk::{
     gio, glib,
     prelude::{Cast, CastNone, IsA, ListModelExt, ObjectExt, StaticType},
 };
-use std::{
-    any::Any,
-    cmp::Ordering,
-    collections::HashMap,
-    fmt::{Debug, Display},
-    marker::PhantomData,
-};
+use std::{any::Any, cmp::Ordering, marker::PhantomData};
 
-/// Sort function for a column.
-pub type ColumnSortFn<T> = Box<dyn Fn(&T, &T) -> Ordering + 'static>;
-
-/// An item of a [`TypedColumnView`].
-pub trait RelmColumn: Any {
+/// An item of a [`TypedListView`].
+pub trait RelmListItem: Any {
     /// The top-level widget for the list item.
     type Root: IsA<gtk::Widget>;
 
     /// The widgets created for the list item.
     type Widgets;
 
-    /// Item whose data is shown in this column.
-    type Item: Any;
-
-    /// The columns created for this list item.
-    const COLUMN_NAME: &'static str;
-
     /// Construct the widgets.
     fn setup(list_item: &gtk::ListItem) -> (Self::Root, Self::Widgets);
 
     /// Bind the widgets to match the data of the list item.
-    fn bind(_item: &mut Self::Item, _widgets: &mut Self::Widgets, _root: &mut Self::Root) {}
+    fn bind(&mut self, _widgets: &mut Self::Widgets, _root: &mut Self::Root) {}
 
-    /// Undo the steps of [`RelmColumn::bind()`] if necessary.
-    fn unbind(_item: &mut Self::Item, _widgets: &mut Self::Widgets, _root: &mut Self::Root) {}
+    /// Undo the steps of [`RelmListItem::bind()`] if necessary.
+    fn unbind(&mut self, _widgets: &mut Self::Widgets, _root: &mut Self::Root) {}
 
-    /// Undo the steps of [`RelmColumn::setup()`] if necessary.
+    /// Undo the steps of [`RelmListItem::setup()`] if necessary.
     fn teardown(_list_item: &gtk::ListItem) {}
-
-    /// Sorter for column.
-    #[must_use]
-    fn sort_fn() -> Option<ColumnSortFn<Self::Item>> {
-        None
-    }
-}
-
-/// Simplified trait for creating columns with only one `gtk::Label` widget per-entry (i.e. a text cell)
-pub trait LabelColumn: 'static {
-    /// Item of the model
-    type Item: Any;
-    /// Value of the column
-    type Value: PartialOrd + Display;
-
-    /// Name of the column
-    const COLUMN_NAME: &'static str;
-    /// Whether to enable the sorting for this column
-    const ENABLE_SORT: bool;
-
-    /// Get the value that this column represents.
-    fn get_cell_value(item: &Self::Item) -> Self::Value;
-    /// Format the value for presentation in the text cell.
-    fn format_cell_value(value: &Self::Value) -> String {
-        value.to_string()
-    }
-}
-
-impl<C> RelmColumn for C
-where
-    C: LabelColumn,
-{
-    type Root = gtk::Label;
-    type Widgets = ();
-    type Item = C::Item;
-
-    const COLUMN_NAME: &'static str = C::COLUMN_NAME;
-
-    fn setup(_: &gtk::ListItem) -> (Self::Root, Self::Widgets) {
-        (gtk::Label::new(None), ())
-    }
-
-    fn bind(item: &mut Self::Item, _: &mut Self::Widgets, label: &mut Self::Root) {
-        label.set_label(&C::format_cell_value(&C::get_cell_value(item)));
-    }
-
-    fn sort_fn() -> Option<ColumnSortFn<Self::Item>> {
-        if C::ENABLE_SORT {
-            Some(Box::new(|a, b| {
-                let a = C::get_cell_value(a);
-                let b = C::get_cell_value(b);
-                a.partial_cmp(&b).unwrap_or(Ordering::Equal)
-            }))
-        } else {
-            None
-        }
-    }
 }
 
 /// A high-level wrapper around [`gio::ListStore`],
-/// [`gtk::SignalListItemFactory`] and [`gtk::ColumnView`].
+/// [`gtk::SignalListItemFactory`] and [`gtk::ListView`].
 ///
-/// [`TypedColumnView`] aims at keeping nearly the same functionality and
+/// [`TypedListView`] aims at keeping nearly the same functionality and
 /// flexibility of the raw bindings while introducing a more idiomatic
 /// and type-safe interface.
-pub struct TypedColumnView<T, S> {
+pub struct TypedListView<T, S> {
     /// The internal list view.
-    pub view: gtk::ColumnView,
+    pub view: gtk::ListView,
     /// The internal selection model.
     pub selection_model: S,
-    columns: HashMap<&'static str, gtk::ColumnViewColumn>,
     store: gio::ListStore,
     filters: Vec<Filter>,
     active_model: gio::ListModel,
@@ -117,13 +46,9 @@ pub struct TypedColumnView<T, S> {
     _ty: PhantomData<*const T>,
 }
 
-impl<T, S> Debug for TypedColumnView<T, S>
-where
-    T: Debug,
-    S: Debug,
-{
+impl<T: std::fmt::Debug, S: std::fmt::Debug> std::fmt::Debug for TypedListView<T, S> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TypedColumnView")
+        f.debug_struct("TypedListView")
             .field("store", &self.store)
             .field("view", &self.view)
             .field("filters", &"<Vec<gtk::Filter>>")
@@ -134,9 +59,22 @@ where
     }
 }
 
-impl<T, S> Default for TypedColumnView<T, S>
+impl<T, S> TypedListView<T, S>
 where
-    T: Any,
+    T: RelmListItem + Ord,
+    S: RelmSelectionExt,
+{
+    /// Create a new [`TypedListView`] that sorts the items
+    /// based on the [`Ord`] trait.
+    #[must_use]
+    pub fn with_sorting() -> Self {
+        Self::init(Some(Box::new(T::cmp)))
+    }
+}
+
+impl<T, S> Default for TypedListView<T, S>
+where
+    T: RelmListItem,
     S: RelmSelectionExt,
 {
     fn default() -> Self {
@@ -144,88 +82,69 @@ where
     }
 }
 
-impl<T, S> TypedColumnView<T, S>
+impl<T, S> TypedListView<T, S>
 where
-    T: Any,
+    T: RelmListItem,
     S: RelmSelectionExt,
 {
-    /// Create a new, empty [`TypedColumnView`].
+    /// Create a new, empty [`TypedListView`].
     #[must_use]
     pub fn new() -> Self {
-        let store = gio::ListStore::new(glib::BoxedAnyObject::static_type());
-
-        let model: gio::ListModel = store.clone().upcast();
-
-        let b = gtk::SortListModel::new(Some(model), None::<gtk::Sorter>);
-
-        let base_model: gio::ListModel = b.clone().upcast();
-
-        let selection_model = S::new_model(base_model.clone());
-        let view = gtk::ColumnView::new(Some(selection_model.clone()));
-        b.set_sorter(view.sorter().as_ref());
-
-        Self {
-            store,
-            view,
-            columns: HashMap::new(),
-            filters: Vec::new(),
-            active_model: base_model.clone(),
-            base_model,
-            _ty: PhantomData,
-            selection_model,
-        }
+        Self::init(None)
     }
 
-    /// Append column to this typed view
-    pub fn append_column<C>(&mut self)
-    where
-        C: RelmColumn<Item = T>,
-    {
+    fn init(sort_fn: OrdFn<T>) -> Self {
+        let store = gio::ListStore::new(glib::BoxedAnyObject::static_type());
+
         let factory = gtk::SignalListItemFactory::new();
         factory.connect_setup(move |_, list_item| {
             let list_item = list_item
                 .downcast_ref::<gtk::ListItem>()
                 .expect("Needs to be ListItem");
 
-            let (root, widgets) = C::setup(list_item);
+            let (root, widgets) = T::setup(list_item);
             unsafe { root.set_data("widgets", widgets) };
             list_item.set_child(Some(&root));
         });
 
-        #[inline]
-        fn modify_widgets<T, C>(
-            list_item: &glib::Object,
-            f: impl FnOnce(&mut T, &mut C::Widgets, &mut C::Root),
-        ) where
-            T: Any,
-            C: RelmColumn<Item = T>,
-        {
+        factory.connect_bind(move |_, list_item| {
             let list_item = list_item
                 .downcast_ref::<gtk::ListItem>()
                 .expect("Needs to be ListItem");
 
-            let widget = list_item.child();
+            let widget = list_item
+                .downcast_ref::<gtk::ListItem>()
+                .expect("Needs to be ListItem")
+                .child();
 
             let obj = list_item.item().unwrap();
             let mut obj = get_mut_value::<T>(&obj);
 
-            let mut root = widget.and_downcast::<C::Root>().unwrap();
+            let mut root = widget.and_downcast::<T::Root>().unwrap();
 
             let mut widgets = unsafe { root.steal_data("widgets") }.unwrap();
-            (f)(&mut *obj, &mut widgets, &mut root);
+            obj.bind(&mut widgets, &mut root);
             unsafe { root.set_data("widgets", widgets) };
-        }
-
-        factory.connect_bind(move |_, list_item| {
-            modify_widgets::<T, C>(list_item.upcast_ref(), |obj, widgets, root| {
-                C::bind(obj, widgets, root);
-            });
         });
 
         factory.connect_unbind(move |_, list_item| {
-            modify_widgets::<T, C>(list_item.upcast_ref(), |obj, widgets, root| {
-                C::unbind(obj, widgets, root);
-            });
+            let list_item = list_item
+                .downcast_ref::<gtk::ListItem>()
+                .expect("Needs to be ListItem");
+
+            let widget = list_item
+                .downcast_ref::<gtk::ListItem>()
+                .expect("Needs to be ListItem")
+                .child();
+
+            let obj = list_item.item().unwrap();
+            let mut obj = get_mut_value::<T>(&obj);
+
+            let mut root = widget.and_downcast::<T::Root>().unwrap();
+
+            let mut widgets = unsafe { root.steal_data("widgets") }.unwrap();
+            obj.unbind(&mut widgets, &mut root);
+            unsafe { root.set_data("widgets", widgets) };
         });
 
         factory.connect_teardown(move |_, list_item| {
@@ -233,24 +152,39 @@ where
                 .downcast_ref::<gtk::ListItem>()
                 .expect("Needs to be ListItem");
 
-            C::teardown(list_item);
+            T::teardown(list_item);
         });
 
-        let sort_fn = C::sort_fn();
+        let model: gio::ListModel = store.clone().upcast();
 
-        let c = gtk::ColumnViewColumn::new(Some(C::COLUMN_NAME), Some(factory));
-
-        if let Some(sort_fn) = sort_fn {
-            c.set_sorter(Some(&gtk::CustomSorter::new(move |first, second| {
+        let base_model = if let Some(sort_fn) = sort_fn {
+            let sorter = gtk::CustomSorter::new(move |first, second| {
                 let first = get_value::<T>(first);
                 let second = get_value::<T>(second);
+                match sort_fn(&first, &second) {
+                    Ordering::Less => gtk::Ordering::Smaller,
+                    Ordering::Equal => gtk::Ordering::Equal,
+                    Ordering::Greater => gtk::Ordering::Larger,
+                }
+            });
 
-                sort_fn(&first, &second).into()
-            })))
+            gtk::SortListModel::new(Some(model), Some(sorter)).upcast()
+        } else {
+            model
+        };
+
+        let selection_model = S::new_model(base_model.clone());
+        let view = gtk::ListView::new(Some(selection_model.clone()), Some(factory));
+
+        Self {
+            store,
+            view,
+            filters: Vec::new(),
+            active_model: base_model.clone(),
+            base_model,
+            _ty: PhantomData,
+            selection_model,
         }
-
-        self.view.append_column(&c);
-        self.columns.insert(C::COLUMN_NAME, c);
     }
 
     /// Add a function to filter the stored items.
@@ -270,11 +204,6 @@ where
             filter,
             model: filter_model,
         });
-    }
-
-    /// Get columns currently associated with this view.
-    pub fn get_columns(&self) -> &HashMap<&'static str, gtk::ColumnViewColumn> {
-        &self.columns
     }
 
     /// Returns the amount of filters that were added.
@@ -377,10 +306,11 @@ where
 
     /// Insert an item into the list and calculate its position from
     /// a sorting function.
-    pub fn insert_sorted<F>(&self, value: T, mut compare_func: F) -> u32
-    where
-        F: FnMut(&T, &T) -> Ordering,
-    {
+    pub fn insert_sorted<F: FnMut(&T, &T) -> Ordering>(
+        &self,
+        value: T,
+        mut compare_func: F,
+    ) -> u32 {
         let item = glib::BoxedAnyObject::new(value);
 
         let compare = move |first: &glib::Object, second: &glib::Object| -> Ordering {

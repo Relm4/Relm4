@@ -2,7 +2,10 @@ use gtk::prelude::*;
 use relm4::{
     binding::{Binding, U8Binding},
     prelude::*,
-    typed_list_view::{ColumnSortFn, LabelColumn, RelmColumn, TypedColumnView},
+    typed_view::{
+        column::{LabelColumn, RelmColumn, TypedColumnView},
+        OrdFn,
+    },
     RelmObjectExt,
 };
 
@@ -57,7 +60,7 @@ impl RelmColumn for Label2Column {
         label.add_write_only_binding(&item.binding, "label");
     }
 
-    fn sort_fn() -> Option<ColumnSortFn<Self::Item>> {
+    fn sort_fn() -> OrdFn<Self::Item> {
         Some(Box::new(|a, b| a.value.cmp(&b.value)))
     }
 }
