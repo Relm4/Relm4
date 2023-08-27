@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.6.2 - 2023-9-27
+
 ### Fixed
 
 + macros: Add support for accessing nested template children
