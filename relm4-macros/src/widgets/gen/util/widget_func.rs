@@ -1,7 +1,8 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned, ToTokens};
-use syn::spanned::Spanned;
-use syn::Error;
+use syn::punctuated::Punctuated;
+use syn::{spanned::Spanned, Ident};
+use syn::{token, Error};
 
 use crate::widgets::{Widget, WidgetFunc};
 
@@ -85,5 +86,27 @@ impl WidgetFunc {
         }
 
         stream
+    }
+
+    pub(crate) fn widget_template_path(
+        &self,
+        template_widget_name: &Ident,
+        widget_name: &Ident,
+    ) -> Punctuated<Ident, token::Dot> {
+        let mut template_path = Punctuated::new();
+        template_path.push(template_widget_name.clone());
+        template_path.push(widget_name.clone());
+        if let Some(chain) = &self.method_chain {
+            for method in chain {
+                if method.turbofish.is_some() || method.args.is_some() {
+                    break;
+                } else {
+                    template_path.push(method.ident.clone());
+                }
+            }
+            template_path
+        } else {
+            template_path
+        }
     }
 }

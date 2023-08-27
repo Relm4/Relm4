@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{quote, quote_spanned};
-use syn::Ident;
+use syn::{punctuated::Punctuated, token, Ident};
 
 use crate::widgets::{
     AssignProperty, AssignPropertyAttr, ConditionalBranches, ConditionalWidget, MatchArm,
@@ -14,7 +14,7 @@ impl Property {
         &self,
         stream: &mut TokenStream2,
         widget_name: &Ident,
-        template_name: Option<&Ident>,
+        template_path: Option<Punctuated<Ident, token::Dot>>,
         model_name: &Ident,
         conditional_branch: bool,
     ) {
@@ -23,7 +23,7 @@ impl Property {
                 stream,
                 &self.name,
                 widget_name,
-                template_name,
+                template_path,
                 model_name,
                 conditional_branch,
             ),
@@ -48,7 +48,7 @@ impl Properties {
         &self,
         stream: &mut TokenStream2,
         widget_name: &Ident,
-        template_name: Option<&Ident>,
+        template_path: Option<Punctuated<Ident, token::Dot>>,
         model_name: &Ident,
         conditional_branch: bool,
     ) {
@@ -56,7 +56,7 @@ impl Properties {
             prop.update_view_stream(
                 stream,
                 widget_name,
-                template_name,
+                template_path.clone(),
                 model_name,
                 conditional_branch,
             );
@@ -72,18 +72,24 @@ impl Widget {
     fn update_view_stream(
         &self,
         stream: &mut TokenStream2,
-        template_name: Option<&Ident>,
+        parent_widget_name: Option<&Ident>,
         model_name: &Ident,
         conditional_branch: bool,
     ) {
         let widget_name = &self.name;
-        let template_name = (self.template_attr == WidgetTemplateAttr::TemplateChild)
-            .then_some(template_name)
-            .flatten();
+        let template_path = if self.template_attr == WidgetTemplateAttr::TemplateChild {
+            parent_widget_name.map(|parent_widget_name| {
+                self.func
+                    .widget_template_path(parent_widget_name, &self.name)
+            })
+        } else {
+            None
+        };
+
         self.properties.update_view_stream(
             stream,
             widget_name,
-            template_name,
+            template_path,
             model_name,
             conditional_branch,
         );
@@ -178,7 +184,7 @@ impl AssignProperty {
         stream: &mut TokenStream2,
         p_name: &PropertyName,
         widget_name: &Ident,
-        template_name: Option<&Ident>,
+        template_path: Option<Punctuated<Ident, token::Dot>>,
         model_name: &Ident,
         conditional_branch: bool,
     ) {
@@ -188,7 +194,7 @@ impl AssignProperty {
                 let mut info = AssignInfo {
                     stream,
                     widget_name,
-                    template_name,
+                    template_path,
                     is_conditional: false,
                 };
                 self.assign_stream(&mut info, p_name, false);
@@ -202,7 +208,7 @@ impl AssignProperty {
                 let mut info = AssignInfo {
                     stream: &mut assign_stream,
                     widget_name,
-                    template_name: None,
+                    template_path: None,
                     is_conditional: false,
                 };
                 self.assign_stream(&mut info, p_name, false);

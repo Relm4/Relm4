@@ -171,7 +171,7 @@ impl AssignProperty {
                         let mut info = AssignInfo {
                             stream,
                             widget_name,
-                            template_name: None,
+                            template_path: None,
                             is_conditional,
                         };
                         self.assign_stream(&mut info, p_name, true);
@@ -187,7 +187,7 @@ impl AssignProperty {
                         let mut info = AssignInfo {
                             stream: &mut assign_stream,
                             widget_name,
-                            template_name: None,
+                            template_path: None,
                             is_conditional,
                         };
 

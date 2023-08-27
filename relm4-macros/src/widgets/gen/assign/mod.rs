@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream as TokenStream2;
-use syn::Ident;
+use syn::{punctuated::Punctuated, token, Ident};
 
 use crate::widgets::{Property, PropertyType};
 
@@ -12,7 +12,7 @@ mod widgets;
 pub(crate) struct AssignInfo<'a> {
     pub(crate) stream: &'a mut TokenStream2,
     pub(crate) widget_name: &'a Ident,
-    pub(crate) template_name: Option<&'a Ident>,
+    pub(crate) template_path: Option<Punctuated<Ident, token::Dot>>,
     pub(crate) is_conditional: bool,
 }
 
