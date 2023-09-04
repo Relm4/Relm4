@@ -73,6 +73,12 @@ pub(crate) fn generate_tokens(vis: Option<Visibility>, mut item_impl: ItemImpl) 
                             #struct_fields
                         }
 
+                        impl ::std::convert::AsRef<#root_widget_type> for #type_name {
+                            fn as_ref(&self) -> &#root_widget_type {
+                                &self.#root_name
+                            }
+                        }
+
                         impl ::std::ops::Deref for #type_name {
                             type Target = #root_widget_type;
 
