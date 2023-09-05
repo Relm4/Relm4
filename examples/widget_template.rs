@@ -24,6 +24,17 @@ impl WidgetTemplate for MySpinner {
 }
 
 #[relm4::widget_template]
+impl WidgetTemplate for MyWindow {
+    view! {
+        gtk::Window {
+            set_title: Some("Widget template"),
+            set_default_width: 300,
+            set_default_height: 100,
+        }
+    }
+}
+
+#[relm4::widget_template]
 impl WidgetTemplate for CustomBox {
     view! {
         gtk::Box {
@@ -76,11 +87,8 @@ impl SimpleComponent for AppModel {
     type Output = ();
 
     view! {
-        gtk::Window {
-            set_title: Some("Widget template"),
-            set_default_width: 300,
-            set_default_height: 100,
-
+        #[template]
+        MyWindow {
             #[template]
             CustomBox {
                 #[template_child]
