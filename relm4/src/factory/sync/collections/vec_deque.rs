@@ -18,6 +18,7 @@ use gtk::prelude::Cast;
 
 #[cfg(feature = "libadwaita")]
 use std::hash::Hasher;
+use crate::factory::sync::collections::vec_deque_builder::FactoryVecDequeBuilder;
 
 /// Provides methods to edit the underlying [`FactoryVecDeque`].
 ///
@@ -439,6 +440,12 @@ where
             // 0 is always an invalid uid
             uid_counter: 1,
         }
+    }
+
+    /// Create a builder for this component.
+    #[must_use]
+    pub fn builder() -> FactoryVecDequeBuilder<C> {
+        FactoryVecDequeBuilder::<C>::default()
     }
 
     /// Provides a [`FactoryVecDequeGuard`] that can be used to edit the factory.
