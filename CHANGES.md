@@ -2,7 +2,12 @@
 
 ## Unreleased
 
-## 0.7.0-alpha.1 - 2023-9-28
+### Changed
+
++ core: Just require `AsRef<gtk::Window>` in `RelmApp::run`
++ core: Add `AsRef<Root>` as requirement to the `WidgetTemplate` trait
+
+## 0.7.0-alpha.1 - 2023-8-28
 
 ### Added
 
@@ -13,7 +18,7 @@
 + core: Bump version of gtk4 dependency to 0.7
 + core: Bump version of libadwaita dependency to 0.5
 
-## 0.6.2 - 2023-9-27
+## 0.6.2 - 2023-8-27
 
 ### Fixed
 

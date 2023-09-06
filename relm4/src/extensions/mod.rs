@@ -40,7 +40,9 @@ impl<T: AsRef<gtk::Widget>> WidgetRef for T {
 ///
 /// Widget templates can be created manually by implementing this trait
 /// or by using the [`widget_template`](crate::widget_template) macro.
-pub trait WidgetTemplate: Sized + std::fmt::Debug + std::ops::Deref<Target = Self::Root> {
+pub trait WidgetTemplate:
+    Sized + std::fmt::Debug + AsRef<Self::Root> + std::ops::Deref<Target = Self::Root>
+{
     /// The root of the template.
     type Root;
 

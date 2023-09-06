@@ -69,7 +69,7 @@ impl<M: Debug + 'static> RelmApp<M> {
     pub fn run<C>(self, payload: C::Init)
     where
         C: Component<Input = M>,
-        C::Root: IsA<gtk::Window> + WidgetExt,
+        C::Root: AsRef<gtk::Window>,
     {
         let Self { app, broker, args } = self;
 
@@ -96,7 +96,8 @@ impl<M: Debug + 'static> RelmApp<M> {
 
                 controller.detach_runtime();
 
-                app.add_window(&window);
+                let window = window.as_ref();
+                app.add_window(window);
                 window.set_visible(true);
             }
         });
@@ -119,7 +120,7 @@ impl<M: Debug + 'static> RelmApp<M> {
     pub fn run_with_args<C, S>(self, payload: C::Init, args: &[S])
     where
         C: Component<Input = M>,
-        C::Root: IsA<gtk::Window> + WidgetExt,
+        C::Root: AsRef<gtk::Window>,
         S: AsRef<str>,
     {
         let args = args.iter().map(|a| a.as_ref().to_string()).collect();
@@ -130,7 +131,7 @@ impl<M: Debug + 'static> RelmApp<M> {
     pub fn run_async<C>(self, payload: C::Init)
     where
         C: AsyncComponent<Input = M>,
-        C::Root: IsA<gtk::Window> + WidgetExt,
+        C::Root: AsRef<gtk::Window>,
     {
         let Self { app, broker, args } = self;
 
@@ -157,7 +158,8 @@ impl<M: Debug + 'static> RelmApp<M> {
 
                 controller.detach_runtime();
 
-                app.add_window(&window);
+                let window = window.as_ref();
+                app.add_window(window);
                 window.set_visible(true);
             }
         });
@@ -180,7 +182,7 @@ impl<M: Debug + 'static> RelmApp<M> {
     pub fn run_async_with_args<C, S>(self, payload: C::Init, args: &[S])
     where
         C: AsyncComponent<Input = M>,
-        C::Root: IsA<gtk::Window> + WidgetExt,
+        C::Root: AsRef<gtk::Window>,
         S: AsRef<str>,
     {
         let args = args.iter().map(|a| a.as_ref().to_string()).collect();
