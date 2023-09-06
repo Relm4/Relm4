@@ -24,7 +24,7 @@ impl <C> FactoryVecDequeBuilder<C>
 where
     C: FactoryComponent<Index = DynamicIndex>
 {
-    pub fn init(/* component_iter: impl IntoIterator<Item = C::Init> */) -> FactoryVecDequeConnector<C> {
+    pub fn init(&self, /* component_iter: impl IntoIterator<Item = C::Init> */) -> FactoryVecDequeConnector<C> {
         FactoryVecDequeConnector {
             parent_widget: (),
             parent_sender: (),
@@ -51,13 +51,13 @@ where
         FactoryVecDeque::new(self.parent_widget.clone(), &self.parent_sender)
     }
 
-    /// Forwards output events from the child components to the designated sender.
-    pub(super) fn forward_from_children<X: 'static, F: (Fn(C::Output) -> X) + 'static>(
-        &mut self,
+    /// Forwards output events from child components to the designated sender.
+    pub fn forward_from_children<X: 'static, F: (Fn(C::Output) -> X) + 'static>(
+        &self,
         sender_: &Sender<X>,
         transform: F,
     ) -> FactoryVecDeque<C> {
         // FIXME implement
-        FactoryVecDeque::new(self.parent_widget.clone(), sender_)
+        FactoryVecDeque::new(self.parent_widget.clone(), &self.parent_sender)
     }
 }

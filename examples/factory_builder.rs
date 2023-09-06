@@ -163,9 +163,16 @@ impl SimpleComponent for App {
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let counters = FactoryVecDeque::builder()
-            .init()
-            .detach();
-        let counters = FactoryVecDeque::new(gtk::Box::default(), sender.input_sender());
+            .init(/* gtk::Box::default() */)
+            .forward_from_children(sender.input_sender(), |output| {
+                match output {
+                    CounterOutput::SendFront(index) => AppMsg::SendFront(index),
+                    CounterOutput::MoveUp(index) => AppMsg::MoveUp(index),
+                    CounterOutput::MoveDown(index) => AppMsg::MoveDown(index),
+                    CounterOutput::Remove(index) => AppMsg::Remove(index),
+                }
+            });
+
         let model = App {
             created_widgets: counter,
             counters,
