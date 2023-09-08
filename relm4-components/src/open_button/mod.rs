@@ -174,9 +174,8 @@ impl SimpleComponent for OpenButton {
         let widgets = view_output!();
 
         if let Some(filename) = model.config.recently_opened_files {
-            let mut factory =
-                FactoryVecDeque::builder(widgets.recent_files_list.clone())
-                    .forward(sender.input_sender(), |msg| msg);
+            let mut factory = FactoryVecDeque::builder(widgets.recent_files_list.clone())
+                .forward(sender.input_sender(), |msg| msg);
 
             if let Ok(entries) = fs::read_to_string(filename) {
                 let mut guard = factory.guard();

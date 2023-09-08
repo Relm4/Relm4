@@ -161,8 +161,8 @@ impl SimpleComponent for App {
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let counters = FactoryVecDeque::builder(gtk::Box::default())
-            .forward(sender.input_sender(), |msg| {
+        let counters =
+            FactoryVecDeque::builder(gtk::Box::default()).forward(sender.input_sender(), |msg| {
                 match msg {
                     CounterOutput::SendFront(index) => AppMsg::SendFront(index),
                     CounterOutput::MoveUp(index) => AppMsg::MoveUp(index),

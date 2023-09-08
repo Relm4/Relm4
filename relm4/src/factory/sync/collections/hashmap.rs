@@ -14,15 +14,15 @@ use std::ops;
 #[derive(Debug)]
 #[must_use]
 pub struct FactoryElementGuard<'a, C>
-    where
-        C: FactoryComponent,
+where
+    C: FactoryComponent,
 {
     inner: &'a mut FactoryHandle<C>,
 }
 
 impl<'a, C> ops::Deref for FactoryElementGuard<'a, C>
-    where
-        C: FactoryComponent,
+where
+    C: FactoryComponent,
 {
     type Target = C;
 
@@ -32,8 +32,8 @@ impl<'a, C> ops::Deref for FactoryElementGuard<'a, C>
 }
 
 impl<'a, C> ops::DerefMut for FactoryElementGuard<'a, C>
-    where
-        C: FactoryComponent,
+where
+    C: FactoryComponent,
 {
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.inner.data.get_mut()
@@ -41,8 +41,8 @@ impl<'a, C> ops::DerefMut for FactoryElementGuard<'a, C>
 }
 
 impl<'a, C> Drop for FactoryElementGuard<'a, C>
-    where
-        C: FactoryComponent,
+where
+    C: FactoryComponent,
 {
     fn drop(&mut self) {
         self.inner.notifier.send(()).unwrap()
@@ -59,8 +59,8 @@ pub struct FactoryHashMapBuilder<K, C: FactoryComponent, S = RandomState> {
 }
 
 impl<K, C> FactoryHashMapBuilder<K, C>
-    where
-        C: FactoryComponent,
+where
+    C: FactoryComponent,
 {
     /// Creates a new [`FactoryHashMapBuilder`].
     #[must_use]
@@ -77,8 +77,8 @@ impl<K, C> FactoryHashMapBuilder<K, C>
 }
 
 impl<K, C> FactoryHashMapBuilder<K, C>
-    where
-        C: FactoryComponent,
+where
+    C: FactoryComponent,
 {
     pub fn hasher<H: Hasher>(self, hasher: H) -> FactoryHashMapBuilder<K, C, H> {
         let Self {
@@ -98,10 +98,10 @@ impl<K, C> FactoryHashMapBuilder<K, C>
     }
 
     pub fn forward<F, Msg>(self, f: F, forward_sender: Sender<Msg>) -> FactoryHashMap<K, C>
-        where
-            F: Fn(C::Output) -> Msg + Send + 'static,
-            C::Output: Send,
-            Msg: Send + 'static,
+    where
+        F: Fn(C::Output) -> Msg + Send + 'static,
+        C::Output: Send,
+        Msg: Send + 'static,
     {
         let Self {
             widget,
@@ -152,8 +152,8 @@ pub struct FactoryHashMap<K, C: FactoryComponent, S = RandomState> {
 }
 
 impl<K, C, S> Drop for FactoryHashMap<K, C, S>
-    where
-        C: FactoryComponent,
+where
+    C: FactoryComponent,
 {
     fn drop(&mut self) {
         self.clear();
@@ -161,10 +161,10 @@ impl<K, C, S> Drop for FactoryHashMap<K, C, S>
 }
 
 impl<K, C, S> ops::Index<&K> for FactoryHashMap<K, C, S>
-    where
-        C: FactoryComponent<Index = K>,
-        K: Hash + Eq,
-        S: BuildHasher,
+where
+    C: FactoryComponent<Index = K>,
+    K: Hash + Eq,
+    S: BuildHasher,
 {
     type Output = C;
 
@@ -174,8 +174,8 @@ impl<K, C, S> ops::Index<&K> for FactoryHashMap<K, C, S>
 }
 
 impl<K, C> FactoryHashMap<K, C, RandomState>
-    where
-        C: FactoryComponent,
+where
+    C: FactoryComponent,
 {
     /// Creates a new [`FactoryHashMap`].
     #[must_use]
@@ -185,8 +185,8 @@ impl<K, C> FactoryHashMap<K, C, RandomState>
 }
 
 impl<K, C, S> FactoryHashMap<K, C, S>
-    where
-        C: FactoryComponent,
+where
+    C: FactoryComponent,
 {
     /// Returns the number of elements in the [`FactoryHashMap`].
     pub fn len(&self) -> usize {
@@ -200,8 +200,8 @@ impl<K, C, S> FactoryHashMap<K, C, S>
 
     /// Send clone of a message to all of the elements.
     pub fn broadcast(&self, msg: C::Input)
-        where
-            C::Input: Clone,
+    where
+        C::Input: Clone,
     {
         self.inner.values().for_each(|c| c.input.emit(msg.clone()));
     }
@@ -235,9 +235,9 @@ impl<K, C, S> FactoryHashMap<K, C, S>
 }
 
 impl<K, C> FactoryHashMap<K, C, RandomState>
-    where
-        C: FactoryComponent<Index = K>,
-        K: Hash + Eq,
+where
+    C: FactoryComponent<Index = K>,
+    K: Hash + Eq,
 {
     /// Creates a [`FactoryHashMap`] from a [`Vec`].
     pub fn from_vec(component_vec: Vec<(K, C::Init)>, widget: C::ParentWidget) -> Self {
@@ -250,10 +250,10 @@ impl<K, C> FactoryHashMap<K, C, RandomState>
 }
 
 impl<K, C, S> FactoryHashMap<K, C, S>
-    where
-        C: FactoryComponent<Index = K>,
-        K: Hash + Eq,
-        S: BuildHasher,
+where
+    C: FactoryComponent<Index = K>,
+    K: Hash + Eq,
+    S: BuildHasher,
 {
     /// Send a mage to one of the elements.
     pub fn send(&self, key: &K, msg: C::Input) {
@@ -314,10 +314,10 @@ impl<K, C, S> FactoryHashMap<K, C, S>
 
 /// Implements the Clone Trait for [`FactoryHashMap`] if the component implements [`CloneableFactoryComponent`].
 impl<K, C> Clone for FactoryHashMap<K, C, RandomState>
-    where
-        C: CloneableFactoryComponent,
-        K: Clone + Hash + Eq,
-        C: FactoryComponent<Index = K>,
+where
+    C: CloneableFactoryComponent,
+    K: Clone + Hash + Eq,
+    C: FactoryComponent<Index = K>,
 {
     fn clone(&self) -> Self {
         // Create a new, empty FactoryHashMap.

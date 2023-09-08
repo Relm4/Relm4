@@ -25,15 +25,15 @@ use std::hash::Hasher;
 #[derive(Debug)]
 #[must_use]
 pub struct FactoryVecDequeGuard<'a, C>
-    where
-        C: FactoryComponent<Index = DynamicIndex>,
+where
+    C: FactoryComponent<Index = DynamicIndex>,
 {
     inner: &'a mut FactoryVecDeque<C>,
 }
 
 impl<'a, C> Drop for FactoryVecDequeGuard<'a, C>
-    where
-        C: FactoryComponent<Index = DynamicIndex>,
+where
+    C: FactoryComponent<Index = DynamicIndex>,
 {
     fn drop(&mut self) {
         self.inner.render_changes();
@@ -41,13 +41,13 @@ impl<'a, C> Drop for FactoryVecDequeGuard<'a, C>
 }
 
 impl<'a, C> FactoryVecDequeGuard<'a, C>
-    where
-        C: FactoryComponent<Index = DynamicIndex>,
+where
+    C: FactoryComponent<Index = DynamicIndex>,
 {
     fn new(inner: &'a mut FactoryVecDeque<C>) -> Self {
         #[allow(unused_mut)]
-            #[allow(clippy::let_and_return)]
-            let mut guard = FactoryVecDequeGuard { inner };
+        #[allow(clippy::let_and_return)]
+        let mut guard = FactoryVecDequeGuard { inner };
 
         #[cfg(feature = "libadwaita")]
         guard.apply_external_updates();
@@ -355,8 +355,8 @@ impl<'a, C> FactoryVecDequeGuard<'a, C>
 }
 
 impl<'a, C> Deref for FactoryVecDequeGuard<'a, C>
-    where
-        C: FactoryComponent<Index = DynamicIndex>,
+where
+    C: FactoryComponent<Index = DynamicIndex>,
 {
     type Target = FactoryVecDeque<C>;
 
@@ -366,8 +366,8 @@ impl<'a, C> Deref for FactoryVecDequeGuard<'a, C>
 }
 
 impl<'a, C> Index<usize> for FactoryVecDequeGuard<'a, C>
-    where
-        C: FactoryComponent<Index = DynamicIndex>,
+where
+    C: FactoryComponent<Index = DynamicIndex>,
 {
     type Output = C;
 
@@ -377,8 +377,8 @@ impl<'a, C> Index<usize> for FactoryVecDequeGuard<'a, C>
 }
 
 impl<'a, C> IndexMut<usize> for FactoryVecDequeGuard<'a, C>
-    where
-        C: FactoryComponent<Index = DynamicIndex>,
+where
+    C: FactoryComponent<Index = DynamicIndex>,
 {
     fn index_mut(&mut self, index: usize) -> &mut Self::Output {
         self.get_mut(index)
@@ -388,8 +388,8 @@ impl<'a, C> IndexMut<usize> for FactoryVecDequeGuard<'a, C>
 
 #[derive(Debug)]
 pub struct FactoryVecDequeBuilder<C>
-    where
-        C: FactoryComponent<Index = DynamicIndex>,
+where
+    C: FactoryComponent<Index = DynamicIndex>,
 {
     widget: C::ParentWidget,
     output_sender: Sender<C::Output>,
@@ -397,8 +397,8 @@ pub struct FactoryVecDequeBuilder<C>
 }
 
 impl<C> FactoryVecDequeBuilder<C>
-    where
-        C: FactoryComponent<Index = DynamicIndex>,
+where
+    C: FactoryComponent<Index = DynamicIndex>,
 {
     /// Create a builder for this component.
     pub fn new(widget: C::ParentWidget) -> Self {
@@ -412,10 +412,10 @@ impl<C> FactoryVecDequeBuilder<C>
 
     /// Forwards output events from child components to the designated sender.
     pub fn forward<F, Msg>(self, sender_: &Sender<Msg>, f: F) -> FactoryVecDeque<C>
-        where
-            F: Fn(C::Output) -> Msg + Send + 'static,
-            C::Output: Send,
-            Msg: Send + 'static,
+    where
+        F: Fn(C::Output) -> Msg + Send + 'static,
+        C::Output: Send,
+        Msg: Send + 'static,
     {
         let Self {
             widget,
@@ -468,8 +468,8 @@ impl<C> FactoryVecDequeBuilder<C>
 /// To access mutable methods of the factory, create a guard using [`Self::guard`].
 #[derive(Debug)]
 pub struct FactoryVecDeque<C>
-    where
-        C: FactoryComponent<Index = DynamicIndex>,
+where
+    C: FactoryComponent<Index = DynamicIndex>,
 {
     widget: C::ParentWidget,
     output_sender: Sender<C::Output>,
@@ -480,8 +480,8 @@ pub struct FactoryVecDeque<C>
 }
 
 impl<C> Drop for FactoryVecDeque<C>
-    where
-        C: FactoryComponent<Index = DynamicIndex>,
+where
+    C: FactoryComponent<Index = DynamicIndex>,
 {
     fn drop(&mut self) {
         self.guard().clear();
@@ -489,8 +489,8 @@ impl<C> Drop for FactoryVecDeque<C>
 }
 
 impl<C> Index<usize> for FactoryVecDeque<C>
-    where
-        C: FactoryComponent<Index = DynamicIndex>,
+where
+    C: FactoryComponent<Index = DynamicIndex>,
 {
     type Output = C;
 
@@ -500,8 +500,8 @@ impl<C> Index<usize> for FactoryVecDeque<C>
 }
 
 impl<C> FactoryVecDeque<C>
-    where
-        C: FactoryComponent<Index = DynamicIndex>,
+where
+    C: FactoryComponent<Index = DynamicIndex>,
 {
     /// Creates a builder for making a [`FactoryVecDeque`].
     #[must_use]
@@ -631,8 +631,8 @@ impl<C> FactoryVecDeque<C>
 
     /// Send clone of a message to all of the elements.
     pub fn broadcast(&self, msg: C::Input)
-        where
-            C::Input: Clone,
+    where
+        C::Input: Clone,
     {
         self.components.iter().for_each(|c| c.send(msg.clone()));
     }
@@ -690,8 +690,8 @@ impl<C> FactoryVecDeque<C>
 
 ///Implements the Clone Trait for `FactoryVecDeque<C>` where C is Cloneable
 impl<C> Clone for FactoryVecDeque<C>
-    where
-        C: CloneableFactoryComponent + FactoryComponent<Index = DynamicIndex>,
+where
+    C: CloneableFactoryComponent + FactoryComponent<Index = DynamicIndex>,
 {
     fn clone(&self) -> Self {
         // Create a new, empty FactoryVecDeque.
