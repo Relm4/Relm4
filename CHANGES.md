@@ -4,6 +4,7 @@
 
 ### Changed
 
++ core: Add `Init` type to the `WidgetTemplate` trait to allow passing data to `init()` 
 + core: Just require `AsRef<gtk::Window>` in `RelmApp::run`
 + core: Add `AsRef<Root>` as requirement to the `WidgetTemplate` trait
 

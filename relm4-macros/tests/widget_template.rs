@@ -3,10 +3,11 @@ use relm4::{gtk, ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent
 
 #[relm4_macros::widget_template]
 impl WidgetTemplate for CustomBox {
+    type Init = i32;
     view! {
         gtk::Box {
             set_orientation: gtk::Orientation::Vertical,
-            set_margin_all: 5,
+            set_margin_all: init,
             set_spacing: 5,
 
             #[name = "child_label"]
@@ -62,7 +63,7 @@ impl SimpleComponent for App {
             },
 
             #[template]
-            CustomBox {
+            CustomBox(5) {
                 gtk::Button {
                     set_label: "Increment",
                     connect_clicked[sender] => move |_| {
@@ -82,7 +83,7 @@ impl SimpleComponent for App {
                     set_label: &format!("Counter: {}", model.counter),
                 },
                 #[template]
-                CustomBox {
+                CustomBox(5) {
                     #[template_child]
                     child_label {
                         set_margin_all: 5,

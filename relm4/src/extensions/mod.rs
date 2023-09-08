@@ -46,8 +46,11 @@ pub trait WidgetTemplate:
     /// The root of the template.
     type Root;
 
+    /// The parameter used to initialize the template.
+    type Init;
+
     /// Initializes the template.
-    fn init() -> Self;
+    fn init(init: Self::Init) -> Self;
 }
 
 /// Additional methods for `gtk::builders::ApplicationBuilder`
