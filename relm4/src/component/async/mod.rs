@@ -1,11 +1,13 @@
 mod builder;
 mod connector;
 mod controller;
+mod stream;
 mod traits;
 
 pub use builder::AsyncComponentBuilder;
 pub use connector::AsyncConnector;
 pub use controller::{AsyncComponentController, AsyncController};
+pub use stream::AsyncComponentStream;
 pub use traits::AsyncComponent;
 pub use traits::SimpleAsyncComponent;
 

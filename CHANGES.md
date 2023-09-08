@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
++ core: Add `AsyncComponentStream` to supports streams for async components as well
+
 ### Changed
 
 + core: Just require `AsRef<gtk::Window>` in `RelmApp::run`
