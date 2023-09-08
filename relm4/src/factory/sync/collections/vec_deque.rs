@@ -1,4 +1,4 @@
-use crate::Sender;
+use crate::{Receiver, Sender};
 
 use crate::factory::sync::builder::FactoryBuilder;
 use crate::factory::sync::component_storage::ComponentStorage;
@@ -213,7 +213,7 @@ where
             states.index.increment();
         }
 
-        let builder = FactoryBuilder::new(&dyn_index, init);
+        let builder = FactoryBuilder::new(&dyn_index, init, self.output_sender.clone());
 
         self.inner
             .components
@@ -386,6 +386,78 @@ where
     }
 }
 
+#[derive(Debug)]
+pub struct FactoryVecDequeBuilder<C>
+where
+    C: FactoryComponent<Index = DynamicIndex>,
+{
+    widget: C::ParentWidget,
+    output_sender: Sender<C::Output>,
+    output_receiver: Receiver<C::Output>,
+}
+
+impl<C> FactoryVecDequeBuilder<C>
+where
+    C: FactoryComponent<Index = DynamicIndex>,
+{
+    pub fn new(widget: C::ParentWidget) -> Self {
+        let (output_sender, output_receiver) = crate::channel();
+        Self {
+            widget,
+            output_sender,
+            output_receiver,
+        }
+    }
+
+    pub fn forward<F, Msg>(self, f: F, forward_sender: Sender<Msg>) -> FactoryVecDeque<C>
+    where
+        F: Fn(C::Output) -> Msg + Send + 'static,
+        C::Output: Send,
+        Msg: Send + 'static,
+    {
+        let Self {
+            widget,
+            output_sender,
+            output_receiver,
+        } = self;
+
+        crate::spawn(async move {
+            while let Some(msg) = output_receiver.recv().await {
+                if forward_sender.send(f(msg)).is_err() {
+                    break;
+                }
+            }
+        });
+
+        FactoryVecDeque {
+            widget,
+            output_sender,
+            components: VecDeque::new(),
+            model_state: VecDeque::new(),
+            rendered_state: VecDeque::new(),
+            // 0 is always an invalid uid
+            uid_counter: 1,
+        }
+    }
+
+    pub fn detach(self) -> FactoryVecDeque<C> {
+        let Self {
+            widget,
+            output_sender,
+            ..
+        } = self;
+        FactoryVecDeque {
+            widget,
+            output_sender,
+            components: VecDeque::new(),
+            model_state: VecDeque::new(),
+            rendered_state: VecDeque::new(),
+            // 0 is always an invalid uid
+            uid_counter: 1,
+        }
+    }
+}
+
 /// A container similar to [`VecDeque`] that can be used to store
 /// data associated with components that implement [`FactoryComponent`].
 ///
@@ -396,7 +468,7 @@ where
     C: FactoryComponent<Index = DynamicIndex>,
 {
     widget: C::ParentWidget,
-    parent_sender: Sender<C::ParentInput>,
+    output_sender: Sender<C::Output>,
     components: VecDeque<ComponentStorage<C>>,
     model_state: VecDeque<ModelStateValue>,
     rendered_state: VecDeque<RenderedState>,
@@ -429,16 +501,8 @@ where
 {
     /// Creates a new [`FactoryVecDeque`].
     #[must_use]
-    pub fn new(widget: C::ParentWidget, parent_sender: &Sender<C::ParentInput>) -> Self {
-        Self {
-            widget,
-            parent_sender: parent_sender.clone(),
-            components: VecDeque::new(),
-            model_state: VecDeque::new(),
-            rendered_state: VecDeque::new(),
-            // 0 is always an invalid uid
-            uid_counter: 1,
-        }
+    pub fn builder(widget: C::ParentWidget) -> FactoryVecDequeBuilder<C> {
+        FactoryVecDequeBuilder::new(widget)
     }
 
     /// Provides a [`FactoryVecDequeGuard`] that can be used to edit the factory.
@@ -511,9 +575,7 @@ where
                 };
                 let component = components.remove(index).unwrap();
                 let dyn_index = &self.model_state[index].index;
-                let component = component
-                    .launch(dyn_index, returned_widget, &self.parent_sender)
-                    .unwrap();
+                let component = component.launch(dyn_index, returned_widget).unwrap();
                 components.insert(index, component);
             }
         }
@@ -609,9 +671,8 @@ where
     pub fn from_iter(
         component_iter: impl IntoIterator<Item = C::Init>,
         widget: C::ParentWidget,
-        parent_sender: &Sender<C::ParentInput>,
     ) -> Self {
-        let mut output = Self::new(widget, parent_sender);
+        let mut output = Self::builder(widget).detach();
         {
             let mut edit = output.guard();
             for component in component_iter {
@@ -630,7 +691,7 @@ where
 {
     fn clone(&self) -> Self {
         // Create a new, empty FactoryVecDeque.
-        let mut clone = FactoryVecDeque::new(self.widget.clone(), &self.parent_sender.clone());
+        let mut clone = FactoryVecDeque::builder(self.widget.clone()).detach();
         // Iterate over the items in the original FactoryVecDeque.
         for item in self.iter() {
             // Clone each item and push it onto the new FactoryVecDeque.

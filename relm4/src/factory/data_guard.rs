@@ -158,7 +158,6 @@ mod test {
 
     impl FactoryComponent for DontDropBelow4 {
         type ParentWidget = gtk::Box;
-        type ParentInput = ();
         type CommandOutput = ();
         type Input = ();
         type Output = ();
