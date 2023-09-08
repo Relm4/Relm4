@@ -14,9 +14,6 @@ pub trait FactoryComponent:
     /// Container widget to which all widgets of the factory will be added.
     type ParentWidget: FactoryView + 'static;
 
-    /// Input messages sent to the parent component.
-    type ParentInput: Debug + 'static;
-
     /// Messages which are received from commands executing in the background.
     type CommandOutput: Debug + Send + 'static;
 
@@ -57,15 +54,6 @@ pub trait FactoryComponent:
         returned_widget: &<Self::ParentWidget as FactoryView>::ReturnedWidget,
         sender: FactorySender<Self>,
     ) -> Self::Widgets;
-
-    /// Optionally convert an output message from this component to an input message for the
-    /// parent component. By default this method does nothing, you must overwrite it to
-    /// forward messages.
-    ///
-    /// If [`None`] is returned, nothing is forwarded.
-    fn forward_to_parent(_output: Self::Output) -> Option<Self::ParentInput> {
-        None
-    }
 
     /// Processes inputs received by the component.
     #[allow(unused)]

@@ -13,7 +13,6 @@ pub(crate) struct FileListItem {
 
 #[relm4::factory(pub(crate))]
 impl FactoryComponent for FileListItem {
-    type ParentInput = OpenButtonMsg;
     type CommandOutput = ();
     type Input = ();
     type Init = PathBuf;
@@ -30,10 +29,6 @@ impl FactoryComponent for FileListItem {
                 }
             }
         }
-    }
-
-    fn forward_to_parent(output: Self::Output) -> Option<Self::ParentInput> {
-        Some(output)
     }
 
     fn init_model(init: Self::Init, _: &DynamicIndex, _: FactorySender<Self>) -> Self {

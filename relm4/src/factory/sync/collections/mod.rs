@@ -2,7 +2,6 @@
 
 mod hashmap;
 mod vec_deque;
-mod vec_deque_builder;
 
 pub use hashmap::FactoryHashMap;
 pub use vec_deque::{FactoryVecDeque, FactoryVecDequeGuard};

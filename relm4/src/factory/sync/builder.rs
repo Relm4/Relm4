@@ -14,18 +14,14 @@ pub(super) struct FactoryBuilder<C: FactoryComponent> {
     pub(super) root_widget: C::Root,
     pub(super) component_sender: FactorySender<C>,
     pub(super) input_receiver: Receiver<C::Input>,
-    pub(super) output_receiver: Receiver<C::Output>,
     pub(super) cmd_receiver: Receiver<C::CommandOutput>,
     pub(super) shutdown_notifier: ShutdownSender,
 }
 
 impl<C: FactoryComponent> FactoryBuilder<C> {
-    pub(super) fn new(index: &C::Index, init: C::Init) -> Self {
+    pub(super) fn new(index: &C::Index, init: C::Init, output_sender: Sender<C::Output>) -> Self {
         // Used for all events to be processed by this component's internal service.
         let (input_sender, input_receiver) = crate::channel::<C::Input>();
-
-        // Used by this component to send events to be handled externally by the caller.
-        let (output_sender, output_receiver) = crate::channel::<C::Output>();
 
         // Sends messages from commands executed from the background.
         let (cmd_sender, cmd_receiver) = crate::channel::<C::CommandOutput>();
@@ -45,43 +41,25 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
             root_widget,
             component_sender,
             input_receiver,
-            output_receiver,
             cmd_receiver,
             shutdown_notifier,
         }
     }
 
     /// Starts the component, passing ownership to a future attached to a [gtk::glib::MainContext].
-    pub(super) fn launch<Transform>(
+    pub(super) fn launch(
         self,
         index: &C::Index,
         returned_widget: <C::ParentWidget as FactoryView>::ReturnedWidget,
-        parent_sender: &Sender<C::ParentInput>,
-        transform: Transform,
-    ) -> FactoryHandle<C>
-    where
-        Transform: Fn(C::Output) -> Option<C::ParentInput> + 'static,
-    {
+    ) -> FactoryHandle<C> {
         let Self {
             mut data,
             root_widget,
             component_sender,
             input_receiver,
-            output_receiver,
             cmd_receiver,
             shutdown_notifier,
         } = self;
-
-        let forward_sender = parent_sender.0.clone();
-        crate::spawn_local(async move {
-            while let Some(msg) = output_receiver.recv().await {
-                if let Some(new_msg) = transform(msg) {
-                    if forward_sender.send(new_msg).is_err() {
-                        break;
-                    }
-                }
-            }
-        });
 
         // Gets notifications when a component's model and view is updated externally.
         let (notifier, notifier_receiver) = crate::channel();
