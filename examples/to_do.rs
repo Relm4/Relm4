@@ -24,7 +24,6 @@ impl FactoryComponent for Task {
     type Input = TaskInput;
     type Output = TaskOutput;
     type CommandOutput = ();
-    type ParentInput = AppMsg;
     type ParentWidget = gtk::ListBox;
 
     view! {
@@ -62,12 +61,6 @@ impl FactoryComponent for Task {
         let attrs = widgets.label.attributes().unwrap_or_default();
         attrs.change(gtk::pango::AttrInt::new_strikethrough(self.completed));
         widgets.label.set_attributes(Some(&attrs));
-    }
-
-    fn forward_to_parent(output: Self::Output) -> Option<AppMsg> {
-        Some(match output {
-            TaskOutput::Delete(index) => AppMsg::DeleteEntry(index),
-        })
     }
 
     fn init_model(name: Self::Init, _index: &DynamicIndex, _sender: FactorySender<Self>) -> Self {
@@ -141,9 +134,14 @@ impl SimpleComponent for App {
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let model = App {
-            tasks: FactoryVecDeque::new(gtk::ListBox::default(), sender.input_sender()),
-        };
+        let tasks = FactoryVecDeque::builder(gtk::ListBox::default()).forward(
+            sender.input_sender(),
+            |output| match output {
+                TaskOutput::Delete(index) => AppMsg::DeleteEntry(index),
+            },
+        );
+
+        let model = App { tasks };
 
         let task_list_box = model.tasks.widget();
         let widgets = view_output!();

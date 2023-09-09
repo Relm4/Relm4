@@ -46,17 +46,8 @@ impl FactoryComponent for Counter {
     type CommandOutput = ();
     type Root = gtk::Box;
     type Widgets = CounterWidgets;
-    type ParentInput = AppMsg;
     type ParentWidget = gtk::Grid;
     type Index = DynamicIndex;
-
-    fn forward_to_parent(output: Self::Output) -> Option<AppMsg> {
-        Some(match output {
-            CounterOutput::SendFront(index) => AppMsg::SendFront(index),
-            CounterOutput::MoveUp(index) => AppMsg::MoveUp(index),
-            CounterOutput::MoveDown(index) => AppMsg::MoveDown(index),
-        })
-    }
 
     fn init_root(&self) -> Self::Root {
         relm4::view! {
@@ -195,7 +186,15 @@ impl SimpleComponent for App {
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let counters = FactoryVecDeque::new(gtk::Grid::default(), sender.input_sender());
+        let counters = FactoryVecDeque::builder(gtk::Grid::default()).forward(
+            sender.input_sender(),
+            |output| match output {
+                CounterOutput::SendFront(index) => AppMsg::SendFront(index),
+                CounterOutput::MoveUp(index) => AppMsg::MoveUp(index),
+                CounterOutput::MoveDown(index) => AppMsg::MoveDown(index),
+            },
+        );
+
         let model = App {
             created_widgets: counter,
             counters,
