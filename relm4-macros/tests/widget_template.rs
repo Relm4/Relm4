@@ -86,7 +86,7 @@ impl SimpleComponent for App {
                     #[template_child]
                     child_label {
                         set_margin_all: 5,
-                        #[watch]
+                        #[track = "true"]
                         set_label: &format!("Alternative counter : {}", model.counter),
                     }
                 },
