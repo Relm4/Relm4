@@ -7,6 +7,10 @@
 + core: Just require `AsRef<gtk::Window>` in `RelmApp::run`
 + core: Add `AsRef<Root>` as requirement to the `WidgetTemplate` trait
 
+### Fixed
+
++ macros: Fix track attribute for template children
+
 ## 0.7.0-alpha.1 - 2023-8-28
 
 ### Added
