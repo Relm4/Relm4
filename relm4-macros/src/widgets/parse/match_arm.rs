@@ -7,10 +7,6 @@ use crate::widgets::{parse_util, MatchArm, ParseError, Widget};
 
 impl MatchArm {
     pub(super) fn parse(input: ParseStream<'_>, index: usize) -> Result<Self, ParseError> {
-        if input.peek(Token![,]) {
-            let _comma: Token![,] = input.parse()?;
-        }
-
         let pattern = syn::Pat::parse_multi_with_leading_vert(input)?;
         let guard = if input.peek(token::FatArrow) {
             None
@@ -34,6 +30,11 @@ impl MatchArm {
         let ref_span = input.span();
         let mut widget = Widget::parse(inner_tokens, attributes, Some(args))?;
         widget.ref_token = Some(And { spans: [ref_span] });
+
+        // Parse trailing commas
+        if input.peek(Token![,]) {
+            let _comma: Token![,] = input.parse()?;
+        }
 
         Ok(Self {
             pattern,

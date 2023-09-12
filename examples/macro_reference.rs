@@ -90,7 +90,7 @@ impl SimpleComponent for App {
                         gtk::Label {
                             set_label: "Value is higher than 2",
                         }
-                    }
+                    },
                 },
 
                 append = &gtk::Label,
