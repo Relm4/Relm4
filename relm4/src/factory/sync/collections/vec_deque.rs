@@ -341,8 +341,7 @@ where
     /// Returns an iterator over the components that returns mutable references.
     pub fn iter_mut(
         &mut self,
-    ) -> impl Iterator<Item = &mut C> + DoubleEndedIterator + ExactSizeIterator + FusedIterator
-    {
+    ) -> impl DoubleEndedIterator<Item = &mut C> + ExactSizeIterator + FusedIterator {
         self.inner
             .components
             .iter_mut()
@@ -599,9 +598,7 @@ where
     }
 
     /// Returns an iterator over the components.
-    pub fn iter(
-        &self,
-    ) -> impl Iterator<Item = &C> + DoubleEndedIterator + ExactSizeIterator + FusedIterator {
+    pub fn iter(&self) -> impl DoubleEndedIterator<Item = &C> + ExactSizeIterator + FusedIterator {
         self.components.iter().map(ComponentStorage::get)
     }
 
