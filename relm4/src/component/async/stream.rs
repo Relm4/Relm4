@@ -5,23 +5,24 @@ use std::task::{Context, Poll};
 use flume::r#async::RecvStream;
 use futures::{pin_mut, Stream, StreamExt};
 
-use crate::{Component, ShutdownOnDrop};
+use crate::component::AsyncComponent;
+use crate::runtime_util::ShutdownOnDrop;
 
-/// Yields [`Component::Output`] values as a stream and contains the
+/// Yields [`AsyncComponent::Output`] values as a stream and contains the
 /// input sender and the root widget.
 ///
-/// Use this as alternative to [`Controller`](crate::Controller) when
+/// Use this as alternative to [`AsyncController`](crate::component::AsyncController) when
 /// you prefer a stream of futures or want to unlock the potential of
 /// [`StreamExt`](futures::StreamExt).
 /// Also, this type implements [`Send`] so using it in commands is
 /// possible.
-pub struct ComponentStream<C: Component> {
+pub struct AsyncComponentStream<C: AsyncComponent> {
     /// The outputs being received by the component.
     pub(super) stream: RecvStream<'static, C::Output>,
     pub(super) shutdown_on_drop: ShutdownOnDrop,
 }
 
-impl<C: Component> Stream for ComponentStream<C> {
+impl<C: AsyncComponent> Stream for AsyncComponentStream<C> {
     type Item = C::Output;
 
     fn poll_next(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Option<Self::Item>> {
@@ -31,7 +32,7 @@ impl<C: Component> Stream for ComponentStream<C> {
     }
 }
 
-impl<C: Component> ComponentStream<C> {
+impl<C: AsyncComponent> AsyncComponentStream<C> {
     /// Receive one message and drop the component afterwards.
     /// This can be used for dialogs.
     pub async fn recv_one(mut self) -> Option<C::Output> {
@@ -39,8 +40,8 @@ impl<C: Component> ComponentStream<C> {
     }
 }
 
-impl<C: Component> ComponentStream<C> {
-    /// Dropping this type will usually stop the runtime of the component.
+impl<C: AsyncComponent> AsyncComponentStream<C> {
+    /// Dropping this type will usually stop the runtime of the worker.
     /// With this method you can give the runtime a static lifetime.
     /// In other words, dropping the stream will not stop
     /// the runtime anymore, instead it will run until the app is closed.
@@ -49,7 +50,7 @@ impl<C: Component> ComponentStream<C> {
     }
 }
 
-impl<C: Component> Debug for ComponentStream<C> {
+impl<C: AsyncComponent> Debug for AsyncComponentStream<C> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("ComponentStream")
             .field("stream", &"<RecvStream>")
@@ -61,15 +62,17 @@ impl<C: Component> Debug for ComponentStream<C> {
 mod test {
     use std::rc::Rc;
 
-    use crate::{Component, ComponentParts, SimpleComponent};
+    use crate::component::{AsyncComponent, AsyncComponentParts};
 
     fn assert_send<T: Send>(_stream: T) {}
 
     struct Test(Rc<()>);
 
-    impl SimpleComponent for Test {
+    #[async_trait::async_trait(?Send)]
+    impl AsyncComponent for Test {
         type Input = ();
         type Output = ();
+        type CommandOutput = ();
         type Init = ();
         type Root = Rc<()>;
         type Widgets = Rc<()>;
@@ -78,12 +81,12 @@ mod test {
             Rc::default()
         }
 
-        fn init(
+        async fn init(
             _init: Self::Init,
-            _root: &Self::Root,
-            _sender: crate::ComponentSender<Self>,
-        ) -> ComponentParts<Self> {
-            ComponentParts {
+            _root: Self::Root,
+            _sender: crate::AsyncComponentSender<Self>,
+        ) -> AsyncComponentParts<Self> {
+            AsyncComponentParts {
                 model: Test(Rc::default()),
                 widgets: Rc::default(),
             }

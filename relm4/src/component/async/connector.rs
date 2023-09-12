@@ -2,7 +2,9 @@
 // Copyright 2022 System76 <info@system76.com>
 // SPDX-License-Identifier: MIT or Apache-2.0
 
-use super::{AsyncComponent, AsyncComponentController, AsyncController};
+use super::{
+    stream::AsyncComponentStream, AsyncComponent, AsyncComponentController, AsyncController,
+};
 use crate::{Receiver, Sender, ShutdownOnDrop};
 use std::fmt::{self, Debug};
 
@@ -84,6 +86,21 @@ impl<C: AsyncComponent> AsyncConnector<C> {
         AsyncController {
             widget,
             sender,
+            shutdown_on_drop,
+        }
+    }
+
+    /// Convert his type into a [`Stream`](futures::Stream) that yields output events
+    /// as futures.
+    pub fn into_stream(self) -> AsyncComponentStream<C> {
+        let Self {
+            receiver,
+            shutdown_on_drop,
+            ..
+        } = self;
+
+        AsyncComponentStream {
+            stream: receiver.into_stream(),
             shutdown_on_drop,
         }
     }

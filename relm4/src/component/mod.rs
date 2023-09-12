@@ -23,7 +23,7 @@ pub use sync::{
 
 pub use r#async::{
     AsyncComponent, AsyncComponentBuilder, AsyncComponentController, AsyncComponentParts,
-    AsyncConnector, AsyncController, SimpleAsyncComponent,
+    AsyncComponentStream, AsyncConnector, AsyncController, SimpleAsyncComponent,
 };
 
 pub use crate::channel::AsyncComponentSender;
