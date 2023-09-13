@@ -134,12 +134,11 @@ impl SimpleComponent for App {
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let tasks = FactoryVecDeque::builder(gtk::ListBox::default()).forward(
-            sender.input_sender(),
-            |output| match output {
+        let tasks = FactoryVecDeque::builder(gtk::ListBox::default())
+            .launch()
+            .forward(sender.input_sender(), |output| match output {
                 TaskOutput::Delete(index) => AppMsg::DeleteEntry(index),
-            },
-        );
+            });
 
         let model = App { tasks };
 

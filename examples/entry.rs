@@ -82,6 +82,7 @@ impl SimpleComponent for App {
         let factory_box = gtk::Box::default();
 
         let counters = FactoryVecDeque::builder(factory_box.clone())
+            .launch()
             .forward(sender.input_sender(), |output| output);
 
         let model = App {

@@ -6,7 +6,7 @@ use crate::factory::{CloneableFactoryComponent, FactoryComponent, FactoryView};
 
 use std::collections::hash_map::RandomState;
 use std::collections::HashMap;
-use std::hash::{BuildHasher, Hash, Hasher};
+use std::hash::{BuildHasher, Hash};
 use std::iter::FusedIterator;
 use std::marker::PhantomData;
 use std::ops;
@@ -50,11 +50,8 @@ where
 }
 
 #[derive(Debug)]
-pub struct FactoryHashMapBuilder<K, C: FactoryComponent, S = RandomState> {
+pub struct FactoryHashMapBuilder<K, C: FactoryComponent> {
     widget: C::ParentWidget,
-    output_sender: Sender<C::Output>,
-    output_receiver: Receiver<C::Output>,
-    hasher: S,
     _key: PhantomData<K>,
 }
 
@@ -65,38 +62,41 @@ where
     /// Creates a new [`FactoryHashMapBuilder`].
     #[must_use]
     pub fn new(widget: C::ParentWidget) -> Self {
-        let (output_sender, output_receiver) = crate::channel();
         Self {
             widget,
+            _key: PhantomData,
+        }
+    }
+
+    pub fn launch(self) -> FactoryHashMapConnector<K, C> {
+        let (output_sender, output_receiver) = crate::channel();
+
+        FactoryHashMapConnector {
+            widget: self.widget,
             output_sender,
             output_receiver,
             hasher: RandomState::default(),
-            _key: PhantomData,
+            _key: self._key,
         }
     }
 }
 
-impl<K, C> FactoryHashMapBuilder<K, C>
+#[derive(Debug)]
+pub struct FactoryHashMapConnector<K, C, S = RandomState>
 where
     C: FactoryComponent,
 {
-    pub fn hasher<H: Hasher>(self, hasher: H) -> FactoryHashMapBuilder<K, C, H> {
-        let Self {
-            widget,
-            output_sender,
-            output_receiver,
-            _key,
-            ..
-        } = self;
-        FactoryHashMapBuilder {
-            widget,
-            output_sender,
-            output_receiver,
-            hasher,
-            _key,
-        }
-    }
+    widget: C::ParentWidget,
+    output_sender: Sender<C::Output>,
+    output_receiver: Receiver<C::Output>,
+    hasher: S,
+    _key: PhantomData<K>,
+}
 
+impl<K, C> FactoryHashMapConnector<K, C>
+where
+    C: FactoryComponent,
+{
     pub fn forward<F, Msg>(self, f: F, forward_sender: Sender<Msg>) -> FactoryHashMap<K, C>
     where
         F: Fn(C::Output) -> Msg + Send + 'static,
@@ -241,7 +241,7 @@ where
 {
     /// Creates a [`FactoryHashMap`] from a [`Vec`].
     pub fn from_vec(component_vec: Vec<(K, C::Init)>, widget: C::ParentWidget) -> Self {
-        let mut output = Self::builder(widget).detach();
+        let mut output = Self::builder(widget).launch().detach();
         for (key, init) in component_vec {
             output.insert(key, init);
         }
@@ -321,7 +321,9 @@ where
 {
     fn clone(&self) -> Self {
         // Create a new, empty FactoryHashMap.
-        let mut clone = FactoryHashMap::builder(self.widget.clone()).detach();
+        let mut clone = FactoryHashMap::builder(self.widget.clone())
+            .launch()
+            .detach();
         // Iterate over the items in the original FactoryHashMap.
         for (k, item) in self.iter() {
             // Clone each item and push it onto the new FactoryHashMap.

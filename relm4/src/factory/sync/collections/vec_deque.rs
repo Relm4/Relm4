@@ -392,8 +392,6 @@ where
     C: FactoryComponent<Index = DynamicIndex>,
 {
     widget: C::ParentWidget,
-    output_sender: Sender<C::Output>,
-    output_receiver: Receiver<C::Output>,
 }
 
 impl<C> FactoryVecDequeBuilder<C>
@@ -402,14 +400,34 @@ where
 {
     /// Create a builder for this component.
     pub fn new(widget: C::ParentWidget) -> Self {
+        Self { widget }
+    }
+
+    pub fn launch(self) -> FactoryVecDequeConnector<C> {
         let (output_sender, output_receiver) = crate::channel();
-        Self {
-            widget,
+
+        FactoryVecDequeConnector {
+            widget: self.widget,
             output_sender,
             output_receiver,
         }
     }
+}
 
+#[derive(Debug)]
+pub struct FactoryVecDequeConnector<C>
+where
+    C: FactoryComponent<Index = DynamicIndex>,
+{
+    widget: C::ParentWidget,
+    output_sender: Sender<C::Output>,
+    output_receiver: Receiver<C::Output>,
+}
+
+impl<C> FactoryVecDequeConnector<C>
+where
+    C: FactoryComponent<Index = DynamicIndex>,
+{
     /// Forwards output events from child components to the designated sender.
     pub fn forward<F, Msg>(self, sender_: &Sender<Msg>, f: F) -> FactoryVecDeque<C>
     where
@@ -676,7 +694,7 @@ where
         component_iter: impl IntoIterator<Item = C::Init>,
         widget: C::ParentWidget,
     ) -> Self {
-        let mut output = Self::builder(widget).detach();
+        let mut output = Self::builder(widget).launch().detach();
         {
             let mut edit = output.guard();
             for component in component_iter {
@@ -695,7 +713,9 @@ where
 {
     fn clone(&self) -> Self {
         // Create a new, empty FactoryVecDeque.
-        let mut clone = FactoryVecDeque::builder(self.widget.clone()).detach();
+        let mut clone = FactoryVecDeque::builder(self.widget.clone())
+            .launch()
+            .detach();
         // Iterate over the items in the original FactoryVecDeque.
         for item in self.iter() {
             // Clone each item and push it onto the new FactoryVecDeque.
