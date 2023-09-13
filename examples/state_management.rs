@@ -347,7 +347,7 @@ impl Worker for Document {
                 // this is just to make the example consistent.
                 let _ = sender.output(DocumentOutput::ChangedTaskName(
                     index.current_index(),
-                    name.clone(),
+                    name,
                 ));
             }
             DocumentInput::AddTag(task_index, name) => {
