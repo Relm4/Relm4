@@ -29,7 +29,6 @@ impl FactoryComponent for Counter {
     type Input = CounterMsg;
     type Output = CounterOutput;
     type CommandOutput = ();
-    type ParentInput = AppMsg;
     type ParentWidget = adw::TabView;
 
     view! {
@@ -84,14 +83,6 @@ impl FactoryComponent for Counter {
         returned_widget -> adw::TabPage {
             set_title: &format!("Page {}", self.value),
         }
-    }
-
-    fn forward_to_parent(output: Self::Output) -> Option<AppMsg> {
-        Some(match output {
-            CounterOutput::SendFront(index) => AppMsg::SendFront(index),
-            CounterOutput::MoveUp(index) => AppMsg::MoveUp(index),
-            CounterOutput::MoveDown(index) => AppMsg::MoveDown(index),
-        })
     }
 
     fn init_model(value: Self::Init, _index: &DynamicIndex, _sender: FactorySender<Self>) -> Self {
@@ -169,7 +160,15 @@ impl SimpleComponent for App {
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let counters = FactoryVecDeque::new(adw::TabView::default(), sender.input_sender());
+        let counters = FactoryVecDeque::builder(adw::TabView::default())
+            .launch()
+            .forward(sender.input_sender(), |output| {
+                match output {
+                    CounterOutput::SendFront(index) => AppMsg::SendFront(index),
+                    CounterOutput::MoveUp(index) => AppMsg::MoveUp(index),
+                    CounterOutput::MoveDown(index) => AppMsg::MoveDown(index),
+                }
+            });
         let model = App {
             created_widgets: counter,
             counters,
