@@ -232,7 +232,6 @@ pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
 ///     type Init = u8;
 ///     type Input = CounterMsg;
 ///     type Output = CounterOutput;
-///     type ParentInput = AppMsg;
 ///     type ParentWidget = gtk::Box;
 ///     
 ///
@@ -270,12 +269,6 @@ pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
 ///         }
 ///     }
 ///
-///     fn forward_to_parent(output: Self::Output) -> Option<AppMsg> {
-///         Some(match output {
-///             CounterOutput::SendFront(index) => AppMsg::SendFront(index),
-///         })
-///     }
-///
 ///     fn init_model(
 ///         value: Self::Init,
 ///         _index: &DynamicIndex,
@@ -296,6 +289,11 @@ pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
 ///     }
 /// }
 /// ```
+///
+/// Note: the enclosing App view (which has AppMsg as its input) is responsible for adding a
+/// forward handler to the `FactoryVecDeque`, which will translate CounterOutput events into AppMsg
+/// events. For example `CounterOutput::SendFront(index) => AppMsg::SendFront(index)`
+///
 #[proc_macro_attribute]
 pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
     let attrs = parse_macro_input!(attributes);

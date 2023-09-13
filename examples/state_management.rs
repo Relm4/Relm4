@@ -345,10 +345,7 @@ impl Worker for Document {
 
                 // We don't technically need to send an event, because gtk::Entry updates itself
                 // this is just to make the example consistent.
-                let _ = sender.output(DocumentOutput::ChangedTaskName(
-                    index.current_index(),
-                    name,
-                ));
+                let _ = sender.output(DocumentOutput::ChangedTaskName(index.current_index(), name));
             }
             DocumentInput::AddTag(task_index, name) => {
                 if let Some(task) = self.model.tasks.get_mut(task_index.current_index()) {
