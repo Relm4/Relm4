@@ -365,8 +365,7 @@ where
     /// [`init_model()`]: AsyncFactoryComponent::init_model
     pub fn iter_mut(
         &mut self,
-    ) -> impl Iterator<Item = Option<&mut C>> + DoubleEndedIterator + ExactSizeIterator + FusedIterator
-    {
+    ) -> impl DoubleEndedIterator<Item = Option<&mut C>> + ExactSizeIterator + FusedIterator {
         self.inner
             .components
             .iter_mut()
@@ -608,8 +607,7 @@ where
     /// [`init_model()`]: AsyncFactoryComponent::init_model
     pub fn iter(
         &self,
-    ) -> impl Iterator<Item = Option<&C>> + DoubleEndedIterator + ExactSizeIterator + FusedIterator
-    {
+    ) -> impl DoubleEndedIterator<Item = Option<&C>> + ExactSizeIterator + FusedIterator {
         self.components.iter().map(AsyncComponentStorage::get)
     }
 }

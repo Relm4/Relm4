@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
++ core: Add `AsyncComponentStream` to supports streams for async components as well
+
 ### Changed
 
 + core: Just require `AsRef<gtk::Window>` in `RelmApp::run`
@@ -10,6 +14,7 @@
 ### Fixed
 
 + macros: Fix track attribute for template children
++ macros: Allow trailing commas in the last match arm
 
 ## 0.7.0-alpha.1 - 2023-8-28
 

@@ -212,17 +212,17 @@ where
     }
 
     /// An iterator visiting all key-value pairs in arbitrary order.
-    pub fn iter(&self) -> impl Iterator<Item = (&K, &C)> + ExactSizeIterator + FusedIterator {
+    pub fn iter(&self) -> impl ExactSizeIterator<Item = (&K, &C)> + FusedIterator {
         self.inner.iter().map(|(k, c)| (k, c.data.get()))
     }
 
     /// Returns an iterator over the factory components.
-    pub fn values(&self) -> impl Iterator<Item = &C> + ExactSizeIterator + FusedIterator {
+    pub fn values(&self) -> impl ExactSizeIterator<Item = &C> + FusedIterator {
         self.inner.values().map(|c| c.data.get())
     }
 
     /// Returns an iterator over the keys of the hash map.
-    pub fn keys(&self) -> impl Iterator<Item = &K> + ExactSizeIterator + FusedIterator {
+    pub fn keys(&self) -> impl ExactSizeIterator<Item = &K> + FusedIterator {
         self.inner.keys()
     }
 
