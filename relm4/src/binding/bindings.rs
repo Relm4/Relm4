@@ -56,6 +56,7 @@ macro_rules! binding {
             #[properties(wrapper_type = super::$name)]
             /// Inner type of the data binding.
             pub struct $name {
+                #[must_use]
                 #[property(get, set)]
                 /// The primary value.
                 value: RefCell<$ty>,
