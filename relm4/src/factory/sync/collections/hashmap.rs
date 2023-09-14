@@ -97,7 +97,7 @@ impl<K, C> FactoryHashMapConnector<K, C>
 where
     C: FactoryComponent,
 {
-    pub fn forward<F, Msg>(self, f: F, forward_sender: Sender<Msg>) -> FactoryHashMap<K, C>
+    pub fn forward<F, Msg>(self, sender_: &Sender<Msg>, f: F) -> FactoryHashMap<K, C>
     where
         F: Fn(C::Output) -> Msg + Send + 'static,
         C::Output: Send,
@@ -111,9 +111,11 @@ where
             ..
         } = self;
 
+        let sender_clone = sender_.clone();
+
         crate::spawn(async move {
             while let Some(msg) = output_receiver.recv().await {
-                if forward_sender.send(f(msg)).is_err() {
+                if sender_clone.send(f(msg)).is_err() {
                     break;
                 }
             }
