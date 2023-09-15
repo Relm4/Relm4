@@ -27,7 +27,6 @@ impl FactoryComponent for Counter {
     type Input = CounterMsg;
     type Output = CounterOutput;
     type CommandOutput = ();
-    type ParentInput = AppMsg;
     type ParentWidget = gtk::Box;
 
     view! {
@@ -85,15 +84,6 @@ impl FactoryComponent for Counter {
                 }
             }
         }
-    }
-
-    fn forward_to_parent(output: Self::Output) -> Option<AppMsg> {
-        Some(match output {
-            CounterOutput::SendFront(index) => AppMsg::SendFront(index),
-            CounterOutput::MoveUp(index) => AppMsg::MoveUp(index),
-            CounterOutput::MoveDown(index) => AppMsg::MoveDown(index),
-            CounterOutput::Remove(index) => AppMsg::Remove(index),
-        })
     }
 
     fn init_model(value: Self::Init, _index: &DynamicIndex, _sender: FactorySender<Self>) -> Self {
@@ -171,7 +161,15 @@ impl SimpleComponent for App {
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let counters = FactoryVecDeque::new(gtk::Box::default(), sender.input_sender());
+        let counters = FactoryVecDeque::builder(gtk::Box::default())
+            .launch()
+            .forward(sender.input_sender(), |msg| match msg {
+                CounterOutput::SendFront(index) => AppMsg::SendFront(index),
+                CounterOutput::MoveUp(index) => AppMsg::MoveUp(index),
+                CounterOutput::MoveDown(index) => AppMsg::MoveDown(index),
+                CounterOutput::Remove(index) => AppMsg::Remove(index),
+            });
+
         let model = App {
             created_widgets: counter,
             counters,

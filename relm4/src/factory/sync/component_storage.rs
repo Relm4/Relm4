@@ -1,5 +1,4 @@
 use crate::factory::{FactoryComponent, FactoryView};
-use crate::Sender;
 
 use super::{FactoryBuilder, FactoryHandle};
 
@@ -55,15 +54,9 @@ impl<C: FactoryComponent> ComponentStorage<C> {
         self,
         index: &C::Index,
         returned_widget: <C::ParentWidget as FactoryView>::ReturnedWidget,
-        parent_sender: &Sender<C::ParentInput>,
     ) -> Option<Self> {
         if let Self::Builder(builder) = self {
-            Some(Self::Final(builder.launch(
-                index,
-                returned_widget,
-                parent_sender,
-                C::forward_to_parent,
-            )))
+            Some(Self::Final(builder.launch(index, returned_widget)))
         } else {
             None
         }

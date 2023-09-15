@@ -45,15 +45,7 @@ impl FactoryComponent for GamePage {
     type Input = CounterMsg;
     type Output = CounterOutput;
     type CommandOutput = ();
-    type ParentInput = AppMsg;
     type ParentWidget = adw::TabView;
-
-    fn forward_to_parent(output: Self::Output) -> Option<AppMsg> {
-        Some(match output {
-            CounterOutput::StartGame(index) => AppMsg::StartGame(index),
-            CounterOutput::SelectedGuess(guess) => AppMsg::SelectedGuess(guess),
-        })
-    }
 
     view! {
         #[root]
@@ -228,7 +220,15 @@ impl Component for App {
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let counters = FactoryVecDeque::new(adw::TabView::default(), sender.input_sender());
+        let counters = FactoryVecDeque::builder(adw::TabView::default())
+            .launch()
+            .forward(sender.input_sender(), |output| {
+                match output {
+                    CounterOutput::StartGame(index) => AppMsg::StartGame(index),
+                    CounterOutput::SelectedGuess(guess) => AppMsg::SelectedGuess(guess),
+                }
+            });
+
         let mut model = App {
             counters,
             start_index: None,

@@ -1,4 +1,4 @@
-use crate::Sender;
+use crate::{Receiver, Sender};
 
 use crate::factory::sync::builder::FactoryBuilder;
 use crate::factory::sync::handle::FactoryHandle;
@@ -6,8 +6,9 @@ use crate::factory::{CloneableFactoryComponent, FactoryComponent, FactoryView};
 
 use std::collections::hash_map::RandomState;
 use std::collections::HashMap;
-use std::hash::{BuildHasher, Hash};
+use std::hash::{BuildHasher, Hash, Hasher};
 use std::iter::FusedIterator;
+use std::marker::PhantomData;
 use std::ops;
 
 #[derive(Debug)]
@@ -48,12 +49,125 @@ where
     }
 }
 
+#[derive(Debug)]
+pub struct FactoryHashMapBuilder<K, C: FactoryComponent, S = RandomState> {
+    hasher: S,
+    widget: C::ParentWidget,
+    _key: PhantomData<K>,
+}
+
+impl<K, C> FactoryHashMapBuilder<K, C>
+where
+    C: FactoryComponent,
+{
+    /// Creates a new [`FactoryHashMapBuilder`].
+    #[must_use]
+    pub fn new(widget: C::ParentWidget) -> Self {
+        Self {
+            hasher: RandomState::default(),
+            widget,
+            _key: PhantomData,
+        }
+    }
+
+    pub fn hasher<H: Hasher>(self, hasher: H) -> FactoryHashMapBuilder<K, C, H> {
+        let Self { widget, _key, .. } = self;
+
+        FactoryHashMapBuilder {
+            hasher,
+            widget,
+            _key,
+        }
+    }
+
+    pub fn launch(self) -> FactoryHashMapConnector<K, C> {
+        let Self {
+            widget,
+            hasher,
+            _key,
+        } = self;
+
+        let (output_sender, output_receiver) = crate::channel();
+
+        FactoryHashMapConnector {
+            widget,
+            output_sender,
+            output_receiver,
+            hasher,
+            _key,
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct FactoryHashMapConnector<K, C, S = RandomState>
+where
+    C: FactoryComponent,
+{
+    widget: C::ParentWidget,
+    output_sender: Sender<C::Output>,
+    output_receiver: Receiver<C::Output>,
+    hasher: S,
+    _key: PhantomData<K>,
+}
+
+impl<K, C> FactoryHashMapConnector<K, C>
+where
+    C: FactoryComponent,
+{
+    pub fn forward<F, Msg>(self, sender_: &Sender<Msg>, f: F) -> FactoryHashMap<K, C>
+    where
+        F: Fn(C::Output) -> Msg + Send + 'static,
+        C::Output: Send,
+        Msg: Send + 'static,
+    {
+        let Self {
+            widget,
+            output_sender,
+            output_receiver,
+            hasher,
+            ..
+        } = self;
+
+        let sender_clone = sender_.clone();
+
+        crate::spawn(async move {
+            while let Some(msg) = output_receiver.recv().await {
+                if sender_clone.send(f(msg)).is_err() {
+                    break;
+                }
+            }
+        });
+
+        FactoryHashMap {
+            widget,
+            output_sender,
+            inner: HashMap::with_hasher(hasher),
+        }
+    }
+
+    pub fn detach(self) -> FactoryHashMap<K, C> {
+        let Self {
+            widget,
+            output_sender,
+            hasher,
+            ..
+        } = self;
+
+        FactoryHashMap {
+            widget,
+            output_sender,
+            inner: HashMap::with_hasher(hasher),
+        }
+    }
+}
+
 /// A container similar to [`HashMap`] that can be used to store
 /// values of type [`FactoryComponent`].
 #[derive(Debug)]
 pub struct FactoryHashMap<K, C: FactoryComponent, S = RandomState> {
     widget: C::ParentWidget,
-    parent_sender: Sender<C::ParentInput>,
+    output_sender: Sender<C::Output>,
     inner: HashMap<K, FactoryHandle<C>, S>,
 }
 
@@ -85,12 +199,8 @@ where
 {
     /// Creates a new [`FactoryHashMap`].
     #[must_use]
-    pub fn new(widget: C::ParentWidget, parent_sender: &Sender<C::ParentInput>) -> Self {
-        Self {
-            widget,
-            parent_sender: parent_sender.clone(),
-            inner: HashMap::new(),
-        }
+    pub fn builder(widget: C::ParentWidget) -> FactoryHashMapBuilder<K, C> {
+        FactoryHashMapBuilder::new(widget)
     }
 }
 
@@ -98,20 +208,6 @@ impl<K, C, S> FactoryHashMap<K, C, S>
 where
     C: FactoryComponent,
 {
-    /// Creates a new [`FactoryHashMap`].
-    #[must_use]
-    pub fn width_hasher(
-        widget: C::ParentWidget,
-        parent_sender: &Sender<C::ParentInput>,
-        hash_builder: S,
-    ) -> Self {
-        Self {
-            widget,
-            parent_sender: parent_sender.clone(),
-            inner: HashMap::with_hasher(hash_builder),
-        }
-    }
-
     /// Returns the number of elements in the [`FactoryHashMap`].
     pub fn len(&self) -> usize {
         self.inner.len()
@@ -164,12 +260,8 @@ where
     K: Hash + Eq,
 {
     /// Creates a [`FactoryHashMap`] from a [`Vec`].
-    pub fn from_vec(
-        component_vec: Vec<(K, C::Init)>,
-        widget: C::ParentWidget,
-        parent_sender: &Sender<C::ParentInput>,
-    ) -> Self {
-        let mut output = Self::new(widget, parent_sender);
+    pub fn from_vec(component_vec: Vec<(K, C::Init)>, widget: C::ParentWidget) -> Self {
+        let mut output = Self::builder(widget).launch().detach();
         for (key, init) in component_vec {
             output.insert(key, init);
         }
@@ -215,19 +307,14 @@ where
     pub fn insert(&mut self, key: K, init: C::Init) -> Option<C> {
         let existing = self.remove(&key);
 
-        let builder = FactoryBuilder::new(&key, init);
+        let builder = FactoryBuilder::new(&key, init, self.output_sender.clone());
 
         let position = C::position(&builder.data, &key);
         let returned_widget = self
             .widget
             .factory_append(builder.root_widget.clone(), &position);
 
-        let component = builder.launch(
-            &key,
-            returned_widget,
-            &self.parent_sender,
-            C::forward_to_parent,
-        );
+        let component = builder.launch(&key, returned_widget);
 
         assert!(self.inner.insert(key, component).is_none());
 
@@ -254,7 +341,9 @@ where
 {
     fn clone(&self) -> Self {
         // Create a new, empty FactoryHashMap.
-        let mut clone = FactoryHashMap::new(self.widget.clone(), &self.parent_sender.clone());
+        let mut clone = FactoryHashMap::builder(self.widget.clone())
+            .launch()
+            .detach();
         // Iterate over the items in the original FactoryHashMap.
         for (k, item) in self.iter() {
             // Clone each item and push it onto the new FactoryHashMap.

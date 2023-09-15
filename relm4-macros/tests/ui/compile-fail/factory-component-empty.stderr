@@ -6,14 +6,13 @@ error: expected `view!` macro invocation
 9 | | }
   | |_^
 
-error[E0046]: not all trait items implemented, missing: `ParentWidget`, `ParentInput`, `CommandOutput`, `Input`, `Output`, `Init`, `Root`, `init_model`, `init_root`, `init_widgets`
+error[E0046]: not all trait items implemented, missing: `ParentWidget`, `CommandOutput`, `Input`, `Output`, `Init`, `Root`, `init_model`, `init_root`, `init_widgets`
  --> tests/ui/compile-fail/factory-component-empty.rs:7:1
   |
 7 | impl FactoryComponent for TestFactoryComponent {
-  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ missing `ParentWidget`, `ParentInput`, `CommandOutput`, `Input`, `Output`, `Init`, `Root`, `init_model`, `init_root`, `init_widgets` in implementation
+  | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ missing `ParentWidget`, `CommandOutput`, `Input`, `Output`, `Init`, `Root`, `init_model`, `init_root`, `init_widgets` in implementation
   |
   = help: implement the missing item: `type ParentWidget = /* Type */;`
-  = help: implement the missing item: `type ParentInput = /* Type */;`
   = help: implement the missing item: `type CommandOutput = /* Type */;`
   = help: implement the missing item: `type Input = /* Type */;`
   = help: implement the missing item: `type Output = /* Type */;`

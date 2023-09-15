@@ -25,7 +25,6 @@ impl FactoryComponent for Counter {
     type Input = ();
     type Output = AppMsg;
     type CommandOutput = ();
-    type ParentInput = AppMsg;
     type ParentWidget = gtk::Box;
 
     view! {
@@ -36,13 +35,6 @@ impl FactoryComponent for Counter {
                 sender.output(AppMsg::Clicked(index.clone()));
             },
         }
-    }
-
-    // You usually wouldn't do this but rather process the click in the factory
-    // element itself. However, this demonstrates how easy it is to forward messages
-    // to the parent component of the factory.
-    fn forward_to_parent(output: Self::Output) -> Option<Self::ParentInput> {
-        Some(output)
     }
 
     fn init_model(value: Self::Init, _index: &DynamicIndex, _sender: FactorySender<Self>) -> Self {
@@ -89,8 +81,12 @@ impl SimpleComponent for App {
     ) -> ComponentParts<Self> {
         let factory_box = gtk::Box::default();
 
+        let counters = FactoryVecDeque::builder(factory_box.clone())
+            .launch()
+            .forward(sender.input_sender(), |output| output);
+
         let model = App {
-            counters: FactoryVecDeque::new(factory_box.clone(), sender.input_sender()),
+            counters,
             created_counters: 0,
             entry: gtk::EntryBuffer::default(),
         };

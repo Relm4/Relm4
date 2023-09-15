@@ -19,7 +19,6 @@ impl FactoryComponent for Counter {
     type Input = ();
     type Output = CounterOutput;
     type CommandOutput = ();
-    type ParentInput = AppMsg;
     type ParentWidget = gtk::Stack;
     type Index = String;
 
@@ -147,7 +146,10 @@ impl SimpleComponent for App {
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let counters = FactoryHashMap::new(gtk::Stack::default(), sender.input_sender());
+        let counters = FactoryHashMap::builder(gtk::Stack::default())
+            .launch()
+            .detach();
+
         let model = App {
             created_widgets: counter,
             counters,
