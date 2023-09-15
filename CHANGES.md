@@ -13,6 +13,7 @@
 
 ### Fixed
 
++ macros: Improve spans in code generation to prevent false positive lints
 + macros: Fix track attribute for template children
 + macros: Allow trailing commas in the last match arm
 

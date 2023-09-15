@@ -58,7 +58,7 @@ impl WidgetFunc {
     pub(super) fn snake_case_name(&self) -> Ident {
         idents_to_snake_case(
             self.path.segments.iter().map(|seg| &seg.ident),
-            self.path.span(),
+            Span2::call_site(),
         )
     }
 }
@@ -86,8 +86,8 @@ impl PartialEq for AssignPropertyAttr {
 
 pub(crate) fn string_to_snake_case(string: &str) -> Ident {
     idents_to_snake_case(
-        [Ident::new(string, Span2::call_site())].iter(),
-        Span2::call_site(),
+        [Ident::new(string, Span2::mixed_site())].iter(),
+        Span2::mixed_site(),
     )
 }
 

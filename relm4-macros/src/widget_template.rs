@@ -34,7 +34,7 @@ pub(crate) fn generate_tokens(vis: Option<Visibility>, mut item_impl: ItemImpl) 
                     } = view_widgets.generate_streams(
                         &TraitImplDetails {
                             vis: vis.clone(),
-                            model_name: Ident::new("_", Span2::call_site()),
+                            model_name: Ident::new("_", Span2::mixed_site()),
                             sender_name: Ident::new("sender", Span2::call_site()),
                             root_name: None,
                         },
