@@ -1,4 +1,4 @@
-use proc_macro2::TokenStream as TokenStream2;
+use proc_macro2::{Span as Span2, TokenStream as TokenStream2};
 use syn::parse::ParseStream;
 use syn::{Error, Expr, Ident, Path, Token};
 
@@ -54,7 +54,7 @@ impl ConditionalWidget {
         } else {
             parse_util::idents_to_snake_case(
                 [Ident::new("conditional_widget", input.span())].iter(),
-                input.span(),
+                Span2::call_site(),
             )
         };
 

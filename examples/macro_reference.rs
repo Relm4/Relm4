@@ -1,3 +1,14 @@
+// Catch potential problems with clippy and the macro
+#![warn(
+    missing_debug_implementations,
+    rust_2018_idioms,
+    unreachable_pub,
+    unused_qualifications,
+    clippy::cargo,
+    clippy::must_use_candidate,
+    clippy::used_underscore_binding
+)]
+
 use gtk::prelude::{
     BoxExt, ButtonExt, GridExt, GtkWindowExt, ObjectExt, OrientableExt, ToggleButtonExt, WidgetExt,
 };

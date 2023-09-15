@@ -99,5 +99,5 @@ fn section_name() -> Ident {
 
     let value = COUNTER.fetch_add(1, Ordering::Relaxed);
 
-    Ident::new(&format!("_section_{value}"), Span2::call_site())
+    Ident::new(&format!("_section_{value}"), Span2::mixed_site())
 }
