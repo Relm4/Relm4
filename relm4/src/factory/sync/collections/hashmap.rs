@@ -6,7 +6,7 @@ use crate::factory::{CloneableFactoryComponent, FactoryComponent, FactoryView};
 
 use std::collections::hash_map::RandomState;
 use std::collections::HashMap;
-use std::hash::{BuildHasher, Hash};
+use std::hash::{BuildHasher, Hash, Hasher};
 use std::iter::FusedIterator;
 use std::marker::PhantomData;
 use std::ops;
@@ -50,7 +50,8 @@ where
 }
 
 #[derive(Debug)]
-pub struct FactoryHashMapBuilder<K, C: FactoryComponent> {
+pub struct FactoryHashMapBuilder<K, C: FactoryComponent, S = RandomState> {
+    hasher: S,
     widget: C::ParentWidget,
     _key: PhantomData<K>,
 }
@@ -63,20 +64,37 @@ where
     #[must_use]
     pub fn new(widget: C::ParentWidget) -> Self {
         Self {
+            hasher: RandomState::default(),
             widget,
             _key: PhantomData,
         }
     }
 
+    pub fn hasher<H: Hasher>(self, hasher: H) -> FactoryHashMapBuilder<K, C, H> {
+        let Self { widget, _key, .. } = self;
+
+        FactoryHashMapBuilder {
+            hasher,
+            widget,
+            _key,
+        }
+    }
+
     pub fn launch(self) -> FactoryHashMapConnector<K, C> {
+        let Self {
+            widget,
+            hasher,
+            _key,
+        } = self;
+
         let (output_sender, output_receiver) = crate::channel();
 
         FactoryHashMapConnector {
-            widget: self.widget,
+            widget,
             output_sender,
             output_receiver,
-            hasher: RandomState::default(),
-            _key: self._key,
+            hasher,
+            _key,
         }
     }
 }
