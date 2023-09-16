@@ -1,5 +1,4 @@
 use syn::parse::{Parse, ParseStream};
-use syn::spanned::Spanned;
 use syn::{braced, Ident, Result, Token};
 
 use crate::widgets::{parse_util, Properties, ReturnedWidget};
@@ -29,12 +28,7 @@ impl Parse for ReturnedWidget {
             (None, None)
         };
 
-        let name = name.unwrap_or_else(|| {
-            parse_util::idents_to_snake_case(
-                [Ident::new("_returned_widget", input.span())].iter(),
-                ty.span(),
-            )
-        });
+        let name = name.unwrap_or_else(|| parse_util::unique_ident_from_parts(["returned_widget"]));
 
         let inner;
         let _token = braced!(inner in input);

@@ -56,10 +56,8 @@ impl WidgetFunc {
 
 impl WidgetFunc {
     pub(super) fn snake_case_name(&self) -> Ident {
-        idents_to_snake_case(
-            self.path.segments.iter().map(|seg| &seg.ident),
-            Span2::call_site(),
-        )
+        let segments = self.path.segments.iter().map(|seg| seg.ident.to_string());
+        unique_ident_from_parts(segments)
     }
 }
 
@@ -85,35 +83,25 @@ impl PartialEq for AssignPropertyAttr {
 }
 
 pub(crate) fn string_to_snake_case(string: &str) -> Ident {
-    idents_to_snake_case(
-        [Ident::new(string, Span2::mixed_site())].iter(),
-        Span2::mixed_site(),
-    )
+    unique_ident_from_parts([string])
 }
 
-pub(crate) fn idents_to_snake_case<'a, I: Iterator<Item = &'a Ident>>(
-    idents: I,
-    span: Span2,
-) -> Ident {
+pub(crate) fn unique_ident_from_parts<I, T>(parts: I) -> Ident
+where
+    I: IntoIterator<Item = T>,
+    T: AsRef<str>,
+{
     static COUNTER: AtomicU16 = AtomicU16::new(0);
-    let val = COUNTER.fetch_add(1, Ordering::Relaxed);
-    let index_str = val.to_string();
+    let unique_number = COUNTER.fetch_add(1, Ordering::Relaxed).to_string();
 
-    let segments: Vec<String> = idents
-        .map(|ident| ident.to_string().to_lowercase())
-        .collect();
-    let length: usize =
-        segments.iter().map(|seg| seg.len() + 1).sum::<usize>() + index_str.len() + 1;
-    let mut name: String = String::with_capacity(length);
+    let name = parts
+        .into_iter()
+        .map(|part| part.as_ref().to_lowercase())
+        .chain(std::iter::once(unique_number))
+        .collect::<Vec<_>>()
+        .join("_");
 
-    for seg in &segments {
-        name.push('_');
-        name.push_str(seg);
-    }
-    name.push('_');
-    name.push_str(&index_str);
-
-    Ident::new(&name, span)
+    Ident::new(&name, Span2::mixed_site())
 }
 
 /// Weird hack to work around syn's awkward macros
