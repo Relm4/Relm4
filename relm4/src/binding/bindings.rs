@@ -41,6 +41,7 @@ macro_rules! binding {
         }
 
         #[allow(missing_docs)]
+        #[allow(clippy::must_use_candidate)]
         mod $mod {
             use std::cell::RefCell;
 
