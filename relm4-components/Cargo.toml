@@ -37,3 +37,7 @@ libadwaita = ["relm4/libadwaita"]
 [[example]]
 name = "web_image"
 required-features = ["web"]
+
+[[example]]
+name = "adw_combo_row"
+required-features = ["libadwaita"]
