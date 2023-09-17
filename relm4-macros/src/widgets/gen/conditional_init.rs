@@ -134,7 +134,7 @@ impl ConditionalWidget {
 
         let w_name = &self.name;
         stream.extend(quote! {
-            let __current_page = "";
+            let current_page = "";
             #w_name.set_visible_child_name(#brach_stream);
         });
     }
