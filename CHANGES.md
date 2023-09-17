@@ -5,7 +5,8 @@
 ### Added
 
 + core: Add `AsyncComponentStream` to supports streams for async components as well
-
++ components: Add an example how to use `SimpleComboBox`
+ 
 ### Changed
 
 + core: Just require `AsRef<gtk::Window>` in `RelmApp::run`
