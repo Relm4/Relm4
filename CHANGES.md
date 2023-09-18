@@ -5,6 +5,8 @@
 ### Added
 
 + core: Add `AsyncComponentStream` to supports streams for async components as well
++ components: Add `SimpleComboRow` helper for libadwaita's `ComboRow`, analogous to `SimpleComboBox`
++ components: Add an example for `SimpleComboRow`
 
 ### Changed
 

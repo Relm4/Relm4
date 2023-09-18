@@ -36,6 +36,8 @@ pub mod alert;
 pub mod open_button;
 pub mod open_dialog;
 pub mod save_dialog;
+#[cfg(feature = "libadwaita")]
+pub mod simple_adw_combo_row;
 pub mod simple_combo_box;
 
 #[cfg(feature = "web")]
