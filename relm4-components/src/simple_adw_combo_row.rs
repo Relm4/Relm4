@@ -99,14 +99,12 @@ where
     E: ToString,
 {
     fn render(&self, combo_box: &adw::ComboRow) {
-        use std::ops::Deref;
         if combo_box.model().is_some() {
             unreachable!()
         }
 
-        let variants: Vec<String> = self.variants.iter().map(ToString::to_string).collect();
-        let variants: Vec<&str> = variants.iter().map(String::deref).collect();
-        combo_box.set_model(Some(&StringList::new(&variants)));
+        let model: StringList = self.variants.iter().map(ToString::to_string).collect();
+        combo_box.set_model(Some(&model));
 
         if let Some(idx) = self.active_index {
             combo_box.set_selected(idx as u32);
