@@ -99,10 +99,6 @@ where
     E: ToString,
 {
     fn render(&self, combo_box: &adw::ComboRow) {
-        if combo_box.model().is_some() {
-            unreachable!()
-        }
-
         let model: StringList = self.variants.iter().map(ToString::to_string).collect();
         combo_box.set_model(Some(&model));
 
