@@ -29,10 +29,15 @@ reqwest = { version = "0.11.18", optional = true }
 tracker = "0.2.1"
 
 [features]
-default = []
+default = ["libadwaita"]
 dox = ["web"]
 web = ["reqwest"]
+libadwaita = ["relm4/libadwaita"]
 
 [[example]]
 name = "web_image"
 required-features = ["web"]
+
+[[example]]
+name = "adw_combo_row"
+required-features = ["libadwaita"]
