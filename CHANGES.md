@@ -7,6 +7,7 @@
 ### Added
 
 + core: Add `AsyncComponentStream` to supports streams for async components as well
++ core: Builder pattern for initializing factories similar to regular components
 + components: Add `SimpleComboRow` helper for libadwaita's `ComboRow`, analogous to `SimpleComboBox`
 + components: Add an example for `SimpleComboRow`
 + components: Add an example how to use `SimpleComboBox`
@@ -16,6 +17,7 @@
 + core: Add `Init` type to the `WidgetTemplate` trait to allow passing data to `init()` 
 + core: Just require `AsRef<gtk::Window>` in `RelmApp::run`
 + core: Add `AsRef<Root>` as requirement to the `WidgetTemplate` trait
++ core: Removed `forward_to_parent` from `FactoryComponent`
 
 ### Fixed
 
