@@ -4,7 +4,7 @@ use syn::punctuated::Punctuated;
 use syn::{spanned::Spanned, Ident};
 use syn::{token, Error};
 
-use crate::widgets::{Widget, WidgetFunc};
+use crate::widgets::{Widget, WidgetFunc, WidgetTemplateAttr};
 
 impl Widget {
     /// Get tokens for the widget's type.
@@ -27,6 +27,8 @@ impl Widget {
             let len = path.segments.len();
             if len == 0 {
                 unreachable!("Path can't be empty");
+            } else if self.template_attr == WidgetTemplateAttr::Template {
+                (&path.segments, path.segments.len())
             } else if len == 1 {
                 return Error::new(func.span().unwrap().into(),
                         format!("You need to specify a type of your function. Use this instead: {}() -> Type {{ ...",
@@ -107,6 +109,18 @@ impl WidgetFunc {
             template_path
         } else {
             template_path
+        }
+    }
+
+    pub(crate) fn widget_template_init(&self) -> TokenStream2 {
+        let widget_ty = &self.path;
+        let args = if let Some(args) = &self.args {
+            args.into_token_stream()
+        } else {
+            quote_spanned! { self.path.span() => () }
+        };
+        quote! {
+            <#widget_ty as relm4::WidgetTemplate>::init(#args)
         }
     }
 }

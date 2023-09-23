@@ -44,12 +44,7 @@ impl Widget {
             WidgetTemplateAttr::None | WidgetTemplateAttr::TemplateChild => {
                 self.func.func_token_stream()
             }
-            WidgetTemplateAttr::Template => {
-                let widget_ty = &self.func.path;
-                quote! {
-                    <#widget_ty as relm4::WidgetTemplate>::init()
-                }
-            }
+            WidgetTemplateAttr::Template => self.func.widget_template_init(),
         });
 
         self.other_init_stream(init_stream);
@@ -69,9 +64,9 @@ impl Widget {
                     });
                 }
                 WidgetTemplateAttr::Template => {
-                    let widget_ty = &self.func.path;
+                    let init = self.func.widget_template_init();
                     stream.extend(quote! {
-                        let #mutability #name #ty = <#widget_ty as relm4::WidgetTemplate>::init();
+                        let #mutability #name #ty = #init;
                     });
                 }
                 // Template children are already initialized by their template.
