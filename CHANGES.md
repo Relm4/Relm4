@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.7.0-beta.1 - 2023-9-23
+
 ### Added
 
 + core: Add `AsyncComponentStream` to supports streams for async components as well
