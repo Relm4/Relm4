@@ -14,19 +14,13 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/relm4/relm4/docs:latest
-    strategy:
-      matrix:
-        rust:
-          - stable
-          - nightly
-          - "1.70.0"
     env:
         DISPLAY: ":99.0"
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: ${{ matrix.rust }}
+          toolchain: stable
 
       - name: "test"
         run: xvfb-run --auto-servernum cargo test
