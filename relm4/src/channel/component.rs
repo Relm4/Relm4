@@ -274,8 +274,11 @@ sender_impl!(FactorySender, FactoryComponent);
 
 impl<C: FactoryComponent> FactorySender<C> {
     /// Emit an output to the component.
-    pub fn output(&self, message: C::Output) {
-        self.shared.output(message).unwrap()
+    ///
+    /// Returns [`Err`] if all receivers were dropped,
+    /// for example by the `detach` method.
+    pub fn output(&self, message: C::Output) -> Result<(), C::Output> {
+        self.shared.output(message)
     }
 }
 
