@@ -27,6 +27,29 @@ jobs:
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.rust }}
+
+      - name: "test"
+        run: xvfb-run --auto-servernum cargo test
+
+      - uses: bcomnes/cleanup-xvfb@v1.0.9
+
+  clippy:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/relm4/relm4/docs:latest
+    strategy:
+      matrix:
+        rust:
+          - stable
+          - nightly
+          - "1.70.0"
+    env:
+      DISPLAY: ":99.0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust }}
           components: clippy
 
       - name: "clippy all targets"
@@ -35,16 +58,11 @@ jobs:
       - name: "clippy all features"
         run: cargo clippy --features "all" -- --deny warnings
 
-      - name: "test"
-        run: xvfb-run --auto-servernum cargo test
-
-      - name: "check examples"
+      - name: "clippy check examples"
         run: cargo clippy --examples -- --deny warnings
-          
-      - name: "check libadwaita examples"
-        run: cd examples/libadwaita && cargo clippy --examples -- --deny warnings
 
-      - uses: bcomnes/cleanup-xvfb@v1.0.9
+      - name: "clippy check libadwaita examples"
+        run: cd examples/libadwaita && cargo clippy --examples -- --deny warnings
 
   fmt:
     name: rustfmt
