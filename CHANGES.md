@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
++ core: Return `Result` from `FactorySender#output` method (so that errors are not silently unwrapped)
+
 ## 0.7.0-beta.1 - 2023-9-23
 
 ### Added
