@@ -7,9 +7,6 @@ use relm4_components::simple_combo_box::SimpleComboBox;
 
 type ComboContent = &'static str;
 
-const LANGS: &[ComboContent] = &[
-    "English", "German", "French", "Polish", "Russian", "Chinese",
-];
 const GREETINGS: &[&str] = &["Hello!", "Hallo!", "Salut!", "Siema!", "привет!", "你好！"];
 
 #[derive(Debug)]
@@ -24,7 +21,11 @@ struct App {
 
 impl App {
     fn lang(&self) -> &str {
-        LANGS[self.idx]
+        // you can also use self.combo.model().variants[self.idx]
+        self.combo
+            .model()
+            .get_active_elem()
+            .expect("combo box should have an active element")
     }
 
     fn greeting(&self) -> &str {
@@ -73,12 +74,16 @@ impl SimpleComponent for App {
     ) -> ComponentParts<Self> {
         let default_idx = 0;
 
+        let langs = vec![
+            "English", "German", "French", "Polish", "Russian", "Chinese",
+        ];
+
         let combo = SimpleComboBox::builder()
             .launch(SimpleComboBox {
-                variants: LANGS.to_vec(),
+                variants: langs,
                 active_index: Some(default_idx),
             })
-            .forward(sender.input_sender(), |idx| AppMsg::ComboChanged(idx));
+            .forward(sender.input_sender(), AppMsg::ComboChanged);
 
         let model = App {
             combo,
