@@ -263,7 +263,7 @@ pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
 ///             gtk::Button {
 ///                 set_label: "To start",
 ///                 connect_clicked[sender, index] => move |_| {
-///                     sender.output(CounterOutput::SendFront(index.clone()))
+///                     sender.output(CounterOutput::SendFront(index.clone()));
 ///                 }
 ///             }
 ///         }

@@ -57,7 +57,7 @@ impl FactoryComponent for Counter {
             gtk::Button {
                 set_label: "Up",
                 connect_clicked[sender, index] => move |_| {
-                    sender.output(CounterOutput::MoveUp(index.clone()))
+                    sender.output(CounterOutput::MoveUp(index.clone()));
                 }
             },
 
@@ -65,7 +65,7 @@ impl FactoryComponent for Counter {
             gtk::Button {
                 set_label: "Down",
                 connect_clicked[sender, index] => move |_| {
-                    sender.output(CounterOutput::MoveDown(index.clone()))
+                    sender.output(CounterOutput::MoveDown(index.clone()));
                 }
             },
 
@@ -73,14 +73,14 @@ impl FactoryComponent for Counter {
             gtk::Button {
                 set_label: "To Start",
                 connect_clicked[sender, index] => move |_| {
-                    sender.output(CounterOutput::SendFront(index.clone()))
+                    sender.output(CounterOutput::SendFront(index.clone()));
                 }
             },
 
             gtk::Button {
                 set_label: "Remove",
                 connect_clicked[sender, index] => move |_| {
-                    sender.output(CounterOutput::Remove(index.clone()))
+                    sender.output(CounterOutput::Remove(index.clone()));
                 }
             }
         }
