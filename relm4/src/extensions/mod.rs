@@ -202,4 +202,7 @@ mod libadwaita {
         adw::ToastOverlay,
         adw::ExpanderRow
     }
+
+    #[cfg(feature = "gnome_45")]
+    container_child_impl! { adw::NavigationPage }
 }
