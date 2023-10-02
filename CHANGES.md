@@ -12,6 +12,8 @@
 
 + core: Add `AsyncComponentStream` to supports streams for async components as well
 + core: Builder pattern for initializing factories similar to regular components
++ core: Implement `RelmContainerExt` for libadwaita 1.4's `NavigationView`
++ core: Implement `RelmSetChildExt` for libadwaita 1.4's `NavigationPage`
 + components: Add `SimpleComboRow` helper for libadwaita's `ComboRow`, analogous to `SimpleComboBox`
 + components: Add an example for `SimpleComboRow`
 + components: Add an example how to use `SimpleComboBox`
