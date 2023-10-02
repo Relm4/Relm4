@@ -67,4 +67,12 @@ mod libadwaita {
             self.add(widget.as_ref());
         }
     }
+
+    #[cfg(feature = "gnome_45")]
+    impl RelmContainerExt for adw::NavigationView {
+        fn container_add(&self, widget: &impl AsRef<gtk::Widget>) {
+            use gtk::prelude::Cast;
+            self.add(widget.as_ref().downcast_ref::<adw::NavigationPage>().expect("Not a adw::NavigationPage."));
+        }
+    }
 }
