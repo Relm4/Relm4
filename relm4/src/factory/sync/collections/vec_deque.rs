@@ -11,6 +11,7 @@ use std::collections::hash_map::DefaultHasher;
 use std::collections::VecDeque;
 use std::hash::Hash;
 use std::iter::FusedIterator;
+use std::marker::PhantomData;
 use std::ops::{Deref, Index, IndexMut};
 
 #[cfg(feature = "libadwaita")]
@@ -386,11 +387,33 @@ where
 }
 
 #[derive(Debug)]
+/// A builder-pattern struct for building a [`FactoryVecDeque`].
 pub struct FactoryVecDequeBuilder<C>
 where
     C: FactoryComponent<Index = DynamicIndex>,
 {
-    widget: C::ParentWidget,
+    _component: PhantomData<C>,
+}
+
+impl<C> Default for FactoryVecDequeBuilder<C>
+where
+    C: FactoryComponent<Index = DynamicIndex>,
+{
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl<C> FactoryVecDequeBuilder<C>
+where
+    C: FactoryComponent<Index = DynamicIndex>,
+    C::ParentWidget: Default,
+{
+    /// Launch the factory with a default parent widget.
+    #[must_use]
+    pub fn launch_default(self) -> FactoryVecDequeConnector<C> {
+        self.launch(Default::default())
+    }
 }
 
 impl<C> FactoryVecDequeBuilder<C>
@@ -398,15 +421,20 @@ where
     C: FactoryComponent<Index = DynamicIndex>,
 {
     /// Create a builder for this component.
-    pub fn new(widget: C::ParentWidget) -> Self {
-        Self { widget }
+    #[must_use]
+    pub fn new() -> Self {
+        Self {
+            _component: PhantomData,
+        }
     }
 
-    pub fn launch(self) -> FactoryVecDequeConnector<C> {
+    /// Launch the factory.
+    /// This is similar to [`Connector::launch`](crate::component::ComponentBuilder::launch).
+    pub fn launch(self, widget: C::ParentWidget) -> FactoryVecDequeConnector<C> {
         let (output_sender, output_receiver) = crate::channel();
 
         FactoryVecDequeConnector {
-            widget: self.widget,
+            widget,
             output_sender,
             output_receiver,
         }
@@ -414,6 +442,7 @@ where
 }
 
 #[derive(Debug)]
+/// Second stage of the builder-pattern for building a [`FactoryVecDeque`].
 pub struct FactoryVecDequeConnector<C>
 where
     C: FactoryComponent<Index = DynamicIndex>,
@@ -522,8 +551,8 @@ where
 {
     /// Creates a builder for making a [`FactoryVecDeque`].
     #[must_use]
-    pub fn builder(widget: C::ParentWidget) -> FactoryVecDequeBuilder<C> {
-        FactoryVecDequeBuilder::new(widget)
+    pub fn builder() -> FactoryVecDequeBuilder<C> {
+        FactoryVecDequeBuilder::new()
     }
 
     /// Provides a [`FactoryVecDequeGuard`] that can be used to edit the factory.
@@ -691,7 +720,7 @@ where
         component_iter: impl IntoIterator<Item = C::Init>,
         widget: C::ParentWidget,
     ) -> Self {
-        let mut output = Self::builder(widget).launch().detach();
+        let mut output = Self::builder().launch(widget).detach();
         {
             let mut edit = output.guard();
             for component in component_iter {
@@ -710,8 +739,8 @@ where
 {
     fn clone(&self) -> Self {
         // Create a new, empty FactoryVecDeque.
-        let mut clone = FactoryVecDeque::builder(self.widget.clone())
-            .launch()
+        let mut clone = FactoryVecDeque::builder()
+            .launch(self.widget.clone())
             .detach();
         // Iterate over the items in the original FactoryVecDeque.
         for item in self.iter() {

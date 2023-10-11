@@ -3,8 +3,10 @@
 mod hashmap;
 mod vec_deque;
 
-pub use hashmap::FactoryHashMap;
-pub use vec_deque::{FactoryVecDeque, FactoryVecDequeGuard};
+pub use hashmap::{FactoryHashMap, FactoryHashMapBuilder, FactoryHashMapConnector};
+pub use vec_deque::{
+    FactoryVecDeque, FactoryVecDequeBuilder, FactoryVecDequeConnector, FactoryVecDequeGuard,
+};
 
 use crate::factory::DynamicIndex;
 

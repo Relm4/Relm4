@@ -76,7 +76,7 @@ impl FactoryComponent for Task {
                     connect_activate[sender, index] => move |entry| {
                         // activate means 'enter' was pressed, so user is done editing
                         let new_name: String = entry.text().into();
-                        sender.output(TaskOutput::Name(index.clone(), new_name));
+                        sender.output(TaskOutput::Name(index.clone(), new_name)).unwrap();
                     }
                 },
 
@@ -85,7 +85,7 @@ impl FactoryComponent for Task {
                     set_tooltip: "Delete Task",
 
                     connect_clicked[sender, index] => move |_| {
-                        sender.output(TaskOutput::Delete(index.clone()));
+                        sender.output(TaskOutput::Delete(index.clone())).unwrap();
                     }
                 },
             },
@@ -108,7 +108,7 @@ impl FactoryComponent for Task {
                                 set_label: "#home",
 
                                 connect_clicked[sender, index] => move |_| {
-                                    sender.output(TaskOutput::AddTag(index.clone(), "#home".into()));
+                                    sender.output(TaskOutput::AddTag(index.clone(), "#home".into())).unwrap();
                                 }
                             },
 
@@ -116,7 +116,7 @@ impl FactoryComponent for Task {
                                 set_label: "#work",
 
                                 connect_clicked[sender, index] => move |_| {
-                                    sender.output(TaskOutput::AddTag(index.clone(), "#work".into()));
+                                    sender.output(TaskOutput::AddTag(index.clone(), "#work".into())).unwrap();
                                 }
                             }
                         }
@@ -162,13 +162,14 @@ impl FactoryComponent for Task {
     fn init_model(_name: Self::Init, index: &DynamicIndex, sender: FactorySender<Self>) -> Self {
         let task_index = index.clone();
 
-        let tags = FactoryVecDeque::builder(gtk::Box::default())
-            .launch()
-            .forward(sender.output_sender(), move |output| match output {
+        let tags = FactoryVecDeque::builder().launch_default().forward(
+            sender.output_sender(),
+            move |output| match output {
                 TagOutput::Delete(tag_index) => {
                     TaskOutput::DeleteTag(task_index.clone(), tag_index)
                 }
-            });
+            },
+        );
 
         Self {
             name: "".into(),
@@ -209,7 +210,7 @@ impl FactoryComponent for Tag {
                     set_label: "Delete",
 
                     connect_clicked[sender, index] => move |_| {
-                        sender.output(TagOutput::Delete(index.clone()));
+                        sender.output(TagOutput::Delete(index.clone())).unwrap();
                     }
                 }
             }
@@ -546,16 +547,17 @@ impl SimpleComponent for App {
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let view = FactoryVecDeque::builder(gtk::ListBox::default())
-            .launch()
-            .forward(sender.input_sender(), |msg| match msg {
-                TaskOutput::Delete(index) => AppInput::DeleteTask(index),
-                TaskOutput::Name(index, name) => AppInput::ChangeTaskName(index, name),
-                TaskOutput::AddTag(index, name) => AppInput::AddTag(index, name),
-                TaskOutput::DeleteTag(task_index, tag_index) => {
-                    AppInput::DeleteTag(task_index, tag_index)
-                }
-            });
+        let view =
+            FactoryVecDeque::builder()
+                .launch_default()
+                .forward(sender.input_sender(), |msg| match msg {
+                    TaskOutput::Delete(index) => AppInput::DeleteTask(index),
+                    TaskOutput::Name(index, name) => AppInput::ChangeTaskName(index, name),
+                    TaskOutput::AddTag(index, name) => AppInput::AddTag(index, name),
+                    TaskOutput::DeleteTag(task_index, tag_index) => {
+                        AppInput::DeleteTag(task_index, tag_index)
+                    }
+                });
 
         let document =
             Document::builder()

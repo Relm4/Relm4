@@ -73,7 +73,7 @@ impl<C: Component> Connector<C> {
         }
     }
 
-    /// Ignore outputs from the component and take the handle.
+    /// Ignore outputs from the component and finish the builder.
     pub fn detach(self) -> Controller<C> {
         let Self {
             state,

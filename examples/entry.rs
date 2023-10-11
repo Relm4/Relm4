@@ -32,7 +32,7 @@ impl FactoryComponent for Counter {
             #[watch]
             set_label: &self.value.to_string(),
             connect_clicked[index] => move |_| {
-                sender.output(AppMsg::Clicked(index.clone()));
+                sender.output(AppMsg::Clicked(index.clone())).unwrap();
             },
         }
     }
@@ -81,8 +81,8 @@ impl SimpleComponent for App {
     ) -> ComponentParts<Self> {
         let factory_box = gtk::Box::default();
 
-        let counters = FactoryVecDeque::builder(factory_box.clone())
-            .launch()
+        let counters = FactoryVecDeque::builder()
+            .launch(factory_box.clone())
             .forward(sender.input_sender(), |output| output);
 
         let model = App {

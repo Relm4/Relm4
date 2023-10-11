@@ -2,9 +2,19 @@
 
 ## Unreleased
 
+### Added
+
++ core: Add builder for initializing async factories
++ core: Add `launch_default()` method to factory builders for launching with default parent widget
+
 ### Changed
 
 + core: Return `Result` from `FactorySender#output` method (so that errors are not silently unwrapped)
++ core: Move parameters from `builder()` to `launch()` in factories for more consistency
+
+### Fixed
+
++ core: Properly re-export factory builder types and document them
 
 ## 0.7.0-beta.1 - 2023-9-23
 

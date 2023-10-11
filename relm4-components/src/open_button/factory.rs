@@ -25,7 +25,7 @@ impl FactoryComponent for FileListItem {
                 set_label: self.path.iter().last().expect("Empty path").to_str().unwrap(),
                 set_margin_all: 0,
                 connect_clicked[sender, index] => move |_| {
-                    sender.output(OpenButtonMsg::OpenRecent(index.clone()));
+                    sender.output(OpenButtonMsg::OpenRecent(index.clone())).unwrap();
                 }
             }
         }

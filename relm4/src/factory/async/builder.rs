@@ -16,7 +16,6 @@ pub(super) struct AsyncFactoryBuilder<C: AsyncFactoryComponent> {
     pub(super) root_widget: C::Root,
     pub(super) component_sender: AsyncFactorySender<C>,
     input_receiver: Receiver<C::Input>,
-    output_receiver: Receiver<C::Output>,
     cmd_receiver: Receiver<C::CommandOutput>,
     shutdown_notifier: ShutdownSender,
 }
@@ -25,12 +24,9 @@ impl<C: AsyncFactoryComponent> AsyncFactoryBuilder<C>
 where
     <C::ParentWidget as FactoryView>::ReturnedWidget: Clone,
 {
-    pub(super) fn new(init: C::Init) -> Self {
+    pub(super) fn new(init: C::Init, output_sender: Sender<C::Output>) -> Self {
         // Used for all events to be processed by this component's internal service.
         let (input_sender, input_receiver) = crate::channel::<C::Input>();
-
-        // Used by this component to send events to be handled externally by the caller.
-        let (output_sender, output_receiver) = crate::channel::<C::Output>();
 
         // Sends messages from commands executed from the background.
         let (cmd_sender, cmd_receiver) = crate::channel::<C::CommandOutput>();
@@ -49,43 +45,25 @@ where
             root_widget,
             component_sender,
             input_receiver,
-            output_receiver,
             cmd_receiver,
             shutdown_notifier,
         }
     }
 
     /// Starts the component, passing ownership to a future attached to a [gtk::glib::MainContext].
-    pub(super) fn launch<Transform>(
+    pub(super) fn launch(
         self,
         index: &DynamicIndex,
         returned_widget: <C::ParentWidget as FactoryView>::ReturnedWidget,
-        parent_sender: &Sender<C::ParentInput>,
-        transform: Transform,
-    ) -> AsyncFactoryHandle<C>
-    where
-        Transform: Fn(C::Output) -> Option<C::ParentInput> + 'static,
-    {
+    ) -> AsyncFactoryHandle<C> {
         let Self {
             mut root_widget,
             component_sender,
             input_receiver,
-            output_receiver,
             cmd_receiver,
             shutdown_notifier,
             init,
         } = self;
-
-        let forward_sender = parent_sender.0.clone();
-        crate::spawn_local(async move {
-            while let Some(msg) = output_receiver.recv().await {
-                if let Some(new_msg) = transform(msg) {
-                    if forward_sender.send(new_msg).is_err() {
-                        break;
-                    }
-                }
-            }
-        });
 
         // Gets notifications when a component's model and view is updated externally.
         let (notifier, notifier_receiver) = crate::channel();
@@ -138,7 +116,6 @@ impl<C: AsyncFactoryComponent> std::fmt::Debug for AsyncFactoryBuilder<C> {
             .field("root_widget", &self.root_widget)
             .field("component_sender", &"<AsyncComponentSender<C>>")
             .field("input_receiver", &self.input_receiver)
-            .field("output_receiver", &self.output_receiver)
             .field("cmd_receiver", &self.cmd_receiver)
             .field("shutdown_notifier", &self.shutdown_notifier)
             .finish()

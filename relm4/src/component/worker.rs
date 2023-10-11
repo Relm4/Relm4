@@ -235,7 +235,7 @@ where
         }
     }
 
-    /// Ignore outputs from the component and take the handle.
+    /// Ignore outputs from the component and finish the builder.
     #[must_use]
     pub fn detach(self) -> WorkerController<W> {
         let Self {

@@ -186,6 +186,16 @@ macro_rules! sender_impl {
                 self.shared.input(message);
             }
 
+            /// Emit an output to the component.
+            ///
+            /// Returns [`Err`] if all receivers were dropped,
+            /// for example by [`detach`].
+            ///
+            /// [`detach`]: crate::component::Connector::detach
+            pub fn output(&self, message: C::Output) -> Result<(), C::Output> {
+                self.shared.output(message)
+            }
+
             /// Spawns an asynchronous command.
             /// You can bind the the command to the lifetime of the component
             /// by using a [`ShutdownReceiver`].
@@ -243,50 +253,6 @@ macro_rules! sender_impl {
 }
 
 sender_impl!(ComponentSender, Component);
-
-impl<C: Component> ComponentSender<C> {
-    /// Emit an output to the component.
-    ///
-    /// Returns [`Err`] if all receivers were dropped,
-    /// for example by [`detach`].
-    ///
-    /// [`detach`]: crate::component::Connector::detach
-    pub fn output(&self, message: C::Output) -> Result<(), C::Output> {
-        self.shared.output(message)
-    }
-}
-
 sender_impl!(AsyncComponentSender, AsyncComponent);
-
-impl<C: AsyncComponent> AsyncComponentSender<C> {
-    /// Emit an output to the component.
-    ///
-    /// Returns [`Err`] if all receivers were dropped,
-    /// for example by [`detach`].
-    ///
-    /// [`detach`]: crate::component::AsyncConnector::detach
-    pub fn output(&self, message: C::Output) -> Result<(), C::Output> {
-        self.shared.output(message)
-    }
-}
-
 sender_impl!(FactorySender, FactoryComponent);
-
-impl<C: FactoryComponent> FactorySender<C> {
-    /// Emit an output to the component.
-    ///
-    /// Returns [`Err`] if all receivers were dropped,
-    /// for example by the `detach` method.
-    pub fn output(&self, message: C::Output) -> Result<(), C::Output> {
-        self.shared.output(message)
-    }
-}
-
 sender_impl!(AsyncFactorySender, AsyncFactoryComponent);
-
-impl<C: AsyncFactoryComponent> AsyncFactorySender<C> {
-    /// Emit an output to the component.
-    pub fn output(&self, message: C::Output) {
-        self.shared.output(message).unwrap()
-    }
-}

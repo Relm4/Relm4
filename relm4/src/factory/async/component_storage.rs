@@ -1,5 +1,4 @@
 use crate::factory::{DynamicIndex, FactoryView};
-use crate::Sender;
 
 use super::traits::AsyncFactoryComponent;
 use super::AsyncFactoryBuilder;
@@ -63,15 +62,9 @@ where
         self,
         index: &DynamicIndex,
         returned_widget: <C::ParentWidget as FactoryView>::ReturnedWidget,
-        parent_sender: &Sender<C::ParentInput>,
     ) -> Option<Self> {
         if let Self::Builder(builder) = self {
-            Some(Self::Final(builder.launch(
-                index,
-                returned_widget,
-                parent_sender,
-                C::forward_to_parent,
-            )))
+            Some(Self::Final(builder.launch(index, returned_widget)))
         } else {
             None
         }

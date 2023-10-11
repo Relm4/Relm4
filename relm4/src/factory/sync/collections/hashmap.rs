@@ -50,10 +50,32 @@ where
 }
 
 #[derive(Debug)]
+/// A builder-pattern struct for building a [`FactoryHashMap`].
 pub struct FactoryHashMapBuilder<K, C: FactoryComponent, S = RandomState> {
     hasher: S,
-    widget: C::ParentWidget,
+    _component: PhantomData<C>,
     _key: PhantomData<K>,
+}
+
+impl<K, C> Default for FactoryHashMapBuilder<K, C>
+where
+    C: FactoryComponent,
+{
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl<K, C> FactoryHashMapBuilder<K, C>
+where
+    C: FactoryComponent,
+    C::ParentWidget: Default,
+{
+    #[must_use]
+    /// Launch the factory with a default parent widget.
+    pub fn launch_default(self) -> FactoryHashMapConnector<K, C> {
+        self.launch(Default::default())
+    }
 }
 
 impl<K, C> FactoryHashMapBuilder<K, C>
@@ -62,30 +84,31 @@ where
 {
     /// Creates a new [`FactoryHashMapBuilder`].
     #[must_use]
-    pub fn new(widget: C::ParentWidget) -> Self {
+    pub fn new() -> Self {
         Self {
             hasher: RandomState::default(),
-            widget,
+            _component: PhantomData,
             _key: PhantomData,
         }
     }
 
+    /// Sets a different hasher.
     pub fn hasher<H: Hasher>(self, hasher: H) -> FactoryHashMapBuilder<K, C, H> {
-        let Self { widget, _key, .. } = self;
+        let Self {
+            _component, _key, ..
+        } = self;
 
         FactoryHashMapBuilder {
             hasher,
-            widget,
+            _component,
             _key,
         }
     }
 
-    pub fn launch(self) -> FactoryHashMapConnector<K, C> {
-        let Self {
-            widget,
-            hasher,
-            _key,
-        } = self;
+    /// Launch the factory.
+    /// This is similar to [`Connector::launch`](crate::component::ComponentBuilder::launch).
+    pub fn launch(self, widget: C::ParentWidget) -> FactoryHashMapConnector<K, C> {
+        let Self { hasher, _key, .. } = self;
 
         let (output_sender, output_receiver) = crate::channel();
 
@@ -100,6 +123,7 @@ where
 }
 
 #[derive(Debug)]
+/// Second stage of the builder-pattern for building a [`FactoryHashMap`].
 pub struct FactoryHashMapConnector<K, C, S = RandomState>
 where
     C: FactoryComponent,
@@ -115,6 +139,7 @@ impl<K, C> FactoryHashMapConnector<K, C>
 where
     C: FactoryComponent,
 {
+    /// Forwards output events to the designated sender.
     pub fn forward<F, Msg>(self, sender_: &Sender<Msg>, f: F) -> FactoryHashMap<K, C>
     where
         F: Fn(C::Output) -> Msg + Send + 'static,
@@ -146,6 +171,7 @@ where
         }
     }
 
+    /// Ignore outputs from the component and finish the builder.
     pub fn detach(self) -> FactoryHashMap<K, C> {
         let Self {
             widget,
@@ -199,8 +225,8 @@ where
 {
     /// Creates a new [`FactoryHashMap`].
     #[must_use]
-    pub fn builder(widget: C::ParentWidget) -> FactoryHashMapBuilder<K, C> {
-        FactoryHashMapBuilder::new(widget)
+    pub fn builder() -> FactoryHashMapBuilder<K, C> {
+        FactoryHashMapBuilder::new()
     }
 }
 
@@ -261,7 +287,7 @@ where
 {
     /// Creates a [`FactoryHashMap`] from a [`Vec`].
     pub fn from_vec(component_vec: Vec<(K, C::Init)>, widget: C::ParentWidget) -> Self {
-        let mut output = Self::builder(widget).launch().detach();
+        let mut output = Self::builder().launch(widget).detach();
         for (key, init) in component_vec {
             output.insert(key, init);
         }
@@ -341,8 +367,8 @@ where
 {
     fn clone(&self) -> Self {
         // Create a new, empty FactoryHashMap.
-        let mut clone = FactoryHashMap::builder(self.widget.clone())
-            .launch()
+        let mut clone = FactoryHashMap::builder()
+            .launch(self.widget.clone())
             .detach();
         // Iterate over the items in the original FactoryHashMap.
         for (k, item) in self.iter() {
