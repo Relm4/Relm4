@@ -203,6 +203,6 @@ mod libadwaita {
         adw::ExpanderRow
     }
 
-    #[cfg(feature = "gnome_45")]
+    #[cfg(all(feature = "libadwaita", feature = "gnome_45"))]
     container_child_impl! { adw::NavigationPage }
 }

@@ -77,7 +77,7 @@ mod libadwaita {
         adw::ToastOverlay
     );
 
-    #[cfg(feature = "gnome_45")]
+    #[cfg(all(feature = "libadwaita", feature = "gnome_45"))]
     mod gnome_45 {
         use super::RelmSetChildExt;
         use adw::prelude::NavigationPageExt;
