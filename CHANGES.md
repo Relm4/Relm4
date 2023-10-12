@@ -6,6 +6,8 @@
 
 + core: Add builder for initializing async factories
 + core: Add `launch_default()` method to factory builders for launching with default parent widget
++ core: Implement `RelmContainerExt` for libadwaita 1.4's `NavigationView`
++ core: Implement `RelmSetChildExt` for libadwaita 1.4's `NavigationPage`
 
 ### Changed
 
