@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
++ core: Implement `RelmContainerExt` for libadwaita 1.4's `NavigationView`
++ core: Implement `RelmSetChildExt` for libadwaita 1.4's `NavigationPage`
+
 ### Changed
 
 + core: Return `Result` from `FactorySender#output` method (so that errors are not silently unwrapped)
