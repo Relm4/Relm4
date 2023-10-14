@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.7.0-beta.2 - 2023-10-14
+
 ### Added
 
 + core: Add builder for initializing async factories
