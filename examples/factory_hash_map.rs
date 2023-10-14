@@ -146,9 +146,7 @@ impl SimpleComponent for App {
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let counters = FactoryHashMap::builder(gtk::Stack::default())
-            .launch()
-            .detach();
+        let counters = FactoryHashMap::builder().launch_default().detach();
 
         let model = App {
             created_widgets: counter,

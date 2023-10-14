@@ -7,5 +7,8 @@ mod traits;
 use builder::FactoryBuilder;
 use handle::FactoryHandle;
 
-pub use collections::{FactoryHashMap, FactoryVecDeque, FactoryVecDequeGuard};
+pub use collections::{
+    FactoryHashMap, FactoryHashMapBuilder, FactoryHashMapConnector, FactoryVecDeque,
+    FactoryVecDequeBuilder, FactoryVecDequeConnector, FactoryVecDequeGuard,
+};
 pub use traits::{CloneableFactoryComponent, FactoryComponent};

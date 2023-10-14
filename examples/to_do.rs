@@ -51,7 +51,7 @@ impl FactoryComponent for Task {
                 set_margin_all: 12,
 
                 connect_clicked[sender, index] => move |_| {
-                    sender.output(TaskOutput::Delete(index.clone()));
+                    sender.output(TaskOutput::Delete(index.clone())).unwrap();
                 }
             }
         }
@@ -134,11 +134,12 @@ impl SimpleComponent for App {
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let tasks = FactoryVecDeque::builder(gtk::ListBox::default())
-            .launch()
-            .forward(sender.input_sender(), |output| match output {
-                TaskOutput::Delete(index) => AppMsg::DeleteEntry(index),
-            });
+        let tasks =
+            FactoryVecDeque::builder()
+                .launch_default()
+                .forward(sender.input_sender(), |output| match output {
+                    TaskOutput::Delete(index) => AppMsg::DeleteEntry(index),
+                });
 
         let model = App { tasks };
 

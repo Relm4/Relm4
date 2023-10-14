@@ -1,4 +1,4 @@
-use crate::Sender;
+use crate::{Receiver, Sender};
 
 use crate::factory::r#async::component_storage::AsyncComponentStorage;
 use crate::factory::r#async::traits::AsyncFactoryComponent;
@@ -11,6 +11,7 @@ use std::collections::hash_map::DefaultHasher;
 use std::collections::VecDeque;
 use std::hash::Hash;
 use std::iter::FusedIterator;
+use std::marker::PhantomData;
 use std::ops::Deref;
 
 #[cfg(feature = "libadwaita")]
@@ -231,7 +232,7 @@ where
             states.index.increment();
         }
 
-        let builder = AsyncFactoryBuilder::new(init);
+        let builder = AsyncFactoryBuilder::new(init, self.output_sender.clone());
 
         self.inner
             .components
@@ -388,6 +389,129 @@ where
     }
 }
 
+#[derive(Debug)]
+/// A builder-pattern struct for building a [`AsyncFactoryVecDeque`].
+pub struct AsyncFactoryVecDequeBuilder<C>
+where
+    C: AsyncFactoryComponent,
+{
+    _component: PhantomData<C>,
+}
+
+impl<C> Default for AsyncFactoryVecDequeBuilder<C>
+where
+    C: AsyncFactoryComponent,
+{
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+impl<C> AsyncFactoryVecDequeBuilder<C>
+where
+    C: AsyncFactoryComponent,
+    C::ParentWidget: Default,
+{
+    /// Launch the factory with a default parent widget.
+    #[must_use]
+    pub fn launch_default(self) -> AsyncFactoryVecDequeConnector<C> {
+        self.launch(Default::default())
+    }
+}
+
+impl<C> AsyncFactoryVecDequeBuilder<C>
+where
+    C: AsyncFactoryComponent,
+{
+    /// Create a builder for this component.
+    #[must_use]
+    pub fn new() -> Self {
+        Self {
+            _component: PhantomData,
+        }
+    }
+
+    /// Launch the factory.
+    /// This is similar to [`Connector::launch`](crate::component::ComponentBuilder::launch).
+    pub fn launch(self, widget: C::ParentWidget) -> AsyncFactoryVecDequeConnector<C> {
+        let (output_sender, output_receiver) = crate::channel();
+
+        AsyncFactoryVecDequeConnector {
+            widget,
+            output_sender,
+            output_receiver,
+        }
+    }
+}
+
+#[derive(Debug)]
+/// Second stage of the builder-pattern for building a [`AsyncFactoryVecDeque`].
+pub struct AsyncFactoryVecDequeConnector<C>
+where
+    C: AsyncFactoryComponent,
+{
+    widget: C::ParentWidget,
+    output_sender: Sender<C::Output>,
+    output_receiver: Receiver<C::Output>,
+}
+
+impl<C> AsyncFactoryVecDequeConnector<C>
+where
+    C: AsyncFactoryComponent,
+    <C::ParentWidget as FactoryView>::ReturnedWidget: Clone,
+{
+    /// Forwards output events from child components to the designated sender.
+    pub fn forward<F, Msg>(self, sender_: &Sender<Msg>, f: F) -> AsyncFactoryVecDeque<C>
+    where
+        F: Fn(C::Output) -> Msg + Send + 'static,
+        C::Output: Send,
+        Msg: Send + 'static,
+    {
+        let Self {
+            widget,
+            output_sender,
+            output_receiver,
+        } = self;
+
+        let sender_clone = sender_.clone();
+        crate::spawn(async move {
+            while let Some(msg) = output_receiver.recv().await {
+                if sender_clone.send(f(msg)).is_err() {
+                    break;
+                }
+            }
+        });
+
+        AsyncFactoryVecDeque {
+            widget,
+            output_sender,
+            components: VecDeque::new(),
+            model_state: VecDeque::new(),
+            rendered_state: VecDeque::new(),
+            // 0 is always an invalid uid
+            uid_counter: 1,
+        }
+    }
+
+    /// Ignore output events from child components and just create the [`AsyncFactoryVecDeque`].
+    pub fn detach(self) -> AsyncFactoryVecDeque<C> {
+        let Self {
+            widget,
+            output_sender,
+            ..
+        } = self;
+        AsyncFactoryVecDeque {
+            widget,
+            output_sender,
+            components: VecDeque::new(),
+            model_state: VecDeque::new(),
+            rendered_state: VecDeque::new(),
+            // 0 is always an invalid uid
+            uid_counter: 1,
+        }
+    }
+}
+
 /// A container similar to [`VecDeque`] that can be used to store
 /// data associated with components that implement [`AsyncFactoryComponent`].
 ///
@@ -398,7 +522,7 @@ where
     <C::ParentWidget as FactoryView>::ReturnedWidget: Clone,
 {
     widget: C::ParentWidget,
-    parent_sender: Sender<C::ParentInput>,
+    output_sender: Sender<C::Output>,
     components: VecDeque<AsyncComponentStorage<C>>,
     model_state: VecDeque<ModelStateValue>,
     rendered_state: VecDeque<RenderedState>,
@@ -418,18 +542,10 @@ impl<C: AsyncFactoryComponent> AsyncFactoryVecDeque<C>
 where
     <C::ParentWidget as FactoryView>::ReturnedWidget: Clone,
 {
-    /// Creates a new [`AsyncFactoryVecDeque`].
+    /// Creates a new [`AsyncFactoryVecDequeBuilder`].
     #[must_use]
-    pub fn new(widget: C::ParentWidget, parent_sender: &Sender<C::ParentInput>) -> Self {
-        Self {
-            widget,
-            parent_sender: parent_sender.clone(),
-            components: VecDeque::new(),
-            model_state: VecDeque::new(),
-            rendered_state: VecDeque::new(),
-            // 0 is always an invalid uid
-            uid_counter: 1,
-        }
+    pub fn builder() -> AsyncFactoryVecDequeBuilder<C> {
+        AsyncFactoryVecDequeBuilder::new()
     }
 
     /// Provides a [`AsyncFactoryVecDequeGuard`] that can be used to edit the factory.
@@ -501,9 +617,7 @@ where
                 };
                 let component = components.remove(index).unwrap();
                 let dyn_index = &self.model_state[index].index;
-                let component = component
-                    .launch(dyn_index, returned_widget, &self.parent_sender)
-                    .unwrap();
+                let component = component.launch(dyn_index, returned_widget).unwrap();
                 components.insert(index, component);
             }
         }

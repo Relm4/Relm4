@@ -15,9 +15,13 @@ mod sync;
 mod data_guard;
 use data_guard::DataGuard;
 
-pub use r#async::{AsyncFactoryComponent, AsyncFactoryVecDeque, AsyncFactoryVecDequeGuard};
+pub use r#async::{
+    AsyncFactoryComponent, AsyncFactoryVecDeque, AsyncFactoryVecDequeBuilder,
+    AsyncFactoryVecDequeConnector, AsyncFactoryVecDequeGuard,
+};
 pub use sync::{
-    CloneableFactoryComponent, FactoryComponent, FactoryHashMap, FactoryVecDeque,
+    CloneableFactoryComponent, FactoryComponent, FactoryHashMap, FactoryHashMapBuilder,
+    FactoryHashMapConnector, FactoryVecDeque, FactoryVecDequeBuilder, FactoryVecDequeConnector,
     FactoryVecDequeGuard,
 };
 

@@ -74,7 +74,7 @@ impl<C: AsyncComponent> AsyncConnector<C> {
         }
     }
 
-    /// Ignore outputs from the component and take the handle.
+    /// Ignore outputs from the component and finish the builder.
     pub fn detach(self) -> AsyncController<C> {
         let Self {
             widget,

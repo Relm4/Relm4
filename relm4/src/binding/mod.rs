@@ -8,7 +8,7 @@
 //! In any case, the primary property type are always documented.
 //!
 //! To find out which widgets are currently supported and which property is considered as primary,
-//! please look at the list implementors for [`ConnectBinding`].
+//! please look at the list implementers for [`ConnectBinding`].
 //! Contributions to add support for more widgets are always welcome.
 
 mod bindings;

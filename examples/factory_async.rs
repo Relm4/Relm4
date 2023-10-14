@@ -32,7 +32,6 @@ impl AsyncFactoryComponent for Counter {
     type Input = CounterMsg;
     type Output = CounterOutput;
     type CommandOutput = ();
-    type ParentInput = AppMsg;
     type ParentWidget = gtk::Box;
 
     view! {
@@ -60,7 +59,7 @@ impl AsyncFactoryComponent for Counter {
             gtk::Button {
                 set_label: "Up",
                 connect_clicked[sender, index] => move |_| {
-                    sender.output(CounterOutput::MoveUp(index.clone()))
+                    sender.output(CounterOutput::MoveUp(index.clone())).unwrap();
                 }
             },
 
@@ -68,7 +67,7 @@ impl AsyncFactoryComponent for Counter {
             gtk::Button {
                 set_label: "Down",
                 connect_clicked[sender, index] => move |_| {
-                    sender.output(CounterOutput::MoveDown(index.clone()))
+                    sender.output(CounterOutput::MoveDown(index.clone())).unwrap();
                 }
             },
 
@@ -76,14 +75,14 @@ impl AsyncFactoryComponent for Counter {
             gtk::Button {
                 set_label: "To Start",
                 connect_clicked[sender, index] => move |_| {
-                    sender.output(CounterOutput::SendFront(index.clone()))
+                    sender.output(CounterOutput::SendFront(index.clone())).unwrap();
                 }
             },
 
             gtk::Button {
                 set_label: "Remove",
                 connect_clicked[sender, index] => move |_| {
-                    sender.output(CounterOutput::Remove(index.clone()))
+                    sender.output(CounterOutput::Remove(index.clone())).unwrap();
                 }
             }
         }
@@ -107,15 +106,6 @@ impl AsyncFactoryComponent for Counter {
             }
         }
         Some(LoadingWidgets::new(root, spinner))
-    }
-
-    fn forward_to_parent(output: Self::Output) -> Option<AppMsg> {
-        Some(match output {
-            CounterOutput::SendFront(index) => AppMsg::SendFront(index),
-            CounterOutput::MoveUp(index) => AppMsg::MoveUp(index),
-            CounterOutput::MoveDown(index) => AppMsg::MoveDown(index),
-            CounterOutput::Remove(index) => AppMsg::Remove(index),
-        })
     }
 
     async fn init_model(
@@ -199,7 +189,16 @@ impl SimpleComponent for App {
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let counters = AsyncFactoryVecDeque::new(gtk::Box::default(), sender.input_sender());
+        let counters = AsyncFactoryVecDeque::builder().launch_default().forward(
+            sender.input_sender(),
+            |output| match output {
+                CounterOutput::SendFront(index) => AppMsg::SendFront(index),
+                CounterOutput::MoveUp(index) => AppMsg::MoveUp(index),
+                CounterOutput::MoveDown(index) => AppMsg::MoveDown(index),
+                CounterOutput::Remove(index) => AppMsg::Remove(index),
+            },
+        );
+
         let model = App {
             created_widgets: counter,
             counters,

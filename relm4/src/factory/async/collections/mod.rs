@@ -1,7 +1,10 @@
 //! Containers similar to [`std::collections`] that can be used to store factory data.
 
 mod vec_deque;
-pub use vec_deque::{AsyncFactoryVecDeque, AsyncFactoryVecDequeGuard};
+pub use vec_deque::{
+    AsyncFactoryVecDeque, AsyncFactoryVecDequeBuilder, AsyncFactoryVecDequeConnector,
+    AsyncFactoryVecDequeGuard,
+};
 
 use crate::factory::DynamicIndex;
 
