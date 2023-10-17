@@ -79,8 +79,10 @@ impl<T> Receiver<T> {
         self.0.recv().ok()
     }
 
+    /// Convert this receiver into a stream that asynchronously yields
+    /// messages from the channel.
     #[must_use]
-    pub(crate) fn into_stream(self) -> RecvStream<'static, T> {
+    pub fn into_stream(self) -> RecvStream<'static, T> {
         self.0.into_stream()
     }
 

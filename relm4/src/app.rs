@@ -87,11 +87,10 @@ impl<M: Debug + 'static> RelmApp<M> {
                 crate::late_initialization::run_late_init();
 
                 let mut controller = connector.detach();
-                let window = controller.widget().clone();
+                let window = controller.widget();
+                app.add_window(window.as_ref());
 
                 controller.detach_runtime();
-
-                app.add_window(window.as_ref());
             }
         });
 
@@ -111,19 +110,6 @@ impl<M: Debug + 'static> RelmApp<M> {
         // Make sure everything is shut down
         shutdown_all();
         glib::MainContext::ref_thread_default().iteration(true);
-    }
-
-    /// Runs the application with the provided command-line arguments, returns once the application
-    /// is closed.
-    #[deprecated]
-    pub fn run_with_args<C, S>(self, payload: C::Init, args: &[S])
-    where
-        C: Component<Input = M>,
-        C::Root: AsRef<gtk::Window>,
-        S: AsRef<str>,
-    {
-        let args = args.iter().map(|a| a.as_ref().to_string()).collect();
-        self.with_args(args).run::<C>(payload);
     }
 
     /// Runs the application, returns once the application is closed.
@@ -148,11 +134,10 @@ impl<M: Debug + 'static> RelmApp<M> {
                 crate::late_initialization::run_late_init();
 
                 let mut controller = connector.detach();
-                let window = controller.widget().clone();
+                let window = controller.widget();
+                app.add_window(window.as_ref());
 
                 controller.detach_runtime();
-
-                app.add_window(window.as_ref());
             }
         });
 
@@ -172,18 +157,5 @@ impl<M: Debug + 'static> RelmApp<M> {
         // Make sure everything is shut down
         shutdown_all();
         glib::MainContext::ref_thread_default().iteration(true);
-    }
-
-    /// Runs the application with the provided command-line arguments, returns once the application
-    /// is closed.
-    #[deprecated]
-    pub fn run_async_with_args<C, S>(self, payload: C::Init, args: &[S])
-    where
-        C: AsyncComponent<Input = M>,
-        C::Root: AsRef<gtk::Window>,
-        S: AsRef<str>,
-    {
-        let args = args.iter().map(|a| a.as_ref().to_string()).collect();
-        self.with_args(args).run_async::<C>(payload)
     }
 }
