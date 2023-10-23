@@ -8,7 +8,7 @@ impl SimpleComponent for App {
     type Input = ();
     type Output = ();
     
-    fn init(_: (), root: &Self::Root, sender: ComponentSender<Self>) -> ComponentParts<Self> {
+    fn init(_: (), root: Self::Root, sender: ComponentSender<Self>) -> ComponentParts<Self> {
         todo!();
     }
 }

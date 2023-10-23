@@ -36,7 +36,7 @@ impl Component for WebImage {
 
     fn init(
         url: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let widget = gtk::Box::default();

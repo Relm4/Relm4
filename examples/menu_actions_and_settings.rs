@@ -359,7 +359,7 @@ impl relm4::SimpleComponent for Model {
 
     fn init(
         app: gtk::Application,
-        root: &Self::Root,
+        root: Self::Root,
         sender: relm4::ComponentSender<Self>,
     ) -> relm4::ComponentParts<Self> {
         let settings = gio::Settings::new("relm4.example");

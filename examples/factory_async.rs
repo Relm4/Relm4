@@ -186,7 +186,7 @@ impl SimpleComponent for App {
 
     fn init(
         counter: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let counters = AsyncFactoryVecDeque::builder().launch_default().forward(

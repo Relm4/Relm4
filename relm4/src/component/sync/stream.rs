@@ -80,7 +80,7 @@ mod test {
 
         fn init(
             _init: Self::Init,
-            _root: &Self::Root,
+            _root: Self::Root,
             _sender: crate::ComponentSender<Self>,
         ) -> ComponentParts<Self> {
             ComponentParts {

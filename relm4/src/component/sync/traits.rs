@@ -46,7 +46,7 @@ pub trait Component: Sized + 'static {
     /// Creates the initial model and view, docking it into the component.
     fn init(
         init: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self>;
 
@@ -154,7 +154,7 @@ pub trait SimpleComponent: Sized + 'static {
     /// Creates the initial model and view, docking it into the component.
     fn init(
         init: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self>;
 
@@ -195,7 +195,7 @@ where
 
     fn init(
         init: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         C::init(init, root, sender)
@@ -226,7 +226,7 @@ impl SimpleComponent for () {
 
     fn init(
         _init: Self::Init,
-        _root: &Self::Root,
+        _root: Self::Root,
         _sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         ComponentParts {

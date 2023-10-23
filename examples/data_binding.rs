@@ -57,7 +57,7 @@ impl SimpleComponent for App {
     // Initialize the component.
     fn init(
         counter: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let value = BoolBinding::default();

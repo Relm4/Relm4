@@ -125,7 +125,7 @@ impl Component for App {
 
     fn init(
         title: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         // Request the caller to reload its options.

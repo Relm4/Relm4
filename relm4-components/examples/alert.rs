@@ -97,14 +97,14 @@ impl SimpleComponent for App {
 
     fn init(
         _: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = App {
             counter: 0,
             alert_toggle: false,
             dialog: Alert::builder()
-                .transient_for(root)
+                .transient_for(&root)
                 .launch(AlertSettings {
                     text: String::from("Do you want to quit without saving? (First alert)"),
                     secondary_text: Some(String::from("Your counter hasn't reached 42 yet")),
@@ -116,7 +116,7 @@ impl SimpleComponent for App {
                 })
                 .forward(sender.input_sender(), convert_alert_response),
             second_dialog: Alert::builder()
-                .transient_for(root)
+                .transient_for(&root)
                 .launch(AlertSettings {
                     text: String::from("Do you want to quit without saving? (Second alert)"),
                     secondary_text: Some(String::from("Your counter hasn't reached 42 yet")),

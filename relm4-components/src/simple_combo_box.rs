@@ -51,7 +51,7 @@ where
 
     fn init(
         model: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let widgets = root.clone();

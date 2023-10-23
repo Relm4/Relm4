@@ -53,7 +53,7 @@ impl SimpleComponent for Header {
 
     fn init(
         _init: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = Header;
@@ -110,7 +110,7 @@ impl SimpleComponent for Dialog {
 
     fn init(
         init: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = Dialog { hidden: true };
@@ -176,14 +176,14 @@ impl SimpleComponent for App {
 
     fn init(
         _: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let header = Header::builder()
             .launch(())
             .forward(sender.input_sender(), identity);
         let dialog = Dialog::builder()
-            .transient_for(root)
+            .transient_for(&root)
             .launch(DialogInit {
                 text: "Do you want to close before saving?".to_string(),
                 secondary_text: Some("All unsaved changes will be lost".to_string()),

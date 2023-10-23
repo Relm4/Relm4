@@ -76,7 +76,7 @@ impl SimpleComponent for App {
 
     fn init(
         _init: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let factory_box = gtk::Box::default();

@@ -23,7 +23,7 @@ impl SimpleComponent for TestComponent {
 
     fn init(
         _init: Self::Init,
-        _root: &Self::Root,
+        _root: Self::Root,
         _sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = Self::default();

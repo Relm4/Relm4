@@ -155,7 +155,7 @@ impl<S: Select + 'static> SimpleComponent for OpenDialogInner<S> {
 
     fn init(
         settings: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = OpenDialogInner {

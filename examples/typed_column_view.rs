@@ -142,7 +142,7 @@ impl SimpleComponent for App {
 
     fn init(
         counter: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         // Initialize the ListView wrapper
