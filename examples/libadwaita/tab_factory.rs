@@ -162,12 +162,10 @@ impl SimpleComponent for App {
     ) -> ComponentParts<Self> {
         let counters = FactoryVecDeque::builder()
             .launch(adw::TabView::default())
-            .forward(sender.input_sender(), |output| {
-                match output {
-                    CounterOutput::SendFront(index) => AppMsg::SendFront(index),
-                    CounterOutput::MoveUp(index) => AppMsg::MoveUp(index),
-                    CounterOutput::MoveDown(index) => AppMsg::MoveDown(index),
-                }
+            .forward(sender.input_sender(), |output| match output {
+                CounterOutput::SendFront(index) => AppMsg::SendFront(index),
+                CounterOutput::MoveUp(index) => AppMsg::MoveUp(index),
+                CounterOutput::MoveDown(index) => AppMsg::MoveDown(index),
             });
         let model = App {
             created_widgets: counter,

@@ -222,11 +222,9 @@ impl Component for App {
     ) -> ComponentParts<Self> {
         let counters = FactoryVecDeque::builder()
             .launch(adw::TabView::default())
-            .forward(sender.input_sender(), |output| {
-                match output {
-                    CounterOutput::StartGame(index) => AppMsg::StartGame(index),
-                    CounterOutput::SelectedGuess(guess) => AppMsg::SelectedGuess(guess),
-                }
+            .forward(sender.input_sender(), |output| match output {
+                CounterOutput::StartGame(index) => AppMsg::StartGame(index),
+                CounterOutput::SelectedGuess(guess) => AppMsg::SelectedGuess(guess),
             });
 
         let mut model = App {
