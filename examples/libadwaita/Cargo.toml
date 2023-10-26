@@ -20,3 +20,8 @@ path = "tab_factory.rs"
 [[example]]
 name = "tab_game"
 path = "tab_game.rs"
+
+[[example]]
+name = "toast"
+path = "toast.rs"
+required-features = ["relm4/gnome_43"]
