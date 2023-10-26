@@ -86,7 +86,7 @@ impl FactoryComponent for GamePage {
                             gtk::Button {
                                 set_label: "Start!",
                                 connect_clicked[sender, index] => move |_| {
-                                    sender.output(CounterOutput::StartGame(index.clone()));
+                                    sender.output(CounterOutput::StartGame(index.clone())).unwrap()
                                 }
                             },
                         }
@@ -97,7 +97,7 @@ impl FactoryComponent for GamePage {
                             set_valign: gtk::Align::Center,
 
                             connect_clicked[sender, index] => move |_| {
-                                sender.output(CounterOutput::SelectedGuess(index.clone()));
+                                sender.output(CounterOutput::SelectedGuess(index.clone())).unwrap()
                             }
                         }
                     }
