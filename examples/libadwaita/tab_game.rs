@@ -86,7 +86,7 @@ impl FactoryComponent for GamePage {
                             gtk::Button {
                                 set_label: "Start!",
                                 connect_clicked[sender, index] => move |_| {
-                                    sender.output(CounterOutput::StartGame(index.clone()));
+                                    sender.output(CounterOutput::StartGame(index.clone())).unwrap()
                                 }
                             },
                         }
@@ -97,7 +97,7 @@ impl FactoryComponent for GamePage {
                             set_valign: gtk::Align::Center,
 
                             connect_clicked[sender, index] => move |_| {
-                                sender.output(CounterOutput::SelectedGuess(index.clone()));
+                                sender.output(CounterOutput::SelectedGuess(index.clone())).unwrap()
                             }
                         }
                     }
@@ -220,13 +220,11 @@ impl Component for App {
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let counters = FactoryVecDeque::builder(adw::TabView::default())
-            .launch()
-            .forward(sender.input_sender(), |output| {
-                match output {
-                    CounterOutput::StartGame(index) => AppMsg::StartGame(index),
-                    CounterOutput::SelectedGuess(guess) => AppMsg::SelectedGuess(guess),
-                }
+        let counters = FactoryVecDeque::builder()
+            .launch(adw::TabView::default())
+            .forward(sender.input_sender(), |output| match output {
+                CounterOutput::StartGame(index) => AppMsg::StartGame(index),
+                CounterOutput::SelectedGuess(guess) => AppMsg::SelectedGuess(guess),
             });
 
         let mut model = App {
