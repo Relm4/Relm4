@@ -60,21 +60,21 @@ impl FactoryComponent for Counter {
                 gtk::Button {
                     set_label: "Up",
                     connect_clicked[sender, index] => move |_| {
-                        sender.output(CounterOutput::MoveUp(index.clone()))
+                        sender.output(CounterOutput::MoveUp(index.clone())).unwrap()
                     }
                 },
 
                 gtk::Button {
                     set_label: "Down",
                     connect_clicked[sender, index] => move |_| {
-                        sender.output(CounterOutput::MoveDown(index.clone()))
+                        sender.output(CounterOutput::MoveDown(index.clone())).unwrap()
                     }
                 },
 
                 gtk::Button {
                     set_label: "To Start",
                     connect_clicked[sender, index] => move |_| {
-                        sender.output(CounterOutput::SendFront(index.clone()))
+                        sender.output(CounterOutput::SendFront(index.clone())).unwrap()
                     }
                 }
             }
@@ -160,8 +160,8 @@ impl SimpleComponent for App {
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let counters = FactoryVecDeque::builder(adw::TabView::default())
-            .launch()
+        let counters = FactoryVecDeque::builder()
+            .launch(adw::TabView::default())
             .forward(sender.input_sender(), |output| {
                 match output {
                     CounterOutput::SendFront(index) => AppMsg::SendFront(index),

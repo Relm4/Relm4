@@ -220,8 +220,8 @@ impl Component for App {
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let counters = FactoryVecDeque::builder(adw::TabView::default())
-            .launch()
+        let counters = FactoryVecDeque::builder()
+            .launch(adw::TabView::default())
             .forward(sender.input_sender(), |output| {
                 match output {
                     CounterOutput::StartGame(index) => AppMsg::StartGame(index),
