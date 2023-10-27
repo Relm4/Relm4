@@ -2,6 +2,8 @@
 
 ## Unreleased
 
++ examples: Add libadwaita `Toast` example
+
 ## 0.7.0-beta.2 - 2023-10-14
 
 ### Added
