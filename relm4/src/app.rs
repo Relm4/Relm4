@@ -75,13 +75,8 @@ impl<M: Debug + 'static> RelmApp<M> {
 
         let payload = Cell::new(Some(payload));
 
-        app.connect_activate(move |app| {
+        app.connect_startup(move |app| {
             if let Some(payload) = payload.take() {
-                assert!(
-                    app.is_registered(),
-                    "App should be already registered when activated"
-                );
-
                 let builder = ComponentBuilder::<C>::default();
                 let connector = match broker {
                     Some(broker) => builder.launch_with_broker(payload, broker),
@@ -96,8 +91,12 @@ impl<M: Debug + 'static> RelmApp<M> {
 
                 controller.detach_runtime();
 
-                let window = window.as_ref();
-                app.add_window(window);
+                app.add_window(window.as_ref());
+            }
+        });
+
+        app.connect_activate(move |app| {
+            if let Some(window) = app.active_window() {
                 window.set_visible(true);
             }
         });
@@ -137,13 +136,8 @@ impl<M: Debug + 'static> RelmApp<M> {
 
         let payload = Cell::new(Some(payload));
 
-        app.connect_activate(move |app| {
+        app.connect_startup(move |app| {
             if let Some(payload) = payload.take() {
-                assert!(
-                    app.is_registered(),
-                    "App should be already registered when activated"
-                );
-
                 let builder = AsyncComponentBuilder::<C>::default();
                 let connector = match broker {
                     Some(broker) => builder.launch_with_broker(payload, broker),
@@ -158,8 +152,12 @@ impl<M: Debug + 'static> RelmApp<M> {
 
                 controller.detach_runtime();
 
-                let window = window.as_ref();
-                app.add_window(window);
+                app.add_window(window.as_ref());
+            }
+        });
+
+        app.connect_activate(move |app| {
+            if let Some(window) = app.active_window() {
                 window.set_visible(true);
             }
         });
