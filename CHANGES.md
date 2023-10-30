@@ -2,6 +2,7 @@
 
 ## Unreleased
 
++ core: Move internal initialization to `gtk::Application::startup` signal handler
 + examples: Add libadwaita `Toast` example
 
 ## 0.7.0-beta.2 - 2023-10-14
@@ -34,7 +35,7 @@
 
 ### Changed
 
-+ core: Add `Init` type to the `WidgetTemplate` trait to allow passing data to `init()` 
++ core: Add `Init` type to the `WidgetTemplate` trait to allow passing data to `init()`
 + core: Just require `AsRef<gtk::Window>` in `RelmApp::run`
 + core: Add `AsRef<Root>` as requirement to the `WidgetTemplate` trait
 + core: Removed `forward_to_parent` from `FactoryComponent`
@@ -87,7 +88,7 @@
 
 ### Added
 
-+ core: Implemented `RelmRemoveExt` for `adw::ExpanderRow`. 
++ core: Implemented `RelmRemoveExt` for `adw::ExpanderRow`.
 + core: Implemented `ContainerChild` for `adw::ExpanderRow`.
 + core: Add `TypedListView` as idiomatic wrapper over `gtk::ListView`
 
@@ -106,9 +107,9 @@
 + core: Documentation and better support for data bindings
 + core: Add `set_tooltip` method to `RelmWidgetExt`
 + core: Add `main_adw_application` method to retrieve the `adw::Application` when the libadwaita feature is enabled
-+ macros: Add `skip_init` option for watch and track attributes to skip their initialization 
++ macros: Add `skip_init` option for watch and track attributes to skip their initialization
 + examples: Introduce setting and action safeties
-+ examples: Example for using relm4-icons 
++ examples: Example for using relm4-icons
 
 ### Changed
 
