@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-+ core: Move internal inititalization to `gtk::Application::startup` signal handler
++ core: Move internal initialization to `gtk::Application::startup` signal handler
 + examples: Add libadwaita `Toast` example
 
 ## 0.7.0-beta.2 - 2023-10-14
