@@ -16,6 +16,9 @@ pub struct RelmApp<M: Debug + 'static> {
     app: gtk::Application,
     broker: Option<&'static MessageBroker<M>>,
     args: Option<Vec<String>>,
+    /// If `true`, make the window visible on
+    /// every activation.
+    visible: bool,
 }
 
 impl<M: Debug + 'static> RelmApp<M> {
@@ -36,6 +39,7 @@ impl<M: Debug + 'static> RelmApp<M> {
             app,
             broker: None,
             args: None,
+            visible: true,
         }
     }
 
@@ -48,6 +52,7 @@ impl<M: Debug + 'static> RelmApp<M> {
             app,
             broker: None,
             args: None,
+            visible: true,
         }
     }
 
@@ -65,19 +70,39 @@ impl<M: Debug + 'static> RelmApp<M> {
         self
     }
 
+    /// If `true`, make the window visible whenever
+    /// the app is activated (e. g. every time [`RelmApp::run`] is called).
+    ///
+    /// By default, this value is `true`.
+    /// If you don't want the window to be visible immediately
+    /// (especially when using async components), you can set this
+    /// to `false` and call [`WidgetExt::set_visible()`] manually
+    /// on your window.
+    #[must_use]
+    pub fn visible_on_activate(mut self, visible: bool) -> Self {
+        self.visible = visible;
+        self
+    }
+
     /// Runs the application, returns once the application is closed.
     pub fn run<C>(self, payload: C::Init)
     where
         C: Component<Input = M>,
         C::Root: AsRef<gtk::Window>,
     {
-        let Self { app, broker, args } = self;
+        let Self {
+            app,
+            broker,
+            args,
+            visible,
+        } = self;
 
         let payload = Cell::new(Some(payload));
 
         app.connect_startup(move |app| {
             if let Some(payload) = payload.take() {
                 let builder = ComponentBuilder::<C>::default();
+
                 let connector = match broker {
                     Some(broker) => builder.launch_with_broker(payload, broker),
                     None => builder.launch(payload),
@@ -87,17 +112,18 @@ impl<M: Debug + 'static> RelmApp<M> {
                 crate::late_initialization::run_late_init();
 
                 let mut controller = connector.detach();
-                let window = controller.widget().clone();
+                let window = controller.widget();
+                app.add_window(window.as_ref());
 
                 controller.detach_runtime();
-
-                app.add_window(window.as_ref());
             }
         });
 
         app.connect_activate(move |app| {
             if let Some(window) = app.active_window() {
-                window.set_visible(true);
+                if visible {
+                    window.set_visible(true);
+                }
             }
         });
 
@@ -111,19 +137,6 @@ impl<M: Debug + 'static> RelmApp<M> {
         // Make sure everything is shut down
         shutdown_all();
         glib::MainContext::ref_thread_default().iteration(true);
-    }
-
-    /// Runs the application with the provided command-line arguments, returns once the application
-    /// is closed.
-    #[deprecated]
-    pub fn run_with_args<C, S>(self, payload: C::Init, args: &[S])
-    where
-        C: Component<Input = M>,
-        C::Root: AsRef<gtk::Window>,
-        S: AsRef<str>,
-    {
-        let args = args.iter().map(|a| a.as_ref().to_string()).collect();
-        self.with_args(args).run::<C>(payload);
     }
 
     /// Runs the application, returns once the application is closed.
@@ -132,13 +145,19 @@ impl<M: Debug + 'static> RelmApp<M> {
         C: AsyncComponent<Input = M>,
         C::Root: AsRef<gtk::Window>,
     {
-        let Self { app, broker, args } = self;
+        let Self {
+            app,
+            broker,
+            args,
+            visible: set_visible,
+        } = self;
 
         let payload = Cell::new(Some(payload));
 
         app.connect_startup(move |app| {
             if let Some(payload) = payload.take() {
                 let builder = AsyncComponentBuilder::<C>::default();
+
                 let connector = match broker {
                     Some(broker) => builder.launch_with_broker(payload, broker),
                     None => builder.launch(payload),
@@ -148,17 +167,18 @@ impl<M: Debug + 'static> RelmApp<M> {
                 crate::late_initialization::run_late_init();
 
                 let mut controller = connector.detach();
-                let window = controller.widget().clone();
+                let window = controller.widget();
+                app.add_window(window.as_ref());
 
                 controller.detach_runtime();
-
-                app.add_window(window.as_ref());
             }
         });
 
         app.connect_activate(move |app| {
             if let Some(window) = app.active_window() {
-                window.set_visible(true);
+                if set_visible {
+                    window.set_visible(true);
+                }
             }
         });
 
@@ -172,18 +192,5 @@ impl<M: Debug + 'static> RelmApp<M> {
         // Make sure everything is shut down
         shutdown_all();
         glib::MainContext::ref_thread_default().iteration(true);
-    }
-
-    /// Runs the application with the provided command-line arguments, returns once the application
-    /// is closed.
-    #[deprecated]
-    pub fn run_async_with_args<C, S>(self, payload: C::Init, args: &[S])
-    where
-        C: AsyncComponent<Input = M>,
-        C::Root: AsRef<gtk::Window>,
-        S: AsRef<str>,
-    {
-        let args = args.iter().map(|a| a.as_ref().to_string()).collect();
-        self.with_args(args).run_async::<C>(payload)
     }
 }

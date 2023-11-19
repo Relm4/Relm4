@@ -2,8 +2,20 @@
 
 ## Unreleased
 
-+ core: Move internal initialization to `gtk::Application::startup` signal handler
+### Added
+
++ core: Add `visible_on_activate()` to `RelmApp` to prevent the app window from being visible immediately
++ core: Make `into_stream()` method on `Receiver` public
 + examples: Add libadwaita `Toast` example
+
+### Changed
+
++ core: Move internal initialization to `gtk::Application::startup` signal handler
++ core: Remove deprecated RelmApp methods
+
+### Fixed
+
++ core: Setting the visibility of the main window isn't overridden by `RelmApp` anymore
 
 ## 0.7.0-beta.2 - 2023-10-14
 
