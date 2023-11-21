@@ -108,8 +108,8 @@ impl SimpleComponent for App {
                 .launch(AlertSettings {
                     text: String::from("Do you want to quit without saving? (First alert)"),
                     secondary_text: Some(String::from("Your counter hasn't reached 42 yet")),
-                    confirm_label: String::from("Close without saving"),
-                    cancel_label: String::from("Cancel"),
+                    confirm_label: Some(String::from("Close without saving")),
+                    cancel_label: Some(String::from("Cancel")),
                     option_label: Some(String::from("Save")),
                     is_modal: true,
                     destructive_accept: true,
@@ -120,8 +120,8 @@ impl SimpleComponent for App {
                 .launch(AlertSettings {
                     text: String::from("Do you want to quit without saving? (Second alert)"),
                     secondary_text: Some(String::from("Your counter hasn't reached 42 yet")),
-                    confirm_label: String::from("Close without saving"),
-                    cancel_label: String::from("Cancel"),
+                    confirm_label: Some(String::from("Close without saving")),
+                    cancel_label: Some(String::from("Cancel")),
                     option_label: Some(String::from("Save")),
                     is_modal: true,
                     destructive_accept: true,

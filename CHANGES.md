@@ -12,6 +12,7 @@
 
 + core: Move internal initialization to `gtk::Application::startup` signal handler
 + core: Remove deprecated RelmApp methods
++ components: Increase flexibility of `Alert` component
 
 ### Fixed
 
