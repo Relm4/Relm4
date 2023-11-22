@@ -2,6 +2,7 @@ use std::task::Poll;
 
 use flume::r#async::RecvStream;
 use futures::{future::FusedFuture, pin_mut, Future, Stream};
+use gtk::glib;
 use once_cell::sync::Lazy;
 use std::sync::Mutex;
 use tokio::sync::mpsc;
@@ -53,6 +54,39 @@ impl Drop for ShutdownOnDrop {
         if let Some(sender) = self.shutdown_event_sender.take() {
             sender.try_send(()).ok();
         }
+    }
+}
+
+/// Similar to [`glib::JoinHandle`], but aborts the task when dropped.
+pub(crate) struct AbortHandle<T: 'static> {
+    inner: glib::JoinHandle<T>,
+}
+
+impl<T> AbortHandle<T> {
+    pub(crate) fn new(inner: glib::JoinHandle<T>) -> Self {
+        Self { inner }
+    }
+}
+
+impl<T> Drop for AbortHandle<T> {
+    fn drop(&mut self) {
+        self.inner.abort();
+    }
+}
+
+impl<T> Future for AbortHandle<T> {
+    type Output = Result<T, gtk::glib::JoinError>;
+
+    fn poll(self: std::pin::Pin<&mut Self>, cx: &mut std::task::Context<'_>) -> Poll<Self::Output> {
+        let pin = &mut self.get_mut().inner;
+        futures::pin_mut!(pin);
+        Future::poll(pin, cx)
+    }
+}
+
+impl<T> FusedFuture for AbortHandle<T> {
+    fn is_terminated(&self) -> bool {
+        self.inner.is_terminated()
     }
 }
 

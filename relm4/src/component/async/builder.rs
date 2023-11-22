@@ -13,7 +13,6 @@ use gtk::glib;
 use gtk::prelude::{GtkWindowExt, NativeDialogExt};
 use std::any;
 use std::marker::PhantomData;
-use tokio::sync::oneshot;
 use tracing::info_span;
 
 /// A component that is ready for docking and launch.
@@ -188,16 +187,12 @@ impl<C: AsyncComponent> AsyncComponentBuilder<C> {
             shutdown_recipient,
         );
 
-        let (source_id_sender, source_id_receiver) =
-            oneshot::channel::<gtk::glib::JoinHandle<()>>();
-
         let rt_root = root.clone();
 
         // Spawns the component's service. It will receive both `Self::Input` and
         // `Self::CommandOutput` messages. It will spawn commands as requested by
         // updates, and send `Self::Output` messages externally.
-        let handle = crate::spawn_local_with_priority(priority, async move {
-            let id = source_id_receiver.await.unwrap().into_source_id().unwrap();
+        crate::spawn_local_with_global_abort(priority, async move {
             let mut state = C::init(payload, rt_root.clone(), component_sender.clone()).await;
             drop(temp_widgets);
 
@@ -254,15 +249,11 @@ impl<C: AsyncComponent> AsyncComponentBuilder<C> {
 
                         shutdown_notifier.shutdown();
 
-                        id.remove();
-
                         return;
                     }
                 );
             }
         });
-
-        source_id_sender.send(handle).unwrap();
 
         // Give back a type for controlling the component service.
         AsyncConnector {
