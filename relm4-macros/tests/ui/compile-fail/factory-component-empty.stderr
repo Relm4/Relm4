@@ -20,4 +20,4 @@ error[E0046]: not all trait items implemented, missing: `ParentWidget`, `Command
   = help: implement the missing item: `type Root = /* Type */;`
   = help: implement the missing item: `fn init_model(_: <Self as FactoryComponent>::Init, _: &<Self as FactoryComponent>::Index, _: FactorySender<Self>) -> Self { todo!() }`
   = help: implement the missing item: `fn init_root(&self) -> <Self as FactoryComponent>::Root { todo!() }`
-  = help: implement the missing item: `fn init_widgets(&mut self, _: &<Self as FactoryComponent>::Index, _: &<Self as FactoryComponent>::Root, _: &<<Self as FactoryComponent>::ParentWidget as FactoryView>::ReturnedWidget, _: FactorySender<Self>) -> <Self as FactoryComponent>::Widgets { todo!() }`
+  = help: implement the missing item: `fn init_widgets(&mut self, _: &<Self as FactoryComponent>::Index, _: <Self as FactoryComponent>::Root, _: &<<Self as FactoryComponent>::ParentWidget as FactoryView>::ReturnedWidget, _: FactorySender<Self>) -> <Self as FactoryComponent>::Widgets { todo!() }`

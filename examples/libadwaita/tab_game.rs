@@ -150,7 +150,7 @@ impl FactoryComponent for GamePage {
     fn init_widgets(
         &mut self,
         index: &DynamicIndex,
-        root: &Self::Root,
+        root: Self::Root,
         returned_widget: &adw::TabPage,
         sender: FactorySender<Self>,
     ) -> Self::Widgets {
@@ -217,7 +217,7 @@ impl Component for App {
 
     fn init(
         _: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let counters = FactoryVecDeque::builder()

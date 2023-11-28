@@ -52,7 +52,7 @@ pub trait AsyncFactoryComponent:
     ///
     /// [`init_model()`]: AsyncFactoryComponent::init_model
     #[must_use]
-    fn init_loading_widgets(_root: &mut Self::Root) -> Option<LoadingWidgets> {
+    fn init_loading_widgets(_root: Self::Root) -> Option<LoadingWidgets> {
         None
     }
 
@@ -60,7 +60,7 @@ pub trait AsyncFactoryComponent:
     fn init_widgets(
         &mut self,
         index: &DynamicIndex,
-        root: &Self::Root,
+        root: Self::Root,
         returned_widget: &<Self::ParentWidget as FactoryView>::ReturnedWidget,
         sender: AsyncFactorySender<Self>,
     ) -> Self::Widgets;

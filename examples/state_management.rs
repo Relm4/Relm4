@@ -148,7 +148,7 @@ impl FactoryComponent for Task {
     fn init_widgets(
         &mut self,
         index: &Self::Index,
-        root: &Self::Root,
+        root: Self::Root,
         _returned_widget: &<Self::ParentWidget as FactoryView>::ReturnedWidget,
         sender: FactorySender<Self>,
     ) -> Self::Widgets {

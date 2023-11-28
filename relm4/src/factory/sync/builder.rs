@@ -66,7 +66,7 @@ impl<C: FactoryComponent> FactoryBuilder<C> {
 
         let widgets = Box::new(data.init_widgets(
             index,
-            &root_widget,
+            root_widget.clone(),
             &returned_widget,
             component_sender.clone(),
         ));

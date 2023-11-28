@@ -52,11 +52,9 @@ where
 
     fn init(
         model: Self::Init,
-        root: Self::Root,
+        widgets: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let widgets = root.clone();
-
         model.render(&widgets);
 
         widgets.connect_selected_notify(move |combo_box| {

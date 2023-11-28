@@ -66,7 +66,7 @@ impl FactoryComponent for Counter {
     fn init_widgets(
         &mut self,
         index: &DynamicIndex,
-        root: &Self::Root,
+        root: Self::Root,
         _returned_widget: &gtk::Widget,
         sender: FactorySender<Self>,
     ) -> Self::Widgets {

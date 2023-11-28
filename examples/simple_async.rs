@@ -51,9 +51,9 @@ impl AsyncComponent for App {
         }
     }
 
-    fn init_loading_widgets(root: &mut Self::Root) -> Option<LoadingWidgets> {
+    fn init_loading_widgets(root: Self::Root) -> Option<LoadingWidgets> {
         view! {
-            #[local_ref]
+            #[local]
             root {
                 set_title: Some("Simple app"),
                 set_default_size: (300, 100),

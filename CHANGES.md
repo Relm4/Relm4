@@ -13,6 +13,7 @@
 ### Changed
 
 + core: Make `set_global_css` and `set_global_css_from_file` methods of `RelmApp` to prevent calling them before initializing GTK 
++ core: Always pass the `Root` as owned parameter (without reference) (affects `Component::init`, `Factory::init_widgets`, `AsyncComponent::init_loading_widgets`, `AsyncFactory::init_widgets` and `AsyncFactory::init_loading_widgets`)
 + core: Move internal initialization to `gtk::Application::startup` signal handler
 + core: Remove deprecated RelmApp methods
 + components: Increase flexibility of `Alert` component
