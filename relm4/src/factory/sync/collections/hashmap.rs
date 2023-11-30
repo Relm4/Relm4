@@ -53,8 +53,8 @@ where
 /// A builder-pattern struct for building a [`FactoryHashMap`].
 pub struct FactoryHashMapBuilder<K, C: FactoryComponent, S = RandomState> {
     hasher: S,
-    _component: PhantomData<C>,
-    _key: PhantomData<K>,
+    component: PhantomData<C>,
+    key: PhantomData<K>,
 }
 
 impl<K, C> Default for FactoryHashMapBuilder<K, C>
@@ -87,28 +87,26 @@ where
     pub fn new() -> Self {
         Self {
             hasher: RandomState::default(),
-            _component: PhantomData,
-            _key: PhantomData,
+            component: PhantomData,
+            key: PhantomData,
         }
     }
 
     /// Sets a different hasher.
     pub fn hasher<H: Hasher>(self, hasher: H) -> FactoryHashMapBuilder<K, C, H> {
-        let Self {
-            _component, _key, ..
-        } = self;
+        let Self { component, key, .. } = self;
 
         FactoryHashMapBuilder {
             hasher,
-            _component,
-            _key,
+            component,
+            key,
         }
     }
 
     /// Launch the factory.
     /// This is similar to [`Connector::launch`](crate::component::ComponentBuilder::launch).
     pub fn launch(self, widget: C::ParentWidget) -> FactoryHashMapConnector<K, C> {
-        let Self { hasher, _key, .. } = self;
+        let Self { hasher, key, .. } = self;
 
         let (output_sender, output_receiver) = crate::channel();
 
@@ -117,7 +115,7 @@ where
             output_sender,
             output_receiver,
             hasher,
-            _key,
+            _key: key,
         }
     }
 }
