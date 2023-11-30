@@ -72,7 +72,7 @@ impl MenuItem {
 
 impl SubMenu {
     fn submenu_stream(&self, parent_ident: &Ident) -> TokenStream2 {
-        let name = Ident::new(&format!("_{parent_ident}"), Span2::call_site());
+        let name = Ident::new(&format!("_{parent_ident}"), Span2::mixed_site());
         let gtk_import = crate::gtk_import();
         let expr = &self.expr;
 

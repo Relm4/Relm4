@@ -17,7 +17,7 @@ impl IfBranch {
         let args = args_from_index(index, input.span());
         let mut widget = Widget::parse(&braced, attributes, Some(args))?;
         widget.ref_token = Some(And {
-            spans: [Span2::call_site()],
+            spans: [Span2::mixed_site()],
         });
 
         Ok(Self { cond, widget })

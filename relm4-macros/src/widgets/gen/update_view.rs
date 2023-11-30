@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote, quote_spanned};
+use quote::quote;
 use syn::{punctuated::Punctuated, token, Ident};
 
 use crate::widgets::{
@@ -142,7 +142,7 @@ impl ConditionalWidget {
                     let index = index.to_string();
                     inner_tokens.extend(quote! {
                         #pattern #guard_if #guard_expr #arrow {
-                            let __page_active: bool = (__current_page == #index);
+                            let page_active: bool = (current_page == #index);
                             #inner_update_stream
                             #index
                         },
@@ -157,9 +157,8 @@ impl ConditionalWidget {
         };
 
         let w_name = &self.name;
-        stream.extend(quote_spanned! {
-            w_name.span() =>
-            let __current_page = #w_name.visible_child_name().map_or("".to_string(), |s| s.as_str().to_string());
+        stream.extend(quote! {
+            let current_page = #w_name.visible_child_name().map_or("".to_string(), |s| s.as_str().to_string());
             #w_name.set_visible_child_name(#brach_stream);
         });
     }
@@ -214,9 +213,8 @@ impl AssignProperty {
                 self.assign_stream(&mut info, p_name, false);
                 let model = paste_model.then(|| model_name);
                 let page_switch = conditional_branch.then(|| {
-                    quote_spanned! {
-                        p_name.span() =>
-                            !__page_active ||
+                    quote! {
+                        !page_active ||
                     }
                 });
 

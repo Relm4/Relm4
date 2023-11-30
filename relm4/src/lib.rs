@@ -23,7 +23,8 @@
     unreachable_pub,
     unused_qualifications,
     clippy::cargo,
-    clippy::must_use_candidate
+    clippy::must_use_candidate,
+    clippy::used_underscore_binding
 )]
 #![allow(clippy::multiple_crate_versions)]
 // Configuration for doc builds on the nightly toolchain.

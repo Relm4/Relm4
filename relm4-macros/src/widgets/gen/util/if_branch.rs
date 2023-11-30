@@ -24,7 +24,7 @@ impl IfBranch {
         });
         stream.extend(quote! {
             {
-                let __page_active: bool = (__current_page == #index);
+                let page_active: bool = (current_page == #index);
                 #inner_update_tokens
                 #index
             }

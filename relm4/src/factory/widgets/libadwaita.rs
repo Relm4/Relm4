@@ -79,18 +79,18 @@ impl FactoryView for adw::PreferencesPage {
     fn factory_prepend(
         &self,
         widget: impl AsRef<Self::Children>,
-        _position: &(),
+        position: &(),
     ) -> Self::ReturnedWidget {
-        self.factory_append(widget, _position)
+        self.factory_append(widget, position)
     }
 
     fn factory_insert_after(
         &self,
         widget: impl AsRef<Self::Children>,
-        _position: &(),
+        position: &(),
         _other: &Self::ReturnedWidget,
     ) -> Self::ReturnedWidget {
-        self.factory_append(widget, _position)
+        self.factory_append(widget, position)
     }
 
     fn returned_widget_to_child(root_child: &Self::ReturnedWidget) -> Self::Children {

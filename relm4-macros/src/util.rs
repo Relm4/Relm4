@@ -56,7 +56,7 @@ pub(super) fn strings_to_path(strings: &[&str]) -> Path {
         .iter()
         .map(|string| -> PathSegment {
             PathSegment {
-                ident: Ident::new(string, Span2::call_site()),
+                ident: Ident::new(string, Span2::mixed_site()),
                 arguments: PathArguments::None,
             }
         })
@@ -98,7 +98,7 @@ pub(super) fn verbatim_impl_item_fn(
             unsafety: None,
             abi: None,
             fn_token: syn::token::Fn::default(),
-            ident: Ident::new(name, Span2::call_site()),
+            ident: Ident::new(name, Span2::mixed_site()),
             generics: syn::Generics {
                 lt_token: None,
                 params: Punctuated::default(),
