@@ -11,10 +11,13 @@ pub(super) fn register_callback(func: Callback) {
     if let Some(inner) = Lazy::get(&LATE_INIT) {
         // If `Lazy` was initialized and is not empty,
         // this means that `run_late_init` has run already.
-        // In this case, we need to call the callback immediately,
-        // otherwise it will never be executed.
+        // In this case, we call the callback as soon as the current function
+        // returns and thereby yields to the glib runtime.
         if inner.get().borrow().is_empty() {
-            return func();
+            crate::spawn_local_with_priority(gtk::glib::Priority::HIGH, async {
+                func();
+            });
+            return;
         }
     }
     LATE_INIT.get().borrow_mut().push(func);
