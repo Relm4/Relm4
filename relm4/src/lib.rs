@@ -154,44 +154,6 @@ pub fn main_adw_application() -> adw::Application {
     main_application().downcast().unwrap()
 }
 
-/// Sets a custom global stylesheet.
-///
-/// # Panics
-///
-/// This function panics if [`RelmApp::new`] wasn't called before
-/// or this function is not called on the thread that also called [`RelmApp::new`].
-pub fn set_global_css(style_data: &str) {
-    let display = gtk::gdk::Display::default().unwrap();
-    let provider = gtk::CssProvider::new();
-    provider.load_from_data(style_data);
-
-    #[allow(deprecated)]
-    gtk::StyleContext::add_provider_for_display(
-        &display,
-        &provider,
-        gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
-    );
-}
-
-/// Sets a custom global stylesheet from a file.
-///
-/// If the file doesn't exist a [`tracing::error`] message will be emitted.
-///
-/// # Panics
-///
-/// This function panics if [`RelmApp::new`] wasn't called before
-/// or this function is not called on the thread that also called [`RelmApp::new`].
-pub fn set_global_css_from_file<P: AsRef<std::path::Path>>(path: P) {
-    match std::fs::read_to_string(path) {
-        Ok(bytes) => {
-            set_global_css(&bytes);
-        }
-        Err(err) => {
-            tracing::error!("Couldn't load global CSS from file: {}", err);
-        }
-    }
-}
-
 /// Spawns a thread-local future on GLib's executor, for non-[`Send`] futures.
 pub fn spawn_local<F, Out>(func: F) -> gtk::glib::JoinHandle<Out>
 where

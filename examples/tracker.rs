@@ -122,7 +122,7 @@ impl SimpleComponent for App {
 
 fn main() {
     let app = RelmApp::new("relm4.example.tracker");
-    relm4::set_global_css(".identical { background: #00ad5c; }");
+    app.set_global_css(".identical { background: #00ad5c; }");
 
     app.run::<App>(());
 }
