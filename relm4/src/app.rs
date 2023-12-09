@@ -84,6 +84,36 @@ impl<M: Debug + 'static> RelmApp<M> {
         self
     }
 
+    /// Sets a custom global stylesheet.
+    pub fn set_global_css(&self, style_data: &str) {
+        let display = gtk::gdk::Display::default().unwrap();
+        let provider = gtk::CssProvider::new();
+        provider.load_from_data(style_data);
+
+        #[allow(deprecated)]
+        gtk::StyleContext::add_provider_for_display(
+            &display,
+            &provider,
+            gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
+        );
+    }
+
+    /// Sets a custom global stylesheet from a file.
+    ///
+    /// If the file doesn't exist a [`tracing::error`] message will be emitted and
+    /// an [`std::io::Error`] will be returned.
+    pub fn set_global_css_from_file<P: AsRef<std::path::Path>>(
+        &self,
+        path: P,
+    ) -> Result<(), std::io::Error> {
+        std::fs::read_to_string(path)
+            .map(|bytes| self.set_global_css(&bytes))
+            .map_err(|err| {
+                tracing::error!("Couldn't load global CSS from file: {}", err);
+                err
+            })
+    }
+
     /// Runs the application, returns once the application is closed.
     pub fn run<C>(self, payload: C::Init)
     where

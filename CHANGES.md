@@ -10,6 +10,7 @@
 
 ### Changed
 
++ core: Make `set_global_css` and `set_global_css_from_file` methods of `RelmApp` to prevent calling them before initializing GTK 
 + core: Move internal initialization to `gtk::Application::startup` signal handler
 + core: Remove deprecated RelmApp methods
 + components: Increase flexibility of `Alert` component
