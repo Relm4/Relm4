@@ -26,6 +26,10 @@ pub trait RelmColumn: Any {
 
     /// The columns created for this list item.
     const COLUMN_NAME: &'static str;
+    /// Whether to enable resizing for this column
+    const ENABLE_RESIZE: bool = false;
+    /// Whether to enable automatic expanding for this column
+    const ENABLE_EXPAND: bool = false;
 
     /// Construct the widgets.
     fn setup(list_item: &gtk::ListItem) -> (Self::Root, Self::Widgets);
@@ -57,6 +61,10 @@ pub trait LabelColumn: 'static {
     const COLUMN_NAME: &'static str;
     /// Whether to enable the sorting for this column
     const ENABLE_SORT: bool;
+    /// Whether to enable resizing for this column
+    const ENABLE_RESIZE: bool = false;
+    /// Whether to enable automatic expanding for this column
+    const ENABLE_EXPAND: bool = false;
 
     /// Get the value that this column represents.
     fn get_cell_value(item: &Self::Item) -> Self::Value;
@@ -75,6 +83,8 @@ where
     type Item = C::Item;
 
     const COLUMN_NAME: &'static str = C::COLUMN_NAME;
+    const ENABLE_RESIZE: bool = C::ENABLE_RESIZE;
+    const ENABLE_EXPAND: bool = C::ENABLE_EXPAND;
 
     fn setup(_: &gtk::ListItem) -> (Self::Root, Self::Widgets) {
         (gtk::Label::new(None), ())
@@ -238,6 +248,9 @@ where
         let sort_fn = C::sort_fn();
 
         let c = gtk::ColumnViewColumn::new(Some(C::COLUMN_NAME), Some(factory));
+        c.set_resizable(C::ENABLE_RESIZE);
+        c.set_expand(C::ENABLE_EXPAND);
+        c.set_resizable(C::ENABLE_RESIZE);
 
         if let Some(sort_fn) = sort_fn {
             c.set_sorter(Some(&gtk::CustomSorter::new(move |first, second| {
