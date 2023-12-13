@@ -250,7 +250,6 @@ where
         let c = gtk::ColumnViewColumn::new(Some(C::COLUMN_NAME), Some(factory));
         c.set_resizable(C::ENABLE_RESIZE);
         c.set_expand(C::ENABLE_EXPAND);
-        c.set_resizable(C::ENABLE_RESIZE);
 
         if let Some(sort_fn) = sort_fn {
             c.set_sorter(Some(&gtk::CustomSorter::new(move |first, second| {
