@@ -4,6 +4,7 @@
 
 ### Added
 
++ core: Add resizeable/expandable column functionality to `RelmColumn` and `LabelColum`
 + core: Add `visible_on_activate()` to `RelmApp` to prevent the app window from being visible immediately
 + core: Make `into_stream()` method on `Receiver` public
 + examples: Add libadwaita `Toast` example

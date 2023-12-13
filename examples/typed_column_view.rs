@@ -33,6 +33,7 @@ impl LabelColumn for Label1Column {
     const COLUMN_NAME: &'static str = "label";
 
     const ENABLE_SORT: bool = true;
+    const ENABLE_RESIZE: bool = true;
 
     fn get_cell_value(item: &Self::Item) -> Self::Value {
         item.value
@@ -73,6 +74,7 @@ impl RelmColumn for ButtonColumn {
     type Item = MyListItem;
 
     const COLUMN_NAME: &'static str = "button";
+    const ENABLE_EXPAND: bool = true;
 
     fn setup(_item: &gtk::ListItem) -> (Self::Root, Self::Widgets) {
         (gtk::CheckButton::new(), ())
