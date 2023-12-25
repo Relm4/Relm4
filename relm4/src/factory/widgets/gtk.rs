@@ -1,4 +1,4 @@
-use gtk::prelude::{BoxExt, Cast, FlowBoxChildExt, GridExt, ListBoxRowExt, WidgetExt};
+use gtk::prelude::{BoxExt, Cast, FlowBoxChildExt, GridExt, ListBoxRowExt, WidgetExt, GtkApplicationExt};
 
 use crate::factory::{positions, FactoryView};
 
@@ -293,6 +293,54 @@ impl FactoryView for gtk::FlowBox {
         returned_widget
             .child()
             .unwrap_or_else(|| returned_widget.upcast_ref::<gtk::Widget>().clone())
+    }
+}
+
+impl FactoryView for gtk::Application {
+    type Children = gtk::Window;
+    type ReturnedWidget = gtk::Window;
+    type Position = ();
+
+    fn factory_remove(&self, widget: &Self::ReturnedWidget) {
+        self.remove_window(widget)
+    }
+
+    fn factory_append(
+        &self,
+        widget: impl AsRef<Self::Children>,
+        _position: &Self::Position,
+    ) -> Self::ReturnedWidget {
+        self.add_window(widget.as_ref());
+        widget.as_ref().clone()
+    }
+
+    fn factory_prepend(
+        &self,
+        widget: impl AsRef<Self::Children>,
+        _position: &Self::Position,
+    ) -> Self::ReturnedWidget {
+        self.add_window(widget.as_ref());
+        widget.as_ref().clone()
+    }
+
+    fn factory_insert_after(
+        &self,
+        widget: impl AsRef<Self::Children>,
+        _position: &Self::Position,
+        _other: &Self::ReturnedWidget,
+    ) -> Self::ReturnedWidget {
+        self.add_window(widget.as_ref());
+        widget.as_ref().clone()
+    }
+
+    fn returned_widget_to_child(root_child: &Self::ReturnedWidget) -> Self::Children {
+        root_child.clone()
+    }
+
+    fn factory_move_after(&self, _widget: &Self::ReturnedWidget, _other: &Self::ReturnedWidget) {
+    }
+
+    fn factory_move_start(&self, _widget: &Self::ReturnedWidget) {
     }
 }
 

@@ -1,8 +1,8 @@
-use gtk::prelude::IsA;
+use gtk::{prelude::IsA, glib};
 use std::fmt::Debug;
 
 /// A trait implemented for GTK4 widgets that allows a factory to create and remove widgets.
-pub trait FactoryView: IsA<gtk::Widget> {
+pub trait FactoryView: IsA<glib::Object> {
     /// The widget returned when inserting a widget.
     ///
     /// This doesn't matter on containers like [`gtk::Box`].
