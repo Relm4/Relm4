@@ -1,5 +1,6 @@
 use gtk::glib;
 use gtk::prelude::{ApplicationExt, ApplicationExtManual, Cast, GtkApplicationExt, IsA, WidgetExt};
+use tokio::sync::oneshot;
 use std::fmt::Debug;
 
 use crate::component::{AsyncComponent, AsyncComponentBuilder, AsyncComponentController};
@@ -133,10 +134,11 @@ impl<M: Debug + 'static> RelmApp<M> {
             println!("activate");
         });
 
-        app.connect_startup(move |_app| {
-            println!("startup {:?}", _app.application_id());
+        app.connect_startup(move |app| {
+            println!("startup {:?}", app.application_id());
             if let Some(payload) = payload.take() {
                 let builder = ComponentBuilder::<C>::default();
+                println!("startup2 {:?}", app.application_id());
 
                 let connector = match broker {
                     Some(broker) => builder.launch_with_broker(payload, broker),
@@ -151,7 +153,11 @@ impl<M: Debug + 'static> RelmApp<M> {
             }
         });
 
+
         let _guard = RUNTIME.enter();
+
+        // prevent app from shutting down. Workaround until I can get the windows to register at the correct time
+        let _hold_guard = app.hold();
         if let Some(args) = args {
             app.run_with_args(&args);
         } else {
@@ -162,13 +168,7 @@ impl<M: Debug + 'static> RelmApp<M> {
         println!("shutdown");
         // Make sure everything is shut down
         shutdown_all();
-
-        // the more iterations, the longer the window shows. but not indefinitely
-        for _ in 0..100{
-            glib::MainContext::ref_thread_default().iteration(true);
-        }
-        println!("end");
-
+        glib::MainContext::ref_thread_default().iteration(true);
     }
 
     /// Runs the application, returns once the application is closed.

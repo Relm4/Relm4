@@ -25,7 +25,7 @@ impl FactoryComponent for Window {
 
     view! {
         #[root]
-        gtk::ApplicationWindow {
+        gtk::Window {
             set_visible: true,
             set_title: Some("Simple app"),
             set_default_size: (300, 100),
@@ -80,18 +80,17 @@ struct App {
 #[derive(Debug)]
 enum AppMsg {
     Activate(u8),
-    Startup,
 }
 
 impl SimpleComponent for App {
     type Init = u8;
     type Input = AppMsg;
     type Output = ();
-    type Root = gtk::Application;
+    type Root = adw::Application;
     type Widgets = ();
 
     fn init_root() -> Self::Root {
-        let app = main_application();
+        let app = main_adw_application();
         app
     }
 
@@ -101,7 +100,7 @@ impl SimpleComponent for App {
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let model = App {
+        let mut model = App {
             queued_windows: VecDeque::new(),
             windows: FactoryVecDeque::builder()
                 .launch_default()
@@ -114,14 +113,6 @@ impl SimpleComponent for App {
             csender.input(AppMsg::Activate(init))
         });
 
-        let csender = sender.clone();
-        root.connect_startup(move |_app|{
-            println!("startup {:?}", _app.application_id());
-
-            println!("Startup");
-            csender.input(AppMsg::Startup)
-        });
-
         ComponentParts { model, widgets: () }
     }
 
@@ -131,14 +122,9 @@ impl SimpleComponent for App {
         match msg {
             AppMsg::Activate(init) => {
                 println!("Add window");
-                // self.queued_windows.push_back(init);
+                self.queued_windows.push_back(init);
                            windows_guard.push_back(init);
 
-            }
-            AppMsg::Startup => {
-                while let Some(init) = self.queued_windows.pop_front() {
-                    windows_guard.push_back(init);
-                }
             }
         }
     }
