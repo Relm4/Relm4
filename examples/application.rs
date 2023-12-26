@@ -1,4 +1,4 @@
-use std::collections::VecDeque;
+use std::thread;
 
 use gtk::prelude::*;
 use relm4::*;
@@ -21,7 +21,7 @@ impl FactoryComponent for Window {
     type Input = WindowMsg;
     type Output = ();
     type CommandOutput = ();
-    type ParentWidget = gtk::Application;
+    type ParentWidget = adw::Application;
 
     view! {
         #[root]
@@ -73,12 +73,13 @@ impl FactoryComponent for Window {
 
 
 struct App {
-    queued_windows: VecDeque<u8>,
+    hold_guard: Option<ApplicationHoldGuard>,
     windows: FactoryVecDeque<Window>,
 }
 
 #[derive(Debug)]
 enum AppMsg {
+    Idle,
     Activate(u8),
 }
 
@@ -90,8 +91,7 @@ impl SimpleComponent for App {
     type Widgets = ();
 
     fn init_root() -> Self::Root {
-        let app = main_adw_application();
-        app
+        main_adw_application()
     }
 
     // Initialize the component.
@@ -100,19 +100,21 @@ impl SimpleComponent for App {
         root: &Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let mut model = App {
-            queued_windows: VecDeque::new(),
+
+        let model = App {
+            hold_guard: Some(root.hold()),
             windows: FactoryVecDeque::builder()
-                .launch_default()
+                .launch(root.clone())
                 .detach()
          };
 
         let csender = sender.clone();
         root.connect_activate(move |_app| {
-            println!("activate");
             csender.input(AppMsg::Activate(init))
         });
 
+
+        sender.input(AppMsg::Idle);
         ComponentParts { model, widgets: () }
     }
 
@@ -120,11 +122,10 @@ impl SimpleComponent for App {
         let mut windows_guard = self.windows.guard();
 
         match msg {
+            AppMsg::Idle => (),
             AppMsg::Activate(init) => {
-                println!("Add window");
-                self.queued_windows.push_back(init);
-                           windows_guard.push_back(init);
-
+                windows_guard.push_back(init);
+                self.hold_guard.take();
             }
         }
     }

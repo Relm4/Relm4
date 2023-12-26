@@ -2,6 +2,7 @@ use gtk::glib;
 use gtk::prelude::{ApplicationExt, ApplicationExtManual, Cast, GtkApplicationExt, IsA, WidgetExt};
 use tokio::sync::oneshot;
 use std::fmt::Debug;
+use std::thread;
 
 use crate::component::{AsyncComponent, AsyncComponentBuilder, AsyncComponentController};
 use crate::runtime_util::shutdown_all;
@@ -130,12 +131,13 @@ impl<M: Debug + 'static> RelmApp<M> {
 
         let payload = Cell::new(Some(payload));
 
+
         app.connect_activate(move |_app| {
             println!("activate");
         });
 
         app.connect_startup(move |app| {
-            println!("startup {:?}", app.application_id());
+            println!("startup {:?} {:?}", app.application_id(), thread::current().id());
             if let Some(payload) = payload.take() {
                 let builder = ComponentBuilder::<C>::default();
                 println!("startup2 {:?}", app.application_id());
@@ -156,8 +158,9 @@ impl<M: Debug + 'static> RelmApp<M> {
 
         let _guard = RUNTIME.enter();
 
-        // prevent app from shutting down. Workaround until I can get the windows to register at the correct time
-        let _hold_guard = app.hold();
+        // TODO: prevent app from shutting down. Workaround until I can get the windows to register at the correct time
+        // this makes a new process hang
+        // let _hold_guard = app.hold();
         if let Some(args) = args {
             app.run_with_args(&args);
         } else {
