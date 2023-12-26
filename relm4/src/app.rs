@@ -1,14 +1,13 @@
 use gtk::glib;
 use gtk::prelude::{ApplicationExt, ApplicationExtManual, Cast, GtkApplicationExt, IsA, WidgetExt};
-use tokio::sync::oneshot;
 use std::fmt::Debug;
-use std::thread;
+use std::rc::Rc;
 
 use crate::component::{AsyncComponent, AsyncComponentBuilder, AsyncComponentController};
 use crate::runtime_util::shutdown_all;
 use crate::{Component, ComponentBuilder, ComponentController, MessageBroker, RUNTIME};
 
-use std::cell::Cell;
+use std::cell::{Cell, RefCell};
 
 /// An app that runs the main application.
 #[derive(Debug)]
@@ -117,64 +116,6 @@ impl<M: Debug + 'static> RelmApp<M> {
     }
 
     /// Runs the application, returns once the application is closed.
-    pub fn run_with_application<C>(self, payload: C::Init)
-    where
-        C: Component<Input = M>,
-        C::Root: AsRef<gtk::Application>,
-    {
-        let Self {
-            app,
-            broker,
-            args,
-            ..
-        } = self;
-
-        let payload = Cell::new(Some(payload));
-
-
-        app.connect_activate(move |_app| {
-            println!("activate");
-        });
-
-        app.connect_startup(move |app| {
-            println!("startup {:?} {:?}", app.application_id(), thread::current().id());
-            if let Some(payload) = payload.take() {
-                let builder = ComponentBuilder::<C>::default();
-                println!("startup2 {:?}", app.application_id());
-
-                let connector = match broker {
-                    Some(broker) => builder.launch_with_broker(payload, broker),
-                    None => builder.launch(payload),
-                };
-
-                // Run late initialization for transient windows for example.
-                crate::late_initialization::run_late_init();
-
-                let mut controller = connector.detach();
-                controller.detach_runtime();
-            }
-        });
-
-
-        let _guard = RUNTIME.enter();
-
-        // TODO: prevent app from shutting down. Workaround until I can get the windows to register at the correct time
-        // this makes a new process hang
-        // let _hold_guard = app.hold();
-        if let Some(args) = args {
-            app.run_with_args(&args);
-        } else {
-            println!("run!");
-            app.run();
-        }
-
-        println!("shutdown");
-        // Make sure everything is shut down
-        shutdown_all();
-        glib::MainContext::ref_thread_default().iteration(true);
-    }
-
-    /// Runs the application, returns once the application is closed.
     pub fn run<C>(self, payload: C::Init)
     where
         C: Component<Input = M>,
@@ -230,6 +171,55 @@ impl<M: Debug + 'static> RelmApp<M> {
     }
 
     /// Runs the application, returns once the application is closed.
+    pub fn run_application<C>(self, payload: C::Init)
+    where
+        C: Component<Input = M>,
+        C::Root: AsRef<gtk::Application>,
+    {
+        let Self {
+            app,
+            broker,
+            args,
+            ..
+        } = self;
+
+        let hold_guard = Rc::new(RefCell::new(Some(app.hold())));
+        app.connect_window_added(move |_app, _window| {
+            hold_guard.borrow_mut().take();
+        });
+
+        let payload = Cell::new(Some(payload));
+        app.connect_startup(move |_app| {
+            if let Some(payload) = payload.take() {
+                let builder = ComponentBuilder::<C>::default();
+                let connector = match broker {
+                    Some(broker) => builder.launch_with_broker(payload, broker),
+                    None => builder.launch(payload),
+                };
+
+                // Run late initialization for transient windows for example.
+                crate::late_initialization::run_late_init();
+
+                let mut controller = connector.detach();
+                controller.detach_runtime();
+            }
+        });
+
+
+        let _guard = RUNTIME.enter();
+        if let Some(args) = args {
+            app.run_with_args(&args);
+        } else {
+            app.run();
+        }
+
+        // Make sure everything is shut down
+        shutdown_all();
+        glib::MainContext::ref_thread_default().iteration(true);
+    }
+
+
+    /// Runs the application, returns once the application is closed.
     pub fn run_async<C>(self, payload: C::Init)
     where
         C: AsyncComponent<Input = M>,
@@ -243,7 +233,6 @@ impl<M: Debug + 'static> RelmApp<M> {
         } = self;
 
         let payload = Cell::new(Some(payload));
-
         app.connect_startup(move |app| {
             if let Some(payload) = payload.take() {
                 let builder = AsyncComponentBuilder::<C>::default();
@@ -283,4 +272,54 @@ impl<M: Debug + 'static> RelmApp<M> {
         shutdown_all();
         glib::MainContext::ref_thread_default().iteration(true);
     }
+
+    /// Runs the application, returns once the application is closed.
+    pub fn run_application_async<C>(self, payload: C::Init)
+    where
+        C: AsyncComponent<Input = M>,
+        C::Root: AsRef<gtk::Application>,
+    {
+        let Self {
+            app,
+            broker,
+            args,
+            ..
+        } = self;
+
+        let hold_guard = Rc::new(RefCell::new(Some(app.hold())));
+        app.connect_window_added(move |_app, _window| {
+            hold_guard.borrow_mut().take();
+        });
+
+        let payload = Cell::new(Some(payload));
+        app.connect_startup(move |_app| {
+            if let Some(payload) = payload.take() {
+                let builder = AsyncComponentBuilder::<C>::default();
+                let connector = match broker {
+                    Some(broker) => builder.launch_with_broker(payload, broker),
+                    None => builder.launch(payload),
+                };
+
+                // Run late initialization for transient windows for example.
+                crate::late_initialization::run_late_init();
+
+                let mut controller = connector.detach();
+                controller.detach_runtime();
+            }
+        });
+
+
+        let _guard = RUNTIME.enter();
+        if let Some(args) = args {
+            app.run_with_args(&args);
+        } else {
+            app.run();
+        }
+
+
+        // Make sure everything is shut down
+        shutdown_all();
+        glib::MainContext::ref_thread_default().iteration(true);
+    }
+
 }

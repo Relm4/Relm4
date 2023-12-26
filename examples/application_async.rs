@@ -1,6 +1,7 @@
+use async_trait::async_trait;
 use gtk::prelude::*;
 use relm4::*;
-use relm4::factory::FactoryVecDeque;
+use relm4::factory::{AsyncFactoryVecDeque, AsyncFactoryComponent};
 use relm4::prelude::*;
 
 struct Window {
@@ -13,8 +14,8 @@ enum WindowMsg {
     Decrement,
 }
 
-#[relm4::factory]
-impl FactoryComponent for Window {
+#[relm4::factory(async)]
+impl AsyncFactoryComponent for Window {
     type Init = u8;
     type Input = WindowMsg;
     type Output = ();
@@ -53,11 +54,11 @@ impl FactoryComponent for Window {
     }
 
     // Initialize the component.
-    fn init_model(value: Self::Init, _index: &DynamicIndex, _sender: FactorySender<Self>) -> Self {
+    async fn init_model(value: Self::Init, _index: &DynamicIndex, _sender: AsyncFactorySender<Self>) -> Self {
         Self { counter: value }
     }
 
-    fn update(&mut self, msg: Self::Input, _sender: FactorySender<Self>) {
+    async fn update(&mut self, msg: Self::Input, _sender: AsyncFactorySender<Self>) {
         match msg {
             WindowMsg::Increment => {
                 self.counter = self.counter.wrapping_add(1);
@@ -70,7 +71,7 @@ impl FactoryComponent for Window {
 }
 
 struct App {
-    windows: FactoryVecDeque<Window>,
+    windows: AsyncFactoryVecDeque<Window>,
 }
 
 #[derive(Debug)]
@@ -78,8 +79,8 @@ enum AppMsg {
     Activate(u8),
 }
 
-#[relm4::component]
-impl SimpleComponent for App {
+#[relm4::component(async)]
+impl SimpleAsyncComponent for App {
     type Init = u8;
     type Input = AppMsg;
     type Output = ();
@@ -92,23 +93,23 @@ impl SimpleComponent for App {
     }
 
     // Initialize the component.
-    fn init(
+    async fn init(
         init: Self::Init,
-        root: &Self::Root,
-        sender: ComponentSender<Self>,
-    ) -> ComponentParts<Self> {
-
+        root: Self::Root,
+        sender: AsyncComponentSender<Self>,
+    ) -> AsyncComponentParts<Self> {
         let model = App {
-            windows: FactoryVecDeque::builder()
+            windows: AsyncFactoryVecDeque::builder()
                 .launch(root.clone())
                 .detach()
-        };
+         };
 
         let widgets = view_output!();
-        ComponentParts { model, widgets }
+
+        AsyncComponentParts { model, widgets }
     }
 
-    fn update(&mut self, msg: Self::Input, _sender: ComponentSender<Self>) {
+    async fn update(&mut self, msg: Self::Input, _sender: AsyncComponentSender<Self>) {
         let mut windows_guard = self.windows.guard();
 
         match msg {
@@ -121,5 +122,5 @@ impl SimpleComponent for App {
 
 fn main() {
     let app = RelmApp::new("relm4.example.application");
-    app.run_application::<App>(10);
+    app.run_application_async::<App>(0);
 }
