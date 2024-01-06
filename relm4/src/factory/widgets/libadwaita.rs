@@ -1,3 +1,4 @@
+#![allow(deprecated)]
 use adw::prelude::*;
 
 use crate::factory::FactoryView;

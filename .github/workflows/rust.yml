@@ -53,7 +53,7 @@ jobs:
         run: cargo clippy --features "all" -- --deny warnings
 
       - name: "clippy check examples"
-        run: cargo clippy --examples -- --deny warnings
+        run: cargo clippy --examples --all-features -- --deny warnings
 
       - name: "clippy check libadwaita examples"
         run: cd examples/libadwaita && cargo clippy --examples -- --deny warnings

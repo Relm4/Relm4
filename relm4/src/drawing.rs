@@ -122,6 +122,7 @@ impl DrawHandler {
     /// Get the drawing context to draw on a [`gtk::DrawingArea`].
     /// If the size of the [`gtk::DrawingArea`] changed, the contents of the
     /// surface will be replaced by a new, empty surface.
+    #[allow(deprecated)]
     pub fn get_context(&mut self) -> DrawContext {
         let allocation = self.drawing_area.allocation();
         let scale = self.drawing_area.scale_factor();

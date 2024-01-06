@@ -1,3 +1,5 @@
+#![allow(deprecated)]
+
 use gtk::prelude::*;
 use relm4::{
     gtk, Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,

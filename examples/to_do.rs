@@ -69,6 +69,14 @@ impl FactoryComponent for Task {
             completed: false,
         }
     }
+
+    fn update(&mut self, message: Self::Input, _sender: FactorySender<Self>) {
+        match message {
+            TaskInput::Toggle(completed) => {
+                self.completed = completed;
+            }
+        }
+    }
 }
 
 #[derive(Debug)]

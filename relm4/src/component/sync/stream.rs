@@ -65,6 +65,7 @@ mod test {
 
     fn assert_send<T: Send>(_stream: T) {}
 
+    #[allow(dead_code)]
     struct Test(Rc<()>);
 
     impl SimpleComponent for Test {

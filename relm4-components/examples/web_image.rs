@@ -65,7 +65,7 @@ impl SimpleComponent for App {
 
     fn init(
         _: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let image = WebImage::builder().launch(IMAGES[0].to_owned()).detach();
