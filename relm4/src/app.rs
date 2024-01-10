@@ -88,6 +88,7 @@ impl<M: Debug + 'static> RelmApp<M> {
     pub fn set_global_css(&self, style_data: &str) {
         let display = gtk::gdk::Display::default().unwrap();
         let provider = gtk::CssProvider::new();
+        #[allow(deprecated)]
         provider.load_from_data(style_data);
 
         #[allow(deprecated)]

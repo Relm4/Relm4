@@ -197,7 +197,7 @@ impl<C: Component> ComponentBuilder<C> {
         // Constructs the initial model and view with the initial payload.
         let state = Rc::new(RefCell::new(C::init(
             payload,
-            &root,
+            root.clone(),
             component_sender.clone(),
         )));
         let watcher = StateWatcher {

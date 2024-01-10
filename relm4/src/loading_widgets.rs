@@ -51,13 +51,12 @@ impl Drop for LoadingWidgets {
 }
 
 impl LoadingWidgets {
-    fn temp_child<C, W>(container: &C, children: &[W]) -> Box<dyn RemoveTempChild>
+    fn temp_child<C, W>(container: C, children: &[W]) -> Box<dyn RemoveTempChild>
     where
-        C: RelmRemoveExt + Clone + 'static,
+        C: RelmRemoveExt + 'static,
         W: AsRef<C::Child>,
         C::Child: Clone + AsRef<C::Child>,
     {
-        let container = container.clone();
         let children = children.iter().map(|c| c.as_ref().clone()).collect();
         let temp_child: TempWidgetsInner<C> = TempWidgetsInner {
             container,
@@ -68,9 +67,9 @@ impl LoadingWidgets {
     }
 
     /// Create new [`LoadingWidgets`] with one child.
-    pub fn new<C, W>(container: &C, child: W) -> Self
+    pub fn new<C, W>(container: C, child: W) -> Self
     where
-        C: RelmRemoveExt + Clone + 'static,
+        C: RelmRemoveExt + 'static,
         W: AsRef<C::Child>,
         C::Child: Clone + AsRef<C::Child>,
     {
@@ -78,9 +77,9 @@ impl LoadingWidgets {
     }
 
     /// Create new [`LoadingWidgets`] with multiple children.
-    pub fn with_children<C, W>(container: &C, children: &[W]) -> Self
+    pub fn with_children<C, W>(container: C, children: &[W]) -> Self
     where
-        C: RelmRemoveExt + Clone + 'static,
+        C: RelmRemoveExt + 'static,
         W: AsRef<C::Child>,
         C::Child: Clone + AsRef<C::Child>,
     {
@@ -91,9 +90,9 @@ impl LoadingWidgets {
     }
 
     /// Add another child to the temporary loading widgets.
-    pub fn push<C, W>(&mut self, container: &C, child: W)
+    pub fn push<C, W>(&mut self, container: C, child: W)
     where
-        C: RelmRemoveExt + Clone + 'static,
+        C: RelmRemoveExt + 'static,
         W: AsRef<C::Child>,
         C::Child: Clone + AsRef<C::Child>,
     {
@@ -102,9 +101,9 @@ impl LoadingWidgets {
     }
 
     /// Add many children to the temporary loading widgets.
-    pub fn add_many<C, W>(&mut self, container: &C, children: &[W])
+    pub fn add_many<C, W>(&mut self, container: C, children: &[W])
     where
-        C: RelmRemoveExt + Clone + 'static,
+        C: RelmRemoveExt + 'static,
         W: AsRef<C::Child>,
         C::Child: Clone + AsRef<C::Child>,
     {

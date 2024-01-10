@@ -181,7 +181,7 @@ mod test {
         fn init_widgets(
             &mut self,
             _: &crate::prelude::DynamicIndex,
-            _: &Self::Root,
+            _: Self::Root,
             _: &<Self::ParentWidget as crate::factory::FactoryView>::ReturnedWidget,
             _: crate::prelude::FactorySender<Self>,
         ) -> Self::Widgets {

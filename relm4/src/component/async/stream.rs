@@ -66,6 +66,7 @@ mod test {
 
     fn assert_send<T: Send>(_stream: T) {}
 
+    #[allow(dead_code)]
     struct Test(Rc<()>);
 
     #[async_trait::async_trait(?Send)]

@@ -100,7 +100,7 @@ impl SimpleComponent for App {
         self.current_section = msg;
     }
 
-    fn init(_: (), root: &Self::Root, sender: ComponentSender<Self>) -> ComponentParts<Self> {
+    fn init(_: (), root: Self::Root, sender: ComponentSender<Self>) -> ComponentParts<Self> {
         let model = App { current_section: 1 };
 
         let widgets = view_output!();

@@ -15,7 +15,7 @@ impl SimpleComponent for AppModel {
     #[allow(unreachable_code)]
     fn init(
         _: (),
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = Self;

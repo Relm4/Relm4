@@ -1,3 +1,5 @@
+#![allow(deprecated)]
+
 use gtk::prelude::*;
 use relm4::{
     gtk, Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,
@@ -69,7 +71,7 @@ impl SimpleComponent for App {
 
     fn init(
         _: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let default_idx = 0;

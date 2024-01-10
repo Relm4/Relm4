@@ -1,7 +1,7 @@
 error: parameter binding must be an identifier
   --> tests/ui/compile-fail/init-identifers.rs:18:9
    |
-18 |         (a, b): &Self::Root,
+18 |         (a, b): Self::Root,
    |         ^^^^^^
 
 error: parameter binding must be an identifier
@@ -16,4 +16,4 @@ error[E0050]: method `init` has 0 parameters but the declaration in trait `relm4
 42 |     fn init() -> ComponentParts<Self> {
    |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ expected 3 parameters, found 0
    |
-   = note: `init` from trait: `fn(<Self as relm4::SimpleComponent>::Init, &<Self as relm4::SimpleComponent>::Root, relm4::ComponentSender<Self>) -> relm4::ComponentParts<Self>`
+   = note: `init` from trait: `fn(<Self as relm4::SimpleComponent>::Init, <Self as relm4::SimpleComponent>::Root, relm4::ComponentSender<Self>) -> relm4::ComponentParts<Self>`

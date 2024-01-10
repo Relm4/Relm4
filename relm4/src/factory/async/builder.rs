@@ -57,7 +57,7 @@ where
         returned_widget: <C::ParentWidget as FactoryView>::ReturnedWidget,
     ) -> AsyncFactoryHandle<C> {
         let Self {
-            mut root_widget,
+            root_widget,
             component_sender,
             input_receiver,
             cmd_receiver,
@@ -70,7 +70,7 @@ where
 
         let input_sender = component_sender.input_sender().clone();
 
-        let loading_widgets = C::init_loading_widgets(&mut root_widget);
+        let loading_widgets = C::init_loading_widgets(root_widget.clone());
 
         let future_receiver = {
             let index = index.clone();
@@ -148,7 +148,7 @@ impl<C: AsyncFactoryComponent> FutureData<C> {
 
         let mut data = Box::new(data);
         let widgets =
-            Box::new(data.init_widgets(&index, &root, &returned_widget, component_sender.clone()));
+            Box::new(data.init_widgets(&index, root, &returned_widget, component_sender.clone()));
 
         let output_sender = component_sender.output_sender().clone();
 

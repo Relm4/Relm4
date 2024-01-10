@@ -127,7 +127,7 @@ pub(crate) fn generate_tokens(
                 fn init_widgets(
                     &mut self,
                     index: & #index_ty,
-                    root: &Self::Root,
+                    root: Self::Root,
                     returned_widget: &<Self::ParentWidget as relm4::factory::FactoryView>::ReturnedWidget,
                     sender: relm4::factory::#sender_ty<Self>,
                 ) -> Self::Widgets {

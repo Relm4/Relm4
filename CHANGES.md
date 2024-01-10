@@ -5,6 +5,7 @@
 ### Added
 
 + core: Add resizeable/expandable column functionality to `RelmColumn` and `LabelColum`
++ core: Pass the `Root` as owned parameter (without reference) to `Component::init`
 + core: Add `visible_on_activate()` to `RelmApp` to prevent the app window from being visible immediately
 + core: Make `into_stream()` method on `Receiver` public
 + examples: Add libadwaita `Toast` example
@@ -12,6 +13,7 @@
 ### Changed
 
 + core: Make `set_global_css` and `set_global_css_from_file` methods of `RelmApp` to prevent calling them before initializing GTK 
++ core: Always pass the `Root` as owned parameter (without reference) (affects `Component::init`, `Factory::init_widgets`, `AsyncComponent::init_loading_widgets`, `AsyncFactory::init_widgets` and `AsyncFactory::init_loading_widgets`)
 + core: Move internal initialization to `gtk::Application::startup` signal handler
 + core: Remove deprecated RelmApp methods
 + components: Increase flexibility of `Alert` component

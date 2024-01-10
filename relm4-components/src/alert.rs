@@ -136,7 +136,7 @@ impl Component for Alert {
 
     fn init(
         settings: AlertSettings,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = Alert {

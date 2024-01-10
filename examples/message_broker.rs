@@ -65,7 +65,7 @@ impl SimpleComponent for Header {
 
     fn init(
         _init: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = Header(false);
@@ -123,7 +123,7 @@ impl SimpleComponent for Dialog {
 
     fn init(
         parent_window: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = Dialog { hidden: true };
@@ -185,7 +185,7 @@ impl SimpleComponent for App {
 
     fn init(
         _init: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let header = Header::builder()

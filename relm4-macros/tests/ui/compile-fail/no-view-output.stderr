@@ -4,7 +4,7 @@ error: expected an injection point for the view macro. Try using `let widgets = 
 15 | /     #[allow(unreachable_code)]
 16 | |     fn init(
 17 | |         _: (),
-18 | |         root: &Self::Root,
+18 | |         root: Self::Root,
 ...  |
 25 | |         ComponentParts { model, widgets }
 26 | |     }

@@ -59,7 +59,7 @@ impl SimpleComponent for Dialog {
 
     fn init(
         _init: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = Dialog { visible: false };
@@ -100,7 +100,7 @@ impl SimpleComponent for Button {
 
     fn init(
         _init: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         // We don't have access to the parent window from here
@@ -108,7 +108,7 @@ impl SimpleComponent for Button {
         // Relm4 will get the window later by calling [`WidgetExt::root()`]
         // on the button once all widgets are connected.
         let dialog = Dialog::builder()
-            .transient_for(root)
+            .transient_for(&root)
             .launch_with_broker((), &DIALOG_BROKER)
             .forward(sender.input_sender(), identity);
 
@@ -142,7 +142,7 @@ impl SimpleComponent for App {
 
     fn init(
         _init: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let button = Button::builder()

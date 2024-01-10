@@ -105,7 +105,7 @@ impl SimpleComponent for SaveDialog {
 
     fn init(
         settings: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = SaveDialog {

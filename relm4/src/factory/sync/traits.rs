@@ -50,7 +50,7 @@ pub trait FactoryComponent:
     fn init_widgets(
         &mut self,
         index: &Self::Index,
-        root: &Self::Root,
+        root: Self::Root,
         returned_widget: &<Self::ParentWidget as FactoryView>::ReturnedWidget,
         sender: FactorySender<Self>,
     ) -> Self::Widgets;

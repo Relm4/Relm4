@@ -148,7 +148,7 @@ impl FactoryComponent for Task {
     fn init_widgets(
         &mut self,
         index: &Self::Index,
-        root: &Self::Root,
+        root: Self::Root,
         _returned_widget: &<Self::ParentWidget as FactoryView>::ReturnedWidget,
         sender: FactorySender<Self>,
     ) -> Self::Widgets {
@@ -544,7 +544,7 @@ impl SimpleComponent for App {
 
     fn init(
         _: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let view =
@@ -576,7 +576,7 @@ impl SimpleComponent for App {
                 });
 
         let save_dialog = SaveDialog::builder()
-            .transient_for_native(root)
+            .transient_for_native(&root)
             .launch(SaveDialogSettings {
                 create_folders: true,
                 accept_label: "Save".into(),
@@ -590,7 +590,7 @@ impl SimpleComponent for App {
             });
 
         let open_dialog = OpenDialog::builder()
-            .transient_for_native(root)
+            .transient_for_native(&root)
             .launch(OpenDialogSettings {
                 create_folders: false,
                 folder_mode: false,

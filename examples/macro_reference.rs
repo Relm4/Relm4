@@ -184,7 +184,7 @@ impl SimpleComponent for App {
     // Initialize the component.
     fn init(
         init: Self::Init,
-        renamed_root: &Self::Root,
+        renamed_root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let counter = App {

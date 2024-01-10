@@ -52,7 +52,7 @@ where
 
     fn init(
         init: Self::Init,
-        _root: &Self::Root,
+        _root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = Self::init(init, sender);
@@ -98,7 +98,7 @@ where
             shutdown_recipient,
         );
 
-        let mut state = C::init(payload, &root, component_sender.clone());
+        let mut state = C::init(payload, root, component_sender.clone());
 
         thread::spawn(move || {
             let context = glib::MainContext::thread_default().unwrap_or_default();

@@ -166,10 +166,8 @@ impl<C: AsyncComponent> AsyncComponentBuilder<C> {
         input_sender: Sender<C::Input>,
         input_receiver: Receiver<C::Input>,
     ) -> AsyncConnector<C> {
-        let Self {
-            mut root, priority, ..
-        } = self;
-        let temp_widgets = C::init_loading_widgets(&mut root);
+        let Self { root, priority, .. } = self;
+        let temp_widgets = C::init_loading_widgets(root.clone());
 
         let RuntimeSenders {
             output_sender,

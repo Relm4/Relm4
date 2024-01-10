@@ -115,7 +115,7 @@ fn gtk_import() -> syn::Path {
 ///
 ///     fn init(
 ///         counter: Self::Init,
-///         root: &Self::Root,
+///         root: Self::Root,
 ///         sender: ComponentSender<Self>,
 ///     ) -> ComponentParts<Self> {
 ///         let model = Self { counter };

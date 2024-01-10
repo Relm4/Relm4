@@ -36,12 +36,12 @@ impl Component for WebImage {
 
     fn init(
         url: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let widget = gtk::Box::default();
         root.append(&widget);
-        let current_widget = Self::set_spinner(root, widget.upcast_ref());
+        let current_widget = Self::set_spinner(&root, widget.upcast_ref());
 
         let model = Self {
             current_id: 0,

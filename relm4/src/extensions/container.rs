@@ -1,3 +1,4 @@
+#![allow(deprecated)]
 use gtk::prelude::*;
 
 use crate::RelmSetChildExt;
