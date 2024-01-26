@@ -9,7 +9,7 @@ use relm4::{gtk, Component, ComponentParts, ComponentSender, RelmApp, RelmWidget
 enum Msg {
     AddPoint((f64, f64)),
     Reset,
-    Resize((i32, i32)),
+    Resize,
 }
 
 #[derive(Debug)]
@@ -58,8 +58,8 @@ impl Component for App {
                 }
               }
             },
-            connect_resize[sender] => move |_, x, y| {
-                sender.input(Msg::Resize((x, y)));
+            connect_resize[sender] => move |_, _, _| {
+                sender.input(Msg::Resize);
             }
           },
         }
@@ -73,9 +73,9 @@ impl Component for App {
             Msg::AddPoint((x, y)) => {
                 self.points.push(Point::new(x, y));
             }
-            Msg::Resize((x, y)) => {
-                self.width = x as f64;
-                self.height = y as f64;
+            Msg::Resize => {
+                self.width = self.handler.width() as f64;
+                self.height = self.handler.height() as f64;
             }
             Msg::Reset => {
                 cx.set_operator(Operator::Clear);

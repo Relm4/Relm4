@@ -141,15 +141,45 @@ impl DrawHandler {
         DrawContext::new(&self.draw_surface, &self.edit_surface, &self.drawing_area)
     }
 
-    /// Get the height of the [`DrawHandler`].
+    /// Get the width and height of the [`DrawHandler`] in pixels.
+    #[must_use]
+    pub fn size(&self) -> (i32, i32) {
+        let scale = self.drawing_area.scale_factor();
+        (
+            self.edit_surface.width() / scale,
+            self.edit_surface.height() / scale,
+        )
+    }
+
+    /// Get the height of the [`DrawHandler`] in pixels.
     #[must_use]
     pub fn height(&self) -> i32 {
+        let scale = self.drawing_area.scale_factor();
+        self.edit_surface.height() / scale
+    }
+
+    /// Get the width of the [`DrawHandler`] in pixels.
+    #[must_use]
+    pub fn width(&self) -> i32 {
+        let scale = self.drawing_area.scale_factor();
+        self.edit_surface.width() / scale
+    }
+
+    /// Get the height of the inner [`ImageSurface`].
+    ///
+    /// **NOTE:** Depending on the monitor scaling this is not necessarily
+    /// the height in pixels.
+    #[must_use]
+    pub fn surface_height(&self) -> i32 {
         self.edit_surface.height()
     }
 
-    /// Get the width of the [`DrawHandler`].
+    /// Get the width of the inner [`ImageSurface`].
+    ///
+    /// **NOTE:** Depending on the monitor scaling this is not necessarily
+    /// the width in pixels.
     #[must_use]
-    pub fn width(&self) -> i32 {
+    pub fn surface_width(&self) -> i32 {
         self.edit_surface.width()
     }
 

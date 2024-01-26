@@ -4,6 +4,7 @@
 
 ### Added
 
++ core: Add `size()` method to `DrawHandler` for easier access of width and height
 + core: Add method to set `RelmAction` enabled or disabled
 + core: Add method to get the inner `gio::SimpleAction` used by `RelmAction`
 + core: Add resizeable/expandable column functionality to `RelmColumn` and `LabelColum`
@@ -23,6 +24,7 @@
 
 ### Fixed
 
++ core: Report the correct dimensions in DrawingHandler when a scaling factor is set
 + core: Setting the visibility of the main window isn't overridden by `RelmApp` anymore
 
 ## 0.7.0-beta.2 - 2023-10-14
