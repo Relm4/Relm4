@@ -4,6 +4,8 @@
 
 ### Added
 
++ core: Add method to set `RelmAction` enabled or disabled
++ core: Add method to get the inner `gio::SimpleAction` used by `RelmAction`
 + core: Add resizeable/expandable column functionality to `RelmColumn` and `LabelColum`
 + core: Pass the `Root` as owned parameter (without reference) to `Component::init`
 + core: Add `visible_on_activate()` to `RelmApp` to prevent the app window from being visible immediately
