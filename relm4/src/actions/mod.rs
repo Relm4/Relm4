@@ -201,6 +201,24 @@ where
     }
 }
 
+impl<Name: ActionName> RelmAction<Name> {
+    /// Sets the action as enabled or disabled.
+    ///
+    /// If disabled, the action cannot be activated anymore.
+    pub fn set_enabled(&self, enabled: bool) {
+        self.action.set_enabled(enabled);
+    }
+
+    /// Returns the inner [`gio::SimpleAction`].
+    ///
+    /// This method is meant for low level control.
+    /// Only use it if you know exactly what you are doing.
+    #[must_use]
+    pub fn gio_action(&self) -> &gio::SimpleAction {
+        &self.action
+    }
+}
+
 #[derive(Debug)]
 /// A type-safe action group that wraps around [`gio::SimpleActionGroup`].
 pub struct RelmActionGroup<GroupName: ActionGroupName> {
