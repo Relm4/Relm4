@@ -8,12 +8,16 @@ pub trait RelmRemoveExt: ContainerChild {
     fn container_remove(&self, child: &impl AsRef<Self::Child>);
 }
 
-impl<T: RelmSetChildExt> RelmRemoveExt for T {
+impl<T> RelmRemoveExt for T
+where
+    T: RelmSetChildExt,
+    T::Child: AsRef<T::Child>,
+{
     fn container_remove(&self, child: &impl AsRef<Self::Child>) {
         if let Some(current_child) = self.container_get_child() {
             let remove_child = child.as_ref().upcast_ref();
             if remove_child == &current_child {
-                self.container_set_child(None::<&gtk::Widget>);
+                self.container_set_child(None::<&T::Child>);
             }
         }
     }
@@ -48,6 +52,8 @@ impl RelmRemoveExt for adw::PreferencesGroup {
 #[cfg_attr(docsrs, doc(cfg(feature = "libadwaita")))]
 impl RelmRemoveExt for adw::ExpanderRow {
     fn container_remove(&self, widget: &impl AsRef<Self::Child>) {
+        use adw::traits::ExpanderRowExt;
+
         let child = widget.as_ref();
         self.remove(child);
     }
@@ -88,15 +94,23 @@ remove_impl!(
 );
 remove_child_impl!(gtk::InfoBar);
 
+#[cfg(all(feature = "libadwaita", feature = "gnome_45"))]
+#[cfg_attr(docsrs, doc(cfg(all(feature = "libadwaita", feature = "gnome_45"))))]
+remove_impl!(adw::NavigationView);
+
 /// Widget types that allow removal of all their children.
 pub trait RelmRemoveAllExt {
     /// Remove all children from the container.
     fn remove_all(&self);
 }
 
-impl<T: RelmSetChildExt> RelmRemoveAllExt for T {
+impl<T> RelmRemoveAllExt for T
+where
+    T: RelmSetChildExt,
+    T::Child: AsRef<T::Child>,
+{
     fn remove_all(&self) {
-        self.container_set_child(None::<&gtk::Widget>);
+        self.container_set_child(None::<&T::Child>);
     }
 }
 
@@ -130,12 +144,10 @@ impl RelmRemoveAllExt for gtk::ListBox {
 
 #[cfg(feature = "libadwaita")]
 #[cfg_attr(docsrs, doc(cfg(feature = "libadwaita")))]
-use adw::traits::ExpanderRowExt;
-
-#[cfg(feature = "libadwaita")]
-#[cfg_attr(docsrs, doc(cfg(feature = "libadwaita")))]
 impl RelmRemoveAllExt for adw::ExpanderRow {
     fn remove_all(&self) {
+        use adw::traits::ExpanderRowExt;
+
         while let Some(child) = self.last_child() {
             let row = child
                 .downcast::<gtk::ListBoxRow>()

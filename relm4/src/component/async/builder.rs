@@ -69,7 +69,7 @@ where
 {
     /// Attach the component's root widget to a given container.
     #[must_use]
-    pub fn attach_to(self, container: &impl RelmContainerExt) -> Self {
+    pub fn attach_to<T: RelmContainerExt<Child = gtk::Widget>>(self, container: &T) -> Self {
         container.container_add(self.root.as_ref());
 
         self
