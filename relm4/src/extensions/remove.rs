@@ -130,7 +130,7 @@ impl RelmRemoveAllExt for gtk::ListBox {
 
 #[cfg(feature = "libadwaita")]
 #[cfg_attr(docsrs, doc(cfg(feature = "libadwaita")))]
-use adw::traits::ExpanderRowExt;
+use adw::prelude::ExpanderRowExt;
 
 #[cfg(feature = "libadwaita")]
 #[cfg_attr(docsrs, doc(cfg(feature = "libadwaita")))]

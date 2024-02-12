@@ -11,6 +11,7 @@
 + core: Pass the `Root` as owned parameter (without reference) to `Component::init`
 + core: Add `visible_on_activate()` to `RelmApp` to prevent the app window from being visible immediately
 + core: Make `into_stream()` method on `Receiver` public
++ core: Updated gtk and libadwaita.
 + examples: Add libadwaita `Toast` example
 
 ### Changed

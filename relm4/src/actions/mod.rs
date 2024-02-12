@@ -1,7 +1,7 @@
 //! Action utility.
 
 use gtk::gio;
-use gtk::glib::FromVariant;
+use gtk::prelude::FromVariant;
 use gtk::prelude::{ActionExt, ActionMapExt, StaticVariantType, ToVariant, WidgetExt};
 
 use std::marker::PhantomData;

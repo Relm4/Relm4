@@ -43,7 +43,7 @@ pub trait WithoutValue: DetailableSetting {}
 /// Any type that implements it must not implement [`WithoutValue`].
 pub trait WithValue<'a>: SettingSafety {
     /// Type used as parameter in safe methods.
-    type Value: glib::ToVariant + Into<glib::Variant>;
+    type Value: gtk::prelude::ToVariant + Into<glib::Variant>;
 
     /// Type used to receive the value on signals.
     type Mapping;
@@ -62,10 +62,10 @@ pub trait Stateless: SettingSafety {}
 /// Any type that implements it must not implement [`Stateless`].
 pub trait Stateful<'a>: SettingSafety {
     /// Type used as parameter in safe methods.
-    type State: glib::ToVariant;
+    type State: gtk::prelude::ToVariant;
 
     /// Owned version of the [`State`](Stateful::State) type, used by getters or methods that mutate state.
-    type Owned: glib::ToVariant + glib::FromVariant;
+    type Owned: gtk::prelude::ToVariant + gtk::prelude::FromVariant;
 
     /// Type used to receive the state on signals.
     type Mapping;
