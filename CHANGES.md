@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.7.0-rc.2 - 2024-2-13
 
 ### Added
 
