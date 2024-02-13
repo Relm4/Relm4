@@ -25,6 +25,7 @@
     clippy::cargo,
     clippy::must_use_candidate
 )]
+#![allow(clippy::multiple_crate_versions)]
 // Configuration for doc builds on the nightly toolchain.
 #![cfg_attr(docsrs, feature(doc_cfg))]
 // Ignore GTK 4.10 deprecations.
