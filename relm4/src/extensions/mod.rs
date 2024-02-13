@@ -200,9 +200,25 @@ mod libadwaita {
         adw::StatusPage,
         adw::PreferencesGroup,
         adw::ToastOverlay,
-        adw::ExpanderRow
+        adw::ExpanderRow,
+        adw::Carousel,
+        adw::Squeezer,
+        adw::Leaflet
     }
 
     #[cfg(all(feature = "libadwaita", feature = "gnome_45"))]
-    container_child_impl! { adw::NavigationPage }
+    mod gnome_45 {
+        use super::ContainerChild;
+
+        container_child_impl! {
+            adw::NavigationView: adw::NavigationPage,
+            adw::NavigationSplitView: adw::NavigationPage
+        }
+        container_child_impl! {
+            adw::NavigationPage,
+            adw::BreakpointBin,
+            adw::OverlaySplitView,
+            adw::ToolbarView
+        }
+    }
 }
