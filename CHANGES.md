@@ -21,6 +21,7 @@
 + core: Remove deprecated RelmApp methods
 + components: Increase flexibility of `Alert` component
 + core: Bump version of libpanel dependency to 0.3
++ all: Increase MSRV to 1.74 to match the dependencies
 
 ### Fixed
 
