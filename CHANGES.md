@@ -4,6 +4,7 @@
 
 ### Added
 
++ core: Implement more traits for libadwaita 1.4 widgets
 + core: Add `size()` method to `DrawHandler` for easier access of width and height
 + core: Add method to set `RelmAction` enabled or disabled
 + core: Add method to get the inner `gio::SimpleAction` used by `RelmAction`
