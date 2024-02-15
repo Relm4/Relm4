@@ -127,6 +127,7 @@ impl AsyncFactoryComponent for Counter {
                 self.value = self.value.wrapping_sub(1);
             }
         }
+        panic!()
     }
 
     fn shutdown(&mut self, _widgets: &mut Self::Widgets, _output: relm4::Sender<Self::Output>) {

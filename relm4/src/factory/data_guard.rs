@@ -67,7 +67,8 @@ impl<C, Widgets, Output> DataGuard<C, Widgets, Output> {
         };
 
         let future = f(runtime_data, runtime_widgets);
-        let rt_dropper = RuntimeDropper(Some(crate::spawn_local(future).into_source_id().unwrap()));
+        let handle = crate::spawn_local_with_global_abort(glib::Priority::default(), future);
+        let rt_dropper = RuntimeDropper(Some(handle.into_source_id().unwrap()));
         let shutdown_fn = Box::new(shutdown_fn);
 
         Self {

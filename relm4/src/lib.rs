@@ -175,6 +175,31 @@ where
     gtk::glib::MainContext::ref_thread_default().spawn_local_with_priority(priority, func)
 }
 
+/// Spawns a thread-local future on GLib's executor, for non-[`Send`] futures.
+/// Unlike [`spawn_local_with_priority`], this function will abort the entire
+/// process when a task panics.
+pub(crate) fn spawn_local_with_global_abort<F, Out>(
+    priority: gtk::glib::Priority,
+    func: F,
+) -> gtk::glib::JoinHandle<Out>
+where
+    F: Future<Output = Out> + 'static,
+    Out: 'static,
+{
+    spawn_local(async move {
+        let mut handle = runtime_util::AbortHandle::new(spawn_local_with_priority(priority, func));
+        futures::select! {
+            result = handle => match result {
+                Ok(result) => result,
+                Err(_) => {
+                    println!("A task panicked, shutting down the application");
+                    std::process::abort();
+                }
+            }
+        }
+    })
+}
+
 static RUNTIME: Lazy<Runtime> = Lazy::new(|| {
     tokio::runtime::Builder::new_multi_thread()
         .enable_all()
