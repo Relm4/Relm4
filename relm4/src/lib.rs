@@ -57,7 +57,7 @@ pub use extensions::*;
 pub use shared_state::{Reducer, Reducible, SharedState};
 pub use shutdown::ShutdownReceiver;
 
-pub use app::RelmApp;
+pub use app::{RelmApp};
 pub use tokio::task::JoinHandle;
 
 use gtk::prelude::{Cast, IsA};

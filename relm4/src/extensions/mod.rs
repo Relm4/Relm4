@@ -181,7 +181,8 @@ container_child_impl! {
 
 container_child_impl! {
     gtk::ListBox: gtk::ListBoxRow,
-    gtk::FlowBox: gtk::FlowBoxChild
+    gtk::FlowBox: gtk::FlowBoxChild,
+    gtk::Application: gtk::Window
 }
 
 #[cfg(feature = "libadwaita")]
@@ -204,6 +205,10 @@ mod libadwaita {
         adw::Carousel,
         adw::Squeezer,
         adw::Leaflet
+    }
+
+    container_child_impl! {
+        adw::Application: gtk::Window
     }
 
     #[cfg(all(feature = "libadwaita", feature = "gnome_45"))]
