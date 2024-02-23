@@ -1,5 +1,6 @@
 //! Typed views.
 
+pub mod grid;
 pub mod column;
 pub mod list;
 mod selection_ext;
