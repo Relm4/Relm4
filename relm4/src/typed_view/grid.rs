@@ -5,12 +5,7 @@ use gtk::{
     gio, glib,
     prelude::{Cast, CastNone, IsA, ListItemExt, ListModelExt, ObjectExt},
 };
-use std::{
-    any::Any, 
-    cmp::Ordering, 
-    fmt::Debug,
-    marker::PhantomData,
-};
+use std::{any::Any, cmp::Ordering, marker::PhantomData};
 
 /// An item of a [`TypedGridView`].
 pub trait RelmGridItem: Any {
@@ -51,11 +46,7 @@ pub struct TypedGridView<T, S> {
     _ty: PhantomData<*const T>,
 }
 
-impl<T, S> Debug for TypedGridView<T, S>
-where 
-    T: Debug, 
-    S: Debug,
-{
+impl<T: std::fmt::Debug, S: std::fmt::Debug> std::fmt::Debug for TypedGridView<T, S> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("TypedGridView")
             .field("store", &self.store)
