@@ -6,7 +6,7 @@ use std::convert::identity;
 
 use gtk::glib;
 use gtk::prelude::{ButtonExt, GtkWindowExt, WidgetExt};
-use relm4::{gtk, MessageBroker};
+use relm4::MessageBroker;
 use relm4::{
     Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,
     SimpleComponent,

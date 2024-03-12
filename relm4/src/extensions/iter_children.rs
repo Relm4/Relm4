@@ -1,5 +1,4 @@
 use super::ContainerChild;
-use crate::gtk;
 use gtk::prelude::{Cast, GridExt, IsA, WidgetExt};
 
 /// An iterator over container children.
@@ -127,7 +126,6 @@ impl RelmIterChildrenExt for gtk::Stack {}
 #[cfg_attr(docsrs, doc(cfg(feature = "libadwaita")))]
 mod libadwaita {
     use super::RelmIterChildrenExt;
-    use crate::gtk;
     use gtk::prelude::{Cast, ListModelExt};
 
     impl RelmIterChildrenExt for adw::TabView {

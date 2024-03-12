@@ -1,10 +1,9 @@
 use gtk::prelude::*;
-use relm4::prelude::*;
-use std::cell::Cell;
+use relm4::{abstractions::Toaster, prelude::*};
 
 struct App {
     activated: &'static str,
-    toast: Cell<Option<adw::Toast>>,
+    toaster: Toaster,
 }
 
 #[derive(Debug)]
@@ -34,8 +33,8 @@ impl SimpleComponent for App {
                     }
                 },
 
-                #[name = "toast_overlay"]
-                adw::ToastOverlay {
+                #[local_ref]
+                toast_overlay -> adw::ToastOverlay {
                     set_vexpand: true,
                     gtk::Box {
                         set_orientation: gtk::Orientation::Vertical,
@@ -60,9 +59,6 @@ impl SimpleComponent for App {
                             set_text: model.activated,
                         },
                     },
-
-                    #[watch]
-                    add_toast?: model.toast.take(),
                 }
             }
 
@@ -72,13 +68,16 @@ impl SimpleComponent for App {
     // Initialize the component.
     fn init(
         _: Self::Init,
-        root: &Self::Root,
+        root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         let model = App {
             activated: "Idle",
-            toast: Cell::new(None),
+            toaster: Toaster::default(),
         };
+
+        let toast_overlay = model.toaster.overlay_widget();
+
         // Insert the code generation of the view! macro here
         let widgets = view_output!();
 
@@ -89,14 +88,16 @@ impl SimpleComponent for App {
         match msg {
             Msg::Activate => {
                 self.activated = "Active";
-                let toast = adw::Toast::new("Activated");
-                toast.set_button_label(Some("Cancel"));
-                toast.set_timeout(0);
+                let toast = adw::Toast::builder()
+                    .title("Activated")
+                    .button_label("Cancel")
+                    .timeout(0)
+                    .build();
                 toast.connect_button_clicked(move |this| {
                     this.dismiss();
                     sender.input(Msg::Cancel);
                 });
-                self.toast.set(Some(toast));
+                self.toaster.add_toast(toast);
             }
             Msg::Cancel => self.activated = "Idle",
         }

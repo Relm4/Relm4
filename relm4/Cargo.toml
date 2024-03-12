@@ -57,7 +57,7 @@ relm4-macros = { path = "../relm4-macros" }
 criterion = { version = "0.5", default-features = false }
 
 # For the examples
-relm4-icons = { git = "https://github.com/Relm4/icons", features = ["plus", "minus", "tag-outline-add", "delete-filled"]}
+relm4-icons = { version = "0.7.0-alpha.2", features = ["plus", "minus", "tag-outline-add", "delete-filled"]}
 relm4-components = { path = "../relm4-components" }
 tokio = { version = "1.28", features = [
     "rt",
@@ -81,3 +81,23 @@ harness = false
 name = "simple"
 path = "examples/simple.rs"
 doc-scrape-examples = true
+
+[[example]]
+name = "leaflet_sidebar"
+path = "examples/leaflet_sidebar.rs"
+required-features = ["libadwaita"]
+
+[[example]]
+name = "tab_factory"
+path = "examples/tab_factory.rs"
+required-features = ["libadwaita"]
+
+[[example]]
+name = "tab_game"
+path = "examples/tab_game.rs"
+required-features = ["libadwaita"]
+
+[[example]]
+name = "toast"
+path = "examples/toast.rs"
+required-features = ["libadwaita", "gnome_43"]

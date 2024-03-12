@@ -23,7 +23,7 @@ impl Parse for SyncOnlyAttrs {
         } = input.parse()?;
 
         if let Some(async_token) = asyncness {
-            Err(syn::Error::new(
+            Err(Error::new(
                 async_token.span,
                 "this macro doesn't support async traits",
             ))
@@ -44,7 +44,7 @@ impl Parse for Attrs {
             if input.peek(Async) {
                 let new_asyncness: Async = input.parse()?;
                 if attrs.asyncness.is_some() {
-                    return Err(syn::Error::new(
+                    return Err(Error::new(
                         new_asyncness.span,
                         "cannot specify asyncness twice",
                     ));
@@ -54,7 +54,7 @@ impl Parse for Attrs {
             } else {
                 let new_vis: Visibility = input.parse()?;
                 if attrs.visibility.is_some() {
-                    return Err(syn::Error::new(
+                    return Err(Error::new(
                         new_vis.span(),
                         "cannot specify visibility twice",
                     ));

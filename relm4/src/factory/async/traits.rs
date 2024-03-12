@@ -1,3 +1,6 @@
+// Prevent false positive in nightly
+#![allow(unused_qualifications)]
+
 //! Traits for for managing and updating factories.
 
 use crate::channel::AsyncFactorySender;

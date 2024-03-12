@@ -4,6 +4,7 @@
 
 ### Added
 
++ core: Add `Toaster` as abstraction over `adw::ToastOverlay` for usage in the model of a component.
 + core: Implement more traits for libadwaita 1.4 widgets
 + core: Add `size()` method to `DrawHandler` for easier access of width and height
 + core: Add method to set `RelmAction` enabled or disabled
@@ -12,11 +13,14 @@
 + core: Pass the `Root` as owned parameter (without reference) to `Component::init`
 + core: Add `visible_on_activate()` to `RelmApp` to prevent the app window from being visible immediately
 + core: Make `into_stream()` method on `Receiver` public
-+ core: Add TypedGridView as idiomatic wrapper over gtk::GridView
++ core: Add TypedGridView as idiomatic wrapper over `gtk::GridView`
 + examples: Add libadwaita `Toast` example
 
 ### Changed
 
++ core: Remove unmaintained actions code
++ core: Move libadwaita examples in regular examples folder
++ core: Move `drawing` module to `abstractions`
 + core: Make `set_global_css` and `set_global_css_from_file` methods of `RelmApp` to prevent calling them before initializing GTK 
 + core: Always pass the `Root` as owned parameter (without reference) (affects `Component::init`, `Factory::init_widgets`, `AsyncComponent::init_loading_widgets`, `AsyncFactory::init_widgets` and `AsyncFactory::init_loading_widgets`)
 + core: Move internal initialization to `gtk::Application::startup` signal handler

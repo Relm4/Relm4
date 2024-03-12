@@ -36,6 +36,12 @@ pub struct MessageBroker<M: Debug> {
     inner: Lazy<MessageBrokerInner<M>>,
 }
 
+impl<M: Debug> Default for MessageBroker<M> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<M: Debug> MessageBroker<M> {
     /// Creates a new [`MessageBroker`].
     ///

@@ -2,7 +2,7 @@ use gtk::prelude::{
     BoxExt, ButtonExt, EntryBufferExtManual, EntryExt, GtkWindowExt, OrientableExt, WidgetExt,
 };
 use relm4::factory::{FactoryComponent, FactoryHashMap, FactorySender};
-use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent};
+use relm4::{ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent};
 
 #[derive(Debug)]
 struct Counter {

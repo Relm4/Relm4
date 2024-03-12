@@ -2,9 +2,8 @@ use std::time::Duration;
 
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
 use relm4::{
-    adw,
     factory::{DynamicIndex, FactoryComponent, FactorySender, FactoryVecDeque},
-    gtk, Component, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SharedState,
+    Component, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SharedState,
 };
 
 enum GameState {

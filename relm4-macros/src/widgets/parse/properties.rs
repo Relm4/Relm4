@@ -115,8 +115,8 @@ fn parse_next_token(input: ParseStream<'_>) -> Result<bool, syn::Error> {
         parse_type!(input, Colon);
     } else if input.peek(Slash) {
         parse_type!(input, Slash);
-    } else if input.peek(syn::token::Eq) {
-        parse_type!(input, syn::token::Eq);
+    } else if input.peek(token::Eq) {
+        parse_type!(input, token::Eq);
     } else if input.peek(Gt) {
         parse_type!(input, Gt);
     } else if input.peek(Lt) {

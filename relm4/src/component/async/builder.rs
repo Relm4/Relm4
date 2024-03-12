@@ -188,8 +188,7 @@ impl<C: AsyncComponent> AsyncComponentBuilder<C> {
             shutdown_recipient,
         );
 
-        let (source_id_sender, source_id_receiver) =
-            oneshot::channel::<gtk::glib::JoinHandle<()>>();
+        let (source_id_sender, source_id_receiver) = oneshot::channel::<glib::JoinHandle<()>>();
 
         let rt_root = root.clone();
 

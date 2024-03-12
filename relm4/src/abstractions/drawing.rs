@@ -2,8 +2,6 @@
 //! Create a [`DrawHandler`], initialize it, and get its context when handling a message (that could be
 //! sent from the draw signal).
 
-// TODO: check if clip has the intended behavior.
-
 use std::cell::RefCell;
 use std::ops::Deref;
 use std::rc::Rc;
