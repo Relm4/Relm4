@@ -12,7 +12,7 @@
 use gtk::prelude::{
     BoxExt, ButtonExt, GridExt, GtkWindowExt, ObjectExt, OrientableExt, ToggleButtonExt, WidgetExt,
 };
-use relm4::{gtk, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent};
+use relm4::{ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent};
 
 #[tracker::track]
 struct App {

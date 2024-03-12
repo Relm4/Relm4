@@ -32,6 +32,15 @@ impl<Data: std::fmt::Debug> std::fmt::Debug for SharedState<Data> {
     }
 }
 
+impl<Data> Default for SharedState<Data>
+where
+    Data: Default,
+{
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<Data> SharedState<Data>
 where
     Data: Default,

@@ -165,7 +165,7 @@ impl Widget {
                 if let PropertyType::Widget(widget) = &prop.ty {
                     if widget.template_attr == WidgetTemplateAttr::TemplateChild {
                         return Err(ParseError::Generic(
-                            syn::Error::new(
+                            Error::new(
                                 widget.name.span(),
                                 "You can't use a template child if the parent is not a template.",
                             )

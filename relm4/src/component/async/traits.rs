@@ -2,6 +2,9 @@
 // Copyright 2022 System76 <info@system76.com>
 // SPDX-License-Identifier: MIT or Apache-2.0
 
+// Prevent false positive in nightly
+#![allow(unused_qualifications)]
+
 use std::fmt::Debug;
 
 use crate::channel::{AsyncComponentSender, Sender};

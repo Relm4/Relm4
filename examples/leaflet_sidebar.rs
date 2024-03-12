@@ -1,3 +1,6 @@
+// This example should be updated soon...
+#![allow(deprecated)]
+
 /// Responsive sidebar layout inspired by the example code in the [libadwaita documentation].
 ///
 /// Shrink the window small enough to see the sidebar and content pages become folded.

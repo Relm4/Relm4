@@ -1,8 +1,7 @@
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
 use relm4::{
-    adw,
     factory::{DynamicIndex, FactoryComponent, FactorySender, FactoryVecDeque},
-    gtk, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent,
+    ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent,
 };
 
 #[derive(Debug)]

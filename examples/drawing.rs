@@ -2,8 +2,8 @@ use std::time::Duration;
 
 use gtk::cairo::{Context, Operator};
 use gtk::prelude::*;
-use relm4::drawing::DrawHandler;
-use relm4::{gtk, Component, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt};
+use relm4::abstractions::DrawHandler;
+use relm4::{Component, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt};
 
 #[derive(Debug)]
 enum Msg {

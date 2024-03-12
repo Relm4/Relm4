@@ -1,6 +1,6 @@
 use crate::{
     factory::{positions::GridPosition, FactoryView},
-    gtk, RelmIterChildrenExt, WidgetRef,
+    RelmIterChildrenExt, WidgetRef,
 };
 use gtk::prelude::{FlowBoxChildExt, ListBoxRowExt};
 

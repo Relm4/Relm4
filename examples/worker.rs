@@ -3,8 +3,8 @@ use std::time::Duration;
 
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
 use relm4::{
-    gtk, Component, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent,
-    Worker, WorkerController,
+    Component, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent, Worker,
+    WorkerController,
 };
 
 struct AsyncHandler;

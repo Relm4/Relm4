@@ -3,7 +3,6 @@ use std::time::Duration;
 use gtk::prelude::*;
 use relm4::{
     component::{AsyncComponent, AsyncComponentParts, AsyncComponentSender},
-    gtk,
     loading_widgets::LoadingWidgets,
     view, RelmApp, RelmWidgetExt,
 };

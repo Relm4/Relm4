@@ -138,6 +138,16 @@ pub struct Reducer<Data: Reducible> {
     inner: Lazy<ReducerInner<Data>>,
 }
 
+impl<Data> Default for Reducer<Data>
+where
+    Data: Reducible + Send + 'static,
+    Data::Input: Send,
+{
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl<Data> Reducer<Data>
 where
     Data: Reducible + Send + 'static,

@@ -1,4 +1,4 @@
-use crate::{gtk, RelmIterChildrenExt, RelmListBoxExt, RelmRemoveAllExt};
+use crate::{RelmIterChildrenExt, RelmListBoxExt, RelmRemoveAllExt};
 use gtk::prelude::{BoxExt, GridExt, WidgetExt};
 
 // A set of widgets for tests

@@ -341,7 +341,7 @@ impl Worker for Document {
             }
             DocumentInput::ChangeTaskName(index, name) => {
                 if let Some(task) = self.model.tasks.get_mut(index.current_index()) {
-                    task.name = name.clone();
+                    task.name.clone_from(&name);
                 }
 
                 // We don't technically need to send an event, because gtk::Entry updates itself

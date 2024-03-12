@@ -7,8 +7,8 @@ use std::convert::identity;
 use gtk::prelude::{BoxExt, ButtonExt, DialogExt, GtkWindowExt, ToggleButtonExt, WidgetExt};
 use relm4::gtk::prelude::Cast;
 use relm4::{
-    gtk, Component, ComponentController, ComponentParts, ComponentSender, Controller,
-    MessageBroker, RelmApp, SimpleComponent,
+    Component, ComponentController, ComponentParts, ComponentSender, Controller, MessageBroker,
+    RelmApp, SimpleComponent,
 };
 
 static HEADER_BROKER: MessageBroker<bool> = MessageBroker::new();

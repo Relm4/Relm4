@@ -183,8 +183,7 @@ impl<C: Component> ComponentBuilder<C> {
         // Gets notifications when a component's model and view is updated externally.
         let (notifier, notifier_receiver) = crate::channel();
 
-        let (source_id_sender, source_id_receiver) =
-            oneshot::channel::<gtk::glib::JoinHandle<()>>();
+        let (source_id_sender, source_id_receiver) = oneshot::channel::<glib::JoinHandle<()>>();
 
         // Encapsulates the senders used by component methods.
         let component_sender = ComponentSender::new(

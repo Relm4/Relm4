@@ -371,7 +371,7 @@ impl VisitMut for PreAndPostView<'_> {
                         ));
                     }
 
-                    self.pre_view = func.block.stmts.clone();
+                    self.pre_view.clone_from(&func.block.stmts.clone());
                     *item = null_item();
                 }
                 "post_view" => {
@@ -382,7 +382,7 @@ impl VisitMut for PreAndPostView<'_> {
                         ));
                     }
 
-                    self.post_view = func.block.stmts.clone();
+                    self.post_view.clone_from(&func.block.stmts.clone());
                     *item = null_item();
                 }
                 _ => (),
