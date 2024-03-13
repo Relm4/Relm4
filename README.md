@@ -52,8 +52,8 @@ Use this in to your `Cargo.toml`:
 relm4 = "0.8"
 # Optional: reusable components
 relm4-components = "0.8"
-# Optional: icons
-relm4-icons = { version = "0.8.0", features = ["plus"] }
+# Optional: icons (more info at https://github.com/Relm4/icons)
+relm4-icons = "0.8.0"
 ```
 
 ### Features
