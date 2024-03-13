@@ -52,7 +52,7 @@ impl RelmRemoveExt for adw::PreferencesGroup {
 #[cfg_attr(docsrs, doc(cfg(feature = "libadwaita")))]
 impl RelmRemoveExt for adw::ExpanderRow {
     fn container_remove(&self, widget: &impl AsRef<Self::Child>) {
-        use adw::traits::ExpanderRowExt;
+        use adw::prelude::ExpanderRowExt;
 
         let child = widget.as_ref();
         self.remove(child);
@@ -62,7 +62,7 @@ impl RelmRemoveExt for adw::ExpanderRow {
 macro_rules! remove_impl {
     ($($type:ty),+) => {
         $(
-            impl RelmRemoveExt for $type {
+            impl $crate::extensions::RelmRemoveExt for $type {
                 fn container_remove(&self, widget: &impl AsRef<Self::Child>) {
                     self.remove(widget.as_ref());
                 }
@@ -75,7 +75,7 @@ macro_rules! remove_child_impl {
     ($($type:ty),+) => {
         $(
             #[allow(deprecated)]
-            impl RelmRemoveExt for $type {
+            impl $crate::extensions::RelmRemoveExt for $type {
                 fn container_remove(&self, widget: &impl AsRef<Self::Child>) {
                     self.remove_child(widget.as_ref());
                 }
@@ -96,7 +96,9 @@ remove_child_impl!(gtk::InfoBar);
 
 #[cfg(all(feature = "libadwaita", feature = "gnome_45"))]
 #[cfg_attr(docsrs, doc(cfg(all(feature = "libadwaita", feature = "gnome_45"))))]
-remove_impl!(adw::NavigationView);
+mod gnome_45 {
+    remove_impl!(adw::NavigationView);
+}
 
 /// Widget types that allow removal of all their children.
 pub trait RelmRemoveAllExt {
@@ -146,7 +148,7 @@ impl RelmRemoveAllExt for gtk::ListBox {
 #[cfg_attr(docsrs, doc(cfg(feature = "libadwaita")))]
 impl RelmRemoveAllExt for adw::ExpanderRow {
     fn remove_all(&self) {
-        use adw::traits::ExpanderRowExt;
+        use adw::prelude::ExpanderRowExt;
 
         while let Some(child) = self.last_child() {
             let row = child

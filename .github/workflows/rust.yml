@@ -36,7 +36,7 @@ jobs:
         rust:
           - stable
           - nightly
-          - "1.74.0"
+          - "1.75.0"
     env:
       DISPLAY: ":99.0"
     steps:

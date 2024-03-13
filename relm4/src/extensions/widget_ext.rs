@@ -1,4 +1,4 @@
-use gtk::prelude::{Cast, StaticType, WidgetExt};
+use gtk::prelude::{Cast, IsA, StaticType, WidgetExt};
 
 /// Trait that extends [`gtk::prelude::WidgetExt`].
 ///
@@ -45,7 +45,7 @@ pub trait RelmWidgetExt {
     fn set_tooltip(&self, test: &str);
 }
 
-impl<T: gtk::glib::IsA<gtk::Widget>> RelmWidgetExt for T {
+impl<T: IsA<gtk::Widget>> RelmWidgetExt for T {
     fn set_size_group(&self, size_group: &gtk::SizeGroup) {
         size_group.add_widget(self);
     }

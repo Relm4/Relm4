@@ -1,4 +1,4 @@
-use glib::prelude::ObjectExt;
+use glib::prelude::{IsA, ObjectExt};
 use gtk::glib;
 
 use crate::binding::Binding;
@@ -10,7 +10,7 @@ pub trait RelmObjectExt {
 
     /// Bind a data binding to a property of an object.
     ///
-    /// This is similar to [`glib::ObjectExt::bind_property`] and
+    /// This is similar to [`gtk::prelude::ObjectExt::bind_property`] and
     /// always bidirectional.
     fn add_binding<B: Binding>(&self, binding: &B, property_name: &str);
 
@@ -20,7 +20,7 @@ pub trait RelmObjectExt {
     fn add_write_only_binding<B: Binding>(&self, binding: &B, property_name: &str);
 }
 
-impl<T: glib::IsA<glib::Object>> RelmObjectExt for T {
+impl<T: IsA<glib::Object>> RelmObjectExt for T {
     fn on_destroy<F: FnOnce() + 'static>(&self, func: F) {
         let func = std::cell::RefCell::new(Some(func));
         self.as_ref().add_weak_ref_notify_local(move || {

@@ -9,7 +9,7 @@
 [![Relm4 on crates.io](https://img.shields.io/crates/v/relm4.svg)](https://crates.io/crates/relm4)
 [![Relm4 docs](https://img.shields.io/badge/rust-documentation-blue)](https://docs.rs/relm4/)
 [![Relm4 book](https://img.shields.io/badge/rust-book-fc0060)](https://relm4.org/book/stable/)
-![Minimum Rust version 1.74](https://img.shields.io/badge/rustc-1.74+-06a096.svg)
+![Minimum Rust version 1.75](https://img.shields.io/badge/rustc-1.75+-06a096.svg)
 [![dependency status](https://deps.rs/repo/github/Relm4/Relm4/status.svg)](https://deps.rs/repo/github/Relm4/Relm4)
 
 An idiomatic GUI library inspired by [Elm](https://elm-lang.org/) and based on [gtk4-rs](https://crates.io/crates/gtk4). 
@@ -49,11 +49,11 @@ Use this in to your `Cargo.toml`:
 
 ```toml
 # Core library
-relm4 = "0.6.2"
+relm4 = "0.8"
 # Optional: reusable components
-relm4-components = "0.6.2"
+relm4-components = "0.8"
 # Optional: icons
-relm4-icons = { version = "0.6.0", features = ["plus"] }
+relm4-icons = { version = "0.8.0", features = ["plus"] }
 ```
 
 ### Features
