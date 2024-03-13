@@ -52,7 +52,7 @@ impl RelmRemoveExt for adw::PreferencesGroup {
 #[cfg_attr(docsrs, doc(cfg(feature = "libadwaita")))]
 impl RelmRemoveExt for adw::ExpanderRow {
     fn container_remove(&self, widget: &impl AsRef<Self::Child>) {
-        use adw::traits::ExpanderRowExt;
+        use adw::prelude::ExpanderRowExt;
 
         let child = widget.as_ref();
         self.remove(child);
@@ -146,7 +146,7 @@ impl RelmRemoveAllExt for gtk::ListBox {
 #[cfg_attr(docsrs, doc(cfg(feature = "libadwaita")))]
 impl RelmRemoveAllExt for adw::ExpanderRow {
     fn remove_all(&self) {
-        use adw::traits::ExpanderRowExt;
+        use adw::prelude::ExpanderRowExt;
 
         while let Some(child) = self.last_child() {
             let row = child

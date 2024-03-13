@@ -2,7 +2,14 @@
 
 ## Unreleased
 
-## 0.7.0 - 2024-2-13
+## 0.8.0 - 2024-3-13
+
+### Changed
+
++ all: Updated all dependencies to their latest version
++ all: Increase MSRV to 1.75 to match the dependencies
+
+## 0.7.0 - 2024-3-13
 
 ### Added
 
