@@ -8,7 +8,7 @@ use relm4_components::open_dialog::{
 use relm4_components::save_dialog::{
     SaveDialog, SaveDialogMsg, SaveDialogResponse, SaveDialogSettings,
 };
-use relm4_icons::icon_name;
+use relm4_icons::icon_names;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
@@ -81,7 +81,7 @@ impl FactoryComponent for Task {
                 },
 
                 gtk::Button {
-                    set_icon_name: icon_name::DELETE_FILLED,
+                    set_icon_name: icon_names::DELETE_FILLED,
                     set_tooltip: "Delete Task",
 
                     connect_clicked[sender, index] => move |_| {
@@ -95,7 +95,7 @@ impl FactoryComponent for Task {
                 set_orientation: gtk::Orientation::Horizontal,
 
                 gtk::MenuButton {
-                    set_icon_name: icon_name::TAG_OUTLINE_ADD,
+                    set_icon_name: icon_names::TAG_OUTLINE_ADD,
                     set_tooltip: "Add Tag",
 
                     #[wrap(Some)]
@@ -429,7 +429,7 @@ impl SimpleComponent for App {
                     },
 
                     pack_start = &gtk::Button {
-                        set_icon_name: icon_name::PLUS,
+                        set_icon_name: icon_names::PLUS,
                         set_tooltip: "Add Task",
 
                         connect_clicked[sender] => move |_| {
@@ -470,7 +470,7 @@ impl SimpleComponent for App {
                     },
 
                     gtk::Button {
-                        set_icon_name: icon_name::DELETE_FILLED,
+                        set_icon_name: icon_names::DELETE_FILLED,
                         set_tooltip: "Delete All Tasks",
                         add_css_class: CSS_CLASS_DESTRUCTIVE_ACTION,
 

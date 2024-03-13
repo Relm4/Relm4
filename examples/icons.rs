@@ -1,6 +1,6 @@
 use gtk::prelude::*;
 use relm4::prelude::*;
-use relm4_icons::icon_name;
+use relm4_icons::icon_names;
 
 struct App {
     counter: u8,
@@ -29,12 +29,12 @@ impl SimpleComponent for App {
                 set_margin_all: 5,
 
                 gtk::Button {
-                    set_icon_name: icon_name::PLUS,
+                    set_icon_name: icon_names::PLUS,
                     connect_clicked => Msg::Increment,
                 },
 
                 gtk::Button {
-                    set_icon_name: icon_name::MINUS,
+                    set_icon_name: icon_names::MINUS,
                     connect_clicked => Msg::Decrement,
                 },
 
