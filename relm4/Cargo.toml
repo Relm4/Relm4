@@ -47,7 +47,7 @@ once_cell = "1.19"
 panel = { version = "0.4", optional = true, package = "libpanel" }
 tokio = { version = "1.36", features = ["rt", "rt-multi-thread", "sync"] }
 
-relm4-macros = { version = "0.7.0", path = "../relm4-macros", optional = true }
+relm4-macros = { version = "0.8.0", path = "../relm4-macros", optional = true }
 tracing = "0.1.40"
 
 [dev-dependencies]
