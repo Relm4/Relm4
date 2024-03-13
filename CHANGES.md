@@ -6,6 +6,7 @@
 
 ### Changed
 
++ core: Switch to regular async traits in favor of the async-trait crate
 + all: Updated all dependencies to their latest version
 + all: Increase MSRV to 1.75 to match the dependencies
 

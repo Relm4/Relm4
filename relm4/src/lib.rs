@@ -96,7 +96,6 @@ pub use adw;
 /// Re-export of libpanel
 pub use panel;
 
-pub use async_trait;
 pub use once_cell;
 pub use tokio;
 

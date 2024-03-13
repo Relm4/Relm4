@@ -16,7 +16,6 @@ use super::{AsyncComponentBuilder, AsyncComponentParts};
 ///
 /// `AsyncComponent` is powerful and flexible, but for many use-cases the [`SimpleAsyncComponent`]
 /// convenience trait will suffice.
-#[async_trait::async_trait(?Send)]
 pub trait AsyncComponent: Sized + 'static {
     /// Messages which are received from commands executing in the background.
     type CommandOutput: Debug + Send + 'static;
@@ -57,30 +56,32 @@ pub trait AsyncComponent: Sized + 'static {
     }
 
     /// Creates the initial model and view, docking it into the component.
-    async fn init(
+    fn init(
         init: Self::Init,
         root: Self::Root,
         sender: AsyncComponentSender<Self>,
-    ) -> AsyncComponentParts<Self>;
+    ) -> impl std::future::Future<Output = AsyncComponentParts<Self>>;
 
     /// Processes inputs received by the component.
     #[allow(unused)]
-    async fn update(
+    fn update(
         &mut self,
         message: Self::Input,
         sender: AsyncComponentSender<Self>,
         root: &Self::Root,
-    ) {
+    ) -> impl std::future::Future<Output = ()> {
+        async {}
     }
 
     /// Defines how the component should respond to command updates.
     #[allow(unused)]
-    async fn update_cmd(
+    fn update_cmd(
         &mut self,
         message: Self::CommandOutput,
         sender: AsyncComponentSender<Self>,
         root: &Self::Root,
-    ) {
+    ) -> impl std::future::Future<Output = ()> {
+        async {}
     }
 
     /// Updates the model and view upon completion of a command.
@@ -96,15 +97,17 @@ pub trait AsyncComponent: Sized + 'static {
     /// [`update_cmd`]: Self::update_cmd
     /// [`update_view`]: Self::update_view
     /// [`component`]: relm4_macros::component
-    async fn update_cmd_with_view(
+    fn update_cmd_with_view(
         &mut self,
         widgets: &mut Self::Widgets,
         message: Self::CommandOutput,
         sender: AsyncComponentSender<Self>,
         root: &Self::Root,
-    ) {
-        self.update_cmd(message, sender.clone(), root).await;
-        self.update_view(widgets, sender);
+    ) -> impl std::future::Future<Output = ()> {
+        async {
+            self.update_cmd(message, sender.clone(), root).await;
+            self.update_view(widgets, sender);
+        }
     }
 
     /// Updates the view after the model has been updated.
@@ -124,15 +127,17 @@ pub trait AsyncComponent: Sized + 'static {
     /// [`update`]: Self::update
     /// [`update_view`]: Self::update_view
     /// [`component`]: relm4_macros::component
-    async fn update_with_view(
+    fn update_with_view(
         &mut self,
         widgets: &mut Self::Widgets,
         message: Self::Input,
         sender: AsyncComponentSender<Self>,
         root: &Self::Root,
-    ) {
-        self.update(message, sender.clone(), root).await;
-        self.update_view(widgets, sender);
+    ) -> impl std::future::Future<Output = ()> {
+        async {
+            self.update(message, sender.clone(), root).await;
+            self.update_view(widgets, sender);
+        }
     }
 
     /// Last method called before a component is shut down.
@@ -152,7 +157,6 @@ pub trait AsyncComponent: Sized + 'static {
 }
 
 /// Asynchronous variant of [`SimpleComponent`](crate::SimpleComponent).
-#[async_trait::async_trait(?Send)]
 pub trait SimpleAsyncComponent: Sized + 'static {
     /// The message type that the component accepts as inputs.
     type Input: Debug + 'static;
@@ -184,19 +188,31 @@ pub trait SimpleAsyncComponent: Sized + 'static {
     }
 
     /// Creates the initial model and view, docking it into the component.
-    async fn init(
+    fn init(
         init: Self::Init,
         root: Self::Root,
         sender: AsyncComponentSender<Self>,
-    ) -> AsyncComponentParts<Self>;
+    ) -> impl std::future::Future<Output = AsyncComponentParts<Self>>;
 
     /// Processes inputs received by the component.
     #[allow(unused)]
-    async fn update(&mut self, message: Self::Input, sender: AsyncComponentSender<Self>) {}
+    fn update(
+        &mut self,
+        message: Self::Input,
+        sender: AsyncComponentSender<Self>,
+    ) -> impl std::future::Future<Output = ()> {
+        async {}
+    }
 
     /// Defines how the component should respond to command updates.
     #[allow(unused)]
-    async fn update_cmd(&mut self, input: &Sender<Self::Input>, output: Sender<Self::Output>) {}
+    fn update_cmd(
+        &mut self,
+        input: &Sender<Self::Input>,
+        output: Sender<Self::Output>,
+    ) -> impl std::future::Future<Output = ()> {
+        async {}
+    }
 
     /// Updates the view after the model has been updated.
     #[allow(unused)]
@@ -209,7 +225,6 @@ pub trait SimpleAsyncComponent: Sized + 'static {
     fn shutdown(&mut self, widgets: &mut Self::Widgets, output: Sender<Self::Output>) {}
 }
 
-#[async_trait::async_trait(?Send)]
 impl<C> AsyncComponent for C
 where
     C: SimpleAsyncComponent,
@@ -257,7 +272,6 @@ where
 }
 
 /// An empty, non-interactive component as a placeholder for tests.
-#[async_trait::async_trait(?Send)]
 impl SimpleAsyncComponent for () {
     type Input = ();
     type Output = ();

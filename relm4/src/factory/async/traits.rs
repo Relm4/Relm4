@@ -13,7 +13,6 @@ use std::fmt::Debug;
 /// A component that's stored inside a factory.
 /// Similar to [`Component`](crate::Component) but adjusted to fit the life cycle
 /// of factories.
-#[async_trait::async_trait(?Send)]
 pub trait AsyncFactoryComponent:
     AsyncPosition<<Self::ParentWidget as FactoryView>::Position> + Sized + 'static
 {
@@ -39,11 +38,11 @@ pub trait AsyncFactoryComponent:
     type Widgets: 'static;
 
     /// Initializes the model.
-    async fn init_model(
+    fn init_model(
         init: Self::Init,
         index: &DynamicIndex,
         sender: AsyncFactorySender<Self>,
-    ) -> Self;
+    ) -> impl std::future::Future<Output = Self>;
 
     /// Initializes the root widget
     fn init_root() -> Self::Root;
@@ -70,22 +69,35 @@ pub trait AsyncFactoryComponent:
 
     /// Processes inputs received by the component.
     #[allow(unused)]
-    async fn update(&mut self, message: Self::Input, sender: AsyncFactorySender<Self>) {}
+    fn update(
+        &mut self,
+        message: Self::Input,
+        sender: AsyncFactorySender<Self>,
+    ) -> impl std::future::Future<Output = ()> {
+        async {}
+    }
 
     /// Defines how the component should respond to command updates.
     #[allow(unused)]
-    async fn update_cmd(&mut self, message: Self::CommandOutput, sender: AsyncFactorySender<Self>) {
+    fn update_cmd(
+        &mut self,
+        message: Self::CommandOutput,
+        sender: AsyncFactorySender<Self>,
+    ) -> impl std::future::Future<Output = ()> {
+        async {}
     }
 
     /// Handles updates from a command.
-    async fn update_cmd_with_view(
+    fn update_cmd_with_view(
         &mut self,
         widgets: &mut Self::Widgets,
         message: Self::CommandOutput,
         sender: AsyncFactorySender<Self>,
-    ) {
-        self.update_cmd(message, sender.clone()).await;
-        self.update_view(widgets, sender);
+    ) -> impl std::future::Future<Output = ()> {
+        async {
+            self.update_cmd(message, sender.clone()).await;
+            self.update_view(widgets, sender);
+        }
     }
 
     /// Updates the view after the model has been updated.
@@ -93,14 +105,16 @@ pub trait AsyncFactoryComponent:
     fn update_view(&self, widgets: &mut Self::Widgets, sender: AsyncFactorySender<Self>) {}
 
     /// Updates the model and view. Optionally returns a command to run.
-    async fn update_with_view(
+    fn update_with_view(
         &mut self,
         widgets: &mut Self::Widgets,
         message: Self::Input,
         sender: AsyncFactorySender<Self>,
-    ) {
-        self.update(message, sender.clone()).await;
-        self.update_view(widgets, sender);
+    ) -> impl std::future::Future<Output = ()> {
+        async {
+            self.update(message, sender.clone()).await;
+            self.update_view(widgets, sender);
+        }
     }
 
     /// Last method called before a factory component is shut down.

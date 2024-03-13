@@ -70,7 +70,6 @@ mod test {
     struct Test(Rc<()>);
 
     #[allow(unused_qualifications)]
-    #[async_trait::async_trait(?Send)]
     impl AsyncComponent for Test {
         type Input = ();
         type Output = ();
