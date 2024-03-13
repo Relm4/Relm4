@@ -65,7 +65,8 @@ The `relm4` crate has four feature flags:
 | `macros` | Enable macros by re-exporting [`relm4-macros`](https://crates.io/crates/relm4-macros) | ✅ |
 | `libadwaita` | Improved support for [libadwaita](https://gitlab.gnome.org/World/Rust/libadwaita-rs) | - |
 | `libpanel` | Improved support for [libpanel](https://gitlab.gnome.org/World/Rust/libpanel-rs) | - |
-| `dox` | Linking to the underlying C libraries is skipped to allow building the docs without dependencies | - |
+| `gnome_46` | Enable all version feature flags of all dependencies to match the GNOME 46 SDK | - |
+| `gnome_45` | Enable all version feature flags of all dependencies to match the GNOME 45 SDK | - |
 | `gnome_44` | Enable all version feature flags of all dependencies to match the GNOME 44 SDK | - |
 | `gnome_43` | Enable all version feature flags of all dependencies to match the GNOME 43 SDK | - |
 | `gnome_42` | Enable all version feature flags of all dependencies to match the GNOME 42 SDK | ✅ |
