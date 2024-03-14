@@ -7,6 +7,7 @@
 ### Fixed
 
 + docs: Fix builds on docs.rs (by upgrading relm4-icons)
++ components: Don't use libadwaita by default
 
 ## 0.8.0 - 2024-3-13
 
