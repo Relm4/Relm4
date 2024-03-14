@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.8.1 - 2024-3-13
+
+### Fixed
+
++ docs: Fix builds on docs.rs (by upgrading relm4-icons)
+
 ## 0.8.0 - 2024-3-13
 
 ### Changed
@@ -9,6 +15,12 @@
 + core: Switch to regular async traits in favor of the async-trait crate
 + all: Updated all dependencies to their latest version
 + all: Increase MSRV to 1.75 to match the dependencies
+
+## 0.7.1 - 2024-3-13
+
+### Fixed
+
++ docs: Fix builds on docs.rs (by upgrading relm4-icons)
 
 ## 0.7.0 - 2024-3-13
 
