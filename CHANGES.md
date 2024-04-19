@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
++ core: Add `#[derive(Clone)]` for actions created by macros
+
 ## 0.8.1 - 2024-3-13
 
 ### Fixed
