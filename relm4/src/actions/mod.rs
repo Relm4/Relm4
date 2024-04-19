@@ -13,6 +13,7 @@ pub use traits::*;
 /// Create a new type that implements [`ActionGroupName`].
 macro_rules! new_action_group {
     ($vis:vis $ty:ident, $name:expr) => {
+        #[derive(Clone)]
         $vis struct $ty;
 
         impl relm4::actions::ActionGroupName for $ty {
@@ -25,6 +26,7 @@ macro_rules! new_action_group {
 /// Create a new type that implements [`ActionName`] without state or target type.
 macro_rules! new_stateless_action {
     ($vis:vis $ty:ident, $group:ty, $name:expr) => {
+        #[derive(Clone)]
         $vis struct $ty;
 
         impl relm4::actions::ActionName for $ty {
@@ -43,6 +45,7 @@ macro_rules! new_stateless_action {
 /// The state stores the state of this action and the target type is passed by callers of the action.
 macro_rules! new_stateful_action {
     ($vis:vis $ty:ident, $group:ty, $name:expr, $value:ty, $state:ty) => {
+        #[derive(Clone)]
         $vis struct $ty;
 
         impl relm4::actions::ActionName for $ty {
