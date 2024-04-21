@@ -56,10 +56,27 @@ macro_rules! new_stateful_action {
 }
 
 /// A type safe action that wraps around [`gio::SimpleAction`].
-#[derive(Debug, Clone)]
 pub struct RelmAction<Name: ActionName> {
     name: PhantomData<Name>,
     action: gio::SimpleAction,
+}
+
+impl<Name: ActionName> Clone for RelmAction<Name> {
+    fn clone(&self) -> Self {
+        Self {
+            name: self.name,
+            action: self.action.clone(),
+        }
+    }
+}
+
+impl<Name: ActionName> std::fmt::Debug for RelmAction<Name> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("RelmAction")
+            .field("name", &self.name)
+            .field("action", &self.action)
+            .finish()
+    }
 }
 
 impl<Name: ActionName> From<RelmAction<Name>> for gio::SimpleAction {
