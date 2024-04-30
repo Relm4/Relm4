@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
++ core: Add `allow_multiple_instances()` to `RelmApp` to allow multiple concurrent instances of the same application
+
 ### Fixed
 
 + core: Don't require `Clone` and `Debug` for the generic action name parameter in `RelmAction`
