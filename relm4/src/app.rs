@@ -84,6 +84,22 @@ impl<M: Debug + 'static> RelmApp<M> {
         self
     }
 
+    /// If `true`, allow multiple concurrent instances of the application
+    /// by setting the [`gtk::gio::ApplicationFlags::NON_UNIQUE`] flag.
+    ///
+    /// By default, this flag is not set.
+    /// When the flag is not set, the application will not be
+    /// started if another instance is already running.
+    pub fn allow_multiple_instances(&self, allow: bool) {
+        let mut flags = self.app.flags();
+        if allow {
+            flags |= gtk::gio::ApplicationFlags::NON_UNIQUE;
+        } else {
+            flags &= !gtk::gio::ApplicationFlags::NON_UNIQUE;
+        }
+        self.app.set_flags(flags);
+    }
+
     /// Sets a custom global stylesheet.
     pub fn set_global_css(&self, style_data: &str) {
         let display = gtk::gdk::Display::default().unwrap();
