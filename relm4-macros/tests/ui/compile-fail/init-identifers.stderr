@@ -1,8 +1,8 @@
 error: parameter binding must be an identifier
   --> tests/ui/compile-fail/init-identifers.rs:18:9
    |
-18 |         (a, b): Self::Root,
-   |         ^^^^^^
+18 |         (_a, _b): Self::Root,
+   |         ^^^^^^^^
 
 error: parameter binding must be an identifier
   --> tests/ui/compile-fail/init-identifers.rs:19:9
