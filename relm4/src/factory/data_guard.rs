@@ -67,7 +67,7 @@ impl<C, Widgets, Output> DataGuard<C, Widgets, Output> {
         };
 
         let future = f(runtime_data, runtime_widgets);
-        let rt_dropper = RuntimeDropper(Some(crate::spawn_local(future).into_source_id().unwrap()));
+        let rt_dropper = RuntimeDropper(Some(crate::spawn_local(future)));
         let shutdown_fn = Box::new(shutdown_fn);
 
         Self {
@@ -88,16 +88,25 @@ impl<C, Widgets, Output> DataGuard<C, Widgets, Output> {
         &mut self.data
     }
 
-    pub(super) fn into_inner(mut self) -> C {
-        drop(self.rt_dropper);
-        self.shutdown_notifier.shutdown();
-        (self.shutdown_fn)(
-            &mut self.data,
-            &mut self.widgets,
-            self.output_sender.clone(),
-        );
-        drop(self.widgets);
-        *self.data
+    pub(super) fn into_inner(self) -> C {
+        let Self {
+            mut data,
+            mut widgets,
+            rt_dropper,
+            output_sender,
+            shutdown_notifier,
+            shutdown_fn,
+        } = self;
+
+        drop(rt_dropper);
+        shutdown_notifier.shutdown();
+
+        shutdown_fn(&mut data, &mut widgets, output_sender);
+
+        drop(widgets);
+        drop(shutdown_fn);
+
+        *data
     }
 }
 
@@ -115,14 +124,14 @@ impl<C, Widgets, Output> std::fmt::Debug for DataGuard<C, Widgets, Output> {
 }
 
 #[derive(Debug)]
-struct RuntimeDropper(Option<glib::SourceId>);
+struct RuntimeDropper(Option<glib::JoinHandle<()>>);
 
 /// A type that will drop a runtime behind a shared reference
 /// when it is dropped.
 impl Drop for RuntimeDropper {
     fn drop(&mut self) {
-        if let Some(id) = self.0.take() {
-            id.remove();
+        if let Some(handle) = self.0.take() {
+            handle.abort();
         }
     }
 }
