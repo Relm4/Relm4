@@ -14,6 +14,7 @@
 ### Fixed
 
 + core: Don't require `Clone` and `Debug` for the generic action name parameter in `RelmAction`
++ examples: show the dialog before closing in "components" example
 
 ## 0.8.1 - 2024-3-13
 
