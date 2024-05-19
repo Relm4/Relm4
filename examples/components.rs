@@ -169,7 +169,7 @@ impl SimpleComponent for App {
             },
             connect_close_request[sender] => move |_| {
                 sender.input(AppMsg::CloseRequest);
-                glib::Propagation::Proceed
+                glib::Propagation::Stop
             }
         }
     }
