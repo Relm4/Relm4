@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
++ core: Simplified internal code for runtime creation
+
 ## 0.8.1 - 2024-3-13
 
 ### Fixed
