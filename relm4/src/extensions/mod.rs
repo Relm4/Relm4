@@ -205,6 +205,9 @@ mod libadwaita {
         adw::Squeezer,
         adw::Leaflet
     }
+    container_child_impl! {
+        adw::PreferencesPage: adw::PreferencesGroup
+    }
 
     #[cfg(all(feature = "libadwaita", feature = "gnome_45"))]
     mod gnome_45 {

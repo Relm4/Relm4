@@ -5,6 +5,7 @@
 ### Added
 
 + core: Add `allow_multiple_instances()` to `RelmApp` to allow multiple concurrent instances of the same application
++ core: Add extension traits for `adw::PreferencesPage`
 
 ### Changed
 

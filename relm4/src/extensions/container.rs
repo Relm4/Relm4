@@ -57,6 +57,13 @@ mod libadwaita {
     use super::RelmContainerExt;
     append_impl!(adw::Leaflet, adw::Carousel, adw::TabView);
 
+    impl RelmContainerExt for adw::PreferencesPage {
+        fn container_add(&self, widget: &impl AsRef<adw::PreferencesGroup>) {
+            use adw::prelude::PreferencesPageExt;
+            self.add(widget.as_ref());
+        }
+    }
+
     impl RelmContainerExt for adw::PreferencesGroup {
         fn container_add(&self, widget: &impl AsRef<gtk::Widget>) {
             use adw::prelude::PreferencesGroupExt;
