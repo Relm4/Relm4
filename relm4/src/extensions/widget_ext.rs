@@ -25,6 +25,12 @@ pub trait RelmWidgetExt {
     /// Set margin at start and end at once.
     fn set_margin_horizontal(&self, margin: i32);
 
+    /// Set both horizontal and vertical expand properties at once.
+    fn set_expand(&self, expand: bool);
+
+    /// Set both horizontal and vertical align properties at once.
+    fn set_align(&self, align: gtk::Align);
+
     /// Add class name if active is [`true`] and
     /// remove class name if active is [`false`]
     fn set_class_active(&self, class: &str, active: bool);
@@ -71,6 +77,16 @@ impl<T: IsA<gtk::Widget>> RelmWidgetExt for T {
         } else {
             self.remove_css_class(class);
         }
+    }
+
+    fn set_expand(&self, expand: bool) {
+        self.set_hexpand(expand);
+        self.set_vexpand(expand);
+    }
+
+    fn set_align(&self, align: gtk::Align) {
+        self.set_halign(align);
+        self.set_valign(align);
     }
 
     #[allow(deprecated)]
