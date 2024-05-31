@@ -4,9 +4,12 @@
 
 ### Added
 
++ core: Add `set_align` and `set_expand` to `RelmWidgetExt` to set horizontal and vertical properties at once
 + core: Add `allow_multiple_instances()` to `RelmApp` to allow multiple concurrent instances of the same application
 + core: Add extension traits for `adw::PreferencesPage`
 + examples: drop sub-components instead of hiding
++ examples: Add example for using multiple windows
+ 
 
 ### Changed
 
