@@ -121,11 +121,13 @@ impl Component for Alert {
                     set_margin_start: 30,
 
                     gtk::Label {
+                        #[watch]
                         set_text: &model.settings.text,
                         add_css_class: TITLE_CSS,
                     },
 
                     gtk::Label {
+                        #[watch]
                         set_text: model.settings.secondary_text.as_deref().unwrap_or_default(),
                         set_justify: gtk::Justification::Center,
                     },
