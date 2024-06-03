@@ -43,7 +43,7 @@ const CLASSES: [&str; 40] = [
     "warning",
 ];
 
-const DEPCRECATED_CLASSES: [&str; 4] = ["app-notification", "content", "large-title", "sidebar"];
+const DEPRECATED_CLASSES: [&str; 4] = ["app-notification", "content", "large-title", "sidebar"];
 
 const COLORS: [&str; 9] = [
     "blue", "green", "yellow", "orange", "red", "purple", "brown", "light", "dark",
@@ -67,11 +67,11 @@ fn main() {
         .open(colors_path)
         .unwrap();
 
-    let classes = CLASSES.into_iter().chain(DEPCRECATED_CLASSES);
+    let classes = CLASSES.into_iter().chain(DEPRECATED_CLASSES);
     for class in classes {
         let var_name = class.to_uppercase().replace('-', "_");
 
-        if DEPCRECATED_CLASSES.contains(&class) {
+        if DEPRECATED_CLASSES.contains(&class) {
             writeln!(
                 classes_file,
                 r#"#[deprecated(note = "Adwaita has deprecated this CSS class")]"#
