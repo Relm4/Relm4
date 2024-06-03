@@ -3,6 +3,7 @@
 //! **[Example implementation](https://github.com/AaronErhardt/relm4/blob/main/relm4-examples/examples/alert.rs)**
 
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
+use once_cell::sync::Lazy;
 use relm4::{gtk, Component, ComponentParts, ComponentSender, RelmWidgetExt};
 
 static LIBADWAITA_ENABLED: bool = cfg!(feature = "libadwaita");
@@ -12,6 +13,11 @@ static ERROR_CSS: &str = "error";
 static TITLE_CSS: &str = "title-2";
 static DESTRUCTIVE_CSS: &str = "destructive-action";
 static FLAT_CSS: &str = "flat";
+
+/// The initializer for the CSS, ensuring it only happens once.
+static INITIALIZE_CSS: Lazy<()> = Lazy::new(|| {
+    relm4::set_global_css_with_priority(COMPONENT_CSS, gtk::STYLE_PROVIDER_PRIORITY_APPLICATION);
+});
 
 /// Configuration for the alert dialog component
 ///
@@ -208,10 +214,8 @@ impl Component for Alert {
         root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        relm4::set_global_css_with_priority(
-            COMPONENT_CSS,
-            gtk::STYLE_PROVIDER_PRIORITY_APPLICATION,
-        );
+        // Initialize the CSS.
+        *INITIALIZE_CSS;
 
         let model = Alert {
             settings,
