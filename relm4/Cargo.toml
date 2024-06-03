@@ -24,7 +24,8 @@ cargo-args = ["-Zunstable-options", "-Zrustdoc-scrape-examples"]
 rustdoc-args = ["--cfg", "docsrs"]
 
 [features]
-default = ["macros", "gnome_42"]
+default = ["css", "macros", "gnome_42"]
+css = ["relm4-css"]
 libadwaita = ["adw"]
 libpanel = ["panel"]
 macros = ["relm4-macros"]
@@ -47,6 +48,7 @@ once_cell = "1.19"
 panel = { version = "0.4", optional = true, package = "libpanel" }
 tokio = { version = "1.36", features = ["rt", "rt-multi-thread", "sync"] }
 
+relm4-css = { version = "0.8.0", path = "../relm4-css", optional = true }
 relm4-macros = { version = "0.8.0", path = "../relm4-macros", optional = true }
 tracing = "0.1.40"
 

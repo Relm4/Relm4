@@ -4,6 +4,7 @@
 //! [relm4](https://docs.rs/relm4)
 //! | [relm4-macros](https://docs.rs/relm4_macros)
 //! | [relm4-components](https://docs.rs/relm4_components)
+//! | [relm4-css](https://docs.rs/relm4-css)
 //! | [gtk4-rs](https://gtk-rs.org/gtk4-rs/git/docs)
 //! | [gtk-rs-core](https://gtk-rs.org/gtk-rs-core/git/docs)
 //! | [libadwaita-rs](https://world.pages.gitlab.gnome.org/Rust/libadwaita-rs/git/docs/libadwaita)
