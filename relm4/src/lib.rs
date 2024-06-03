@@ -199,3 +199,50 @@ where
 {
     RUNTIME.spawn_blocking(func)
 }
+
+/// Sets a custom global stylesheet, with the given priority.
+///
+/// The priority can be any value, but GTK [includes some][style-providers] that you can use.
+///
+/// [style-providers]: https://gtk-rs.org/gtk4-rs/stable/latest/docs/gtk4/index.html?search=const%3ASTYLE_PROVIDER&filter-crate=gtk4#constants
+pub fn set_global_css_with_priority(style_data: &str, priority: u32) {
+    let display = gtk::gdk::Display::default().unwrap();
+    let provider = gtk::CssProvider::new();
+    #[allow(deprecated)]
+    provider.load_from_data(style_data);
+
+    #[allow(deprecated)]
+    gtk::StyleContext::add_provider_for_display(&display, &provider, priority);
+}
+/// Sets a custom global stylesheet.
+pub fn set_global_css(style_data: &str) {
+    set_global_css_with_priority(style_data, gtk::STYLE_PROVIDER_PRIORITY_APPLICATION);
+}
+
+/// Sets a custom global stylesheet from a file, with the given priority.
+///
+/// If the file doesn't exist a [`tracing::error`] message will be emitted and
+/// an [`std::io::Error`] will be returned.
+///
+/// The priority can be any value, but GTK [includes some][style-providers] that you can use.
+///
+/// [style-providers]: https://gtk-rs.org/gtk4-rs/stable/latest/docs/gtk4/index.html?search=const%3ASTYLE_PROVIDER&filter-crate=gtk4#constants
+pub fn set_global_css_from_file_with_priority<P: AsRef<std::path::Path>>(
+    path: P,
+    priority: u32,
+) -> Result<(), std::io::Error> {
+    std::fs::read_to_string(path)
+        .map(|bytes| set_global_css_with_priority(&bytes, priority))
+        .map_err(|err| {
+            tracing::error!("Couldn't load global CSS from file: {}", err);
+            err
+        })
+}
+
+/// Sets a custom global stylesheet from a file.
+///
+/// If the file doesn't exist a [`tracing::error`] message will be emitted and
+/// an [`std::io::Error`] will be returned.
+pub fn set_global_css_from_file<P: AsRef<std::path::Path>>(path: P) -> Result<(), std::io::Error> {
+    set_global_css_from_file_with_priority(path, gtk::STYLE_PROVIDER_PRIORITY_APPLICATION)
+}

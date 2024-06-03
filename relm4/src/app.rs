@@ -105,18 +105,14 @@ impl<M: Debug + 'static> RelmApp<M> {
     /// The priority can be any value, but GTK [includes some][style-providers] that you can use.
     ///
     /// [style-providers]: https://gtk-rs.org/gtk4-rs/stable/latest/docs/gtk4/index.html?search=const%3ASTYLE_PROVIDER&filter-crate=gtk4#constants
+    #[deprecated(note = "Use `relm4::set_global_css_with_priority` instead")]
     pub fn set_global_css_with_priority(&self, style_data: &str, priority: u32) {
-        let display = gtk::gdk::Display::default().unwrap();
-        let provider = gtk::CssProvider::new();
-        #[allow(deprecated)]
-        provider.load_from_data(style_data);
-
-        #[allow(deprecated)]
-        gtk::StyleContext::add_provider_for_display(&display, &provider, priority);
+        crate::set_global_css_with_priority(style_data, priority);
     }
     /// Sets a custom global stylesheet.
+    #[deprecated(note = "Use `relm4::set_global_css` instead")]
     pub fn set_global_css(&self, style_data: &str) {
-        self.set_global_css_with_priority(style_data, gtk::STYLE_PROVIDER_PRIORITY_APPLICATION);
+        crate::set_global_css(style_data);
     }
 
     /// Sets a custom global stylesheet from a file, with the given priority.
@@ -127,28 +123,25 @@ impl<M: Debug + 'static> RelmApp<M> {
     /// The priority can be any value, but GTK [includes some][style-providers] that you can use.
     ///
     /// [style-providers]: https://gtk-rs.org/gtk4-rs/stable/latest/docs/gtk4/index.html?search=const%3ASTYLE_PROVIDER&filter-crate=gtk4#constants
+    #[deprecated(note = "Use `relm4::set_global_css_from_file_with_priority` instead")]
     pub fn set_global_css_from_file_with_priority<P: AsRef<std::path::Path>>(
         &self,
         path: P,
         priority: u32,
     ) -> Result<(), std::io::Error> {
-        std::fs::read_to_string(path)
-            .map(|bytes| self.set_global_css_with_priority(&bytes, priority))
-            .map_err(|err| {
-                tracing::error!("Couldn't load global CSS from file: {}", err);
-                err
-            })
+        crate::set_global_css_from_file_with_priority(path, priority)
     }
 
     /// Sets a custom global stylesheet from a file.
     ///
     /// If the file doesn't exist a [`tracing::error`] message will be emitted and
     /// an [`std::io::Error`] will be returned.
+    #[deprecated(note = "Use `relm4::set_global_css_from_file` instead")]
     pub fn set_global_css_from_file<P: AsRef<std::path::Path>>(
         &self,
         path: P,
     ) -> Result<(), std::io::Error> {
-        self.set_global_css_from_file_with_priority(path, gtk::STYLE_PROVIDER_PRIORITY_APPLICATION)
+        crate::set_global_css_from_file(path)
     }
 
     /// Runs the application, returns once the application is closed.
