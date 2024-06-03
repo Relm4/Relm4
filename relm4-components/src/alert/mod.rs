@@ -6,13 +6,13 @@ use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
 use once_cell::sync::Lazy;
 use relm4::{gtk, Component, ComponentParts, ComponentSender, RelmWidgetExt};
 
-static LIBADWAITA_ENABLED: bool = cfg!(feature = "libadwaita");
-static COMPONENT_CSS: &str = include_str!("style.css");
+const LIBADWAITA_ENABLED: bool = cfg!(feature = "libadwaita");
+const COMPONENT_CSS: &str = include_str!("style.css");
 
-static ERROR_CSS: &str = "error";
-static TITLE_CSS: &str = "title-2";
-static DESTRUCTIVE_CSS: &str = "destructive-action";
-static FLAT_CSS: &str = "flat";
+const ERROR_CSS: &str = "error";
+const TITLE_CSS: &str = "title-2";
+const DESTRUCTIVE_CSS: &str = "destructive-action";
+const FLAT_CSS: &str = "flat";
 
 /// The initializer for the CSS, ensuring it only happens once.
 static INITIALIZE_CSS: Lazy<()> = Lazy::new(|| {
