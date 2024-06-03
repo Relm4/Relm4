@@ -39,7 +39,7 @@ impl SimpleComponent for App {
 
                     gtk::ListBox {
                         set_selection_mode: gtk::SelectionMode::Single,
-                        add_css_class: "navigation-sidebar",
+                        add_css_class: relm4::css::NAVIGATION_SIDEBAR,
 
                         adw::ActionRow {
                             set_title: "Section 1",
@@ -88,7 +88,7 @@ impl SimpleComponent for App {
                     },
 
                     gtk::Label {
-                        add_css_class: "title-1",
+                        add_css_class: relm4::css::TITLE_1,
                         set_vexpand: true,
 
                         #[watch]

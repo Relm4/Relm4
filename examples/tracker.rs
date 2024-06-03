@@ -45,7 +45,7 @@ impl SimpleComponent for App {
     view! {
         gtk::Window {
             #[track(model.changed(App::identical()))]
-            set_class_active: ("identical", model.identical),
+            set_class_active: (relm4::css::IDENTICAL, model.identical),
 
             gtk::Box {
                 set_orientation: gtk::Orientation::Horizontal,
