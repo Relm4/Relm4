@@ -9,6 +9,7 @@
 + core: Add extension traits for `adw::PreferencesPage`
 + examples: drop sub-components instead of hiding
 + examples: Add example for using multiple windows
++ core: Add functions to set priority of CSS stylesheets
  
 
 ### Changed
