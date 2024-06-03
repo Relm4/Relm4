@@ -12,6 +12,7 @@
 + core: Add functions to set priority of CSS stylesheets
 + core: Rewrite `Alert` component from stratch to work with both GTK4 and Adwaita
 + css: Add Adwaita style classes and colors
++ core: Migrate codebase over to using `relm4-css`
 
 ### Changed
 
