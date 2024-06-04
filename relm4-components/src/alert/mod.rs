@@ -9,11 +9,6 @@ use relm4::{gtk, Component, ComponentParts, ComponentSender, RelmWidgetExt};
 const LIBADWAITA_ENABLED: bool = cfg!(feature = "libadwaita");
 const COMPONENT_CSS: &str = include_str!("style.css");
 
-const ERROR_CSS: &str = "error";
-const TITLE_CSS: &str = "title-2";
-const DESTRUCTIVE_CSS: &str = "destructive-action";
-const FLAT_CSS: &str = "flat";
-
 /// The initializer for the CSS, ensuring it only happens once.
 static INITIALIZE_CSS: Lazy<()> = Lazy::new(|| {
     relm4::set_global_css_with_priority(COMPONENT_CSS, gtk::STYLE_PROVIDER_PRIORITY_APPLICATION);
@@ -129,7 +124,7 @@ impl Component for Alert {
                     gtk::Label {
                         #[watch]
                         set_text: &model.settings.text,
-                        add_css_class: TITLE_CSS,
+                        add_css_class: relm4::css::TITLE_2,
                     },
 
                     gtk::Label {
@@ -158,9 +153,9 @@ impl Component for Alert {
                             #[watch]
                             set_visible: model.settings.confirm_label.is_some(),
                             #[watch]
-                            set_class_active: (DESTRUCTIVE_CSS, !LIBADWAITA_ENABLED && model.settings.destructive_accept),
+                            set_class_active: (relm4::css::DESTRUCTIVE_ACTION, !LIBADWAITA_ENABLED && model.settings.destructive_accept),
                             #[watch]
-                            set_class_active: (FLAT_CSS, LIBADWAITA_ENABLED || !model.settings.destructive_accept),
+                            set_class_active: (relm4::css::FLAT, LIBADWAITA_ENABLED || !model.settings.destructive_accept),
                             set_hexpand: true,
                             connect_clicked => AlertMsg::Response(AlertResponse::Confirm),
 
@@ -168,7 +163,7 @@ impl Component for Alert {
                                 #[watch]
                                 set_label: model.settings.confirm_label.as_deref().unwrap_or_default(),
                                 #[watch]
-                                set_class_active: (ERROR_CSS, LIBADWAITA_ENABLED && model.settings.destructive_accept),
+                                set_class_active: (relm4::css::ERROR, LIBADWAITA_ENABLED && model.settings.destructive_accept),
                             }
                         },
 
@@ -182,7 +177,7 @@ impl Component for Alert {
                             gtk::Button {
                                 #[watch]
                                 set_label: model.settings.cancel_label.as_deref().unwrap_or_default(),
-                                add_css_class: FLAT_CSS,
+                                add_css_class: relm4::css::FLAT,
                                 set_hexpand: true,
                                 connect_clicked => AlertMsg::Response(AlertResponse::Cancel)
                             }
@@ -198,7 +193,7 @@ impl Component for Alert {
                             gtk::Button {
                                 #[watch]
                                 set_label: model.settings.option_label.as_deref().unwrap_or_default(),
-                                add_css_class: FLAT_CSS,
+                                add_css_class: relm4::css::FLAT,
                                 set_hexpand: true,
                                 connect_clicked => AlertMsg::Response(AlertResponse::Option)
                             }

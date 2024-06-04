@@ -4,6 +4,7 @@
 //! [relm4](https://docs.rs/relm4)
 //! | [relm4-macros](https://docs.rs/relm4_macros)
 //! | [relm4-components](https://docs.rs/relm4_components)
+//! | [relm4-css](https://docs.rs/relm4-css)
 //! | [gtk4-rs](https://gtk-rs.org/gtk4-rs/git/docs)
 //! | [gtk-rs-core](https://gtk-rs.org/gtk-rs-core/git/docs)
 //! | [libadwaita-rs](https://world.pages.gitlab.gnome.org/Rust/libadwaita-rs/git/docs/libadwaita)
@@ -81,19 +82,24 @@ pub mod prelude;
 /// Re-export of gtk4
 pub use gtk;
 
+/// Re-export of relm4-css
+#[cfg(feature = "css")]
+#[cfg_attr(docsrs, doc(cfg(feature = "css")))]
+pub use relm4_css as css;
+
 // Re-exports
 #[cfg(feature = "macros")]
 #[cfg_attr(docsrs, doc(cfg(feature = "macros")))]
 pub use relm4_macros::*;
 
+/// Re-export of libadwaita
 #[cfg(feature = "libadwaita")]
 #[cfg_attr(docsrs, doc(cfg(feature = "libadwaita")))]
-/// Re-export of libadwaita
 pub use adw;
 
+/// Re-export of libpanel
 #[cfg(feature = "libpanel")]
 #[cfg_attr(docsrs, doc(cfg(feature = "libpanel")))]
-/// Re-export of libpanel
 pub use panel;
 
 pub use once_cell;

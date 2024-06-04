@@ -69,7 +69,7 @@ impl SimpleComponent for OpenButton {
 
     view! {
         gtk::Box {
-            add_css_class: "linked",
+            add_css_class: relm4::css::LINKED,
             gtk::Button {
                 set_label: model.config.text,
                 connect_clicked => OpenButtonMsg::ShowDialog,

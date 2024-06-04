@@ -19,7 +19,7 @@ impl SimpleComponent for Header {
         gtk::HeaderBar {
             #[wrap(Some)]
             set_title_widget = &gtk::Box {
-                add_css_class: "linked",
+                add_css_class: relm4::css::LINKED,
                 append: group = &gtk::ToggleButton {
                     set_label: "View",
                     set_active: true,
