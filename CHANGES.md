@@ -10,6 +10,7 @@
 + examples: drop sub-components instead of hiding
 + examples: Add example for using multiple windows
 + core: Add functions to set priority of CSS stylesheets
++ core: Rewrite `Alert` component from stratch to work with both GTK4 and Adwaita
  
 
 ### Changed
