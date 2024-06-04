@@ -45,7 +45,7 @@ impl SimpleComponent for App {
     view! {
         gtk::Window {
             #[track(model.changed(App::identical()))]
-            set_class_active: (relm4::css::IDENTICAL, model.identical),
+            set_class_active: ("identical", model.identical),
 
             gtk::Box {
                 set_orientation: gtk::Orientation::Horizontal,
@@ -122,7 +122,7 @@ impl SimpleComponent for App {
 
 fn main() {
     let app = RelmApp::new("relm4.example.tracker");
-    app.set_global_css(".identical { background: #00ad5c; }");
+    relm4::set_global_css(".identical { background: #00ad5c; }");
 
     app.run::<App>(());
 }
