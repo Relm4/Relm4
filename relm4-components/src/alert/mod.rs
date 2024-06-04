@@ -210,6 +210,7 @@ impl Component for Alert {
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
         // Initialize the CSS.
+        #[allow(clippy::no_effect)] // Fixes a false positive in Rust < 1.78
         *INITIALIZE_CSS;
 
         let model = Alert {
