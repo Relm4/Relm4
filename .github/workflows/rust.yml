@@ -35,7 +35,6 @@ jobs:
       matrix:
         rust:
           - stable
-          - nightly
           - "1.75.0"
     env:
       DISPLAY: ":99.0"
