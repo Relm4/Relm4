@@ -13,6 +13,8 @@
 + core: Rewrite `Alert` component from stratch to work with both GTK4 and Adwaita
 + css: Add Adwaita style classes and colors
 + core: Migrate codebase over to using `relm4-css`
++ components: Increase flexibility of `Alert` component
++ components: Make `Alert` component match styling of Adwaita's `MessageDialog` better
 
 ### Changed
 
