@@ -8,6 +8,8 @@ use relm4::{gtk, Component, ComponentParts, ComponentSender, RelmWidgetExt};
 
 const LIBADWAITA_ENABLED: bool = cfg!(feature = "libadwaita");
 const COMPONENT_CSS: &str = include_str!("style.css");
+const MESSAGE_AREA_CSS: &str = "message-area";
+const RESPONSE_BUTTONS_CSS: &str = "response-buttons";
 
 /// The initializer for the CSS, ensuring it only happens once.
 static INITIALIZE_CSS: Lazy<()> = Lazy::new(|| {
@@ -25,10 +27,11 @@ static INITIALIZE_CSS: Lazy<()> = Lazy::new(|| {
 /// - `confirm_label` is set to [`None`].
 /// - `cancel_label` is set to [`None`].
 /// - `option_label` is set to [`None`].
+/// - `extra_child` is set to [`None`].
 #[derive(Debug)]
 pub struct AlertSettings {
     /// Large text
-    pub text: String,
+    pub text: Option<String>,
     /// Optional secondary, smaller text
     pub secondary_text: Option<String>,
     /// Modal dialogs freeze other windows as long they are visible
@@ -41,18 +44,21 @@ pub struct AlertSettings {
     pub cancel_label: Option<String>,
     /// Text for third option button. If [`None`] the button won't be shown.
     pub option_label: Option<String>,
+    /// An optional, extra widget to display below the secondary text.
+    pub extra_child: Option<gtk::Widget>,
 }
 
 impl Default for AlertSettings {
     fn default() -> Self {
         Self {
-            text: String::from("Alert"),
+            text: Some("Alert".into()),
             secondary_text: None,
             is_modal: true,
             destructive_accept: false,
             confirm_label: None,
             cancel_label: None,
             option_label: None,
+            extra_child: None,
         }
     }
 }
@@ -63,6 +69,7 @@ pub struct Alert {
     /// The settings used by the alert component.
     pub settings: AlertSettings,
     is_active: bool,
+    current_child: Option<gtk::Widget>,
 }
 
 /// Messages that can be sent to the alert dialog component
@@ -113,29 +120,40 @@ impl Component for Alert {
             gtk::Box {
                 set_orientation: gtk::Orientation::Vertical,
 
+                #[name(message_area)]
                 gtk::Box {
                     set_orientation: gtk::Orientation::Vertical,
-                    set_spacing: 10,
-                    set_margin_top: 16,
-                    set_margin_bottom: 16,
-                    set_margin_end: 30,
-                    set_margin_start: 30,
+                    set_spacing: 8,
+                    set_vexpand: true,
+                    add_css_class: MESSAGE_AREA_CSS,
 
                     gtk::Label {
                         #[watch]
-                        set_text: &model.settings.text,
+                        set_text: model.settings.text.as_deref().unwrap_or_default(),
+                        #[watch]
+                        set_visible: model.settings.text.is_some(),
+                        set_valign: gtk::Align::Start,
+                        set_justify: gtk::Justification::Center,
                         add_css_class: relm4::css::TITLE_2,
+                        set_wrap: true,
+                        set_max_width_chars: 20,
                     },
 
                     gtk::Label {
                         #[watch]
                         set_text: model.settings.secondary_text.as_deref().unwrap_or_default(),
+                        set_vexpand: true,
+                        set_valign: gtk::Align::Fill,
                         set_justify: gtk::Justification::Center,
+                        set_wrap: true,
+                        set_max_width_chars: 40,
                     },
                 },
 
                 gtk::Box {
+                    add_css_class: RESPONSE_BUTTONS_CSS,
                     set_orientation: gtk::Orientation::Vertical,
+                    set_vexpand_set: true,
                     set_valign: gtk::Align::End,
                     gtk::Separator {},
 
@@ -213,9 +231,12 @@ impl Component for Alert {
         #[allow(clippy::no_effect)] // Fixes a false positive in Rust < 1.78
         *INITIALIZE_CSS;
 
+        let current_child = settings.extra_child.clone();
+
         let model = Alert {
             settings,
             is_active: false,
+            current_child,
         };
 
         let widgets = view_output!();
@@ -230,6 +251,16 @@ impl Component for Alert {
         sender: ComponentSender<Self>,
         _root: &Self::Root,
     ) {
+        // Update the view to contain the extra component, by removing whatever's present in the UI and then adding what the caller's current widget is.
+        if let Some(widget) = self.current_child.take() {
+            widgets.message_area.remove(&widget);
+        }
+
+        if let Some(extra_child) = self.settings.extra_child.clone() {
+            widgets.message_area.append(&extra_child);
+            self.current_child = Some(extra_child);
+        }
+
         match input {
             AlertMsg::Show => self.is_active = true,
             AlertMsg::Hide => self.is_active = false,

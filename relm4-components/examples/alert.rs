@@ -106,25 +106,31 @@ impl SimpleComponent for App {
             dialog: Alert::builder()
                 .transient_for(&root)
                 .launch(AlertSettings {
-                    text: String::from("Do you want to quit without saving? (First alert)"),
+                    text: Some(String::from(
+                        "Do you want to quit without saving? (First alert)",
+                    )),
                     secondary_text: Some(String::from("Your counter hasn't reached 42 yet")),
                     confirm_label: Some(String::from("Close without saving")),
                     cancel_label: Some(String::from("Cancel")),
                     option_label: Some(String::from("Save")),
                     is_modal: true,
                     destructive_accept: true,
+                    extra_child: Some(gtk::Button::with_label("Button in Alert").into()),
                 })
                 .forward(sender.input_sender(), convert_alert_response),
             second_dialog: Alert::builder()
                 .transient_for(&root)
                 .launch(AlertSettings {
-                    text: String::from("Do you want to quit without saving? (Second alert)"),
+                    text: Some(String::from(
+                        "Do you want to quit without saving? (Second alert)",
+                    )),
                     secondary_text: Some(String::from("Your counter hasn't reached 42 yet")),
                     confirm_label: Some(String::from("Close without saving")),
                     cancel_label: Some(String::from("Cancel")),
                     option_label: Some(String::from("Save")),
                     is_modal: true,
                     destructive_accept: true,
+                    extra_child: None,
                 })
                 .forward(sender.input_sender(), convert_alert_response),
         };
