@@ -174,6 +174,7 @@ fn main() {
 - [Rhino Setup](https://github.com/rhino-linux/rhino-setup) - Setup wizard for [Rolling Rhino](https://rhinolinux.org/)
 - [Lemoa](https://github.com/lemmy-gtk/lemoa) - Desktop client for Lemmy
 - [Score Tracker](https://github.com/weclaw1/score-tracker) - App for tracking player scores in card and board games
+- [Spidey](https://github.com/kdwk/Spidey) - A seamless and distraction-free work and play environment on the web
 
 ## License
 
