@@ -175,7 +175,7 @@ fn main() {
 - [Lemoa](https://github.com/lemmy-gtk/lemoa) - Desktop client for Lemmy
 - [Score Tracker](https://github.com/weclaw1/score-tracker) - App for tracking player scores in card and board games
 - [Spidey](https://github.com/kdwk/Spidey) - A seamless and distraction-free work and play environment on the web
-- [Toolbox Tuner](https://github.com/13hannes11/toolbox-tuner) - An application to manage containertoolboxes
+- [Toolbox Tuner](https://github.com/13hannes11/toolbox-tuner) - An application to manage Toolbx containers
 
 ## License
 
