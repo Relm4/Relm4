@@ -64,11 +64,15 @@ impl SimpleComponent for AppModel {
         vbox.append(&stress_test_button);
         vbox.append(&label);
 
-        stress_test_button.connect_clicked(clone!(@strong sender => move |_| {
-            for _ in 0..=ITERATIONS {
-                sender.input(AppMsg::Increment);
+        stress_test_button.connect_clicked(clone!(
+            #[strong]
+            sender,
+            move |_| {
+                for _ in 0..=ITERATIONS {
+                    sender.input(AppMsg::Increment);
+                }
             }
-        }));
+        ));
 
         let widgets = AppWidgets { label };
 

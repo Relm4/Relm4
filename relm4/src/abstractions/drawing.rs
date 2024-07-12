@@ -97,8 +97,10 @@ impl DrawHandler {
         let edit_surface = ImageSurface::create(Format::ARgb32, 100, 100).unwrap();
 
         use gtk::glib;
-        drawing_area.set_draw_func(
-            glib::clone!(#[strong] draw_surface, move |_, context, _, _| {
+        drawing_area.set_draw_func(glib::clone!(
+            #[strong]
+            draw_surface,
+            move |_, context, _, _| {
                 // TODO: only copy the area that was exposed?
                 if let Err(error) = context.set_source_surface(&draw_surface.get(), 0.0, 0.0) {
                     tracing::error!("Cannot set source surface: {:?}", error);
@@ -107,8 +109,8 @@ impl DrawHandler {
                 if let Err(error) = context.paint() {
                     tracing::error!("Cannot paint: {:?}", error);
                 }
-            }),
-        );
+            }
+        ));
 
         Self {
             draw_surface,
