@@ -75,7 +75,9 @@ impl SimpleComponent for OpenButton {
                 connect_clicked => OpenButtonMsg::ShowDialog,
             },
             gtk::MenuButton {
-                set_visible: model.config.recently_opened_files.is_some(),
+                #[watch]
+                set_visible: model.config.recently_opened_files.is_some()
+                    && model.recent_files.is_some(),
 
                 #[wrap(Some)]
                 #[name(popover)]
@@ -86,8 +88,8 @@ impl SimpleComponent for OpenButton {
                         set_min_content_height: 100,
                         set_min_content_height: 300,
 
-                        #[name(recent_files_list)]
-                        gtk::Box {
+                        #[local_ref]
+                        recent_files_list -> gtk::Box {
                             set_orientation: gtk::Orientation::Vertical,
                             set_vexpand: true,
                             set_hexpand: true,
@@ -162,6 +164,8 @@ impl SimpleComponent for OpenButton {
                 OpenDialogResponse::Cancel => OpenButtonMsg::Ignore,
             });
 
+        let recent_files_list = gtk::Box::builder().build();
+
         let mut model = Self {
             config: settings,
             dialog,
@@ -171,11 +175,9 @@ impl SimpleComponent for OpenButton {
             tracker: 0,
         };
 
-        let widgets = view_output!();
-
         if let Some(filename) = model.config.recently_opened_files {
             let mut factory = FactoryVecDeque::builder()
-                .launch(widgets.recent_files_list.clone())
+                .launch(recent_files_list.clone())
                 .forward(sender.input_sender(), |msg| msg);
 
             if let Ok(entries) = fs::read_to_string(filename) {
@@ -187,6 +189,8 @@ impl SimpleComponent for OpenButton {
 
             model.recent_files = Some(factory);
         }
+
+        let widgets = view_output!();
 
         ComponentParts { model, widgets }
     }
