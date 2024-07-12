@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.9.0 - 2024-7-12
+
 ### Added
 
 + core: Add `set_align` and `set_expand` to `RelmWidgetExt` to set horizontal and vertical properties at once
@@ -10,7 +12,7 @@
 + examples: drop sub-components instead of hiding
 + examples: Add example for using multiple windows
 + core: Add functions to set priority of CSS stylesheets
-+ core: Rewrite `Alert` component from stratch to work with both GTK4 and Adwaita
++ core: Rewrite `Alert` component from scratch to work with both GTK4 and Adwaita
 + css: Add Adwaita style classes and colors
 + core: Migrate codebase over to using `relm4-css`
 + components: Increase flexibility of `Alert` component
@@ -19,6 +21,7 @@
 ### Changed
 
 + core: Simplified internal code for runtime creation
++ all: update dependencies
 
 ### Fixed
 

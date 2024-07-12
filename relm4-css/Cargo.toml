@@ -16,6 +16,8 @@ repository.workspace = true
 keywords.workspace = true
 categories.workspace = true
 
+include = ["src/", "build.rs", "README.md", "../LICENSE-MIT", "../LICENSE-APACHE"]
+
 [package.metadata.docs.rs]
 all-features = true
 # enable unstable features in the documentation

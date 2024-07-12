@@ -60,11 +60,11 @@ impl SimpleComponent for App {
         vbox.append(&dec_button);
         vbox.append(&label);
 
-        inc_button.connect_clicked(clone!(@strong sender => move |_| {
+        inc_button.connect_clicked(clone!(#[strong] sender,  move |_| {
             sender.input(Msg::Increment);
         }));
 
-        dec_button.connect_clicked(clone!(@strong sender => move |_| {
+        dec_button.connect_clicked(clone!(#[strong] sender, move |_| {
             sender.input(Msg::Decrement);
         }));
 

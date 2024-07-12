@@ -98,7 +98,7 @@ impl DrawHandler {
 
         use gtk::glib;
         drawing_area.set_draw_func(
-            glib::clone!(@strong draw_surface => move |_, context, _, _| {
+            glib::clone!(#[strong] draw_surface, move |_, context, _, _| {
                 // TODO: only copy the area that was exposed?
                 if let Err(error) = context.set_source_surface(&draw_surface.get(), 0.0, 0.0) {
                     tracing::error!("Cannot set source surface: {:?}", error);

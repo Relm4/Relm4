@@ -16,6 +16,8 @@ repository.workspace = true
 keywords.workspace = true
 categories.workspace = true
 
+include = ["src/", "examples/", "README.md", "../LICENSE-MIT", "../LICENSE-APACHE"]
+
 [package.metadata.docs.rs]
 all-features = true
 # enable unstable features in the documentation
@@ -24,8 +26,8 @@ cargo-args = ["-Zunstable-options", "-Zrustdoc-scrape-examples"]
 
 [dependencies]
 once_cell = "1.19"
-relm4 = { version = "0.8.0", path = "../relm4", default-features = false, features = ["css", "macros"] }
-reqwest = { version = "0.12.1", optional = true }
+relm4 = { version = "0.9.0", path = "../relm4", default-features = false, features = ["css", "macros"] }
+reqwest = { version = "0.12.5", optional = true }
 tracker = "0.2.1"
 
 [features]

@@ -49,11 +49,11 @@ Use this in to your `Cargo.toml`:
 
 ```toml
 # Core library
-relm4 = "0.8"
+relm4 = "0.9"
 # Optional: reusable components
-relm4-components = "0.8"
+relm4-components = "0.9"
 # Optional: icons (more info at https://github.com/Relm4/icons)
-relm4-icons = "0.8.0"
+relm4-icons = "0.9.0"
 ```
 
 ### Features
