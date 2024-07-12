@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
++ components: Add `icon` to `IconButton`
 
 ## 0.9.0 - 2024-7-12
 
