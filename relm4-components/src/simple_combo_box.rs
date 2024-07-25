@@ -112,5 +112,4 @@ where
     pub fn get_active_elem(&self) -> Option<&E> {
         self.active_index.and_then(|idx| self.variants.get(idx))
     }
-
 }
