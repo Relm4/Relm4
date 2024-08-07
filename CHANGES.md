@@ -4,6 +4,7 @@
 
 ### Fixed
 
+* macros: Fix `error: the borrowed expression implements the required traits` clippy lint
 + components: Don't panic in `get_active_elem()` when calling on `SimpleComboBox` with empty variants
 * core: Ignore sending error if async component was dropped quickly
 
