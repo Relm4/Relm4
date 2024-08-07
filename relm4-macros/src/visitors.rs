@@ -48,7 +48,7 @@ impl VisitMut for ComponentVisitor<'_> {
                     Some("view") => {
                         if self.view_widgets.is_some() {
                             self.errors
-                                .push(syn::Error::new_spanned(&mac, "duplicate view macro"));
+                                .push(syn::Error::new_spanned(mac, "duplicate view macro"));
                         }
 
                         self.view_widgets.replace(mac.mac.parse_body());
@@ -158,7 +158,7 @@ impl VisitMut for FactoryComponentVisitor<'_> {
                     Some("view") => {
                         if self.view_widgets.is_some() {
                             self.errors
-                                .push(syn::Error::new_spanned(&mac, "duplicate view macro"));
+                                .push(syn::Error::new_spanned(mac, "duplicate view macro"));
                         }
 
                         self.view_widgets.replace(mac.mac.parse_body());
@@ -366,7 +366,7 @@ impl VisitMut for PreAndPostView<'_> {
                 "pre_view" => {
                     if !self.pre_view.is_empty() {
                         self.errors.push(syn::Error::new_spanned(
-                            &func,
+                            func,
                             "duplicate pre_view function",
                         ));
                     }
@@ -377,7 +377,7 @@ impl VisitMut for PreAndPostView<'_> {
                 "post_view" => {
                     if !self.post_view.is_empty() {
                         self.errors.push(syn::Error::new_spanned(
-                            &func,
+                            func,
                             "duplicate post_view function",
                         ));
                     }
