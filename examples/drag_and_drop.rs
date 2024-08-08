@@ -10,7 +10,7 @@ use relm4::{ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleCompo
 // a boxed type
 // see: https://gtk-rs.org/gtk-rs-core/stable/latest/docs/glib/subclass/index.html#example-for-registering-a-boxed-type-for-a-rust-struct
 // or wrapped with BoxedAnyObject but it has the downside of not as easily
-// beeing distinguishable in conjunction with the set_types method
+// being distinguishable in conjunction with the set_types method
 // see: https://docs.rs/glib/latest/glib/struct.BoxedAnyObject.html
 
 #[derive(Clone, glib::Boxed)]
