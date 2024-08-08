@@ -4,6 +4,7 @@
 
 ### Fixed
 
+* components: Replace deprecated `from_pixbuf()` usage
 + components: Don't panic in `get_active_elem()` when calling on `SimpleComboBox` with empty variants
 * core: Ignore sending error if async component was dropped quickly
 
