@@ -110,6 +110,6 @@ where
     /// Return the value of the currently selected element or [`None`] if nothing is selected.
     #[must_use]
     pub fn get_active_elem(&self) -> Option<&E> {
-        self.active_index.map(|idx| &self.variants[idx])
+        self.active_index.and_then(|idx| self.variants.get(idx))
     }
 }

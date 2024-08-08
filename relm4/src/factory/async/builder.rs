@@ -91,7 +91,7 @@ where
                 let data = C::init_model(init, &index, component_sender).await;
                 drop(loading_widgets);
                 let data_guard = future_data.start_runtime(data);
-                future_sender.send(data_guard).unwrap();
+                let _ = future_sender.send(data_guard);
             });
             future_receiver
         };

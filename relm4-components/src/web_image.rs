@@ -132,7 +132,8 @@ impl WebImage {
 
     fn generate_image(data: VecDeque<u8>) -> Option<gtk::Image> {
         let pixbuf = gtk::gdk_pixbuf::Pixbuf::from_read(data).ok()?;
-        Some(gtk::Image::from_pixbuf(Some(&pixbuf)))
+        let texture = gtk::gdk::Texture::for_pixbuf(&pixbuf);
+        Some(gtk::Image::from_paintable(Some(&texture)))
     }
 
     async fn get_img_data(id: usize, url: String) -> Option<(usize, VecDeque<u8>)> {

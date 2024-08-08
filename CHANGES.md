@@ -6,6 +6,12 @@
 
 + components: Hide recent button from `OpenButton` component when there is no entries
 
+### Fixed
+
+* components: Replace deprecated `from_pixbuf()` usage
++ components: Don't panic in `get_active_elem()` when calling on `SimpleComboBox` with empty variants
+* core: Ignore sending error if async component was dropped quickly
+
 ## 0.9.0 - 2024-7-12
 
 ### Added
