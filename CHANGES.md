@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Changed
+
++ components: Hide recent button from `OpenButton` component when there is no entries
+
 ### Fixed
 
 * components: Replace deprecated `from_pixbuf()` usage
