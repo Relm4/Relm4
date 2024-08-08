@@ -164,7 +164,7 @@ impl SimpleComponent for OpenButton {
                 OpenDialogResponse::Cancel => OpenButtonMsg::Ignore,
             });
 
-        let recent_files_list = gtk::Box::builder().build();
+        let recent_files_list = gtk::Box::default();
 
         let mut model = Self {
             config: settings,
