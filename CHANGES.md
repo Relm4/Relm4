@@ -1,6 +1,9 @@
 # Changelog
 
 ## Unreleased
+
+### Changed
+
 + components: Hide recent button from `OpenButton` component when there is no entries
 
 ## 0.9.0 - 2024-7-12
