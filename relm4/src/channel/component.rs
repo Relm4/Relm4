@@ -117,7 +117,7 @@ where
         });
     }
 
-    /// Spawns a synchronous command that will be dropped as soon as the factory component is shut down.
+    /// Spawns a synchronous command.
     ///
     /// Essentially, this is a simpler version of [`Self::spawn_command()`].
     fn spawn_oneshot_command<Cmd>(&self, cmd: Cmd)
