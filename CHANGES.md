@@ -4,6 +4,7 @@
 
 ### Changed
 
++ core: Add more async factory types to prelude
 + components: Hide recent button from `OpenButton` component when there is no entries
 
 ### Fixed
