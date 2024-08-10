@@ -7,7 +7,10 @@ pub use crate::component::{
     AsyncComponent, AsyncComponentController, AsyncComponentParts, AsyncComponentSender,
     AsyncController, SimpleAsyncComponent,
 };
-pub use crate::factory::{DynamicIndex, FactoryComponent, FactorySender};
+pub use crate::factory::{
+    AsyncFactoryComponent, AsyncFactorySender, AsyncFactoryVecDeque, DynamicIndex,
+    FactoryComponent, FactorySender, FactoryVecDeque,
+};
 pub use crate::{
     Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,
     RelmWidgetExt, SimpleComponent, WidgetRef, WidgetTemplate,
