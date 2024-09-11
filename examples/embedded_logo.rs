@@ -6,9 +6,7 @@ use relm4::gtk::gdk::Texture;
 use relm4::gtk::gdk_pixbuf::Pixbuf;
 use relm4::gtk::gio::{Cancellable, MemoryInputStream};
 
-
 struct App {}
-
 
 /// embedded logo as paintable texture
 ///
@@ -21,7 +19,6 @@ fn embedded_logo() -> Texture {
     let pixbuf = Pixbuf::from_stream(&stream, Cancellable::NONE).unwrap();
     Texture::for_pixbuf(&pixbuf)
 }
-
 
 #[derive(Debug)]
 enum Msg {}
