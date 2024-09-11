@@ -13,6 +13,7 @@
 + components: Don't panic in `get_active_elem()` when calling on `SimpleComboBox` with empty variants
 + core: Ignore sending error if async component was dropped quickly
 + macros: Destructure fields of returned widgets
++ examples: Add example that shows embedded logo
 
 ## 0.9.0 - 2024-7-12
 
