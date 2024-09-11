@@ -19,8 +19,7 @@ fn embedded_logo() -> Texture {
     let g_bytes = glib::Bytes::from(&bytes.to_vec());
     let stream = MemoryInputStream::from_bytes(&g_bytes);
     let pixbuf = Pixbuf::from_stream(&stream, Cancellable::NONE).unwrap();
-    let texture = Texture::for_pixbuf(&pixbuf);
-    texture
+    Texture::for_pixbuf(&pixbuf)
 }
 
 
