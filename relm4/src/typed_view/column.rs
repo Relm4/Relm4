@@ -307,7 +307,7 @@ where
         }
     }
 
-    /// Notify that a certian filter has changed.
+    /// Notify that a certain filter has changed.
     /// This causes the filter expression to be re-evaluated.
     pub fn notify_filter_changed(&self, idx: usize) {
         if let Some(filter) = self.filters.get(idx) {
