@@ -5,6 +5,7 @@
 ### Changed
 
 + core: Add more async factory types to prelude
++ core: Add `notify_filter_changed` to typed views to allow dynamic filters
 + components: Hide recent button from `OpenButton` component when there is no entries
 
 ### Fixed
