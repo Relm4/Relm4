@@ -3,7 +3,7 @@
 use super::{get_mut_value, get_value, Filter, OrdFn, RelmSelectionExt, TypedListItem};
 use gtk::{
     gio, glib,
-    prelude::{Cast, CastNone, IsA, ListItemExt, ListModelExt, ObjectExt},
+    prelude::{Cast, CastNone, FilterExt, IsA, ListItemExt, ListModelExt, ObjectExt},
 };
 use std::{
     any::Any,
@@ -301,6 +301,19 @@ where
             } else {
                 filter.model.set_filter(None::<&gtk::CustomFilter>);
             }
+            true
+        } else {
+            false
+        }
+    }
+
+    /// Notify that a certain filter has changed.
+    /// This causes the filter expression to be re-evaluated.
+    ///
+    /// Returns true if a filter was notified.
+    pub fn notify_filter_changed(&self, idx: usize) -> bool {
+        if let Some(filter) = self.filters.get(idx) {
+            filter.filter.changed(gtk::FilterChange::Different);
             true
         } else {
             false
