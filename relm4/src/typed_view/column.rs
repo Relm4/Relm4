@@ -309,9 +309,14 @@ where
 
     /// Notify that a certain filter has changed.
     /// This causes the filter expression to be re-evaluated.
-    pub fn notify_filter_changed(&self, idx: usize) {
+    ///
+    /// Returns true if a filter was notified.
+    pub fn notify_filter_changed(&self, idx: usize) -> bool {
         if let Some(filter) = self.filters.get(idx) {
             filter.filter.changed(gtk::FilterChange::Different);
+            true
+        } else {
+            false
         }
     }
 
