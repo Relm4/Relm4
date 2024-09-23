@@ -16,7 +16,7 @@ repository.workspace = true
 
 categories.workspace = true
 
-include = ["src/", "tests/", "README.md", "../LICENSE-MIT", "../LICENSE-APACHE"]
+include = ["src/", "tests/", "README.md", "LICENSE-MIT", "LICENSE-APACHE"]
 
 [lib]
 proc-macro = true

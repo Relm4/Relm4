@@ -16,7 +16,7 @@ repository.workspace = true
 keywords.workspace = true
 categories.workspace = true
 
-include = ["src/", "examples/", "README.md", "../LICENSE-MIT", "../LICENSE-APACHE"]
+include = ["src/", "examples/", "README.md", "LICENSE-MIT", "LICENSE-APACHE"]
 
 [package.metadata.docs.rs]
 all-features = true
