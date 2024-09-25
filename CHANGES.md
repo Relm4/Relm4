@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
++ core: Add gnome_47 feature flag for GNOME 47
+
 ### Changed
 
 + core: Add more async factory types to prelude
@@ -10,6 +14,7 @@
 
 ### Fixed
 
++ core: Target gtk/gnome_46 with the gnome_46 feature flag
 + components: Replace deprecated `from_pixbuf()` usage
 + components: Don't panic in `get_active_elem()` when calling on `SimpleComboBox` with empty variants
 + core: Ignore sending error if async component was dropped quickly
