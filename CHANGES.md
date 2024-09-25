@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
++ core: Add gnome_47 feature flag for GNOME 47
+
 ### Changed
 
 + core: Add more async factory types to prelude
