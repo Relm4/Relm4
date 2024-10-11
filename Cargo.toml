@@ -4,7 +4,7 @@ members = ["relm4", "relm4-components", "relm4-css", "relm4-macros"]
 exclude = ["examples", "examples/libadwaita"]
 
 [workspace.package]
-version = "0.9.0"
+version = "0.9.1"
 authors = ["Aaron Erhardt <aaron.erhardt@t-online.de>"]
 edition = "2021"
 rust-version = "1.75"
