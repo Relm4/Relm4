@@ -731,7 +731,7 @@ where
         output
     }
     /// Adds multiple components to the back of the [`FactoryVecDeque`].
-    /// 
+    ///
     /// This method takes an iterator over components and adds each one
     /// to the deque, rendering them efficiently.
     pub fn extend(&mut self, component_iter: impl IntoIterator<Item = C::Init>) {
