@@ -7,6 +7,7 @@
 ### Added
 
 + core: Add gnome_47 feature flag for GNOME 47
++ core: Add method `FactoryVecDeque::extend` to append multiple components efficiently.
 
 ### Changed
 
