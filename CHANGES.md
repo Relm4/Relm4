@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
++ core: Add method `FactoryVecDeque::extend` to append multiple components efficiently.
+
 ## 0.9.1 - 2024-10-11
 
 ### Added

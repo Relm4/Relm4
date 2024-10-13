@@ -730,6 +730,19 @@ where
         }
         output
     }
+    /// Adds multiple components to the back of the [`FactoryVecDeque`].
+    ///
+    /// This method takes an iterator over components and adds each one
+    /// to the deque, rendering them efficiently.
+    pub fn extend(&mut self, component_iter: impl IntoIterator<Item = C::Init>) {
+        // Acquire the guard to make changes
+        let mut edit = self.guard();
+
+        // Iterate over the incoming components and push each one
+        for component in component_iter {
+            edit.push_back(component);
+        }
+    }
 }
 
 ///Implements the Clone Trait for `FactoryVecDeque<C>` where C is Cloneable
