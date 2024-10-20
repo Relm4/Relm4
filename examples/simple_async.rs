@@ -7,7 +7,7 @@ use relm4::{
     view, RelmApp, RelmWidgetExt,
 };
 
-struct App {
+struct AppModel {
     counter: u8,
 }
 
@@ -18,7 +18,7 @@ enum AppMsg {
 }
 
 #[relm4::component(async)]
-impl AsyncComponent for App {
+impl AsyncComponent for AppModel {
     type Init = u8;
     type Input = AppMsg;
     type Output = ();
@@ -77,7 +77,7 @@ impl AsyncComponent for App {
     ) -> AsyncComponentParts<Self> {
         tokio::time::sleep(Duration::from_secs(1)).await;
 
-        let model = App { counter };
+        let model = AppModel { counter };
 
         // Insert the code generation of the view! macro here
         let widgets = view_output!();
@@ -105,5 +105,5 @@ impl AsyncComponent for App {
 
 fn main() {
     let app = RelmApp::new("relm4.example.simple_async");
-    app.run_async::<App>(0);
+    app.run_async::<AppModel>(0);
 }

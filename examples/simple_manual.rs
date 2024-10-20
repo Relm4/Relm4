@@ -2,7 +2,7 @@ use gtk::glib::clone;
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt};
 use relm4::{ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent};
 
-struct App {
+struct AppModel {
     counter: u8,
 }
 
@@ -20,7 +20,7 @@ struct AppWidgets {
     label: gtk::Label,
 }
 
-impl SimpleComponent for App {
+impl SimpleComponent for AppModel {
     type Init = u8;
     type Input = AppMsg;
     type Output = ();
@@ -41,7 +41,7 @@ impl SimpleComponent for App {
         window: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let model = App { counter };
+        let model = AppModel { counter };
 
         let vbox = gtk::Box::builder()
             .orientation(gtk::Orientation::Vertical)
@@ -102,5 +102,5 @@ impl SimpleComponent for App {
 
 fn main() {
     let app = RelmApp::new("relm4.example.simple_manual");
-    app.run::<App>(0);
+    app.run::<AppModel>(0);
 }
