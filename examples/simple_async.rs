@@ -12,7 +12,7 @@ struct App {
 }
 
 #[derive(Debug)]
-enum Msg {
+enum AppMsg {
     Increment,
     Decrement,
 }
@@ -20,7 +20,7 @@ enum Msg {
 #[relm4::component(async)]
 impl AsyncComponent for App {
     type Init = u8;
-    type Input = Msg;
+    type Input = AppMsg;
     type Output = ();
     type CommandOutput = ();
 
@@ -33,12 +33,12 @@ impl AsyncComponent for App {
 
                 gtk::Button {
                     set_label: "Increment",
-                    connect_clicked => Msg::Increment,
+                    connect_clicked => AppMsg::Increment,
                 },
 
                 gtk::Button {
                     set_label: "Decrement",
-                    connect_clicked => Msg::Decrement,
+                    connect_clicked => AppMsg::Decrement,
                 },
 
                 gtk::Label {
@@ -93,10 +93,10 @@ impl AsyncComponent for App {
     ) {
         tokio::time::sleep(Duration::from_secs(1)).await;
         match msg {
-            Msg::Increment => {
+            AppMsg::Increment => {
                 self.counter = self.counter.wrapping_add(1);
             }
-            Msg::Decrement => {
+            AppMsg::Decrement => {
                 self.counter = self.counter.wrapping_sub(1);
             }
         }

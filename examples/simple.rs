@@ -6,7 +6,7 @@ struct App {
 }
 
 #[derive(Debug)]
-enum Msg {
+enum AppMsg {
     Increment,
     Decrement,
 }
@@ -14,7 +14,7 @@ enum Msg {
 #[relm4::component]
 impl SimpleComponent for App {
     type Init = u8;
-    type Input = Msg;
+    type Input = AppMsg;
     type Output = ();
 
     view! {
@@ -29,12 +29,12 @@ impl SimpleComponent for App {
 
                 gtk::Button {
                     set_label: "Increment",
-                    connect_clicked => Msg::Increment,
+                    connect_clicked => AppMsg::Increment,
                 },
 
                 gtk::Button {
                     set_label: "Decrement",
-                    connect_clicked => Msg::Decrement,
+                    connect_clicked => AppMsg::Decrement,
                 },
 
                 gtk::Label {
@@ -62,10 +62,10 @@ impl SimpleComponent for App {
 
     fn update(&mut self, msg: Self::Input, _sender: ComponentSender<Self>) {
         match msg {
-            Msg::Increment => {
+            AppMsg::Increment => {
                 self.counter = self.counter.wrapping_add(1);
             }
-            Msg::Decrement => {
+            AppMsg::Decrement => {
                 self.counter = self.counter.wrapping_sub(1);
             }
         }
