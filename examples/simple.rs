@@ -1,7 +1,7 @@
 use gtk::prelude::*;
 use relm4::prelude::*;
 
-struct App {
+struct AppModel {
     counter: u8,
 }
 
@@ -12,7 +12,7 @@ enum AppMsg {
 }
 
 #[relm4::component]
-impl SimpleComponent for App {
+impl SimpleComponent for AppModel {
     type Init = u8;
     type Input = AppMsg;
     type Output = ();
@@ -52,7 +52,7 @@ impl SimpleComponent for App {
         root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let model = App { counter };
+        let model = AppModel { counter };
 
         // Insert the code generation of the view! macro here
         let widgets = view_output!();
@@ -74,5 +74,5 @@ impl SimpleComponent for App {
 
 fn main() {
     let app = RelmApp::new("relm4.example.simple");
-    app.run::<App>(0);
+    app.run::<AppModel>(0);
 }
