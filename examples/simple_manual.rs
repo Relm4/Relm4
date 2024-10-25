@@ -2,12 +2,12 @@ use gtk::glib::clone;
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt};
 use relm4::{ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent};
 
-struct App {
+struct AppModel {
     counter: u8,
 }
 
 #[derive(Debug)]
-enum Msg {
+enum AppMsg {
     Increment,
     Decrement,
 }
@@ -20,9 +20,9 @@ struct AppWidgets {
     label: gtk::Label,
 }
 
-impl SimpleComponent for App {
+impl SimpleComponent for AppModel {
     type Init = u8;
-    type Input = Msg;
+    type Input = AppMsg;
     type Output = ();
     type Widgets = AppWidgets;
     type Root = gtk::Window;
@@ -41,7 +41,7 @@ impl SimpleComponent for App {
         window: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let model = App { counter };
+        let model = AppModel { counter };
 
         let vbox = gtk::Box::builder()
             .orientation(gtk::Orientation::Vertical)
@@ -64,7 +64,7 @@ impl SimpleComponent for App {
             #[strong]
             sender,
             move |_| {
-                sender.input(Msg::Increment);
+                sender.input(AppMsg::Increment);
             }
         ));
 
@@ -72,7 +72,7 @@ impl SimpleComponent for App {
             #[strong]
             sender,
             move |_| {
-                sender.input(Msg::Decrement);
+                sender.input(AppMsg::Decrement);
             }
         ));
 
@@ -83,10 +83,10 @@ impl SimpleComponent for App {
 
     fn update(&mut self, msg: Self::Input, _sender: ComponentSender<Self>) {
         match msg {
-            Msg::Increment => {
+            AppMsg::Increment => {
                 self.counter = self.counter.wrapping_add(1);
             }
-            Msg::Decrement => {
+            AppMsg::Decrement => {
                 self.counter = self.counter.wrapping_sub(1);
             }
         }
@@ -102,5 +102,5 @@ impl SimpleComponent for App {
 
 fn main() {
     let app = RelmApp::new("relm4.example.simple_manual");
-    app.run::<App>(0);
+    app.run::<AppModel>(0);
 }

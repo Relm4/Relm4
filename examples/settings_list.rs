@@ -20,7 +20,7 @@ fn main() {
         .application_id("org.relm4.SettingsListExample")
         .launch(|_app, window| {
             // Initialize a component's root widget
-            let mut component = App::builder()
+            let mut component = AppModel::builder()
                 // Attach the root widget to the given window.
                 .attach_to(&window)
                 // Start the component service with an initial parameter
@@ -75,7 +75,7 @@ fn main() {
 }
 
 #[derive(Default)]
-pub struct App {
+pub struct AppModel {
     pub options: Vec<(String, String, u32)>,
 }
 
@@ -107,7 +107,7 @@ pub enum CmdOut {
     Reload,
 }
 
-impl Component for App {
+impl Component for AppModel {
     type Init = String;
     type Input = Input;
     type Output = Output;
@@ -144,7 +144,7 @@ impl Component for App {
         root.append(&list);
 
         ComponentParts {
-            model: App::default(),
+            model: AppModel::default(),
             widgets: Widgets {
                 list,
                 button_sg: gtk::SizeGroup::new(gtk::SizeGroupMode::Both),

@@ -1,20 +1,20 @@
 use gtk::prelude::*;
 use relm4::prelude::*;
 
-struct App {
+struct AppModel {
     counter: u8,
 }
 
 #[derive(Debug)]
-enum Msg {
+enum AppMsg {
     Increment,
     Decrement,
 }
 
 #[relm4::component]
-impl SimpleComponent for App {
+impl SimpleComponent for AppModel {
     type Init = u8;
-    type Input = Msg;
+    type Input = AppMsg;
     type Output = ();
 
     view! {
@@ -29,12 +29,12 @@ impl SimpleComponent for App {
 
                 gtk::Button {
                     set_label: "Increment",
-                    connect_clicked => Msg::Increment,
+                    connect_clicked => AppMsg::Increment,
                 },
 
                 gtk::Button {
                     set_label: "Decrement",
-                    connect_clicked => Msg::Decrement,
+                    connect_clicked => AppMsg::Decrement,
                 },
 
                 gtk::Label {
@@ -52,7 +52,7 @@ impl SimpleComponent for App {
         root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let model = App { counter };
+        let model = AppModel { counter };
 
         // Insert the code generation of the view! macro here
         let widgets = view_output!();
@@ -62,10 +62,10 @@ impl SimpleComponent for App {
 
     fn update(&mut self, msg: Self::Input, _sender: ComponentSender<Self>) {
         match msg {
-            Msg::Increment => {
+            AppMsg::Increment => {
                 self.counter = self.counter.wrapping_add(1);
             }
-            Msg::Decrement => {
+            AppMsg::Decrement => {
                 self.counter = self.counter.wrapping_sub(1);
             }
         }
@@ -74,5 +74,5 @@ impl SimpleComponent for App {
 
 fn main() {
     let app = RelmApp::new("relm4.example.simple");
-    app.run::<App>(0);
+    app.run::<AppModel>(0);
 }

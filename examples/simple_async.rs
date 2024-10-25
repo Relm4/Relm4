@@ -7,20 +7,20 @@ use relm4::{
     view, RelmApp, RelmWidgetExt,
 };
 
-struct App {
+struct AppModel {
     counter: u8,
 }
 
 #[derive(Debug)]
-enum Msg {
+enum AppMsg {
     Increment,
     Decrement,
 }
 
 #[relm4::component(async)]
-impl AsyncComponent for App {
+impl AsyncComponent for AppModel {
     type Init = u8;
-    type Input = Msg;
+    type Input = AppMsg;
     type Output = ();
     type CommandOutput = ();
 
@@ -33,12 +33,12 @@ impl AsyncComponent for App {
 
                 gtk::Button {
                     set_label: "Increment",
-                    connect_clicked => Msg::Increment,
+                    connect_clicked => AppMsg::Increment,
                 },
 
                 gtk::Button {
                     set_label: "Decrement",
-                    connect_clicked => Msg::Decrement,
+                    connect_clicked => AppMsg::Decrement,
                 },
 
                 gtk::Label {
@@ -77,7 +77,7 @@ impl AsyncComponent for App {
     ) -> AsyncComponentParts<Self> {
         tokio::time::sleep(Duration::from_secs(1)).await;
 
-        let model = App { counter };
+        let model = AppModel { counter };
 
         // Insert the code generation of the view! macro here
         let widgets = view_output!();
@@ -93,10 +93,10 @@ impl AsyncComponent for App {
     ) {
         tokio::time::sleep(Duration::from_secs(1)).await;
         match msg {
-            Msg::Increment => {
+            AppMsg::Increment => {
                 self.counter = self.counter.wrapping_add(1);
             }
-            Msg::Decrement => {
+            AppMsg::Decrement => {
                 self.counter = self.counter.wrapping_sub(1);
             }
         }
@@ -105,5 +105,5 @@ impl AsyncComponent for App {
 
 fn main() {
     let app = RelmApp::new("relm4.example.simple_async");
-    app.run_async::<App>(0);
+    app.run_async::<AppModel>(0);
 }
