@@ -4,6 +4,10 @@
 
 ### Added
 
++ core: Add convenience methods for setting the active `StackPage` in `FactoryVecDeque` and `FactoryHashMap`
+
+### Added
+
 + core: Add method `FactoryVecDeque::extend` to append multiple components efficiently.
 
 ## 0.9.1 - 2024-10-11

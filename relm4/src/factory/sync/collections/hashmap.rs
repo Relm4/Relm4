@@ -11,6 +11,8 @@ use std::iter::FusedIterator;
 use std::marker::PhantomData;
 use std::ops;
 
+use gtk::prelude::IsA;
+
 #[derive(Debug)]
 #[must_use]
 pub struct FactoryElementGuard<'a, C>
@@ -376,5 +378,26 @@ where
         }
         // Return the new, cloned FactoryHashMap.
         clone
+    }
+}
+
+impl<K, C> FactoryHashMap<K, C, RandomState>
+where
+    C: FactoryComponent,
+    K: Clone + Hash + Eq,
+    C::ParentWidget: IsA<gtk::Stack>,
+    C::Root: IsA<gtk::Widget>,
+{
+    /// Makes the element at a given key visible in a [`gtk::Stack`].
+    /// Returns [`true`] on success, otherwise [`false`].
+    pub fn set_visible(&self, key: &K) -> bool {
+        if let Some(handle) = self.inner.get(key) {
+            self.widget
+                .as_ref()
+                .set_visible_child(handle.root_widget.as_ref());
+            true
+        } else {
+            false
+        }
     }
 }
