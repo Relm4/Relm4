@@ -165,7 +165,9 @@ impl SimpleComponent for App {
             AppMsg::AddCounter => {
                 let index = self.entry_buffer.text().to_string();
                 if !index.is_empty() {
-                    self.counters.insert(index, self.created_widgets);
+                    self.counters.insert(index.clone(), self.created_widgets);
+                    // Change focus to the currently created element
+                    self.counters.set_visible(&index);
                     self.created_widgets = self.created_widgets.wrapping_add(1);
                 }
             }

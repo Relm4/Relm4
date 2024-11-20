@@ -16,6 +16,7 @@ use std::ops::{Deref, Index, IndexMut};
 
 #[cfg(feature = "libadwaita")]
 use gtk::prelude::Cast;
+use gtk::prelude::IsA;
 
 #[cfg(feature = "libadwaita")]
 use std::hash::Hasher;
@@ -763,5 +764,25 @@ where
         }
         // Return the new, cloned FactoryVecDeque.
         clone
+    }
+}
+
+impl<C> FactoryVecDeque<C>
+where
+    C: FactoryComponent<Index = DynamicIndex>,
+    C::ParentWidget: IsA<gtk::Stack>,
+    C::Root: IsA<gtk::Widget>,
+{
+    /// Makes the element at a given index visible in a [`gtk::Stack`].
+    /// Returns [`true`] on success, otherwise [`false`].
+    pub fn set_visible(&self, index: usize) -> bool {
+        if let Some(handle) = self.components.get(index) {
+            self.widget
+                .as_ref()
+                .set_visible_child(handle.widget().as_ref());
+            true
+        } else {
+            false
+        }
     }
 }
