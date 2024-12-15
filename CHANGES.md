@@ -5,6 +5,7 @@
 ### Added
 
 + core: Add convenience methods for setting the active `StackPage` in `FactoryVecDeque` and `FactoryHashMap`
++ core: Impl `Binding` for `gtk::CheckButton`
 
 ### Added
 
