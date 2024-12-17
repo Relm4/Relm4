@@ -36,6 +36,7 @@ macro_rules! impl_connect_binding {
 }
 
 // bool bindings
+impl_connect_binding!(gtk::CheckButton, bool, "active", check_button);
 impl_connect_binding!(gtk::ToggleButton, bool, "active", toggle_button);
 impl_connect_binding!(gtk::Switch, bool, "active", switch);
 impl_connect_binding!(gtk::Spinner, bool, "spinning", spinner);
