@@ -107,12 +107,14 @@ impl SimpleComponent for AppModel {
         root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        let model = AppModel {
+        let mut model = AppModel {
             first_icon: random_icon_name(),
             second_icon: random_icon_name(),
             identical: false,
             tracker: 0,
         };
+
+        model.identical = model.first_icon == model.second_icon;
 
         let widgets = view_output!();
 
