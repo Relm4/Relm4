@@ -33,7 +33,7 @@ where
     inner: &'a mut FactoryVecDeque<C>,
 }
 
-impl<'a, C> Drop for FactoryVecDequeGuard<'a, C>
+impl<C> Drop for FactoryVecDequeGuard<'_, C>
 where
     C: FactoryComponent<Index = DynamicIndex>,
 {
@@ -355,7 +355,7 @@ where
     }
 }
 
-impl<'a, C> Deref for FactoryVecDequeGuard<'a, C>
+impl<C> Deref for FactoryVecDequeGuard<'_, C>
 where
     C: FactoryComponent<Index = DynamicIndex>,
 {
@@ -366,7 +366,7 @@ where
     }
 }
 
-impl<'a, C> Index<usize> for FactoryVecDequeGuard<'a, C>
+impl<C> Index<usize> for FactoryVecDequeGuard<'_, C>
 where
     C: FactoryComponent<Index = DynamicIndex>,
 {
@@ -377,7 +377,7 @@ where
     }
 }
 
-impl<'a, C> IndexMut<usize> for FactoryVecDequeGuard<'a, C>
+impl<C> IndexMut<usize> for FactoryVecDequeGuard<'_, C>
 where
     C: FactoryComponent<Index = DynamicIndex>,
 {

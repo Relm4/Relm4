@@ -22,7 +22,7 @@ where
     inner: &'a mut FactoryHandle<C>,
 }
 
-impl<'a, C> ops::Deref for FactoryElementGuard<'a, C>
+impl<C> ops::Deref for FactoryElementGuard<'_, C>
 where
     C: FactoryComponent,
 {
@@ -33,7 +33,7 @@ where
     }
 }
 
-impl<'a, C> ops::DerefMut for FactoryElementGuard<'a, C>
+impl<C> ops::DerefMut for FactoryElementGuard<'_, C>
 where
     C: FactoryComponent,
 {
@@ -42,7 +42,7 @@ where
     }
 }
 
-impl<'a, C> Drop for FactoryElementGuard<'a, C>
+impl<C> Drop for FactoryElementGuard<'_, C>
 where
     C: FactoryComponent,
 {
