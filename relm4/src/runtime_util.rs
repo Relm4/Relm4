@@ -171,7 +171,7 @@ where
     sender_dropped: bool,
 }
 
-impl<'a, T> GuardedReceiver<'a, T>
+impl<T> GuardedReceiver<'_, T>
 where
     T: 'static,
 {
@@ -183,7 +183,7 @@ where
     }
 }
 
-impl<'a, T> Future for GuardedReceiver<'a, T>
+impl<T> Future for GuardedReceiver<'_, T>
 where
     T: 'static,
 {
@@ -211,7 +211,7 @@ where
     }
 }
 
-impl<'a, T> FusedFuture for GuardedReceiver<'a, T> {
+impl<T> FusedFuture for GuardedReceiver<'_, T> {
     fn is_terminated(&self) -> bool {
         self.sender_dropped
     }

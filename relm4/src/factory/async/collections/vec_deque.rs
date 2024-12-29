@@ -32,7 +32,7 @@ where
     inner: &'a mut AsyncFactoryVecDeque<C>,
 }
 
-impl<'a, C: AsyncFactoryComponent> Drop for AsyncFactoryVecDequeGuard<'a, C>
+impl<C: AsyncFactoryComponent> Drop for AsyncFactoryVecDequeGuard<'_, C>
 where
     <C::ParentWidget as FactoryView>::ReturnedWidget: Clone,
 {
@@ -378,7 +378,7 @@ where
     }
 }
 
-impl<'a, C: AsyncFactoryComponent> Deref for AsyncFactoryVecDequeGuard<'a, C>
+impl<C: AsyncFactoryComponent> Deref for AsyncFactoryVecDequeGuard<'_, C>
 where
     <C::ParentWidget as FactoryView>::ReturnedWidget: Clone,
 {

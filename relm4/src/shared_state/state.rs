@@ -273,7 +273,7 @@ pub struct SharedStateReadGuard<'a, Data> {
     inner: RwLockReadGuard<'a, Data>,
 }
 
-impl<'a, Data> Deref for SharedStateReadGuard<'a, Data> {
+impl<Data> Deref for SharedStateReadGuard<'_, Data> {
     type Target = Data;
 
     fn deref(&self) -> &Self::Target {
@@ -288,7 +288,7 @@ pub struct SharedStateWriteGuard<'a, Data> {
     subscribers: RwLockWriteGuard<'a, Vec<SubscriberFn<Data>>>,
 }
 
-impl<'a, Data: std::fmt::Debug> std::fmt::Debug for SharedStateWriteGuard<'a, Data> {
+impl<Data: std::fmt::Debug> std::fmt::Debug for SharedStateWriteGuard<'_, Data> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("SharedStateWriteGuard")
             .field("data", &self.data)
@@ -297,7 +297,7 @@ impl<'a, Data: std::fmt::Debug> std::fmt::Debug for SharedStateWriteGuard<'a, Da
     }
 }
 
-impl<'a, Data> Deref for SharedStateWriteGuard<'a, Data> {
+impl<Data> Deref for SharedStateWriteGuard<'_, Data> {
     type Target = Data;
 
     fn deref(&self) -> &Self::Target {
@@ -305,13 +305,13 @@ impl<'a, Data> Deref for SharedStateWriteGuard<'a, Data> {
     }
 }
 
-impl<'a, Data> DerefMut for SharedStateWriteGuard<'a, Data> {
+impl<Data> DerefMut for SharedStateWriteGuard<'_, Data> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.data
     }
 }
 
-impl<'a, Data> Drop for SharedStateWriteGuard<'a, Data> {
+impl<Data> Drop for SharedStateWriteGuard<'_, Data> {
     // Notify subscribers
     fn drop(&mut self) {
         let data = &*self.data;
