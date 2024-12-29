@@ -11,6 +11,10 @@
 
 + core: Add method `FactoryVecDeque::extend` to append multiple components efficiently.
 
+### Fixed
+
++ example "tracker": Display identical background when initial icons are in fact identical.
+
 ## 0.9.1 - 2024-10-11
 
 ### Added
