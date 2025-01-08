@@ -178,6 +178,7 @@ fn main() {
 - [Toolbox Tuner](https://github.com/13hannes11/toolbox-tuner) - An application to manage Toolbx containers
 - [BitRitter](https://codeberg.org/Chfkch/bitritter) - A bitwarden/vaultwarden client with mobile devices in mind
 - [Space Acres](https://github.com/autonomys/space-acres) - An opinionated GUI application for farming on Autonomys Network
+- [Exercise Timer](https://github.com/mfep/exercise-timer) - An interval training app for the GNOME desktop
 
 ## License
 
