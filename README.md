@@ -180,6 +180,7 @@ fn main() {
 - [Space Acres](https://github.com/autonomys/space-acres) - An opinionated GUI application for farming on Autonomys Network
 - [Exercise Timer](https://github.com/mfep/exercise-timer) - An interval training app for the GNOME desktop
 - [Words!](https://codeberg.org/petsoi/words) - [on Flathub](https://flathub.org/apps/page.codeberg.petsoi.words) - A word game similar to Wordle
+- [LACT](https://github.com/ilya-zlobintsev/lact) - A GPU configuration and info utility
 
 ## License
 
