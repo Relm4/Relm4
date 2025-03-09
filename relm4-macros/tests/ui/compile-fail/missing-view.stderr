@@ -6,7 +6,6 @@ error: expected `view!` macro invocation
 8  | |     type Input = ();
 9  | |     type Output = ();
 ...  |
-13 | |     }
 14 | | }
    | |_^
 
