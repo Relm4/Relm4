@@ -90,3 +90,11 @@ mod libadwaita {
         set_child_content_impl!(adw::ToolbarView);
     }
 }
+
+#[cfg(feature = "libpanel")]
+#[cfg_attr(docsrs, doc(cfg(feature = "libpanel")))]
+mod libpanel {
+    use super::RelmSetChildExt;
+    use panel::prelude::PanelWidgetExt;
+    set_child_impl!(panel::Widget);
+}

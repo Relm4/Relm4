@@ -48,6 +48,29 @@ macro_rules! add_child_impl {
     }
 }
 
+#[cfg(any(feature = "libadwaita", feature = "libpanel"))]
+#[cfg_attr(docsrs, doc(cfg(any(feature = "libadwaita", feature = "libpanel"))))]
+macro_rules! add_impl {
+    ($($type:ty: $child:ty), +) => {
+        $(
+            impl RelmContainerExt for $type {
+                fn container_add(&self, child: &impl AsRef<$child>) {
+                    self.add(child.as_ref());
+                }
+            }
+        )+
+    };
+    ($($type:ty), +) => {
+        $(
+            impl RelmContainerExt for $type {
+                fn container_add(&self, widget: &impl AsRef<gtk::Widget>) {
+                    self.add(widget.as_ref());
+                }
+            }
+        )+
+    };
+}
+
 append_impl!(gtk::Box, gtk::ListBox);
 add_child_impl!(gtk::InfoBar, gtk::Stack);
 
@@ -55,33 +78,30 @@ add_child_impl!(gtk::InfoBar, gtk::Stack);
 #[cfg_attr(docsrs, doc(cfg(feature = "libadwaita")))]
 mod libadwaita {
     use super::RelmContainerExt;
+    use adw::prelude::{PreferencesGroupExt, PreferencesPageExt};
     append_impl!(adw::Leaflet, adw::Carousel, adw::TabView);
-
-    impl RelmContainerExt for adw::PreferencesPage {
-        fn container_add(&self, widget: &impl AsRef<adw::PreferencesGroup>) {
-            use adw::prelude::PreferencesPageExt;
-            self.add(widget.as_ref());
-        }
+    add_impl! {
+        adw::PreferencesPage: adw::PreferencesGroup
     }
-
-    impl RelmContainerExt for adw::PreferencesGroup {
-        fn container_add(&self, widget: &impl AsRef<gtk::Widget>) {
-            use adw::prelude::PreferencesGroupExt;
-            self.add(widget.as_ref());
-        }
-    }
-
-    impl RelmContainerExt for adw::Squeezer {
-        fn container_add(&self, widget: &impl AsRef<gtk::Widget>) {
-            self.add(widget.as_ref());
-        }
+    add_impl! {
+        adw::PreferencesGroup,
+        adw::Squeezer
     }
 
     #[cfg(all(feature = "libadwaita", feature = "gnome_45"))]
     #[cfg_attr(docsrs, doc(cfg(all(feature = "libadwaita", feature = "gnome_45"))))]
-    impl RelmContainerExt for adw::NavigationView {
-        fn container_add(&self, widget: &impl AsRef<adw::NavigationPage>) {
-            self.add(widget.as_ref());
-        }
+    add_impl! {
+        adw::NavigationView: adw::NavigationPage
+    }
+}
+
+#[cfg(feature = "libpanel")]
+#[cfg_attr(docsrs, doc(cfg(feature = "libpanel")))]
+mod libpanel {
+    use super::RelmContainerExt;
+    use panel::prelude::PanelFrameExt;
+    append_impl!(panel::Paned);
+    add_impl! {
+        panel::Frame: panel::Widget
     }
 }

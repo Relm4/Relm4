@@ -2,6 +2,7 @@
 
 ## Unreleased
 + components: Add `icon` to `IconButton`
++ core: Implement container traits to allow easier usage of libpanel widgets in the view macro
 
 ### Added
 
