@@ -100,6 +100,13 @@ mod gnome_45 {
     remove_impl!(adw::NavigationView);
 }
 
+#[cfg(feature = "libpanel")]
+#[cfg_attr(docsrs, doc(cfg(feature = "libpanel")))]
+mod libpanel {
+    use panel::prelude::PanelFrameExt;
+    remove_impl!(panel::Paned, panel::Frame);
+}
+
 /// Widget types that allow removal of all their children.
 pub trait RelmRemoveAllExt {
     /// Remove all children from the container.

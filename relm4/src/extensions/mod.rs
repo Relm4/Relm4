@@ -225,3 +225,16 @@ mod libadwaita {
         }
     }
 }
+
+#[cfg(feature = "libpanel")]
+#[cfg_attr(docsrs, doc(cfg(feature = "libpanel")))]
+mod libpanel {
+    use super::ContainerChild;
+    container_child_impl! {
+        panel::Frame: panel::Widget
+    }
+    container_child_impl! {
+        panel::Paned,
+        panel::Widget
+    }
+}
