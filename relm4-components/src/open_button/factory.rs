@@ -22,7 +22,7 @@ impl FactoryComponent for FileListItem {
     view! {
         gtk::ListBoxRow {
             gtk::Button {
-                set_label: self.path.iter().last().expect("Empty path").to_str().unwrap(),
+                set_label: self.path.iter().next_back().expect("Empty path").to_str().unwrap(),
                 set_margin_all: 0,
                 connect_clicked[sender, index] => move |_| {
                     sender.output(OpenButtonMsg::OpenRecent(index.clone())).unwrap();
