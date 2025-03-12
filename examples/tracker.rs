@@ -17,7 +17,7 @@ const ICON_LIST: &[&str] = &[
 fn random_icon_name() -> &'static str {
     ICON_LIST
         .iter()
-        .choose(&mut rand::thread_rng())
+        .choose(&mut rand::rng())
         .expect("Could not choose a random icon")
 }
 
