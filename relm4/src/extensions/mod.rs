@@ -162,11 +162,13 @@ container_child_impl! {
     gtk::InfoBar,
     gtk::Button,
     gtk::ComboBox,
+    gtk::FlowBox,
     gtk::FlowBoxChild,
     gtk::Frame,
     gtk::Popover,
     gtk::Window,
     gtk::ApplicationWindow,
+    gtk::ListBox,
     gtk::ListBoxRow,
     gtk::ScrolledWindow,
     gtk::Dialog,
@@ -177,11 +179,6 @@ container_child_impl! {
     gtk::WindowHandle,
     gtk::Expander,
     gtk::AspectFrame
-}
-
-container_child_impl! {
-    gtk::ListBox: gtk::ListBoxRow,
-    gtk::FlowBox: gtk::FlowBoxChild
 }
 
 #[cfg(feature = "libadwaita")]

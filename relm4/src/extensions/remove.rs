@@ -23,22 +23,6 @@ where
     }
 }
 
-impl RelmRemoveExt for gtk::ListBox {
-    fn container_remove(&self, widget: &impl AsRef<Self::Child>) {
-        let row = widget.as_ref();
-        row.set_child(None::<&gtk::Widget>);
-        self.remove(row);
-    }
-}
-
-impl RelmRemoveExt for gtk::FlowBox {
-    fn container_remove(&self, widget: &impl AsRef<Self::Child>) {
-        let child = widget.as_ref();
-        child.set_child(None::<&gtk::Widget>);
-        self.remove(widget.as_ref());
-    }
-}
-
 #[cfg(feature = "libadwaita")]
 #[cfg_attr(docsrs, doc(cfg(feature = "libadwaita")))]
 impl RelmRemoveExt for adw::PreferencesGroup {
@@ -90,7 +74,9 @@ remove_impl!(
     gtk::Grid,
     gtk::ActionBar,
     gtk::Stack,
-    gtk::HeaderBar
+    gtk::HeaderBar,
+    gtk::ListBox,
+    gtk::FlowBox
 );
 remove_child_impl!(gtk::InfoBar);
 
