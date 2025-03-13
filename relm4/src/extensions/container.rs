@@ -71,7 +71,7 @@ macro_rules! add_impl {
     };
 }
 
-append_impl!(gtk::Box, gtk::ListBox);
+append_impl!(gtk::Box, gtk::ListBox, gtk::FlowBox);
 add_child_impl!(gtk::InfoBar, gtk::Stack);
 
 #[cfg(feature = "libadwaita")]
