@@ -2,6 +2,7 @@
 
 pub mod column;
 pub mod grid;
+mod iterator;
 pub mod list;
 mod selection_ext;
 
