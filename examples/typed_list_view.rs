@@ -162,6 +162,10 @@ impl SimpleComponent for App {
                     self.list_view_wrapper.append(MyListItem::new(self.counter));
                 }
 
+                self.list_view_wrapper
+                    .iter()
+                    .for_each(|row| println!("item {}", row.borrow().value));
+
                 // Count up the first item
                 let first_item = self.list_view_wrapper.get(0).unwrap();
                 let first_binding = &mut first_item.borrow_mut().binding;
