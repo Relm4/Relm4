@@ -435,7 +435,7 @@ where
         self.store.remove_all();
     }
 
-    /// Returns an iterator that allows modifying each [`TypedColumnItem`].
+    /// Returns an iterator that allows modifying each [`TypedListItem`].
     pub fn iter(&self) -> TypedIterator<'_, TypedColumnView<T, S>> {
         TypedIterator {
             list: self,
