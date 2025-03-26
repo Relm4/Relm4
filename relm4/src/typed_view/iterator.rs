@@ -11,8 +11,8 @@ use super::{
 #[derive(Debug)]
 /// Holds the state for iterating [`TypedListItem`]s of [`TypedColumnView`], [`TypedGridView`] or [`TypedColumnView`].
 pub struct TypedIterator<'a, T> {
-    pub(crate) list: &'a T,
-    pub(crate) index: u32,
+    pub(super) list: &'a T,
+    pub(super) index: u32,
 }
 
 impl<T, S> Iterator for TypedIterator<'_, TypedColumnView<T, S>>
