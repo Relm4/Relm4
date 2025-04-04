@@ -14,6 +14,8 @@ use std::{
     marker::PhantomData,
 };
 
+pub use self::iterator::TypedIterator;
+
 /// Sorting function used for views.
 pub type OrdFn<T> = Option<Box<dyn Fn(&T, &T) -> Ordering>>;
 
