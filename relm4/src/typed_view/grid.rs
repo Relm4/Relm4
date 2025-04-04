@@ -1,6 +1,9 @@
 //! Idiomatic and high-level abstraction over [`gtk::GridView`].
 
-use super::{get_mut_value, get_value, Filter, OrdFn, RelmSelectionExt, TypedListItem};
+use super::{
+    get_mut_value, get_value, iterator::TypedIterator, Filter, OrdFn, RelmSelectionExt,
+    TypedListItem,
+};
 use gtk::{
     gio, glib,
     prelude::{Cast, CastNone, FilterExt, IsA, ListItemExt, ListModelExt, ObjectExt},
@@ -343,5 +346,13 @@ where
     /// Remove all items.
     pub fn clear(&mut self) {
         self.store.remove_all();
+    }
+
+    /// Returns an iterator that allows modifying each [`TypedListItem`].
+    pub fn iter(&self) -> TypedIterator<'_, TypedGridView<T, S>> {
+        TypedIterator {
+            list: self,
+            index: 0,
+        }
     }
 }

@@ -10,6 +10,7 @@
 + core: Add convenience methods for setting the active `StackPage` in `FactoryVecDeque` and `FactoryHashMap`
 + core: Impl `Binding` for `gtk::CheckButton`
 + core: Added a method to change column headers in `RelmColumn`. Useful for translations
++ core: Add a `iter` methods for iterating items in `TypedColumnView`, `TypedGridView` and `TypedListView`
 
 ### Added
 
