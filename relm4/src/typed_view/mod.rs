@@ -2,6 +2,7 @@
 
 pub mod column;
 pub mod grid;
+mod iterator;
 pub mod list;
 mod selection_ext;
 
@@ -12,6 +13,8 @@ use std::{
     cmp::Ordering,
     marker::PhantomData,
 };
+
+pub use self::iterator::TypedIterator;
 
 /// Sorting function used for views.
 pub type OrdFn<T> = Option<Box<dyn Fn(&T, &T) -> Ordering>>;
