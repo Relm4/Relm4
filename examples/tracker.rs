@@ -21,6 +21,15 @@ fn random_icon_name() -> &'static str {
         .expect("Could not choose a random icon")
 }
 
+// Returns a random icon different from the excluded one (avoids repeats).
+fn gen_unique_icon(exclude: &'static str) -> &'static str {
+    let mut rnd = random_icon_name();
+    while rnd == exclude {
+        rnd = random_icon_name()
+    }
+    rnd
+}
+
 #[derive(Debug)]
 enum AppMsg {
     UpdateFirst,
@@ -93,10 +102,10 @@ impl SimpleComponent for AppModel {
 
         match msg {
             AppMsg::UpdateFirst => {
-                self.set_first_icon(random_icon_name());
+                self.set_first_icon(gen_unique_icon(self.first_icon));
             }
             AppMsg::UpdateSecond => {
-                self.set_second_icon(random_icon_name());
+                self.set_second_icon(gen_unique_icon(self.second_icon));
             }
         }
         self.set_identical(self.first_icon == self.second_icon);
