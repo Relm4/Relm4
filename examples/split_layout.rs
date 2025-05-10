@@ -1,7 +1,6 @@
-use relm4::prelude::*;
 use gtk::prelude::*;
 use relm4::adw::prelude::*;
-use tracker;
+use relm4::prelude::*;
 
 #[derive(Debug)]
 enum AppMsg {
@@ -12,7 +11,7 @@ enum AppMsg {
 #[tracker::track]
 struct AppModel {
     sidebar_width: i32,
-    sidebar_visible:  bool,
+    sidebar_visible: bool,
 }
 
 #[relm4::component]
@@ -75,13 +74,14 @@ impl SimpleComponent for AppModel {
     fn update(&mut self, msg: AppMsg, _sender: ComponentSender<Self>) {
         // reset tracker value of the model
         self.reset();
-        match msg
-        {
+        match msg {
             AppMsg::ToggleSidebar => {
-                self.set_sidebar_width(if self.sidebar_width == 200 { 50 } else { 200 }); // if current width is 200 -> set to 50, otherwise set to 200
+                self.set_sidebar_width(if self.sidebar_width == 200 { 50 } else { 200 });
+                // if current width is 200 -> set to 50, otherwise set to 200
             }
             AppMsg::SetVisibleSidebar => {
-                self.set_sidebar_visible(!self.sidebar_visible); // if visible -> hide, if hidden -> show
+                self.set_sidebar_visible(!self.sidebar_visible);
+                // if visible -> hide, if hidden -> show
             }
         }
     }
@@ -91,7 +91,6 @@ impl SimpleComponent for AppModel {
         root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-
         let model = AppModel {
             sidebar_width: 200,
             sidebar_visible: true,
