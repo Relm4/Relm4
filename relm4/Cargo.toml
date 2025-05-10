@@ -106,3 +106,8 @@ required-features = ["libadwaita"]
 name = "toast"
 path = "examples/toast.rs"
 required-features = ["libadwaita", "gnome_43"]
+
+[[example]]
+name = "split_layout"
+path = "examples/split_layout.rs"
+required-features = ["libadwaita", "gnome_45"]
