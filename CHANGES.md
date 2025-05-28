@@ -1,9 +1,11 @@
 # Changelog
 
 ## Unreleased
+
 + components: Add `icon` to `IconButton`
 + core: Implement container traits to allow easier usage of libpanel widgets in the view macro
-* core: Support naturally appending any `Widget`s as children to `ListBox` and `FlowBox` in view macro.
++ core: Support naturally appending any `Widget`s as children to `ListBox` and `FlowBox` in view macro.
++ all: Use the 2024 edition and increase MSRV to 1.85 to match the dependencies
 
 ### Added
 
@@ -117,7 +119,7 @@
 
 ### Changed
 
-+ core: Make `set_global_css` and `set_global_css_from_file` methods of `RelmApp` to prevent calling them before initializing GTK 
++ core: Make `set_global_css` and `set_global_css_from_file` methods of `RelmApp` to prevent calling them before initializing GTK
 + core: Always pass the `Root` as owned parameter (without reference) (affects `Component::init`, `Factory::init_widgets`, `AsyncComponent::init_loading_widgets`, `AsyncFactory::init_widgets` and `AsyncFactory::init_loading_widgets`)
 + core: Move internal initialization to `gtk::Application::startup` signal handler
 + core: Remove deprecated RelmApp methods

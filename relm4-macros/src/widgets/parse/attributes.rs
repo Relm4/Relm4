@@ -2,7 +2,7 @@ use quote::ToTokens;
 use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
-use syn::{bracketed, parenthesized, token, Error, Expr, Ident, Lit, LitStr, Path, Result, Token};
+use syn::{Error, Expr, Ident, Lit, LitStr, Path, Result, Token, bracketed, parenthesized, token};
 
 use crate::widgets::{Attr, Attrs};
 

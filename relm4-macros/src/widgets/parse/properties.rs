@@ -1,12 +1,12 @@
 use proc_macro2::{Literal, Punct};
 use syn::ext::IdentExt;
-use syn::parse::discouraged::Speculative;
 use syn::parse::ParseStream;
+use syn::parse::discouraged::Speculative;
 use syn::punctuated::{Pair, Punctuated};
 use syn::token::{And, At, Caret, Colon, Dot, Gt, Lt, Or, Question, Slash, Tilde, Underscore};
-use syn::{braced, bracketed, parenthesized, token, Ident, Lifetime, Token};
+use syn::{Ident, Lifetime, Token, braced, bracketed, parenthesized, token};
 
-use crate::widgets::{parse_util, ParseError, Properties, Property, PropertyName, PropertyType};
+use crate::widgets::{ParseError, Properties, Property, PropertyName, PropertyType, parse_util};
 
 impl Properties {
     pub(super) fn parse(input: ParseStream<'_>) -> Self {
@@ -28,7 +28,7 @@ impl Properties {
                 break;
             }
 
-            if let Err(prop) = parse_comma_error(input) {
+            if let Some(prop) = parse_comma_error(input) {
                 // If there's already an error, ignore the additional comma error
                 if contains_error {
                     // Skip to next token to start with "fresh" and hopefully correct syntax.
@@ -41,7 +41,7 @@ impl Properties {
                             input.advance_to(&next_input);
 
                             // Now we should definitely have a comma
-                            if let Err(prop) = parse_comma_error(input) {
+                            if let Some(prop) = parse_comma_error(input) {
                                 props.push(prop);
                             }
                             break;
@@ -58,14 +58,14 @@ impl Properties {
     }
 }
 
-fn parse_comma_error(input: ParseStream<'_>) -> Result<(), Property> {
+fn parse_comma_error(input: ParseStream<'_>) -> Option<Property> {
     let lookahead = input.lookahead1();
     if lookahead.peek(Token![,]) {
         input.parse::<Token![,]>().unwrap();
-        Ok(())
+        None
     } else {
         let err = lookahead.error();
-        Err(Property {
+        Some(Property {
             name: PropertyName::Ident(parse_util::string_to_snake_case("comma_error")),
             ty: PropertyType::ParseError(ParseError::Generic(err.to_compile_error())),
         })
@@ -138,6 +138,8 @@ fn parse_next_token(input: ParseStream<'_>) -> Result<bool, syn::Error> {
     } else if input.parse::<Punct>().is_ok() || input.parse::<Literal>().is_ok() {
         Ok(false)
     } else {
-        unreachable!("Every possible token should be covered. Please report this error at Relm4! \nContext: '''{input}''' \n");
+        unreachable!(
+            "Every possible token should be covered. Please report this error at Relm4! \nContext: '''{input}''' \n"
+        );
     }
 }

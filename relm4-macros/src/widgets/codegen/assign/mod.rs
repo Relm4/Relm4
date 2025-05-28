@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream as TokenStream2;
-use syn::{punctuated::Punctuated, token, Ident};
+use syn::{Ident, punctuated::Punctuated, token};
 
 use crate::widgets::{Property, PropertyType};
 

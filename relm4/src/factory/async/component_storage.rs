@@ -1,8 +1,8 @@
 use crate::factory::{DynamicIndex, FactoryView};
 
-use super::traits::AsyncFactoryComponent;
 use super::AsyncFactoryBuilder;
 use super::AsyncFactoryHandle;
+use super::traits::AsyncFactoryComponent;
 
 #[derive(Debug)]
 pub(super) enum AsyncComponentStorage<C: AsyncFactoryComponent>

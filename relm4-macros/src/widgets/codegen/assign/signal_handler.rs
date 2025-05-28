@@ -1,7 +1,7 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote_spanned, ToTokens};
+use quote::{ToTokens, quote_spanned};
 use syn::Expr;
-use syn::{spanned::Spanned, Ident};
+use syn::{Ident, spanned::Spanned};
 
 use crate::widgets::{PropertyName, SignalHandler, SignalHandlerVariant};
 

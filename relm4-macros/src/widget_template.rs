@@ -1,6 +1,6 @@
 use proc_macro2::{Span as Span2, TokenStream as TokenStream2};
 use quote::quote;
-use syn::{spanned::Spanned, Error, Ident, ImplItem, ItemImpl, Visibility};
+use syn::{Error, Ident, ImplItem, ItemImpl, Visibility, spanned::Spanned};
 
 use crate::{
     token_streams::{TokenStreams, TraitImplDetails},

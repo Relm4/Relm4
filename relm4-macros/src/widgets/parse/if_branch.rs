@@ -5,7 +5,7 @@ use syn::token::{And, Paren};
 use syn::{Expr, ExprCall, ExprLit, ExprPath, Ident, Lit, LitStr};
 
 use crate::args::Args;
-use crate::widgets::{parse_util, IfBranch, ParseError, Widget};
+use crate::widgets::{IfBranch, ParseError, Widget, parse_util};
 
 impl IfBranch {
     pub(super) fn parse(input: ParseStream<'_>, index: usize) -> Result<Self, ParseError> {

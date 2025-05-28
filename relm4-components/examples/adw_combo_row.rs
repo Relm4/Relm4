@@ -1,7 +1,7 @@
 use adw::prelude::*;
 use relm4::{
-    adw, gtk, Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,
-    SimpleComponent,
+    Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,
+    SimpleComponent, adw, gtk,
 };
 use relm4_components::simple_adw_combo_row::SimpleComboRow;
 

@@ -1,11 +1,11 @@
 use proc_macro2::{Span as Span2, TokenStream as TokenStream2};
 use syn::punctuated::Punctuated;
 use syn::token::{Else, FatArrow, If, Match, Mut};
-use syn::{token, AngleBracketedGenericArguments, Expr, ExprClosure, Ident, Pat, Path, Type};
+use syn::{AngleBracketedGenericArguments, Expr, ExprClosure, Ident, Pat, Path, Type, token};
 
 use crate::args::Args;
 
-mod gen;
+mod codegen;
 mod parse;
 mod parse_util;
 mod span;

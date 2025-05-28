@@ -1,7 +1,7 @@
 //! Traits for for managing and updating factories.
 
-use crate::factory::{FactorySender, FactoryView, Position};
 use crate::Sender;
+use crate::factory::{FactorySender, FactoryView, Position};
 
 use std::fmt::Debug;
 

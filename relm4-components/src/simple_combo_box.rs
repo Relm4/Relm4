@@ -4,8 +4,8 @@
 use std::fmt::Debug;
 
 use relm4::gtk::prelude::{ComboBoxExt, ComboBoxExtManual};
-use relm4::{gtk, ComponentSender};
 use relm4::{Component, ComponentParts};
+use relm4::{ComponentSender, gtk};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 /// A simple wrapper around [`gtk::ComboBox`].

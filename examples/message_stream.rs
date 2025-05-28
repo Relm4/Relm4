@@ -3,7 +3,7 @@
 #![allow(deprecated)]
 
 use gtk::prelude::*;
-use relm4::{prelude::*, Sender};
+use relm4::{Sender, prelude::*};
 
 struct Dialog {
     buffer: gtk::EntryBuffer,

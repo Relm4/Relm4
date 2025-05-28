@@ -3,7 +3,7 @@ use std::mem::ManuallyDrop;
 use futures::Future;
 use gtk::glib;
 
-use crate::{shutdown::ShutdownSender, Sender};
+use crate::{Sender, shutdown::ShutdownSender};
 
 type DynShutdownFn<C, Widgets, Output> = dyn Fn(&mut C, &mut Widgets, Sender<Output>);
 

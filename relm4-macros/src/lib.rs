@@ -28,7 +28,7 @@
 )]
 
 use proc_macro::TokenStream;
-use syn::{parse_macro_input, ItemImpl};
+use syn::{ItemImpl, parse_macro_input};
 
 mod additional_fields;
 mod args;

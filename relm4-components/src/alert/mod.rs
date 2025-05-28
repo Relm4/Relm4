@@ -4,7 +4,7 @@
 
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
 use once_cell::sync::Lazy;
-use relm4::{gtk, Component, ComponentParts, ComponentSender, RelmWidgetExt};
+use relm4::{Component, ComponentParts, ComponentSender, RelmWidgetExt, gtk};
 
 const LIBADWAITA_ENABLED: bool = cfg!(feature = "libadwaita");
 const COMPONENT_CSS: &str = include_str!("style.css");

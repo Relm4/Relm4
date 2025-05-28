@@ -1,6 +1,6 @@
 use gtk::prelude::{BoxExt, Cast, FlowBoxChildExt, GridExt, ListBoxRowExt, WidgetExt};
 
-use crate::factory::{positions, FactoryView};
+use crate::factory::{FactoryView, positions};
 
 impl FactoryView for gtk::Box {
     type Children = gtk::Widget;

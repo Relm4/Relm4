@@ -1,14 +1,14 @@
 use std::task::Poll;
 
 use flume::r#async::RecvStream;
-use futures::{future::FusedFuture, pin_mut, Future, Stream};
+use futures::{Future, Stream, future::FusedFuture, pin_mut};
 use once_cell::sync::Lazy;
 use std::sync::Mutex;
 use tokio::sync::mpsc;
 
 use crate::{
-    shutdown::{self, ShutdownSender},
     Receiver, Sender, ShutdownReceiver,
+    shutdown::{self, ShutdownSender},
 };
 
 /// Stores the shutdown senders of all components ever created during

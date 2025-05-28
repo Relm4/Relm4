@@ -3,10 +3,10 @@
 
 //! Traits for for managing and updating factories.
 
+use crate::Sender;
 use crate::channel::AsyncFactorySender;
 use crate::factory::{AsyncPosition, DynamicIndex, FactoryView};
 use crate::loading_widgets::LoadingWidgets;
-use crate::Sender;
 
 use std::fmt::Debug;
 

@@ -2,9 +2,10 @@ use std::time::Duration;
 
 use gtk::prelude::*;
 use relm4::{
+    RelmApp, RelmWidgetExt,
     component::{AsyncComponent, AsyncComponentParts, AsyncComponentSender},
     loading_widgets::LoadingWidgets,
-    view, RelmApp, RelmWidgetExt,
+    view,
 };
 
 struct AppModel {

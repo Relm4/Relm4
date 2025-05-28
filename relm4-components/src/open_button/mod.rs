@@ -4,8 +4,8 @@
 use relm4::factory::{DynamicIndex, FactoryVecDeque};
 use relm4::gtk::prelude::*;
 use relm4::{
-    gtk, Component, ComponentController, ComponentParts, ComponentSender, Controller,
-    SimpleComponent,
+    Component, ComponentController, ComponentParts, ComponentSender, Controller, SimpleComponent,
+    gtk,
 };
 
 use crate::open_dialog::{OpenDialog, OpenDialogMsg, OpenDialogResponse, OpenDialogSettings};

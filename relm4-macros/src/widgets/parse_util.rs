@@ -3,7 +3,7 @@ use std::sync::atomic::{AtomicU16, Ordering};
 use proc_macro2::Span as Span2;
 use syn::parse::ParseBuffer;
 use syn::spanned::Spanned;
-use syn::{braced, bracketed, parenthesized, Error, Ident, Path};
+use syn::{Error, Ident, Path, braced, bracketed, parenthesized};
 
 use super::{ParseError, PropertyName};
 use crate::widgets::{AssignPropertyAttr, WidgetAttr, WidgetFunc};

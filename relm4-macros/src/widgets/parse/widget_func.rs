@@ -1,9 +1,9 @@
 use syn::parse::ParseStream;
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
-use syn::{token, Ident, Path, Token};
+use syn::{Ident, Path, Token, token};
 
-use crate::widgets::{parse_util, ParseError, WidgetFunc};
+use crate::widgets::{ParseError, WidgetFunc, parse_util};
 
 impl WidgetFunc {
     pub(super) fn parse_with_path(input: ParseStream<'_>, path: &Path) -> Result<Self, ParseError> {

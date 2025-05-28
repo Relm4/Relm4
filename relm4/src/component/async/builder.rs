@@ -6,8 +6,8 @@ use super::super::MessageBroker;
 use super::{AsyncComponent, AsyncComponentParts, AsyncConnector};
 use crate::channel::AsyncComponentSender;
 use crate::{
-    late_initialization, GuardedReceiver, Receiver, RelmContainerExt, RelmWidgetExt,
-    RuntimeSenders, Sender,
+    GuardedReceiver, Receiver, RelmContainerExt, RelmWidgetExt, RuntimeSenders, Sender,
+    late_initialization,
 };
 use gtk::glib;
 use gtk::prelude::{GtkWindowExt, NativeDialogExt};

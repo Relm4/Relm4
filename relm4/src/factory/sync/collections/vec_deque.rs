@@ -7,8 +7,8 @@ use crate::factory::{DynamicIndex, FactoryComponent, FactoryView};
 
 use super::{ModelStateValue, RenderedState};
 
-use std::collections::hash_map::DefaultHasher;
 use std::collections::VecDeque;
+use std::collections::hash_map::DefaultHasher;
 use std::hash::Hash;
 use std::iter::FusedIterator;
 use std::marker::PhantomData;

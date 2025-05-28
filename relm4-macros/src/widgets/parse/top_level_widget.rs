@@ -2,8 +2,8 @@ use syn::parse::ParseStream;
 
 use crate::util;
 use crate::widgets::{
-    parse_util, Attr, Attrs, Properties, Property, PropertyName, PropertyType, TopLevelWidget,
-    Widget, WidgetAttr, WidgetFunc, WidgetTemplateAttr,
+    Attr, Attrs, Properties, Property, PropertyName, PropertyType, TopLevelWidget, Widget,
+    WidgetAttr, WidgetFunc, WidgetTemplateAttr, parse_util,
 };
 
 impl TopLevelWidget {

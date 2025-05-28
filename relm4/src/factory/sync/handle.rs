@@ -1,7 +1,7 @@
 use std::fmt;
 
-use crate::factory::{DataGuard, FactoryComponent, FactoryView};
 use crate::Sender;
+use crate::factory::{DataGuard, FactoryComponent, FactoryView};
 
 /// Don't allow public access to a [`FactoryHandle`].
 ///

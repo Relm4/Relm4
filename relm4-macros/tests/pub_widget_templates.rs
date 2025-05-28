@@ -1,8 +1,8 @@
 use gtk::prelude::GtkWindowExt;
-use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent};
+use relm4::{ComponentParts, ComponentSender, SimpleComponent, gtk};
 
 pub mod templates {
-    use relm4::{gtk, WidgetTemplate};
+    use relm4::{WidgetTemplate, gtk};
 
     #[relm4::widget_template(pub)]
     impl WidgetTemplate for TestTemplate {

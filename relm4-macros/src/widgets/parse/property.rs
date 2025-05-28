@@ -1,10 +1,10 @@
 use syn::parse::ParseStream;
 use syn::spanned::Spanned;
-use syn::{token, Error, Ident, Token};
+use syn::{Error, Ident, Token, token};
 
 use crate::widgets::{
-    parse_util, AssignProperty, Attrs, ConditionalWidget, ParseError, Property, PropertyName,
-    PropertyType, SignalHandler, Widget, WidgetFunc,
+    AssignProperty, Attrs, ConditionalWidget, ParseError, Property, PropertyName, PropertyType,
+    SignalHandler, Widget, WidgetFunc, parse_util,
 };
 
 impl Property {

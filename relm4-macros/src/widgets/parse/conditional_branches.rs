@@ -1,7 +1,7 @@
 use syn::parse::ParseStream;
 use syn::{Expr, Token};
 
-use crate::widgets::{parse_util, ConditionalBranches, IfBranch, MatchArm, ParseError};
+use crate::widgets::{ConditionalBranches, IfBranch, MatchArm, ParseError, parse_util};
 
 impl ConditionalBranches {
     pub(super) fn parse_if(input: ParseStream<'_>) -> Result<Self, ParseError> {

@@ -2,10 +2,10 @@ use std::time::Duration;
 
 use gtk::{glib, prelude::*};
 use relm4::{
+    RelmObjectExt,
     binding::{Binding, U8Binding},
     prelude::*,
     typed_view::list::{RelmListItem, TypedListView},
-    RelmObjectExt,
 };
 
 struct MyListItem {

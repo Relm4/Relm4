@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote, ToTokens};
+use quote::{ToTokens, quote};
 use syn::{Error, Ident, Visibility};
 
 use crate::widgets::{TopLevelWidget, ViewWidgets, Widget};

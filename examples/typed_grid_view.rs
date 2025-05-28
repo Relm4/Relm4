@@ -1,9 +1,9 @@
 use gtk::prelude::*;
 use relm4::{
+    RelmObjectExt,
     binding::{Binding, U8Binding},
     prelude::*,
     typed_view::grid::{RelmGridItem, TypedGridView},
-    RelmObjectExt,
 };
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]

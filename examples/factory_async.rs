@@ -5,7 +5,7 @@ use relm4::factory::{
     AsyncFactoryComponent, AsyncFactorySender, AsyncFactoryVecDeque, DynamicIndex,
 };
 use relm4::loading_widgets::LoadingWidgets;
-use relm4::{view, ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent};
+use relm4::{ComponentParts, ComponentSender, RelmApp, RelmWidgetExt, SimpleComponent, view};
 
 #[derive(Debug)]
 struct Counter {

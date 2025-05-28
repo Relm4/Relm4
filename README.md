@@ -9,15 +9,15 @@
 [![Relm4 on crates.io](https://img.shields.io/crates/v/relm4.svg)](https://crates.io/crates/relm4)
 [![Relm4 docs](https://img.shields.io/badge/rust-documentation-blue)](https://docs.rs/relm4/)
 [![Relm4 book](https://img.shields.io/badge/rust-book-fc0060)](https://relm4.org/book/stable/)
-![Minimum Rust version 1.75](https://img.shields.io/badge/rustc-1.75+-06a096.svg)
+![Minimum Rust version 1.85](https://img.shields.io/badge/rustc-1.85+-06a096.svg)
 [![dependency status](https://deps.rs/repo/github/Relm4/Relm4/status.svg)](https://deps.rs/repo/github/Relm4/Relm4)
 
-An idiomatic GUI library inspired by [Elm](https://elm-lang.org/) and based on [gtk4-rs](https://crates.io/crates/gtk4). 
+An idiomatic GUI library inspired by [Elm](https://elm-lang.org/) and based on [gtk4-rs](https://crates.io/crates/gtk4).
 Relm4 is a new version of [relm](https://github.com/antoyo/relm) that's built from scratch and is compatible with [GTK4](https://www.gtk.org/) and [libadwaita](https://gitlab.gnome.org/GNOME/libadwaita).
 
 ## Why Relm4
 
-We believe that GUI development should be easy, productive and delightful.  
+We believe that GUI development should be easy, productive and delightful.
 The [gtk4-rs](https://crates.io/crates/gtk4) crate already provides everything you need to write modern, beautiful and cross-platform applications.
 Built on top of this foundation, Relm4 makes developing more idiomatic, simpler and faster and enables you to become productive in just a few hours.
 
@@ -65,6 +65,7 @@ The `relm4` crate has four feature flags:
 | `macros` | Enable macros by re-exporting [`relm4-macros`](https://crates.io/crates/relm4-macros) | ✅ |
 | `libadwaita` | Improved support for [libadwaita](https://gitlab.gnome.org/World/Rust/libadwaita-rs) | - |
 | `libpanel` | Improved support for [libpanel](https://gitlab.gnome.org/World/Rust/libpanel-rs) | - |
+| `gnome_47` | Enable all version feature flags of all dependencies to match the GNOME 47 SDK | - |
 | `gnome_46` | Enable all version feature flags of all dependencies to match the GNOME 46 SDK | - |
 | `gnome_45` | Enable all version feature flags of all dependencies to match the GNOME 45 SDK | - |
 | `gnome_44` | Enable all version feature flags of all dependencies to match the GNOME 44 SDK | - |

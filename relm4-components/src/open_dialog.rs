@@ -2,7 +2,7 @@
 //!
 //! **[Example implementation](https://github.com/Relm4/Relm4/blob/main/relm4-components/examples/file_dialogs.rs)**
 use gtk::prelude::{Cast, FileChooserExt, FileExt, ListModelExt, NativeDialogExt};
-use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent};
+use relm4::{ComponentParts, ComponentSender, SimpleComponent, gtk};
 
 use std::{fmt::Debug, marker::PhantomData, path::PathBuf};
 

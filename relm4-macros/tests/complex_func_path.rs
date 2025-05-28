@@ -1,5 +1,5 @@
 use gtk::prelude::{GtkWindowExt, OrientableExt};
-use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent};
+use relm4::{ComponentParts, ComponentSender, SimpleComponent, gtk};
 
 #[derive(Default)]
 struct App;
