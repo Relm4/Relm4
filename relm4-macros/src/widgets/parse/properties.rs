@@ -28,7 +28,7 @@ impl Properties {
                 break;
             }
 
-            if let Err(prop) = parse_comma_error(input) {
+            if let Some(prop) = parse_comma_error(input) {
                 // If there's already an error, ignore the additional comma error
                 if contains_error {
                     // Skip to next token to start with "fresh" and hopefully correct syntax.
@@ -41,7 +41,7 @@ impl Properties {
                             input.advance_to(&next_input);
 
                             // Now we should definitely have a comma
-                            if let Err(prop) = parse_comma_error(input) {
+                            if let Some(prop) = parse_comma_error(input) {
                                 props.push(prop);
                             }
                             break;
@@ -58,14 +58,14 @@ impl Properties {
     }
 }
 
-fn parse_comma_error(input: ParseStream<'_>) -> Result<(), Property> {
+fn parse_comma_error(input: ParseStream<'_>) -> Option<Property> {
     let lookahead = input.lookahead1();
     if lookahead.peek(Token![,]) {
         input.parse::<Token![,]>().unwrap();
-        Ok(())
+        None
     } else {
         let err = lookahead.error();
-        Err(Property {
+        Some(Property {
             name: PropertyName::Ident(parse_util::string_to_snake_case("comma_error")),
             ty: PropertyType::ParseError(ParseError::Generic(err.to_compile_error())),
         })

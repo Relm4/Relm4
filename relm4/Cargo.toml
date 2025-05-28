@@ -16,7 +16,15 @@ repository.workspace = true
 keywords.workspace = true
 categories.workspace = true
 
-include = ["src/", "examples/", "benches/", "tests/", "README.md", "LICENSE-MIT", "LICENSE-APACHE"]
+include = [
+    "src/",
+    "examples/",
+    "benches/",
+    "tests/",
+    "README.md",
+    "LICENSE-MIT",
+    "LICENSE-APACHE",
+]
 
 [package.metadata.docs.rs]
 all-features = true
@@ -31,6 +39,7 @@ css = ["relm4-css"]
 libadwaita = ["adw"]
 libpanel = ["panel"]
 macros = ["relm4-macros"]
+# gnome_48 = ["gnome_47", "gtk/gnome_48", "adw/v1_7"]
 gnome_47 = ["gnome_46", "gtk/gnome_47", "adw/v1_6"]
 gnome_46 = ["gnome_45", "gtk/gnome_46", "adw/v1_5"]
 gnome_45 = ["gnome_44", "gtk/gnome_45", "adw/v1_4"]
@@ -59,7 +68,7 @@ tracing = "0.1.41"
 relm4-macros = { path = "../relm4-macros" }
 
 # For the benchmarks
-criterion = { version = "0.5", default-features = false }
+criterion = { version = "0.6", default-features = false }
 
 # For the examples
 relm4-icons = "0.9.0"
@@ -72,7 +81,7 @@ tokio = { version = "1.45", features = [
 ] }
 rand = "0.9.1"
 tracker = "0.2"
-reqwest = "0.12.17"
+reqwest = "0.12.18"
 tracing-subscriber = "0.3.19"
 serde = { version = "1", features = ["derive", "default"] }
 serde_json = "1"
