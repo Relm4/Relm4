@@ -59,7 +59,7 @@ tracing = "0.1.41"
 relm4-macros = { path = "../relm4-macros" }
 
 # For the benchmarks
-criterion = { version = "0.5", default-features = false }
+criterion = { version = "0.6", default-features = false }
 
 # For the examples
 relm4-icons = "0.9.0"
