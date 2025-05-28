@@ -1,8 +1,8 @@
 use gtk::prelude::*;
 use relm4::{
+    RelmObjectExt,
     binding::{Binding, BoolBinding, ConnectBindingExt, F64Binding, StringBinding},
     prelude::*,
-    RelmObjectExt,
 };
 
 struct App {

@@ -2,7 +2,7 @@ use std::sync::{Arc, RwLock};
 
 use once_cell::sync::Lazy;
 
-use crate::{Sender, RUNTIME};
+use crate::{RUNTIME, Sender};
 
 use super::SubscriberFn;
 

@@ -1,9 +1,9 @@
 use syn::parse::ParseStream;
 use syn::token::And;
-use syn::{token, Token};
+use syn::{Token, token};
 
 use crate::widgets::parse::if_branch::args_from_index;
-use crate::widgets::{parse_util, MatchArm, ParseError, Widget};
+use crate::widgets::{MatchArm, ParseError, Widget, parse_util};
 
 impl MatchArm {
     pub(super) fn parse(input: ParseStream<'_>, index: usize) -> Result<Self, ParseError> {

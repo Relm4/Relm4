@@ -1,4 +1,4 @@
-use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent};
+use relm4::{ComponentParts, ComponentSender, SimpleComponent, gtk};
 
 struct App;
 

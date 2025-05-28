@@ -1,8 +1,8 @@
 use std::fmt::Debug;
 
+use relm4::RelmRemoveAllExt;
 use relm4::gtk::prelude::*;
 use relm4::prelude::*;
-use relm4::RelmRemoveAllExt;
 
 mod css {
     pub const COMPONENT_SPACING: i32 = 5;

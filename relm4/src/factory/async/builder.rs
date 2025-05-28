@@ -9,7 +9,7 @@ use crate::channel::AsyncFactorySender;
 use crate::factory::{DataGuard, DynamicIndex, FactoryView};
 use crate::runtime_util::GuardedReceiver;
 use crate::shutdown::ShutdownSender;
-use crate::{shutdown, Receiver, Sender};
+use crate::{Receiver, Sender, shutdown};
 
 pub(super) struct AsyncFactoryBuilder<C: AsyncFactoryComponent> {
     init: C::Init,

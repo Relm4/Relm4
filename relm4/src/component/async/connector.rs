@@ -3,7 +3,7 @@
 // SPDX-License-Identifier: MIT or Apache-2.0
 
 use super::{
-    stream::AsyncComponentStream, AsyncComponent, AsyncComponentController, AsyncController,
+    AsyncComponent, AsyncComponentController, AsyncController, stream::AsyncComponentStream,
 };
 use crate::{Receiver, Sender, ShutdownOnDrop};
 use std::fmt::{self, Debug};

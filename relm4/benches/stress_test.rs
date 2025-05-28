@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use criterion::{criterion_group, criterion_main, Criterion};
+use criterion::{Criterion, criterion_group, criterion_main};
 use gtk::gio::ApplicationFlags;
 use gtk::glib::clone;
 use gtk::prelude::{ApplicationExt, BoxExt, ButtonExt, GtkWindowExt};

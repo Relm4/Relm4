@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main, stable, next ]
+    branches: [main, stable, next]
   pull_request:
-    branches: [ main, stable, next ]
+    branches: [main, stable, next]
 
 env:
   CARGO_TERM_COLOR: always
@@ -15,7 +15,7 @@ jobs:
     container:
       image: ghcr.io/relm4/relm4/docs:latest
     env:
-        DISPLAY: ":99.0"
+      DISPLAY: ":99.0"
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@master
@@ -35,7 +35,7 @@ jobs:
       matrix:
         rust:
           - stable
-          - "1.75.0"
+          - "1.85.0"
     env:
       DISPLAY: ":99.0"
     steps:
@@ -71,7 +71,7 @@ jobs:
   docs:
     name: check-docs
     runs-on: ubuntu-latest
-    env: 
+    env:
       RUSTDOCFLAGS: "-D warnings"
       RUSTFLAGS: --cfg docsrs
     steps:

@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote_spanned, ToTokens};
+use quote::{ToTokens, quote_spanned};
 use syn::parse::{Parse, ParseStream};
 use syn::punctuated::{Pair, Punctuated};
 use syn::spanned::Spanned;
@@ -20,7 +20,10 @@ where
     fn parse(input: ParseStream<'_>) -> Result<Self> {
         let punct: Punctuated<T, Token![,]> = input.call(Punctuated::parse_terminated)?;
         if punct.is_empty() {
-            return Err(Error::new(input.span(), "Expected at least one element. This is probably caused by empty arguments and macros."));
+            return Err(Error::new(
+                input.span(),
+                "Expected at least one element. This is probably caused by empty arguments and macros.",
+            ));
         }
         let inner = punct.into_pairs().map(Pair::into_value).collect();
 

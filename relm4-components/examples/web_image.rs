@@ -1,7 +1,7 @@
 use gtk::prelude::*;
 use relm4::{
-    gtk, Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,
-    SimpleComponent,
+    Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,
+    SimpleComponent, gtk,
 };
 use relm4_components::web_image::{WebImage, WebImageMsg};
 

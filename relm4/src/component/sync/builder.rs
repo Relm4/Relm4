@@ -5,8 +5,8 @@
 use super::super::MessageBroker;
 use super::{Component, ComponentParts, Connector, StateWatcher};
 use crate::{
-    late_initialization, ComponentSender, GuardedReceiver, Receiver, RelmContainerExt,
-    RelmWidgetExt, RuntimeSenders, Sender,
+    ComponentSender, GuardedReceiver, Receiver, RelmContainerExt, RelmWidgetExt, RuntimeSenders,
+    Sender, late_initialization,
 };
 use gtk::glib;
 use gtk::prelude::{GtkWindowExt, NativeDialogExt};

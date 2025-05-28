@@ -3,7 +3,7 @@
 
 use std::fmt::Debug;
 
-use relm4::{adw, Component, ComponentParts, ComponentSender};
+use relm4::{Component, ComponentParts, ComponentSender, adw};
 
 use adw::gtk::StringList;
 use adw::prelude::ComboRowExt;

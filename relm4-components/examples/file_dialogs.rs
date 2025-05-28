@@ -2,8 +2,8 @@
 
 use gtk::prelude::*;
 use relm4::{
-    gtk, Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,
-    RelmWidgetExt, SimpleComponent,
+    Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,
+    RelmWidgetExt, SimpleComponent, gtk,
 };
 use relm4_components::{open_dialog::*, save_dialog::*};
 

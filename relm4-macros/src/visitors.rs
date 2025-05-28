@@ -2,9 +2,9 @@ use std::mem;
 
 use proc_macro2::TokenStream;
 use quote::quote;
+use syn::LocalInit;
 use syn::visit::{self, Visit};
 use syn::visit_mut::{self, VisitMut};
-use syn::LocalInit;
 
 use crate::additional_fields::AdditionalFields;
 use crate::menu::Menus;

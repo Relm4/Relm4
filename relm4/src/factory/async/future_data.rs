@@ -3,8 +3,8 @@ use std::cell::RefCell;
 use once_cell::unsync::OnceCell;
 
 use super::AsyncFactoryComponent;
-use crate::factory::data_guard::DataGuard;
 use crate::Receiver;
+use crate::factory::data_guard::DataGuard;
 
 type DataReceiver<T> = RefCell<Option<Receiver<T>>>;
 

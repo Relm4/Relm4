@@ -1,6 +1,6 @@
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
-use syn::{punctuated::Punctuated, token, Ident};
+use syn::{Ident, punctuated::Punctuated, token};
 
 use crate::widgets::{
     AssignProperty, AssignPropertyAttr, ConditionalBranches, ConditionalWidget, MatchArm,

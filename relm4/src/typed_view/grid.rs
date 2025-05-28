@@ -1,8 +1,8 @@
 //! Idiomatic and high-level abstraction over [`gtk::GridView`].
 
 use super::{
-    get_mut_value, get_value, iterator::TypedIterator, Filter, OrdFn, RelmSelectionExt,
-    TypedListItem,
+    Filter, OrdFn, RelmSelectionExt, TypedListItem, get_mut_value, get_value,
+    iterator::TypedIterator,
 };
 use gtk::{
     gio, glib,

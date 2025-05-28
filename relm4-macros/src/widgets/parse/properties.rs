@@ -1,12 +1,12 @@
 use proc_macro2::{Literal, Punct};
 use syn::ext::IdentExt;
-use syn::parse::discouraged::Speculative;
 use syn::parse::ParseStream;
+use syn::parse::discouraged::Speculative;
 use syn::punctuated::{Pair, Punctuated};
 use syn::token::{And, At, Caret, Colon, Dot, Gt, Lt, Or, Question, Slash, Tilde, Underscore};
-use syn::{braced, bracketed, parenthesized, token, Ident, Lifetime, Token};
+use syn::{Ident, Lifetime, Token, braced, bracketed, parenthesized, token};
 
-use crate::widgets::{parse_util, ParseError, Properties, Property, PropertyName, PropertyType};
+use crate::widgets::{ParseError, Properties, Property, PropertyName, PropertyType, parse_util};
 
 impl Properties {
     pub(super) fn parse(input: ParseStream<'_>) -> Self {
@@ -138,6 +138,8 @@ fn parse_next_token(input: ParseStream<'_>) -> Result<bool, syn::Error> {
     } else if input.parse::<Punct>().is_ok() || input.parse::<Literal>().is_ok() {
         Ok(false)
     } else {
-        unreachable!("Every possible token should be covered. Please report this error at Relm4! \nContext: '''{input}''' \n");
+        unreachable!(
+            "Every possible token should be covered. Please report this error at Relm4! \nContext: '''{input}''' \n"
+        );
     }
 }

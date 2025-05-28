@@ -1,12 +1,12 @@
 use gtk::prelude::*;
 use relm4::{
+    RelmObjectExt,
     binding::{Binding, U8Binding},
     prelude::*,
     typed_view::{
-        column::{LabelColumn, RelmColumn, TypedColumnView},
         OrdFn,
+        column::{LabelColumn, RelmColumn, TypedColumnView},
     },
-    RelmObjectExt,
 };
 
 #[derive(Debug, PartialEq, Eq)]

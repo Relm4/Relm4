@@ -2,7 +2,7 @@ use super::{FactoryComponent, FactoryHandle};
 
 use crate::factory::{DataGuard, FactorySender, FactoryView};
 use crate::shutdown::ShutdownSender;
-use crate::{shutdown, GuardedReceiver, Receiver, Sender};
+use crate::{GuardedReceiver, Receiver, Sender, shutdown};
 
 use std::any;
 

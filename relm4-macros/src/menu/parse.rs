@@ -1,7 +1,7 @@
 use proc_macro2::Span as Span2;
 use syn::parse::{Parse, ParseStream};
 use syn::punctuated::Punctuated;
-use syn::{braced, parenthesized, token, Ident, Path, Result, Token};
+use syn::{Ident, Path, Result, Token, braced, parenthesized, token};
 
 use crate::menu::SubMenu;
 

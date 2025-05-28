@@ -1,7 +1,7 @@
 use gtk::prelude::*;
+use relm4::Worker;
 use relm4::factory::{FactoryVecDeque, FactoryView};
 use relm4::prelude::*;
-use relm4::Worker;
 use relm4_components::open_dialog::{
     OpenDialog, OpenDialogMsg, OpenDialogResponse, OpenDialogSettings,
 };

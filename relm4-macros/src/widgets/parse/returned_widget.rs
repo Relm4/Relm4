@@ -1,7 +1,7 @@
 use syn::parse::{Parse, ParseStream};
-use syn::{braced, Ident, Result, Token};
+use syn::{Ident, Result, Token, braced};
 
-use crate::widgets::{parse_util, Properties, ReturnedWidget};
+use crate::widgets::{Properties, ReturnedWidget, parse_util};
 
 impl Parse for ReturnedWidget {
     fn parse(input: ParseStream<'_>) -> Result<Self> {

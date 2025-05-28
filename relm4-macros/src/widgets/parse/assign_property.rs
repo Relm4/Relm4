@@ -1,5 +1,5 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote_spanned, ToTokens};
+use quote::{ToTokens, quote_spanned};
 use syn::parse::ParseStream;
 use syn::spanned::Spanned;
 use syn::{Error, Expr, ExprCall, ExprField, Ident, Member, Result, Token};
@@ -145,8 +145,7 @@ fn expr_field_from_expr_call(call_expr: &ExprCall) -> Option<&ExprField> {
 
 fn generate_tracker_from_expression(expression: &Expr) -> Result<TokenStream2> {
     let error_fn = move |span, msg: &str| {
-        let error_msg =
-                    "Unable to generate tracker function. Please pass a condition as string value of the `track` attribute.\n\
+        let error_msg = "Unable to generate tracker function. Please pass a condition as string value of the `track` attribute.\n\
                     Usage: #[track = \"TRACK_CONDITION\"]";
         Err(Error::new(span, format!("{error_msg}\nHint: {msg}")))
     };

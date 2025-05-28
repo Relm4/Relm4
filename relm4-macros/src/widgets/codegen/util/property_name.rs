@@ -1,8 +1,8 @@
 use proc_macro2::TokenStream as TokenStream2;
-use quote::{quote, quote_spanned, ToTokens};
+use quote::{ToTokens, quote, quote_spanned};
 use syn::Ident;
 
-use crate::widgets::gen::{assign::AssignInfo, PropertyName};
+use crate::widgets::codegen::{PropertyName, assign::AssignInfo};
 
 impl PropertyName {
     pub(crate) fn assign_fn_stream(&self, info: &mut AssignInfo<'_>) -> TokenStream2 {

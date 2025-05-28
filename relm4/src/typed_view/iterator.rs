@@ -1,11 +1,11 @@
 use std::any::Any;
 
 use super::{
+    TypedListItem,
     column::TypedColumnView,
     grid::{RelmGridItem, TypedGridView},
     list::{RelmListItem, TypedListView},
     selection_ext::RelmSelectionExt,
-    TypedListItem,
 };
 
 #[derive(Debug)]

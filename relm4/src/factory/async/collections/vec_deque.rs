@@ -1,14 +1,14 @@
 use crate::{Receiver, Sender};
 
+use crate::factory::r#async::AsyncFactoryBuilder;
 use crate::factory::r#async::component_storage::AsyncComponentStorage;
 use crate::factory::r#async::traits::AsyncFactoryComponent;
-use crate::factory::r#async::AsyncFactoryBuilder;
 use crate::factory::{DynamicIndex, FactoryView};
 
 use super::{ModelStateValue, RenderedState};
 
-use std::collections::hash_map::DefaultHasher;
 use std::collections::VecDeque;
+use std::collections::hash_map::DefaultHasher;
 use std::hash::Hash;
 use std::iter::FusedIterator;
 use std::marker::PhantomData;

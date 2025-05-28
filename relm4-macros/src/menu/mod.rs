@@ -2,7 +2,7 @@ use syn::punctuated::Punctuated;
 use syn::token::Comma;
 use syn::{Expr, Ident, LitStr, Path};
 
-mod gen;
+mod codegen;
 mod parse;
 
 #[derive(Debug)]

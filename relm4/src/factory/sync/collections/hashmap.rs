@@ -4,8 +4,8 @@ use crate::factory::sync::builder::FactoryBuilder;
 use crate::factory::sync::handle::FactoryHandle;
 use crate::factory::{CloneableFactoryComponent, FactoryComponent, FactoryView};
 
-use std::collections::hash_map::RandomState;
 use std::collections::HashMap;
+use std::collections::hash_map::RandomState;
 use std::hash::{BuildHasher, Hash, Hasher};
 use std::iter::FusedIterator;
 use std::marker::PhantomData;

@@ -3,8 +3,8 @@ use super::AsyncFactoryComponent;
 
 use std::fmt;
 
-use crate::factory::FactoryView;
 use crate::Sender;
+use crate::factory::FactoryView;
 
 /// Don't allow public access to a [`FactoryHandle`].
 ///

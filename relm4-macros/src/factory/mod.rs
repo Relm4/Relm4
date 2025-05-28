@@ -1,7 +1,7 @@
 use proc_macro2::{Span as Span2, TokenStream as TokenStream2};
-use quote::{quote, ToTokens};
+use quote::{ToTokens, quote};
 use syn::visit_mut::VisitMut;
-use syn::{parse_quote, Ident};
+use syn::{Ident, parse_quote};
 
 use crate::attrs::Attrs;
 use crate::token_streams::{TokenStreams, TraitImplDetails};

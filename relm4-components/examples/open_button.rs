@@ -2,8 +2,8 @@ use std::path::PathBuf;
 
 use gtk::prelude::*;
 use relm4::{
-    gtk, Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,
-    SimpleComponent,
+    Component, ComponentController, ComponentParts, ComponentSender, Controller, RelmApp,
+    SimpleComponent, gtk,
 };
 use relm4_components::open_button::{OpenButton, OpenButtonSettings};
 use relm4_components::open_dialog::OpenDialogSettings;
