@@ -81,7 +81,7 @@ tokio = { version = "1.45", features = [
 ] }
 rand = "0.9.1"
 tracker = "0.2"
-reqwest = "0.12.18"
+reqwest = "0.12.19"
 tracing-subscriber = "0.3.19"
 serde = { version = "1", features = ["derive", "default"] }
 serde_json = "1"
