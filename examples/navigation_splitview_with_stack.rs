@@ -13,8 +13,8 @@ mod app {
     use adw::prelude::{AdwApplicationWindowExt, IsA, NavigationPageExt, ToValue};
     use gtk::glib;
     use relm4::{
-        adw, view, Component, ComponentController, ComponentParts, ComponentSender, Controller,
-        SimpleComponent,
+        Component, ComponentController, ComponentParts, ComponentSender, Controller,
+        SimpleComponent, adw, view,
     };
     use std::convert::identity;
 
