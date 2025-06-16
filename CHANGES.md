@@ -6,6 +6,7 @@
 + core: Implement container traits to allow easier usage of libpanel widgets in the view macro
 + core: Support naturally appending any `Widget`s as children to `ListBox` and `FlowBox` in view macro.
 + all: Use the 2024 edition and increase MSRV to 1.85 to match the dependencies
++ examples: Add an example that shows how to use `adw::NavigationSplitView` with a `adw::Stack`
 
 ### Added
 
