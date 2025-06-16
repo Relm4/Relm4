@@ -120,3 +120,8 @@ required-features = ["libadwaita", "gnome_43"]
 name = "split_layout"
 path = "examples/split_layout.rs"
 required-features = ["libadwaita", "gnome_45"]
+
+[[example]]
+name = "navigation_splitview_with_stack"
+path = "examples/navigation_splitview_with_stack.rs"
+required-features = ["libadwaita", "gnome_45"]
