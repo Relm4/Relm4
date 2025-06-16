@@ -12,7 +12,7 @@ mod app {
     use gtk::glib;
     use relm4::{
         Component, ComponentController, ComponentParts, ComponentSender, Controller,
-        SimpleComponent, adw, view,
+        SimpleComponent, adw,
     };
     use std::convert::identity;
 
@@ -77,11 +77,12 @@ mod app {
                     ),
                     &[(&split_view, "collapsed", true)]
                 ),
+            },
+            stack = &gtk::Stack {
+                add_titled: (counter.widget(), None, "Counter"),
+                add_titled: (toggler.widget(), None, "Toggle"),
+                set_vhomogeneous: false,
             }
-        }
-
-        additional_fields! {
-            stack: gtk::Stack,
         }
 
         fn init(
@@ -96,20 +97,12 @@ mod app {
                 .launch(init.1)
                 .forward(sender.input_sender(), identity);
 
-            view! {
-                stack = &gtk::Stack {
-                    add_titled: (counter.widget(), None, "Counter"),
-                    add_titled: (toggler.widget(), None, "Toggle"),
-                    set_vhomogeneous: false,
-                }
-            }
+            let widgets = view_output!();
 
             let model = App {
                 _counter: counter,
                 _toggler: toggler,
             };
-
-            let widgets = view_output!();
 
             widgets.stack.connect_visible_child_notify({
                 let split_view = widgets.split_view.clone();
