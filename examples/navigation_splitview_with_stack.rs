@@ -1,5 +1,3 @@
-// Required feature: libadwaita,gnome_45
-
 use relm4::RelmApp;
 
 fn main() {
@@ -19,8 +17,8 @@ mod app {
     use std::convert::identity;
 
     pub struct App {
-        _counter: Controller<CounterModel>, // must hold on to this, would otherwise crash
-        _toggler: Controller<TogglerModel>, // must hold on to this, would otherwise crash
+        _counter: Controller<CounterModel>,
+        _toggler: Controller<TogglerModel>,
     }
 
     #[derive(Debug)]
