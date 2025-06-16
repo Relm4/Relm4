@@ -17,6 +17,11 @@ mod app {
     use std::convert::identity;
 
     pub struct App {
+        // Hoding on to these two controllers, as dropping a controller stops the
+        // runtime of a component unless we've detach it before (and it would no
+        // longer be able to process incoming messages). Note that although it is
+        // possible to detach it, this operation should only be done if there is
+        // no practical way to store the controller.
         _counter: Controller<CounterModel>,
         _toggler: Controller<TogglerModel>,
     }
