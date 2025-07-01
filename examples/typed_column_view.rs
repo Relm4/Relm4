@@ -40,7 +40,7 @@ impl LabelColumn for Label1Column {
     }
 
     fn format_cell_value(value: &Self::Value) -> String {
-        format!("Value: {} ", value)
+        format!("Value: {value} ")
     }
 }
 

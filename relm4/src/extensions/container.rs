@@ -71,8 +71,12 @@ macro_rules! add_impl {
     };
 }
 
-append_impl!(gtk::Box, gtk::ListBox, gtk::FlowBox);
+append_impl!(gtk::Box, gtk::ListBox);
 add_child_impl!(gtk::InfoBar, gtk::Stack);
+
+#[cfg(feature = "gnome_42")]
+#[cfg_attr(docsrs, doc(cfg(feature = "gnome_42")))]
+append_impl!(gtk::FlowBox);
 
 #[cfg(feature = "libadwaita")]
 #[cfg_attr(docsrs, doc(cfg(feature = "libadwaita")))]

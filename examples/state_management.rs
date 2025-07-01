@@ -290,7 +290,7 @@ impl Worker for Document {
     fn update(&mut self, input: DocumentInput, sender: ComponentSender<Self>) {
         match input {
             DocumentInput::Save(path) => {
-                println!("Save as JSON to {:?}", path);
+                println!("Save as JSON to {path:?}");
 
                 // TODO in a real app you would report any errors from saving the document
                 if let Ok(json) = serde_json::to_string(&self.model) {
@@ -298,7 +298,7 @@ impl Worker for Document {
                 }
             }
             DocumentInput::Open(path) => {
-                println!("Open tasks document at {:?}", path);
+                println!("Open tasks document at {path:?}");
 
                 if let Ok(json) = std::fs::read_to_string(path) {
                     if let Ok(new_model) = serde_json::from_str(&json) {
