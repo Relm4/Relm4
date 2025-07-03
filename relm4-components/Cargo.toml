@@ -27,7 +27,7 @@ cargo-args = ["-Zunstable-options", "-Zrustdoc-scrape-examples"]
 [dependencies]
 once_cell = "1.21"
 relm4 = { version = "0.9.0", path = "../relm4", default-features = false, features = ["css", "macros"] }
-reqwest = { version = "0.12.21", optional = true }
+reqwest = { version = "0.12.22", optional = true }
 tracker = "0.2.2"
 
 [features]
