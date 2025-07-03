@@ -58,7 +58,7 @@ fragile = "2.0.1"
 gtk = { version = "0.9", package = "gtk4" }
 once_cell = "1.21"
 panel = { version = "0.5", optional = true, package = "libpanel" }
-tokio = { version = "1.45", features = ["rt", "rt-multi-thread", "sync"] }
+tokio = { version = "1.46", features = ["rt", "rt-multi-thread", "sync"] }
 
 relm4-css = { version = "0.9.0", path = "../relm4-css", optional = true }
 relm4-macros = { version = "0.9.0", path = "../relm4-macros", optional = true }
@@ -73,7 +73,7 @@ criterion = { version = "0.6", default-features = false }
 # For the examples
 relm4-icons = "0.9.0"
 relm4-components = { path = "../relm4-components" }
-tokio = { version = "1.45", features = [
+tokio = { version = "1.46", features = [
     "rt",
     "macros",
     "time",
