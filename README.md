@@ -182,6 +182,7 @@ fn main() {
 - [Exercise Timer](https://github.com/mfep/exercise-timer) - An interval training app for the GNOME desktop
 - [Words!](https://codeberg.org/petsoi/words) - [on Flathub](https://flathub.org/apps/page.codeberg.petsoi.words) - A word game similar to Wordle
 - [LACT](https://github.com/ilya-zlobintsev/lact) - A GPU configuration and info utility
+- [xdg-mimer](https://github.com/ketetefid/xdg-mimer) - A GUI tool for managing MIME associations using XDG standards
 
 ## License
 
