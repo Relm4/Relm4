@@ -183,6 +183,7 @@ fn main() {
 - [Words!](https://codeberg.org/petsoi/words) - [on Flathub](https://flathub.org/apps/page.codeberg.petsoi.words) - A word game similar to Wordle
 - [LACT](https://github.com/ilya-zlobintsev/lact) - A GPU configuration and info utility
 - [xdg-mimer](https://github.com/ketetefid/xdg-mimer) - A GUI tool for managing MIME associations using XDG standards
+- [CoDLinux](https://github.com/coyoteclan/codlinux) - A CoD [1](https://en.wikipedia.org/wiki/Call_of_Duty)/[UO](https://en.wikipedia.org/wiki/Call_of_Duty:_United_Offensive) client helper for GNU/Linux
 
 ## License
 
