@@ -183,6 +183,7 @@ fn main() {
 - [Words!](https://codeberg.org/petsoi/words) - [on Flathub](https://flathub.org/apps/page.codeberg.petsoi.words) - A word game similar to Wordle
 - [LACT](https://github.com/ilya-zlobintsev/lact) - A GPU configuration and info utility
 - [xdg-mimer](https://github.com/ketetefid/xdg-mimer) - A GUI tool for managing MIME associations using XDG standards
+- [waypomo](https://tangled.sh/@wrl.sh/waypomo) - endless pomodoro timer for wlroots compositors (uses gtk4-layer-shell)
 
 ## License
 
