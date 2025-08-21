@@ -184,6 +184,7 @@ fn main() {
 - [LACT](https://github.com/ilya-zlobintsev/lact) - A GPU configuration and info utility
 - [xdg-mimer](https://github.com/ketetefid/xdg-mimer) - A GUI tool for managing MIME associations using XDG standards
 - [CoDLinux](https://gitlab.com/kazam0180/codlinux) - A [CoD](https://en.wikipedia.org/wiki/Call_of_Duty) & [CoD:UO](https://en.wikipedia.org/wiki/Call_of_Duty:_United_Offensive) client helper for GNU/Linux
+- [waypomo](https://tangled.sh/@wrl.sh/waypomo) - endless pomodoro timer for wlroots compositors (uses gtk4-layer-shell)
 
 ## License
 
