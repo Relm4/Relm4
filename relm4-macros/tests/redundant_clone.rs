@@ -3,7 +3,7 @@ use relm4::{
     gtk,
 };
 
-struct App;
+pub struct App;
 
 #[relm4::component(pub async)]
 impl AsyncComponent for App {

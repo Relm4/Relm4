@@ -1,6 +1,10 @@
 use gtk::prelude::*;
 use relm4::prelude::*;
-use relm4_icons::icon_names;
+
+mod icon_names {
+    pub use shipped::*;
+    include!(concat!(env!("OUT_DIR"), "/icon_names.rs"));
+}
 
 struct App {
     counter: u8,
@@ -76,7 +80,7 @@ impl SimpleComponent for App {
 fn main() {
     let app = RelmApp::new("relm4.example.icons");
 
-    relm4_icons::initialize_icons();
+    relm4_icons::initialize_icons(icon_names::GRESOURCE_BYTES, icon_names::RESOURCE_PREFIX);
 
     app.run::<App>(0);
 }

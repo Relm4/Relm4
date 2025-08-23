@@ -1,7 +1,7 @@
 use gtk::prelude::{BoxExt, GtkWindowExt, OrientableExt};
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, WidgetTemplate, gtk};
 
-#[relm4_macros::widget_template]
+#[relm4_macros::widget_template(pub)]
 impl WidgetTemplate for CustomBox {
     view! {
         gtk::Box {
@@ -16,7 +16,7 @@ impl WidgetTemplate for CustomBox {
     }
 }
 
-#[relm4_macros::widget_template]
+#[relm4_macros::widget_template(pub)]
 impl WidgetTemplate for CustomWindow {
     view! {
         gtk::Window {
@@ -34,14 +34,14 @@ impl WidgetTemplate for CustomWindow {
 }
 
 #[derive(Default)]
-struct App {
+pub struct App {
     counter: u8,
 }
 
 #[derive(Debug)]
-enum AppMsg {}
+pub enum AppMsg {}
 
-#[relm4_macros::component]
+#[relm4_macros::component(pub)]
 impl SimpleComponent for App {
     type Init = u8;
     type Input = AppMsg;

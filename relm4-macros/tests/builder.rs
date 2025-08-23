@@ -2,9 +2,9 @@ use gtk::prelude::GtkWindowExt;
 use relm4::{ComponentParts, ComponentSender, SimpleComponent, gtk};
 
 #[derive(Default)]
-struct App;
+pub struct App;
 
-#[relm4_macros::component]
+#[relm4_macros::component(pub)]
 impl SimpleComponent for App {
     type Init = ();
     type Input = ();

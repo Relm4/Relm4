@@ -16,9 +16,9 @@ pub mod templates {
 }
 
 #[derive(Default)]
-struct AppModel;
+pub struct AppModel;
 
-#[relm4_macros::component]
+#[relm4_macros::component(pub)]
 impl SimpleComponent for AppModel {
     type Init = ();
     type Input = ();

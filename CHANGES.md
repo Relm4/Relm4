@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.10.0-beta.4 - 2025-08-23
+
 + components: Add `icon` to `IconButton`
 + core: Implement container traits to allow easier usage of libpanel widgets in the view macro
 + core: Support naturally appending any `Widget`s as children to `ListBox` and `FlowBox` in view macro.

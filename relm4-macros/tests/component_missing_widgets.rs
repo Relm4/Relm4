@@ -1,8 +1,8 @@
 use relm4::{ComponentParts, ComponentSender, SimpleComponent, gtk};
 
-struct TestComponent;
+pub struct TestComponent;
 
-#[relm4_macros::component]
+#[relm4_macros::component(pub)]
 impl SimpleComponent for TestComponent {
     type Init = ();
     type Input = ();

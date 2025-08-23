@@ -2,9 +2,9 @@ use gtk::prelude::{GtkWindowExt, OrientableExt};
 use relm4::{ComponentParts, ComponentSender, SimpleComponent, gtk};
 
 #[derive(Default)]
-struct App;
+pub struct App;
 
-trait TestType {
+pub trait TestType {
     type Test;
 }
 
@@ -12,7 +12,7 @@ impl TestType for App {
     type Test = gtk::Box;
 }
 
-#[relm4_macros::component]
+#[relm4_macros::component(pub)]
 impl SimpleComponent for App {
     type Init = ();
     type Input = ();

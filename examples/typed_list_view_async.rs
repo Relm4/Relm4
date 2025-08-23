@@ -24,7 +24,7 @@ impl Eq for MyListItem {}
 
 impl PartialOrd for MyListItem {
     fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
-        Some(self.value.cmp(&other.value))
+        Some(self.cmp(other))
     }
 }
 

@@ -1,10 +1,16 @@
 [workspace]
 resolver = "2"
-members = ["relm4", "relm4-components", "relm4-css", "relm4-macros"]
+members = [
+    "examples/icons",
+    "relm4",
+    "relm4-components",
+    "relm4-css",
+    "relm4-macros",
+]
 exclude = ["examples", "examples/libadwaita"]
 
 [workspace.package]
-version = "0.9.1"
+version = "0.10.0-beta.4"
 authors = ["Aaron Erhardt <aaron.erhardt@t-online.de>"]
 edition = "2024"
 rust-version = "1.85"

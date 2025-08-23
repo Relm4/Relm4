@@ -2,17 +2,17 @@ use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt};
 use relm4::{ComponentParts, ComponentSender, RelmWidgetExt, SimpleComponent, gtk};
 
 #[derive(Default)]
-struct App {
+pub struct App {
     counter: u8,
 }
 
 #[derive(Debug)]
-enum AppMsg {
+pub enum AppMsg {
     Increment,
     Decrement,
 }
 
-#[relm4_macros::component]
+#[relm4_macros::component(pub)]
 impl SimpleComponent for App {
     type Init = u8;
     type Input = AppMsg;
