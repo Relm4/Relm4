@@ -76,7 +76,10 @@ add_child_impl!(gtk::InfoBar, gtk::Stack);
 
 #[cfg(feature = "gnome_42")]
 #[cfg_attr(docsrs, doc(cfg(feature = "gnome_42")))]
-append_impl!(gtk::FlowBox);
+mod gnome_42 {
+    use super::RelmContainerExt;
+    append_impl!(gtk::FlowBox);
+}
 
 #[cfg(feature = "libadwaita")]
 #[cfg_attr(docsrs, doc(cfg(feature = "libadwaita")))]
@@ -94,8 +97,11 @@ mod libadwaita {
 
     #[cfg(all(feature = "libadwaita", feature = "gnome_45"))]
     #[cfg_attr(docsrs, doc(cfg(all(feature = "libadwaita", feature = "gnome_45"))))]
-    add_impl! {
-        adw::NavigationView: adw::NavigationPage
+    mod gnome_45 {
+        use super::RelmContainerExt;
+        add_impl! {
+            adw::NavigationView: adw::NavigationPage
+        }
     }
 }
 

@@ -18,12 +18,12 @@ pub trait ActionName {
 
     /// Target value type for passing values to this action.
     ///
-    /// Use [`()`] for actions without target value.
+    /// Use `()` for actions without target value.
     type Target;
 
     /// State type of this action.
     ///
-    /// Use [`()`] for stateless actions.
+    /// Use `()` for stateless actions.
     type State;
 
     /// The name of the action.
