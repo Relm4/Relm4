@@ -27,6 +27,23 @@ jobs:
 
       - uses: bcomnes/cleanup-xvfb@v1.0.9
 
+  build-win:
+    runs-on: windows-2025
+    container:
+      image: ghcr.io/relm4/relm4/docs:latest
+    env:
+      DISPLAY: ":99.0"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+
+      - name: "test"
+        run: xvfb-run --auto-servernum cargo test
+
+      - uses: bcomnes/cleanup-xvfb@v1.0.9
+
   clippy:
     runs-on: ubuntu-latest
     container:
