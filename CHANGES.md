@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.10.0 - 2025-09-01
+
++ all: Update dependencies
+
 ## 0.10.0-beta.4 - 2025-08-23
 
 + components: Add `icon` to `IconButton`

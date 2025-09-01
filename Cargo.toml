@@ -10,7 +10,7 @@ members = [
 exclude = ["examples", "examples/libadwaita"]
 
 [workspace.package]
-version = "0.10.0-beta.4"
+version = "0.10.0"
 authors = ["Aaron Erhardt <aaron.erhardt@t-online.de>"]
 edition = "2024"
 rust-version = "1.85"

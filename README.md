@@ -49,11 +49,11 @@ Use this in to your `Cargo.toml`:
 
 ```toml
 # Core library
-relm4 = "0.9"
+relm4 = "0.10"
 # Optional: reusable components
-relm4-components = "0.9"
+relm4-components = "0.10"
 # Optional: icons (more info at https://github.com/Relm4/icons)
-relm4-icons = "0.9.0"
+relm4-icons = "0.10"
 ```
 
 ### Features
@@ -65,6 +65,7 @@ The `relm4` crate has four feature flags:
 | `macros` | Enable macros by re-exporting [`relm4-macros`](https://crates.io/crates/relm4-macros) | ✅ |
 | `libadwaita` | Improved support for [libadwaita](https://gitlab.gnome.org/World/Rust/libadwaita-rs) | - |
 | `libpanel` | Improved support for [libpanel](https://gitlab.gnome.org/World/Rust/libpanel-rs) | - |
+| `gnome_48` | Enable all version feature flags of all dependencies to match the GNOME 48 SDK | - |
 | `gnome_47` | Enable all version feature flags of all dependencies to match the GNOME 47 SDK | - |
 | `gnome_46` | Enable all version feature flags of all dependencies to match the GNOME 46 SDK | - |
 | `gnome_45` | Enable all version feature flags of all dependencies to match the GNOME 45 SDK | - |
