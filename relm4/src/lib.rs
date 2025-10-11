@@ -49,6 +49,7 @@ pub mod typed_view;
 pub use channel::ComponentSender;
 pub use channel::*;
 pub use component::worker::{Worker, WorkerController, WorkerHandle};
+pub use component::{AsyncWorker, AsyncWorkerController, AsyncWorkerHandle};
 pub use component::{
     Component, ComponentBuilder, ComponentController, ComponentParts, Controller, MessageBroker,
     SimpleComponent,
