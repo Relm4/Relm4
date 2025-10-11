@@ -2,6 +2,9 @@
 
 ## Unreleased
 
++ core: Add new `AsyncWorker` to create `Worker`s with async/await support
++ examples: Add example for `AsyncWorker`
+
 ## 0.10.0 - 2025-09-01
 
 + all: Update dependencies
