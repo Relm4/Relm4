@@ -6,18 +6,14 @@ use relm4::{
     factory::{DynamicIndex, FactoryComponent, FactorySender, FactoryVecDeque},
 };
 
+#[derive(Default)]
 enum GameState {
+    #[default]
     Start,
     Countdown(u8),
     Running,
     Guessing,
     End(bool),
-}
-
-impl Default for GameState {
-    fn default() -> Self {
-        Self::Start
-    }
 }
 
 static GAME_STATE: SharedState<GameState> = SharedState::new();
