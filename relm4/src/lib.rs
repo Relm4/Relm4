@@ -54,7 +54,7 @@ pub use component::{
     SimpleComponent,
 };
 pub use extensions::*;
-pub use shared_state::{Reducer, Reducible, SharedState};
+pub use shared_state::{AsyncReducer, AsyncReducible, Reducer, Reducible, SharedState};
 pub use shutdown::ShutdownReceiver;
 
 pub use app::RelmApp;

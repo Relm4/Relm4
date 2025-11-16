@@ -2,6 +2,8 @@
 
 ## Unreleased
 
++ core: Add `AsyncReducible` and `AsyncReducer` for reducers that can use `async`/`await`
+
 ## 0.10.0 - 2025-09-01
 
 + all: Update dependencies
