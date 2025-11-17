@@ -1,10 +1,10 @@
 error: expected `view!` macro invocation
   --> tests/ui/compile-fail/missing-view.rs:6:1
    |
-6  | / impl SimpleComponent for App {
-7  | |     type Init = ();
-8  | |     type Input = ();
-9  | |     type Output = ();
+ 6 | / impl SimpleComponent for App {
+ 7 | |     type Init = ();
+ 8 | |     type Input = ();
+ 9 | |     type Output = ();
 ...  |
 14 | | }
    | |_^
