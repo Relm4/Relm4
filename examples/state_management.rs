@@ -299,8 +299,8 @@ impl Worker for Document {
             DocumentInput::Open(path) => {
                 println!("Open tasks document at {path:?}");
 
-                if let Ok(json) = std::fs::read_to_string(path) {
-                    if let Ok(new_model) = serde_json::from_str(&json) {
+                if let Ok(json) = std::fs::read_to_string(path)
+                    && let Ok(new_model) = serde_json::from_str(&json) {
                         // update the data model
                         self.model = new_model;
 
@@ -320,7 +320,6 @@ impl Worker for Document {
                                     sender.output(DocumentOutput::AddedTag(task_index, tag_name));
                             }
                         }
-                    }
                 }
             }
             DocumentInput::Clear => {
