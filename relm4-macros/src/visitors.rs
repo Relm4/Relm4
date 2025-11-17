@@ -444,11 +444,10 @@ impl VisitMut for ViewOutputExpander<'_> {
             ..
         }) = stmt
         {
-            if let syn::Expr::Macro(mac) = &**expr {
-                if mac.mac.path.is_ident("view_output") {
+            if let syn::Expr::Macro(mac) = &**expr
+                && mac.mac.path.is_ident("view_output") {
                     expand = true;
                 }
-            }
 
             if expand {
                 // Replace the macro invocation with the widget initialization code. Perform the

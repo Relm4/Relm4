@@ -180,11 +180,10 @@ impl<M: Debug + 'static> RelmApp<M> {
         });
 
         app.connect_activate(move |app| {
-            if let Some(window) = app.active_window() {
-                if visible {
+            if let Some(window) = app.active_window()
+                && visible {
                     window.set_visible(true);
                 }
-            }
         });
 
         let _guard = RUNTIME.enter();
@@ -235,11 +234,10 @@ impl<M: Debug + 'static> RelmApp<M> {
         });
 
         app.connect_activate(move |app| {
-            if let Some(window) = app.active_window() {
-                if set_visible {
+            if let Some(window) = app.active_window()
+                && set_visible {
                     window.set_visible(true);
                 }
-            }
         });
 
         let _guard = RUNTIME.enter();

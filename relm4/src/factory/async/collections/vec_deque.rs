@@ -195,11 +195,10 @@ where
             states.index.decrement();
         }
 
-        if let Some(comp) = &component {
-            if let Some(widget) = &comp.returned_widget() {
+        if let Some(comp) = &component
+            && let Some(widget) = &comp.returned_widget() {
                 self.widget.factory_remove(widget);
             }
-        }
 
         component.and_then(AsyncComponentStorage::extract)
     }

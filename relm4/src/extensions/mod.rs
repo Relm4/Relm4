@@ -105,17 +105,13 @@ impl RelmListBoxExt for gtk::ListBox {
     }
 
     fn row_of_child(&self, widget: &impl AsRef<gtk::Widget>) -> Option<gtk::ListBoxRow> {
-        if let Some(row) = widget.as_ref().ancestor(gtk::ListBoxRow::static_type()) {
-            if let Some(row) = row.downcast_ref::<gtk::ListBoxRow>() {
-                if let Some(parent_widget) = row.parent() {
-                    if let Some(parent_box) = parent_widget.downcast_ref::<Self>() {
-                        if parent_box == self {
+        if let Some(row) = widget.as_ref().ancestor(gtk::ListBoxRow::static_type())
+            && let Some(row) = row.downcast_ref::<gtk::ListBoxRow>()
+                && let Some(parent_widget) = row.parent()
+                    && let Some(parent_box) = parent_widget.downcast_ref::<Self>()
+                        && parent_box == self {
                             return Some(row.clone());
                         }
-                    }
-                }
-            }
-        }
 
         None
     }
