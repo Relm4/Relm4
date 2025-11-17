@@ -195,8 +195,8 @@ impl Component for AppModel {
     fn update_view(&self, widgets: &mut Self::Widgets, sender: ComponentSender<Self>) {
         if self.options.is_empty() && !widgets.options.is_empty() {
             widgets.list.remove_all();
-        } else if self.options.len() != widgets.options.len() {
-            if let Some((description, button_label, id)) = self.options.last() {
+        } else if self.options.len() != widgets.options.len()
+            && let Some((description, button_label, id)) = self.options.last() {
                 let id = *id;
                 relm4::view! {
                     widget = gtk::Box {
@@ -228,7 +228,6 @@ impl Component for AppModel {
 
                 widgets.list.append(&widget);
                 widgets.options.push(widget);
-            }
         }
     }
 }
