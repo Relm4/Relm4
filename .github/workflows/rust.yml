@@ -76,11 +76,9 @@ jobs:
       RUSTFLAGS: --cfg docsrs
     steps:
       - uses: actions/checkout@v5
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: nightly
+      - uses: dtolnay/rust-toolchain@nightly
       - name: "Build docs for all features"
-        run: cargo doc --all-features
+        run: cargo +nightly doc --all-features
 
   codespell:
     runs-on: ubuntu-latest
