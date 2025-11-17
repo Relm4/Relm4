@@ -205,8 +205,9 @@ fn parse_track(nested: &Punctuated<Expr, token::Comma>) -> Result<(Option<Ident>
 fn expr_to_skip_init_ident(expr: &Expr) -> Option<Ident> {
     if let Expr::Path(path) = &expr
         && let Some(ident) = path.path.get_ident()
-            && ident == "skip_init" {
-                return Some(ident.clone());
-            }
+        && ident == "skip_init"
+    {
+        return Some(ident.clone());
+    }
     None
 }

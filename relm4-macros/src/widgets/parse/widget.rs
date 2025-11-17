@@ -120,9 +120,10 @@ impl Widget {
 
         // Make sure that the name is only defined one.
         if (attr.is_local_attr() || template_attr == WidgetTemplateAttr::TemplateChild)
-            && let Some(name) = &new_name {
-                return Err(Error::new(name.span(), "Widget name is specified more than once (attribute, assignment or local attribute).").into());
-            }
+            && let Some(name) = &new_name
+        {
+            return Err(Error::new(name.span(), "Widget name is specified more than once (attribute, assignment or local attribute).").into());
+        }
 
         // Generate a name
         let (name, name_assigned_by_user) = if let Some(name) = new_name {
@@ -162,15 +163,16 @@ impl Widget {
         if template_attr != &WidgetTemplateAttr::Template {
             for prop in &props.properties {
                 if let PropertyType::Widget(widget) = &prop.ty
-                    && widget.template_attr == WidgetTemplateAttr::TemplateChild {
-                        return Err(ParseError::Generic(
-                            Error::new(
-                                widget.name.span(),
-                                "You can't use a template child if the parent is not a template.",
-                            )
-                            .to_compile_error(),
-                        ));
-                    }
+                    && widget.template_attr == WidgetTemplateAttr::TemplateChild
+                {
+                    return Err(ParseError::Generic(
+                        Error::new(
+                            widget.name.span(),
+                            "You can't use a template child if the parent is not a template.",
+                        )
+                        .to_compile_error(),
+                    ));
+                }
             }
         }
         Ok(())

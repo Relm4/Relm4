@@ -41,9 +41,10 @@ impl<C: AsyncFactoryComponent> AsyncData<C> {
     fn update(&self) {
         let future = &mut *self.future.borrow_mut();
         if future.is_some()
-            && let Ok(data) = future.as_ref().unwrap().0.try_recv() {
-                *future = None;
-                self.data.set(data).ok().unwrap();
-            }
+            && let Ok(data) = future.as_ref().unwrap().0.try_recv()
+        {
+            *future = None;
+            self.data.set(data).ok().unwrap();
+        }
     }
 }

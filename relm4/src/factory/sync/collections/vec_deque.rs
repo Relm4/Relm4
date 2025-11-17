@@ -179,9 +179,10 @@ where
         }
 
         if let Some(comp) = &component
-            && let Some(widget) = &comp.returned_widget() {
-                self.widget.factory_remove(widget);
-            }
+            && let Some(widget) = &comp.returned_widget()
+        {
+            self.widget.factory_remove(widget);
+        }
 
         component.map(ComponentStorage::extract)
     }

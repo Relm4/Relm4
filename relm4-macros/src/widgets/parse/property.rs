@@ -110,23 +110,25 @@ impl Property {
 
             // Attributes must have been set to `None` by `take()`
             if let Some(attrs) = attributes
-                && let Some(first_attr) = attrs.inner.first() {
-                    return Err(Error::new(
-                        first_attr.span(),
-                        "No attributes allowed in the following expression.",
-                    )
-                    .into());
-                }
+                && let Some(first_attr) = attrs.inner.first()
+            {
+                return Err(Error::new(
+                    first_attr.span(),
+                    "No attributes allowed in the following expression.",
+                )
+                .into());
+            }
 
             // Arguments must have been set to `None` by `take()`
             if let Some(args) = args
-                && let Some(first_arg) = args.inner.first() {
-                    return Err(Error::new(
-                        first_arg.span(),
-                        "No arguments allowed in this expression.",
-                    )
-                    .into());
-                }
+                && let Some(first_arg) = args.inner.first()
+            {
+                return Err(Error::new(
+                    first_arg.span(),
+                    "No arguments allowed in this expression.",
+                )
+                .into());
+            }
 
             if !input.is_empty() && !input.peek(Token![,]) {
                 Err(input
