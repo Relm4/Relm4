@@ -1,7 +1,7 @@
 error: expected identifier, found `}`
   --> tests/ui/compile-fail/bad_impl.rs:30:1
    |
-7  | impl SimpleComponent for TestComponent {
+ 7 | impl SimpleComponent for TestComponent {
    |                                        - while parsing this item list starting here
 ...
 30 | }
@@ -16,7 +16,7 @@ warning: unused import: `gtk`
 1 | use relm4::{gtk, ComponentParts, ComponentSender, SimpleComponent};
   |             ^^^
   |
-  = note: `#[warn(unused_imports)]` on by default
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
 
 error[E0046]: not all trait items implemented, missing: `Root`, `Widgets`, `init_root`
  --> tests/ui/compile-fail/bad_impl.rs:7:1

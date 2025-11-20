@@ -3,6 +3,8 @@
 ## Unreleased
 
 + core: Add `AsyncReducible` and `AsyncReducer` for reducers that can use `async`/`await`
++ fix(examples): derive Default impl for `GameState`
++ build: update all dependencies to fix check-docs ci failure
 
 ## 0.10.0 - 2025-09-01
 
