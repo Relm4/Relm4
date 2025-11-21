@@ -34,16 +34,16 @@ impl SignalHandler {
                 let mut clone_stream = TokenStream2::new();
                 if let Some(args) = &inner.args {
                     for arg in &args.inner {
-                        if let Expr::Path(path) = arg {
-                            if let Some(ident) = path.path.get_ident() {
-                                // Just an ident was used. Simply clone it.
-                                clone_stream.extend(quote_spanned! { arg.span() =>
-                                    #[allow(clippy::redundant_clone)]
-                                    #[allow(clippy::clone_on_copy)]
-                                    let #ident = #ident.clone();
-                                });
-                                continue;
-                            }
+                        if let Expr::Path(path) = arg
+                            && let Some(ident) = path.path.get_ident()
+                        {
+                            // Just an ident was used. Simply clone it.
+                            clone_stream.extend(quote_spanned! { arg.span() =>
+                                #[allow(clippy::redundant_clone)]
+                                #[allow(clippy::clone_on_copy)]
+                                let #ident = #ident.clone();
+                            });
+                            continue;
                         }
                         // Allow more complex expressions such as `value = data.sender()`
                         clone_stream.extend(quote_spanned! { arg.span() =>

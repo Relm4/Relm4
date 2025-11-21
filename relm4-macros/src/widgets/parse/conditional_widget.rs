@@ -37,14 +37,12 @@ impl ConditionalWidget {
     ) -> Result<Self, ParseError> {
         let (transition, attr_name, doc_attr, assign_wrapper) = Self::process_attrs(attrs)?;
 
-        if attr_name.is_some() {
-            if let Some(name) = &name {
-                return Err(Error::new(
-                    name.span(),
-                    "Name defined as attribute and redefined here.",
-                )
-                .into());
-            }
+        if attr_name.is_some()
+            && let Some(name) = &name
+        {
+            return Err(
+                Error::new(name.span(), "Name defined as attribute and redefined here.").into(),
+            );
         }
 
         let name = if let Some(name) = name {

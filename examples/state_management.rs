@@ -299,26 +299,25 @@ impl Worker for Document {
             DocumentInput::Open(path) => {
                 println!("Open tasks document at {path:?}");
 
-                if let Ok(json) = std::fs::read_to_string(path) {
-                    if let Ok(new_model) = serde_json::from_str(&json) {
-                        // update the data model
-                        self.model = new_model;
+                if let Ok(json) = std::fs::read_to_string(path)
+                    && let Ok(new_model) = serde_json::from_str(&json)
+                {
+                    // update the data model
+                    self.model = new_model;
 
-                        // refresh the view from the data model
-                        let _ = sender.output(DocumentOutput::Cleared);
+                    // refresh the view from the data model
+                    let _ = sender.output(DocumentOutput::Cleared);
 
-                        for (task_index, task) in self.model.tasks.iter().enumerate() {
-                            let _ = sender.output(DocumentOutput::AddedTask);
+                    for (task_index, task) in self.model.tasks.iter().enumerate() {
+                        let _ = sender.output(DocumentOutput::AddedTask);
 
-                            let task_name = task.name.clone();
-                            let _ = sender
-                                .output(DocumentOutput::ChangedTaskName(task_index, task_name));
+                        let task_name = task.name.clone();
+                        let _ =
+                            sender.output(DocumentOutput::ChangedTaskName(task_index, task_name));
 
-                            for tag in &task.tags {
-                                let tag_name = tag.name.clone();
-                                let _ =
-                                    sender.output(DocumentOutput::AddedTag(task_index, tag_name));
-                            }
+                        for tag in &task.tags {
+                            let tag_name = tag.name.clone();
+                            let _ = sender.output(DocumentOutput::AddedTag(task_index, tag_name));
                         }
                     }
                 }

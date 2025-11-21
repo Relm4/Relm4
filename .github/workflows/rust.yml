@@ -35,7 +35,7 @@ jobs:
       matrix:
         rust:
           - stable
-          - "1.85.0"
+          - "1.91.1"
     env:
       DISPLAY: ":99.0"
     steps:
@@ -72,15 +72,14 @@ jobs:
     name: check-docs
     runs-on: ubuntu-latest
     env:
-      RUSTDOCFLAGS: "-D warnings"
-      RUSTFLAGS: --cfg docsrs
+      RUSTDOCFLAGS: "-D warnings --cfg docsrs"
     steps:
       - uses: actions/checkout@v5
-      - uses: dtolnay/rust-toolchain@stable
+      - uses: dtolnay/rust-toolchain@nightly
         with:
-          toolchain: nightly
+          toolchain: nightly-2025-09-27
       - name: "Build docs for all features"
-        run: cargo doc --all-features
+        run: cargo +nightly-2025-09-27 doc --all-features
 
   codespell:
     runs-on: ubuntu-latest

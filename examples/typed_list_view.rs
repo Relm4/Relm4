@@ -69,7 +69,7 @@ impl RelmListItem for MyListItem {
 
         label.set_label(&format!("Value: {} ", self.value));
         label2.add_write_only_binding(&self.binding, "label");
-        button.set_active(self.value % 2 == 0);
+        button.set_active(self.value.is_multiple_of(2));
     }
 }
 
