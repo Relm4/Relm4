@@ -14,7 +14,7 @@ categories.workspace = true
 
 [dependencies]
 relm4-icons.workspace = true
-relm4.workspace = true
+relm4 = { workspace = true, default-features = true }
 
 [build-dependencies]
 relm4-icons-build.workspace = true
