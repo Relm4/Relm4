@@ -23,3 +23,8 @@ repository = "https://github.com/Relm4/Relm4"
 
 keywords = ["gui", "gtk", "gtk4", "elm"]
 categories = ["gui"]
+
+[workspace.dependencies]
+relm4 = { path = "./relm4" }
+relm4-icons = "0.10.0"
+relm4-icons-build = "0.10.0"

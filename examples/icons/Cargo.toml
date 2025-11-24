@@ -13,8 +13,8 @@ keywords.workspace = true
 categories.workspace = true
 
 [dependencies]
-relm4-icons = "0.10.0"
-relm4 = { path = "../../relm4" }
+relm4-icons.workspace = true
+relm4.workspace = true
 
 [build-dependencies]
-relm4-icons-build = "0.10.0"
+relm4-icons-build.workspace = true
