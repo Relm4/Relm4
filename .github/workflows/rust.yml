@@ -60,6 +60,8 @@ jobs:
   fmt:
     name: rustfmt
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/relm4/relm4/docs:latest
     steps:
       - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
@@ -71,6 +73,8 @@ jobs:
   docs:
     name: check-docs
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/relm4/relm4/docs:latest
     env:
       RUSTDOCFLAGS: "-D warnings --cfg docsrs"
     steps:
@@ -83,6 +87,8 @@ jobs:
 
   codespell:
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/relm4/relm4/docs:latest
     steps:
       - uses: actions/checkout@v5
       - uses: codespell-project/actions-codespell@master
