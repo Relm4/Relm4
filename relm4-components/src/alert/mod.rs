@@ -3,8 +3,8 @@
 //! **[Example implementation](https://github.com/AaronErhardt/relm4/blob/main/relm4-examples/examples/alert.rs)**
 
 use gtk::prelude::{BoxExt, ButtonExt, GtkWindowExt, OrientableExt, WidgetExt};
-use once_cell::sync::Lazy;
 use relm4::{Component, ComponentParts, ComponentSender, RelmWidgetExt, gtk};
+use std::sync::LazyLock;
 
 const LIBADWAITA_ENABLED: bool = cfg!(feature = "libadwaita");
 const COMPONENT_CSS: &str = include_str!("style.css");
@@ -12,7 +12,7 @@ const MESSAGE_AREA_CSS: &str = "message-area";
 const RESPONSE_BUTTONS_CSS: &str = "response-buttons";
 
 /// The initializer for the CSS, ensuring it only happens once.
-static INITIALIZE_CSS: Lazy<()> = Lazy::new(|| {
+static INITIALIZE_CSS: LazyLock<()> = LazyLock::new(|| {
     relm4::set_global_css_with_priority(COMPONENT_CSS, gtk::STYLE_PROVIDER_PRIORITY_APPLICATION);
 });
 

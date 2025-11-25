@@ -1,14 +1,14 @@
 use std::cell::RefCell;
 
 use fragile::Fragile;
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 
 type Callback = Box<dyn FnOnce()>;
 
-static LATE_INIT: Lazy<Fragile<RefCell<Vec<Callback>>>> = Lazy::new(Fragile::default);
+static LATE_INIT: LazyLock<Fragile<RefCell<Vec<Callback>>>> = LazyLock::new(Fragile::default);
 
 pub(super) fn register_callback(func: Callback) {
-    if let Some(inner) = Lazy::get(&LATE_INIT) {
+    if let Some(inner) = LazyLock::get(&LATE_INIT) {
         // If `Lazy` was initialized and is not empty,
         // this means that `run_late_init` has run already.
         // In this case, we call the callback as soon as the current function
