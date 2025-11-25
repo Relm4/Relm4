@@ -11,6 +11,9 @@
 + all: Update dependencies
 + core: Add gnome_49 feature flag for GNOME 49
 + core: Export `RelmSelectionExt` trait publicly from `relm4::typed_view` module to allow for user extensions of `TypedColumnView`
++ all: Switch from `once_cell`'s `Lazy`, `sync::OnceCell`, `unsync::OnceCell`
+  to `std` types `LazyLock`, `sync::OnceLock` and `cell::OnceCell`.
+  Remove `once_cell` dependency from `Cargo.toml` files.
 
 ## 0.10.0 - 2025-09-01
 
