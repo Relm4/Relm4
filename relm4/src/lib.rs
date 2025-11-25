@@ -103,7 +103,6 @@ pub use adw;
 #[cfg_attr(docsrs, doc(cfg(feature = "libpanel")))]
 pub use panel;
 
-pub use once_cell;
 pub use tokio;
 
 thread_local! {
