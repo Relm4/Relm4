@@ -17,7 +17,7 @@ jobs:
     env:
       DISPLAY: ":99.0"
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: stable
@@ -39,7 +39,7 @@ jobs:
     env:
       DISPLAY: ":99.0"
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ matrix.rust }}
@@ -63,7 +63,7 @@ jobs:
     container:
       image: ghcr.io/relm4/relm4/docs:latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt
@@ -78,7 +78,7 @@ jobs:
     env:
       RUSTDOCFLAGS: "-D warnings --cfg docsrs"
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: dtolnay/rust-toolchain@nightly
         with:
           toolchain: nightly-2025-09-27
@@ -90,7 +90,7 @@ jobs:
     container:
       image: ghcr.io/relm4/relm4/docs:latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: codespell-project/actions-codespell@master
         with:
           check_filenames: true
