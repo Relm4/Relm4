@@ -61,22 +61,22 @@ pub use app::RelmApp;
 pub use tokio::task::JoinHandle;
 
 use gtk::prelude::{Cast, IsA};
-use once_cell::sync::OnceCell;
 use runtime_util::{GuardedReceiver, RuntimeSenders, ShutdownOnDrop};
 use std::cell::Cell;
 use std::future::Future;
 use std::sync::LazyLock;
+use std::sync::OnceLock;
 use tokio::runtime::Runtime;
 
 /// Defines how many threads that Relm4 should use for background tasks.
 ///
 /// NOTE: The default thread count is 1.
-pub static RELM_THREADS: OnceCell<usize> = OnceCell::new();
+pub static RELM_THREADS: OnceLock<usize> = OnceLock::new();
 
 /// Defines the maximum number of background threads to spawn for handling blocking tasks.
 ///
 /// NOTE: The default max is 512.
-pub static RELM_BLOCKING_THREADS: OnceCell<usize> = OnceCell::new();
+pub static RELM_BLOCKING_THREADS: OnceLock<usize> = OnceLock::new();
 
 pub mod prelude;
 
