@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 
-use once_cell::unsync::OnceCell;
+use std::cell::OnceCell;
 
 use super::AsyncFactoryComponent;
 use crate::Receiver;
