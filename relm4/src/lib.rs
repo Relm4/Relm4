@@ -61,10 +61,11 @@ pub use app::RelmApp;
 pub use tokio::task::JoinHandle;
 
 use gtk::prelude::{Cast, IsA};
-use once_cell::sync::{Lazy, OnceCell};
+use once_cell::sync::OnceCell;
 use runtime_util::{GuardedReceiver, RuntimeSenders, ShutdownOnDrop};
 use std::cell::Cell;
 use std::future::Future;
+use std::sync::LazyLock;
 use tokio::runtime::Runtime;
 
 /// Defines how many threads that Relm4 should use for background tasks.
@@ -179,7 +180,7 @@ where
     gtk::glib::MainContext::ref_thread_default().spawn_local_with_priority(priority, func)
 }
 
-static RUNTIME: Lazy<Runtime> = Lazy::new(|| {
+static RUNTIME: LazyLock<Runtime> = LazyLock::new(|| {
     tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .worker_threads(*RELM_THREADS.get_or_init(|| 1))
