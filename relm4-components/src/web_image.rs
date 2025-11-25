@@ -71,13 +71,12 @@ impl Component for WebImage {
         sender: ComponentSender<Self>,
         root: &Self::Root,
     ) {
-        if let Some((id, data)) = message {
-            if id == self.current_id {
-                if let Some(img) = Self::generate_image(data) {
-                    self.current_widget = Self::set_image(root, &self.current_widget, &img);
-                    sender.output(()).ok();
-                }
-            }
+        if let Some((id, data)) = message
+            && id == self.current_id
+            && let Some(img) = Self::generate_image(data)
+        {
+            self.current_widget = Self::set_image(root, &self.current_widget, &img);
+            sender.output(()).ok();
         }
     }
 }

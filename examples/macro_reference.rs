@@ -68,7 +68,7 @@ impl SimpleComponent for App {
                     attach[1, 1, 1, 1] = &gtk::Label {
                         set_label: "Count to 10 to see if the tracker works!",
                         // Alternative: #[track = "counter.value % 10 == 0"]
-                        #[track(skip_init, counter.value % 10 == 0)]
+                        #[track(skip_init, counter.value.is_multiple_of(10))]
                         set_label: &format!("Grid works! ({})", counter.value),
                     }
                 },
@@ -76,11 +76,11 @@ impl SimpleComponent for App {
                 // A conditional widget
                 // Alternative: #[transition = "SlideLeft"]
                 #[transition(SlideLeft)]
-                append = if counter.value % 2 == 0 {
+                append = if counter.value.is_multiple_of(2) {
                     gtk::Label {
                         set_label: "Value is even",
                     }
-                } else if counter.value % 3 == 0 {
+                } else if counter.value.is_multiple_of(3) {
                     gtk::Label {
                         set_label: "Value is dividable by 3",
                     }
@@ -144,7 +144,7 @@ impl SimpleComponent for App {
                     set_label: "Counter is even",
                     #[watch]
                     #[block_signal(toggle_handler)]
-                    set_active: counter.value % 2 == 0,
+                    set_active: counter.value.is_multiple_of(2),
 
                     connect_toggled[sender] => move |_| {
                         sender.input(Msg::Increment);

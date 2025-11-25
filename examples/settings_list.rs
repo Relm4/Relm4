@@ -195,40 +195,40 @@ impl Component for AppModel {
     fn update_view(&self, widgets: &mut Self::Widgets, sender: ComponentSender<Self>) {
         if self.options.is_empty() && !widgets.options.is_empty() {
             widgets.list.remove_all();
-        } else if self.options.len() != widgets.options.len() {
-            if let Some((description, button_label, id)) = self.options.last() {
-                let id = *id;
-                relm4::view! {
-                    widget = gtk::Box {
-                        set_orientation: gtk::Orientation::Horizontal,
-                        set_margin_start: 20,
-                        set_margin_end: 20,
-                        set_margin_top: 8,
-                        set_margin_bottom: 8,
-                        set_spacing: 24,
+        } else if self.options.len() != widgets.options.len()
+            && let Some((description, button_label, id)) = self.options.last()
+        {
+            let id = *id;
+            relm4::view! {
+                widget = gtk::Box {
+                    set_orientation: gtk::Orientation::Horizontal,
+                    set_margin_start: 20,
+                    set_margin_end: 20,
+                    set_margin_top: 8,
+                    set_margin_bottom: 8,
+                    set_spacing: 24,
 
-                        append = &gtk::Label {
-                            set_label: description,
-                            set_halign: gtk::Align::Start,
-                            set_hexpand: true,
-                            set_valign: gtk::Align::Center,
-                            set_ellipsize: gtk::pango::EllipsizeMode::End,
-                        },
+                    append = &gtk::Label {
+                        set_label: description,
+                        set_halign: gtk::Align::Start,
+                        set_hexpand: true,
+                        set_valign: gtk::Align::Center,
+                        set_ellipsize: gtk::pango::EllipsizeMode::End,
+                    },
 
-                        append: button = &gtk::Button {
-                            set_label: button_label,
-                            set_size_group: &widgets.button_sg,
+                    append: button = &gtk::Button {
+                        set_label: button_label,
+                        set_size_group: &widgets.button_sg,
 
-                            connect_clicked[sender] => move |_| {
-                                sender.output(Output::Clicked(id)).unwrap();
-                            }
+                        connect_clicked[sender] => move |_| {
+                            sender.output(Output::Clicked(id)).unwrap();
                         }
                     }
                 }
-
-                widgets.list.append(&widget);
-                widgets.options.push(widget);
             }
+
+            widgets.list.append(&widget);
+            widgets.options.push(widget);
         }
     }
 }
