@@ -25,7 +25,6 @@ rustc-args = ["--cfg", "docsrs"]
 cargo-args = ["-Zunstable-options", "-Zrustdoc-scrape-examples"]
 
 [dependencies]
-once_cell.workspace = true
 relm4 = { workspace = true, default-features = false, features = [
     "css",
     "macros",
