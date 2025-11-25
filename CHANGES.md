@@ -8,6 +8,9 @@
 + core: Increase MSRV to 1.91.1 to incorporate latest Rust features
 + build: Use `workspace.dependencies` to unify dependencies version management across all crates in project's workspace.
 + examples: New example `message_from_grid_view`, that shows how to send a message from grid view
++ all: Switch from `once_cell`'s `Lazy`, `sync::OnceCell`, `unsync::OnceCell`
+  to `std` types `LazyLock`, `sync::OnceLock` and `cell::OnceCell`.
+  Remove `once_cell` dependency from `Cargo.toml` files.
 
 ## 0.10.0 - 2025-09-01
 
