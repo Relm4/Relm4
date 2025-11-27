@@ -5,7 +5,7 @@ use relm4::{
     typed_view::grid::{RelmGridItem, TypedGridView},
 };
 
-const CONTRIBUTERS: &[&str] = &[
+const CONTRIBUTORS: &[&str] = &[
     "AaronErhardt",
     "MaksymShcherbak",
     "mmstick",
@@ -15,7 +15,7 @@ const CONTRIBUTERS: &[&str] = &[
 ];
 
 fn random_name() -> String {
-    let name = CONTRIBUTERS
+    let name = CONTRIBUTORS
         .iter()
         .choose(&mut rand::rng())
         .expect("Could not choose a random name");
