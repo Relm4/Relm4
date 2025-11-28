@@ -61,21 +61,22 @@ pub use app::RelmApp;
 pub use tokio::task::JoinHandle;
 
 use gtk::prelude::{Cast, IsA};
-use once_cell::sync::{Lazy, OnceCell};
 use runtime_util::{GuardedReceiver, RuntimeSenders, ShutdownOnDrop};
 use std::cell::Cell;
 use std::future::Future;
+use std::sync::LazyLock;
+use std::sync::OnceLock;
 use tokio::runtime::Runtime;
 
 /// Defines how many threads that Relm4 should use for background tasks.
 ///
 /// NOTE: The default thread count is 1.
-pub static RELM_THREADS: OnceCell<usize> = OnceCell::new();
+pub static RELM_THREADS: OnceLock<usize> = OnceLock::new();
 
 /// Defines the maximum number of background threads to spawn for handling blocking tasks.
 ///
 /// NOTE: The default max is 512.
-pub static RELM_BLOCKING_THREADS: OnceCell<usize> = OnceCell::new();
+pub static RELM_BLOCKING_THREADS: OnceLock<usize> = OnceLock::new();
 
 pub mod prelude;
 
@@ -102,7 +103,6 @@ pub use adw;
 #[cfg_attr(docsrs, doc(cfg(feature = "libpanel")))]
 pub use panel;
 
-pub use once_cell;
 pub use tokio;
 
 thread_local! {
@@ -179,7 +179,7 @@ where
     gtk::glib::MainContext::ref_thread_default().spawn_local_with_priority(priority, func)
 }
 
-static RUNTIME: Lazy<Runtime> = Lazy::new(|| {
+static RUNTIME: LazyLock<Runtime> = LazyLock::new(|| {
     tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .worker_threads(*RELM_THREADS.get_or_init(|| 1))

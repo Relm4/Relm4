@@ -3,7 +3,7 @@ use std::{
     sync::{RwLock, RwLockReadGuard, RwLockWriteGuard, TryLockError},
 };
 
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 
 use crate::Sender;
 
@@ -19,8 +19,8 @@ use super::SubscriberFn;
 /// If you use [`Self::read()`] and [`Self::write()`] in the same scope
 /// your code might be stuck in a deadlock or panic.
 pub struct SharedState<Data> {
-    data: Lazy<RwLock<Data>>,
-    subscribers: Lazy<RwLock<Vec<SubscriberFn<Data>>>>,
+    data: LazyLock<RwLock<Data>>,
+    subscribers: LazyLock<RwLock<Vec<SubscriberFn<Data>>>>,
 }
 
 impl<Data: std::fmt::Debug> std::fmt::Debug for SharedState<Data> {
@@ -60,8 +60,8 @@ where
     #[must_use]
     pub const fn new() -> Self {
         Self {
-            data: Lazy::new(RwLock::default),
-            subscribers: Lazy::new(RwLock::default),
+            data: LazyLock::new(RwLock::default),
+            subscribers: LazyLock::new(RwLock::default),
         }
     }
 
