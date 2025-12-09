@@ -1,10 +1,10 @@
 use gtk::prelude::*;
 use rand::seq::IteratorRandom;
+use relm4::gtk::glib;
 use relm4::{
     prelude::*,
     typed_view::grid::{RelmGridItem, TypedGridView},
 };
-use relm4::gtk::glib;
 
 const CONTRIBUTORS: &[&str] = &[
     "AaronErhardt",
@@ -73,7 +73,8 @@ impl RelmGridItem for MyGridItem {
         widgets.label.set_label(&self.name);
         let name = self.name;
         widgets.button.connect_clicked(glib::clone!(
-            #[strong(rename_to = sender)] self.sender,
+            #[strong(rename_to = sender)]
+            self.sender,
             move |_btn| {
                 // Use the cloned sender to send a message
                 sender.input(Msg::Print(name));
