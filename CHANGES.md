@@ -8,6 +8,8 @@
 + core: Increase MSRV to 1.91.1 to incorporate latest Rust features
 + build: Use `workspace.dependencies` to unify dependencies version management across all crates in project's workspace.
 + examples: New example `message_from_grid_view`, that shows how to send a message from grid view
++ all: Update dependencies
++ core: Add gnome_49 feature flag for GNOME 49
 
 ## 0.10.0 - 2025-09-01
 
