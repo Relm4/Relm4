@@ -70,7 +70,7 @@ impl RelmGridItem for MyGridItem {
     }
 
     fn bind(&mut self, widgets: &mut Self::Widgets, _root: &mut Self::Root) {
-        widgets.label.set_label(&self.name);
+        widgets.label.set_label(self.name);
         let name = self.name;
         widgets.button.connect_clicked(glib::clone!(
             #[strong(rename_to = sender)]
