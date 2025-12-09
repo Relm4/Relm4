@@ -60,18 +60,19 @@ relm4-icons = "0.10"
 
 The `relm4` crate has four feature flags:
 
-| Flag | Purpose | Default |
-| :--- | :------ | :-----: |
-| `macros` | Enable macros by re-exporting [`relm4-macros`](https://crates.io/crates/relm4-macros) | ✅ |
-| `libadwaita` | Improved support for [libadwaita](https://gitlab.gnome.org/World/Rust/libadwaita-rs) | - |
-| `libpanel` | Improved support for [libpanel](https://gitlab.gnome.org/World/Rust/libpanel-rs) | - |
-| `gnome_48` | Enable all version feature flags of all dependencies to match the GNOME 48 SDK | - |
-| `gnome_47` | Enable all version feature flags of all dependencies to match the GNOME 47 SDK | - |
-| `gnome_46` | Enable all version feature flags of all dependencies to match the GNOME 46 SDK | - |
-| `gnome_45` | Enable all version feature flags of all dependencies to match the GNOME 45 SDK | - |
-| `gnome_44` | Enable all version feature flags of all dependencies to match the GNOME 44 SDK | - |
-| `gnome_43` | Enable all version feature flags of all dependencies to match the GNOME 43 SDK | - |
-| `gnome_42` | Enable all version feature flags of all dependencies to match the GNOME 42 SDK | ✅ |
+| Flag         | Purpose                                                                               | Default |
+|:-------------|:--------------------------------------------------------------------------------------| :-----: |
+| `macros`     | Enable macros by re-exporting [`relm4-macros`](https://crates.io/crates/relm4-macros) | ✅ |
+| `libadwaita` | Improved support for [libadwaita](https://gitlab.gnome.org/World/Rust/libadwaita-rs)  | - |
+| `libpanel`   | Improved support for [libpanel](https://gitlab.gnome.org/World/Rust/libpanel-rs)      | - |
+| `gnome_49`   | Enable all version feature flags of all dependencies to match the GNOME 49 SDK        | - |
+| `gnome_48`   | Enable all version feature flags of all dependencies to match the GNOME 48 SDK        | - |
+| `gnome_47`   | Enable all version feature flags of all dependencies to match the GNOME 47 SDK        | - |
+| `gnome_46`   | Enable all version feature flags of all dependencies to match the GNOME 46 SDK        | - |
+| `gnome_45`   | Enable all version feature flags of all dependencies to match the GNOME 45 SDK        | - |
+| `gnome_44`   | Enable all version feature flags of all dependencies to match the GNOME 44 SDK        | - |
+| `gnome_43`   | Enable all version feature flags of all dependencies to match the GNOME 43 SDK        | - |
+| `gnome_42`   | Enable all version feature flags of all dependencies to match the GNOME 42 SDK        | ✅ |
 
 The `macros` feature is a default feature.
 
