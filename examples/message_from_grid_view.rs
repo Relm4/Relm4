@@ -4,6 +4,7 @@ use relm4::{
     prelude::*,
     typed_view::grid::{RelmGridItem, TypedGridView},
 };
+use relm4::gtk::glib;
 
 const CONTRIBUTORS: &[&str] = &[
     "AaronErhardt",
@@ -14,17 +15,16 @@ const CONTRIBUTORS: &[&str] = &[
     "M23SNEZ3",
 ];
 
-fn random_name() -> String {
-    let name = CONTRIBUTORS
+fn random_name() -> &'static str {
+    CONTRIBUTORS
         .iter()
         .choose(&mut rand::rng())
-        .expect("Could not choose a random name");
-    name.to_string()
+        .expect("Could not choose a random name")
 }
 
 #[derive(Debug, Clone)]
 struct MyGridItem {
-    name: String,
+    name: &'static str,
     sender: ComponentSender<App>,
 }
 
@@ -71,14 +71,14 @@ impl RelmGridItem for MyGridItem {
 
     fn bind(&mut self, widgets: &mut Self::Widgets, _root: &mut Self::Root) {
         widgets.label.set_label(&self.name);
-        // Clone sender
-        let sender_clone = self.sender.clone();
-        let self_clone = self.clone();
-        widgets.button.connect_clicked(move |_btn| {
-            // Use the cloned sender to send a message
-            // Msg::Print passes the cloned instance of the App struct
-            sender_clone.input(Msg::Print(self_clone.clone()));
-        });
+        let name = self.name;
+        widgets.button.connect_clicked(glib::clone!(
+            #[strong(rename_to = sender)] self.sender,
+            move |_btn| {
+                // Use the cloned sender to send a message
+                sender.input(Msg::Print(name));
+            }
+        ));
     }
 }
 
@@ -88,15 +88,15 @@ struct App {
 }
 
 #[derive(Debug)]
-enum Msg {
+enum Msg<'a> {
     Add,
-    Print(MyGridItem),
+    Print(&'a str),
 }
 
 #[relm4::component]
 impl SimpleComponent for App {
     type Init = u8;
-    type Input = Msg;
+    type Input = Msg<'static>;
     type Output = ();
 
     view! {
@@ -151,8 +151,8 @@ impl SimpleComponent for App {
                     self.grid_view.append(MyGridItem::new(sender.clone()));
                 }
             }
-            Msg::Print(grid_item) => {
-                println!("Name: {:?}", grid_item.name)
+            Msg::Print(name) => {
+                println!("Name: {:?}", name)
             }
         }
     }
