@@ -5,7 +5,7 @@
 + core: Add `AsyncReducible` and `AsyncReducer` for reducers that can use `async`/`await`
 + fix(examples): derive Default impl for `GameState`
 + build: update all dependencies to fix check-docs ci failure
-+ core: Increase MSRV to 1.91.1 to incorporate latest Rust features
++ core: Increase MSRV to 1.92 to incorporate latest Rust features
 + build: Use `workspace.dependencies` to unify dependencies version management across all crates in project's workspace.
 + examples: New example `message_from_grid_view`, that shows how to send a message from grid view
 + all: Update dependencies
