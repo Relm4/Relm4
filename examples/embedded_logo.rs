@@ -3,8 +3,6 @@ use relm4::prelude::*;
 
 use gtk::glib;
 use relm4::gtk::gdk::Texture;
-use relm4::gtk::gdk_pixbuf::Pixbuf;
-use relm4::gtk::gio::{Cancellable, MemoryInputStream};
 
 struct App {}
 
@@ -15,9 +13,9 @@ struct App {}
 fn embedded_logo() -> Texture {
     let bytes = include_bytes!(".././assets/Relm_logo.png");
     let g_bytes = glib::Bytes::from(&bytes.to_vec());
-    let stream = MemoryInputStream::from_bytes(&g_bytes);
-    let pixbuf = Pixbuf::from_stream(&stream, Cancellable::NONE).unwrap();
-    Texture::for_pixbuf(&pixbuf)
+    Texture::from_bytes(&g_bytes).expect(
+        "Failed to create Texture of embedded logo from bytes of .././assets/Relm_logo.png file",
+    )
 }
 
 #[derive(Debug)]
