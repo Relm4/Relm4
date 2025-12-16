@@ -1,6 +1,6 @@
 use gtk::prelude::*;
 use rand::seq::IteratorRandom;
-use relm4::gtk::glib;
+use relm4::gtk::{glib, glib::SignalHandlerId};
 use relm4::{
     prelude::*,
     typed_view::grid::{RelmGridItem, TypedGridView},
@@ -40,6 +40,7 @@ impl MyGridItem {
 struct Widgets {
     button: gtk::Button,
     label: gtk::Label,
+    click_handler: Option<SignalHandlerId>,
 }
 
 impl RelmGridItem for MyGridItem {
@@ -64,15 +65,22 @@ impl RelmGridItem for MyGridItem {
             }
         }
 
-        let widgets = Widgets { label, button };
+        let widgets = Widgets {
+            label,
+            button,
+            click_handler: None,
+        };
 
         (my_box, widgets)
     }
 
     fn bind(&mut self, widgets: &mut Self::Widgets, _root: &mut Self::Root) {
         widgets.label.set_label(self.name);
+        if let Some(id) = widgets.click_handler.take() {
+            widgets.button.disconnect(id);
+        }
         let name = self.name;
-        widgets.button.connect_clicked(glib::clone!(
+        let handler_id = widgets.button.connect_clicked(glib::clone!(
             #[strong(rename_to = sender)]
             self.sender,
             move |_btn| {
@@ -80,6 +88,7 @@ impl RelmGridItem for MyGridItem {
                 sender.input(Msg::Print(name));
             }
         ));
+        widgets.click_handler = Some(handler_id);
     }
 }
 
