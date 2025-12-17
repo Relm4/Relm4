@@ -9,7 +9,8 @@ use super::{
 };
 
 #[derive(Debug)]
-/// Holds the state for iterating [`TypedListItem`]s of [`TypedColumnView`], [`TypedGridView`] or [`TypedColumnView`].
+/// Holds the state for iterating [`TypedListItem`]s of [`TypedListView`],
+/// [`TypedGridView`] or [`TypedColumnView`].
 pub struct TypedIterator<'a, T> {
     pub(super) list: &'a T,
     pub(super) index: u32,
