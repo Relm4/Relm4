@@ -38,7 +38,7 @@ gtk = { version = "0.10.3", package = "gtk4" }
 once_cell = "1.21"
 panel = { version = "0.6", package = "libpanel" }
 tokio = { version = "1.47" }
-tracing = "0.1.43"
+tracing = "0.1.44"
 reqwest = "0.12.26"
 tracker = "0.2"
 proc-macro2 = "1.0"
