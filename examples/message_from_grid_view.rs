@@ -46,7 +46,8 @@ impl RelmGridItem for MyGridItem {
     type Root = gtk::Box;
     type Widgets = Widgets;
 
-    fn setup(_item: &gtk::ListItem) -> (gtk::Box, Widgets) {
+    fn setup(item: &gtk::ListItem) -> (gtk::Box, Widgets) {
+        item.set_activatable(false);
         relm4::view! {
             my_box = gtk::Box {
                 set_orientation: gtk::Orientation::Horizontal,
