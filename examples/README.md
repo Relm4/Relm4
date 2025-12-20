@@ -234,7 +234,7 @@ data loading.
 
 ### `widget_template.rs`
 
-Create reusable UI elements with the [`widget_template`](https://docs.rs/relm4/latest/relm4/attr.widget_template.html
+Create reusable UI elements with the [`widget_template`](https://docs.rs/relm4/latest/relm4/attr.widget_template.html)
 macro.
 [Discussed further in the Relm4 Book](https://relm4.org/book/stable/widget_templates/index.html).
 
