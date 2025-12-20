@@ -165,7 +165,7 @@ pub(crate) fn generate_tokens(
                 struct __DoNotReturnManually;
 
                 let _no_manual_return: __DoNotReturnManually = (move || {
-                    #[allow(unused_variables)]
+                    #[allow(unused_variables, unused_assignments)]
                     let Self::Widgets {
                         #destructure_fields
                         #additional_fields_return_stream
