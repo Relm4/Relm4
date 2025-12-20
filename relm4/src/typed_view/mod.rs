@@ -6,7 +6,7 @@ mod iterator;
 pub mod list;
 mod selection_ext;
 
-use self::selection_ext::RelmSelectionExt;
+pub use self::selection_ext::RelmSelectionExt;
 use gtk::{glib, prelude::Cast};
 use std::{
     cell::{Ref, RefMut},
