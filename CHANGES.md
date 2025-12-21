@@ -11,6 +11,7 @@
 + all: Update dependencies
 + core: Add gnome_49 feature flag for GNOME 49
 + core: Export `RelmSelectionExt` trait publicly from `relm4::typed_view` module to allow for user extensions of `TypedColumnView`
++ docs: Fix invalid syntax in `menu!` documentation
 
 ## 0.10.0 - 2025-09-01
 
