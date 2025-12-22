@@ -25,8 +25,8 @@ cargo run --example NAME
 
 Some examples require additional features to be enabled, such as support for
 [Adwaita](https://gnome.pages.gitlab.gnome.org/adwaita/) or newer GNOME versions.
-For example, the `split_layout` example requires GNOME 45 and Adwaita, and must be run with
-`cargo run --example split_layout --features gnome_45,libadwaita`
+The requirements for each example are provided in 
+[the Relm4 `Cargo.toml`](/relm4/Cargo.toml).
 
 ## List of examples:
 
@@ -93,7 +93,6 @@ Run with `cargo run --manifest-path icons/Cargo.toml`
 
 Responsive sidebar layout example inspired by the example code in the
 [libadwaita documentation](https://gnome.pages.gitlab.gnome.org/libadwaita/doc/main/adaptive-layouts.html#leaflet).
-Requires Adwaita.
 
 ### `log.rs`
 
@@ -133,7 +132,7 @@ Open and manage multiple [`Window`](https://docs.rs/gtk4/latest/gtk4/struct.Wind
 ### `navigation_splitview_with_stack.rs`
 
 An [`adw::NavigationSplitView`](https://docs.rs/libadwaita/latest/libadwaita/struct.NavigationSplitView.html) with a
-[`Stack`](https://docs.rs/gtk4/latest/gtk4/struct.Stack.html). Requires GNOME 45 and Adwaita.
+[`Stack`](https://docs.rs/gtk4/latest/gtk4/struct.Stack.html).
 
 ### `non_blocking_async.rs`
 
@@ -176,8 +175,7 @@ Manual implementation of the
 ### `split_layout.rs`
 
 A split layout using an
-[`adw::OverlaySplitView`](https://docs.rs/libadwaita/latest/libadwaita/struct.OverlaySplitView.html). Requires GNOME 45
-and Adwaita.
+[`adw::OverlaySplitView`](https://docs.rs/libadwaita/latest/libadwaita/struct.OverlaySplitView.html).
 
 ### `state_management.rs`
 
@@ -186,12 +184,11 @@ State management with data flow based on [messages] and [factories].
 ### `tab_factory.rs`
 
 Manage tabs in an [`adw::TabView`](https://docs.rs/libadwaita/latest/libadwaita/struct.TabView.html) with [factories].
-Requires Adwaita.
 
 ### `tab_game.rs`
 
 A simple game demonstrating tab management and
-[`SharedState`](https://docs.rs/relm4/latest/relm4/shared_state/struct.SharedState.html). Requires Adwaita.
+[`SharedState`](https://docs.rs/relm4/latest/relm4/shared_state/struct.SharedState.html).
 
 ### `to_do.rs`
 
@@ -201,7 +198,6 @@ A simple to-do list application using [factories].
 
 Show toasts (small popup notifications) using 
 [`adw::ToastOverlay`](https://docs.rs/libadwaita/latest/libadwaita/struct.ToastOverlay.html).
-Requires GNOME 43 and Adwaita.
 
 ### `tracker.rs`
 
