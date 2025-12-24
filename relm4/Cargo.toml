@@ -125,3 +125,8 @@ required-features = ["libadwaita", "gnome_45"]
 name = "navigation_splitview_with_stack"
 path = "examples/navigation_splitview_with_stack.rs"
 required-features = ["libadwaita", "gnome_45"]
+
+[[example]]
+name = "message_from_grid_view"
+path = "examples/message_from_grid_view.rs"
+required-features = ["gtk/v4_12"]
