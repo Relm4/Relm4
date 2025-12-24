@@ -1,3 +1,4 @@
+use glib::SignalHandlerId;
 use gtk::prelude::*;
 use rand::seq::IteratorRandom;
 use relm4::gtk::glib;
@@ -22,10 +23,11 @@ fn random_name() -> &'static str {
         .expect("Could not choose a random name")
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 struct MyGridItem {
     name: &'static str,
     sender: ComponentSender<App>,
+    button_click_handler_id: Option<SignalHandlerId>,
 }
 
 impl MyGridItem {
@@ -33,6 +35,7 @@ impl MyGridItem {
         Self {
             name: random_name(),
             sender,
+            button_click_handler_id: Default::default(),
         }
     }
 }
@@ -73,7 +76,7 @@ impl RelmGridItem for MyGridItem {
     fn bind(&mut self, widgets: &mut Self::Widgets, _root: &mut Self::Root) {
         widgets.label.set_label(self.name);
         let name = self.name;
-        widgets.button.connect_clicked(glib::clone!(
+        let button_click_handler_id = widgets.button.connect_clicked(glib::clone!(
             #[strong(rename_to = sender)]
             self.sender,
             move |_btn| {
@@ -81,6 +84,14 @@ impl RelmGridItem for MyGridItem {
                 sender.input(Msg::Print(name));
             }
         ));
+        self.button_click_handler_id
+            .replace(button_click_handler_id);
+    }
+
+    fn unbind(&mut self, widgets: &mut Self::Widgets, _root: &mut Self::Root) {
+        if let Some(id) = self.button_click_handler_id.take() {
+            widgets.button.disconnect(id)
+        }
     }
 }
 
