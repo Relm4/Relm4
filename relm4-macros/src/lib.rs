@@ -234,7 +234,7 @@ pub fn component(attributes: TokenStream, input: TokenStream) -> TokenStream {
 ///     type Input = CounterMsg;
 ///     type Output = CounterOutput;
 ///     type ParentWidget = gtk::Box;
-///     
+///
 ///
 ///     view! {
 ///         root = gtk::Box {
@@ -313,7 +313,7 @@ pub fn factory(attributes: TokenStream, input: TokenStream) -> TokenStream {
 ///
 /// + `"Label text" => ActionType,` to create new entries.
 /// + `"Label text" => ActionType(value),` to create new entries with action value.
-/// + `custom => "widget_id",` add a placeholder for custom widgets you can add later with [`set_attribute_name`](https://gtk-rs.org/gtk-rs-core/stable/0.15/docs/gio/struct.MenuItem.html#method.set_attribute_value).
+/// + `custom: "widget_id",` to add a placeholder for custom widgets you can add later with [`set_attribute_name`](https://gtk-rs.org/gtk-rs-core/stable/0.15/docs/gio/struct.MenuItem.html#method.set_attribute_value).
 /// + `section! { ... }` to create new sections.
 ///
 /// # Example
