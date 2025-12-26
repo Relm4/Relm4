@@ -42,11 +42,17 @@ impl_connect_binding!(gtk::Switch, bool, "active", switch);
 impl_connect_binding!(gtk::Spinner, bool, "spinning", spinner);
 impl_connect_binding!(gtk::Popover, bool, "visible", popover);
 impl_connect_binding!(gtk::Revealer, bool, "reveal-child", revealer);
+#[cfg(all(feature = "libadwaita", feature = "gnome_45"))]
+impl_connect_binding!(adw::SwitchRow, bool, "active", switch_row);
+#[cfg(feature = "libadwaita")]
+impl_connect_binding!(adw::ExpanderRow, bool, "expanded", expander_row);
 
 // f64 bindings
 impl_connect_binding!(gtk::SpinButton, f64, "value", spin_button);
 impl_connect_binding!(gtk::Adjustment, f64, "value", adjustment);
 impl_connect_binding!(gtk::ScaleButton, f64, "value", scale_button);
+#[cfg(all(feature = "libadwaita", feature = "gnome_45"))]
+impl_connect_binding!(adw::SpinRow, f64, "value", spin_row);
 
 // String bindings
 impl_connect_binding!(gtk::Label, String, "label", label);
@@ -58,3 +64,17 @@ impl_connect_binding!(gtk::StackPage, String, "name", stack_page, {
     let stack = gtk::Stack::default();
     stack.add_child(&gtk::Label::default())
 });
+#[cfg(feature = "libadwaita")]
+impl_connect_binding!(adw::SplitButton, String, "label", split_button);
+#[cfg(feature = "libadwaita")]
+impl_connect_binding!(adw::ButtonContent, String, "label", button_content);
+#[cfg(feature = "libadwaita")]
+impl_connect_binding!(adw::PreferencesRow, String, "title", preferences_row);
+#[cfg(feature = "libadwaita")]
+impl_connect_binding!(adw::ActionRow, String, "title", action_row);
+#[cfg(all(feature = "libadwaita", feature = "gnome_47"))]
+impl_connect_binding!(adw::ButtonRow, String, "title", button_row);
+#[cfg(feature = "libadwaita")]
+impl_connect_binding!(adw::WindowTitle, String, "title", window_title);
+#[cfg(all(feature = "libadwaita", feature = "gnome_44"))]
+impl_connect_binding!(adw::Banner, String, "title", banner);
