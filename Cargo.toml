@@ -25,7 +25,7 @@ keywords = ["gui", "gtk", "gtk4", "gnome", "elm"]
 categories = ["gui"]
 
 [workspace.dependencies]
-relm4 = { path = "./relm4", default-features = false }
+relm4 = { version = "0.10.0", path = "./relm4", default-features = false }
 relm4-css = { version = "0.10.0", path = "./relm4-css" }
 relm4-macros = { version = "0.10.0", path = "./relm4-macros" }
 relm4-icons = "0.10.0"
