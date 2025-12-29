@@ -2,40 +2,51 @@
 
 ## Unreleased
 
+## 0.10.1 - 2025-12-29
+
+### Added
+
 + core: Add `AsyncReducible` and `AsyncReducer` for reducers that can use `async`/`await`
-+ fix(examples): derive Default impl for `GameState`
-+ build: update all dependencies to fix check-docs ci failure
-+ core: Increase MSRV to 1.92 to incorporate latest Rust features
-+ build: Use `workspace.dependencies` to unify dependencies version management across all crates in project's workspace.
-+ examples: New example `message_from_grid_view`, that shows how to send a message from grid view
-+ all: Update dependencies
 + core: Add gnome_49 feature flag for GNOME 49
 + core: Export `RelmSelectionExt` trait publicly from `relm4::typed_view` module to allow for user extensions of `TypedColumnView`
-+ docs: Fix invalid syntax in `menu!` documentation
 + core: Implement `Binding` for various Adwaita widgets
++ build: Use `workspace.dependencies` to unify dependencies version management across all crates in project's workspace.
++ examples: New example `message_from_grid_view`, that shows how to send a message from grid view
+
+### Changed
+
++ core: Increase MSRV to 1.92 to incorporate latest Rust features
++ build: update all dependencies to fix check-docs ci failure
++ all: Update dependencies
+
+### Fixed
+
++ docs: Fix invalid syntax in `menu!` documentation
++ examples: derive Default impl for `GameState`
 
 ## 0.10.0 - 2025-09-01
+
+### Changed
 
 + all: Update dependencies
 
 ## 0.10.0-beta.4 - 2025-08-23
 
+### Added
+
 + components: Add `icon` to `IconButton`
 + core: Implement container traits to allow easier usage of libpanel widgets in the view macro
 + core: Support naturally appending any `Widget`s as children to `ListBox` and `FlowBox` in view macro.
-+ all: Use the 2024 edition and increase MSRV to 1.85 to match the dependencies
 + examples: Add an example that shows how to use `adw::NavigationSplitView` with a `adw::Stack`
-
-### Added
-
 + core: Add convenience methods for setting the active `StackPage` in `FactoryVecDeque` and `FactoryHashMap`
 + core: Impl `Binding` for `gtk::CheckButton`
 + core: Added a method to change column headers in `RelmColumn`. Useful for translations
 + core: Add a `iter` methods for iterating items in `TypedColumnView`, `TypedGridView` and `TypedListView`
-
-### Added
-
 + core: Add method `FactoryVecDeque::extend` to append multiple components efficiently.
+
+### Changed
+
++ all: Use the 2024 edition and increase MSRV to 1.85 to match the dependencies
 
 ### Fixed
 
@@ -46,11 +57,11 @@
 ### Added
 
 + core: Add gnome_47 feature flag for GNOME 47
++ core: Add more async factory types to prelude
++ core: Add `notify_filter_changed` to typed views to allow dynamic filters
 
 ### Changed
 
-+ core: Add more async factory types to prelude
-+ core: Add `notify_filter_changed` to typed views to allow dynamic filters
 + components: Hide recent button from `OpenButton` component when there is no entries
 
 ### Fixed
