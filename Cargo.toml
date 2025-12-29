@@ -21,7 +21,7 @@ description = "An idiomatic GUI library inspired by Elm and based on gtk4-rs"
 homepage = "https://relm4.org"
 repository = "https://github.com/Relm4/Relm4"
 
-keywords = ["gui", "gtk", "gtk4", "elm"]
+keywords = ["gui", "gtk", "gtk4", "gnome", "elm"]
 categories = ["gui"]
 
 [workspace.dependencies]
