@@ -1,7 +1,4 @@
-#!/bin/bash
-
-# Exit on error
-set -e
+#!/usr/bin/env -S bash -euo pipefail
 
 # Check the code
 cargo update
