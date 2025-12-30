@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+### Added
+
+
+
+### Changed
+
+
+
+### Fixed
+
++ all: Update dependencies in `relm4` crate to `relm4-*` crate to `0.10.1` to make sure `unused_assignments` fix
+  is delivered on `relm4` version update. Fixes #842.
+
 ## 0.10.1 - 2025-12-29
 
 ### Added
