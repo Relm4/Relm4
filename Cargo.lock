@@ -922,7 +922,7 @@ dependencies = [
 
 [[package]]
 name = "icons"
-version = "0.10.0"
+version = "0.10.1"
 dependencies = [
  "relm4",
  "relm4-icons",
@@ -1495,7 +1495,7 @@ checksum = "7a2d987857b319362043e95f5353c0535c1f58eec5336fdfcf626430af7def58"
 
 [[package]]
 name = "relm4"
-version = "0.10.0"
+version = "0.10.1"
 dependencies = [
  "criterion",
  "flume",
@@ -1520,7 +1520,7 @@ dependencies = [
 
 [[package]]
 name = "relm4-components"
-version = "0.10.0"
+version = "0.10.1"
 dependencies = [
  "once_cell",
  "relm4",
@@ -1530,13 +1530,13 @@ dependencies = [
 
 [[package]]
 name = "relm4-css"
-version = "0.10.0"
+version = "0.10.1"
 
 [[package]]
 name = "relm4-icons"
-version = "0.10.0"
+version = "0.10.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "28869f8322ed72bed568cbb704403037ff62a66c966ded7a862ad5732f108530"
+checksum = "98d855c42d60cec35fbdf0217e2c3606fe3f8ee000fe7371c5c87e05e37e79de"
 dependencies = [
  "gtk4",
 ]
@@ -1555,7 +1555,7 @@ dependencies = [
 
 [[package]]
 name = "relm4-macros"
-version = "0.10.0"
+version = "0.10.1"
 dependencies = [
  "proc-macro2",
  "quote",

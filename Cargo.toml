@@ -28,7 +28,7 @@ categories = ["gui"]
 relm4 = { version = "0.10.0", path = "./relm4", default-features = false }
 relm4-css = { version = "0.10.0", path = "./relm4-css" }
 relm4-macros = { version = "0.10.0", path = "./relm4-macros" }
-relm4-icons = "0.10.0"
+relm4-icons = "0.10.1"
 
 adw = { version = "0.8.1", package = "libadwaita" }
 flume = "0.12.0"
