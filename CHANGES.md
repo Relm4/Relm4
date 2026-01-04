@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Fixed
+
+core: Fix incorrectly enabled `adw/v1_9` dependent feature flag for `gnome_49`. Gnome 49 [ships with `libadwaita` 1.8](https://release.gnome.org/49/developers/?utm_source=chatgpt.com#:~:text=GNOME%2049%20comes%20with%20Libadwaita%201%2E8).
+
 ## 0.10.1 - 2025-12-29
 
 ### Added
