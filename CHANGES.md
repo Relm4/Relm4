@@ -8,7 +8,7 @@
 
 ### Changed
 
-
++ all: Update dependencies
 
 ### Fixed
 
