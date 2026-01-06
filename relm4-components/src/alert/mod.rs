@@ -110,7 +110,6 @@ impl Component for Alert {
         gtk::Window {
             #[watch]
             set_visible: model.is_active,
-            #[watch]
             set_modal: model.settings.is_modal,
             add_css_class: "relm4-alert",
 
