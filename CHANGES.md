@@ -15,6 +15,7 @@
 + all: Update dependencies in `relm4` crate to `relm4-*` crate to `0.10.1` to make sure `unused_assignments` fix
   is delivered on `relm4` version update. Fixes #842.
 + core: Fix incorrectly enabled `adw/v1_9` dependent feature flag for `gnome_49`. Gnome 49 [ships with `libadwaita` 1.8](https://release.gnome.org/49/developers/?utm_source=chatgpt.com#:~:text=GNOME%2049%20comes%20with%20Libadwaita%201%2E8).
++ components: Set modalality on actual window when is_modal set in AllertSettings. Fixes #837.
 
 ## 0.10.1 - 2025-12-29
 
