@@ -9,6 +9,9 @@
 ### Changed
 
 + all: Update dependencies
++ all: Switch from `once_cell`'s `Lazy`, `sync::OnceCell`, `unsync::OnceCell`
+  to `std` types `LazyLock`, `sync::OnceLock` and `cell::OnceCell`.
+  Remove `once_cell` dependency from `Cargo.toml` files.
 
 ### Fixed
 

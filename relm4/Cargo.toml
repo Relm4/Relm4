@@ -57,7 +57,6 @@ flume.workspace = true
 futures.workspace = true
 fragile.workspace = true
 gtk.workspace = true
-once_cell.workspace = true
 panel = { workspace = true, optional = true }
 tokio = { workspace = true, features = ["rt", "rt-multi-thread", "sync"] }
 
