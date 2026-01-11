@@ -107,6 +107,7 @@ impl SimpleComponent for OpenButton {
                         recent_files_list -> gtk::ListBox {
                             set_vexpand: true,
                             set_hexpand: true,
+                            set_selection_mode: gtk::SelectionMode::None,
                         }
                     }
                 }
