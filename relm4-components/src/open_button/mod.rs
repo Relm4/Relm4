@@ -94,6 +94,12 @@ impl SimpleComponent for OpenButton {
                 set_visible: model.config.recently_opened_files.is_some()
                     && model.recent_files.is_some(),
 
+                #[watch]
+                set_sensitive: !model.recent_files
+                    .as_ref()
+                    .map(FactoryVecDeque::is_empty)
+                    .unwrap_or(false),
+
                 #[wrap(Some)]
                 #[name(popover)]
                 set_popover = &gtk::Popover {
