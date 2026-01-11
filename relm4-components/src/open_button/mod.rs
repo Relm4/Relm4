@@ -1,7 +1,7 @@
 //! Reusable and easily configurable open button dialog component.
 //!
 //! **[Example implementation](https://github.com/Relm4/Relm4/blob/main/relm4-components/examples/open_button.rs)**
-use relm4::factory::{DynamicIndex, FactoryVecDeque};
+use relm4::factory::{DynamicIndex, FactoryComponent, FactoryVecDeque};
 use relm4::gtk::prelude::*;
 use relm4::{
     Component, ComponentController, ComponentParts, ComponentSender, Controller, SimpleComponent,
@@ -104,8 +104,7 @@ impl SimpleComponent for OpenButton {
                         set_min_content_height: 300,
 
                         #[local_ref]
-                        recent_files_list -> gtk::Box {
-                            set_orientation: gtk::Orientation::Vertical,
+                        recent_files_list -> gtk::ListBox {
                             set_vexpand: true,
                             set_hexpand: true,
                         }
@@ -179,7 +178,7 @@ impl SimpleComponent for OpenButton {
                 OpenDialogResponse::Cancel => OpenButtonMsg::Ignore,
             });
 
-        let recent_files_list = gtk::Box::default();
+        let recent_files_list = <FileListItem as FactoryComponent>::ParentWidget::default();
 
         let mut model = Self {
             config: settings,
