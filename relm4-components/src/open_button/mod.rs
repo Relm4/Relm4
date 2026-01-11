@@ -99,9 +99,8 @@ impl SimpleComponent for OpenButton {
                 set_popover = &gtk::Popover {
                     gtk::ScrolledWindow {
                         set_hscrollbar_policy: gtk::PolicyType::Never,
-                        set_min_content_width: 100,
-                        set_min_content_height: 100,
-                        set_min_content_height: 300,
+                        set_vscrollbar_policy: gtk::PolicyType::Automatic,
+                        set_propagate_natural_height: true,
 
                         #[local_ref]
                         recent_files_list -> gtk::ListBox {
