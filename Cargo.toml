@@ -7,7 +7,15 @@ members = [
     "relm4-css",
     "relm4-macros",
 ]
-exclude = ["examples", "examples/libadwaita"]
+exclude = [
+    "examples", 
+    "examples/libadwaita",
+    ".envrc",
+    "flake.lock",
+    "flake.nix",
+    "default.nix",
+    "shell.nix",
+]
 
 [workspace.package]
 version = "0.10.1"
