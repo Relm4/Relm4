@@ -4,7 +4,7 @@
 
 ### Added
 
-
++ exclude nix files when publishing to crates.io. [commit](https://github.com/Relm4/Relm4/commit/365c15f0d2453883441707291b90beb143729d0e)
 
 ### Changed
 
