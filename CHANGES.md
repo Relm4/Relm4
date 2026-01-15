@@ -13,6 +13,7 @@
 ### Changed
 
 + all: Update dependencies
++ build: Switch documentation build back to latest Rust nightly version to match how docs.rs builds it.
 
 ### Fixed
 
