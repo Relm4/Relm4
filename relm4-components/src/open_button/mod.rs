@@ -1,7 +1,7 @@
 //! Reusable and easily configurable open button dialog component.
 //!
 //! **[Example implementation](https://github.com/Relm4/Relm4/blob/main/relm4-components/examples/open_button.rs)**
-use relm4::factory::{DynamicIndex, FactoryVecDeque};
+use relm4::factory::{DynamicIndex, FactoryComponent, FactoryVecDeque};
 use relm4::gtk::prelude::*;
 use relm4::{
     Component, ComponentController, ComponentParts, ComponentSender, Controller, SimpleComponent,
@@ -94,20 +94,25 @@ impl SimpleComponent for OpenButton {
                 set_visible: model.config.recently_opened_files.is_some()
                     && model.recent_files.is_some(),
 
+                #[watch]
+                set_sensitive: !model.recent_files
+                    .as_ref()
+                    .map(FactoryVecDeque::is_empty)
+                    .unwrap_or(false),
+
                 #[wrap(Some)]
                 #[name(popover)]
                 set_popover = &gtk::Popover {
                     gtk::ScrolledWindow {
                         set_hscrollbar_policy: gtk::PolicyType::Never,
-                        set_min_content_width: 100,
-                        set_min_content_height: 100,
-                        set_min_content_height: 300,
+                        set_vscrollbar_policy: gtk::PolicyType::Automatic,
+                        set_propagate_natural_height: true,
 
                         #[local_ref]
-                        recent_files_list -> gtk::Box {
-                            set_orientation: gtk::Orientation::Vertical,
+                        recent_files_list -> gtk::ListBox {
                             set_vexpand: true,
                             set_hexpand: true,
+                            set_selection_mode: gtk::SelectionMode::None,
                         }
                     }
                 }
@@ -179,7 +184,7 @@ impl SimpleComponent for OpenButton {
                 OpenDialogResponse::Cancel => OpenButtonMsg::Ignore,
             });
 
-        let recent_files_list = gtk::Box::default();
+        let recent_files_list = <FileListItem as FactoryComponent>::ParentWidget::default();
 
         let mut model = Self {
             config: settings,

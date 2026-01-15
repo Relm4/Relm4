@@ -5,6 +5,10 @@
 ### Added
 
 + exclude nix files when publishing to crates.io. [commit](https://github.com/Relm4/Relm4/commit/365c15f0d2453883441707291b90beb143729d0e)
++ components: Let popover menu of recent files from `OpenButton` component grow and shrink naturally.
++ components: Let popover menu of recent files from `OpenButton` component to show vertical scrolling when it is necessary.
++ components: Deactivate recent files popover menu button from `OpenButton` component when there are no recent files
+  and activate it back when files were opened.
 
 ### Changed
 
@@ -16,6 +20,7 @@
   is delivered on `relm4` version update. Fixes #842.
 + core: Fix incorrectly enabled `adw/v1_9` dependent feature flag for `gnome_49`. Gnome 49 [ships with `libadwaita` 1.8](https://release.gnome.org/49/developers/?utm_source=chatgpt.com#:~:text=GNOME%2049%20comes%20with%20Libadwaita%201%2E8).
 + components: Set modality on actual window when is_modal set in AlertSettings. Fixes #837.
++ components: Fix `Gtk-CRITITCAL` in popover menu of recent files in `OpenButton` component. Fixes #858.
 
 ## 0.10.1 - 2025-12-29
 

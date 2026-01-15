@@ -16,12 +16,14 @@ impl FactoryComponent for FileListItem {
     type CommandOutput = ();
     type Input = ();
     type Init = PathBuf;
-    type ParentWidget = gtk::Box;
+    type ParentWidget = gtk::ListBox;
     type Output = OpenButtonMsg;
 
     view! {
         gtk::ListBoxRow {
+            set_focusable: true,
             gtk::Button {
+                set_focusable: false,
                 set_label: self.path.iter().next_back().expect("Empty path").to_str().unwrap(),
                 set_margin_all: 0,
                 connect_clicked[sender, index] => move |_| {
