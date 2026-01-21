@@ -81,9 +81,9 @@ jobs:
       - uses: actions/checkout@v6
       - uses: dtolnay/rust-toolchain@nightly
         with:
-          toolchain: nightly-2025-09-27
+          toolchain: nightly
       - name: "Build docs for all features"
-        run: cargo +nightly-2025-09-27 doc --all-features
+        run: cargo +nightly doc --all-features
 
   codespell:
     runs-on: ubuntu-latest
