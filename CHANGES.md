@@ -15,6 +15,7 @@
 
 + all: Update dependencies
 + build: Switch documentation build back to latest Rust nightly version to match how docs.rs builds it.
++ core: Increase MSRV to 1.93 to incorporate latest Rust features
 
 ### Fixed
 

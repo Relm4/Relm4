@@ -35,7 +35,7 @@ jobs:
       matrix:
         rust:
           - stable
-          - "1.92"
+          - "1.93"
     env:
       DISPLAY: ":99.0"
     steps:
