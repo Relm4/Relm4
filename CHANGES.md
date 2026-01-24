@@ -9,6 +9,7 @@
 + components: Let popover menu of recent files from `OpenButton` component to show vertical scrolling when it is necessary.
 + components: Deactivate recent files popover menu button from `OpenButton` component when there are no recent files
   and activate it back when files were opened.
++ examples: Documentation
 
 ### Changed
 
