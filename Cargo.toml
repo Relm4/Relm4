@@ -8,7 +8,7 @@ members = [
     "relm4-macros",
 ]
 exclude = [
-    "examples", 
+    "examples",
     "examples/libadwaita",
     ".envrc",
     "flake.lock",
