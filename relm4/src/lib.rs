@@ -210,7 +210,7 @@ where
 ///
 /// The priority can be any value, but GTK [includes some][style-providers] that you can use.
 ///
-/// [style-providers]: https://gtk-rs.org/gtk4-rs/stable/latest/docs/gtk4/index.html?search=const%3ASTYLE_PROVIDER&filter-crate=gtk4#constants
+/// [style-providers]: https://gtk-rs.org/gtk4-rs/stable/latest/docs/gtk4/index.html?search=STYLE_PROVIDER&filter-crate=gtk4#constants
 pub fn set_global_css_with_priority(style_data: &str, priority: u32) {
     let display = gtk::gdk::Display::default().unwrap();
     let provider = gtk::CssProvider::new();
@@ -232,7 +232,7 @@ pub fn set_global_css(style_data: &str) {
 ///
 /// The priority can be any value, but GTK [includes some][style-providers] that you can use.
 ///
-/// [style-providers]: https://gtk-rs.org/gtk4-rs/stable/latest/docs/gtk4/index.html?search=const%3ASTYLE_PROVIDER&filter-crate=gtk4#constants
+/// [style-providers]: https://gtk-rs.org/gtk4-rs/stable/latest/docs/gtk4/index.html?search=STYLE_PROVIDER&filter-crate=gtk4#constants
 pub fn set_global_css_from_file_with_priority<P: AsRef<std::path::Path>>(
     path: P,
     priority: u32,
