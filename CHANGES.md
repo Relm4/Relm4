@@ -21,7 +21,7 @@
 
 + all: Update dependencies in `relm4` crate to `relm4-*` crate to `0.10.1` to make sure `unused_assignments` fix
   is delivered on `relm4` version update. Fixes #842.
-+ core: Fix incorrectly enabled `adw/v1_9` dependent feature flag for `gnome_49`. Gnome 49 [ships with `libadwaita` 1.8](https://release.gnome.org/49/developers/?utm_source=chatgpt.com#:~:text=GNOME%2049%20comes%20with%20Libadwaita%201%2E8).
++ core: Fix incorrectly enabled `adw/v1_9` dependent feature flag for `gnome_49`. Gnome 49 [ships with `libadwaita` 1.8](https://release.gnome.org/49/developers/#:~:text=GNOME%2049%20comes%20with%20Libadwaita%201.8).
 + components: Set modality on actual window when is_modal set in AlertSettings. Fixes #837.
 + components: Fix `Gtk-CRITITCAL` in popover menu of recent files in `OpenButton` component. Fixes #858.
 + documentation: Fix broken link in `relm4` crate
