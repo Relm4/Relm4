@@ -47,7 +47,7 @@ once_cell = "1.21"
 panel = { version = "0.6", package = "libpanel" }
 tokio = { version = "1.47" }
 tracing = "0.1.44"
-reqwest = "0.12.28"
+reqwest = "0.13.1"
 tracker = "0.2"
 proc-macro2 = "1.0"
 quote = "1.0"
