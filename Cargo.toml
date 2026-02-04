@@ -43,7 +43,6 @@ flume = "0.12.0"
 futures = "0.3.31"
 fragile = "2.0.1"
 gtk = { version = "0.10.3", package = "gtk4" }
-once_cell = "1.21"
 panel = { version = "0.6", package = "libpanel" }
 tokio = { version = "1.47" }
 tracing = "0.1.44"

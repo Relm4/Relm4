@@ -16,6 +16,9 @@
 + all: Update dependencies
 + build: Switch documentation build back to latest Rust nightly version to match how docs.rs builds it.
 + core: Increase MSRV to 1.93 to incorporate latest Rust features
++ all: Switch from `once_cell`'s `Lazy`, `sync::OnceCell`, `unsync::OnceCell`
+  to `std` types `LazyLock`, `sync::OnceLock` and `cell::OnceCell`.
+  Remove `once_cell` dependency from `Cargo.toml` files.
 
 ### Fixed
 
