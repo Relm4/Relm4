@@ -355,4 +355,15 @@ where
             index: 0,
         }
     }
+
+    /// Sort all items with for the given compare function.
+    pub fn sort<F: FnMut(&T, &T) -> Ordering>(&self, mut compare_func: F) {
+        let compare = move |first: &glib::Object, second: &glib::Object| -> Ordering {
+            let first = get_value::<T>(first);
+            let second = get_value::<T>(second);
+            compare_func(&first, &second)
+        };
+
+        self.store.sort(compare);
+    }
 }
