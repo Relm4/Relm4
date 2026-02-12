@@ -1,8 +1,8 @@
 use std::sync::Mutex;
 
 use crate::{Receiver, Sender};
-use once_cell::sync::Lazy;
 use std::fmt::Debug;
+use std::sync::LazyLock;
 
 #[derive(Debug)]
 /// A type that can be used in static variables to pass messages to components.
@@ -33,7 +33,7 @@ use std::fmt::Debug;
 /// let controller = MyComponent::builder().launch_with_broker((), &MY_COMPONENT).detach();
 /// ```
 pub struct MessageBroker<M: Debug> {
-    inner: Lazy<MessageBrokerInner<M>>,
+    inner: LazyLock<MessageBrokerInner<M>>,
 }
 
 impl<M: Debug> Default for MessageBroker<M> {
@@ -48,7 +48,7 @@ impl<M: Debug> MessageBroker<M> {
     /// The returned message broker will not forward messages until it's initialized.
     #[must_use]
     pub const fn new() -> Self {
-        let inner: Lazy<MessageBrokerInner<M>> = Lazy::new(|| MessageBrokerInner::<M>::new());
+        let inner: LazyLock<MessageBrokerInner<M>> = LazyLock::new(MessageBrokerInner::<M>::new);
         Self { inner }
     }
 

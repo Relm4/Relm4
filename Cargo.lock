@@ -1503,7 +1503,6 @@ dependencies = [
  "gtk4",
  "libadwaita",
  "libpanel",
- "once_cell",
  "rand",
  "relm4-components",
  "relm4-css",
@@ -1521,7 +1520,6 @@ dependencies = [
 name = "relm4-components"
 version = "0.10.1"
 dependencies = [
- "once_cell",
  "relm4",
  "reqwest",
  "tracker",
