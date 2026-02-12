@@ -62,7 +62,7 @@ tracing-subscriber = "0.3.22"
 serde = "1"
 serde_json = "1"
 rustversion = "1"
-trybuild = "1.0.114"
+trybuild = "1.0.116"
 
 # build-dependencies
 relm4-icons-build = "0.10.1"
