@@ -25,6 +25,7 @@
 + components: Set modality on actual window when is_modal set in AlertSettings. Fixes #837.
 + components: Fix `Gtk-CRITITCAL` in popover menu of recent files in `OpenButton` component. Fixes #858.
 + documentation: Fix broken link in `relm4` crate
++ tests: Fix fragile test `list_box_extension_traits` which failed with `gnome_45` flag but worked with `gnome_44`. Fixes #826.
 
 ## 0.10.1 - 2025-12-29
 
