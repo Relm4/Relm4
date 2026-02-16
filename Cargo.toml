@@ -40,7 +40,7 @@ relm4-icons = "0.10.1"
 
 adw = { version = "0.8.1", package = "libadwaita" }
 flume = "0.12.0"
-futures = "0.3.31"
+futures = "0.3.32"
 fragile = "2.0.1"
 gtk = { version = "0.10.3", package = "gtk4" }
 once_cell = "1.21"
