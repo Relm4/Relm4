@@ -103,6 +103,13 @@ mod libadwaita {
             adw::NavigationView: adw::NavigationPage
         }
     }
+
+    #[cfg(all(feature = "libadwaita", feature = "gnome_48"))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "libadwaita", feature = "gnome_48"))))]
+    mod gnome_48 {
+        use super::RelmContainerExt;
+        append_impl!(adw::WrapBox);
+    }
 }
 
 #[cfg(feature = "libpanel")]
