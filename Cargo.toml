@@ -58,7 +58,7 @@ relm4-components = { path = "./relm4-components" }
 
 criterion = { version = "0.8", default-features = false }
 rand = "0.10.0"
-tracing-subscriber = "0.3.22"
+tracing-subscriber = "0.3.23"
 serde = "1"
 serde_json = "1"
 rustversion = "1"
