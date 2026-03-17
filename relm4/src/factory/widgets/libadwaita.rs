@@ -299,3 +299,53 @@ impl FactoryView for adw::Leaflet {
         returned_widget.child()
     }
 }
+
+#[cfg(all(feature = "libadwaita", feature = "gnome_48"))]
+impl FactoryView for adw::WrapBox {
+    type Children = gtk::Widget;
+    type ReturnedWidget = gtk::Widget;
+    type Position = ();
+
+    fn factory_remove(&self, widget: &Self::ReturnedWidget) {
+        self.remove(widget);
+    }
+
+    fn factory_append(
+        &self,
+        widget: impl AsRef<Self::Children>,
+        _: &Self::Position,
+    ) -> Self::ReturnedWidget {
+        self.append(widget.as_ref());
+        widget.as_ref().clone()
+    }
+
+    fn factory_prepend(
+        &self,
+        widget: impl AsRef<Self::Children>,
+        position: &Self::Position,
+    ) -> Self::ReturnedWidget {
+        self.factory_append(widget, position)
+    }
+
+    fn factory_insert_after(
+        &self,
+        widget: impl AsRef<Self::Children>,
+        position: &Self::Position,
+        _other: &Self::ReturnedWidget,
+    ) -> Self::ReturnedWidget {
+        self.factory_append(widget, position)
+    }
+
+    fn factory_move_after(&self, _widget: &Self::ReturnedWidget, _other: &Self::ReturnedWidget) {}
+
+    fn factory_move_start(&self, _widget: &Self::ReturnedWidget) {}
+
+    fn returned_widget_to_child(returned_widget: &Self::ReturnedWidget) -> Self::Children {
+        returned_widget.clone()
+    }
+
+    fn factory_update_position(&self, widget: &Self::ReturnedWidget, position: &Self::Position) {
+        self.factory_remove(widget);
+        self.factory_append(widget, position);
+    }
+}

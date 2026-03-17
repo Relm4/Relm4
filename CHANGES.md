@@ -1,6 +1,7 @@
 # Changelog
 
 ## Unreleased
++ core: Implement container and factory traits for `adw::WrapBox`
 
 ### Added
 

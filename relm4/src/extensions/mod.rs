@@ -218,6 +218,13 @@ mod libadwaita {
             adw::ToolbarView
         }
     }
+
+    #[cfg(all(feature = "libadwaita", feature = "gnome_48"))]
+    mod gnome_48 {
+        use super::ContainerChild;
+
+        container_child_impl!(adw::WrapBox);
+    }
 }
 
 #[cfg(feature = "libpanel")]
