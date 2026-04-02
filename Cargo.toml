@@ -41,7 +41,7 @@ relm4-icons = "0.10.1"
 adw = { version = "0.8.1", package = "libadwaita" }
 flume = "0.12.0"
 futures = "0.3.32"
-fragile = "2.0.1"
+fragile = "2.1.0"
 gtk = { version = "0.10.3", package = "gtk4" }
 once_cell = "1.21"
 panel = { version = "0.6", package = "libpanel" }
