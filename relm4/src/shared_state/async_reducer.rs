@@ -1,7 +1,7 @@
 use std::future::Future;
 use std::sync::{Arc, RwLock};
 
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 
 use crate::{RUNTIME, Sender};
 
@@ -137,7 +137,7 @@ where
 /// ```
 #[derive(Debug)]
 pub struct AsyncReducer<Data: AsyncReducible> {
-    inner: Lazy<AsyncReducerInner<Data>>,
+    inner: LazyLock<AsyncReducerInner<Data>>,
 }
 
 impl<Data> Default for AsyncReducer<Data>
@@ -159,7 +159,7 @@ where
     #[must_use]
     pub const fn new() -> Self {
         Self {
-            inner: Lazy::new(AsyncReducerInner::default),
+            inner: LazyLock::new(AsyncReducerInner::default),
         }
     }
 
