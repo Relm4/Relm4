@@ -11,6 +11,7 @@
 + components: Deactivate recent files popover menu button from `OpenButton` component when there are no recent files
   and activate it back when files were opened.
 + examples: Documentation
++ GNOME 50 features
 
 ### Changed
 
