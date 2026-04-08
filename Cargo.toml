@@ -18,7 +18,7 @@ exclude = [
 ]
 
 [workspace.package]
-version = "0.10.1"
+version = "0.11.0"
 authors = ["Aaron Erhardt <aaron.erhardt@t-online.de>"]
 edition = "2024"
 rust-version = "1.93"
@@ -33,9 +33,9 @@ keywords = ["gui", "gtk", "gtk4", "gnome", "elm"]
 categories = ["gui"]
 
 [workspace.dependencies]
-relm4 = { version = "0.10.1", path = "./relm4", default-features = false }
-relm4-css = { version = "0.10.1", path = "./relm4-css" }
-relm4-macros = { version = "0.10.1", path = "./relm4-macros" }
+relm4 = { version = "0.11.0", path = "./relm4", default-features = false }
+relm4-css = { version = "0.11.0", path = "./relm4-css" }
+relm4-macros = { version = "0.11.0", path = "./relm4-macros" }
 relm4-icons = "0.11.0"
 
 adw = { version = "0.9.1", package = "libadwaita" }
