@@ -224,6 +224,9 @@ mod libadwaita {
         use super::ContainerChild;
 
         container_child_impl!(adw::WrapBox);
+        container_child_impl! {
+            adw::ToggleGroup: adw::Toggle
+        }
     }
 }
 

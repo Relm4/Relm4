@@ -279,3 +279,38 @@ fn tab_view_factory_view() {
     tab_view.factory_move_start(&page2);
     assert_children!(tab_view: widget2, widget3, widget1);
 }
+
+#[gtk::test]
+#[cfg(feature = "libadwaita")]
+#[cfg(feature = "gnome_48")]
+fn toggle_group_factory_view() {
+    let toogle_group = adw::ToggleGroup::default();
+
+    let toggle1 = adw::Toggle::default();
+    let toggle2 = adw::Toggle::default();
+    // let widget3 = gtk::Entry::default();
+
+    let toogle_group_item1 = toogle_group.factory_append(&toggle1, &());
+    let toogle_groutp_item2 = toogle_group.factory_append(&toggle2, &());
+    // let page3 = tab_view.factory_insert_after(&widget3, &(), &page2);
+    // let page1 = tab_view.factory_prepend(&widget1, &());
+    
+    // assert_eq!(toogle_group_item1.is_enabled(), false);
+    // assert_eq!(page2.child(), widget2);
+    // assert_eq!(page3.child(), widget3);
+
+    // assert_eq!(adw::TabView::returned_widget_to_child(&page1), widget1);
+    // assert_eq!(adw::TabView::returned_widget_to_child(&page2), widget2);
+    // assert_eq!(adw::TabView::returned_widget_to_child(&page3), widget3);
+
+    // assert_children!(tab_view: widget1, widget2, widget3);
+
+    // tab_view.factory_move_after(&page3, &page1);
+    // assert_children!(tab_view: widget1, widget3, widget2);
+
+    // tab_view.factory_move_after(&page1, &page2);
+    // assert_children!(tab_view: widget3, widget2, widget1);
+
+    // tab_view.factory_move_start(&page2);
+    // assert_children!(tab_view: widget2, widget3, widget1);
+}
