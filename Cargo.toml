@@ -65,4 +65,4 @@ rustversion = "1"
 trybuild = "1.0.116"
 
 # build-dependencies
-relm4-icons-build = "0.10.1"
+relm4-icons-build = "0.11.0"
