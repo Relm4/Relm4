@@ -286,31 +286,30 @@ fn tab_view_factory_view() {
 fn toggle_group_factory_view() {
     let toogle_group = adw::ToggleGroup::default();
 
-    let toggle1 = adw::Toggle::default();
+    let toggle1 = adw::Toggle::builder()
+        .name("toggle1")
+        .child(&gtk::Box::default())
+        .build();
     let toggle2 = adw::Toggle::default();
-    // let widget3 = gtk::Entry::default();
+    let toggle3 = adw::Toggle::default();
 
-    let _toogle_group_item1 = toogle_group.factory_append(&toggle1, &());
-    let _toogle_groutp_item2 = toogle_group.factory_append(&toggle2, &());
-    // let page3 = tab_view.factory_insert_after(&widget3, &(), &page2);
-    // let page1 = tab_view.factory_prepend(&widget1, &());
-    
-    // assert_eq!(toogle_group_item1.is_enabled(), false);
-    // assert_eq!(page2.child(), widget2);
-    // assert_eq!(page3.child(), widget3);
+    let toogle_group_item1 = toogle_group.factory_append(&toggle1, &());
+    let toogle_group_item2 = toogle_group.factory_append(&toggle2, &());
+    let toogle_group_item3 = toogle_group.factory_insert_after(&toggle3, &(), &toogle_group_item1);
 
-    // assert_eq!(adw::TabView::returned_widget_to_child(&page1), widget1);
-    // assert_eq!(adw::TabView::returned_widget_to_child(&page2), widget2);
-    // assert_eq!(adw::TabView::returned_widget_to_child(&page3), widget3);
+    assert_eq!(
+        adw::ToggleGroup::returned_widget_to_child(&toogle_group_item1),
+        toggle1
+    );
+    assert_eq!(
+        adw::ToggleGroup::returned_widget_to_child(&toogle_group_item2),
+        toggle2
+    );
+    assert_eq!(
+        adw::ToggleGroup::returned_widget_to_child(&toogle_group_item3),
+        toggle3
+    );
 
-    // assert_children!(tab_view: widget1, widget2, widget3);
-
-    // tab_view.factory_move_after(&page3, &page1);
-    // assert_children!(tab_view: widget1, widget3, widget2);
-
-    // tab_view.factory_move_after(&page1, &page2);
-    // assert_children!(tab_view: widget3, widget2, widget1);
-
-    // tab_view.factory_move_start(&page2);
-    // assert_children!(tab_view: widget2, widget3, widget1);
+    assert_eq!(toogle_group.factory_remove(&toogle_group_item3), ());
+    assert!(toogle_group.toggle_by_name("toggle1") == Some(toogle_group_item1));
 }
