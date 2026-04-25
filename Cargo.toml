@@ -13,8 +13,6 @@ exclude = [
     ".envrc",
     "flake.lock",
     "flake.nix",
-    "default.nix",
-    "shell.nix",
 ]
 
 [workspace.package]
