@@ -290,8 +290,8 @@ fn toggle_group_factory_view() {
     let toggle2 = adw::Toggle::default();
     // let widget3 = gtk::Entry::default();
 
-    let toogle_group_item1 = toogle_group.factory_append(&toggle1, &());
-    let toogle_groutp_item2 = toogle_group.factory_append(&toggle2, &());
+    let _toogle_group_item1 = toogle_group.factory_append(&toggle1, &());
+    let _toogle_groutp_item2 = toogle_group.factory_append(&toggle2, &());
     // let page3 = tab_view.factory_insert_after(&widget3, &(), &page2);
     // let page1 = tab_view.factory_prepend(&widget1, &());
     

@@ -109,14 +109,6 @@ mod libadwaita {
     mod gnome_48 {
         use super::RelmContainerExt;
         append_impl!(adw::WrapBox);
-        // add_impl! {
-        //     adw::ToggleGroup: adw::Toggle
-        // }
-        impl RelmContainerExt for adw::ToggleGroup {
-            fn container_add(&self, child: &impl AsRef<adw::Toggle>) {
-                self.add(child.as_ref().to_owned());
-            }
-        }
     }
 }
 

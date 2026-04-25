@@ -366,8 +366,9 @@ impl FactoryView for adw::ToggleGroup {
         widget: impl AsRef<Self::Children>,
         _position: &Self::Position,
     ) -> Self::ReturnedWidget {
-        self.add(widget.to_owned());
-        widget.as_ref().clone()
+        let toggle_ref = widget.as_ref();
+        self.add(toggle_ref.clone());
+        toggle_ref.clone()
     }
 
     fn factory_prepend(
