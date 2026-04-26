@@ -349,3 +349,50 @@ impl FactoryView for adw::WrapBox {
         self.factory_append(widget, position);
     }
 }
+
+#[cfg(all(feature = "libadwaita", feature = "gnome_48"))]
+impl FactoryView for adw::ToggleGroup {
+    type Children = adw::Toggle;
+    type ReturnedWidget = adw::Toggle;
+
+    type Position = ();
+
+    fn factory_remove(&self, widget: &Self::ReturnedWidget) {
+        self.remove(widget);
+    }
+
+    fn factory_append(
+        &self,
+        widget: impl AsRef<Self::Children>,
+        _position: &Self::Position,
+    ) -> Self::ReturnedWidget {
+        let toggle_ref = widget.as_ref();
+        self.add(toggle_ref.clone());
+        toggle_ref.clone()
+    }
+
+    fn factory_prepend(
+        &self,
+        widget: impl AsRef<Self::Children>,
+        position: &(),
+    ) -> Self::ReturnedWidget {
+        self.factory_append(widget, position)
+    }
+
+    fn factory_insert_after(
+        &self,
+        widget: impl AsRef<Self::Children>,
+        position: &(),
+        _other: &Self::ReturnedWidget,
+    ) -> Self::ReturnedWidget {
+        self.factory_append(widget, position)
+    }
+
+    fn returned_widget_to_child(root_child: &Self::ReturnedWidget) -> Self::Children {
+        root_child.clone()
+    }
+
+    fn factory_move_after(&self, _widget: &Self::ReturnedWidget, _other: &Self::ReturnedWidget) {}
+
+    fn factory_move_start(&self, _widget: &Self::ReturnedWidget) {}
+}

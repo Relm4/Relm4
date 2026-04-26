@@ -279,3 +279,37 @@ fn tab_view_factory_view() {
     tab_view.factory_move_start(&page2);
     assert_children!(tab_view: widget2, widget3, widget1);
 }
+
+#[gtk::test]
+#[cfg(feature = "libadwaita")]
+#[cfg(feature = "gnome_48")]
+fn toggle_group_factory_view() {
+    let toogle_group = adw::ToggleGroup::default();
+
+    let toggle1 = adw::Toggle::builder()
+        .name("toggle1")
+        .child(&gtk::Box::default())
+        .build();
+    let toggle2 = adw::Toggle::default();
+    let toggle3 = adw::Toggle::default();
+
+    let toogle_group_item1 = toogle_group.factory_append(&toggle1, &());
+    let toogle_group_item2 = toogle_group.factory_append(&toggle2, &());
+    let toogle_group_item3 = toogle_group.factory_insert_after(&toggle3, &(), &toogle_group_item1);
+
+    assert_eq!(
+        adw::ToggleGroup::returned_widget_to_child(&toogle_group_item1),
+        toggle1
+    );
+    assert_eq!(
+        adw::ToggleGroup::returned_widget_to_child(&toogle_group_item2),
+        toggle2
+    );
+    assert_eq!(
+        adw::ToggleGroup::returned_widget_to_child(&toogle_group_item3),
+        toggle3
+    );
+
+    assert_eq!(toogle_group.factory_remove(&toogle_group_item3), ());
+    assert!(toogle_group.toggle_by_name("toggle1") == Some(toogle_group_item1));
+}

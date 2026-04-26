@@ -1,7 +1,17 @@
 # Changelog
 
 ## Unreleased
+
+### Added
+
++ chore: adw::ToggleGroup factory over adw::Toggle & refactor nix
 + core: Implement container and factory traits for `adw::WrapBox`
+
+### Changed
+
+### Fixed
+
+## 0.11.0 - 2026-05-10
 
 ### Added
 
