@@ -6,6 +6,7 @@
 
 + chore: adw::ToggleGroup factory over adw::Toggle & refactor nix
 + core: Implement container and factory traits for `adw::WrapBox`
++ docs: Document `update_view` requirement on factory methods
 
 ### Changed
 
