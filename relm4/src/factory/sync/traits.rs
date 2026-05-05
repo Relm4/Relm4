@@ -64,6 +64,15 @@ pub trait FactoryComponent:
     fn update_cmd(&mut self, message: Self::CommandOutput, sender: FactorySender<Self>) {}
 
     /// Handles updates from a command.
+    ///
+    /// The default implementation of this method calls [`update_cmd`] followed by [`update_view`].
+    /// If you override this method while using the [`factory`] macro, you must remember to call
+    /// [`update_view`] in your implementation. Otherwise, the view will not reflect the updated
+    /// model.
+    ///
+    /// [`update_cmd`]: Self::update_cmd
+    /// [`update_view`]: Self::update_view
+    /// [`factory`]: relm4_macros::factory
     fn update_cmd_with_view(
         &mut self,
         widgets: &mut Self::Widgets,
@@ -79,6 +88,15 @@ pub trait FactoryComponent:
     fn update_view(&self, widgets: &mut Self::Widgets, sender: FactorySender<Self>) {}
 
     /// Updates the model and view. Optionally returns a command to run.
+    ///
+    /// The default implementation of this method calls [`update`] followed by [`update_view`].
+    /// If you override this method while using the [`factory`] macro, you must remember to call
+    /// [`update_view`] in your implementation. Otherwise, the view will not reflect the updated
+    /// model.
+    ///
+    /// [`update`]: Self::update
+    /// [`update_view`]: Self::update_view
+    /// [`factory`]: relm4_macros::factory
     fn update_with_view(
         &mut self,
         widgets: &mut Self::Widgets,
