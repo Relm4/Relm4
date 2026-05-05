@@ -190,6 +190,7 @@ fn main() {
 - [waypomo](https://tangled.sh/@wrl.sh/waypomo) - endless pomodoro timer for wlroots compositors (uses gtk4-layer-shell)
 - [Vinyl](https://codeberg.org/M23Snezhok/Vinyl) - A simple adwaita audio player  
 - [ratic](https://gitlab.gnome.org/ratcornu/ratic) - A fully-featured music player.
+- [wayle](https://github.com/wayle-rs/wayle) - A compositor agnostic shell with extensive customization 
 
 ## License
 
