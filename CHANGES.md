@@ -7,6 +7,8 @@
 + chore: adw::ToggleGroup factory over adw::Toggle & refactor nix
 + core: Implement container and factory traits for `adw::WrapBox`
 + docs: Document `update_view` requirement on factory methods
++ core: Implement container traits for `gtk::TreeExpander`, `gtk::MenuButton`, `gtk::SearchBar`, `gtk::Viewport`, and
+  `adw::Dialog`
 
 ### Changed
 
