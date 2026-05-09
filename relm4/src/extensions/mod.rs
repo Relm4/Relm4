@@ -175,7 +175,18 @@ container_child_impl! {
     gtk::Revealer,
     gtk::WindowHandle,
     gtk::Expander,
-    gtk::AspectFrame
+    gtk::AspectFrame,
+    gtk::TreeExpander,
+    gtk::SearchBar,
+    gtk::Viewport
+}
+
+#[cfg(feature = "gnome_42")]
+#[cfg_attr(docsrs, doc(cfg(feature = "gnome_42")))]
+mod gnome_42 {
+    use super::ContainerChild;
+
+    container_child_impl!(gtk::MenuButton);
 }
 
 #[cfg(feature = "libadwaita")]
@@ -217,6 +228,13 @@ mod libadwaita {
             adw::OverlaySplitView,
             adw::ToolbarView
         }
+    }
+
+    #[cfg(all(feature = "libadwaita", feature = "gnome_46"))]
+    mod gnome_46 {
+        use super::ContainerChild;
+
+        container_child_impl!(adw::Dialog);
     }
 
     #[cfg(all(feature = "libadwaita", feature = "gnome_48"))]

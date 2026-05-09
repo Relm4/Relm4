@@ -42,8 +42,19 @@ set_child_impl!(
     gtk::Revealer,
     gtk::WindowHandle,
     gtk::Expander,
-    gtk::AspectFrame
+    gtk::AspectFrame,
+    gtk::TreeExpander,
+    gtk::SearchBar,
+    gtk::Viewport
 );
+
+#[cfg(feature = "gnome_42")]
+#[cfg_attr(docsrs, doc(cfg(feature = "gnome_42")))]
+mod gnome_42 {
+    use super::RelmSetChildExt;
+
+    set_child_impl!(gtk::MenuButton);
+}
 
 #[cfg(feature = "libadwaita")]
 #[cfg_attr(docsrs, doc(cfg(feature = "libadwaita")))]
@@ -88,6 +99,15 @@ mod libadwaita {
         set_child_content_impl!(adw::NavigationSplitView);
         set_child_content_impl!(adw::OverlaySplitView);
         set_child_content_impl!(adw::ToolbarView);
+    }
+
+    #[cfg(all(feature = "libadwaita", feature = "gnome_46"))]
+    #[cfg_attr(docsrs, doc(cfg(all(feature = "libadwaita", feature = "gnome_46"))))]
+    mod gnome_46 {
+        use super::RelmSetChildExt;
+        use adw::prelude::AdwDialogExt;
+
+        set_child_impl!(adw::Dialog);
     }
 }
 
