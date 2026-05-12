@@ -53,5 +53,9 @@ impl ConditionalWidget {
                 }
             }
         }
+
+        if let Some(properties) = &self.properties {
+            properties.assign_stream(&mut info, sender_name);
+        }
     }
 }

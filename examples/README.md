@@ -39,6 +39,12 @@ keyboard shortcuts and [menus](https://docs.rs/gio/latest/gio/struct.Menu.html).
 
 A [`MessageDialog`](https://docs.rs/gtk4/latest/gtk4/struct.MessageDialog.html) made of multiple [components].
 
+### `conditional_properties.rs`
+
+Set properties on a
+[conditional widget](https://relm4.org/book/stable/component_macro/reference.html#conditional-widgets)'s
+[`Stack`](https://docs.rs/gtk4/latest/gtk4/struct.Stack.html).
+
 ### `data_binding.rs`
 
 Automatically update the UI using [data binding](https://docs.rs/relm4/latest/relm4/binding/index.html).

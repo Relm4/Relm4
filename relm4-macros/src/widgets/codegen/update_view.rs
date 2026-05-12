@@ -161,6 +161,10 @@ impl ConditionalWidget {
             let current_page = #w_name.visible_child_name().map_or("".to_string(), |s| s.as_str().to_string());
             #w_name.set_visible_child_name(#brach_stream);
         });
+
+        if let Some(properties) = &self.properties {
+            properties.update_view_stream(stream, w_name, None, model_name, false);
+        }
     }
 }
 

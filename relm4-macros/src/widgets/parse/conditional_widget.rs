@@ -1,10 +1,10 @@
 use proc_macro2::TokenStream as TokenStream2;
 use syn::parse::ParseStream;
-use syn::{Error, Expr, Ident, Path, Token};
+use syn::{Error, Expr, Ident, Path, Token, braced};
 
 use crate::args::Args;
 use crate::widgets::parse_util::{self, attr_twice_error};
-use crate::widgets::{Attr, Attrs, ConditionalBranches, ConditionalWidget, ParseError};
+use crate::widgets::{Attr, Attrs, ConditionalBranches, ConditionalWidget, ParseError, Properties};
 
 type ConditionalAttrs = (
     Option<Ident>,
@@ -53,29 +53,36 @@ impl ConditionalWidget {
             parse_util::unique_ident_from_parts(["conditional_widget"])
         };
 
-        if input.peek(Token![if]) {
-            let branches = ConditionalBranches::parse_if(input)?;
-            Ok(Self {
-                doc_attr,
-                transition,
-                assign_wrapper,
-                name,
-                args,
-                branches,
-            })
+        let branches = if input.peek(Token![if]) {
+            ConditionalBranches::parse_if(input)?
         } else if input.peek(Token![match]) {
-            let branches = ConditionalBranches::parse_match(input)?;
-            Ok(Self {
-                doc_attr,
-                transition,
-                assign_wrapper,
-                name,
-                args,
-                branches,
-            })
+            ConditionalBranches::parse_match(input)?
         } else {
-            Err(input.error("Expected `if` or `match`").into())
-        }
+            Err::<_, ParseError>(input.error("Expected `if` or `match`").into())?
+        };
+
+        let properties = if input.peek(Token![->]) {
+            let _arrow: Token![->] = input.parse()?;
+            Some(Self::parse_properties(input)?)
+        } else {
+            None
+        };
+
+        Ok(Self {
+            doc_attr,
+            transition,
+            assign_wrapper,
+            name,
+            args,
+            branches,
+            properties,
+        })
+    }
+
+    fn parse_properties(input: ParseStream<'_>) -> syn::Result<Properties> {
+        let inner;
+        let _token = braced!(inner in input);
+        Ok(Properties::parse(&inner))
     }
 
     fn process_attrs(attrs: Option<Attrs>) -> Result<ConditionalAttrs, ParseError> {

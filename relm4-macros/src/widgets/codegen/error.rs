@@ -66,6 +66,10 @@ impl ConditionalWidget {
                 }
             }
         }
+
+        if let Some(properties) = &self.properties {
+            properties.error_stream(stream, &self.name);
+        }
     }
 }
 

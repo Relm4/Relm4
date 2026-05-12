@@ -87,6 +87,10 @@ impl ConditionalWidget {
                 }
             }
         }
+
+        if let Some(properties) = &self.properties {
+            properties.struct_fields_stream(stream, vis);
+        }
     }
 }
 
