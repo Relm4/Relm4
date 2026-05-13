@@ -14,6 +14,7 @@
 ### Changed
 
 + macros: Deprecate `#[transition]` conditional widget attribute
++ examples: Replace deprecated `#[transition]` attribute
 
 ### Fixed
 
