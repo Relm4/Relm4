@@ -167,6 +167,7 @@ struct ConditionalWidget {
     name: Ident,
     args: Option<Args<Expr>>,
     branches: ConditionalBranches,
+    properties: Option<Properties>,
 }
 
 #[derive(Debug)]

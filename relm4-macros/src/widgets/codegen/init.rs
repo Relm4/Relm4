@@ -109,5 +109,9 @@ impl ConditionalWidget {
                 }
             }
         }
+
+        if let Some(properties) = &self.properties {
+            properties.init_stream(stream);
+        }
     }
 }

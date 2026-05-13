@@ -63,6 +63,10 @@ impl ConditionalWidget {
                 }
             }
         }
+
+        if let Some(properties) = &self.properties {
+            properties.destructure_stream(stream);
+        }
     }
 }
 
