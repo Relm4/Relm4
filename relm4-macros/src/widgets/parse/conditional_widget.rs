@@ -125,8 +125,9 @@ impl ConditionalWidget {
                     _ => {
                         return Err(Error::new(
                             attr.span(),
-                            "Conditional widgets can only have docs and `name` or `transition` as attribute.",
-                        ).into());
+                            "Conditional widgets can only have docs and `name` as attribute.",
+                        )
+                        .into());
                     }
                 }
             }

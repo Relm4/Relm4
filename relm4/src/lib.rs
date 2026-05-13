@@ -252,3 +252,9 @@ pub fn set_global_css_from_file_with_priority<P: AsRef<std::path::Path>>(
 pub fn set_global_css_from_file<P: AsRef<std::path::Path>>(path: P) -> Result<(), std::io::Error> {
     set_global_css_from_file_with_priority(path, gtk::STYLE_PROVIDER_PRIORITY_APPLICATION)
 }
+
+/// Dummy function for marking the `#[transition]` macro attribute as deprecated.
+/// See https://stackoverflow.com/a/77267752.
+#[deprecated = "The `#[transition]` macro attribute is deprecated. Call `set_transition_type` on the returned widget instead."]
+#[doc(hidden)]
+pub const fn transition() {}

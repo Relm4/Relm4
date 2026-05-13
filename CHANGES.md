@@ -13,6 +13,8 @@
 
 ### Changed
 
++ macros: Deprecate `#[transition]` conditional widget attribute
+
 ### Fixed
 
 ## 0.11.0 - 2026-05-10
