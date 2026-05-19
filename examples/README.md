@@ -45,6 +45,11 @@ Set properties on a
 [conditional widget](https://relm4.org/book/stable/component_macro/reference.html#conditional-widgets)'s
 [`Stack`](https://docs.rs/gtk4/latest/gtk4/struct.Stack.html).
 
+### `conditional_root.rs`
+
+Use a [conditional widget](https://relm4.org/book/stable/component_macro/reference.html#conditional-widgets) as a
+[component][components]'s root widget.
+
 ### `data_binding.rs`
 
 Automatically update the UI using [data binding](https://docs.rs/relm4/latest/relm4/binding/index.html).
