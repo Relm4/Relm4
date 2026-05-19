@@ -100,7 +100,7 @@ impl Widget {
 }
 
 impl ConditionalWidget {
-    fn update_view_stream(&self, stream: &mut TokenStream2, model_name: &Ident) {
+    pub(crate) fn update_view_stream(&self, stream: &mut TokenStream2, model_name: &Ident) {
         let brach_stream = match &self.branches {
             ConditionalBranches::If(if_branches) => {
                 let mut stream = TokenStream2::new();

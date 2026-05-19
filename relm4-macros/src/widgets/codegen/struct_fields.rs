@@ -57,7 +57,7 @@ impl Widget {
 }
 
 impl ConditionalWidget {
-    fn struct_fields_stream(&self, stream: &mut TokenStream2, vis: &Option<Visibility>) {
+    pub(crate) fn struct_fields_stream(&self, stream: &mut TokenStream2, vis: &Option<Visibility>) {
         let name = &self.name;
         let gtk_import = crate::gtk_import();
 

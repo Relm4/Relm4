@@ -19,7 +19,22 @@ pub(super) struct ViewWidgets {
 #[derive(Debug)]
 pub(super) struct TopLevelWidget {
     pub(super) root_attr: Option<Ident>,
-    pub(super) inner: Widget,
+    pub(super) inner: TopLevelInner,
+}
+
+#[derive(Debug)]
+pub(super) enum TopLevelInner {
+    Widget(Widget),
+    ConditionalWidget(ConditionalWidget),
+}
+
+impl TopLevelInner {
+    pub(super) fn name(&self) -> &Ident {
+        match self {
+            TopLevelInner::Widget(widget) => &widget.name,
+            TopLevelInner::ConditionalWidget(widget) => &widget.name,
+        }
+    }
 }
 
 #[derive(Debug)]
@@ -84,7 +99,7 @@ struct ClosureSignalHandler {
 }
 
 #[derive(Debug)]
-enum PropertyName {
+pub(super) enum PropertyName {
     Ident(Ident),
     Path(Path),
     RelmContainerExtAssign(Span2),
@@ -160,7 +175,7 @@ struct ReturnedWidget {
 }
 
 #[derive(Debug)]
-struct ConditionalWidget {
+pub(super) struct ConditionalWidget {
     doc_attr: Option<TokenStream2>,
     transition: Option<Ident>,
     assign_wrapper: Option<Path>,
