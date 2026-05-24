@@ -74,8 +74,6 @@ impl SimpleComponent for App {
                 },
 
                 // A conditional widget
-                // Alternative: #[transition = "SlideLeft"]
-                #[transition(SlideLeft)]
                 append = if counter.value.is_multiple_of(2) {
                     gtk::Label {
                         set_label: "Value is even",
@@ -88,9 +86,10 @@ impl SimpleComponent for App {
                     gtk::Label {
                         set_label: "Value is odd",
                     }
+                } -> {
+                    set_transition_type: gtk::StackTransitionType::SlideLeft,
                 },
 
-                #[transition = "SlideRight"]
                 append: match_stack = match counter.value {
                     (0..=2) => {
                         gtk::Label {
@@ -102,6 +101,8 @@ impl SimpleComponent for App {
                             set_label: "Value is higher than 2",
                         }
                     },
+                } -> {
+                    set_transition_type: gtk::StackTransitionType::SlideRight,
                 },
 
                 append = &gtk::Label,

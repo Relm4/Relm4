@@ -43,6 +43,8 @@ pub mod binding;
 pub mod component;
 pub mod factory;
 pub mod loading_widgets;
+#[doc(hidden)]
+pub mod macro_helper;
 pub mod shared_state;
 pub mod typed_view;
 

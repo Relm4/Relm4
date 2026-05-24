@@ -29,7 +29,6 @@ impl SimpleComponent for AppModel {
                 set_margin_all: 5,
 
                 // Create a conditional widget stack.
-                #[transition(SlideLeftRight)]
                 if model.left {
                     gtk::Label {
                         set_halign: gtk::Align::Start,
@@ -42,6 +41,7 @@ impl SimpleComponent for AppModel {
                    }
                 } -> {
                     // You can set the `gtk::Stack`'s properties here.
+                    set_transition_type: gtk::StackTransitionType::SlideLeftRight,
                     set_halign: gtk::Align::Center,
                     #[watch]
                     set_hhomogeneous: model.homogeneous,

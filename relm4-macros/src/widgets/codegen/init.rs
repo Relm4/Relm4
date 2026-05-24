@@ -92,7 +92,9 @@ impl ConditionalWidget {
 
         if let Some(transition) = &self.transition {
             stream.extend(quote_spanned! {
+                // emit deprecation warning
                 transition.span() =>
+                    const _: () = ::relm4::transition();
                     #name.set_transition_type(#gtk_import::StackTransitionType:: #transition);
             });
         }
