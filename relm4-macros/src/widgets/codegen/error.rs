@@ -53,7 +53,7 @@ impl Widget {
 }
 
 impl ConditionalWidget {
-    fn error_stream(&self, stream: &mut TokenStream2) {
+    pub(crate) fn error_stream(&self, stream: &mut TokenStream2) {
         match &self.branches {
             ConditionalBranches::If(if_branches) => {
                 for branch in if_branches {

@@ -2,7 +2,7 @@ use proc_macro2::TokenStream as TokenStream2;
 use quote::{ToTokens, quote};
 use syn::{Error, Ident, Visibility};
 
-use crate::widgets::{TopLevelWidget, ViewWidgets, Widget};
+use crate::widgets::{TopLevelInner, TopLevelWidget, ViewWidgets};
 
 #[derive(Default)]
 pub(super) struct TokenStreams {
@@ -53,7 +53,7 @@ impl ViewWidgets {
     }
 
     /// Get the root widget
-    pub(super) fn get_root_widget(&self) -> syn::Result<&Widget> {
+    pub(super) fn get_root_widget(&self) -> syn::Result<&TopLevelInner> {
         self.top_level_widgets
             .iter()
             .find(|w| w.root_attr.is_some())
@@ -69,7 +69,11 @@ impl ViewWidgets {
     /// Generate root type for `Root` parameter in `Component` impl
     pub(super) fn root_type(&self) -> TokenStream2 {
         match self.get_root_widget() {
-            Ok(root_widget) => root_widget.func_type_token_stream(),
+            Ok(TopLevelInner::Widget(root_widget)) => root_widget.func_type_token_stream(),
+            Ok(TopLevelInner::ConditionalWidget(_)) => {
+                let gtk_import = crate::gtk_import();
+                quote! { #gtk_import::Stack }.to_token_stream()
+            }
             Err(err) => err.to_compile_error(),
         }
     }
@@ -77,7 +81,7 @@ impl ViewWidgets {
     /// Get the name of the root widget
     pub(super) fn root_name(&self) -> TokenStream2 {
         match self.get_root_widget() {
-            Ok(root_widget) => root_widget.name.to_token_stream(),
+            Ok(inner) => inner.name().to_token_stream(),
             Err(err) => err.to_compile_error(),
         }
     }
@@ -96,7 +100,7 @@ impl TopLevelWidget {
     }
 }
 
-impl Widget {
+impl TopLevelInner {
     pub(super) fn init_token_generation(
         &self,
         streams: &mut TokenStreams,
@@ -110,15 +114,24 @@ impl Widget {
             sender_name,
         } = trait_impl_details;
 
-        let name = &self.name;
+        let name = &self.name();
 
         // Initialize the root
-        if generate_root_init_stream {
+        match (self, generate_root_init_stream) {
             // For the `component` macro
-            self.init_root_init_streams(&mut streams.init_root, &mut streams.init);
-        } else {
+            (Self::Widget(widget), true) => {
+                widget.init_root_init_streams(&mut streams.init_root, &mut streams.init)
+            }
             // For the `view!` macro
-            self.init_stream(&mut streams.init);
+            (Self::Widget(widget), false) => widget.init_stream(&mut streams.init),
+            // `component`
+            (Self::ConditionalWidget(conditional), true) => {
+                conditional.init_root_init_streams(&mut streams.init_root, &mut streams.init)
+            }
+            // `view!`
+            (Self::ConditionalWidget(conditional), false) => {
+                conditional.init_stream(&mut streams.init)
+            }
         }
 
         #[cfg(feature = "relm4")]
@@ -126,17 +139,35 @@ impl Widget {
             use relm4::RelmContainerExt as _;
         });
 
-        self.error_stream(&mut streams.error);
-        self.start_assign_stream(&mut streams.assign, sender_name);
-        self.init_conditional_init_stream(&mut streams.assign, model_name);
-        self.struct_fields_stream(&mut streams.struct_fields, vis);
-        self.return_stream(&mut streams.return_fields);
-        self.destructure_stream(&mut streams.destructure_fields);
-        self.init_update_view_stream(&mut streams.update_view, model_name);
+        match self {
+            TopLevelInner::Widget(widget) => {
+                widget.error_stream(&mut streams.error);
+                widget.start_assign_stream(&mut streams.assign, sender_name);
+                widget.init_conditional_init_stream(&mut streams.assign, model_name);
+                widget.struct_fields_stream(&mut streams.struct_fields, vis);
+                widget.return_stream(&mut streams.return_fields);
+                widget.destructure_stream(&mut streams.destructure_fields);
+                widget.init_update_view_stream(&mut streams.update_view, model_name);
+            }
+            TopLevelInner::ConditionalWidget(conditional) => {
+                conditional.error_stream(&mut streams.error);
+                conditional.start_assign_stream(&mut streams.assign, sender_name);
+                conditional.init_conditional_init_stream(&mut streams.assign, model_name);
+                conditional.struct_fields_stream(&mut streams.struct_fields, vis);
+                conditional.return_stream(&mut streams.return_fields);
+                conditional.destructure_stream(&mut streams.destructure_fields);
+                conditional.update_view_stream(&mut streams.update_view, model_name);
+            }
+        }
 
         // Rename the `root` to the actual widget name
         if generate_root_init_stream {
-            let mut_token = self.mutable.as_ref();
+            let mut_token = if let TopLevelInner::Widget(widget) = self {
+                widget.mutable.as_ref()
+            } else {
+                None
+            };
+
             if let Some(root_name) = root_name {
                 streams.rename_root.extend(quote! {
                     let #mut_token #name = #root_name.clone();

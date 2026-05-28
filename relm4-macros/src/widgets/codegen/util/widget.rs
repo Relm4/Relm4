@@ -1,4 +1,4 @@
-use crate::widgets::ViewWidgets;
+use crate::widgets::{TopLevelInner, ViewWidgets};
 
 impl ViewWidgets {
     /// Get a mutable reference to the root widget
@@ -7,8 +7,9 @@ impl ViewWidgets {
             .top_level_widgets
             .iter_mut()
             .find(|w| w.root_attr.is_some())
+            && let TopLevelInner::Widget(widget) = &mut root_widget.inner
         {
-            root_widget.inner.name_assigned_by_user = true;
+            widget.name_assigned_by_user = true;
         }
     }
 }

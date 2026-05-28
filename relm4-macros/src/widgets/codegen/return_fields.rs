@@ -46,7 +46,7 @@ impl Widget {
 }
 
 impl ConditionalWidget {
-    fn return_stream(&self, stream: &mut TokenStream2) {
+    pub(crate) fn return_stream(&self, stream: &mut TokenStream2) {
         let name = &self.name;
 
         stream.extend(quote! { #name, });

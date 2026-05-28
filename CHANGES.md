@@ -10,6 +10,7 @@
 + core: Implement container traits for `gtk::TreeExpander`, `gtk::MenuButton`, `gtk::SearchBar`, `gtk::Viewport`, and
   `adw::Dialog`
 + macros: Allow setting conditional widget `gtk::Stack` properties
++ macros: Conditional root widgets
 
 ### Changed
 

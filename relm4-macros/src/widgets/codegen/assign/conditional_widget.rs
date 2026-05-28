@@ -1,12 +1,35 @@
-use quote::{quote, quote_spanned};
-use syn::Ident;
-
 use crate::widgets::{ConditionalBranches, ConditionalWidget, PropertyName};
+use proc_macro2::Span;
+use quote::{quote, quote_spanned};
+use syn::__private::TokenStream2;
+use syn::Ident;
+use syn::spanned::Spanned;
 
 use super::AssignInfo;
 
 impl ConditionalWidget {
-    pub(super) fn assign_stream<'a>(
+    pub(crate) fn start_assign_stream<'a>(
+        &'a self,
+        stream: &'a mut TokenStream2,
+        sender_name: &'a Ident,
+    ) {
+        let w_name = &self.name;
+        let mut info = AssignInfo {
+            stream,
+            widget_name: w_name,
+            template_path: None,
+            is_conditional: true,
+        };
+        let span = info.stream.span();
+
+        self.assign_branches(&mut info, sender_name, span);
+
+        if let Some(properties) = &self.properties {
+            properties.assign_stream(&mut info, sender_name);
+        }
+    }
+
+    pub(crate) fn assign_stream<'a>(
         &'a self,
         info: &mut AssignInfo<'a>,
         p_name: &PropertyName,
@@ -39,23 +62,33 @@ impl ConditionalWidget {
             template_path: None,
             is_conditional: true,
         };
+
+        self.assign_branches(&mut info, sender_name, span);
+
+        if let Some(properties) = &self.properties {
+            properties.assign_stream(&mut info, sender_name);
+        }
+    }
+
+    pub(crate) fn assign_branches<'a>(
+        &'a self,
+        info: &mut AssignInfo<'a>,
+        sender_name: &'a Ident,
+        span: Span,
+    ) {
         match &self.branches {
             ConditionalBranches::If(if_branches) => {
                 for branch in if_branches {
-                    let p_name = PropertyName::Ident(Ident::new("add_named", p_name.span()));
-                    branch.widget.assign_stream(&mut info, &p_name, sender_name);
+                    let p_name = PropertyName::Ident(Ident::new("add_named", span));
+                    branch.widget.assign_stream(info, &p_name, sender_name);
                 }
             }
             ConditionalBranches::Match((_, _, match_arms)) => {
                 for arm in match_arms {
-                    let p_name = PropertyName::Ident(Ident::new("add_named", p_name.span()));
-                    arm.widget.assign_stream(&mut info, &p_name, sender_name);
+                    let p_name = PropertyName::Ident(Ident::new("add_named", span));
+                    arm.widget.assign_stream(info, &p_name, sender_name);
                 }
             }
-        }
-
-        if let Some(properties) = &self.properties {
-            properties.assign_stream(&mut info, sender_name);
         }
     }
 }
