@@ -115,7 +115,7 @@ impl ConditionalWidget {
             stream.extend(quote_spanned! {
                 // emit deprecation warning
                 transition.span() =>
-                    const _: () = ::relm4::transition();
+                    const _: () = ::relm4::macro_helper::transition();
                     #name.set_transition_type(#gtk_import::StackTransitionType:: #transition);
             });
         }
