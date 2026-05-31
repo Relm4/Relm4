@@ -107,6 +107,58 @@ impl FactoryView for gtk::Grid {
     }
 }
 
+impl FactoryView for gtk::Fixed {
+    type ReturnedWidget = gtk::Widget;
+    type Children = gtk::Widget;
+    /// (x, y)
+    type Position = (f64, f64);
+
+    fn factory_remove(&self, widget: &Self::ReturnedWidget) {
+        use gtk::prelude::FixedExt;
+        self.remove(widget);
+    }
+
+    fn factory_append(
+        &self,
+        widget: impl AsRef<Self::Children>,
+        position: &Self::Position,
+    ) -> Self::ReturnedWidget {
+        use gtk::prelude::FixedExt;
+        self.put(widget.as_ref(), position.0, position.1);
+        widget.as_ref().clone()
+    }
+
+    fn factory_prepend(
+        &self,
+        widget: impl AsRef<Self::Children>,
+        position: &Self::Position,
+    ) -> Self::ReturnedWidget {
+        self.factory_append(widget, position)
+    }
+
+    fn factory_insert_after(
+        &self,
+        widget: impl AsRef<Self::Children>,
+        position: &Self::Position,
+        _other: &Self::ReturnedWidget,
+    ) -> Self::ReturnedWidget {
+        self.factory_append(widget, position)
+    }
+
+    fn returned_widget_to_child(returned_widget: &Self::ReturnedWidget) -> Self::Children {
+        returned_widget.clone()
+    }
+
+    fn factory_move_after(&self, _widget: &Self::ReturnedWidget, _other: &Self::ReturnedWidget) {}
+
+    fn factory_move_start(&self, _widget: &Self::ReturnedWidget) {}
+
+    fn factory_update_position(&self, widget: &Self::ReturnedWidget, position: &Self::Position) {
+        self.factory_remove(widget);
+        self.factory_append(widget, position);
+    }
+}
+
 impl FactoryView for gtk::Stack {
     type Children = gtk::Widget;
     type ReturnedWidget = gtk::StackPage;
