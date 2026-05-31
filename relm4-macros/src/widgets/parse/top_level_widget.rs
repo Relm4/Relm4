@@ -1,10 +1,10 @@
-use syn::parse::ParseStream;
-
 use crate::util;
 use crate::widgets::{
-    Attr, Attrs, Properties, Property, PropertyName, PropertyType, TopLevelWidget, Widget,
-    WidgetAttr, WidgetFunc, WidgetTemplateAttr, parse_util,
+    Attr, Attrs, ConditionalWidget, ParseError, Properties, Property, PropertyName, PropertyType,
+    TopLevelInner, TopLevelWidget, Widget, WidgetAttr, WidgetFunc, WidgetTemplateAttr, parse_util,
 };
+use syn::Token;
+use syn::parse::ParseStream;
 
 impl TopLevelWidget {
     pub(super) fn parse(input: ParseStream<'_>) -> Self {
@@ -30,9 +30,8 @@ impl TopLevelWidget {
             (None, None)
         };
 
-        let inner = match Widget::parse(input, attributes, None) {
-            Ok(inner) => inner,
-            Err(err) => Widget {
+        let inner = TopLevelInner::parse(input, attributes).unwrap_or_else(|err| {
+            TopLevelInner::Widget(Widget {
                 doc_attr: None,
                 attr: WidgetAttr::None,
                 template_attr: WidgetTemplateAttr::None,
@@ -58,9 +57,27 @@ impl TopLevelWidget {
                 ref_token: None,
                 deref_token: None,
                 returned_widget: None,
-            },
-        };
+            })
+        });
 
         Self { root_attr, inner }
+    }
+}
+
+impl TopLevelInner {
+    fn parse(input: ParseStream<'_>, attributes: Option<Attrs>) -> Result<Self, ParseError> {
+        let conditional = if input.peek2(Token![=]) {
+            // `name = if ...`
+            input.peek3(Token![if]) || input.peek3(Token![match])
+        } else {
+            // `if ...`
+            input.peek(Token![if]) || input.peek(Token![match])
+        };
+
+        Ok(if conditional {
+            Self::ConditionalWidget(ConditionalWidget::parse(input, attributes, None)?)
+        } else {
+            Self::Widget(Widget::parse(input, attributes, None)?)
+        })
     }
 }

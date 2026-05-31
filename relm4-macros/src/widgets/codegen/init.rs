@@ -81,7 +81,21 @@ impl Widget {
 }
 
 impl ConditionalWidget {
-    fn init_stream(&self, stream: &mut TokenStream2) {
+    pub(crate) fn init_root_init_streams(
+        &self,
+        init_root_stream: &mut TokenStream2,
+        init_stream: &mut TokenStream2,
+    ) {
+        let gtk_import = crate::gtk_import();
+
+        init_root_stream.extend(quote! {
+            #gtk_import::Stack::default()
+        });
+
+        self.other_init_stream(init_stream)
+    }
+
+    pub(crate) fn init_stream(&self, stream: &mut TokenStream2) {
         let name = &self.name;
         let gtk_import = crate::gtk_import();
 
@@ -89,6 +103,13 @@ impl ConditionalWidget {
             name.span() =>
                 let #name = #gtk_import::Stack::default();
         });
+
+        self.other_init_stream(stream);
+    }
+
+    fn other_init_stream(&self, stream: &mut TokenStream2) {
+        let name = &self.name;
+        let gtk_import = crate::gtk_import();
 
         if let Some(transition) = &self.transition {
             stream.extend(quote_spanned! {
