@@ -19,11 +19,10 @@ fn main() {
         .build();
 
     gtk_app.connect_open(|app, files, _hint| {
-        if let Some(file) = files.first() {
-            if let Some(path) = file.path() {
+        if let Some(file) = files.first()
+            && let Some(path) = file.path() {
                 let _ = OPEN_FILE.set(path);
             }
-        }
         app.activate();
     });
 
