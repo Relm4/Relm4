@@ -2278,18 +2278,18 @@ dependencies = [
 
 [[package]]
 name = "tracker"
-version = "0.2.2"
+version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ce5c98457ff700aaeefcd4a4a492096e78a2af1dd8523c66e94a3adb0fdbd415"
+checksum = "c9e91c5c9cfc2fc187ef95f2be219e0b057037afaa48496f0ce873cd7e06a87c"
 dependencies = [
  "tracker-macros",
 ]
 
 [[package]]
 name = "tracker-macros"
-version = "0.2.2"
+version = "0.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dc19eb2373ccf3d1999967c26c3d44534ff71ae5d8b9dacf78f4b13132229e48"
+checksum = "12a42d0cae5c1dce306bbb8f86afba7abd15e4023911e7bfcf353f4c03de35d7"
 dependencies = [
  "proc-macro2",
  "quote",
