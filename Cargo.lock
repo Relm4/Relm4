@@ -1645,7 +1645,7 @@ dependencies = [
  "quote",
  "relm4",
  "rustversion",
- "syn 2.0.119",
+ "syn 3.0.4",
  "trybuild",
 ]
 
