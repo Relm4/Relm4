@@ -50,7 +50,7 @@ gnome_43 = ["gnome_42", "gtk/gnome_43", "adw/v1_2"]
 gnome_42 = ["gtk/gnome_42"]
 
 # All features except docs. This is also used in the CI
-all = ["macros", "libadwaita", "panel", "panel/v1_4"]
+all = ["macros", "libadwaita", "panel", "gnome_50"]
 
 [dependencies]
 adw = { workspace = true, optional = true }
