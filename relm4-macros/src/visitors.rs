@@ -93,16 +93,14 @@ impl VisitMut for ComponentVisitor<'_> {
                     _ => (),
                 }
             }
-            syn::ImplItem::Fn(func) => {
-                if &*func.sig.ident.to_string() == "init" {
-                    let mut init_fn_visitor = InitFnVisitor::default();
-                    init_fn_visitor.visit_impl_item_fn(func);
+            syn::ImplItem::Fn(func) if &*func.sig.ident.to_string() == "init" => {
+                let mut init_fn_visitor = InitFnVisitor::default();
+                init_fn_visitor.visit_impl_item_fn(func);
 
-                    self.model_name = init_fn_visitor.model_name;
-                    self.sender_name = init_fn_visitor.sender_name;
-                    self.root_name = init_fn_visitor.root_name;
-                    self.errors.append(&mut init_fn_visitor.errors);
-                }
+                self.model_name = init_fn_visitor.model_name;
+                self.sender_name = init_fn_visitor.sender_name;
+                self.root_name = init_fn_visitor.root_name;
+                self.errors.append(&mut init_fn_visitor.errors);
             }
             _ => (),
         }
@@ -203,21 +201,19 @@ impl VisitMut for FactoryComponentVisitor<'_> {
                     _ => (),
                 }
             }
-            syn::ImplItem::Fn(func) => {
-                if &*func.sig.ident.to_string() == "init_widgets" {
-                    let mut init_fn_visitor = InitWidgetsFnVisitor::default();
-                    init_fn_visitor.visit_impl_item_fn(func);
+            syn::ImplItem::Fn(func) if &*func.sig.ident.to_string() == "init_widgets" => {
+                let mut init_fn_visitor = InitWidgetsFnVisitor::default();
+                init_fn_visitor.visit_impl_item_fn(func);
 
-                    self.root_name = init_fn_visitor.root_name;
-                    self.errors.append(&mut init_fn_visitor.errors);
+                self.root_name = init_fn_visitor.root_name;
+                self.errors.append(&mut init_fn_visitor.errors);
 
-                    let existing = self.init_widgets.replace(func.clone());
-                    if existing.is_some() {
-                        self.errors.push(syn::Error::new_spanned(
-                            func,
-                            "duplicate init_widgets function",
-                        ));
-                    }
+                let existing = self.init_widgets.replace(func.clone());
+                if existing.is_some() {
+                    self.errors.push(syn::Error::new_spanned(
+                        func,
+                        "duplicate init_widgets function",
+                    ));
                 }
             }
             _ => (),
