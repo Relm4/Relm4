@@ -57,6 +57,7 @@
             polkit
             gdk-pixbuf
             libadwaita
+            libpanel
             pkg-config
             gnome-desktop
             appstream
