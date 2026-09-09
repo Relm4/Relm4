@@ -91,11 +91,11 @@ pub(super) fn verbatim_impl_item_fn(
     ImplItem::Fn(syn::ImplItemFn {
         attrs: Vec::new(),
         vis: syn::Visibility::Inherited,
-        defaultness: None,
+        modifiers: syn::FnModifiers::default(),
         sig: syn::Signature {
             constness: None,
             asyncness: None,
-            unsafety: None,
+            safety: syn::Safety::Default,
             abi: None,
             fn_token: syn::token::Fn::default(),
             ident: Ident::new(name, Span2::mixed_site()),
