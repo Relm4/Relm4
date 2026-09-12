@@ -64,6 +64,11 @@ impl_connect_binding!(gtk::StackPage, String, "name", stack_page, {
     let stack = gtk::Stack::default();
     stack.add_child(&gtk::Label::default())
 });
+impl_connect_binding!(gtk::Entry, String, "text", entry);
+impl_connect_binding!(gtk::PasswordEntry, String, "text", password_entry);
+impl_connect_binding!(gtk::SearchEntry, String, "text", search_entry);
+impl_connect_binding!(gtk::EditableLabel, String, "text", editable_label);
+
 #[cfg(feature = "libadwaita")]
 impl_connect_binding!(adw::SplitButton, String, "label", split_button);
 #[cfg(feature = "libadwaita")]
@@ -74,6 +79,10 @@ impl_connect_binding!(adw::PreferencesRow, String, "title", preferences_row);
 impl_connect_binding!(adw::ActionRow, String, "title", action_row);
 #[cfg(all(feature = "libadwaita", feature = "gnome_47"))]
 impl_connect_binding!(adw::ButtonRow, String, "title", button_row);
+#[cfg(all(feature = "libadwaita", feature = "gnome_47"))]
+impl_connect_binding!(adw::EntryRow, String, "text", entry_row);
+#[cfg(all(feature = "libadwaita", feature = "gnome_47"))]
+impl_connect_binding!(adw::PasswordEntryRow, String, "text", entry_row);
 #[cfg(feature = "libadwaita")]
 impl_connect_binding!(adw::WindowTitle, String, "title", window_title);
 #[cfg(all(feature = "libadwaita", feature = "gnome_44"))]

@@ -12,6 +12,7 @@
 + macros: Allow setting conditional widget `gtk::Stack` properties
 + core: Implement factory view for `gtk::Fixed`
 + macros: Conditional root widgets
++ binding: Added more String bindings for various Entry widgets
 
 ### Changed
 
