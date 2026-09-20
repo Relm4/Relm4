@@ -36,6 +36,7 @@ pub enum SimpleComboRowMsg<E: ToString> {
 }
 
 #[derive(Debug)]
+#[doc = "Widgets of the simple combo row component."]
 pub struct SimpleComboRowWidgets {
     combo_row: adw::ComboRow,
     combo_selected_signal: SignalHandlerId,
