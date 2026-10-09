@@ -21,6 +21,8 @@
 
 ### Fixed
 
++ core: Reuse one `CssProvider` in `inline_css` so repeated updates do not leak providers
+
 ## 0.11.0 - 2026-05-10
 
 ### Added
