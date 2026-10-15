@@ -5,7 +5,7 @@ use std::fmt::Debug;
 
 use relm4::{Component, ComponentParts, ComponentSender, adw};
 
-use adw::gtk::StringList;
+use adw::gtk::{StringList, glib::signal::SignalHandlerId, prelude::ObjectExt};
 use adw::prelude::ComboRowExt;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -35,6 +35,13 @@ pub enum SimpleComboRowMsg<E: ToString> {
     UpdateIndex(usize),
 }
 
+#[derive(Debug)]
+#[doc = "Widgets of the simple combo row component."]
+pub struct SimpleComboRowWidgets {
+    combo_row: adw::ComboRow,
+    combo_selected_signal: SignalHandlerId,
+}
+
 impl<E> Component for SimpleComboRow<E>
 where
     E: ToString + 'static + Debug,
@@ -44,7 +51,7 @@ where
     type Output = usize;
     type Init = Self;
     type Root = adw::ComboRow;
-    type Widgets = adw::ComboRow;
+    type Widgets = SimpleComboRowWidgets;
 
     fn init_root() -> Self::Root {
         adw::ComboRow::default()
@@ -52,14 +59,19 @@ where
 
     fn init(
         model: Self::Init,
-        widgets: Self::Root,
+        combo_row: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
-        model.render(&widgets);
-
-        widgets.connect_selected_notify(move |combo_box| {
+        let combo_selected_signal = combo_row.connect_selected_notify(move |combo_box| {
             sender.input(Self::Input::UpdateIndex(combo_box.selected() as _));
         });
+
+        let mut widgets = SimpleComboRowWidgets {
+            combo_row,
+            combo_selected_signal,
+        };
+
+        model.render(&mut widgets);
 
         ComponentParts { model, widgets }
     }
@@ -81,12 +93,18 @@ where
             SimpleComboRowMsg::SetActiveIdx(idx) => {
                 if idx < self.variants.len() {
                     self.active_index = Some(idx);
-                    widgets.set_selected(idx as u32);
+                    widgets.combo_row.set_selected(idx as u32);
                 }
             }
             SimpleComboRowMsg::UpdateData(data) => {
                 *self = data;
+                widgets
+                    .combo_row
+                    .block_signal(&widgets.combo_selected_signal);
                 self.render(widgets);
+                widgets
+                    .combo_row
+                    .unblock_signal(&widgets.combo_selected_signal);
             }
         }
     }
@@ -96,12 +114,12 @@ impl<E> SimpleComboRow<E>
 where
     E: ToString,
 {
-    fn render(&self, combo_box: &adw::ComboRow) {
+    fn render(&self, widgets: &mut SimpleComboRowWidgets) {
         let model: StringList = self.variants.iter().map(ToString::to_string).collect();
-        combo_box.set_model(Some(&model));
+        widgets.combo_row.set_model(Some(&model));
 
         if let Some(idx) = self.active_index {
-            combo_box.set_selected(idx as u32);
+            widgets.combo_row.set_selected(idx as u32);
         }
     }
 

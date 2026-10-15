@@ -21,6 +21,8 @@
 
 ### Fixed
 
++ components: fix unwanted `SimpleComboRowMsg::UpdateIndex` call, after calling `SimpleComboRowMsg::UpdateData` already
+
 ## 0.11.0 - 2026-05-10
 
 ### Added
