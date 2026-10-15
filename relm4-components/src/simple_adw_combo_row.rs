@@ -98,7 +98,13 @@ where
             }
             SimpleComboRowMsg::UpdateData(data) => {
                 *self = data;
+                widgets
+                    .combo_row
+                    .block_signal(&widgets.combo_selected_signal);
                 self.render(widgets);
+                widgets
+                    .combo_row
+                    .unblock_signal(&widgets.combo_selected_signal);
             }
         }
     }
@@ -113,13 +119,7 @@ where
         widgets.combo_row.set_model(Some(&model));
 
         if let Some(idx) = self.active_index {
-            widgets
-                .combo_row
-                .block_signal(&widgets.combo_selected_signal);
             widgets.combo_row.set_selected(idx as u32);
-            widgets
-                .combo_row
-                .unblock_signal(&widgets.combo_selected_signal);
         }
     }
 
