@@ -28,10 +28,9 @@ include = [
 
 [package.metadata.docs.rs]
 all-features = true
-rustc-args = ["--cfg", "docsrs"]
-cargo-args = ["-Zunstable-options", "-Zrustdoc-scrape-examples"]
-# enable unstable features in the documentation
 rustdoc-args = ["--cfg", "docsrs"]
+# enable unstable features in the documentation
+cargo-args = ["-Zunstable-options", "-Zrustdoc-scrape-examples"]
 
 [features]
 default = ["css", "macros", "gnome_42"]
