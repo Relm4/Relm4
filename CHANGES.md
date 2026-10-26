@@ -22,6 +22,7 @@
 ### Fixed
 
 + core: Reuse one `CssProvider` in `inline_css` so repeated updates do not leak providers
++ core: Pass only the program name to GApplication unless `with_args` is set, so app-specific flags are not rejected as unknown options
 
 ## 0.11.0 - 2026-05-10
 
