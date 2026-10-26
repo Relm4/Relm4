@@ -188,11 +188,7 @@ impl<M: Debug + 'static> RelmApp<M> {
         });
 
         let _guard = RUNTIME.enter();
-        if let Some(args) = args {
-            app.run_with_args(&args);
-        } else {
-            app.run();
-        }
+        app.run_with_args(&application_arguments(args));
 
         // Make sure everything is shut down
         shutdown_all();
@@ -243,14 +239,44 @@ impl<M: Debug + 'static> RelmApp<M> {
         });
 
         let _guard = RUNTIME.enter();
-        if let Some(args) = args {
-            app.run_with_args(&args);
-        } else {
-            app.run();
-        }
+        app.run_with_args(&application_arguments(args));
 
         // Make sure everything is shut down
         shutdown_all();
         glib::MainContext::ref_thread_default().iteration(true);
+    }
+}
+
+/// Arguments passed to `GApplication`.
+///
+/// `ApplicationExtManual::run` forwards the process argv. Flags that the app
+/// already parsed (for example with clap) are then unknown to GIO, which
+/// prints `Unknown option` and exits. When the caller did not set
+/// [`RelmApp::with_args`], pass only the program name.
+pub(crate) fn application_arguments(explicit: Option<Vec<String>>) -> Vec<String> {
+    explicit.unwrap_or_else(|| {
+        vec![
+            std::env::args()
+                .next()
+                .unwrap_or_else(|| String::from("app")),
+        ]
+    })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::application_arguments;
+
+    #[test]
+    fn explicit_arguments_are_forwarded() {
+        let args = application_arguments(Some(vec!["demo".into(), "--flag".into()]));
+        assert_eq!(args, vec!["demo".to_string(), "--flag".to_string()]);
+    }
+
+    #[test]
+    fn default_arguments_are_only_the_program_name() {
+        let args = application_arguments(None);
+        assert_eq!(args.len(), 1);
+        assert!(!args[0].starts_with('-'));
     }
 }
