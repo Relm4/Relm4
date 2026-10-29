@@ -71,6 +71,9 @@ fn list_box_extension_traits() {
     assert_eq!(rows.next_back(), None);
 
     list_box.remove_all();
+    let _ = &widgets.0.unparent();
+    let _ = &widgets.1.unparent();
+    let _ = &widgets.2.unparent();
 
     assert_eq!(list_box.iter_children().next(), None);
 
