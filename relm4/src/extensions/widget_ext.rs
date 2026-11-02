@@ -1,3 +1,4 @@
+use gtk::glib::prelude::ObjectExt;
 use gtk::prelude::{Cast, IsA, StaticType, WidgetExt};
 
 /// Trait that extends [`gtk::prelude::WidgetExt`].
@@ -93,17 +94,28 @@ impl<T: IsA<gtk::Widget>> RelmWidgetExt for T {
     fn inline_css(&self, style: &str) {
         use gtk::prelude::StyleContextExt;
 
-        let context = self.style_context();
-        let provider = gtk::CssProvider::new();
-
         let data = if style.ends_with(';') {
             ["*{", style, "}"].concat()
         } else {
             ["*{", style, ";}"].concat()
         };
 
+        // `#[watch] inline_css: ...` calls this on every update. Adding a new
+        // provider each time leaks CssProviders for the life of the widget.
+        const KEY: &str = "relm4-inline-css-provider";
+        if let Some(provider) = unsafe { self.data::<gtk::CssProvider>(KEY) } {
+            let provider = unsafe { provider.as_ref() };
+            provider.load_from_data(&data);
+            return;
+        }
+
+        let provider = gtk::CssProvider::new();
         provider.load_from_data(&data);
-        context.add_provider(&provider, gtk::STYLE_PROVIDER_PRIORITY_APPLICATION + 1);
+        self.style_context()
+            .add_provider(&provider, gtk::STYLE_PROVIDER_PRIORITY_APPLICATION + 1);
+        unsafe {
+            self.set_data(KEY, provider);
+        }
     }
 
     fn set_tooltip(&self, text: &str) {
