@@ -22,6 +22,7 @@
 ### Fixed
 
 + core: Pass only the program name to GApplication unless `with_args` is set, so app-specific flags are not rejected as unknown options
++ components: fix the unwanted call to `SimpleComboRowMsg::UpdateIndex` after calling `SimpleComboRowMsg::UpdateData`
 
 ## 0.11.0 - 2026-05-10
 
